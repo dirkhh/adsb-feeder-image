@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# overall distro module for ADSB.lol image
+# <Description what this module does>
+# Written by Dirk Hohndel <dirk@hohndel.org>
+# GPL V3
+########
+
+
+# Source error handling, leave this in place
+set -x
+set -e
+
+source /common.sh
+install_cleanup_trap
+
+unpack /filesystem/home/pi /home/"${BASE_USER}" "${BASE_USER}"
+unpack /filesystem/home/root /root root
+unpack /filesystem/boot /boot
+
+
+# Unpack root at the end, so files are modified before
+unpack /filesystem/root /
+
+echo "127.0.0.1 $(hostname -s)" >> /etc/hosts
+
+systemctl enable adsb-docker
+
+

@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# adsb-pi-setup python web app
+# <Description what this module does>
+# Written by Dirk Hohndel <dirk@hohndel.org>
+# AGPL V3
+########
+
+
+# Source error handling, leave this in place
+set -x
+set -e
+
+source /common.sh
+install_cleanup_trap
+
+unpack /filesystem/root /
+
+  apt-get update --allow-releaseinfo-change
+  apt-get install -y python3 python3-pip
+  pip install flask
+
