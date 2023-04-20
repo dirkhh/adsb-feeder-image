@@ -5,7 +5,7 @@ Requires=networking.service
 [Service]
 RemainAfterExit=yes
 WorkingDirectory=/usr/local/share/adsb-pi-setup
-ExecStart=/usr/local/bin/flask --app app run
+ExecStart=/usr/local/bin/flask --app app run --host 0.0.0.0
 Restart=always
 
 [Install]
