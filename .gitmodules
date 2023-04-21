@@ -1,0 +1,3 @@
+[submodule "src/modules/adsb-pi-setup/filesystem/root/usr/local/share/adsb-pi-setup"]
+	path = src/modules/adsb-pi-setup/filesystem/root/usr/local/share/adsb-pi-setup
+	url = https://github.com/dirkhh/adsb-pi-setup
