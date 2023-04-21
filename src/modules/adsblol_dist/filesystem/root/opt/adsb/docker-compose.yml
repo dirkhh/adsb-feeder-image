@@ -25,7 +25,6 @@ services:
       #
       # --------------------------------------------------
       # readsb/decoder parameters:
-      - READSB_GAIN=${FEEDER_SDR_GAIN}
       - READSB_MODEAC=true
       - READSB_RX_LOCATION_ACCURACY=2
       - READSB_STATS_RANGE=true
@@ -40,7 +39,6 @@ services:
           feed.planespotters.net,30004,beast_reduce_plus_out;
           feed.theairtraffic.com,30004,beast_reduce_plus_out
       # If you really want to feed ADSBExchange, you can do so by adding this above: feed1.adsbexchange.com,30004,beast_reduce_plus_out
-      - UUID=${FEEDER_UUID}
       #
       # --------------------------------------------------
       # MLAT and MLATHUB related parameters:
@@ -52,7 +50,6 @@ services:
           mlat.planespotters.net,31090,39003;
           feed.theairtraffic.com,31090,39004
       # If you really want to feed ADSBExchange, you can do so by adding this above: feed.adsbexchange.com,31090,39005
-      - MLAT_USER=${FEEDER_NAME}
       # MLATHUB automatically gets MLAT results data from the feeders defined in MLAT_CONFIG,
       # and additionally from the Net Connectors defined with MLATHUB_NET_CONNECTOR
       #- MLATHUB_NET_CONNECTOR=

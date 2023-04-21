@@ -12,6 +12,5 @@ export BASE_ADD_USER=yes
 export BASE_USER_PASSWORD=raspberry
 export BASE_OVERRIDE_HOSTNAME=adsb-pi
 
-
 export MODULES="base(network,adsblol_dist(adsb_docker,adsb-pi-setup))"
 

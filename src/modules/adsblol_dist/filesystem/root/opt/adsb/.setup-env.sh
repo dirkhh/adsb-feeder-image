@@ -7,5 +7,5 @@ if [ ! -f "$WORKING_DIR"/.env ] && [ -f /boot/adsblol.env ]; then
 fi
 
 if grep -q 00000000-0000-0000-0000-000000000000 "$WORKING_DIR"/.env ; then
-	sed -i "s|^.*FEEDER_UUID=00000000-0000-0000-0000-000000000000|FEEDER_UUID=$(cat /proc/sys/kernel/random/uuid)|" "$WORKING_DIR"/.env
+	sed -i "s|^.*UUID=00000000-0000-0000-0000-000000000000|UUID=$(cat /proc/sys/kernel/random/uuid)|" "$WORKING_DIR"/.env
 fi
