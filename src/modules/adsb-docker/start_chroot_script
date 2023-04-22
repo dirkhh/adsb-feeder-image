@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # CustomPiOS module : docker
-# Original script written by Damien DALY (https://github.com/MaitreDede/)
+# Original script written by Damien DALY (https://Fgithub.com/MaitreDede/)
 # Changes by Guy Sheffer
 # GPL V3
 ########
@@ -20,11 +20,12 @@ install_cleanup_trap
 #
 #
 # modified to build a base image (so intended for non-interactive use) by Dirk Hohndel <dirk@hohndel.org>
+export DEBIAN_FRONTEND=noninteractive
 
 
     echo "Installing docker, each step may take a while:"
     echo -n "Updating repositories... "
-    sudo apt-get update -qq -y >/dev/null && sudo apt-get upgrade -q -y
+    sudo apt-get update -qq -y >/dev/null && sudo apt-get upgrade -q -y -o Dpkg::Options::=--force-confnew -o Dpkg::Options::="--force-confdef"
     echo -n "Ensuring dependencies are installed... "
     sudo apt-get install -qq -y apt-transport-https ca-certificates curl gnupg2 slirp4netns software-properties-common uidmap w3m jq netcat >/dev/null
     echo -n "Getting docker..."
@@ -114,7 +115,7 @@ fi
         # First install the UDEV rules for RTL-SDR dongles
         sudo -E "$(which bash)" -c "curl -sL -o /etc/udev/rules.d/rtl-sdr.rules https://raw.githubusercontent.com/wiedehopf/adsb-scripts/master/osmocom-rtl-sdr.rules"
         # Next, exclude the drivers so the dongles stay accessible
-        # Please keep the list in this order and add any additional ones to the BOTTOM. 
+        # Please keep the list in this order and add any additional ones to the BOTTOM.
         BLOCKED_MODULES=()
         BLOCKED_MODULES+=("rtl2832_sdr")
         BLOCKED_MODULES+=("dvb_usb_rtl2832u")
@@ -140,7 +141,7 @@ fi
         # Rebuild module dependency database factoring in blacklists
         which depmod >/dev/null 2>&1 && depmod -a || true
         # On systems with initramfs, this needs to be updated to make sure the exclusions take effect:
-        which update-initramfs >/dev/null 2>&1 && sudo update-initramfs -u || true 
+        which update-initramfs >/dev/null 2>&1 && sudo update-initramfs -u || true
     popd >/dev/null
     # Check tmpdir is set and not null before attempting to remove it
     if [[ -z "$tmpdir" ]]; then
