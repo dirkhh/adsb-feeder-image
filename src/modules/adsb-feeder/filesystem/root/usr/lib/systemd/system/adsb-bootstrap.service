@@ -1,0 +1,15 @@
+[Unit]
+Description=ADSB Bootstrap Service
+Requires=networking.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/adsb
+ExecStartPre=/usr/bin/bash /opt/adsb/.setup-env.sh
+ExecStartPre=/bin/sleep 30
+ExecStart=/usr/bin/bash /opt/adsb/bootstrap.sh
+TimeoutStartSec=0
+
+[Install]
+WantedBy=multi-user.target
