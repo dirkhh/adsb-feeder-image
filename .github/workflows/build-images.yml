@@ -1,23 +1,72 @@
 # Original: https://github.com/guysoft/OctoPi-Klipper-CustomPiOS/blob/6a88c12f562be4668e26fe89a445e761be1481ac/LICENSE
 # License: GPL-3.0
-name: ODroid C4
+name: build images
 
 on:
   push:
     branches:
     - '*'
-  schedule:
-  - cron: '28 3 * * *'
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        name: [ orangepi5, lepotato, raspberrypi64, asus-tinkerboard, banana-pi-m5-m2p, odroidc4, orangepi4-lts, raspberrypi32, rockpi4 ]
+        include:
+          - name: orangepi5
+            base_arch: arm64
+            variant: armbian
+            url: https://redirect.armbian.com/orangepi5/Jammy_legacy
+            magic_path: "repository/src/image-armbian/orangepi5.img.xz"
+          - name: lepotato
+            base_arch: arm64
+            variant: armbian
+            url: https://redirect.armbian.com/lepotato/Jammy_current
+            magic_path: "repository/src/image-armbian/le-potato.img.xz"
+          - name: raspberrypi64
+            base_arch: arm64
+            variant: default
+            url: https://downloads.raspberrypi.org/raspios_lite_arm64/images/raspios_lite_arm64-2023-02-22/2023-02-21-raspios-bullseye-arm64-lite.img.xz
+            magic_path: "repository/src/image/2023-02-21-raspios-bullseye-arm64-lite.img.xz"
+          - name: asus-tinkerboard
+            base_arch: ""
+            variant: armbian
+            url: https://redirect.armbian.com/tinkerboard/Jammy_current
+            magic_path: "repository/src/image-armbian/asus-tinkerboard.img.xz"
+          - name: banana-pi-m5-m2p
+            base_arch: arm64
+            variant: armbian
+            url: https://redirect.armbian.com/bananapim5/Bullseye_current
+            magic_path: "repository/src/image-armbian/banana-pi-m5-m2p.img.xz"
+          - name: odroidc4
+            base_arch: arm64
+            variant: armbian
+            url: https://redirect.armbian.com/odroidc4/Bullseye_current
+            magic_path: "repository/src/image-armbian/odroidc4.img.xz"
+          - name: orangepi4-lts
+            base_arch: arm64
+            variant: armbian
+            url: https://redirect.armbian.com/orangepi4-lts/Bullseye_current
+            magic_path: "repository/src/image-armbian/orangepi4-lts.img.xz"
+          - name: raspberrypi32
+            variant: default
+            base_arch: ""
+            url: https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2023-02-22/2023-02-21-raspios-bullseye-armhf-lite.img.xz
+            magic_path: "repository/src/image/2023-02-21-raspios-bullseye-armhf-lite.img.xz"
+          - name: rockpi4
+            variant: armbian
+            base_arch: arm64
+            url: https://redirect.armbian.com/rockpi-4c/Bullseye_current
+            magic_path: "repository/src/image-armbian/rockpi4.img.xz"
+
     env:
-      IMG_NAME: odroidc4
-      BASE_ARCH: arm64
-      VARIANT: armbian
-      IMAGE_URL: https://redirect.armbian.com/odroidc4/Bullseye_current
-      MAGIC_PATH: "repository/src/image-armbian/odroidc4.img.xz"
+      IMG_NAME: ${{ matrix.name }}
+      BASE_ARCH: ${{ matrix.base_arch }}
+      VARIANT: ${{ matrix.variant }}
+      IMAGE_URL: ${{ matrix.url }}
+      MAGIC_PATH: ${{ matrix.magic_path }}
     steps:
     - name: Install Dependencies
       run: |
@@ -76,7 +125,7 @@ jobs:
         find -name "*.img*" || true
         CURRENT_IMAGE_NAME="$(basename $MAGIC_PATH)"
         echo "${CURRENT_IMAGE_NAME}"
-        IMAGE="${NOW}-${IMG_NAME}-adsblol.img"
+        IMAGE="${NOW}-${IMG_NAME}-adsb-feeder.img"
         if [ "${VARIANT}" = "default" ]; then
           WORKSPACE="repository/src/workspace"
         else
@@ -99,6 +148,10 @@ jobs:
         ls -l "${IMAGE}.xz"
         echo "::set-output name=image::${IMAGE}.xz"
 
+    - name: get logical release name
+      uses: tenhaus/get-release-or-tag@v2
+      id: tag
+
     # Upload to GitHub Releases
     - name: Upload to GitHub Releases
       if: github.event_name != 'pull_request'
@@ -118,7 +171,8 @@ jobs:
             chmod +x /usr/local/bin/github-release
         fi
         # As release name, use the name of the image minus the .img.xz
-        RELEASE_NAME=$(basename "${{ steps.compress.outputs.image }}" .img.xz)
+        #RELEASE_NAME=$(basename "${{ steps.compress.outputs.image }}" .img.xz)
+        RELEASE_NAME=adsb-feeder-${{ steps.tag.outputs.tag }}
         github-release ${{ github.repository }} \
           $RELEASE_NAME \
           main \
