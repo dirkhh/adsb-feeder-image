@@ -17,7 +17,7 @@ jobs:
         include:
           - name: orangepi5
             base_arch: arm64
-            variant: armbian
+            variant: orangepi5
             url: https://redirect.armbian.com/orangepi5/Jammy_legacy
             magic_path: "repository/src/image-armbian/orangepi5.img.xz"
           - name: lepotato

@@ -1,0 +1,12 @@
+# this is just like armbian, only with the root partition being partition 2
+
+VARIANT_CONFIG_DIR=$(realpath -s $(dirname $(realpath -s $BASH_SOURCE))/../..)
+BASE_ZIP_IMG=`ls -t ${DIST_PATH}/image-armbian/*.{zip,7z,xz} | head -n 1`
+BASE_APT_CACHE=no
+OCTOPI_INCLUDE_WIRINGPI=no
+export BASE_DISTRO=armbian
+# The root partiton of the image filesystem, 2 for raspbian or orangepi5, 1 for armbian
+BASE_ROOT_PARTITION=2
+BASE_IMAGE_RESIZEROOT=500
+BASE_IMAGE_RASPBIAN=no
+BASE_IMAGE_ENLARGEROOT=1000
