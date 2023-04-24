@@ -116,16 +116,23 @@ jobs:
         source config
         sudo --preserve-env ../../CustomPiOS/src/release "${VARIANT}"
 
+    - name: get sha or tag for release
+      uses: tenhaus/get-release-or-tag@v2
+      id: sha_or_tag
 
+    - name: convert sha_or_tag to reasonable tag
+      id: tag
+      run: |
+        export better_tag=$(echo ${{ steps.sha_or_tag.outputs.tag }} | sed -r 's/^(.{8}).{32}$/g-\1/')
+        echo ::set-output name=tag::$better_tag
 
     - name: Copy output and add timestamp
       id: copy
       run: |
-        NOW="$(date +"%Y-%m-%d-%H%M")"
         find -name "*.img*" || true
         CURRENT_IMAGE_NAME="$(basename $MAGIC_PATH)"
         echo "${CURRENT_IMAGE_NAME}"
-        IMAGE="${NOW}-${IMG_NAME}-adsb-feeder.img"
+        IMAGE="adsb-feeder-${IMG_NAME}-${{ steps.tag.outputs.tag }}.img"
         if [ "${VARIANT}" = "default" ]; then
           WORKSPACE="repository/src/workspace"
         else
@@ -148,13 +155,9 @@ jobs:
         ls -l "${IMAGE}.xz"
         echo "::set-output name=image::${IMAGE}.xz"
 
-    - name: get logical release name
-      uses: tenhaus/get-release-or-tag@v2
-      id: tag
-
     # Upload to GitHub Releases
     - name: Upload to GitHub Releases
-      if: github.event_name != 'pull_request'
+      if: ${{ github.ref == 'refs/heads/main' }}
       env:
         GITHUB_TOKEN: ${{ secrets.PAT_GITHUB_TOKEN }}
       run: |
@@ -176,5 +179,5 @@ jobs:
         github-release ${{ github.repository }} \
           $RELEASE_NAME \
           main \
-          "Releasing $IMG_NAME $VARIANT $RELEASE_NAME" \
+          "CI/CD builds for $RELEASE_NAME" \
           "*img.xz"
