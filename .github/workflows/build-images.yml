@@ -157,7 +157,6 @@ jobs:
 
     # Upload to GitHub Releases
     - name: Upload to GitHub Releases
-      if: ${{ github.ref == 'refs/heads/main' }}
       env:
         GITHUB_TOKEN: ${{ secrets.PAT_GITHUB_TOKEN }}
       run: |
@@ -173,9 +172,14 @@ jobs:
             wget -O- "https://github.com/c4milo/github-release/releases/download/v1.1.0/github-release_v1.1.0_${SYSTEM}_${ARCH}.tar.gz" | tar -xz -C /usr/local/bin
             chmod +x /usr/local/bin/github-release
         fi
-        # As release name, use the name of the image minus the .img.xz
-        #RELEASE_NAME=$(basename "${{ steps.compress.outputs.image }}" .img.xz)
-        RELEASE_NAME=adsb-feeder-${{ steps.tag.outputs.tag }}
+        if [ ${{ github.ref }} = 'refs/heads/main' ];
+        then
+          PREFIX=""
+        else
+          PREFIX=$"{{ github.ref }}-"
+        fi
+        # assemble a release name
+        RELEASE_NAME=${PREFIX}adsb-feeder-${{ steps.tag.outputs.tag }}
         github-release ${{ github.repository }} \
           $RELEASE_NAME \
           main \
