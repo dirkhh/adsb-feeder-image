@@ -124,7 +124,7 @@ jobs:
       id: tag
       run: |
         export better_tag=$(echo ${{ steps.sha_or_tag.outputs.tag }} | sed -r 's/^(.{8}).{32}$/g-\1/')
-        echo ::set-output name=tag::$better_tag
+        echo "tag=${better_tag}" >> $GITHUB_OUTPUT
 
     - name: Copy output and add timestamp
       id: copy
@@ -144,7 +144,7 @@ jobs:
         BUILT_IMAGE="$(find $WORKSPACE -name "*.img" | head -n 1)"
         mv -v "${BUILT_IMAGE}" "${IMAGE}"
         sudo chmod 777 "${IMAGE}"
-        echo "::set-output name=image::${IMAGE}"
+        echo "image=${IMAGE}" >> $GITHUB_OUTPUT
 
 
     - name: Compress img to img.xz
@@ -153,7 +153,7 @@ jobs:
         export IMAGE="${{ steps.copy.outputs.image }}"
         sudo xz -z -3 -T0 -e "${IMAGE}"
         ls -l "${IMAGE}.xz"
-        echo "::set-output name=image::${IMAGE}.xz"
+        echo "image=${IMAGE}.xz" >> $GITHUB_OUTPUT
 
     # Upload to GitHub Releases
     - name: Upload to GitHub Releases
