@@ -5,10 +5,6 @@ services:
     container_name: ultrafeeder
     hostname: ultrafeeder
     restart: unless-stopped
-    env_file:
-      - /opt/adsb/.env
-      - /opt/adsb/.web-setup.env
-      - /opt/adsb/.adv-setup.env
     device_cgroup_rules:
       - 'c 189:* rwm'
     ports:
@@ -18,6 +14,7 @@ services:
       # --------------------------------------------------
       # general parameters:
       - LOGLEVEL=error
+      - TZ=${FEEDER_TZ}
       # --------------------------------------------------
       # SDR related parameters:
       - READSB_DEVICE_TYPE=rtlsdr
@@ -26,9 +23,16 @@ services:
       #
       # --------------------------------------------------
       # readsb/decoder parameters:
-      - READSB_MODEAC=true
+      - READSB_LAT=${FEEDER_LAT}
+      - READSB_LON=${FEEDER_LONG}
+      - READSB_ALT=${FEEDER_ALT}
+      - READSB_GAIN=${FEEDER_READSB_GAIN}
+      - READSB_MODEAC=false
       - READSB_RX_LOCATION_ACCURACY=2
       - READSB_STATS_RANGE=true
+      # Sources and Aggregator connections:
+      # (Note - remove the ones you are not using / feeding)
+      - ULTRAFEEDER_CONFIG=${FEEDER_ULTRAFEEDER_CONFIG}
       #
       # --------------------------------------------------
       # TAR1090 (Map Web Page) parameters:
@@ -45,7 +49,6 @@ services:
       - TAR1090_RANGE_OUTLINE_WIDTH=2.0
       - TAR1090_RANGERINGSDISTANCES=50,100,150,200
       - TAR1090_RANGERINGSCOLORS='#1A237E','#0D47A1','#42A5F5','#64B5F6'
-      #
       # --------------------------------------------------
       # GRAPHS1090 (Decoder and System Status Web Page) parameters:
       # The two 978 related parameters should only be included if you are running dump978 for UAT reception (USA only)
@@ -53,12 +56,6 @@ services:
       # - ENABLE_978=yes
       # - URL_978=http://dump978/skyaware978
       # 
-      # --------------------------------------------------
-      # Prometheus and InfluxDB connection parameters:
-      #- INFLUXDBV2_URL=${INFLUX_URL}
-      #- INFLUXDBV2_TOKEN=${INFLUX_TOKEN}
-      #- INFLUXDBV2_BUCKET=${INFLUX_BUCKET}
-      #- PROMETHEUS_ENABLE=true
     volumes:
       - /opt/adsb/ultrafeeder/globe_history:/var/globe_history
       - /opt/adsb/ultrafeeder/graphs1090:/var/lib/collectd
