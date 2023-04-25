@@ -25,7 +25,7 @@ services:
       # readsb/decoder parameters:
       - READSB_LAT=${FEEDER_LAT}
       - READSB_LON=${FEEDER_LONG}
-      - READSB_ALT=${FEEDER_ALT}
+      - READSB_ALT=${FEEDER_ALT_M}
       - READSB_GAIN=${FEEDER_READSB_GAIN}
       - READSB_MODEAC=false
       - READSB_RX_LOCATION_ACCURACY=2
