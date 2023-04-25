@@ -33,6 +33,8 @@ services:
       # Sources and Aggregator connections:
       # (Note - remove the ones you are not using / feeding)
       - ULTRAFEEDER_CONFIG=${FEEDER_ULTRAFEEDER_CONFIG}
+      - MLAT_USER=${MLAT_SITE_NAME}
+      - UUID=${UUID}
       #
       # --------------------------------------------------
       # TAR1090 (Map Web Page) parameters:
