@@ -85,14 +85,6 @@ jobs:
         path: repository
         submodules: false
 
-    # Checkout adsb-pi-setup
-    - name: Checkout adsb-pi-setup
-      uses: actions/checkout@v2
-      with:
-        repository: 'katlol/adsb-pi-setup'
-        path: 'repository/src/modules/adsb-pi-setup/filesystem/root/usr/local/share/adsb-pi-setup'
-        submodules: false
-
     - name: Download image
       run: |
         MAGIC_DIR=$(dirname "${MAGIC_PATH}")
