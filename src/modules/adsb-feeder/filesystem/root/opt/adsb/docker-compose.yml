@@ -25,7 +25,7 @@ services:
       # readsb/decoder parameters:
       - READSB_LAT=${FEEDER_LAT}
       - READSB_LON=${FEEDER_LONG}
-      - READSB_ALT=${FEEDER_ALT}
+      - READSB_ALT=${FEEDER_ALT_M}
       - READSB_GAIN=${FEEDER_READSB_GAIN}
       - READSB_MODEAC=false
       - READSB_RX_LOCATION_ACCURACY=2
@@ -34,7 +34,7 @@ services:
       # (Note - remove the ones you are not using / feeding)
       - ULTRAFEEDER_CONFIG=${FEEDER_ULTRAFEEDER_CONFIG}
       - MLAT_USER=${MLAT_SITE_NAME}
-      - UUID=${UUID}
+      - UUID=${ULTRAFEEDER_UUID}
       #
       # --------------------------------------------------
       # TAR1090 (Map Web Page) parameters:
@@ -57,7 +57,7 @@ services:
       - GRAPHS1090_DARKMODE=true
       # - ENABLE_978=yes
       # - URL_978=http://dump978/skyaware978
-      # 
+      #
     volumes:
       - /opt/adsb/ultrafeeder/globe_history:/var/globe_history
       - /opt/adsb/ultrafeeder/graphs1090:/var/lib/collectd
