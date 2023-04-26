@@ -21,6 +21,8 @@ class Restart:
             return False
         with self.lock:
             subprocess.call("/usr/bin/systemctl restart adsb-docker", shell=True)
+            subprocess.call("/usr/bin/systemctl disable adsb-bootstrap", shell=True)
+            subprocess.call("/usr/bin/systemctl stop adsb-bootstrap", shell=True)
 
     @property
     def state(self):
