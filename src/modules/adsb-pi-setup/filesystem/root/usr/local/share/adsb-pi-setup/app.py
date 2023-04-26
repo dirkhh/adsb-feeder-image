@@ -51,15 +51,16 @@ def handle_advanced_post_request():
         tar1090 = request.url_root.replace(str(port), "8080")
         return redirect(tar1090)
 
-    net = ENV_FILE.generate_ultrafeeder_config(request.form)
+    print("request_form", request.form)
 
     ENV_FILE.update(
         {
             "FEEDER_TAR1090_USEROUTEAPI": "1" if request.form.get("route") else "0",
-            "FEEDER_ULTRAFEEDER_CONFIG": net,
             "MLAT_PRIVACY": "--privacy" if request.form.get("privacy") else "",
         }
     )
+    net = ENV_FILE.generate_ultrafeeder_config(request.form)
+    ENV_FILE.update({"FEEDER_ULTRAFEEDER_CONFIG": net})
     return redirect("/restarting")
 
 
