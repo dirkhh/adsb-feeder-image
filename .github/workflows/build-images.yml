@@ -5,7 +5,8 @@ name: build images
 on:
   push:
     branches:
-    - '*'
+    - 'main'
+    - 'dev'
     tags:
     - "v*"
 
@@ -69,11 +70,35 @@ jobs:
       VARIANT: ${{ matrix.variant }}
       IMAGE_URL: ${{ matrix.url }}
       MAGIC_PATH: ${{ matrix.magic_path }}
+
+
     steps:
     - name: Install Dependencies
       run: |
         sudo apt update
         sudo apt install coreutils p7zip-full qemu-user-static
+
+
+    # check the sources out in the 'expected place' for the following step that tags them
+    - name: Checkout Project Repository
+      uses: actions/checkout@v3
+
+
+    - name: tag current version as latest (regardless of other tags)
+      uses: rickstaa/action-create-tag@v1
+      with:
+        tag: "latest"
+        tag_exists_error: false
+        force_push_tag: true
+        message: "latest commit"
+        github_token: ${{ secrets.PAT_GITHUB_TOKEN }}
+
+
+    - name: Checkout Project Repository again with the new tag
+      uses: actions/checkout@v3
+      with:
+        path: repository
+
 
     - name: Checkout CustomPiOS
       uses: actions/checkout@v3
@@ -81,11 +106,12 @@ jobs:
         repository: 'guysoft/CustomPiOS'
         path: CustomPiOS
 
-    - name: Checkout Project Repository
-      uses: actions/checkout@v3
-      with:
-        path: repository
-        submodules: false
+
+    - name: Update CustomPiOS Paths
+      run: |
+        cd repository/src
+        ../../CustomPiOS/src/update-custompios-paths
+
 
     - name: Download image
       run: |
@@ -93,10 +119,6 @@ jobs:
         mkdir -p "${MAGIC_DIR}"
         wget -qO "${MAGIC_PATH}" "$IMAGE_URL"
 
-    - name: Update CustomPiOS Paths
-      run: |
-        cd repository/src
-        ../../CustomPiOS/src/update-custompios-paths
 
     - name: Build Image
       run: |
@@ -108,6 +130,7 @@ jobs:
         fi
         sudo bash -x ./build_dist "${VARIANT}"
 
+
     - name: Release Image
       env:
         BASE_RELEASE_COMPRESS: no
@@ -118,17 +141,17 @@ jobs:
         source config
         sudo --preserve-env ../../CustomPiOS/src/release "${VARIANT}"
 
-    - name: get sha or tag for release
-      uses: tenhaus/get-release-or-tag@v2
-      id: sha_or_tag
 
-    - name: convert sha_or_tag to reasonable tag
+    - name: create a reasonable tag for this run - either a short sha or the tag we were called with
       id: tag
       run: |
-        export better_tag=$(echo ${{ steps.sha_or_tag.outputs.tag }} | sed -r 's/^(.{8}).{32}$/g-\1/')
+        export tag=""
+        if [ "${{ github.ref_type }}" = "tag" ] ; then tag="${{ github.ref_name }}" ; else tag="${{ github.sha }}" ; fi
+        export better_tag=$(echo $tag | sed -r 's/^(.{8}).{32}$/g-\1/')
         echo "tag=${better_tag}" >> $GITHUB_OUTPUT
 
-    - name: Copy output and add timestamp
+
+    - name: Copy output
       id: copy
       run: |
         find -name "*.img*" || true
@@ -157,33 +180,24 @@ jobs:
         ls -l "${IMAGE}.xz"
         echo "image=${IMAGE}.xz" >> $GITHUB_OUTPUT
 
-    # Upload to GitHub Releases
+
     - name: Upload to GitHub Releases
-      env:
-        GITHUB_TOKEN: ${{ secrets.PAT_GITHUB_TOKEN }}
-      run: |
-        set -ex
-        if ! command -v github-release &> /dev/null
-        then
-            # what system are we? darwin_amd64, linux_amd64, etc.
-            SYSTEM=$(uname -s | tr '[:upper:]' '[:lower:]')
-            ARCH=$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')
-            if [ "$SYSTEM" == "darwin" ]; then
-                ARCH="amd64"
-            fi
-            wget -O- "https://github.com/c4milo/github-release/releases/download/v1.1.0/github-release_v1.1.0_${SYSTEM}_${ARCH}.tar.gz" | tar -xz -C /usr/local/bin
-            chmod +x /usr/local/bin/github-release
-        fi
-        if [ ${{ github.ref }} = 'refs/heads/main' ];
-        then
-          PREFIX=""
-        else
-          PREFIX="${{ github.ref }}-"
-        fi
-        # assemble a release name
-        RELEASE_NAME=${PREFIX}adsb-feeder-${{ steps.tag.outputs.tag }}
-        github-release ${{ github.repository }} \
-          $RELEASE_NAME \
-          main \
-          "CI/CD builds for $RELEASE_NAME" \
-          "*img.xz"
+      uses: softprops/action-gh-release@v1
+      if: ${{ startsWith(steps.tag.outputs.tag, 'v') }}
+      with:
+        github_token: ${{ secrets.PAT_GITHUB_TOKEN }}
+        files: "*.img.xz"
+        generate_release_notes: true
+
+
+    - name: Upload non-release artifacts
+      uses: softprops/action-gh-release@v1
+      if: ${{ startsWith(steps.tag.outputs.tag, 'g') }}
+      with:
+        github_token: ${{ secrets.PAT_GITHUB_TOKEN }}
+        files: "*.img.xz"
+        generate_release_notes: true
+        prerelease: true
+        tag_name: latest
+        name: testbuild-${{ steps.tag.outputs.tag }}
+
