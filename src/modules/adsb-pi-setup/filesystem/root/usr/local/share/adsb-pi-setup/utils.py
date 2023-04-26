@@ -153,7 +153,7 @@ class EnvFile:
                 updated_lines.append(line)
 
         for key, value in values.items():
-            if key in updated_keys:
+            if not key or key in updated_keys:
                 continue
             updated_lines.append(f"{key}={value}\n")
 
