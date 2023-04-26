@@ -1,0 +1,19 @@
+h1 {
+    color: brown;
+    text-align: center;
+    padding: 10px;
+}
+.bigbigbutton {
+  display: block;
+  width: 90%;
+  height: 4em;
+  border: none;
+  background-color: #1144CC;
+  color: #CCDDFF;
+  padding: 1em 2em;
+  margin: 1em;
+  font-size: 125%;
+  cursor: pointer;
+  text-align: center;
+  border-radius: 2em;
+}

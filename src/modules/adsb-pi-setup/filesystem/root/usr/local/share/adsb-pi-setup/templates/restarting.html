@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} Restarting the ADSB system {% endblock %}</h1>
+
+<p>This may take a moment - you will be redirected when this has completed.</p>
+<p id="progress-text">Please be patient.</p>
+
+<img id="cat-image" style="display: none; width: 300px;">
+
+<script>
+  function showProgress() {
+    var progressText = document.getElementById('progress-text');
+    progressText.innerHTML += '.';
+
+    var catImage = document.getElementById('cat-image');
+    catImage.src = "https://cataas.com/cat/says/restarting?" + new Date().getTime(); // Append unique timestamp
+    if (catImage.style.display === 'none') {
+      catImage.style.display = 'block';
+    }
+  }
+
+  function checkRestartStatus() {
+    var request = new XMLHttpRequest();
+    request.open('GET', '/restart');
+    request.onload = function() {
+      if (request.status === 200 && request.responseText === 'done') {
+        // restarting the ADSB infra completed, redirect user
+        window.location = '/?success=1';
+      } else if (request.status === 200 && request.responseText === 'restarting') {
+        // restart is still in progress, show progress and check again after a delay
+        showProgress();
+        setTimeout(checkRestartStatus, 2000);
+      } else {
+        // ops, we got an error from the server
+        alert('Something went wrong.');
+      }
+    };
+    request.onerror = function() {
+      // ops, we got an error trying to talk to the server
+      alert('Something went wrong.');
+    };
+    request.send();
+  }
+
+  // Trigger restart and then start checking the restart status
+  var restartRequest = new XMLHttpRequest();
+  restartRequest.open('POST', '/restart');
+  restartRequest.onload = function() {
+    if (restartRequest.status === 200) {
+      checkRestartStatus();
+    } else {
+      // ops, we got an error from the server
+      alert('Something went wrong.');
+    }
+  };
+  restartRequest.onerror = function() {
+    // ops, we got an error trying to talk to the server
+    alert('Something went wrong.');
+  };
+  restartRequest.send();
+</script>
+{% endblock %}
