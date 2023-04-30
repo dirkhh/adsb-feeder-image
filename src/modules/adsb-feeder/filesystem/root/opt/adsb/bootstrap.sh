@@ -10,6 +10,6 @@ IP=$(ip -4 ad li dev $(ip ro li | head -1 | awk '/default/{ print $5 }') up | aw
 
 # this gets stopped and disabled by the setup app
 while true; do
-    curl "http://my.adsb.im/adsb-feeder.html?lip=${IP}" > /dev/null 2>&1
+    curl "https://my.adsb.im/adsb-feeder.html?lip=${IP}" > /dev/null 2>&1
     sleep 60
 done
