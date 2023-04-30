@@ -26,7 +26,7 @@ jobs:
         - name: lepotato
           base_arch: arm64
           variant: armbian
-          url: https://redirect.armbian.com/lepotato/Jammy_current
+          url: https://files.adsb.im/images/Armbian_Lepotato_minimal.img.xz
           magic_path: "repository/src/image-armbian/le-potato.img.xz"
         - name: raspberrypi64
           base_arch: arm64
@@ -36,7 +36,7 @@ jobs:
         - name: asus-tinkerboard
           base_arch: ""
           variant: armbian
-          url: https://redirect.armbian.com/tinkerboard/Jammy_current
+          url: https://files.adsb.im/images/Armbian_Tinkerboard_minimal.img.xz
           magic_path: "repository/src/image-armbian/asus-tinkerboard.img.xz"
         - name: banana-pi-m5-m2p
           base_arch: arm64
