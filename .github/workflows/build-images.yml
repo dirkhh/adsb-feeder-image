@@ -11,6 +11,22 @@ on:
     - "v*"
 
 jobs:
+  # first, prepare the sources by moving the 'latest' tag to the current SHA
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+    # check the sources out in the 'expected place' for the following step that tags them
+    - name: Checkout Project Repository
+      uses: actions/checkout@v3
+    - name: tag current version as latest (regardless of other tags)
+      uses: rickstaa/action-create-tag@v1
+      with:
+        tag: "latest"
+        tag_exists_error: false
+        force_push_tag: true
+        message: "latest commit"
+        github_token: ${{ secrets.PAT_GITHUB_TOKEN }}
+  # next run all the board builds
   build:
     runs-on: ubuntu-latest
     strategy:
@@ -77,29 +93,6 @@ jobs:
       run: |
         sudo apt update
         sudo apt install coreutils p7zip-full qemu-user-static
-
-
-    # check the sources out in the 'expected place' for the following step that tags them
-    - name: Checkout Project Repository
-      uses: actions/checkout@v3
-
-
-    - name: Check for 'latest' tag
-      id: is_latest
-      run: |
-        export need_latest_tag=1
-        git tag --points-at HEAD | grep '^latest$' && need_latest_tag=0
-        echo "need_latest_tag=${need_latest_tag}" >> $GITHUB_OUTPUT
-
-    - name: tag current version as latest (regardless of other tags)
-      uses: rickstaa/action-create-tag@v1
-      if: 1 == ${{ steps.is_latest.outputs.need_latest_tag }}
-      with:
-        tag: "latest"
-        tag_exists_error: false
-        force_push_tag: true
-        message: "latest commit"
-        github_token: ${{ secrets.PAT_GITHUB_TOKEN }}
 
 
     - name: Checkout Project Repository again with the new tag
