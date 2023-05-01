@@ -32,23 +32,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [orangepi5, lepotato, raspberrypi64, asus-tinkerboard, banana-pi-m5-m2p, odroidc4, orangepi4-lts, raspberrypi32, rockpi4]
+        name: [asus-tinkerboard, banana-pi-m5-m2p, lepotato, odroidc4, orangepi3-lts, orangepi4-lts, orangepi5, raspberrypi32, raspberrypi64, renegade, rockpi4]
         include:
-        - name: orangepi5
-          base_arch: arm64
-          variant: orangepi5
-          url: https://redirect.armbian.com/orangepi5/Jammy_legacy
-          magic_path: "repository/src/image-armbian/orangepi5.img.xz"
-        - name: lepotato
-          base_arch: arm64
-          variant: armbian
-          url: https://files.adsb.im/images/Armbian_Lepotato_minimal.img.xz
-          magic_path: "repository/src/image-armbian/le-potato.img.xz"
-        - name: raspberrypi64
-          base_arch: arm64
-          variant: default
-          url: https://downloads.raspberrypi.org/raspios_lite_arm64/images/raspios_lite_arm64-2023-02-22/2023-02-21-raspios-bullseye-arm64-lite.img.xz
-          magic_path: "repository/src/image/2023-02-21-raspios-bullseye-arm64-lite.img.xz"
         - name: asus-tinkerboard
           base_arch: ""
           variant: armbian
@@ -57,27 +42,47 @@ jobs:
         - name: banana-pi-m5-m2p
           base_arch: arm64
           variant: armbian
-          url: https://redirect.armbian.com/bananapim5/Bullseye_current
+          url: https://redirect.armbian.com/bananapim5/Bullseye_current_minimal
           magic_path: "repository/src/image-armbian/banana-pi-m5-m2p.img.xz"
+        - name: lepotato
+          base_arch: arm64
+          variant: armbian
+          url: https://files.adsb.im/images/Armbian_Lepotato_minimal.img.xz
+          magic_path: "repository/src/image-armbian/le-potato.img.xz"
         - name: odroidc4
           base_arch: arm64
           variant: armbian
-          url: https://redirect.armbian.com/odroidc4/Bullseye_current
+          url: https://redirect.armbian.com/odroidc4/Bullseye_current_minimal
           magic_path: "repository/src/image-armbian/odroidc4.img.xz"
         - name: orangepi4-lts
           base_arch: arm64
           variant: armbian
-          url: https://redirect.armbian.com/orangepi4-lts/Bullseye_current
+          url: https://redirect.armbian.com/orangepi4-lts/Bullseye_current_minimal
           magic_path: "repository/src/image-armbian/orangepi4-lts.img.xz"
+        - name: orangepi5
+          base_arch: arm64
+          variant: orangepi5
+          url: https://redirect.armbian.com/orangepi5/Bullseye_legacy_minimal
+          magic_path: "repository/src/image-armbian/orangepi5.img.xz"
         - name: raspberrypi32
           variant: default
           base_arch: ""
           url: https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2023-02-22/2023-02-21-raspios-bullseye-armhf-lite.img.xz
           magic_path: "repository/src/image/2023-02-21-raspios-bullseye-armhf-lite.img.xz"
+        - name: raspberrypi64
+          base_arch: arm64
+          variant: default
+          url: https://downloads.raspberrypi.org/raspios_lite_arm64/images/raspios_lite_arm64-2023-02-22/2023-02-21-raspios-bullseye-arm64-lite.img.xz
+          magic_path: "repository/src/image/2023-02-21-raspios-bullseye-arm64-lite.img.xz"
+        - name: renegade
+          variant: armbian
+          base_arch: arm64
+          url: https://redirect.armbian.com/renegade/Bullseye_current_minimal
+          magic_path: "repository/src/image-armbian/renegade.img.xz"
         - name: rockpi4
           variant: armbian
           base_arch: arm64
-          url: https://redirect.armbian.com/rockpi-4c/Bullseye_current
+          url: https://redirect.armbian.com/rockpi-4c/Bullseye_current_minimal
           magic_path: "repository/src/image-armbian/rockpi4.img.xz"
 
     env:
