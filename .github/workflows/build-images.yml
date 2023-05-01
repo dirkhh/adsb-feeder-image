@@ -54,6 +54,11 @@ jobs:
           variant: armbian
           url: https://redirect.armbian.com/odroidc4/Bullseye_current_minimal
           magic_path: "repository/src/image-armbian/odroidc4.img.xz"
+        - name: orangepi3-lts
+          base_arch: arm64
+          variant: armbian
+          url: https://redirect.armbian.com/orangepi3-lts/Bullseye_current_minimal
+          magic_path: "repository/src/image-armbian/orangepi3-lts.img.xz"
         - name: orangepi4-lts
           base_arch: arm64
           variant: armbian
