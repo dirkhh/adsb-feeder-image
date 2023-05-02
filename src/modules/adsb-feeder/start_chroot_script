@@ -21,6 +21,7 @@ unpack /filesystem/home/root /root root
 unpack /filesystem/root /
 
 apt install dhcpcd5
+
 echo "127.0.0.1 $(hostname -s)" >> /etc/hosts
 
 systemctl enable adsb-docker

@@ -1,6 +1,6 @@
 [Unit]
 Description=ADSB Setup Service
-Requires=networking.service
+After=network-online.target
 
 [Service]
 RemainAfterExit=yes
