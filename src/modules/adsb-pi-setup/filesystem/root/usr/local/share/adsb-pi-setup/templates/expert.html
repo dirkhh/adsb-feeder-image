@@ -5,17 +5,14 @@
 
 <p>This is not designed for normal users. Unless you really know what you are doing, click the back button or click <a href="/advanced">here</a> to get back to the reasonably safe part of this user interface.</p>
 <p>If you insist on doing this, be aware that you are on your own and that your best bet to get back to a working state is to simply write a new image on your µSD card.</p>
-<p>
-<form method="post">
-<button type="submit" class="bigbigbutton" name="you-asked-for-it" value="you-got-it">I know what I'm doing, just take these settings</button>
-</p>
-<p>
-    <div class="row">
-        <label class="mb-2 col-4" for="dc">docker-compose.yml</label>
-        <textarea class="mb-3 col-11" id="dc" name="dc" rows="20" cols="100">{{ filecontent['dc'] }}</textarea>
-        <label class="mb-2 col-4" for="env">.env</label>
-        <textarea class="mb-3 col-11" id="env" name="env" rows="20" cols="100">{{ filecontent['env'] }}</textarea>
-    </div>
-</form>
-</p>
+    <form method="post">
+        <button type="submit" class="bigbigbutton red" name="you-asked-for-it" value="you-got-it">I know what I'm doing, just take these settings</button>
+        <button type="submit" class="bigbigbutton {{ 'visible' if filecontent['have_backup'] else 'invisible' }}" name="you-got-it" value="give-it-back" >I messed it up, try to restore things</button>
+        <div class="row">
+            <label class="mb-2 col-4" for="dc">docker-compose.yml</label>
+            <textarea class="mb-3 col-11" id="dc" name="dc" rows="20" cols="100">{{ filecontent['dc'] }}</textarea>
+            <label class="mb-2 col-4" for="env">.env</label>
+            <textarea class="mb-3 col-11" id="env" name="env" rows="20" cols="100">{{ filecontent['env'] }}</textarea>
+        </div>
+    </form>
 {% endblock %}

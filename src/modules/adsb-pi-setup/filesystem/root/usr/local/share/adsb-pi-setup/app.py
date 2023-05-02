@@ -1,8 +1,7 @@
-from os import urandom, getenv, path
-from flask import Flask, render_template, request, redirect
-
-from utils import RESTART, ENV_FILE, NETCONFIGS
 import shutil
+from os import urandom, path
+from flask import Flask, render_template, request, redirect
+from utils import RESTART, ENV_FILE
 
 app = Flask(__name__)
 app.secret_key = urandom(16).hex()
@@ -72,7 +71,9 @@ def expert():
     env_values = ENV_FILE.envs
     if RESTART.lock.locked():
         return redirect("/restarting")
-    filecontent = {}
+    filecontent = {'have_backup': False}
+    if path.exists("/opt/adsb/env-working") and path.exists("/opt/adsb/docker-compose.yml-working"):
+        filecontent['have_backup'] = True
     with open("/opt/adsb/.env", "r") as env:
         filecontent['env'] = env.read()
     with open("/opt/adsb/docker-compose.yml") as dc:
@@ -99,6 +100,22 @@ def handle_expert_post_request():
             env.write(request.form["env"])
         with open("/opt/adsb/docker-compose.yml", "w") as dc:
             dc.write(request.form["dc"])
+
+        restart = RESTART.restart_systemd()
+        return redirect("restarting")
+
+    if request.form.get("you-got-it") == "give-it-back":
+        # do we have saved old files?
+        if path.exists("/opt/adsb/env-working"):
+            try:
+                shutil.copyfile("/opt/adsb/env-working", "/opt/adsb/.env")
+            except shutil.Error as err:
+                print(f"copying .env didn't work: {err.args[0]}: {err.args[1]}")
+        if path.exists("/opt/adsb/docker-compose.yml-working"):
+            try:
+                shutil.copyfile("/opt/adsb/docker-compose.yml-working", "/opt/adsb/docker-compose.yml")
+            except shutil.Error as err:
+                print(f"copying docker-compose.yml didn't work: {err.args[0]}: {err.args[1]}")
 
         restart = RESTART.restart_systemd()
         return redirect("restarting")

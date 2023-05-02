@@ -17,3 +17,7 @@ h1 {
   text-align: center;
   border-radius: 2em;
 }
+
+.red {
+  background-color: #CC4411; !important
+}
