@@ -66,7 +66,7 @@ jobs:
           magic_path: "repository/src/image-armbian/orangepi4-lts.img.xz"
         - name: orangepi5
           base_arch: arm64
-          variant: orangepi5
+          variant: armbian-root2
           url: https://redirect.armbian.com/orangepi5/Bullseye_legacy_minimal
           magic_path: "repository/src/image-armbian/orangepi5.img.xz"
         - name: raspberrypi32
