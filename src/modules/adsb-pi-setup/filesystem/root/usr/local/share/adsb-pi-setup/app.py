@@ -1,7 +1,8 @@
-from os import urandom, getenv
+from os import urandom, getenv, path
 from flask import Flask, render_template, request, redirect
 
 from utils import RESTART, ENV_FILE, NETCONFIGS
+import shutil
 
 app = Flask(__name__)
 app.secret_key = urandom(16).hex()
@@ -62,6 +63,48 @@ def handle_advanced_post_request():
     net = ENV_FILE.generate_ultrafeeder_config(request.form)
     ENV_FILE.update({"FEEDER_ULTRAFEEDER_CONFIG": net})
     return redirect("/restarting")
+
+
+@app.route("/expert", methods=("GET", "POST"))
+def expert():
+    if request.method == "POST":
+        return handle_expert_post_request()
+    env_values = ENV_FILE.envs
+    if RESTART.lock.locked():
+        return redirect("/restarting")
+    filecontent = {}
+    with open("/opt/adsb/.env", "r") as env:
+        filecontent['env'] = env.read()
+    with open("/opt/adsb/docker-compose.yml") as dc:
+        filecontent['dc'] = dc.read()
+    return render_template(
+        "expert.html", env_values=env_values, metadata=ENV_FILE.metadata, filecontent=filecontent
+    )
+
+
+def handle_expert_post_request():
+    if request.form.get("you-asked-for-it") == "you-got-it":
+        # well - let's at least try to save the old stuff
+        if not path.exists("/opt/adsb/env-working"):
+            try:
+                shutil.copyfile("/opt/adsb/.env", "/opt/adsb/env-working")
+            except shutil.Error as err:
+                print(f"copying .env didn't work: {err.args[0]}: {err.args[1]}")
+        if not path.exists("/opt/adsb/dc-working"):
+            try:
+                shutil.copyfile("/opt/adsb/docker-compose.yml", "/opt/adsb/docker-compose.yml-working")
+            except shutil.Error as err:
+                print(f"copying docker-compose.yml didn't work: {err.args[0]}: {err.args[1]}")
+        with open("/opt/adsb/.env", "w") as env:
+            env.write(request.form["env"])
+        with open("/opt/adsb/docker-compose.yml", "w") as dc:
+            dc.write(request.form["dc"])
+
+        restart = RESTART.restart_systemd()
+        return redirect("restarting")
+
+    print("request_form", request.form)
+    return redirect("/advanced")
 
 
 @app.route("/", methods=("GET", "POST"))
