@@ -32,7 +32,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [asus-tinkerboard, banana-pi-m5-m2p, lepotato, odroidc4, orangepi3-lts, orangepi4-lts, orangepi5, raspberrypi32, raspberrypi64, renegade, rockpi4]
+        name: [asus-tinkerboard, banana-pi-m5-m2p, lepotato, odroidc4, orangepi3-lts, orangepi4-lts, orangepi5, pine64, raspberrypi32, raspberrypi64, renegade, rockpi4]
         include:
         - name: asus-tinkerboard
           base_arch: ""
@@ -69,6 +69,11 @@ jobs:
           variant: armbian-root2
           url: https://redirect.armbian.com/orangepi5/Bullseye_legacy_minimal
           magic_path: "repository/src/image-armbian/orangepi5.img.xz"
+        - name: pine64
+          variant: armbian
+          base_arch: arm64
+          url: https://redirect.armbian.com/pine64/Bullseye_current_minimal
+          magic_path: "repository/src/image-armbian/pine64.img.xz"
         - name: raspberrypi32
           variant: default
           base_arch: ""
