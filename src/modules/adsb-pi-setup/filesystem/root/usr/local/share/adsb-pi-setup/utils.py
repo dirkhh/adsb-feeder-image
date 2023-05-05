@@ -61,9 +61,13 @@ class NetConfigs:
                 "adsb,feed.adsb.lol,30004,beast_reduce_plus_out",
                 "mlat,feed.adsb.lol,31090,39001",
             ),
+            "flyitaly": NetConfig(
+                "adsb,dati.flyitalyadsb.com,4905,beast_reduce_plus_out",
+                "mlat,dati.flyitalyadsb.com,30100,39002",
+            )
             "adsbx": NetConfig(
                 "adsb,feed1.adsbexchange.com,30004,beast_reduce_plus_out",
-                "mlat,feed.adsbexchange.com,31090,39005",
+                "mlat,feed.adsbexchange.com,31090,39003",
             ),
             "tat": NetConfig(
                 "adsb,feed.theairtraffic.com,30004,beast_reduce_plus_out",
@@ -71,15 +75,15 @@ class NetConfigs:
             ),
             "ps": NetConfig(
                 "adsb,feed.planespotters.net,30004,beast_reduce_plus_out",
-                "mlat,mlat.planespotters.net,31090,39003",
+                "mlat,mlat.planespotters.net,31090,39005",
             ),
             "adsbone": NetConfig(
                 "adsb,feed.adsb.one,64004,beast_reduce_plus_out",
-                "mlat,feed.adsb.one,64006,39002",
+                "mlat,feed.adsb.one,64006,39006",
             ),
             "adsbfi": NetConfig(
                 "adsb,feed.adsb.fi,30004,beast_reduce_plus_out",
-                "mlat,feed.adsb.fi,31090,39000",
+                "mlat,feed.adsb.fi,31090,39007",
             ),
         }
 
