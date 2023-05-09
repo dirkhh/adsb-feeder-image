@@ -64,7 +64,7 @@ class NetConfigs:
             "flyitaly": NetConfig(
                 "adsb,dati.flyitalyadsb.com,4905,beast_reduce_plus_out",
                 "mlat,dati.flyitalyadsb.com,30100,39002",
-            )
+            ),
             "adsbx": NetConfig(
                 "adsb,feed1.adsbexchange.com,30004,beast_reduce_plus_out",
                 "mlat,feed.adsbexchange.com,31090,39003",
