@@ -104,17 +104,21 @@ jobs:
 
 
     steps:
-    - name: Install Dependencies
-      run: |
-        sudo apt update
-        sudo apt install coreutils p7zip-full qemu-user-static
-
-
+    # check if the python code at src/modules/adsb-pi-setup/filesystem/root/usr/local/share/adsb-pi-setup is valid
     - name: Checkout Project Repository again with the new tag
       uses: actions/checkout@v3
       with:
         path: repository
 
+    - name: Check Python Code
+      run: |
+        cd repository/src/modules/adsb-pi-setup/filesystem/root/usr/local/share/adsb-pi-setup
+        python3 -m py_compile *.py
+
+    - name: Install Dependencies
+      run: |
+        sudo apt update
+        sudo apt install coreutils p7zip-full qemu-user-static
 
     - name: Checkout CustomPiOS
       uses: actions/checkout@v3
@@ -216,4 +220,3 @@ jobs:
         prerelease: true
         tag_name: latest
         name: testbuild-${{ steps.tag.outputs.tag }}
-
