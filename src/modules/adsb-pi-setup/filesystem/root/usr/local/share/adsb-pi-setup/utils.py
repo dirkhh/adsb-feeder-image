@@ -1,8 +1,6 @@
-import re
 import subprocess
 import threading
 from os import getenv, path
-from pprint import pprint
 from typing import Dict
 from uuid import uuid4
 
@@ -51,7 +49,7 @@ class NetConfig:
 
     @property
     def normal(self):
-        return self.generate(None, None)
+        return self.generate(True, None)
 
 
 class NetConfigs:
@@ -93,6 +91,7 @@ class NetConfigs:
     def get_keys(self):
         return self.configs.keys()
 
+
 class EnvFile:
     def __init__(self, env_file_path: str, restart: Restart = None):
         self.env_file_path = env_file_path
@@ -118,12 +117,11 @@ class EnvFile:
                 env_values[key] = value
         self.update(env_values)
 
-        FEEDER_ULTRAFEEDER_CONFIG = self.generate_ultrafeeder_config(
+        feeder_ultrafeeder_config = self.generate_ultrafeeder_config(
             {"adsblol": "checked"}
         )
         if "FEEDER_ULTRAFEEDER_CONFIG" not in self.envs.keys():
-            self.update({"FEEDER_ULTRAFEEDER_CONFIG": FEEDER_ULTRAFEEDER_CONFIG})
-
+            self.update({"FEEDER_ULTRAFEEDER_CONFIG": feeder_ultrafeeder_config})
 
     @property
     def envs(self):
