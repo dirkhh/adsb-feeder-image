@@ -15,7 +15,7 @@
     echo -n "Updating repositories... "
     sudo apt-get update -qq -y >/dev/null && sudo apt-get upgrade -q -y
     echo -n "Ensuring dependencies are installed... "
-    sudo apt-get install -qq -y apt-transport-https ca-certificates curl gnupg2 slirp4netns software-properties-common uidmap w3m jq netcat >/dev/null
+    sudo apt-get install -qq -y apt-transport-https ca-certificates curl gnupg2 slirp4netns software-properties-common uidmap w3m jq netcat-openbsd >/dev/null
     echo -n "Getting docker..."
     curl -fsSL https://get.docker.com -o get-docker.sh
     echo "Installing Docker... "
