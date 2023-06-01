@@ -111,6 +111,7 @@ class EnvFile:
             "ADSBLOL_UUID": str(uuid4()),
             "ULTRAFEEDER_UUID": str(uuid4()),
             "MLAT_PRIVACY": "--privacy",
+            "FEEDER_READSB_GAIN": "autogain",
         }
         for key, value in default_envs.items():
             if key not in env_values:
