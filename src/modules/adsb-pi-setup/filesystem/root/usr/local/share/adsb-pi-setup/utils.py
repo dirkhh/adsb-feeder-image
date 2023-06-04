@@ -49,7 +49,7 @@ class NetConfig:
 
     @property
     def normal(self):
-        return self.generate(True, None)
+        return self.generate(False, None)  # without uuid or mlat privacy flag
 
 
 class NetConfigs:
