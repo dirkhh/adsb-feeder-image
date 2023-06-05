@@ -1,0 +1,13 @@
+version: '2.0'
+
+services:
+  fr24feed:
+    image: ghcr.io/sdr-enthusiasts/docker-flightradar24:latest
+    tty: true
+    container_name: fr24feed
+    restart: always
+    ports:
+      - 8754:8754
+    environment:
+      - BEASTHOST=ultrafeeder
+      - FR24KEY=${FEEDER_FR24_SHARING_KEY}

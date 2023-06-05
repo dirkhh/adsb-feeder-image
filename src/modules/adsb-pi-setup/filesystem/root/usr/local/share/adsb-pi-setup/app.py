@@ -1,7 +1,9 @@
+import re
 import shutil
 from os import urandom, path
 from flask import Flask, render_template, request, redirect
 from utils import RESTART, ENV_FILE
+import subprocess
 
 app = Flask(__name__)
 app.secret_key = urandom(16).hex()
@@ -50,6 +52,12 @@ def handle_advanced_post_request():
         host, port = request.server
         tar1090 = request.url_root.replace(str(port), "8080")
         return redirect(tar1090)
+
+    if request.form.get("expert") == "go":
+        return redirect("/expert")
+
+    if request.form.get("aggregators") == "go":
+        return redirect("/aggregators")
 
     print("request_form", request.form)
 
@@ -122,6 +130,72 @@ def handle_expert_post_request():
 
     print("request_form", request.form)
     return redirect("/advanced")
+
+
+@app.route("/aggregators", methods=("GET", "POST"))
+def aggregators():
+    if request.method == "POST":
+        return handle_aggregators_post_request()
+    env_values = ENV_FILE.envs
+    if RESTART.lock.locked():
+        return redirect("/restarting")
+    return render_template(
+        "aggregators.html", env_values=env_values, metadata=ENV_FILE.metadata
+    )
+
+
+def handle_aggregators_post_request():
+    if request.form.get("tar1090") == "go":
+        host, port = request.server
+        tar1090 = request.url_root.replace(str(port), "8080")
+        return redirect(tar1090)
+    if request.form.get("advanced") == "go":
+        return redirect("/advanced")
+    if request.form.get("expert") == "go":
+        return redirect("/expert")
+    if request.form.get("get-sharing-key") == "go":
+        return request_fr24_sharing_key()
+    if request.form.get("FEEDER_FR24_SHARING_KEY"):
+        # set this as the new sharing key
+        sharing_key = request.form.get("FEEDER_FR24_SHARING_KEY")
+        if re.match("[0-9a-zA-Z]*", sharing_key):
+            # that might be a valid key
+            ENV_FILE.update({"FEEDER_FR24_SHARING_KEY": sharing_key})
+        else:
+            if re.match(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b', sharing_key):
+                # likely the user added an email address and wanted to request a sharing key
+                # so let's just take them there
+                return request_fr24_sharing_key()
+            else:
+                # hmm, that's weird. we need some error return, I guess
+                return "that's not a valid sharing key"
+        # we have a sharing key, let's just enable the container
+        RESTART.restart_systemd()
+        return redirect("/aggregators")
+    else:
+        return "missing sharing key"
+
+
+def request_fr24_sharing_key():
+    if not request.form.get("FEEDER_FR24_SHARING_KEY"):
+        return redirect("/aggregators")
+    # create the docker command line to request a sharing key from FR24
+    env_values = ENV_FILE.envs
+    lat = float(env_values["FEEDER_LAT"])
+    lng = float(env_values["FEEDER_LONG"])
+    alt = int(int(env_values["FEEDER_ALT_M"]) / 0.308)
+    email = request.form.get("FEEDER_FR24_SHARING_KEY")
+    cmdline = f"docker run --rm -i -e FEEDER_LAT=\"{lat}\" -e FEEDER_LONG=\"{lng}\" -e FEEDER_ALT_FT=\"{alt}\" " \
+        f"-e FR24_EMAIL=\"{email}\" --entrypoint /scripts/signup.sh ghcr.io/sdr-enthusiasts/docker-flightradar24"
+    result = subprocess.run(cmdline, timeout=60.0, shell=True, capture_output=True)
+    ## need to catch timeout error
+    sharing_key_match = re.search("Your sharing key \\(([a-zA-Z0-9]*)\\) has been", str(result.stdout))
+    if sharing_key_match:
+        sharing_key = sharing_key_match.group(1)
+        ENV_FILE.update({"FEEDER_FR24_SHARING_KEY": sharing_key, "FR24": "1"})
+        RESTART.restart_systemd()
+    return redirect("/aggregators")
+    #    return "placeholder for waiting page"
 
 
 @app.route("/", methods=("GET", "POST"))

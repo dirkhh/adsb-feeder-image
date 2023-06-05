@@ -31,7 +31,13 @@
         <label for="adsbx" class="mb-3 col-sm-11">Submit your data to <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a> <br/><small>(please note that this site has been aquired by a private equity company with unknown plans for the data submitted; it does, however, provide the best MLAT coverage of all the sites listed)</small></label><br/>
     </div>
     <div class="form-group {{ 'visible' if metadata['adv_visible'] else 'invisible' }}">
-	    <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+    <div class="form-group {{ 'visible' if metadata['adv_visible'] else 'invisible' }}">
+        <button type="submit" name="aggregators" value="go" class="btn">Additional aggregators</button>
+    </div>
+    <div class="form-group {{ 'visible' if metadata['adv_visible'] else 'invisible' }}">
+        <button type="submit" name="expert" value="go" class="btn">Expert setup</button>
     </div>
     <p>{{ message }} </p>
 </form>

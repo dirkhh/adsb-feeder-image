@@ -1,4 +1,6 @@
+import re
 import subprocess
+import sys
 import threading
 from os import getenv, path
 from typing import Dict
@@ -18,6 +20,8 @@ class Restart:
         if self.lock.locked():
             return False
         with self.lock:
+            DOCKER_CONFIG.set_values()
+            subprocess.call("/usr/bin/systemctl daemon-reload", shell=True)
             subprocess.call("/usr/bin/systemctl restart adsb-docker", shell=True)
             subprocess.call("/usr/bin/systemctl disable adsb-bootstrap", shell=True)
             subprocess.call("/usr/bin/systemctl stop adsb-bootstrap", shell=True)
@@ -92,6 +96,26 @@ class NetConfigs:
         return self.configs.keys()
 
 
+class DockerConfig:
+    def __init__(self, config_file_path: str):
+        self.file_path = config_file_path
+
+    def set_values(self):
+        with open(self.file_path, "w") as conf_file:
+            env_values = ENV_FILE.envs
+            config = ["# this sets the variable(s) used in the service file\n",
+                      "# it gets automatically updated by the adsb-setup service\n",
+                      "# set this to \n",
+                      "# FR24_FLAG=-f\n"
+                      "# FR24_VALUE=fr24.yml\n",
+                      "[Service]\n"]
+            if env_values["FR24"] == "1":
+                config.append("Environment=FR24_FLAG=-f\nEnvironment=FR24_VALUE=fr24.yml\n")
+            else:
+                config.append("Environment=FR24_FLAG=\nEnvironment=FR24_VALUE=\n")
+            conf_file.writelines(config)
+
+
 class EnvFile:
     def __init__(self, env_file_path: str, restart: Restart = None):
         self.env_file_path = env_file_path
@@ -112,6 +136,7 @@ class EnvFile:
             "ULTRAFEEDER_UUID": str(uuid4()),
             "MLAT_PRIVACY": "--privacy",
             "FEEDER_READSB_GAIN": "autogain",
+            "FR24": "0",
         }
         for key, value in default_envs.items():
             if key not in env_values:
@@ -203,9 +228,12 @@ class EnvFile:
         metadata["privacy"] = (
             "checked" if env_values["MLAT_PRIVACY"] == "--privacy" else ""
         )
-        from pprint import pprint
-
-        pprint(metadata)
+        fr24_enabled = env_values["FR24"] == "1" \
+                       "FEEDER_FR24_SHARING_KEY" in env_values and \
+                       re.match("^[0-9a-zA-Z]*$", env_values["FEEDER_FR24_SHARING_KEY"])
+        metadata["fr24"] = (
+            "checked" if fr24_enabled else ""
+        )
         return metadata
 
     def generate_ultrafeeder_config(self, form_data):
@@ -226,5 +254,8 @@ class EnvFile:
 RESTART = Restart()
 ENV_FILE = EnvFile(
     env_file_path=getenv("ADSB_PI_SETUP_ENVFILE", "/opt/adsb/.env"), restart=RESTART
+)
+DOCKER_CONFIG = DockerConfig(
+    config_file_path=getenv("ADSB_SETUP_DOCKER_CONFIG", "/usr/lib/systemd/system/adsb-docker.service.d/adsb-docker.conf")
 )
 NETCONFIGS = NetConfigs()
