@@ -7,11 +7,6 @@ from typing import Dict
 from uuid import uuid4
 
 
-class DockerCompose:
-    def __init__(self, docker_compose_path: str):
-        self.docker_compose_path = docker_compose_path
-
-
 class Restart:
     def __init__(self):
         self.lock = threading.Lock()
@@ -20,7 +15,6 @@ class Restart:
         if self.lock.locked():
             return False
         with self.lock:
-            DOCKER_CONFIG.set_values()
             subprocess.call("/usr/bin/systemctl daemon-reload", shell=True)
             subprocess.call("/usr/bin/systemctl restart adsb-docker", shell=True)
             subprocess.call("/usr/bin/systemctl disable adsb-bootstrap", shell=True)
@@ -94,26 +88,6 @@ class NetConfigs:
 
     def get_keys(self):
         return self.configs.keys()
-
-
-class DockerConfig:
-    def __init__(self, config_file_path: str):
-        self.file_path = config_file_path
-
-    def set_values(self):
-        with open(self.file_path, "w") as conf_file:
-            env_values = ENV_FILE.envs
-            config = ["# this sets the variable(s) used in the service file\n",
-                      "# it gets automatically updated by the adsb-setup service\n",
-                      "# set this to \n",
-                      "# FR24_FLAG=-f\n"
-                      "# FR24_VALUE=fr24.yml\n",
-                      "[Service]\n"]
-            if env_values["FR24"] == "1":
-                config.append("Environment=FR24_FLAG=-f\nEnvironment=FR24_VALUE=fr24.yml\n")
-            else:
-                config.append("Environment=FR24_FLAG=\nEnvironment=FR24_VALUE=\n")
-            conf_file.writelines(config)
 
 
 class EnvFile:
@@ -254,8 +228,5 @@ class EnvFile:
 RESTART = Restart()
 ENV_FILE = EnvFile(
     env_file_path=getenv("ADSB_PI_SETUP_ENVFILE", "/opt/adsb/.env"), restart=RESTART
-)
-DOCKER_CONFIG = DockerConfig(
-    config_file_path=getenv("ADSB_SETUP_DOCKER_CONFIG", "/usr/lib/systemd/system/adsb-docker.service.d/adsb-docker.conf")
 )
 NETCONFIGS = NetConfigs()

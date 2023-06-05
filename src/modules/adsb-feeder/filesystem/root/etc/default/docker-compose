@@ -1,0 +1,9 @@
+# assemble the docker compose files we want to use
+# this needs to be extended for each new aggregator
+
+COMPOSE_FILES=( "-f" "docker-compose.yml" )
+
+# to use FlightRadar24 we need the fr24.yml file - we check FR24 in .env
+if grep "FR24=1" /opt/adsb/.env > /dev/null 2>&1 ; then
+	COMPOSE_FILES+=( "-f" "fr24.yml" )
+fi

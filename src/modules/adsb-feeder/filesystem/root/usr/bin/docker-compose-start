@@ -1,0 +1,3 @@
+#!/bin/bash
+source /etc/default/docker-compose
+/usr/bin/docker compose ${COMPOSE_FILES[@]} up -d -t 30
