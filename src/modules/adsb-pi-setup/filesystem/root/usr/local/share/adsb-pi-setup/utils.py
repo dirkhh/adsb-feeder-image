@@ -202,7 +202,7 @@ class EnvFile:
         metadata["privacy"] = (
             "checked" if env_values["MLAT_PRIVACY"] == "--privacy" else ""
         )
-        fr24_enabled = env_values["FR24"] == "1" \
+        fr24_enabled = env_values["FR24"] == "1" and \
                        "FEEDER_FR24_SHARING_KEY" in env_values and \
                        re.match("^[0-9a-zA-Z]*$", env_values["FEEDER_FR24_SHARING_KEY"])
         metadata["fr24"] = (
