@@ -20,20 +20,20 @@
                        placeholder="existing flightradar24 sharing key or email address" class="form-control"
                        value="{{ env_values['FEEDER_FR24_SHARING_KEY'] }}">
             </label>
-            <button type="submit" class="btn btn-primary" name="get-sharing-key" value="go" onclick="show_loader()">Request key</button>
+            <button type="submit" class="btn btn-primary" name="get-sharing-key" value="go" onclick="show_loader()">Submit or request key</button>
         </div>
     </div>
     <!--
     <div class="form-group {{ 'visible' if metadata['adv_visible'] else 'invisible' }}">
         <button type="submit" class="btn btn-primary">Submit</button>
     </div>
-    -->
     <div class="form-group {{ 'visible' if metadata['adv_visible'] else 'invisible' }}">
         <button type="submit" name="advanced" value="go" class="btn btn-secondary">Advanced configuration of base feeders</button>
     </div>
     <div class="form-group {{ 'visible' if metadata['adv_visible'] else 'invisible' }}">
         <button type="submit" name="expert" value="go" class="btn btn-secondary">Expert setup</button>
     </div>
+    -->
 </form>
 </div>
     <script>

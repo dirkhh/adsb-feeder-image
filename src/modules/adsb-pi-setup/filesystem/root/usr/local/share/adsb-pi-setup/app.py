@@ -154,25 +154,23 @@ def handle_aggregators_post_request():
     if request.form.get("expert") == "go":
         return redirect("/expert")
     if request.form.get("get-sharing-key") == "go":
-        return request_fr24_sharing_key()
-    if request.form.get("FEEDER_FR24_SHARING_KEY"):
-        # set this as the new sharing key
         sharing_key = request.form.get("FEEDER_FR24_SHARING_KEY")
+        if not sharing_key:
+            return redirect("/aggegators")  #  basically just a page reload
+        if re.match(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b', sharing_key):
+            # that's an email address, so we are looking to get a sharing key
+            return request_fr24_sharing_key()
         if re.match("[0-9a-zA-Z]*", sharing_key):
             # that might be a valid key
             ENV_FILE.update({"FEEDER_FR24_SHARING_KEY": sharing_key})
         else:
-            if re.match(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b', sharing_key):
-                # likely the user added an email address and wanted to request a sharing key
-                # so let's just take them there
-                return request_fr24_sharing_key()
-            else:
-                # hmm, that's weird. we need some error return, I guess
-                return "that's not a valid sharing key"
+            # hmm, that's weird. we need some error return, I guess
+            return "that's not a valid sharing key"
         # we have a sharing key, let's just enable the container
         RESTART.restart_systemd()
         return redirect("/aggregators")
     else:
+        # how did we get here???
         return "missing sharing key"
 
 
