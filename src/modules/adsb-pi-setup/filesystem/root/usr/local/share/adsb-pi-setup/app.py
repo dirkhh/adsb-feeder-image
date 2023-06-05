@@ -170,8 +170,8 @@ def handle_aggregators_post_request():
             return request_fr24_sharing_key()
         if re.match("[0-9a-zA-Z]*", sharing_key):
             # that might be a valid key
-            ENV_FILE.update({"FEEDER_FR24_SHARING_KEY": sharing_key})
             print_err(f"{sharing_key} looks like a valid sharing key")
+            ENV_FILE.update({"FEEDER_FR24_SHARING_KEY": sharing_key, "FR24": "1"})
         else:
             # hmm, that's weird. we need some error return, I guess
             print_err(f"we got a text that's neither email address nor sharing key: {sharing_key}")
