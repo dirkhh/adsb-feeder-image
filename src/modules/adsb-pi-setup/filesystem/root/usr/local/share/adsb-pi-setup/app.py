@@ -1,5 +1,6 @@
 import re
 import shutil
+import sys
 from os import urandom, path
 from flask import Flask, render_template, request, redirect
 from utils import RESTART, ENV_FILE
@@ -7,6 +8,10 @@ import subprocess
 
 app = Flask(__name__)
 app.secret_key = urandom(16).hex()
+
+
+def print_err(*args):
+    print(*args, file=sys.stderr)
 
 
 @app.route("/propagateTZ")
@@ -155,16 +160,21 @@ def handle_aggregators_post_request():
         return redirect("/expert")
     if request.form.get("get-sharing-key") == "go":
         sharing_key = request.form.get("FEEDER_FR24_SHARING_KEY")
+        print_err(f"form.get of sharing key results in {sharing_key}")
         if not sharing_key:
+            print_err("no sharing key - reload")
             return redirect("/aggegators")  #  basically just a page reload
         if re.match(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b', sharing_key):
             # that's an email address, so we are looking to get a sharing key
+            print_err("got email address, going to request a sharing key")
             return request_fr24_sharing_key()
         if re.match("[0-9a-zA-Z]*", sharing_key):
             # that might be a valid key
             ENV_FILE.update({"FEEDER_FR24_SHARING_KEY": sharing_key})
+            print_err(f"{sharing_key} looks like a valid sharing key")
         else:
             # hmm, that's weird. we need some error return, I guess
+            print_err(f"we got a text that's neither email address nor sharing key: {sharing_key}")
             return "that's not a valid sharing key"
         # we have a sharing key, let's just enable the container
         RESTART.restart_systemd()
