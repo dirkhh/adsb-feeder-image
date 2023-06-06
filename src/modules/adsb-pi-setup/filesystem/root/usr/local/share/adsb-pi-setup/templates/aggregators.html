@@ -10,30 +10,66 @@
 
 <form method="post">
     <div class="row no-gutters">
-        <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="fr24" id="fr24" {{ metadata['fr24'] }}/>
-        <label for="fr24" class="mb-3 col-sm-11">Submit your data to <a href="https://www.flightradar24.com/privacy-policy">flightradar24</a></label>
+        <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="FR24" id="FR24" {{ metadata['FR24'] }}/>
+        <label for="FR24" class="mb-3 col-sm-10">
+            Submit your data to <a href="https://www.flightradar24.com/privacy-policy">flightradar24</a><br/>
+            Enter your flightradar24 sharing key<br/>
+            (or enter you email address and click the button to request a sharing key)
+        </label>
         <div class="col-sm-1">&nbsp;</div>
+        <!-- this ends the first row -->
+        <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
         <div class="form-group col-sm-11 no-gutters" id="FR_FIELDS">
-            <label for="FR24_ID" class="col-sm-8">flightradar24 sharing key<br/>(or enter you email address and click the button to request a sharing key)
-                <input type="text" name="FEEDER_FR24_SHARING_KEY"
-                       placeholder="existing flightradar24 sharing key or email address" class="form-control"
+            <label for="FR24_ID" class="col-sm-11">FR24 sharing key or email
+                <input type="text" name="FEEDER_FR24_SHARING_KEY" class="form-control col-sm-6 mr-1"
+                       placeholder="existing flightradar24 sharing key or email address"
                        value="{{ env_values['FEEDER_FR24_SHARING_KEY'] }}">
+                <button type="submit" class="btn btn-primary col-sm-3 ml-1"
+                        name="get-sharing-key" value="go" onclick="show_spinner()">
+                    Submit or request key
+                </button>
             </label>
-            <button type="submit" class="btn btn-primary" name="get-sharing-key" value="go" onclick="show_spinner()">Submit or request key</button>
+        </div>
+    </div>
+</form>
+<form method="post">
+    <div class="row no-gutters">
+        <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="PW" id="PW" {{ metadata['PW'] }}/>
+        <label for="PW" class="mb-3 col-sm-10">
+            Submit your data to <a href="https://plane.watch">Plane.watch</a><br/>
+            To sign up for an API key go to <a href="https://atc.plane.watch/">atc.plane.watch</a>,
+            sign up for an account, log in and click on <b>Feeders, + New Feeder</b>.
+            Fill out the details and save the data. This will show you an API key that you can enter here.
+        </label>
+        <div class="col-sm-1">&nbsp;</div>
+        <!-- this ends the first row -->
+        <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
+        <div class="form-group col-sm-11 no-gutters" id="PW_FIELDS">
+            <label for="PW_ID" class="col-sm-11"> Plane.watch API key
+                <input type="text" name="FEEDER_PLANEWATCH_API_KEY" class="form-control col-sm-6 ml-1"
+                       placeholder="Plane.watch API key"
+                       value="{{ env_values['FEEDER_PLANEWATCH_API_KEY'] }}">
+                <button type="submit" class="btn btn-primary col-sm-3 ml-1"
+                        name="get-pw-api-key" value="go" onclick="show_spinner()">
+                    Submit to activate
+                </button>
+            </label>
         </div>
     </div>
 </form>
 </div>
-    <script>
-        const fr_24checkbox = document.getElementById('fr24');
-        const fr_fields = document.getElementById('FR_FIELDS');
-        fr_24checkbox.addEventListener('click', function handleClick() {
-            if (fr_24checkbox.checked) {
-                fr_fields.style.display = 'block';
-            } else {
-                fr_fields.style.display = 'none';
+<script>
+    function show_or_hide(b, f) { if (b.checked) f.style.display = "block"; else f.style.display = "none"; }
+    document.addEventListener('readystatechange', event => {
+        if (event.target.readyState === "complete") {
+            const box_fields = [["FR24", "FR_FIELDS"], ["PW", "PW_FIELDS"]];
+            for (const pair of box_fields) {
+                let box = document.getElementById(pair[0]);
+                let fields = document.getElementById(pair[1]);
+                box.addEventListener("click", function () { show_or_hide(box, fields); })
+                show_or_hide(box, fields);
             }
-            });
         }
-    </script>
+    })
+</script>
 {% endblock %}

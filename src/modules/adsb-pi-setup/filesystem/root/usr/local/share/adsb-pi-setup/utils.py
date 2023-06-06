@@ -111,6 +111,7 @@ class EnvFile:
             "MLAT_PRIVACY": "--privacy",
             "FEEDER_READSB_GAIN": "autogain",
             "FR24": "0",
+            "PW": "0",
         }
         for key, value in default_envs.items():
             if key not in env_values:
