@@ -112,6 +112,12 @@ class EnvFile:
             "FEEDER_READSB_GAIN": "autogain",
             "FR24": "0",
             "PW": "0",
+            "FA": "0",
+            "RB": "0",
+            "PF": "0",
+            "AH": "0",
+            "OS": "0",
+            "RV": "0",
         }
         for key, value in default_envs.items():
             if key not in env_values:
@@ -206,8 +212,29 @@ class EnvFile:
         fr24_enabled = env_values["FR24"] == "1" and \
                        "FEEDER_FR24_SHARING_KEY" in env_values and \
                        re.match("^[0-9a-zA-Z]*$", env_values["FEEDER_FR24_SHARING_KEY"])
-        metadata["fr24"] = (
+        metadata["FR24"] = (
             "checked" if fr24_enabled else ""
+        )
+        metadata["PW"] = (
+            "checked" if env_values["PW"] == "1" else ""
+        )
+        metadata["FA"] = (
+            "checked" if env_values["FA"] == "1" else ""
+        )
+        metadata["RB"] = (
+            "checked" if env_values["RB"] == "1" else ""
+        )
+        metadata["PF"] = (
+            "checked" if env_values["PF"] == "1" else ""
+        )
+        metadata["AH"] = (
+            "checked" if env_values["AH"] == "1" else ""
+        )
+        metadata["OS"] = (
+            "checked" if env_values["OS"] == "1" else ""
+        )
+        metadata["RV"] = (
+            "checked" if env_values["RV"] == "1" else ""
         )
         return metadata
 
