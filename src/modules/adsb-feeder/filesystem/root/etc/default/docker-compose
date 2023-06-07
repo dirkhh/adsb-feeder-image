@@ -3,7 +3,29 @@
 
 COMPOSE_FILES=( "-f" "docker-compose.yml" )
 
-# to use FlightRadar24 we need the fr24.yml file - we check FR24 in .env
+# for each of the yml snippets check if this aggregator is enabled
+# in the .env file
 if grep "FR24=1" /opt/adsb/.env > /dev/null 2>&1 ; then
 	COMPOSE_FILES+=( "-f" "fr24.yml" )
+fi
+if grep "PW=1" /opt/adsb/.env > /dev/null 2>&1 ; then
+	COMPOSE_FILES+=( "-f" "pw.yml" )
+fi
+if grep "FA=1" /opt/adsb/.env > /dev/null 2>&1 ; then
+	COMPOSE_FILES+=( "-f" "fa.yml" )
+fi
+if grep "RB=1" /opt/adsb/.env > /dev/null 2>&1 ; then
+	COMPOSE_FILES+=( "-f" "rb.yml" )
+fi
+if grep "PF=1" /opt/adsb/.env > /dev/null 2>&1 ; then
+	COMPOSE_FILES+=( "-f" "pf.yml" )
+fi
+if grep "AH=1" /opt/adsb/.env > /dev/null 2>&1 ; then
+	COMPOSE_FILES+=( "-f" "ah.yml" )
+fi
+if grep "OS=1" /opt/adsb/.env > /dev/null 2>&1 ; then
+	COMPOSE_FILES+=( "-f" "os.yml" )
+fi
+if grep "RV=1" /opt/adsb/.env > /dev/null 2>&1 ; then
+	COMPOSE_FILES+=( "-f" "rv.yml" )
 fi

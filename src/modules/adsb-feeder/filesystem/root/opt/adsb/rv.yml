@@ -1,0 +1,24 @@
+version: '2.0'
+
+services:
+    radarvirtuel:
+    image: ghcr.io/sdr-enthusiasts/docker-radarvirtuel:latest
+    tty: true
+    container_name: radarvirtuel
+    hostname: radarvirtuel
+    restart: always
+    environment:
+      - FEEDER_KEY=${FEEDER_RV_FEEDER_KEY}
+      - SOURCE_HOST=ultrafeeder:30002
+      - RV_SERVER=mg22.adsbnetwork.com:50050
+      - VERBOSE=OFF
+      - MLAT_SERVER=mlat.adsbnetwork.com:50000
+      - MLAT_HOST=ultrafeeder:30005
+      - LAT=${FEEDER_LAT}
+      - LON=${FEEDER_LONG}
+      - ALT=${FEEDER_ALT_M}
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,noexec,relatime,size=128M
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+      - "/etc/timezone:/etc/timezone:ro"

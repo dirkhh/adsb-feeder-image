@@ -1,0 +1,19 @@
+version: '2.0'
+
+services:
+    opensky:
+    image: ghcr.io/sdr-enthusiasts/docker-opensky-network:latest
+    tty: true
+    container_name: opensky
+    restart: always
+    environment:
+      - TZ=${FEEDER_TZ}
+      - BEASTHOST=ultrafeeder
+      - LAT=${FEEDER_LAT}
+      - LONG=${FEEDER_LONG}
+      - ALT=${FEEDER_ALT_M}
+      - OPENSKY_USERNAME=${FEEDER_OPENSKY_USERNAME}
+      - OPENSKY_SERIAL=${FEEDER_OPENSKY_SERIAL}
+    tmpfs:
+      - /run:exec,size=64M
+      - /var/log

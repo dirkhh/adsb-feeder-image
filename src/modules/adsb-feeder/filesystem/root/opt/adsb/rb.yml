@@ -1,0 +1,18 @@
+version: '2.0'
+
+services:
+    rbfeeder:
+    image: ghcr.io/sdr-enthusiasts/docker-radarbox:latest
+    tty: true
+    container_name: rbfeeder
+    restart: always
+    environment:
+      - BEASTHOST=ultrafeeder
+      - LAT=${FEEDER_LAT}
+      - LONG=${FEEDER_LONG}
+      - ALT=${FEEDER_ALT_M}
+      - TZ=${FEEDER_TZ}
+      - SHARING_KEY=${FEEDER_RADARBOX_SHARING_KEY}
+    tmpfs:
+      - /run:exec,size=64M
+      - /var/log

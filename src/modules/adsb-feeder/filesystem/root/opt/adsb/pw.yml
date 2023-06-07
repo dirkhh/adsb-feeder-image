@@ -1,0 +1,18 @@
+version: '2.0'
+
+services:
+  planewatch:
+    image: ghcr.io/plane-watch/docker-plane-watch:latest
+    tty: true
+    container_name: planewatch
+    restart: always
+    environment:
+      - BEASTHOST=ultrafeeder
+      - LAT=${FEEDER_LAT}
+      - LONG=${FEEDER_LONG}
+      - ALT=${FEEDER_ALT_M}m
+      - TZ=${FEEDER_TZ}
+      - API_KEY=${FEEDER_PLANEWATCH_API_KEY}
+    tmpfs:
+      - /run:exec,size=64M
+      - /var/log
