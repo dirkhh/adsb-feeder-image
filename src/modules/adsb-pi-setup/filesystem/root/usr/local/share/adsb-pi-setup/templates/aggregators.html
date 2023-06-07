@@ -19,14 +19,14 @@
         <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
         <div class="form-group col-sm-11 no-gutters" id="FR_FIELDS">
             <div class="row no-gutters">
-                <label for="FEEDER_FR24_SHARING_KEY" class="col-sm-11">Enter your flightradar24 sharing key<br/>
+                <label for="FRSK" class="col-sm-11">Enter your flightradar24 sharing key<br/>
                     (or enter you email address and click the button to request a sharing key)
                 </label>
-                <input type="text" id="FEEDER_FR24_SHARING_KEY" class="form-control col-sm-6 mr-1"
+                <input type="text" id="FRSK" name="FEEDER_FR24_SHARING_KEY" class="form-control col-sm-6 mr-1"
                        placeholder="existing flightradar24 sharing key or email address"
                        value="{{ env_values['FEEDER_FR24_SHARING_KEY'] }}">
                 <button type="submit" class="btn btn-primary col-sm-3 ml-1"
-                        name="get-sharing-key" value="go" onclick="show_spinner()">
+                        name="get-fr24-sharing-key" value="go" onclick="show_spinner()">
                     Submit or request key
                 </button>
             </div>
@@ -44,12 +44,12 @@
         <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
         <div class="form-group col-sm-11 no-gutters" id="PW_FIELDS">
             <div class="row no-gutters">
-                <label for="FEEDER_PLANEWATCH_API_KEY" class="col-sm-11">
+                <label for="PWAK" class="col-sm-11">
                     To sign up for an API key go to <a href="https://atc.plane.watch/">atc.plane.watch</a>,
                     sign up for an account, log in and click on <b>Feeders, + New Feeder</b>.
                     Fill out the details and save the data. This will show you an API key that you can enter here.
                 </label>
-                <input type="text" id="FEEDER_PLANEWATCH_API_KEY" class="form-control col-sm-6 ml-1"
+                <input type="text" id="PWAK" name="FEEDER_PLANEWATCH_API_KEY" class="form-control col-sm-6 ml-1"
                        placeholder=" Plane.watch API key"
                        value="{{ env_values['FEEDER_PLANEWATCH_API_KEY'] }}">
                 <button type="submit" class="btn btn-primary col-sm-3 ml-1"
@@ -71,12 +71,12 @@
         <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
         <div class="form-group col-sm-11 no-gutters" id="FA_FIELDS">
             <div class="row no-gutters">
-                <label for="FEEDER_PIAWARE_FEEDER_ID" class="col-sm-11">
+                <label for="FAFI" class="col-sm-11">
                     You need an FlightAware / Piaware sharing key.
                     If you already have one, please enter it below. Automation to get one for you if you
                     are a new user will be added in a future release.
                 </label>
-                <input type="text" id="FEEDER_PIAWARE_FEEDER_ID" class="form-control col-sm-6 ml-1"
+                <input type="text" id="FAFI" name="FEEDER_PIAWARE_FEEDER_ID" class="form-control col-sm-6 ml-1"
                        placeholder=" Piaware key"
                        value="{{ env_values['FEEDER_PIAWARE_FEEDER_ID'] }}">
                 <button type="submit" class="btn btn-primary col-sm-3 ml-1"
@@ -98,16 +98,16 @@
         <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
         <div class="form-group col-sm-11 no-gutters" id="RB_FIELDS">
             <div class="row no-gutters">
-                <label for="FEEDER_RADARBOX_SHARING_KEY" class="col-sm-11">
+                <label for="RBSK" class="col-sm-11">
                     You need an RadarBox sharing key.
                     If you already have one, please enter it below. Automation to get one for you if you
                     are a new user will be added in a future release.
                 </label>
-                <input type="text" id="FEEDER_RADARBOX_SHARING_KEY" class="form-control col-sm-6 ml-1"
+                <input type="text" id="RBSK" name="FEEDER_RADARBOX_SHARING_KEY" class="form-control col-sm-6 ml-1"
                        placeholder=" RadarBox sharing key"
                        value="{{ env_values['FEEDER_RADARBOX_SHARING_KEY'] }}">
                 <button type="submit" class="btn btn-primary col-sm-3 ml-1"
-                        name="get-rw-sharing-key" value="go" onclick="show_spinner()">
+                        name="get-rb-sharing-key" value="go" onclick="show_spinner()">
                     Submit to activate
                 </button>
             </div>
@@ -125,12 +125,12 @@
         <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
         <div class="form-group col-sm-11 no-gutters" id="PF_FIELDS">
             <div class="row no-gutters">
-                <label for="FEEDER_PLANEFINDER_SHARECODE" class="col-sm-11">
+                <label for="PFSC" class="col-sm-11">
                     You need an PlaneFinder sharecode.
                     If you already have one, please enter it below. Automation to get one for you if you
                     are a new user will be added in a future release.
                 </label>
-                <input type="text" id="FEEDER_PLANEFINDER_SHARECODE" class="form-control col-sm-6 ml-1"
+                <input type="text" id="PFSC" name="FEEDER_PLANEFINDER_SHARECODE" class="form-control col-sm-6 ml-1"
                        placeholder=" PlaneFinder sharecode"
                        value="{{ env_values['FEEDER_PLANEFINDER_SHARECODE'] }}">
                 <button type="submit" class="btn btn-primary col-sm-3 ml-1"
@@ -152,17 +152,17 @@
         <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
         <div class="form-group col-sm-11 no-gutters" id="AH_FIELDS">
             <div class="row no-gutters">
-                <label for="FEEDER_ADSBHUB_STATION_KEY" class="col-sm-11">
+                <label for="AHSK" class="col-sm-11">
                     To sign up for an ADSBHub station key go to <a href="https://www.adsbhub.org/howtofeed.php">ADSBHub how to feed</a>,
                     setting your station up as feeder type "Linux" in "Client" mode, feeding via the "SBS" protocol.
                     This will get you your station key. Existing users can find their station key on the Settings page
                     of the ADSBHub site.
                 </label>
-                <input type="text" id="FEEDER_ADSBHUB_STATION_KEY" class="form-control col-sm-6 ml-1"
+                <input type="text" id="AHSK" name="FEEDER_ADSBHUB_STATION_KEY" class="form-control col-sm-6 ml-1"
                        placeholder=" ADSBHub station key"
                        value="{{ env_values['FEEDER_ADSBHUB_STATION_KEY'] }}">
                 <button type="submit" class="btn btn-primary col-sm-3 ml-1"
-                        name="get-pw-api-key" value="go" onclick="show_spinner()">
+                        name="get-ah-station-key" value="go" onclick="show_spinner()">
                     Submit to activate
                 </button>
             </div>
@@ -183,14 +183,14 @@
           -->
         <div class="form-group col-sm-11 no-gutters" id="OS_FIELDS">
             <div class="row no-gutters">
-                <label for="FEEDER_OPENSKY_USERNAME" class="col-sm-11">You need an OpenSky username and serial number.
+                <label for="OSUN" class="col-sm-11">You need an OpenSky username and serial number.
                     If you already have these, please enter them below. Automation to get them for you if you
                     are a new user will be added in a future release.
                 </label>
-                <input type="text" id="FEEDER_OPENSKY_USERNAME" class="form-control col-sm-3 ml-1"
+                <input type="text" id="OSUN" name="FEEDER_OPENSKY_USERNAME" class="form-control col-sm-3 ml-1"
                        placeholder=" OpenSky username"
                        value="{{ env_values['FEEDER_OPENSKY_USERNAME'] }}">
-                <input type="text" id="FEEDER_OPENSKY_SERIAL" class="form-control col-sm-3 ml-1"
+                <input type="text" name="FEEDER_OPENSKY_SERIAL" class="form-control col-sm-3 ml-1"
                        placeholder=" OpenSky serial number"
                        value="{{ env_values['FEEDER_OPENSKY_SERIAL'] }}">
                 <button type="submit" class="btn btn-primary col-sm-3 ml-1"
@@ -212,12 +212,12 @@
         <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
         <div class="form-group col-sm-11 no-gutters" id="RV_FIELDS">
             <div class="row no-gutters">
-                <label for="FEEDER_RV_FEEDER_KEY" class="col-sm-11">To sign up for an feeder key send email to
+                <label for="RVFK" class="col-sm-11">To sign up for an feeder key send email to
                     <a href="mailto://support@adsbnetwork.com">support@adsbnetwork.com</a>.
                     Include your name, Lat/Lon of nearest airport, and mention that you are using a Docker setup.
                     They will respond with a feeder key that you can enter here
                 </label>
-                <input type="text" id="FEEDER_RV_FEEDER_KEY" class="form-control col-sm-6 ml-1"
+                <input type="text" id="RVFK" name="FEEDER_RV_FEEDER_KEY" class="form-control col-sm-6 ml-1"
                        placeholder=" RadarVirtuel feeder key"
                        value="{{ env_values['FEEDER_RV_FEEDER_KEY'] }}">
                 <button type="submit" class="btn btn-primary col-sm-3 ml-1"
