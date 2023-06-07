@@ -1,255 +1,280 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>{% block title %} Setup additional aggregators {% endblock %}</h1>
+    <h1>{% block title %} Setup additional aggregators {% endblock %}</h1>
 
-<div id="non-loader">
-<form method="post">
-<button type="submit" class="bigbigbutton" name="tar1090" value="go">I'm done here - take me to the website</button>
-</form>
+    <div id="non-loader">
+        <form method="post">
+            <button type="submit" class="bigbigbutton" name="tar1090" value="go" onclick="show_spinner()">
+                I'm done here - take me to the website
+            </button>
 
-<form method="post">
-    <div class="row no-gutters">
-        <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="FR24" id="FR24" {{ metadata['FR24'] }}/>
-        <label for="FR24" class="mb-3 col-sm-10">
-            Submit your data to <a href="https://www.flightradar24.com/privacy-policy">flightradar24</a>
-        </label>
-        <div class="col-sm-1">&nbsp;</div>
-        <!-- this ends the first row -->
-        <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
-        <div class="form-group col-sm-11 no-gutters" id="FR_FIELDS">
             <div class="row no-gutters">
-                <label for="FRSK" class="col-sm-11">Enter your flightradar24 sharing key<br/>
-                    (or enter you email address and click the button to request a sharing key)
+                <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="FR24"
+                       id="FR24" {{ metadata['FR24'] }}/>
+                <label for="FR24" class="mb-3 col-sm-10">
+                    Submit your data to <a href="https://www.flightradar24.com/privacy-policy">flightradar24</a>
                 </label>
-                <input type="text" id="FRSK" name="FEEDER_FR24_SHARING_KEY" class="form-control col-sm-6 mr-1"
-                       placeholder="existing flightradar24 sharing key or email address"
-                       value="{{ env_values['FEEDER_FR24_SHARING_KEY'] }}">
-                <button type="submit" class="btn btn-primary col-sm-3 ml-1"
-                        name="get-fr24-sharing-key" value="go" onclick="show_spinner()">
-                    Submit or request key
-                </button>
+                <div class="col-sm-1">&nbsp;</div>
+                <!-- this ends the first row -->
+                <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
+                <div class="form-group col-sm-11 no-gutters" id="FR_FIELDS">
+                    <div class="row no-gutters">
+                        <label for="FRSK" class="col-sm-11">Enter your flightradar24 sharing key<br/>
+                            (or enter you email address and click the button to request a sharing key)
+                        </label>
+                        <input type="text" id="FRSK" name="FEEDER_FR24_SHARING_KEY" class="form-control col-sm-6 mr-1"
+                                {{ metadata["FR24"] | replace("checked", "required") }}
+                               placeholder="existing flightradar24 sharing key or email address"
+                               value="{{ env_values['FEEDER_FR24_SHARING_KEY'] }}">
+                        <button type="submit" class="btn btn-primary col-sm-3 ml-1"
+                                name="get-fr24-sharing-key" value="go" onclick="show_spinner()">
+                            Submit or request key
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-</form>
-<form method="post">
-    <div class="row no-gutters">
-        <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="PW" id="PW" {{ metadata['PW'] }}/>
-        <label for="PW" class="mb-3 col-sm-10">
-            Submit your data to <a href="https://plane.watch">Plane.watch</a>
-        </label>
-        <div class="col-sm-1">&nbsp;</div>
-        <!-- this ends the first row -->
-        <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
-        <div class="form-group col-sm-11 no-gutters" id="PW_FIELDS">
+
             <div class="row no-gutters">
-                <label for="PWAK" class="col-sm-11">
-                    To sign up for an API key go to <a href="https://atc.plane.watch/">atc.plane.watch</a>,
-                    sign up for an account, log in and click on <b>Feeders, + New Feeder</b>.
-                    Fill out the details and save the data. This will show you an API key that you can enter here.
+                <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="PW"
+                       id="PW" {{ metadata['PW'] }}/>
+                <label for="PW" class="mb-3 col-sm-10">
+                    Submit your data to <a href="https://plane.watch">Plane.watch</a>
                 </label>
-                <input type="text" id="PWAK" name="FEEDER_PLANEWATCH_API_KEY" class="form-control col-sm-6 ml-1"
-                       placeholder=" Plane.watch API key"
-                       value="{{ env_values['FEEDER_PLANEWATCH_API_KEY'] }}">
-                <button type="submit" class="btn btn-primary col-sm-3 ml-1"
-                        name="get-pw-api-key" value="go" onclick="show_spinner()">
-                    Submit to activate
-                </button>
+                <div class="col-sm-1">&nbsp;</div>
+                <!-- this ends the first row -->
+                <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
+                <div class="form-group col-sm-11 no-gutters" id="PW_FIELDS">
+                    <div class="row no-gutters">
+                        <label for="PWAK" class="col-sm-11">
+                            To sign up for an API key go to <a href="https://atc.plane.watch/">atc.plane.watch</a>,
+                            sign up for an account, log in and click on <b>Feeders, + New Feeder</b>.
+                            Fill out the details and save the data. This will show you an API key that you can enter
+                            here.
+                        </label>
+                        <input type="text" id="PWAK" name="FEEDER_PLANEWATCH_API_KEY" class="form-control col-sm-6 ml-1"
+                                {{ metadata["PW"] | replace("checked", "required") }}
+                               placeholder=" Plane.watch API key"
+                               value="{{ env_values['FEEDER_PLANEWATCH_API_KEY'] }}">
+                        <button type="submit" class="btn btn-primary col-sm-3 ml-1"
+                                name="get-pw-api-key" value="go" onclick="show_spinner()">
+                            Submit to activate
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-</form>
-<form method="post">
-    <div class="row no-gutters">
-        <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="FA" id="FA" {{ metadata['FA'] }}/>
-        <label for="FA" class="mb-3 col-sm-10">
-            Submit your data to <a href="https://flightaware.com/">FlightAware</a>
-        </label>
-        <div class="col-sm-1">&nbsp;</div>
-        <!-- this ends the first row -->
-        <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
-        <div class="form-group col-sm-11 no-gutters" id="FA_FIELDS">
+
             <div class="row no-gutters">
-                <label for="FAFI" class="col-sm-11">
-                    You need an FlightAware / Piaware sharing key.
-                    If you already have one, please enter it below. Automation to get one for you if you
-                    are a new user will be added in a future release.
+                <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="FA"
+                       id="FA" {{ metadata['FA'] }}/>
+                <label for="FA" class="mb-3 col-sm-10">
+                    Submit your data to <a href="https://flightaware.com/">FlightAware</a>
                 </label>
-                <input type="text" id="FAFI" name="FEEDER_PIAWARE_FEEDER_ID" class="form-control col-sm-6 ml-1"
-                       placeholder=" Piaware key"
-                       value="{{ env_values['FEEDER_PIAWARE_FEEDER_ID'] }}">
-                <button type="submit" class="btn btn-primary col-sm-3 ml-1"
-                        name="get-fa-api-key" value="go" onclick="show_spinner()">
-                    Submit to activate
-                </button>
+                <div class="col-sm-1">&nbsp;</div>
+                <!-- this ends the first row -->
+                <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
+                <div class="form-group col-sm-11 no-gutters" id="FA_FIELDS">
+                    <div class="row no-gutters">
+                        <label for="FAFI" class="col-sm-11">
+                            You need an FlightAware / Piaware sharing key.
+                            If you already have one, please enter it below. Automation to get one for you if you
+                            are a new user will be added in a future release.
+                        </label>
+                        <input type="text" id="FAFI" name="FEEDER_PIAWARE_FEEDER_ID" class="form-control col-sm-6 ml-1"
+                                {{ metadata["FA"] | replace("checked", "required") }}
+                               placeholder=" Piaware key"
+                               value="{{ env_values['FEEDER_PIAWARE_FEEDER_ID'] }}">
+                        <button type="submit" class="btn btn-primary col-sm-3 ml-1"
+                                name="get-fa-api-key" value="go" onclick="show_spinner()">
+                            Submit to activate
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-</form>
-<form method="post">
-    <div class="row no-gutters">
-        <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="RB" id="RB" {{ metadata['RB'] }}/>
-        <label for="RB" class="mb-3 col-sm-10">
-            Submit your data to <a href="https://www.radarbox.com/">RadarBox</a>
-        </label>
-        <div class="col-sm-1">&nbsp;</div>
-        <!-- this ends the first row -->
-        <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
-        <div class="form-group col-sm-11 no-gutters" id="RB_FIELDS">
+
             <div class="row no-gutters">
-                <label for="RBSK" class="col-sm-11">
-                    You need an RadarBox sharing key.
-                    If you already have one, please enter it below. Automation to get one for you if you
-                    are a new user will be added in a future release.
+                <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="RB"
+                       id="RB" {{ metadata['RB'] }}/>
+                <label for="RB" class="mb-3 col-sm-10">
+                    Submit your data to <a href="https://www.radarbox.com/">RadarBox</a>
                 </label>
-                <input type="text" id="RBSK" name="FEEDER_RADARBOX_SHARING_KEY" class="form-control col-sm-6 ml-1"
-                       placeholder=" RadarBox sharing key"
-                       value="{{ env_values['FEEDER_RADARBOX_SHARING_KEY'] }}">
-                <button type="submit" class="btn btn-primary col-sm-3 ml-1"
-                        name="get-rb-sharing-key" value="go" onclick="show_spinner()">
-                    Submit to activate
-                </button>
+                <div class="col-sm-1">&nbsp;</div>
+                <!-- this ends the first row -->
+                <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
+                <div class="form-group col-sm-11 no-gutters" id="RB_FIELDS">
+                    <div class="row no-gutters">
+                        <label for="RBSK" class="col-sm-11">
+                            You need an RadarBox sharing key.
+                            If you already have one, please enter it below. Automation to get one for you if you
+                            are a new user will be added in a future release.
+                        </label>
+                        <input type="text" id="RBSK" name="FEEDER_RADARBOX_SHARING_KEY"
+                               class="form-control col-sm-6 ml-1"
+                                {{ metadata["RB"] | replace("checked", "required") }}
+                               placeholder=" RadarBox sharing key"
+                               value="{{ env_values['FEEDER_RADARBOX_SHARING_KEY'] }}">
+                        <button type="submit" class="btn btn-primary col-sm-3 ml-1"
+                                name="get-rb-sharing-key" value="go" onclick="show_spinner()">
+                            Submit to activate
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-</form>
-<form method="post">
-    <div class="row no-gutters">
-        <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="PF" id="PF" {{ metadata['PF'] }}/>
-        <label for="PF" class="mb-3 col-sm-10">
-            Submit your data to <a href="https://planefinder.net/">PlaneFinder</a>
-        </label>
-        <div class="col-sm-1">&nbsp;</div>
-        <!-- this ends the first row -->
-        <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
-        <div class="form-group col-sm-11 no-gutters" id="PF_FIELDS">
+
             <div class="row no-gutters">
-                <label for="PFSC" class="col-sm-11">
-                    You need an PlaneFinder sharecode.
-                    If you already have one, please enter it below. Automation to get one for you if you
-                    are a new user will be added in a future release.
+                <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="PF"
+                       id="PF" {{ metadata['PF'] }}/>
+                <label for="PF" class="mb-3 col-sm-10">
+                    Submit your data to <a href="https://planefinder.net/">PlaneFinder</a>
                 </label>
-                <input type="text" id="PFSC" name="FEEDER_PLANEFINDER_SHARECODE" class="form-control col-sm-6 ml-1"
-                       placeholder=" PlaneFinder sharecode"
-                       value="{{ env_values['FEEDER_PLANEFINDER_SHARECODE'] }}">
-                <button type="submit" class="btn btn-primary col-sm-3 ml-1"
-                        name="get-pf-sharecode" value="go" onclick="show_spinner()">
-                    Submit to activate
-                </button>
+                <div class="col-sm-1">&nbsp;</div>
+                <!-- this ends the first row -->
+                <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
+                <div class="form-group col-sm-11 no-gutters" id="PF_FIELDS">
+                    <div class="row no-gutters">
+                        <label for="PFSC" class="col-sm-11">
+                            You need an PlaneFinder sharecode.
+                            If you already have one, please enter it below. Automation to get one for you if you
+                            are a new user will be added in a future release.
+                        </label>
+                        <input type="text" id="PFSC" name="FEEDER_PLANEFINDER_SHARECODE"
+                               class="form-control col-sm-6 ml-1"
+                                {{ metadata["PF"] | replace("checked", "required") }}
+                               placeholder=" PlaneFinder sharecode"
+                               value="{{ env_values['FEEDER_PLANEFINDER_SHARECODE'] }}">
+                        <button type="submit" class="btn btn-primary col-sm-3 ml-1"
+                                name="get-pf-sharecode" value="go" onclick="show_spinner()">
+                            Submit to activate
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-</form>
-<form method="post">
-    <div class="row no-gutters">
-        <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="AH" id="AH" {{ metadata['AH'] }}/>
-        <label for="AH" class="mb-3 col-sm-10">
-            Submit your data to <a href="https://adsbhub.org">ADSBHub</a>
-        </label>
-        <div class="col-sm-1">&nbsp;</div>
-        <!-- this ends the first row -->
-        <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
-        <div class="form-group col-sm-11 no-gutters" id="AH_FIELDS">
+
             <div class="row no-gutters">
-                <label for="AHSK" class="col-sm-11">
-                    To sign up for an ADSBHub station key go to <a href="https://www.adsbhub.org/howtofeed.php">ADSBHub how to feed</a>,
-                    setting your station up as feeder type "Linux" in "Client" mode, feeding via the "SBS" protocol.
-                    This will get you your station key. Existing users can find their station key on the Settings page
-                    of the ADSBHub site.
+                <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="AH"
+                       id="AH" {{ metadata['AH'] }}/>
+                <label for="AH" class="mb-3 col-sm-10">
+                    Submit your data to <a href="https://adsbhub.org">ADSBHub</a>
                 </label>
-                <input type="text" id="AHSK" name="FEEDER_ADSBHUB_STATION_KEY" class="form-control col-sm-6 ml-1"
-                       placeholder=" ADSBHub station key"
-                       value="{{ env_values['FEEDER_ADSBHUB_STATION_KEY'] }}">
-                <button type="submit" class="btn btn-primary col-sm-3 ml-1"
-                        name="get-ah-station-key" value="go" onclick="show_spinner()">
-                    Submit to activate
-                </button>
+                <div class="col-sm-1">&nbsp;</div>
+                <!-- this ends the first row -->
+                <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
+                <div class="form-group col-sm-11 no-gutters" id="AH_FIELDS">
+                    <div class="row no-gutters">
+                        <label for="AHSK" class="col-sm-11">
+                            To sign up for an ADSBHub station key go to <a href="https://www.adsbhub.org/howtofeed.php">ADSBHub
+                            how to feed</a>,
+                            setting your station up as feeder type "Linux" in "Client" mode, feeding via the "SBS"
+                            protocol.
+                            This will get you your station key. Existing users can find their station key on the
+                            Settings page
+                            of the ADSBHub site.
+                        </label>
+                        <input type="text" id="AHSK" name="FEEDER_ADSBHUB_STATION_KEY"
+                               class="form-control col-sm-6 ml-1"
+                                {{ metadata["AH"] | replace("checked", "required") }}
+                               placeholder=" ADSBHub station key"
+                               value="{{ env_values['FEEDER_ADSBHUB_STATION_KEY'] }}">
+                        <button type="submit" class="btn btn-primary col-sm-3 ml-1"
+                                name="get-ah-station-key" value="go" onclick="show_spinner()">
+                            Submit to activate
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-</form>
-<form method="post">
-    <div class="row no-gutters">
-        <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="OS" id="OS" {{ metadata['OS'] }}/>
-        <label for="OS" class="mb-3 col-sm-10">
-            Submit your data to <a href="https://opensky-network.org/">OpenSky Network</a>
-        </label>
-        <div class="col-sm-1">&nbsp;</div>
-        <!-- this ends the first row -->
-        <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
-        <!--
-            this one needs automation set up with a docker container again -- and it needs two fields
-          -->
-        <div class="form-group col-sm-11 no-gutters" id="OS_FIELDS">
+
             <div class="row no-gutters">
-                <label for="OSUN" class="col-sm-11">You need an OpenSky username and serial number.
-                    If you already have these, please enter them below. Automation to get them for you if you
-                    are a new user will be added in a future release.
+                <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="OS"
+                       id="OS" {{ metadata['OS'] }}/>
+                <label for="OS" class="mb-3 col-sm-10">
+                    Submit your data to <a href="https://opensky-network.org/">OpenSky Network</a>
                 </label>
-                <input type="text" id="OSUN" name="FEEDER_OPENSKY_USERNAME" class="form-control col-sm-3 ml-1"
-                       placeholder=" OpenSky username"
-                       value="{{ env_values['FEEDER_OPENSKY_USERNAME'] }}">
-                <input type="text" name="FEEDER_OPENSKY_SERIAL" class="form-control col-sm-3 ml-1"
-                       placeholder=" OpenSky serial number"
-                       value="{{ env_values['FEEDER_OPENSKY_SERIAL'] }}">
-                <button type="submit" class="btn btn-primary col-sm-3 ml-1"
-                        name="get-os-info" value="go" onclick="show_spinner()">
-                    Submit to activate
-                </button>
+                <div class="col-sm-1">&nbsp;</div>
+                <!-- this ends the first row -->
+                <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
+                <!--
+                    this one needs automation set up with a docker container again -- and it needs two fields
+                  -->
+                <div class="form-group col-sm-11 no-gutters" id="OS_FIELDS">
+                    <div class="row no-gutters">
+                        <label for="OSUN" class="col-sm-11">You need an OpenSky username and serial number.
+                            If you already have these, please enter them below. Automation to get them for you if you
+                            are a new user will be added in a future release.
+                        </label>
+                        <input type="text" id="OSUN" name="FEEDER_OPENSKY_USERNAME" class="form-control col-sm-3 ml-1"
+                                {{ metadata["PW"] | replace("checked", "required") }}
+                               placeholder=" OpenSky username"
+                               value="{{ env_values['FEEDER_OPENSKY_USERNAME'] }}">
+                        <input type="text" id="OSSN" name="FEEDER_OPENSKY_SERIAL" class="form-control col-sm-3 ml-1"
+                                {{ metadata["OS"] | replace("checked", "required") }}
+                               placeholder=" OpenSky serial number"
+                               value="{{ env_values['FEEDER_OPENSKY_SERIAL'] }}">
+                        <button type="submit" class="btn btn-primary col-sm-3 ml-1"
+                                name="get-os-info" value="go" onclick="show_spinner()">
+                            Submit to activate
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-</form>
-<form method="post">
-    <div class="row no-gutters">
-        <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="RV" id="RV" {{ metadata['RV'] }}/>
-        <label for="RV" class="mb-3 col-sm-10">
-            Submit your data to <a href="https://www.radarvirtuel.com/">RadarVirtuel</a>
-        </label>
-        <div class="col-sm-1">&nbsp;</div>
-        <!-- this ends the first row -->
-        <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
-        <div class="form-group col-sm-11 no-gutters" id="RV_FIELDS">
+
             <div class="row no-gutters">
-                <label for="RVFK" class="col-sm-11">To sign up for an feeder key send email to
-                    <a href="mailto://support@adsbnetwork.com">support@adsbnetwork.com</a>.
-                    Include your name, Lat/Lon of nearest airport, and mention that you are using a Docker setup.
-                    They will respond with a feeder key that you can enter here
+                <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="RV"
+                       id="RV" {{ metadata['RV'] }}/>
+                <label for="RV" class="mb-3 col-sm-10">
+                    Submit your data to <a href="https://www.radarvirtuel.com/">RadarVirtuel</a>
                 </label>
-                <input type="text" id="RVFK" name="FEEDER_RV_FEEDER_KEY" class="form-control col-sm-6 ml-1"
-                       placeholder=" RadarVirtuel feeder key"
-                       value="{{ env_values['FEEDER_RV_FEEDER_KEY'] }}">
-                <button type="submit" class="btn btn-primary col-sm-3 ml-1"
-                        name="get-rv-feeder-key" value="go" onclick="show_spinner()">
-                    Submit to activate
-                </button>
+                <div class="col-sm-1">&nbsp;</div>
+                <!-- this ends the first row -->
+                <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
+                <div class="form-group col-sm-11 no-gutters" id="RV_FIELDS">
+                    <div class="row no-gutters">
+                        <label for="RVFK" class="col-sm-11">To sign up for an feeder key send email to
+                            <a href="mailto://support@adsbnetwork.com">support@adsbnetwork.com</a>.
+                            Include your name, Lat/Lon of nearest airport, and mention that you are using a Docker
+                            setup.
+                            They will respond with a feeder key that you can enter here
+                        </label>
+                        <input type="text" id="RVFK" name="FEEDER_RV_FEEDER_KEY" class="form-control col-sm-6 ml-1"
+                                {{ metadata["RV"] | replace("checked", "required") }}
+                               placeholder=" RadarVirtuel feeder key"
+                               value="{{ env_values['FEEDER_RV_FEEDER_KEY'] }}">
+                        <button type="submit" class="btn btn-primary col-sm-3 ml-1"
+                                name="get-rv-feeder-key" value="go" onclick="show_spinner()">
+                            Submit to activate
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
+        </form>
     </div>
-</form>
-</div>
-<script>
-    function show_or_hide(b, f) { console.log("called show_or_hide for " + b)
-        if (b.checked) f.style.display = "block"; else f.style.display = "none"; }
-    document.addEventListener('readystatechange', event => {
-        if (event.target.readyState === "complete") {
-            const box_fields = [["FR24", "FR_FIELDS"],
-                                ["PW", "PW_FIELDS"],
-                                ["FA", "FA_FIELDS"],
-                                ["RB", "RB_FIELDS"],
-                                ["PF", "PF_FIELDS"],
-                                ["AH", "AH_FIELDS"],
-                                ["OS", "OS_FIELDS"],
-                                ["RV", "RV_FIELDS"]];
-            for (const pair of box_fields) {
-                console.log("adding event listener for " + pair[0] + " affecting " + pair[1])
-                let box = document.getElementById(pair[0]);
-                let fields = document.getElementById(pair[1]);
-                box.addEventListener("click", function () { show_or_hide(box, fields); })
-                show_or_hide(box, fields);
-            }
+    <script>
+        function show_or_hide(b, f) {
+            if (b.checked) f.style.display = "block"; else f.style.display = "none";
         }
-    })
-</script>
+
+        document.addEventListener('readystatechange', event => {
+            if (event.target.readyState === "complete") {
+                const box_fields = [
+                    ["FR24", "FR_FIELDS", ["FRSK"]],
+                    ["PW", "PW_FIELDS", ["PWAK"]],
+                    ["FA", "FA_FIELDS", ["FAFI"]],
+                    ["RB", "RB_FIELDS", ["RBSK"]],
+                    ["PF", "PF_FIELDS", ["PFSC"]],
+                    ["AH", "AH_FIELDS", ["AHSK"]],
+                    ["OS", "OS_FIELDS", ["OSUN", "OSSN"]],
+                    ["RV", "RV_FIELDS", ["RVFK"]]];
+                for (const ids of box_fields) {
+                    console.log("adding event listener for " + ids[0] + " affecting " + ids[1])
+                    let box = document.getElementById(ids[0]);
+                    let fields = document.getElementById(ids[1]);
+                    box.addEventListener("click", function () {
+                        show_or_hide(box, fields);
+                        for (const input_field of ids[2])
+                            document.getElementById(input_field).required = box.checked;
+                    })
+                    show_or_hide(box, fields);
+                }
+            }
+        })
+    </script>
 {% endblock %}
