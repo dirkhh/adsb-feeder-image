@@ -10,8 +10,8 @@ def print_err(*args):
 
 
 def handle_aggregators_post_request():
+    print_err(request.form)
     if request.form.get("tar1090") == "go":
-        print_err(request.form)
         update_env()
         RESTART.restart_systemd()
         host, port = request.server
@@ -72,6 +72,7 @@ def fr24_setup():
 
 def pw_setup():
     api_key = request.form.get("FEEDER_PLANEWATCH_API_KEY")
+    print_err(f"form.get of api key results in {api_key}")
     if not api_key:
         print_err("no api key - reload")
         print_err(request.form)
@@ -84,6 +85,7 @@ def pw_setup():
 
 def fa_setup():
     feeder_id = request.form.get("FEEDER_PIAWARE_FEEDER_ID")
+    print_err(f"form.get of feeder id results in {feeder_id}")
     if not feeder_id:
         print_err("no feeder ID - reload")
         return redirect("/aggregators")  # basically just a page reload - needs some error instead
@@ -95,6 +97,7 @@ def fa_setup():
 
 def rb_setup():
     sharing_key = request.form.get("FEEDER_RADARBOX_SHARING_KEY")
+    print_err(f"form.get of sharing key results in {sharing_key}")
     if not sharing_key:
         print_err("no sharing key - reload")
         return redirect("/aggregators")  # basically just a page reload - needs some error instead
@@ -106,6 +109,7 @@ def rb_setup():
 
 def pf_setup():
     sharecode = request.form.get("FEEDER_PLANEFINDER_SHARECODE")
+    print_err(f"form.get of sharecode results in {sharecode}")
     if not sharecode:
         print_err("no sharecode - reload")
         return redirect("/aggregators")  # basically just a page reload - needs some error instead
@@ -117,6 +121,7 @@ def pf_setup():
 
 def ah_setup():
     station_key = request.form.get("FEEDER_ADSBHUB_STATION_KEY")
+    print_err(f"form.get of station key results in {station_key}")
     if not station_key:
         print_err("no station key - reload")
         return redirect("/aggregators")  # basically just a page reload - needs some error instead
@@ -129,6 +134,8 @@ def ah_setup():
 def os_setup():
     username = request.form.get("FEEDER_OPENSKY_USERNAME")
     serial = request.form.get("FEEDER_OPENSKY_SERIAL")
+    print_err(f"form.get of username results in {username}")
+    print_err(f"form.get of serial results in {serial}")
     if not username or not serial:
         print_err("no username or serial - reload")
         return redirect("/aggregators")  # basically just a page reload - needs some error instead
@@ -142,6 +149,7 @@ def os_setup():
 
 def rv_setup():
     feeder_key = request.form.get("FEEDER_RV_FEEDER_KEY")
+    print_err(f"form.get of feeder key results in {feeder_key}")
     if not feeder_key:
         print_err("no feeder key - reload")
         return redirect("/aggregators")  # basically just a page reload - needs some error instead
