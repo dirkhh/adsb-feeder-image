@@ -11,6 +11,9 @@ def print_err(*args):
 
 def handle_aggregators_post_request():
     if request.form.get("tar1090") == "go":
+        print_err(request.form)
+        update_env()
+        RESTART.restart_systemd()
         host, port = request.server
         tar1090 = request.url_root.replace(str(port), "8080")
         return redirect(tar1090)
@@ -33,6 +36,15 @@ def handle_aggregators_post_request():
     else:
         # how did we get here???
         return "something went wrong"
+
+
+def update_env():
+    checkboxes = ["FR24", "PW", "FA", "RB", "PF", "AH", "OS", "RV"]
+    env_updates = {}
+    for box in checkboxes:
+        env_updates[box] = "1" if request.form.get(box) == "on" else "0"
+    # we should also check that there are the right keys given...
+    ENV_FILE.update(env_updates)
 
 
 def fr24_setup():
@@ -149,7 +161,7 @@ def request_fr24_sharing_key():
     alt = int(int(env_values["FEEDER_ALT_M"]) / 0.308)
     email = request.form.get("FEEDER_FR24_SHARING_KEY")
     cmdline = f"docker run --rm -i -e FEEDER_LAT=\"{lat}\" -e FEEDER_LONG=\"{lng}\" -e FEEDER_ALT_FT=\"{alt}\" " \
-        f"-e FR24_EMAIL=\"{email}\" --entrypoint /scripts/signup.sh ghcr.io/sdr-enthusiasts/docker-flightradar24"
+              f"-e FR24_EMAIL=\"{email}\" --entrypoint /scripts/signup.sh ghcr.io/sdr-enthusiasts/docker-flightradar24"
     result = subprocess.run(cmdline, timeout=60.0, shell=True, capture_output=True)
     # need to catch timeout error
     sharing_key_match = re.search("Your sharing key \\(([a-zA-Z0-9]*)\\) has been", str(result.stdout))
