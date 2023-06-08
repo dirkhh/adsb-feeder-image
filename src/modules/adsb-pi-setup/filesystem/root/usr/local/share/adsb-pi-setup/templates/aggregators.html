@@ -76,17 +76,23 @@
                 <div class="form-group col-sm-11 no-gutters" id="FA_FIELDS">
                     <div class="row no-gutters">
                         <label for="FAFI" class="col-sm-11">
-                            You need an FlightAware / Piaware sharing key.
-                            If you already have one, please enter it below. Automation to get one for you if you
-                            are a new user will be added in a future release.
+                            You need a FlightAware / Piaware feeder ID.
+                            If you already have one, please enter it below. Otherwise, leave the field empty and
+                            click on the button and we will try to get one for you. Once this process completes
+                            and the feeder ID has been filled in, open the local
+                            <a id="piaware" href="" target="_blank">Piaware page</a> (this should open in a new tab)
+                            and click on the "Claim this feeder on FlightAware" button.
                         </label>
+                        <script>var link = document.getElementById('piaware');
+                                link.setAttribute('href', window.location.protocol + "//" + window.location.hostname + ":8081/");
+                        </script>
                         <input type="text" id="FAFI" name="FEEDER_PIAWARE_FEEDER_ID" class="form-control col-sm-6 ml-1"
                                 {{ metadata["FA"] | replace("checked", "required") }}
                                placeholder=" Piaware key"
                                value="{{ env_values['FEEDER_PIAWARE_FEEDER_ID'] }}">
                         <button type="submit" class="btn btn-primary col-sm-3 ml-1"
                                 name="get-fa-api-key" value="go">
-                            Submit to activate
+                            Submit or request key
                         </button>
                     </div>
                 </div>
@@ -105,8 +111,10 @@
                     <div class="row no-gutters">
                         <label for="RBSK" class="col-sm-11">
                             You need an RadarBox sharing key.
-                            If you already have one, please enter it below. Automation to get one for you if you
-                            are a new user will be added in a future release.
+                            If you already have one, please enter it below. Otherwise, leave the field empty and
+                            click on the button and we will try to get one for you. Please log into the
+                            <a href="https://www.radarbox.com/sharing-data/claim">RadarBox website</a> once this
+                            process has completed in order to claim the key for your account.
                         </label>
                         <input type="text" id="RBSK" name="FEEDER_RADARBOX_SHARING_KEY"
                                class="form-control col-sm-6 ml-1"
@@ -115,7 +123,7 @@
                                value="{{ env_values['FEEDER_RADARBOX_SHARING_KEY'] }}">
                         <button type="submit" class="btn btn-primary col-sm-3 ml-1"
                                 name="get-rb-sharing-key" value="go">
-                            Submit to activate
+                            Submit or request key
                         </button>
                     </div>
                 </div>
