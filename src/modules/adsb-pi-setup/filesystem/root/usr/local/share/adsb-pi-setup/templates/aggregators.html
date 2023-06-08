@@ -4,8 +4,8 @@
     <h1>{% block title %} Setup additional aggregators {% endblock %}</h1>
 
     <div id="non-loader">
-        <form method="post">
-            <button type="submit" class="bigbigbutton" name="tar1090" value="go" onclick="show_spinner()">
+        <form method="post" onsubmit="show_spinner(); return true;">
+            <button type="submit" class="bigbigbutton" name="tar1090" value="go">
                 I'm done here - take me to the website
             </button>
 
@@ -28,7 +28,7 @@
                                placeholder="existing flightradar24 sharing key or email address"
                                value="{{ env_values['FEEDER_FR24_SHARING_KEY'] }}">
                         <button type="submit" class="btn btn-primary col-sm-3 ml-1"
-                                name="get-fr24-sharing-key" value="go" onclick="show_spinner()">
+                                name="get-fr24-sharing-key" value="go">
                             Submit or request key
                         </button>
                     </div>
@@ -57,7 +57,7 @@
                                placeholder=" Plane.watch API key"
                                value="{{ env_values['FEEDER_PLANEWATCH_API_KEY'] }}">
                         <button type="submit" class="btn btn-primary col-sm-3 ml-1"
-                                name="get-pw-api-key" value="go" onclick="show_spinner()">
+                                name="get-pw-api-key" value="go">
                             Submit to activate
                         </button>
                     </div>
@@ -85,7 +85,7 @@
                                placeholder=" Piaware key"
                                value="{{ env_values['FEEDER_PIAWARE_FEEDER_ID'] }}">
                         <button type="submit" class="btn btn-primary col-sm-3 ml-1"
-                                name="get-fa-api-key" value="go" onclick="show_spinner()">
+                                name="get-fa-api-key" value="go">
                             Submit to activate
                         </button>
                     </div>
@@ -114,7 +114,7 @@
                                placeholder=" RadarBox sharing key"
                                value="{{ env_values['FEEDER_RADARBOX_SHARING_KEY'] }}">
                         <button type="submit" class="btn btn-primary col-sm-3 ml-1"
-                                name="get-rb-sharing-key" value="go" onclick="show_spinner()">
+                                name="get-rb-sharing-key" value="go">
                             Submit to activate
                         </button>
                     </div>
@@ -143,7 +143,7 @@
                                placeholder=" PlaneFinder sharecode"
                                value="{{ env_values['FEEDER_PLANEFINDER_SHARECODE'] }}">
                         <button type="submit" class="btn btn-primary col-sm-3 ml-1"
-                                name="get-pf-sharecode" value="go" onclick="show_spinner()">
+                                name="get-pf-sharecode" value="go">
                             Submit to activate
                         </button>
                     </div>
@@ -176,7 +176,7 @@
                                placeholder=" ADSBHub station key"
                                value="{{ env_values['FEEDER_ADSBHUB_STATION_KEY'] }}">
                         <button type="submit" class="btn btn-primary col-sm-3 ml-1"
-                                name="get-ah-station-key" value="go" onclick="show_spinner()">
+                                name="get-ah-station-key" value="go">
                             Submit to activate
                         </button>
                     </div>
@@ -202,7 +202,7 @@
                             are a new user will be added in a future release.
                         </label>
                         <input type="text" id="OSUN" name="FEEDER_OPENSKY_USERNAME" class="form-control col-sm-3 ml-1"
-                                {{ metadata["PW"] | replace("checked", "required") }}
+                                {{ metadata["OS"] | replace("checked", "required") }}
                                placeholder=" OpenSky username"
                                value="{{ env_values['FEEDER_OPENSKY_USERNAME'] }}">
                         <input type="text" id="OSSN" name="FEEDER_OPENSKY_SERIAL" class="form-control col-sm-3 ml-1"
@@ -210,7 +210,7 @@
                                placeholder=" OpenSky serial number"
                                value="{{ env_values['FEEDER_OPENSKY_SERIAL'] }}">
                         <button type="submit" class="btn btn-primary col-sm-3 ml-1"
-                                name="get-os-info" value="go" onclick="show_spinner()">
+                                name="get-os-info" value="go">
                             Submit to activate
                         </button>
                     </div>
@@ -239,7 +239,7 @@
                                placeholder=" RadarVirtuel feeder key"
                                value="{{ env_values['FEEDER_RV_FEEDER_KEY'] }}">
                         <button type="submit" class="btn btn-primary col-sm-3 ml-1"
-                                name="get-rv-feeder-key" value="go" onclick="show_spinner()">
+                                name="get-rv-feeder-key" value="go">
                             Submit to activate
                         </button>
                     </div>
