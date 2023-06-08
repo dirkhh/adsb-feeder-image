@@ -87,8 +87,8 @@ def fa_setup():
     feeder_id = request.form.get("FEEDER_PIAWARE_FEEDER_ID")
     print_err(f"form.get of feeder id results in {feeder_id}")
     if not feeder_id:
-        print_err("no feeder ID - reload")
-        return redirect("/aggregators")  # basically just a page reload - needs some error instead
+        print_err("no feeder ID - request one")
+        return request_fa_feeder_id()
     # here we should check if the feeder id looks about right - reg exp
     ENV_FILE.update({"FEEDER_PIAWARE_FEEDER_ID": feeder_id, "FA": "1"})
     RESTART.restart_systemd()
@@ -99,8 +99,8 @@ def rb_setup():
     sharing_key = request.form.get("FEEDER_RADARBOX_SHARING_KEY")
     print_err(f"form.get of sharing key results in {sharing_key}")
     if not sharing_key:
-        print_err("no sharing key - reload")
-        return redirect("/aggregators")  # basically just a page reload - needs some error instead
+        print_err("no sharing key - request one")
+        return request_rb_feeder_id()
     # here we should check if the feeder id looks about right - reg exp
     ENV_FILE.update({"FEEDER_RADARBOX_SHARING_KEY": sharing_key, "RB": "1"})
     RESTART.restart_systemd()
@@ -159,23 +159,86 @@ def rv_setup():
     return redirect("/aggregators")
 
 
+def download_docker_container(container: str) -> bool:
+    cmdline = f"docker pull {container}"
+    try:
+        result = subprocess.run(cmdline, timeout=180.0, shell=True)
+    except subprocess.TimeoutExpired:
+        return False
+    return True
+
+
+def docker_run_with_timeout(arguments: str, timeout: float) -> str:
+    cmdline = f"docker run --name temp_container {arguments}"
+    try:
+        result = subprocess.run(cmdline, timeout=timeout, shell=True, capture_output=True)
+    except subprocess.TimeoutExpired as exc:
+        # for several of these containers "timeout" is actually the expected behavior;
+        # they don't stop on their own. So just grab the output and kill the container
+        output = str(exc.stdout)
+        try:
+            result = subprocess.run("docker rm -f temp_container")
+        except subprocess.TimeoutExpired:
+            print_err(f"failed to remove the temp container {str(result.stdout)} / {str(result.stderr)}")
+    else:
+        output = str(result.stdout)
+    return output
+
+
 def request_fr24_sharing_key():
-    if not request.form.get("FEEDER_FR24_SHARING_KEY"):
-        return redirect("/aggregators")
-    # create the docker command line to request a sharing key from FR24
     env_values = ENV_FILE.envs
     lat = float(env_values["FEEDER_LAT"])
     lng = float(env_values["FEEDER_LONG"])
     alt = int(int(env_values["FEEDER_ALT_M"]) / 0.308)
     email = request.form.get("FEEDER_FR24_SHARING_KEY")
-    cmdline = f"docker run --rm -i -e FEEDER_LAT=\"{lat}\" -e FEEDER_LONG=\"{lng}\" -e FEEDER_ALT_FT=\"{alt}\" " \
-              f"-e FR24_EMAIL=\"{email}\" --entrypoint /scripts/signup.sh ghcr.io/sdr-enthusiasts/docker-flightradar24"
-    result = subprocess.run(cmdline, timeout=60.0, shell=True, capture_output=True)
-    # need to catch timeout error
-    sharing_key_match = re.search("Your sharing key \\(([a-zA-Z0-9]*)\\) has been", str(result.stdout))
-    if sharing_key_match:
-        sharing_key = sharing_key_match.group(1)
-        ENV_FILE.update({"FEEDER_FR24_SHARING_KEY": sharing_key, "FR24": "1"})
-        RESTART.restart_systemd()
+    if download_docker_container("ghcr.io/sdr-enthusiasts/docker-flightradar24:latest"):
+        cmdline = f"--rm -i -e FEEDER_LAT=\"{lat}\" -e FEEDER_LONG=\"{lng}\" -e FEEDER_ALT_FT=\"{alt}\" " \
+                  f"-e FR24_EMAIL=\"{email}\" --entrypoint /scripts/signup.sh ghcr.io/sdr-enthusiasts/docker-flightradar24"
+        output = docker_run_with_timeout(cmdline, 45.0)
+        sharing_key_match = re.search("Your sharing key \\(([a-zA-Z0-9]*)\\) has been", output)
+        if sharing_key_match:
+            sharing_key = sharing_key_match.group(1)
+            ENV_FILE.update({"FEEDER_FR24_SHARING_KEY": sharing_key, "FR24": "1"})
+            RESTART.restart_systemd()
+        else:
+            print_err(f"couldn't find a sharing key in the container output: {output}")
+    else:
+        print_err("failed to download the FR24 docker image")
     return redirect("/aggregators")
-    #    return "placeholder for waiting page"
+
+
+def request_fa_feeder_id():
+    if download_docker_container("ghcr.io/sdr-enthusiasts/docker-piaware:latest"):
+        cmdline = f"--rm ghcr.io/sdr-enthusiasts/docker-piaware:latest"
+        output = docker_run_with_timeout(cmdline, 45.0)
+        feeder_id_match = re.search(" feeder ID is \\(([-a-zA-Z0-9]*)\\)", output)
+        if feeder_id_match:
+            feeder_id = feeder_id_match.group(1)
+            ENV_FILE.update({"FEEDER_PIAWARE_FEEDER_ID": feeder_id, "FA": "1"})
+            RESTART.restart_systemd()
+        else:
+            print_err(f"couldn't find a feeder ID in the container output: {output}")
+    else:
+        print_err("failed to download the piaware docker image")
+    return redirect("/aggregators")
+
+
+def request_rb_feeder_id():
+    env_values = ENV_FILE.envs
+    lat = float(env_values["FEEDER_LAT"])
+    lng = float(env_values["FEEDER_LONG"])
+    alt = int(env_values["FEEDER_ALT_M"])
+    if download_docker_container("ghcr.io/sdr-enthusiasts/docker-radarbox:latest"):
+        cmdline = f"--rm -i --network adsb_default -e BEASTHOST=ultrafeeder -e LAT=${lat} " \
+                  f"-e LONG=${lng} -e ALT=${alt} ghcr.io/sdr-enthusiasts/docker-radarbox"
+        output = docker_run_with_timeout(cmdline, 45.0)
+        sharing_key_match = re.search("My feeder ID is \\(([a-zA-Z0-9-]*)\\)", output)
+        if sharing_key_match:
+            sharing_key = sharing_key_match.group(1)
+            ENV_FILE.update({"FEEDER_RADARBOX_SHARING_KEY": sharing_key, "RB": "1"})
+            RESTART.restart_systemd()
+        else:
+            print_err(f"couldn't find a sharing key in the container output: {output}")
+    else:
+        print_err("failed to download the radarbox docker image")
+    return redirect("/aggregators")
