@@ -173,7 +173,7 @@ class EnvFile:
     def metadata(self):
         env_values = self.envs
         metadata = {}
-        ultrafeeder = env_values["FEEDER_ULTRAFEEDER_CONFIG"].split(";")
+        ultrafeeder = env_values.get("FEEDER_ULTRAFEEDER_CONFIG", "").split(";")
         for key in NETCONFIGS.get_keys():
             adsb_normal, mlat_normal = NETCONFIGS.configs[key].normal.split(";")
             # check that in ultrafeeder,
