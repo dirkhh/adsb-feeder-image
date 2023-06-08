@@ -177,7 +177,7 @@ def docker_run_with_timeout(arguments: str, timeout: float) -> str:
         # they don't stop on their own. So just grab the output and kill the container
         output = str(exc.stdout)
         try:
-            result = subprocess.run("docker rm -f temp_container")
+            result = subprocess.run("docker rm -f temp_container", timeout=10.0, shell=True, capture_output=True)
         except subprocess.TimeoutExpired:
             print_err(f"failed to remove the temp container {str(result.stdout)} / {str(result.stderr)}")
     else:
@@ -211,7 +211,7 @@ def request_fa_feeder_id():
     if download_docker_container("ghcr.io/sdr-enthusiasts/docker-piaware:latest"):
         cmdline = f"--rm ghcr.io/sdr-enthusiasts/docker-piaware:latest"
         output = docker_run_with_timeout(cmdline, 45.0)
-        feeder_id_match = re.search(" feeder ID is \\(([-a-zA-Z0-9]*)\\)", output)
+        feeder_id_match = re.search(" feeder ID is ([-a-zA-Z0-9]*)", output)
         if feeder_id_match:
             feeder_id = feeder_id_match.group(1)
             ENV_FILE.update({"FEEDER_PIAWARE_FEEDER_ID": feeder_id, "FA": "1"})
@@ -232,7 +232,7 @@ def request_rb_feeder_id():
         cmdline = f"--rm -i --network adsb_default -e BEASTHOST=ultrafeeder -e LAT=${lat} " \
                   f"-e LONG=${lng} -e ALT=${alt} ghcr.io/sdr-enthusiasts/docker-radarbox"
         output = docker_run_with_timeout(cmdline, 45.0)
-        sharing_key_match = re.search("My feeder ID is \\(([a-zA-Z0-9-]*)\\)", output)
+        sharing_key_match = re.search("Your new key is ([a-zA-Z0-9]*)", output)
         if sharing_key_match:
             sharing_key = sharing_key_match.group(1)
             ENV_FILE.update({"FEEDER_RADARBOX_SHARING_KEY": sharing_key, "RB": "1"})
