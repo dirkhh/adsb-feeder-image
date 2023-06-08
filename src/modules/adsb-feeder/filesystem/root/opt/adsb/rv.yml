@@ -1,7 +1,7 @@
 version: '2.0'
 
 services:
-    radarvirtuel:
+  radarvirtuel:
     image: ghcr.io/sdr-enthusiasts/docker-radarvirtuel:latest
     tty: true
     container_name: radarvirtuel
