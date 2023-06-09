@@ -70,3 +70,22 @@ h1 {
   transform: translate(-50%,-50%);
   -ms-transform: translate(-50%,-50%);
 }
+
+.container {
+  min-height: 100%vh;
+  padding-bottom: 5rem; # height of the footer
+}
+
+.footer {
+  font-size: small;
+  color: dimgray;
+  height: 5rem;
+  padding-left: 4em;
+  padding-right: 4em;
+}
+
+ul.checkboxlist {
+  float: left;
+  list-style: none;
+  margin: 0;
+}
