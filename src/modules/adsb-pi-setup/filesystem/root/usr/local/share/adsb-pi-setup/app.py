@@ -133,11 +133,11 @@ def handle_expert_post_request():
 
 @app.route("/aggregators", methods=("GET", "POST"))
 def aggregators():
+    if RESTART.lock.locked():
+        return redirect("/restarting")
     if request.method == "POST":
         return handle_aggregators_post_request()
     env_values = ENV_FILE.envs
-    if RESTART.lock.locked():
-        return redirect("/restarting")
     return render_template(
         "aggregators.html", env_values=env_values, metadata=ENV_FILE.metadata
     )
