@@ -1,12 +1,16 @@
+import filecmp
 import io
+import os.path
 import pathlib
 import shutil
 import zipfile
 
-from aggregators import handle_aggregators_post_request
-from flask import Flask, send_file, render_template, request, redirect
+from aggregators import handle_aggregators_post_request, print_err
+from flask import Flask, flash, render_template, request, redirect, send_file, url_for
 from os import urandom, path
+from typing import List
 from utils import RESTART, ENV_FILE
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = urandom(16).hex()
@@ -40,15 +44,84 @@ def restart():
 
 @app.route("/backup")
 def backup():
-    # we rely on the working directory being /opt/adsb since we don't want path names in the ZIP file
-    adsb_path = pathlib.Path(".")
+    adsb_path = pathlib.Path("/opt/adsb")
     data = io.BytesIO()
     with zipfile.ZipFile(data, mode="w") as backup_zip:
-        backup_zip.write(adsb_path / ".env")
+        backup_zip.write(adsb_path / ".env", arcname=".env")
         for f in adsb_path.glob("*.yml"):
-            backup_zip.write(f)
+            backup_zip.write(f, arcname=os.path.basename(f))
     data.seek(0)
     return send_file(data, mimetype="application/zip", as_attachment=True, download_name="adsb-feeder-config.zip")
+
+
+@app.route("/restore", methods=['GET', 'POST'])
+def restore():
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            flash('No file submitted')
+            return redirect(request.url)
+        file = request.files['file']
+        # If the user does not select a file, the browser submits an
+        # empty file without a filename.
+        if file.filename == '':
+            flash('No file selected')
+            return redirect(request.url)
+        if file.filename.endswith(".zip"):
+            filename = secure_filename(file.filename)
+            restore_path = pathlib.Path("/opt/adsb/restore")
+            restore_path.mkdir(mode=0o644, exist_ok=True)
+            file.save(restore_path / filename)
+            print_err(f"saved restore file to {restore_path / filename}")
+            return redirect(url_for("executerestore", zipfile=filename))
+        else:
+            flash("Please only submit ADSB Feeder Image backup files")
+            return redirect(request.url)
+    else:
+        return render_template("/restore.html", metadata=ENV_FILE.metadata)
+
+
+@app.route("/executerestore", methods=["GET", "POST"])
+def executerestore():
+    if request.method == "GET":
+        # the user has uploaded a zip file and we need to take a look.
+        # be very careful with the content of this zip file...
+        filename = request.args['zipfile']
+        adsb_path = pathlib.Path("/opt/adsb")
+        restore_path = pathlib.Path("/opt/adsb/restore")
+        restored_files: List[str] = []
+        with zipfile.ZipFile(restore_path / filename, "r") as restore_zip:
+            for name in restore_zip.namelist():
+                print_err(f"found file {name} in archive")
+                # only accept the .env file and simple .yml filenames
+                if name != ".env" and (not name.endswith(".yml") or name != secure_filename(name)):
+                    continue
+                restore_zip.extract(name, restore_path)
+                restored_files.append(name)
+        # now check which ones are different from the installed versions
+        changed: List[str] = []
+        unchanged: List[str] = []
+        for name in restored_files:
+            if os.path.isfile(adsb_path / name):
+                if filecmp.cmp(adsb_path / name, restore_path / name):
+                    print_err(f"{name} is different from current version")
+                    unchanged.append(name)
+                else:
+                    print_err(f"{name} is unchanged")
+                    changed.append(name)
+        metadata = ENV_FILE.metadata
+        metadata["changed"] = changed
+        metadata["unchanged"] = unchanged
+        return render_template("/restoreexecute.html", metadata=metadata)
+    else:
+        # they have selected the files to restore
+        restore_path = pathlib.Path("/opt/adsb/restore")
+        adsb_path = pathlib.Path("/opt/adsb")
+        for name in request.form.keys():
+            print_err(f"restoring {name}")
+            shutil.move(adsb_path / name, restore_path / (name + ".dist"))
+            shutil.move(restore_path / name, adsb_path / name)
+        return redirect("/advanced")  # that's a good place from where the user can continue
 
 
 @app.route("/advanced", methods=("GET", "POST"))

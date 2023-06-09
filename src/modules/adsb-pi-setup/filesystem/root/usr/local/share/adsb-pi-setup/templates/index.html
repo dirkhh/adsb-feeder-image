@@ -1,13 +1,14 @@
 {% extends 'base.html' %}
 {% set active_page = "setup" %}
 
-
 {% block content %}
 <h1>{% block title %} Setup required parameters {% endblock %}</h1>
 
-<p>You can use <a href="https://www.freemaptools.com/elevation-finder.htm">this tool</a> to find your lat / long / altitude</p>
-
-</a></p>
+<p>If you are new to the ADSB Feeder Image, please fill out the data below. You can use the
+<a href="https://www.freemaptools.com/elevation-finder.htm">location and elevation finder tool</a>
+to find your lat / long / altitude</p>
+<p>If you are upgrading from a previous version of the ADSB Feeder Image, you can also
+<a class="btn btn-secondary" href="{{  url_for('restore') }}">restore your configuration backup</a></p>
 <form method="post">
     <div class="form-group">
         <label for="mlat_name">Station Name (shows up on public maps if enabled later)</label>
@@ -39,10 +40,11 @@
     </div>
     <div class="form-group">
         <label for="tz">Timzone</label>
-        <button onclick="sendTimeToServer()">update timezone</button>
+        <button class="btn btn-secondary" onclick="sendTimeToServer()">update timezone</button>
         <input type="text" name="form_timezone" id="form_timezone"
                required
-               placeholder="populate from the browser timezone by clicking the button above" class="form-control"
+               placeholder="populate from the browser timezone by clicking the button above"
+               class="form-control mt-2"
                value="{{ env_values['FEEDER_TZ'] }}"></input>
     </div>
 
