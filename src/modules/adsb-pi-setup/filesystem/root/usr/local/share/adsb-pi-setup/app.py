@@ -1,6 +1,10 @@
+import io
+import pathlib
 import shutil
+import zipfile
+
 from aggregators import handle_aggregators_post_request
-from flask import Flask, render_template, request, redirect
+from flask import Flask, send_file, render_template, request, redirect
 from os import urandom, path
 from utils import RESTART, ENV_FILE
 
@@ -32,6 +36,19 @@ def restart():
         return "restarting" if restart else "already restarting"
     if request.method == "GET":
         return RESTART.state
+
+
+@app.route("/backup")
+def backup():
+    # we rely on the working directory being /opt/adsb since we don't want path names in the ZIP file
+    adsb_path = pathlib.Path(".")
+    data = io.BytesIO()
+    with zipfile.ZipFile(data, mode="w") as backup_zip:
+        backup_zip.write(adsb_path / ".env")
+        for f in adsb_path.glob("*.yml"):
+            backup_zip.write(f)
+    data.seek(0)
+    return send_file(data, mimetype="application/zip", as_attachment=True, download_name="adsb-feeder-config.zip")
 
 
 @app.route("/advanced", methods=("GET", "POST"))
