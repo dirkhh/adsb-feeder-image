@@ -20,10 +20,11 @@ unpack /filesystem/home/root /root root
 # Unpack root at the end, so files are modified before
 unpack /filesystem/root /
 
-apt install -y dhcpcd5
+apt install -y network-manager net-tools
 
 echo "127.0.0.1 $(hostname -s)" >> /etc/hosts
 
 systemctl enable adsb-docker
 
+echo "extraargs=net.ifnames=0" >> /boot/armbianEnv.txt
 
