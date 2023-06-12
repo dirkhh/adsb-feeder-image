@@ -22,9 +22,11 @@ unpack /filesystem/root /
 
 apt install -y network-manager net-tools
 
-echo "127.0.0.1 $(hostname -s)" >> /etc/hosts
+echo "127.0.0.1 adsb-feeder.local" >> /etc/hosts
 
-systemctl enable adsb-docker
-
+# ensure that we get predictable interface names
 echo "extraargs=net.ifnames=0" >> /boot/armbianEnv.txt
 
+sed -i 's/Wants=network-online.target/Wants=network-pre.target/;s/After=network.target network-online.target/Before=wpa_supplicant.service network.target network-online.target/' /usr/lib/systemd/system/armbian-firstrun-config.service
+systemctl enable armbian-firstrun-config
+systemctl enable adsb-docker
