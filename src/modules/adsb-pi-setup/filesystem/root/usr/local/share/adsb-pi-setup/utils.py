@@ -81,6 +81,10 @@ class NetConfigs:
                 "adsb,feed.adsb.fi,30004,beast_reduce_plus_out",
                 "mlat,feed.adsb.fi,31090,39007",
             ),
+            "avdelphi": NetConfig(
+                "adsb,data.avdelphi.com,24999,beast_reduce_plus_out",
+                "",
+            ),
         }
 
     def get_config(self, key):
