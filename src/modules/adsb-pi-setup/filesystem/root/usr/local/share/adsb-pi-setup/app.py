@@ -137,27 +137,21 @@ def advanced():
 
 
 def handle_advanced_post_request():
+    print("request_form", request.form)
+    if request.form.get("submit") == "go":
+        ENV_FILE.update(
+            {
+                "FEEDER_TAR1090_USEROUTEAPI": "1" if request.form.get("route") else "0",
+                "MLAT_PRIVACY": "--privacy" if request.form.get("privacy") else "",
+            }
+        )
+    net = ENV_FILE.generate_ultrafeeder_config(request.form)
+    ENV_FILE.update({"FEEDER_ULTRAFEEDER_CONFIG": net})
     if request.form.get("tar1090") == "go":
         host, port = request.server
         tar1090 = request.url_root.replace(str(port), "8080")
         return redirect(tar1090)
 
-    if request.form.get("expert") == "go":
-        return redirect("/expert")
-
-    if request.form.get("aggregators") == "go":
-        return redirect("/aggregators")
-
-    print("request_form", request.form)
-
-    ENV_FILE.update(
-        {
-            "FEEDER_TAR1090_USEROUTEAPI": "1" if request.form.get("route") else "0",
-            "MLAT_PRIVACY": "--privacy" if request.form.get("privacy") else "",
-        }
-    )
-    net = ENV_FILE.generate_ultrafeeder_config(request.form)
-    ENV_FILE.update({"FEEDER_ULTRAFEEDER_CONFIG": net})
     return redirect("/restarting")
 
 
