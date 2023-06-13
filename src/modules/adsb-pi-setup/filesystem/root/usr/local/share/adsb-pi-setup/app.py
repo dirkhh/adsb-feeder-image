@@ -241,9 +241,9 @@ def setup():
         return redirect("/restarting")
 
     if request.method == "POST":
-        lat, lng, alt, form_timezone, mlat_name = (
+        lat, lng, alt, form_timezone, mlat_name, agg = (
             request.form[key]
-            for key in ["lat", "lng", "alt", "form_timezone", "mlat_name"]
+            for key in ["lat", "lng", "alt", "form_timezone", "mlat_name", "aggregators", ]
         )
 
         if all([lat, lng, alt, form_timezone]):
@@ -254,6 +254,7 @@ def setup():
                     "FEEDER_ALT_M": alt,
                     "FEEDER_TZ": form_timezone,
                     "MLAT_SITE_NAME": mlat_name,
+                    "FEEDER_AGG": agg,
                 }
             )
             return redirect("/restarting")

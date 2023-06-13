@@ -51,11 +51,11 @@ to find your lat / long / altitude</p>
             <label >Which <a href="#" title="aggregators that don't require you to create an account or provide an email address">semi-anonymous </a>
                    aggregators do you want to feed?</label><br/>
             <div>
-                <input type="radio" name="aggregators" id="all" value="all" required>
+                <input type="radio" name="aggregators" id="all" value="all" required {% if env_values["FEEDER_AGG"] == "all" %} checked {% endif %}>
                 <label class="form-check-label mr-3" for="all">All</label>
-                <input type="radio" name="aggregators" id="priv" value="priv">
+                <input type="radio" name="aggregators" id="priv" value="priv"  {% if env_values["FEEDER_AGG"] == "priv" %} checked {% endif %}>
                 <label class="form-check-label mr-3" for="priv">Aggregators with privacy policy</label>
-                <input type="radio" name="aggregators" id="ind" value="ind">
+                <input type="radio" name="aggregators" id="ind" value="ind"  {% if env_values["FEEDER_AGG"] == "ind" %} checked {% endif %}>
                 <label class="form-check-label " for="ind">Pick individually</label>
             </div>
     </div>

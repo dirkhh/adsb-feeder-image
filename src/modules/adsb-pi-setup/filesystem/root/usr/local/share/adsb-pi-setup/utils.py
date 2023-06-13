@@ -28,9 +28,10 @@ class Restart:
 
 
 class NetConfig:
-    def __init__(self, adsb_config: str, mlat_config: str):
+    def __init__(self, adsb_config: str, mlat_config: str, has_policy: bool):
         self.adsb_config = adsb_config
         self.mlat_config = mlat_config
+        self.has_policy = has_policy
 
     def generate(self, mlat_privacy: bool = True, uuid: str = None):
         adsb_line = self.adsb_config
@@ -56,34 +57,43 @@ class NetConfigs:
             "adsblol": NetConfig(
                 "adsb,feed.adsb.lol,30004,beast_reduce_plus_out",
                 "mlat,feed.adsb.lol,31090,39001",
+                True,
             ),
             "flyitaly": NetConfig(
                 "adsb,dati.flyitalyadsb.com,4905,beast_reduce_plus_out",
                 "mlat,dati.flyitalyadsb.com,30100,39002",
+                True,
             ),
             "adsbx": NetConfig(
                 "adsb,feed1.adsbexchange.com,30004,beast_reduce_plus_out",
                 "mlat,feed.adsbexchange.com,31090,39003",
+                True,
             ),
             "tat": NetConfig(
                 "adsb,feed.theairtraffic.com,30004,beast_reduce_plus_out",
                 "mlat,feed.theairtraffic.com,31090,39004",
+                False,
+
             ),
             "ps": NetConfig(
                 "adsb,feed.planespotters.net,30004,beast_reduce_plus_out",
                 "mlat,mlat.planespotters.net,31090,39005",
+                True,
             ),
             "adsbone": NetConfig(
                 "adsb,feed.adsb.one,64004,beast_reduce_plus_out",
                 "mlat,feed.adsb.one,64006,39006",
+                False,
             ),
             "adsbfi": NetConfig(
                 "adsb,feed.adsb.fi,30004,beast_reduce_plus_out",
                 "mlat,feed.adsb.fi,31090,39007",
+                False,
             ),
             "avdelphi": NetConfig(
                 "adsb,data.avdelphi.com,24999,beast_reduce_plus_out",
                 "",
+                True,
             ),
         }
 
@@ -114,6 +124,7 @@ class EnvFile:
             "ULTRAFEEDER_UUID": str(uuid4()),
             "MLAT_PRIVACY": "--privacy",
             "FEEDER_READSB_GAIN": "autogain",
+            "FEEDER_AGG": "none",
             "FR24": "0",
             "PW": "0",
             "FA": "0",
@@ -128,9 +139,7 @@ class EnvFile:
                 env_values[key] = value
         self.update(env_values)
 
-        feeder_ultrafeeder_config = self.generate_ultrafeeder_config(
-            {"adsblol": "checked"}
-        )
+        feeder_ultrafeeder_config = self.generate_ultrafeeder_config()
         if "FEEDER_ULTRAFEEDER_CONFIG" not in self.envs.keys():
             self.update({"FEEDER_ULTRAFEEDER_CONFIG": feeder_ultrafeeder_config})
 
@@ -213,6 +222,9 @@ class EnvFile:
         metadata["privacy"] = (
             "checked" if env_values["MLAT_PRIVACY"] == "--privacy" else ""
         )
+        metadata["indagg"] = (
+            "1" if env_values["FEEDER_AGG"] == "ind" else ""
+        )
         fr24_enabled = env_values["FR24"] == "1" and \
                        "FEEDER_FR24_SHARING_KEY" in env_values and \
                        re.match("^[0-9a-zA-Z]*$", env_values["FEEDER_FR24_SHARING_KEY"])
@@ -242,17 +254,20 @@ class EnvFile:
         )
         return metadata
 
-    def generate_ultrafeeder_config(self, form_data):
+    def generate_ultrafeeder_config(self, form_data = {}):
         net_configs_list = []
+        agg = self.envs["FEEDER_AGG"]
         for key in NetConfigs().get_keys():
-            if form_data.get(key):
+            if agg == "all" or agg == "priv" or \
+               agg == "ind" and form_data.get(key):
                 print("Itering for key", key)
                 net_config = NetConfigs().get_config(key)
-                config_string = net_config.generate(
-                    mlat_privacy=self.envs["MLAT_PRIVACY"] == "--privacy",
-                    uuid=self.envs["ADSBLOL_UUID"] if key == "adsblol" else None,
-                )
-                net_configs_list.append(config_string)
+                if agg != "priv" or net_config.has_policy:
+                    config_string = net_config.generate(
+                        mlat_privacy=self.envs["MLAT_PRIVACY"] == "--privacy",
+                        uuid=self.envs["ADSBLOL_UUID"] if key == "adsblol" else None,
+                    )
+                    net_configs_list.append(config_string)
         print("net_configs_list", net_configs_list)
         return ";".join(net_configs_list)
 
