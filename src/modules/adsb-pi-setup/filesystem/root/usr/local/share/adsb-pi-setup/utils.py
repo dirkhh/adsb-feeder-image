@@ -38,11 +38,11 @@ class NetConfig:
 
         if uuid and len(uuid) == 36:
             adsb_line += f",uuid={uuid}"
-            mlat_line += f",uuid={uuid}"
-
-        if mlat_privacy:
+            if mlat_line:
+                mlat_line += f",uuid={uuid}"
+        if mlat_line and mlat_privacy:
             mlat_line += ",--privacy"
-        print("Ready line: ", f"{adsb_line};{mlat_line}")
+        print(f"Ready line: {adsb_line};{mlat_line}")
         return f"{adsb_line};{mlat_line}"
 
     @property
