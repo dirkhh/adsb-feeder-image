@@ -18,6 +18,7 @@ At this point it supports:
 - [planespotters.net](http://planespotters.net)
 - [TheAirTraffic.com](http://theairtraffic.com)
 - [Fly Italy ADSB](https://flyitalyadsb.com)
+- [AVDelphi](https://www.avdelphi.com)
 - [ADSBexchange](https://adsbexchange.com)
 - [PlaneFinder](https://planefinder.net)
 - [Plane.watch](https://plane.watch)
