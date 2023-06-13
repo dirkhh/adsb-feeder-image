@@ -47,7 +47,11 @@ to find your lat / long / altitude</p>
                class="form-control mt-2"
                value="{{ env_values['FEEDER_TZ'] }}"></input>
     </div>
-
+    <div class="form-group">
+	    <button onclick="show_spinner()" type="submit" class="btn btn-primary">Submit</button>
+    </div>
+    <p>{{ message }} </p>
+</form>
 <script>
 function sendTimeToServer(){
     const date = new Date();
@@ -57,11 +61,4 @@ function sendTimeToServer(){
     document.getElementById("form_timezone").value = dateTimeFormat.resolvedOptions()['timeZone'];
 }
 </script>
-
-
-    <div class="form-group">
-	    <button onclick="show_spinner()" type="submit" class="btn btn-primary">Submit</button>
-    </div>
-    <p>{{ message }} </p>
-</form>
 {% endblock %}
