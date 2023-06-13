@@ -48,7 +48,19 @@ to find your lat / long / altitude</p>
                value="{{ env_values['FEEDER_TZ'] }}"></input>
     </div>
     <div class="form-group">
-	    <button onclick="show_spinner()" type="submit" class="btn btn-primary">Submit</button>
+            <label >Which <a href="#" title="aggregators that don't require you to create an account or provide an email address">semi-anonymous </a>
+                   aggregators do you want to feed?</label><br/>
+            <div>
+                <input type="radio" name="aggregators" id="all" value="all" required>
+                <label class="form-check-label mr-3" for="all">All</label>
+                <input type="radio" name="aggregators" id="priv" value="priv">
+                <label class="form-check-label mr-3" for="priv">Aggregators with privacy policy</label>
+                <input type="radio" name="aggregators" id="ind" value="ind">
+                <label class="form-check-label " for="ind">Pick individually</label>
+            </div>
+    </div>
+    <div class="form-group">
+	    <button type="submit" class="btn btn-primary">Submit</button>
     </div>
     <p>{{ message }} </p>
 </form>
