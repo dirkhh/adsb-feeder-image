@@ -239,8 +239,9 @@ def setup():
             request.form[key]
             for key in ["lat", "lng", "alt", "form_timezone", "mlat_name", "aggregators", ]
         )
-
+        print_err(f"got lat: {lat}, lng: {lng}, alt: {alt}, TZ: {form_timezone}, mlat-name: {mlat_name}, agg: {agg}")
         if all([lat, lng, alt, form_timezone]):
+            net = ENV_FILE.generate_ultrafeeder_config(request.form)
             ENV_FILE.update(
                 {
                     "FEEDER_LAT": lat,
@@ -249,6 +250,7 @@ def setup():
                     "FEEDER_TZ": form_timezone,
                     "MLAT_SITE_NAME": mlat_name,
                     "FEEDER_AGG": agg,
+                    "FEEDER_ULTRAFEEDER_CONFIG": net,
                 }
             )
             return redirect("/restarting")
