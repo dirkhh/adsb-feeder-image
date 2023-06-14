@@ -58,6 +58,28 @@ to find your lat / long / altitude</p>
                 <input type="radio" name="aggregators" id="ind" value="ind"  {% if env_values["FEEDER_AGG"] == "ind" %} checked {% endif %}>
                 <label class="form-check-label " for="ind">Pick individually</label>
             </div>
+            <div id="explain-all" style="display: {% if env_values['FEEDER_AGG'] == 'all' %} block {% else %} none {% endif %}; font-size: smaller;">
+                With this option you will feed data to
+                       <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
+                       <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/">Fly Italy ADSB</a>,
+                       <a href="https://www.avdelphi.com/privacy.html">AVDelphi</a>,
+                       <a href="https://www.planespotters.net/legal/privacypolicy/">planespotters.net</a>,
+                       <a href="https://adsb.one/privacy-license/">adsb.one</a>,
+                       <a href="https://theairtraffic.com/privacy-license/">TheAirTraffic.com</a>,
+                       <a href="https://adsb.fi/">adsb.fi</a>,
+                       <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
+            </div>
+            <div id="explain-priv" style="display: {% if env_values['FEEDER_AGG'] == 'priv' %} block {% else %} none {% endif %}; font-size: smaller;">
+                With this option you will feed data to
+                       <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
+                       <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/">Fly Italy ADSB</a>,
+                       <a href="https://www.avdelphi.com/privacy.html">AVDelphi</a>,
+                       <a href="https://www.planespotters.net/legal/privacypolicy/">planespotters.net</a>,
+                       <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
+            </div>
+            <div id="explain-ind" style="display: {% if env_values['FEEDER_AGG'] == 'ind' %} block {% else %} none {% endif %}; font-size: smaller;">
+                With this option you can make detailed selections on the next page.
+            </div>
     </div>
     <div class="form-group">
 	    <button type="submit" class="btn btn-primary">Submit</button>
@@ -66,11 +88,32 @@ to find your lat / long / altitude</p>
 </form>
 <script>
 function sendTimeToServer(){
-    const date = new Date();
     const dateTimeFormat = new Intl.DateTimeFormat('en-US',{})
-    var i = document.createElement("img");
+    const i = document.createElement("img");
     i.src = "/propagateTZ?tz=" + dateTimeFormat.resolvedOptions()['timeZone'];
     document.getElementById("form_timezone").value = dateTimeFormat.resolvedOptions()['timeZone'];
 }
+const explainAll = document.getElementById('explain-all');
+const explainPriv = document.getElementById('explain-priv');
+const explainInd = document.getElementById('explain-ind');
+function aggregatorClick() {
+  if (document.getElementById('all').checked) {
+    explainAll.style.display = 'block';
+    explainPriv.style.display = 'none';
+    explainInd.style.display = 'none';
+  } else if (document.getElementById('priv').checked) {
+    explainAll.style.display = 'none';
+    explainPriv.style.display = 'block';
+    explainInd.style.display = 'none';
+  } else if (document.getElementById('ind').checked) {
+    explainAll.style.display = 'none';
+    explainPriv.style.display = 'none';
+    explainInd.style.display = 'block';
+  }
+}
+const aggregatorBtns = document.querySelectorAll('input[name="aggregators"]');
+aggregatorBtns.forEach(radio => {
+  radio.addEventListener('click', aggregatorClick);
+});
 </script>
 {% endblock %}
