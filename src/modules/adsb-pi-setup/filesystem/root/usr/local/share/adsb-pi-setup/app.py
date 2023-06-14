@@ -5,11 +5,11 @@ import pathlib
 import shutil
 import zipfile
 
-from aggregators import handle_aggregators_post_request, print_err
+from aggregators import handle_aggregators_post_request
 from flask import Flask, flash, render_template, request, redirect, send_file, url_for
 from os import urandom, path
 from typing import List
-from utils import RESTART, ENV_FILE
+from utils import RESTART, ENV_FILE, print_err
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)

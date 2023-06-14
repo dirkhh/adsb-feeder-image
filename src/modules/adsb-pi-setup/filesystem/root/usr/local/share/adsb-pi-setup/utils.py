@@ -7,6 +7,10 @@ from typing import Dict
 from uuid import uuid4
 
 
+def print_err(*args):
+    print(*args, file=sys.stderr)
+
+
 class Restart:
     def __init__(self):
         self.lock = threading.Lock()
@@ -260,7 +264,7 @@ class EnvFile:
         for key in NetConfigs().get_keys():
             if agg == "all" or agg == "priv" or \
                agg == "ind" and form_data.get(key):
-                print("Itering for key", key)
+                print_err("checking for key", key)
                 net_config = NetConfigs().get_config(key)
                 if agg != "priv" or net_config.has_policy:
                     config_string = net_config.generate(
@@ -268,7 +272,7 @@ class EnvFile:
                         uuid=self.envs["ADSBLOL_UUID"] if key == "adsblol" else None,
                     )
                     net_configs_list.append(config_string)
-        print("net_configs_list", net_configs_list)
+        print_err("net_configs_list", net_configs_list)
         return ";".join(net_configs_list)
 
 

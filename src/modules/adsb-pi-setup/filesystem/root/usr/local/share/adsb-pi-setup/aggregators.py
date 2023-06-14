@@ -1,12 +1,7 @@
 import re
 import subprocess
-import sys
 from flask import request, redirect
-from utils import RESTART, ENV_FILE
-
-
-def print_err(*args):
-    print(*args, file=sys.stderr)
+from utils import RESTART, ENV_FILE, print_err
 
 
 def handle_aggregators_post_request():
