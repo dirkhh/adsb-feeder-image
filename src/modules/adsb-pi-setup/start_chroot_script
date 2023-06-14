@@ -16,4 +16,13 @@ install_cleanup_trap
 unpack /filesystem/root /
 
 apt-get update --allow-releaseinfo-change
-apt-get install -y --no-install-recommends python3 python3-flask
+if [ "$BASE_DISTRO" = "armbian" ] ; then
+	apt-get install -y --no-install-recommends python3 python3-flask
+else
+	# the packaged flask is still v1 and too old for our code
+	# on the flipside, Raspbian still allows us to use pip to install
+	# systemwide packages - so let's do it this way
+	apt-get install -y --no-install-recommends python3 python3-pip
+	pip install --no-cache-dir -r /usr/local/share/adsb-pi-setup/requirements.txt
+	ln -s /usr/local/bin/flask /usr/bin
+fi
