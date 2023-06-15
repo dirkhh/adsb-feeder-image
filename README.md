@@ -41,7 +41,7 @@ an indoor or (much better) outdoor antenna is all you need
 - if doing this with the RPi image, only use the 'wifi setup' option to make sure the image can connect to your wifi - everything else should be
 kept unchanged
 - boot from the image
-- wait a couple of minutes for the initial boot to complete, then connect to the [ADSB-PI Setup Page](http://adsb-pi.local:5000) -- this link
+- wait a couple of minutes for the initial boot to complete, then connect to the [ADSB-PI Setup Page](http://adsb-feeder.local:5000) -- this link
 _should_ work to find the freshly booted system on your local network - assuming you have a reasonably standard setup with mDNS enabled. If this fails. got to the [adsb.im redirector](http://my.adsb.im) - which should forward you to the right local address on your network.
 - on the setup website enter the latitude, longitude, and elevation of your receiver as well as a name.
 - there's a convenient button to get the correct time zone from your browser
