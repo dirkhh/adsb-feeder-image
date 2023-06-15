@@ -26,7 +26,8 @@ services:
                   fa-stats|http://host.docker.internal:8082,
                   fa-status|http://host.docker.internal:8082,
                   setup|http://host.docker.internal:5000,
-                  config|http://host.docker.internal:5000
+                  config|http://host.docker.internal:5000,
+                  /|http://host.docker.internal:5000/index
       - REDIRECT=
                   fr|http://host.docker.internal:8754,
                   fr24|http://host.docker.internal:8754,

@@ -251,6 +251,13 @@ def aggregators():
     )
 
 
+@app.route("/index")
+def index():
+    return render_template(
+        "index.html", env_values=ENV_FILE.envs, metadata=ENV_FILE.metadata
+    )
+
+    
 @app.route("/", methods=("GET", "POST"))
 def setup():
     if request.args.get("success"):
@@ -280,7 +287,7 @@ def setup():
             return redirect("/restarting")
 
     return render_template(
-        "index.html", env_values=ENV_FILE.envs, metadata=ENV_FILE.metadata
+        "setup.html", env_values=ENV_FILE.envs, metadata=ENV_FILE.metadata
     )
 
 

@@ -1,119 +1,33 @@
 {% extends 'base.html' %}
-{% set active_page = "setup" %}
+{% set active_page = "index" %}
 
 {% block content %}
-<h1>{% block title %} Setup required parameters {% endblock %}</h1>
-
-<p>If you are new to the ADSB Feeder Image, please fill out the data below. You can use the
-<a href="https://www.freemaptools.com/elevation-finder.htm">location and elevation finder tool</a>
-to find your lat / long / altitude</p>
-<p>If you are upgrading from a previous version of the ADSB Feeder Image, you can also
-<a class="btn btn-secondary" href="{{  url_for('restore') }}">restore your configuration backup</a></p>
-<form method="post">
-    <div class="form-group">
-        <label for="mlat_name">Station Name (shows up on public maps if enabled later)</label>
-        <input type="text" name="mlat_name"
-               required
-               placeholder="my-awesome-antenna-AMS" class="form-control"
-               value="{{ env_values['MLAT_SITE_NAME'] }}"></input>
-    </div>
-    <div class="form-group">
-        <label for="lat">Latitude</label>
-        <input type="text" name="lat"
-               required
-               placeholder="Antenna latitude" class="form-control"
-               value="{{ env_values['FEEDER_LAT'] }}"></input>
-    </div>
-    <div class="form-group">
-        <label for="lng">Longitude</label>
-        <input type="text" name="lng"
-               required
-               placeholder="Antenna longitude" class="form-control"
-               value="{{ env_values['FEEDER_LONG'] }}"></input>
-    </div>
-    <div class="form-group">
-        <label for="alt">Altitude above mean sealevel in meters</label>
-        <input type="text" name="alt"
-               required
-               placeholder="Antenna MSL altitude (in m)" class="form-control"
-               value="{{ env_values['FEEDER_ALT_M'] }}"></input>
-    </div>
-    <div class="form-group">
-        <label for="tz">Timezone</label>
-        <button class="btn btn-secondary" onclick="sendTimeToServer()">update timezone</button>
-        <input type="text" name="form_timezone" id="form_timezone"
-               required
-               placeholder="populate from the browser timezone by clicking the button above"
-               class="form-control mt-2"
-               value="{{ env_values['FEEDER_TZ'] }}"></input>
-    </div>
-    <div class="form-group">
-            <label >Which <a href="#" title="aggregators that don't require you to create an account or provide an email address">semi-anonymous </a>
-                   aggregators do you want to feed?</label><br/>
-            <div>
-                <input type="radio" name="aggregators" id="all" value="all" required {% if env_values["FEEDER_AGG"] == "all" %} checked {% endif %}>
-                <label class="form-check-label mr-3" for="all">All</label>
-                <input type="radio" name="aggregators" id="priv" value="priv"  {% if env_values["FEEDER_AGG"] == "priv" %} checked {% endif %}>
-                <label class="form-check-label mr-3" for="priv">Aggregators with privacy policy</label>
-                <input type="radio" name="aggregators" id="ind" value="ind"  {% if env_values["FEEDER_AGG"] == "ind" %} checked {% endif %}>
-                <label class="form-check-label " for="ind">Pick individually</label>
-            </div>
-            <div id="explain-all" style="display: {% if env_values['FEEDER_AGG'] == 'all' %} block {% else %} none {% endif %}; font-size: smaller;">
-                With this option you will feed data to
-                       <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
-                       <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/">Fly Italy ADSB</a>,
-                       <a href="https://www.avdelphi.com/privacy.html">AVDelphi</a>,
-                       <a href="https://www.planespotters.net/legal/privacypolicy/">planespotters.net</a>,
-                       <a href="https://adsb.one/privacy-license/">adsb.one</a>,
-                       <a href="https://theairtraffic.com/privacy-license/">TheAirTraffic.com</a>,
-                       <a href="https://adsb.fi/">adsb.fi</a>,
-                       <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
-            </div>
-            <div id="explain-priv" style="display: {% if env_values['FEEDER_AGG'] == 'priv' %} block {% else %} none {% endif %}; font-size: smaller;">
-                With this option you will feed data to
-                       <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
-                       <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/">Fly Italy ADSB</a>,
-                       <a href="https://www.avdelphi.com/privacy.html">AVDelphi</a>,
-                       <a href="https://www.planespotters.net/legal/privacypolicy/">planespotters.net</a>,
-                       <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
-            </div>
-            <div id="explain-ind" style="display: {% if env_values['FEEDER_AGG'] == 'ind' %} block {% else %} none {% endif %}; font-size: smaller;">
-                With this option you can make detailed selections on the next page.
-            </div>
-    </div>
-    <div class="form-group">
-	    <button type="submit" class="btn btn-primary">Submit</button>
-    </div>
-    <p>{{ message }} </p>
-</form>
-<script>
-function sendTimeToServer(){
-    const dateTimeFormat = new Intl.DateTimeFormat('en-US',{})
-    const i = document.createElement("img");
-    i.src = "/propagateTZ?tz=" + dateTimeFormat.resolvedOptions()['timeZone'];
-    document.getElementById("form_timezone").value = dateTimeFormat.resolvedOptions()['timeZone'];
-}
-const explainAll = document.getElementById('explain-all');
-const explainPriv = document.getElementById('explain-priv');
-const explainInd = document.getElementById('explain-ind');
-function aggregatorClick() {
-  if (document.getElementById('all').checked) {
-    explainAll.style.display = 'block';
-    explainPriv.style.display = 'none';
-    explainInd.style.display = 'none';
-  } else if (document.getElementById('priv').checked) {
-    explainAll.style.display = 'none';
-    explainPriv.style.display = 'block';
-    explainInd.style.display = 'none';
-  } else if (document.getElementById('ind').checked) {
-    explainAll.style.display = 'none';
-    explainPriv.style.display = 'none';
-    explainInd.style.display = 'block';
-  }
-}
-const aggregatorBtns = document.querySelectorAll('input[name="aggregators"]');
-aggregatorBtns.forEach(radio => {
-  radio.addEventListener('click', aggregatorClick);
-});
-</script>
+<h1>ADSB Feeder Homepage</h1>
+<div id="UF" style="display: block;">
+	<h4>TAR1090 Mapping Interface</h4>
+	<li><a href="map">TAR1090 map</a>
+	<li><a href="stats">System Statistics and Graphs</a>
+	<li><a href="map/?replay">Timelapse / Replay</a>
+	<li><a href="map/?heatmap&realheat">Heatmap</a>
+	<li><a href="map/?ptracks">Tracks</a>
+</div>
+<body>
+<div id="FA" style="display: {% if metadata['FA'] == "1" %} block {% else %} none {% endif %};">
+	<h4>FlightAware</h4>
+	<li><a href="fa">FlightAware map</a>
+	<li><a href="fa-status">FlightAware status</a>
+</div>
+<div id="FR" style="display: {% if metadata['FR'] == "1" %} block {% else %} none {% endif %};">
+	<h4>FlightRadar 24</h4>
+	<li><a href="fr-status">FR24 status</a>
+</div>
+<div id="UA" style="display: none;">
+	<h4>UAT 978</h4>
+	<li><a href="dump978/skyaware">UAT (978 MHz) map</a>
+</div>
+<div id="CF" style="display: block;">
+	<h4>Device Configuration and Administration</h4>
+	<li><a href="config">Device Configuration Website</a>
+	<li><a href="portainer">Portainer</a> * Note - this link may give a SSL Certificate warning; feel free to ignore
+</div>
 {% endblock %}
