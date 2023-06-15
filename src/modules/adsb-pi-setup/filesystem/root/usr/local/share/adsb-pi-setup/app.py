@@ -50,6 +50,11 @@ def backup():
         backup_zip.write(adsb_path / ".env", arcname=".env")
         for f in adsb_path.glob("*.yml"):
             backup_zip.write(f, arcname=os.path.basename(f))
+        uf_path = pathlib.Path(adsb_path / "ultrafeeder")
+        if uf_path.is_dir():
+            backup_zip.mkdir("ultrafeeder")
+            for f in uf_path.rglob("*"):
+                    backup_zip.write(f)
     data.seek(0)
     return send_file(data, mimetype="application/zip", as_attachment=True, download_name="adsb-feeder-config.zip")
 
