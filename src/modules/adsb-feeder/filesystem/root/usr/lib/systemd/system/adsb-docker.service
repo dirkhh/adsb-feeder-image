@@ -1,13 +1,12 @@
 [Unit]
 Description=ADSB Docker Service
 Requires=docker.service
-After=docker.service network-online.target
+After=docker.service network-online.target adsb-bootstrap.service adsb-setup.service
 
 [Service]
 Type=oneshot
 RemainAfterExit=yes
 WorkingDirectory=/opt/adsb
-ExecStartPre=/usr/bin/bash /opt/adsb/.setup-env.sh
 ExecStart=/usr/bin/docker-compose-start
 ExecStop=/usr/bin/docker compose down -t 30
 TimeoutStartSec=0
