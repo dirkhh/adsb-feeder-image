@@ -8,6 +8,7 @@ services:
     restart: always
     ports:
       - 8081:8080
+      - 8082:80
     environment:
       - BEASTHOST=ultrafeeder
       - LAT=${FEEDER_LAT}
