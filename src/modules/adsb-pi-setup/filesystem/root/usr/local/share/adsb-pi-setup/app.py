@@ -113,7 +113,7 @@ def executerestore():
         changed: List[str] = []
         unchanged: List[str] = []
         for name in restored_files:
-            if os.path.isfile(adsb_path / name):
+            if not name.startswith("ultrafeeder/") and os.path.isfile(adsb_path / name):
                 if filecmp.cmp(adsb_path / name, restore_path / name):
                     print_err(f"{name} is unchanged")
                     unchanged.append(name)
