@@ -128,6 +128,8 @@ class EnvFile:
             "ULTRAFEEDER_UUID": str(uuid4()),
             "MLAT_PRIVACY": "--privacy",
             "FEEDER_READSB_GAIN": "autogain",
+            "FEEDER_HEYWHATSTHAT_ID": "",
+            "HEYWHATSTHAT": "0",
             "FEEDER_AGG": "none",
             "FR24": "0",
             "PW": "0",
@@ -225,6 +227,9 @@ class EnvFile:
         )
         metadata["privacy"] = (
             "checked" if env_values["MLAT_PRIVACY"] == "--privacy" else ""
+        )
+        metadata["heywhatsthat"] = (
+            "checked" if env_values["HEYWHATSTHAT"] == "1" else ""
         )
         metadata["indagg"] = (
             "1" if env_values["FEEDER_AGG"] == "ind" else ""

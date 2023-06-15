@@ -8,7 +8,6 @@
 <form method="post">
 <button type="submit" class="bigbigbutton" name="tar1090" value="go">I'm done here - take me to the website</button>
 </form>
-</p>
 <p>
 <form method="post">
     <div class="row no-gutters">
@@ -16,6 +15,25 @@
         <label for="privacy" class="mb-3 col-sm-11">Enable privacy flag (ON = does not show on <a href="https://map.adsb.lol/syncmap/">public aggregator maps</a>)</label><br/>
         <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="route" id="route" {{ metadata['route'] }}/>
         <label for="route" class="mb-3 col-sm-11">Use adsb.lol Route API to show flight routes when known.</label>
+        <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="heywhatsthat" id="heywhatsthat" {{ metadata['heywhatsthat'] }}/>
+        <div class="col-sm-11 no-gutters">
+            <label for="heywhatsthat" class="mb-3 col-sm-11">
+                <a href="https://www.heywhatsthat.com/">HeyWhat'sThat</a> is an incredibly cool web service that allows you
+                to discover what you should be able to see from the location of your antenna - including estimates for how
+                far away you should be able to detect planes (depending on their altitude - and assuming there are no other
+                obstructions).
+            </label>
+            <div class="col-sm-11 mb-1" id="hwt-text"
+                 style="display: {% if metadata['heywhatsthat'] == '1' and metadata['FEEDER_HEYWHATSTHAT_ID'] == '' %} block {% else %} none {% endif %}">
+                Click on the link, select "New Panorama" at the top, enter your address (or find the location
+                on the map), enter a title on the lower left and click "Submit request". After a couple of minutes you'll
+                be offered to look at your panorama. At the top left you'll see the title you just entered, the latitude
+                and longitude and elevation - and below that a link that starts ends with <code>/?view=CODE</code>.
+                Enter this code here to see the theoretical range information on your receiver map.
+            </div>
+            <input type="text" id="HEYWHATSTHAT_ID" name="FEEDER_HEYWHATSTHAT_ID" class="form-control col-sm-6 ml-1 mb-2"
+               placeholder=" HeyWhat'sThat Panorama ID" value="{{ env_values['FEEDER_HEYWHATSTHAT_ID'] }}">
+        </div>
         <div class="row no-gutters" style="display: {%  if metadata['indagg'] == '1' %} block {% else %} none {% endif %} ">
             <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="adsblol" id="adsblol" {{ metadata['adsblol'] }}/>
             <label for="adsblol" class="mb-3 col-sm-10">Submit your data to <a href="https://adsb.lol/privacy-license/">adsb.lol</a></label><br/>
@@ -40,5 +58,14 @@
     </div>
     <p>{{ message }} </p>
 </form>
-</p>
+<script>
+    function show_or_hide(b, f) {
+        if (b.checked) f.style.display = "block"; else f.style.display = "none";
+    }
+    const hwt = document.getElementById('heywhatsthat');
+    const hwttext = document.getElementById('hwt-text');
+    hwt.addEventListener("change", function () {
+        show_or_hide(hwt, hwttext);
+    });
+</script>
 {% endblock %}

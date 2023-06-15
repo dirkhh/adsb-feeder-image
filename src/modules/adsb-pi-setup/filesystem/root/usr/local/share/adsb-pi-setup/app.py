@@ -156,6 +156,8 @@ def handle_advanced_post_request():
             {
                 "FEEDER_TAR1090_USEROUTEAPI": "1" if request.form.get("route") else "0",
                 "MLAT_PRIVACY": "--privacy" if request.form.get("privacy") else "",
+                "HEYWHATSTHAT": "1" if request.form.get("heywhatsthat") else "",
+                "FEEDER_HEYWHATSTHAT_ID": request.form.get("FEEDER_HEYWHATSTHAT_ID", default=""),
             }
         )
     net = ENV_FILE.generate_ultrafeeder_config(request.form)
