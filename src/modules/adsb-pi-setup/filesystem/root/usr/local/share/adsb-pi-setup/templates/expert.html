@@ -2,10 +2,31 @@
 {% set active_page = "expert" %}
 
 {% block content %}
-<h1>{% block title %} Expert setup - replace the config files {% endblock %}</h1>
-
-<p>This is not designed for normal users. Unless you really know what you are doing, click the back button or click <a href="/advanced">here</a> to get back to the reasonably safe part of this user interface.</p>
-<p>If you insist on doing this, be aware that you are on your own and that your best bet to get back to a working state is to simply write a new image on your µSD card.</p>
+<h1>{% block title %} Expert setup {% endblock %}</h1>
+<h2>Install ssh credentials</h2>
+<form method="POST">
+  <div class="row">
+    <label for="ssh-pub" class="col-12">
+        Enter or paste your public key below. This will allow you to then log in as root on the feeder SBC.
+    </label>
+    <input class="col-8 ml-2" id="ssh-pub" name="ssh-pub" type="text" placeholder=" Enter your public key" required>
+    <button type="submit" class="btn btn-primary mb-1 ml-3" name="ssh" value="go">Submit</button>
+  </div>
+</form>
+<p class="mb-5"></p>
+<h2>Edit or replace main docker-compose file and .env file</h2>
+<p>
+    This is not designed for normal users. Unless you really know what you are doing, click the back button or
+    click <a href="/advanced">here</a> to get back to the reasonably safe part of this user interface.
+</p>
+<p>
+    The other way to take over this part of the image is to log in via ssh or to use the backup/restore route
+    to replace the files - so this part of the UI will likely go away at some point.
+</p>
+<p>
+    If you insist on doing this, be aware that you are on your own and that your best bet to get back to a
+    working state is to simply write a new image on your µSD card.
+</p>
     <form method="post">
         <button type="submit" class="bigbigbutton red" name="you-asked-for-it" value="you-got-it">I know what I'm doing, just take these settings</button>
         <button type="submit" class="bigbigbutton {{ 'visible' if filecontent['have_backup'] else 'invisible' }}" name="you-got-it" value="give-it-back" >I messed it up, try to restore things</button>

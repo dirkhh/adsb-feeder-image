@@ -190,6 +190,15 @@ def expert():
 
 
 def handle_expert_post_request():
+    if request.form.get("ssh") == "go":
+        ssh_pub = request.form.get("ssh-pub")
+        ssh_dir = pathlib.Path("/root/.ssh")
+        ssh_dir.mkdir(mode=0o700, exist_ok=True)
+        with open(ssh_dir / "authorized_keys", "a+") as authorized_keys:
+            authorized_keys.write(f"{ssh_pub}\n")
+        flash("Public key for root account added.", "Notice")
+        return redirect("/expert")
+
     if request.form.get("you-asked-for-it") == "you-got-it":
         # well - let's at least try to save the old stuff
         if not path.exists("/opt/adsb/env-working"):
