@@ -139,6 +139,8 @@ class EnvFile:
             "AH": "0",
             "OS": "0",
             "RV": "0",
+            "PORTAINER": "1",
+            "WEBPROXY": "1",
         }
         for key, value in default_envs.items():
             if key not in env_values:

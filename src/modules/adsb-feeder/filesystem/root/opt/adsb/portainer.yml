@@ -1,0 +1,19 @@
+services:
+  portainer_server:
+    image: portainer/portainer-ce
+    tty: true
+    container_name: portainer
+    hostname: portainer
+    restart: always
+    ports:
+      - 8000:8000
+      - 9443:9443
+    environment:
+      - NONE=
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,noexec,relatime,size=128M
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/adsb/portainer_data:/data
+      - "/etc/localtime:/etc/localtime:ro"
+      - "/etc/timezone:/etc/timezone:ro"
