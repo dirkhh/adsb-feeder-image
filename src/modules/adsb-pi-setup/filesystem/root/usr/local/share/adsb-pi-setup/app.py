@@ -44,6 +44,11 @@ def restart():
 
 @app.route("/backup")
 def backup():
+    return render_template("/backup.html", metadata=ENV_FILE.metadata)
+
+
+@app.route("/backupexecute")
+def backup_execute():
     adsb_path = pathlib.Path("/opt/adsb")
     data = io.BytesIO()
     with zipfile.ZipFile(data, mode="w") as backup_zip:
@@ -54,7 +59,7 @@ def backup():
         if uf_path.is_dir():
             backup_zip.mkdir("ultrafeeder")
             for f in uf_path.rglob("*"):
-                    backup_zip.write(f)
+                backup_zip.write(f, arcname=f.relative_to(adsb_path))
     data.seek(0)
     return send_file(data, mimetype="application/zip", as_attachment=True, download_name="adsb-feeder-config.zip")
 
@@ -99,7 +104,8 @@ def executerestore():
             for name in restore_zip.namelist():
                 print_err(f"found file {name} in archive")
                 # only accept the .env file and simple .yml filenames
-                if name != ".env" and (not name.endswith(".yml") or name != secure_filename(name)):
+                if name != ".env" and not name.startswith("ultrafeeder/") and \
+                   (not name.endswith(".yml") or name != secure_filename(name)):
                     continue
                 restore_zip.extract(name, restore_path)
                 restored_files.append(name)
@@ -109,11 +115,13 @@ def executerestore():
         for name in restored_files:
             if os.path.isfile(adsb_path / name):
                 if filecmp.cmp(adsb_path / name, restore_path / name):
-                    print_err(f"{name} is different from current version")
+                    print_err(f"{name} is unchanged")
                     unchanged.append(name)
                 else:
-                    print_err(f"{name} is unchanged")
+                    print_err(f"{name} is different from current version")
                     changed.append(name)
+            elif name == "ultrafeeder/":
+                changed.append("ultrafeeder")
         metadata = ENV_FILE.metadata
         metadata["changed"] = changed
         metadata["unchanged"] = unchanged
