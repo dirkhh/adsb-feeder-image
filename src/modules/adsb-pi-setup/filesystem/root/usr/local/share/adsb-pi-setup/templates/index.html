@@ -5,29 +5,29 @@
 <h1>ADSB Feeder Homepage</h1>
 <div id="UF" style="display: block;">
 	<h4>TAR1090 Mapping Interface</h4>
-	<li><a href="map">TAR1090 map</a>
-	<li><a href="stats">System Statistics and Graphs</a>
-	<li><a href="map/?replay">Timelapse / Replay</a>
-	<li><a href="map/?heatmap&realheat">Heatmap</a>
-	<li><a href="map/?ptracks">Tracks</a>
+	<li><a href="/map">TAR1090 map</a>
+	<li><a href="/stats">System Statistics and Graphs</a>
+	<li><a href="/map/?replay">Timelapse / Replay</a>
+	<li><a href="/map/?heatmap&realheat">Heatmap</a>
+	<li><a href="/map/?ptracks">Tracks</a>
 </div>
 <body>
 <div id="FA" style="display: {% if metadata['FA'] == "1" %} block {% else %} none {% endif %};">
 	<h4>FlightAware</h4>
-	<li><a href="fa">FlightAware map</a>
-	<li><a href="fa-status">FlightAware status</a>
+	<li><a href="/fa">FlightAware map</a>
+	<li><a href="/fa-status">FlightAware status</a>
 </div>
 <div id="FR" style="display: {% if metadata['FR'] == "1" %} block {% else %} none {% endif %};">
 	<h4>FlightRadar 24</h4>
-	<li><a href="fr-status">FR24 status</a>
+	<li><a href="/fr-status">FR24 status</a>
 </div>
 <div id="UA" style="display: none;">
 	<h4>UAT 978</h4>
-	<li><a href="dump978/skyaware">UAT (978 MHz) map</a>
+	<li><a href="/dump978/skyaware">UAT (978 MHz) map</a>
 </div>
 <div id="CF" style="display: block;">
 	<h4>Device Configuration and Administration</h4>
 	<li><a href="{{ url_for("setup") }}">Device Configuration Website</a>
-	<li><a href="portainer">Portainer</a> * Note - this link may give a SSL Certificate warning; feel free to ignore
+	<li><a href="/portainer">Portainer</a> * Note - this link may give a SSL Certificate warning; feel free to ignore
 </div>
 {% endblock %}

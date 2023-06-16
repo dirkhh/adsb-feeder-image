@@ -9,7 +9,7 @@
 to find your lat / long / altitude</p>
 <p>If you are upgrading from a previous version of the ADSB Feeder Image, you can also
 <a class="btn btn-secondary" href="{{  url_for('restore') }}">restore your configuration backup</a></p>
-<form method="post">
+<form method="post" action="{{ url_for("setup") }}">
     <div class="form-group">
         <label for="mlat_name">Station Name (shows up on public maps if enabled later)</label>
         <input type="text" name="mlat_name"

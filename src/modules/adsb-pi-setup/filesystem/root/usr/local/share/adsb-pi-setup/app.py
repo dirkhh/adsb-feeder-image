@@ -16,6 +16,54 @@ app = Flask(__name__)
 app.secret_key = urandom(16).hex()
 
 
+# let's play proxy, shall we?
+proxy_routes = [
+    # endpoint, port, url_path
+    ["/map/", 8080, "/"],
+    ["/tar1090/", 8080, "/"],
+    ["/graphs1090/", 8080, "/graphs1090/"],
+    ["/graphs/", 8080, "/graphs1090/"],
+    ["/stats/", 8080, "/graphs1090/"],
+    ["/piaware/", 8088, "/"],
+    ["/pa/", 8088, "/"],
+    ["/flightaware/", 8088, "/"],
+    ["/piaware-stats/", 8082, "/"],
+    ["/pa-stats/", 8082, "/"],
+    ["/fa-stats/", 8082, "/"],
+    ["/fa-status/", 8082, "/"],
+    ["/config/", 5000, "/setup"],
+    ["/portainer/", 9443, "/"],
+]
+
+
+# inner function used to redirect the caller to the correct endpoint
+def my_redirect(orig, new_port, new_path):
+    print_err(f"my_redirect called for endpoint {orig} with port {new_port} and path {new_path}")
+    host_url = request.host_url.rstrip("0123456789:/ ")
+    new_path = new_path.rstrip("/ ")
+    q: str = ""
+    if request.query_string:
+        q = f"?{request.query_string.decode()}"
+    print_err(f"after cleanup: host|{host_url}| path|{new_path}| query-string|{q}|")
+    url = f"{host_url}:{new_port}{new_path}{q}"
+    print_err(f"redirecting {orig} to {url}")
+    return redirect(url)
+
+
+# factory to create local functions that respond to the route endpoint
+def function_factory(orig_endpoint, new_port, new_path):
+    def f():
+        return my_redirect(orig_endpoint, new_port, new_path)
+
+    return f
+
+
+for endpoint, port, url_path in proxy_routes:
+    r = function_factory(endpoint, port, url_path)
+    print_err(f"{r} for {endpoint}")
+    app.add_url_rule(endpoint, endpoint, r)
+
+
 @app.route("/propagateTZ")
 def get_tz():
     browser_timezone = request.args.get("tz")
@@ -246,14 +294,26 @@ def aggregators():
     )
 
 
+@app.route("/")
+def director():
+    # when the system is not yet configured, we should go to setup, otherwise to index
+    if os.path.exists("/opt/adsb/.initial.setup.done"):
+        return index()
+    else:
+        return setup()
+
+
 @app.route("/index")
 def index():
+    # once we landed here for the first time, ensure that '/' gets us here again
+    with open("/opt/adsb/.initial.setup.done", "w") as marker:
+        marker.write("done\n")
     return render_template(
         "index.html", env_values=ENV_FILE.envs, metadata=ENV_FILE.metadata
     )
 
     
-@app.route("/", methods=("GET", "POST"))
+@app.route("/setup", methods=("GET", "POST"))
 def setup():
     if request.args.get("success"):
         return redirect("/index")

@@ -33,12 +33,8 @@ if [ -f /opt/adsb/.env ] ; then
 	if grep "PORTAINER=1" /opt/adsb/.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "portainer.yml" )
 	fi
-	if grep "WEBPROXY=1" /opt/adsb/.env > /dev/null 2>&1 ; then
-		COMPOSE_FILES+=( "-f" "webproxy.yml" )
-	fi
 else
 	# if we don't have a .env file for some reason, enable the
-	# portainer and webproxy to get the system into a known
-	# good state
-	COMPOSE_FILES+=( "-f" "portainer.yml" "-f" "webproxy.yml" )
+	# portainer to get the system into a known good state
+	COMPOSE_FILES+=( "-f" "portainer.yml" )
 fi
