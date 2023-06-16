@@ -3,7 +3,6 @@
 {% block content %}
 <h1>{% block title %} Restarting the ADSB system {% endblock %}</h1>
 
-
 <script>
     document.addEventListener('readystatechange', event => {
         if (event.target.readyState === "complete") {
@@ -33,7 +32,7 @@
     request.onload = function() {
       if (request.status === 200 && request.responseText === 'done') {
         // restarting the ADSB infra completed, redirect user
-        window.location = '/?success=1';
+        window.location = '/index';
       } else if (request.status === 200 && request.responseText === 'restarting') {
         // restart is still in progress, show progress and check again after a delay
         setTimeout(checkRestartStatus, 2000);

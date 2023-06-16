@@ -9,9 +9,7 @@ def handle_aggregators_post_request():
     if request.form.get("tar1090") == "go":
         update_env()
         RESTART.restart_systemd()
-        host, port = request.server
-        tar1090 = request.url_root.replace(str(port), "8080")
-        return redirect(tar1090)
+        return redirect("/restarting")
     if request.form.get("get-fr24-sharing-key") == "go":
         return fr24_setup()
     elif request.form.get("get-pw-api-key") == "go":

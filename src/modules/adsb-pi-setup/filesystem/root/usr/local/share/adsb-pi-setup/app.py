@@ -162,11 +162,6 @@ def handle_advanced_post_request():
         )
     net = ENV_FILE.generate_ultrafeeder_config(request.form)
     ENV_FILE.update({"FEEDER_ULTRAFEEDER_CONFIG": net})
-    if request.form.get("tar1090") == "go":
-        host, port = request.server
-        tar1090 = request.url_root.replace(str(port), "8080")
-        return redirect(tar1090)
-
     return redirect("/restarting")
 
 
@@ -261,7 +256,7 @@ def index():
 @app.route("/", methods=("GET", "POST"))
 def setup():
     if request.args.get("success"):
-        return redirect("/advanced")
+        return redirect("/index")
     if RESTART.lock.locked():
         return redirect("/restarting")
 
