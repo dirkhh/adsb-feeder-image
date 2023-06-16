@@ -34,26 +34,8 @@
             <input type="text" id="HEYWHATSTHAT_ID" name="FEEDER_HEYWHATSTHAT_ID" class="form-control col-sm-6 ml-1 mb-2"
                placeholder=" HeyWhat'sThat Panorama ID" value="{{ env_values['FEEDER_HEYWHATSTHAT_ID'] }}">
         </div>
-        <div class="row no-gutters" style="display: {%  if metadata['indagg'] == '1' %} block {% else %} none {% endif %} ">
-            <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="adsblol" id="adsblol" {{ metadata['adsblol'] }}/>
-            <label for="adsblol" class="mb-3 col-sm-10">Submit your data to <a href="https://adsb.lol/privacy-license/">adsb.lol</a></label><br/>
-            <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="flyitaly" id="flyitaly" {{ metadata['flyitaly'] }}/>
-            <label for="flyitaly" class="mb-3 col-sm-10">Submit your data to <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/">Fly Italy ADSB</a></label><br/>
-            <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="avdelphi" id="avdelphi" {{ metadata['avdelphi'] }}/>
-            <label for="avdelphi" class="mb-3 col-sm-10">Submit your data to <a href="https://www.avdelphi.com/privacy.html">AVDelphi</a></label><br/>
-            <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="ps" id="ps" {{ metadata['ps'] }}/>
-            <label for="ps" class="mb-3 col-sm-10">Submit your data to <a href="https://www.planespotters.net/legal/privacypolicy/">planespotters.net</a></label><br/>
-            <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="adsbone" id="adsbone" {{ metadata['adsbone'] }}/>
-            <label for="adsbone" class="mb-3 col-sm-10">Submit your data to <a href="https://adsb.one/privacy-license/">adsb.one</a> <small>(please note that this site is missing a clear data/privacy policy)</small></label><br/>
-            <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="tat" id="tat" {{ metadata['tat'] }}/>
-            <label for="tat" class="mb-3 col-sm-10">Submit your data to <a href="https://theairtraffic.com/privacy-license/">TheAirTraffic.com</a> <small>(please note that this site is missing a clear data/privacy policy)</small></label><br/>
-            <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="adsbfi" id="adsbfi" {{ metadata['adsbfi'] }}/>
-            <label for="adsbfi" class="mb-3 col-sm-10">Submit your data to <a href="https://adsb.fi/">adsb.fi</a> <small>(please note that this site is missing a clear data/privacy policy)</small></label><br/>
-            <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="adsbx" id="adsbx" {{ metadata['adsbx'] }}/>
-            <label for="adsbx" class="mb-3 col-sm-10">Submit your data to <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a> <br/><small>(please note that this site has been aquired by a private equity company with unknown plans for the data submitted; it does, however, provide the best MLAT coverage of all the sites listed)</small></label><br/>
-        </div>
     </div>
-    <div class="form-group {{ 'visible' if metadata['adv_visible'] else 'invisible' }}">
+    <div class="form-group">
         <button type="submit" name="submit" value="go" class="btn btn-primary">Submit</button>
     </div>
     <p>{{ message }} </p>

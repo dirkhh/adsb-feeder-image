@@ -36,6 +36,9 @@ def update_env():
     env_updates = {}
     for box in checkboxes:
         env_updates[box] = "1" if request.form.get(box) == "on" else "0"
+    net = ENV_FILE.generate_ultrafeeder_config(request.form)
+    env_updates["FEEDER_ULTRAFEEDER_CONFIG"] = net
+    env_updates["UF"] = "1" if net else "0"
     # we should also check that there are the right keys given...
     ENV_FILE.update(env_updates)
 

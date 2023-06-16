@@ -15,8 +15,8 @@
     <nav class="navbar navbar-expand-md navbar-light bg-light">
         {% set navigation_bar = [
             (url_for('setup'), 'setup', 'Basic Setup'),
-            (url_for('advanced'), 'advanced', 'Parameters'),
-            (url_for('aggregators'), 'aggregators', 'More Aggregators'),
+            (url_for('advanced'), 'advanced', 'Advanced'),
+            (url_for('aggregators'), 'aggregators', 'Aggregators'),
             (url_for('backup'), 'backup', 'Backup'),
             (url_for('restore'), 'restore', 'Restore'),
             (url_for('expert'), 'expert', 'Expert')
@@ -31,7 +31,9 @@
             <ul class="navbar-nav">
                 {% for href, id, caption in navigation_bar %}
                     <li {% if id == active_page %}class="active"{% endif %}
-                        {{ 'visible' if metadata['adv_visible'] else 'invisible' }}>
+                        style="display: {% if env_values['BASE_CONFIG'] == "1" or
+                                           id == 'setup' or
+                                           id == 'restore' %} block {% else %} none {% endif %};">
                         <a class="nav-link" href="{{ href|e }}">{{ caption|e }}</a></li>
                 {% endfor %}
             </ul>

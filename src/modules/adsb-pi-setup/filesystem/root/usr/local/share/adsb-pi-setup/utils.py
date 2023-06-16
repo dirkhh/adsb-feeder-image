@@ -20,6 +20,7 @@ class Restart:
             return False
         with self.lock:
             subprocess.call("/usr/bin/bash /opt/adsb/adsb-system-restart.sh", shell=True)
+            return True
 
     @property
     def state(self):
@@ -136,8 +137,9 @@ class EnvFile:
             "AH": "0",
             "OS": "0",
             "RV": "0",
-            "PORTAINER": "1",
-            "WEBPROXY": "1",
+            "UF": "0",
+            "PORTAINER": "0",
+            "BASE_CONFIG": "0",
         }
         for key, value in default_envs.items():
             if key not in env_values:
@@ -145,6 +147,8 @@ class EnvFile:
         self.update(env_values)
 
         feeder_ultrafeeder_config = self.generate_ultrafeeder_config()
+        if feeder_ultrafeeder_config:
+            self.update({"UF": "1"})
         if "FEEDER_ULTRAFEEDER_CONFIG" not in self.envs.keys():
             self.update({"FEEDER_ULTRAFEEDER_CONFIG": feeder_ultrafeeder_config})
 
@@ -212,14 +216,6 @@ class EnvFile:
                 metadata[key] = "checked"
             else:
                 metadata[key] = ""
-
-        metadata["adv_visible"] = (
-            all(
-                key in env_values and float(env_values[key]) != 0
-                for key in ["FEEDER_LAT", "FEEDER_LONG", "FEEDER_ALT_M"]
-            )
-            and not self.restart.lock.locked()
-        )
 
         metadata["route"] = (
             "checked" if env_values["FEEDER_TAR1090_USEROUTEAPI"] == "1" else ""

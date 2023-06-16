@@ -46,6 +46,9 @@ def my_redirect(orig, new_port, new_path):
         q = f"?{request.query_string.decode()}"
     print_err(f"after cleanup: host|{host_url}| path|{new_path}| query-string|{q}|")
     url = f"{host_url}:{new_port}{new_path}{q}"
+    # work around oddity in tar1090
+    if url.endswith("graph1090"):
+        url += "/"
     print_err(f"redirecting {orig} to {url}")
     return redirect(url)
 
@@ -70,7 +73,7 @@ def get_tz():
     env_values = ENV_FILE.envs
     env_values["FEEDER_TZ"] = browser_timezone
     return render_template(
-        "index.html", env_values=env_values, metadata=ENV_FILE.metadata
+        url_for("setup"), env_values=env_values, metadata=ENV_FILE.metadata
     )
 
 
@@ -84,8 +87,8 @@ def restarting():
 @app.route("/restart", methods=(["GET", "POST"]))
 def restart():
     if request.method == "POST":
-        RESTART.restart_systemd()
-        return "restarting" if restart else "already restarting"
+        resp = RESTART.restart_systemd()
+        return "restarting" if resp else "already restarting"
     if request.method == "GET":
         return RESTART.state
 
@@ -208,8 +211,6 @@ def handle_advanced_post_request():
                 "FEEDER_HEYWHATSTHAT_ID": request.form.get("FEEDER_HEYWHATSTHAT_ID", default=""),
             }
         )
-    net = ENV_FILE.generate_ultrafeeder_config(request.form)
-    ENV_FILE.update({"FEEDER_ULTRAFEEDER_CONFIG": net})
     return redirect("/restarting")
 
 
@@ -320,7 +321,7 @@ def setup():
     if RESTART.lock.locked():
         return redirect("/restarting")
 
-    if request.method == "POST":
+    if request.method == "POST" and request.form.get("submit") == "go":
         lat, lng, alt, form_timezone, mlat_name, agg = (
             request.form[key]
             for key in ["lat", "lng", "alt", "form_timezone", "mlat_name", "aggregators", ]
@@ -337,9 +338,10 @@ def setup():
                     "MLAT_SITE_NAME": mlat_name,
                     "FEEDER_AGG": agg,
                     "FEEDER_ULTRAFEEDER_CONFIG": net,
+                    "BASE_CONFIG": "1",
                 }
             )
-            return redirect("/restarting")
+            return redirect(url_for("restarting"))
 
     return render_template(
         "setup.html", env_values=ENV_FILE.envs, metadata=ENV_FILE.metadata

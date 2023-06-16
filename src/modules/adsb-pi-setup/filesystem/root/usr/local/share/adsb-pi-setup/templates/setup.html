@@ -78,11 +78,11 @@ to find your lat / long / altitude</p>
                        <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
             </div>
             <div id="explain-ind" style="display: {% if env_values['FEEDER_AGG'] == 'ind' %} block {% else %} none {% endif %}; font-size: smaller;">
-                With this option you can make detailed selections on the next page.
+                With this option you can make detailed selections on the Aggregator page.
             </div>
     </div>
     <div class="form-group">
-	    <button type="submit" class="btn btn-primary">Submit</button>
+	    <button type="submit" name="submit" value="go" class="btn btn-primary">Submit</button>
     </div>
     <p>{{ message }} </p>
 </form>
