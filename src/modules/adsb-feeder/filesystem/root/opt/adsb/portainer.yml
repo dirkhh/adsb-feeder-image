@@ -1,6 +1,6 @@
 services:
   portainer_server:
-    image: portainer/portainer-ce
+    image: ${PORTAINER_CONTAINER}
     tty: true
     container_name: portainer
     hostname: portainer

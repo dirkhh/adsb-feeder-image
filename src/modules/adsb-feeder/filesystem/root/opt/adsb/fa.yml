@@ -2,7 +2,7 @@ version: '2.0'
 
 services:
   piaware:
-    image: ghcr.io/sdr-enthusiasts/docker-piaware:latest
+    image: ${FA_CONTAINER}
     tty: true
     container_name: piaware
     restart: always

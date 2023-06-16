@@ -2,7 +2,7 @@ version: '2.0'
 
 services:
   adsbhub:
-    image: ghcr.io/sdr-enthusiasts/docker-adsbhub:latest
+    image: ${AH_CONTAINER}
     tty: true
     container_name: adsbhub
     restart: always

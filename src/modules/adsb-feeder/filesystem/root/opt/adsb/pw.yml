@@ -2,7 +2,7 @@ version: '2.0'
 
 services:
   planewatch:
-    image: ghcr.io/plane-watch/docker-plane-watch:latest
+    image: ${PW_CONTAINER}
     tty: true
     container_name: planewatch
     restart: always

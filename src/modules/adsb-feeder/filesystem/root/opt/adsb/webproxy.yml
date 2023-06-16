@@ -1,6 +1,6 @@
 services:
   webproxy:
-    image: ghcr.io/sdr-enthusiasts/webproxy
+    image: ${WEBPROXY_CONTAINER}
     tty: true
     container_name: webproxy
     hostname: webproxy

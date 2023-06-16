@@ -2,7 +2,7 @@ version: '2.0'
 
 services:
   radarvirtuel:
-    image: ghcr.io/sdr-enthusiasts/docker-radarvirtuel:latest
+    image: ${RV_CONTAINER}
     tty: true
     container_name: radarvirtuel
     hostname: radarvirtuel
