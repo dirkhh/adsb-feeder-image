@@ -1,12 +1,13 @@
 [Unit]
 Description=ADSB Bootstrap Service
-After=network-online.target adsb-init.service
+After=network-online.target
 
 [Service]
 Type=oneshot
 RemainAfterExit=yes
 WorkingDirectory=/opt/adsb
-ExecStart=/usr/bin/bash /opt/adsb/bootstrap.sh
+ExecStartPre=/usr/bin/bash /opt/adsb/.setup-env.sh
+ExecStart=/usr/bin/bash /opt/adsb/docker-pull.sh
 TimeoutStartSec=0
 
 [Install]

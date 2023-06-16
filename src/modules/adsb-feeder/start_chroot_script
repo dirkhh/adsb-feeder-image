@@ -32,6 +32,8 @@ if [ "$BASE_DISTRO" = "armbian" ] ; then
 	systemctl enable armbian-firstrun-config
 fi
 systemctl enable adsb-docker
+systemctl enable adsb-init.service
+systemctl enable adsb-bootstrap.service
 export ROOT_PWD=$(openssl rand -base64 9)
 echo -e "$ROOT_PWD\n$ROOT_PWD" | (passwd root)
 export PI_PWD=$(openssl rand -base64 9)

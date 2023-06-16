@@ -1,7 +1,7 @@
 [Unit]
 Description=ADSB Docker Service
 Requires=docker.service
-After=docker.service network-online.target adsb-bootstrap.service adsb-setup.service
+After=docker.service network-online.target adsb-init.service adsb-setup.service
 
 [Service]
 Type=oneshot

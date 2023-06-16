@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# while the user is getting ready, let's try to pull the docker container;
-# that way startup will feel quicker
+# while the user is getting ready, let's try to pull the remaining docker containers
+# in the background -- that way startup will feel quicker
 cd /opt/adsb
 bash docker-pull.sh &
 
