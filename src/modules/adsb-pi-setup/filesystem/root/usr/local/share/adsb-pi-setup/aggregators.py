@@ -187,9 +187,10 @@ def request_fr24_sharing_key():
     lng = float(env_values["FEEDER_LONG"])
     alt = int(int(env_values["FEEDER_ALT_M"]) / 0.308)
     email = request.form.get("FEEDER_FR24_SHARING_KEY")
-    if download_docker_container("ghcr.io/sdr-enthusiasts/docker-flightradar24:latest"):
+    container_name = env_values["FR24_CONTAINER"]
+    if download_docker_container(container_name):
         cmdline = f"--rm -i -e FEEDER_LAT=\"{lat}\" -e FEEDER_LONG=\"{lng}\" -e FEEDER_ALT_FT=\"{alt}\" " \
-                  f"-e FR24_EMAIL=\"{email}\" --entrypoint /scripts/signup.sh ghcr.io/sdr-enthusiasts/docker-flightradar24"
+                  f"-e FR24_EMAIL=\"{email}\" --entrypoint /scripts/signup.sh {container_name}"
         output = docker_run_with_timeout(cmdline, 45.0)
         sharing_key_match = re.search("Your sharing key \\(([a-zA-Z0-9]*)\\) has been", output)
         if sharing_key_match:
@@ -204,8 +205,9 @@ def request_fr24_sharing_key():
 
 
 def request_fa_feeder_id():
-    if download_docker_container("ghcr.io/sdr-enthusiasts/docker-piaware:latest"):
-        cmdline = f"--rm ghcr.io/sdr-enthusiasts/docker-piaware:latest"
+    container_name = ENV_FILE.envs['FA_CONTAINER']
+    if download_docker_container(container_name):
+        cmdline = f"--rm {container_name}"
         output = docker_run_with_timeout(cmdline, 45.0)
         feeder_id_match = re.search(" feeder ID is ([-a-zA-Z0-9]*)", output)
         if feeder_id_match:
@@ -224,9 +226,10 @@ def request_rb_feeder_id():
     lat = float(env_values["FEEDER_LAT"])
     lng = float(env_values["FEEDER_LONG"])
     alt = int(env_values["FEEDER_ALT_M"])
-    if download_docker_container("ghcr.io/sdr-enthusiasts/docker-radarbox:latest"):
+    container_name = env_values["RB_CONTAINER"]
+    if download_docker_container(container_name):
         cmdline = f"--rm -i --network adsb_default -e BEASTHOST=ultrafeeder -e LAT=${lat} " \
-                  f"-e LONG=${lng} -e ALT=${alt} ghcr.io/sdr-enthusiasts/docker-radarbox"
+                  f"-e LONG=${lng} -e ALT=${alt} {container_name}"
         output = docker_run_with_timeout(cmdline, 45.0)
         sharing_key_match = re.search("Your new key is ([a-zA-Z0-9]*)", output)
         if sharing_key_match:
