@@ -1,36 +1,36 @@
 # assemble the docker compose files we want to use
 # this needs to be extended for each new aggregator
 
-COMPOSE_FILES=( "-f" "docker-compose.yml" )
+COMPOSE_FILES=( "-f" "/opt/adsb/docker-compose.yml" )
 
 if [ -f /opt/adsb/.env ] ; then
 	# for each of the yml snippets check if this aggregator is enabled
 	# in the .env file
 	if grep "FR24=1" /opt/adsb/.env > /dev/null 2>&1 ; then
-		COMPOSE_FILES+=( "-f" "fr24.yml" )
+		COMPOSE_FILES+=( "-f" "/opt/adsb/fr24.yml" )
 	fi
 	if grep "PW=1" /opt/adsb/.env > /dev/null 2>&1 ; then
-		COMPOSE_FILES+=( "-f" "pw.yml" )
+		COMPOSE_FILES+=( "-f" "/opt/adsb/pw.yml" )
 	fi
 	if grep "FA=1" /opt/adsb/.env > /dev/null 2>&1 ; then
-		COMPOSE_FILES+=( "-f" "fa.yml" )
+		COMPOSE_FILES+=( "-f" "/opt/adsb/fa.yml" )
 	fi
 	if grep "RB=1" /opt/adsb/.env > /dev/null 2>&1 ; then
-		COMPOSE_FILES+=( "-f" "rb.yml" )
+		COMPOSE_FILES+=( "-f" "/opt/adsb/rb.yml" )
 	fi
 	if grep "PF=1" /opt/adsb/.env > /dev/null 2>&1 ; then
-		COMPOSE_FILES+=( "-f" "pf.yml" )
+		COMPOSE_FILES+=( "-f" "/opt/adsb/pf.yml" )
 	fi
 	if grep "AH=1" /opt/adsb/.env > /dev/null 2>&1 ; then
-		COMPOSE_FILES+=( "-f" "ah.yml" )
+		COMPOSE_FILES+=( "-f" "/opt/adsb/ah.yml" )
 	fi
 	if grep "OS=1" /opt/adsb/.env > /dev/null 2>&1 ; then
-		COMPOSE_FILES+=( "-f" "os.yml" )
+		COMPOSE_FILES+=( "-f" "/opt/adsb/os.yml" )
 	fi
 	if grep "RV=1" /opt/adsb/.env > /dev/null 2>&1 ; then
-		COMPOSE_FILES+=( "-f" "rv.yml" )
+		COMPOSE_FILES+=( "-f" "/opt/adsb/rv.yml" )
 	fi
 	if grep "PORTAINER=1" /opt/adsb/.env > /dev/null 2>&1 ; then
-		COMPOSE_FILES+=( "-f" "portainer.yml" )
+		COMPOSE_FILES+=( "-f" "/opt/adsb/portainer.yml" )
 	fi
 fi
