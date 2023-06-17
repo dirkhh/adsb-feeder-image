@@ -32,6 +32,11 @@ proxy_routes = [
     ["/fa-stats/", 8082, "/"],
     ["/fa-status/", 8082, "/"],
     ["/config/", 5000, "/setup"],
+    ["/fr-status/", 8754, "/"],
+    ["/fr/", 8754, "/"],
+    ["/fr24/", 8754, "/"],
+    ["/flightradar/", 8754, "/"],
+    ["/flightradar24/", 8754, "/"],
     ["/portainer/", 9443, "/"],
 ]
 
