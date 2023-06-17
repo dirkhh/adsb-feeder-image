@@ -78,7 +78,7 @@ def get_tz():
     env_values = ENV_FILE.envs
     env_values["FEEDER_TZ"] = browser_timezone
     return render_template(
-        url_for("setup"), env_values=env_values, metadata=ENV_FILE.metadata
+        "setup.html", env_values=env_values, metadata=ENV_FILE.metadata
     )
 
 
