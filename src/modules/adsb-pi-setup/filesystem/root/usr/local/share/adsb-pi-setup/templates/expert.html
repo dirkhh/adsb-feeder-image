@@ -5,7 +5,7 @@
 <h1>{% block title %} Expert setup {% endblock %}</h1>
 <h2>Install ssh credentials</h2>
 <form method="POST">
-  <div class="row">
+  <div style="display: {% if env_values.get('SSH_CONFIGURED') == "1" %} none {% else %} block {% endif %}" class="row">
     <label for="ssh-pub" class="col-12">
         Enter or paste your public key below. This will allow you to then log in as root on the feeder SBC.
     </label>

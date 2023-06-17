@@ -247,6 +247,7 @@ def handle_expert_post_request():
         with open(ssh_dir / "authorized_keys", "a+") as authorized_keys:
             authorized_keys.write(f"{ssh_pub}\n")
         flash("Public key for root account added.", "Notice")
+        ENV_FILE.update({"SSH_CONFIGURED": "1"})
         return redirect("/expert")
 
     if request.form.get("you-asked-for-it") == "you-got-it":
