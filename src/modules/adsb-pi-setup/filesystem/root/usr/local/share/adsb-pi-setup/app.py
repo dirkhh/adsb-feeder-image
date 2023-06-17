@@ -52,7 +52,7 @@ def my_redirect(orig, new_port, new_path):
     print_err(f"after cleanup: host|{host_url}| path|{new_path}| query-string|{q}|")
     url = f"{host_url}:{new_port}{new_path}{q}"
     # work around oddity in tar1090
-    if url.endswith("graph1090"):
+    if url.endswith("graphs1090"):
         url += "/"
     print_err(f"redirecting {orig} to {url}")
     return redirect(url)
