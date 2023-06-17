@@ -216,6 +216,7 @@ def handle_advanced_post_request():
                 "FEEDER_HEYWHATSTHAT_ID": request.form.get("FEEDER_HEYWHATSTHAT_ID", default=""),
             }
         )
+    RESTART.restart_systemd()
     return redirect("/restarting")
 
 
