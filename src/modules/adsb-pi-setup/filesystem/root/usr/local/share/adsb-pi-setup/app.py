@@ -308,7 +308,11 @@ def handle_expert_post_request():
         flash("Public key for root account added.", "Notice")
         ENV_FILE.update({"SSH_CONFIGURED": "1"})
         return redirect("/expert")
-
+    if request.form.get("update") == "go":
+        # this needs a lot more checking and safety, but for now, just go
+        cmdline = "/usr/bin/docker-update-adsb-im"
+        subprocess.run(cmdline, timeout=600.0, shell=True)
+        return redirect("/expert")
     if request.form.get("you-asked-for-it") == "you-got-it":
         # well - let's at least try to save the old stuff
         if not path.exists("/opt/adsb/env-working"):

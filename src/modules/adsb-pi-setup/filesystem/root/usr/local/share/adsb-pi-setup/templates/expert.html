@@ -14,6 +14,17 @@
   </div>
 </form>
 <p class="mb-5"></p>
+<h2>Update feeder containers</h2>
+<form method="POST" onsubmit="show_spinner(); return true;">
+  <div class="row">
+    <label for="update" class="col-8">Update to the currently recommended container images.
+        This could take several minutes (depending on the speed of your internet connection and the amount of the
+        changes made in the containers.
+    </label>
+    <button type="submit" class="btn btn-primary mb-1 ml-3 col-3" name="update" value="go">Update</button>
+  </div>
+</form>
+
 <h2>Edit or replace main docker-compose file and .env file</h2>
 <p>
     This is not designed for normal users. Unless you really know what you are doing, click the back button or

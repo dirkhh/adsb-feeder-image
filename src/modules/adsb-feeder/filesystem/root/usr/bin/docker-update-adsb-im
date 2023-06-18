@@ -9,7 +9,7 @@ cp .env env.${TIME}
 
 curl https://my.adsb.im/api/docker.image.versions -o docker.image.versions || exit 1
 
-grep -v "_CONTAINER=" end.${TIME} > env.new
+grep -v "_CONTAINER=" env.${TIME} > env.new
 cat docker.image.versions >> env.new
 mv env.new .env
 
