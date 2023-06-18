@@ -7,11 +7,28 @@ TIME=$(date -Iseconds)
 cp docker.image.versions docker.image.versions.${TIME}
 cp .env env.${TIME}
 
-curl https://my.adsb.im/api/docker.image.versions -o docker.image.versions || exit 1
+if curl -s https://my.adsb.im/api/docker.image.versions -o docker.image.versions ; then
+	echo "${TIME}: successfully retrieved new image versions from server" >> /var/log/update.log
+else
+	echo "${TIME}: failed to retrieved new image versions from server" >> /var/log/update.log
+	exit 1
+fi
+
+# let's check if this really brings in anything new:
+sort < docker.image.versions.${TIME} > /tmp/old.div
+sort < docker.image.versions > /tmp/new.div
+
+if diff /tmp/old.div /tmp/new.div > /dev/null 2>&1 ; then
+	echo "${TIME}: no new container images" >> /var/log/update.log
+	exit 0
+fi
 
 grep -v "_CONTAINER=" env.${TIME} > env.new
 cat docker.image.versions >> env.new
 mv env.new .env
 
+echo "${TIME}: pulling new container images and restarting docker" >> /var/log/update.log
 bash ./docker-pull.sh
 bash /usr/bin/docker-compose-start
+
+echo "${TIME}: done" >> /var/log/update.log
