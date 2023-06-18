@@ -1,0 +1,17 @@
+#!/bin/bash
+
+cd /opt/adsb
+TIME=$(date -Iseconds)
+
+# just in case - make some backups
+cp docker.image.versions docker.image.versions.${TIME}
+cp .env env.${TIME}
+
+curl https://my.adsb.im/api/docker.image.versions -o docker.image.versions || exit 1
+
+grep -v "_CONTAINER=" end.${TIME} > env.new
+cat docker.image.versions >> env.new
+mv env.new .env
+
+bash ./docker-pull.sh
+bash /usr/bin/docker-compose-start
