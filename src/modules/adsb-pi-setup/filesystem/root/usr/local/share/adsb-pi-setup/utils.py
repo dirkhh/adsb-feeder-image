@@ -140,6 +140,8 @@ class EnvFile:
             "UF": "0",
             "PORTAINER": "0",
             "BASE_CONFIG": "0",
+            "NIGHTLY_BASE_UPDATE": "1",
+            "NIGHTLY_CONTAINER_UPDATE": "1",
         }
         for key, value in default_envs.items():
             if key not in env_values:

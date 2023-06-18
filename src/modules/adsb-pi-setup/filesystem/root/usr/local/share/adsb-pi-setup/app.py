@@ -406,6 +406,8 @@ def setup():
                     "FEEDER_AGG": agg,
                 }
             )
+            # while we are at it, set the local time zone
+            subprocess.call(f"/usr/bin/timedatectl set-timezone {form_timezone}", shell=True)
             # with the data just stored, we can now create the Ultrafeeder config
             # and the remaining base settings
             net = ENV_FILE.generate_ultrafeeder_config(request.form)

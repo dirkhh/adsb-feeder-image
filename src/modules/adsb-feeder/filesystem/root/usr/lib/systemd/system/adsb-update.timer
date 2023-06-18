@@ -1,0 +1,13 @@
+# Timer service that triggers the nightly updates daily at 1:30am
+# for now that's UTC
+
+[Unit]
+Description=Run Nightly ADSB Feeder Image Updates
+Requires=adsb-update.service
+
+[Timer]
+Unit=adsb-update.service
+OnCalendar=*-*-* 01:30:00
+
+[Install]
+WantedBy=timers.target

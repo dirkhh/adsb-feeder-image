@@ -36,6 +36,7 @@ systemctl enable adsb-docker
 systemctl enable adsb-init.service
 systemctl enable adsb-bootstrap.service
 systemctl enable adsb-web-forward.service
+systemctl enable adsb-update.timer
 export ROOT_PWD=$(openssl rand -base64 9)
 echo -e "$ROOT_PWD\n$ROOT_PWD" | (passwd root)
 export PI_PWD=$(openssl rand -base64 9)
