@@ -9,7 +9,7 @@
 <button type="submit" class="bigbigbutton" name="tar1090" value="go">I'm done here - take me to the website</button>
 </form>
 <p>
-<form method="post">
+<form method="post" action="/advanced">
     <div class="row no-gutters">
         <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="privacy" id="privacy" {{ metadata['privacy'] }}/>
         <label for="privacy" class="mb-3 col-sm-11">Enable privacy flag (ON = does not show on <a href="https://map.adsb.lol/syncmap/">public aggregator maps</a>)</label><br/>
@@ -35,12 +35,102 @@
                placeholder=" HeyWhat'sThat Panorama ID" value="{{ env_values['FEEDER_HEYWHATSTHAT_ID'] }}">
         </div>
     </div>
+    <div class="row" style="display: {% if env_values.get('NUM_SDRS')|int > 1 %} flex {% else %} none {% endif %};">
+        <div class="col-sm-12 mt-5 mb-3">
+            You have more than one SDR connected. Please assign them for their roles.
+        </div>
+        <div class="col-sm-3 no-gutters">
+            <button type="button" name="sdr_can_read" onclick="can_read_sdr()">Check SDRs</button>
+        </div>
+        <div class="col-sm-9 no-gutters">
+            <div class="row">
+                <p class="col-sm-2 bg-info mr-2">SDR #</p>
+                <p class="col-sm-3 bg-info mr-2">Serial</p>
+                <p class="col-sm-6 bg-info mr-2">Used for</p>
+            </div>
+            <div class="row" id="sdr0" style="display: none">
+                <p class="col-sm-2" id="sdr0-tag">SDR 0</p>
+                <p class="col-sm-3" id="sdr0-serial"></p>
+                <p class="col-sm-6 small" id="sdr0-puprpose">
+                    <label class="checkbox-inline mr-2">
+                        <input type="radio" id="1090-0" name="1090" value="0"> 1090
+                    </label>
+                    <label class="checkbox-inline mr-2">
+                        <input type="radio" id="978-0" name="978" value="0"> 978
+                    </label>
+                    <label class="checkbox-inline mr-2">
+                        <input type="radio" id="other-0" name="other" value="0"> Other
+                    </label>
+                </p>
+            </div>
+            <div class="row" id="sdr1" style="display: none">
+                <p class="col-sm-2" id="sdr1-tag">SDR 1</p>
+                <p class="col-sm-3" id="sdr1-serial"></p>
+                <p class="col-sm-6 small" id="sdr1-puprpose">
+                    <label class="checkbox-inline mr-2">
+                        <input type="radio" id="1090-1" name="1090" value="1"> 1090
+                    </label>
+                    <label class="checkbox-inline mr-2">
+                        <input type="radio" id="978-1" name="978" value="1"> 978
+                    </label>
+                    <label class="checkbox-inline mr-2">
+                        <input type="radio" id="other-1" name="other" value="1"> Other
+                    </label>
+                </p>
+            </div>
+            <div class="row" id="sdr2" style="display: none">
+                <p class="col-sm-2" id="sdr2-tag">SDR 2</p>
+                <p class="col-sm-3" id="sdr2-serial"></p>
+                <p class="col-sm-6 small" id="sdr2-puprpose">
+                    <label class="checkbox-inline mr-2">
+                        <input type="radio" id="1090-2" name="1090" value="2"> 1090
+                    </label>
+                    <label class="checkbox-inline mr-2">
+                        <input type="radio" id="978-2" name="978" value="2"> 978
+                    </label>
+                    <label class="checkbox-inline mr-2">
+                        <input type="radio" id="other-2" name="other" value="2"> Other
+                    </label>
+                </p>
+            </div>
+        </div>
+    </div>
     <div class="form-group">
         <button type="submit" name="submit" value="go" class="btn btn-primary">Submit</button>
     </div>
     <p>{{ message }} </p>
 </form>
 <script>
+    function can_read_sdr() {
+        fetch(`${SCRIPT_ROOT}/api/can_read_sdr`)
+            .then( response => response.json() )
+            .then( data => {
+                console.log("received back", data);
+                if(data.access == true) {
+                    let num = data['num'];
+                    for (let i = 0; i < num; i++) {
+                        let id = 'sdr' + i;
+                        let serials = data['serials'];
+                        document.getElementById(id).style.display = 'flex';
+                        document.getElementById(id + "-serial").innerHTML = serials[i];
+                        document.getElementById('1090-' + i).value = serials[i];
+                        document.getElementById('978-' + i).value = serials[i];
+                        document.getElementById('other-' + i).value = serials[i];
+                        if (serials[i].endsWith("1090")) {
+                            document.getElementById('1090-' + i).checked = true;
+                        } else if (serials[i].endsWith("978")) {
+                            document.getElementById('978-' + i).checked = true;
+                        }
+                    }
+                    for (let i = num; i < 3; i++) {
+                        let id = 'sdr' + i;
+                        document.getElementById(id).style.display = 'none'
+                    }
+                } else {
+                    console.log("need to shut down docker")
+                }
+            });
+    }
     function show_or_hide(b, f) {
         if (b.checked) f.style.display = "block"; else f.style.display = "none";
     }

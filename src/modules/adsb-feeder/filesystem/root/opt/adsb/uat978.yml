@@ -1,0 +1,25 @@
+version: '2.0'
+
+services:
+  dump978:
+    image: ${UAT978_CONTAINER}
+    tty: true
+    container_name: dump978
+    hostname: dump978
+    restart: always
+    device_cgroup_rules:
+      - 'c 189:* rwm'
+    environment:
+      - TZ=${FEEDER_TZ}
+      - READSB_RTLSDR_DEVICE=${ADSB_SDR_SERIAL}
+      - READSB_RTLSDR_PPM=${ADSB_SDR_PPM}
+      - READSB_GAIN=${ADSB_SDR_GAIN}
+      - DUMP978_RTLSDR_DEVICE=${UAT_SDR_SERIAL}
+      - DUMP978_SDR_GAIN=${UAT_SDR_GAIN}
+      - DUMP978_SDR_PPM=${UAT_SDR_PPM}
+      - AUTOGAIN_INITIAL_PERIOD=7200
+    volumes:
+      - /opt/adsb/dump978/autogain:/run/autogain
+      - /dev:/dev:ro
+    tmpfs:
+      - /run/readsb

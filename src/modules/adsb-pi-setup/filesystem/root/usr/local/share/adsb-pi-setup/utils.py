@@ -272,6 +272,8 @@ class EnvFile:
                         uuid=self.envs["ADSBLOL_UUID"] if key == "adsblol" else None,
                     )
                     net_configs_list.append(config_string)
+        if self.envs.get("UAT_SDR_SERIAL"):
+            net_configs_list.append("adsb,dump978,30978,uat_in")
         print_err("net_configs_list", net_configs_list)
         return ";".join(net_configs_list)
 

@@ -1,8 +1,11 @@
 import filecmp
 import io
+import json
 import os.path
 import pathlib
+import re
 import shutil
+import subprocess
 import zipfile
 
 from aggregators import handle_aggregators_post_request
@@ -44,7 +47,8 @@ proxy_routes = [
 # inner function used to redirect the caller to the correct endpoint
 def my_redirect(orig, new_port, new_path):
     print_err(f"my_redirect called for endpoint {orig} with port {new_port} and path {new_path}")
-    host_url = request.host_url.rstrip("0123456789:/ ")
+    host_url = request.host_url.rstrip("/ ")
+    host_url = re.sub(":\\d+$", "", host_url)
     new_path = new_path.rstrip("/ ")
     q: str = ""
     if request.query_string:
@@ -192,6 +196,55 @@ def executerestore():
             shutil.move(restore_path / name, adsb_path / name)
         return redirect("/advanced")  # that's a good place from where the user can continue
 
+# first number (num) tells us how many SDRs there are (or -1 if unknown),
+# second bool (access) tells us if we have full access
+# third list of strings gives us the serial numbers (assuming num > 0 and access True)
+def check_sdrs() -> (int, bool, List[str]):
+    num = -1
+    access = False
+    serials: List[str] = []
+    output: str = ""
+    if not os.path.isfile("/usr/bin/rtl_eeprom"):
+        print_err("can't find rtl_eeprom")
+        return num, False, serials
+    try:
+        result = subprocess.run("/usr/bin/rtl_eeprom", shell=True, capture_output=True, timeout=20.0)
+    except subprocess.TimeoutExpired as exc:
+        output = exc.stderr.decode()
+    else:
+        output = result.stderr.decode()
+    print_err(f"coming back from first call with {output}")
+    match = re.search("Found (\\d+) device", output)
+    if match:
+        num = int(match.group(1))
+    match = re.search("usb_claim_interface error",output)
+    if not match:
+        access = True
+        match = re.search("Serial number:\\s+(\\S+)", output)
+        if match:
+            serials.append(match.group(1))
+        for i in range(1, num):
+            try:
+                result = subprocess.run(f"/usr/bin/rtl_eeprom -d {i}", shell=True, capture_output=True, timeout=20.0)
+            except subprocess.TimeoutExpired as exc:
+                output = exc.stderr.decode()
+            else:
+                output = result.stderr.decode()
+            print_err(f"coming back from call number {i} with {output}")
+            match = re.search("Serial number:\\s+(\\S+)", output)
+            if match:
+                serials.append(match.group(1))
+    if 0 < num != len(serials):
+        print_err(f"found {num} SDRs but only {len(serials)} serial numbers")
+    return num, access, serials
+
+
+@app.route("/api/can_read_sdr")
+def can_read_sdr():
+    num, access, serials = check_sdrs()
+    sdr_state = {"num": num, "access": access, "serials": serials}
+    return json.dumps(sdr_state)
+
 
 @app.route("/advanced", methods=("GET", "POST"))
 def advanced():
@@ -206,17 +259,23 @@ def advanced():
 
 
 def handle_advanced_post_request():
-    print("request_form", request.form)
+    print_err("request_form", request.form)
     if request.form.get("submit") == "go":
-        ENV_FILE.update(
-            {
+        advanced_settings = {
                 "FEEDER_TAR1090_USEROUTEAPI": "1" if request.form.get("route") else "0",
                 "MLAT_PRIVACY": "--privacy" if request.form.get("privacy") else "",
                 "HEYWHATSTHAT": "1" if request.form.get("heywhatsthat") else "",
                 "FEEDER_HEYWHATSTHAT_ID": request.form.get("FEEDER_HEYWHATSTHAT_ID", default=""),
             }
-        )
-    RESTART.restart_systemd()
+        serial1090 = request.form.get("1090", default="")
+        serial978 = request.form.get("978", default="")
+        if serial1090:
+            advanced_settings["ADSB_SDR_SERIAL"] = serial1090
+        if serial978:
+            advanced_settings["UAT_SDR_SERIAL"] = serial978
+            advanced_settings["FEEDER_ENABLE_UAT978"] = "yes"
+            advanced_settings["FEEDER_URL_978"] = "http://dump978/skyaware978"
+        ENV_FILE.update(advanced_settings)
     return redirect("/restarting")
 
 
@@ -304,18 +363,18 @@ def aggregators():
 
 @app.route("/")
 def director():
-    # when the system is not yet configured, we should go to setup, otherwise to index
-    if os.path.exists("/opt/adsb/.initial.setup.done"):
-        return index()
-    else:
+    # figure out where to go:
+    env_values = ENV_FILE.envs
+    if env_values.get("BASE_CONFIG") != "1":
         return setup()
+    num_sdrs = env_values.get("NUM_SDRS")
+    if num_sdrs and int(num_sdrs) > 1 and not env_values.get("ADSB_SDR_SERIAL"):
+        return advanced()
+    return index()
 
 
 @app.route("/index")
 def index():
-    # once we landed here for the first time, ensure that '/' gets us here again
-    with open("/opt/adsb/.initial.setup.done", "w") as marker:
-        marker.write("done\n")
     return render_template(
         "index.html", env_values=ENV_FILE.envs, metadata=ENV_FILE.metadata
     )
@@ -323,11 +382,8 @@ def index():
     
 @app.route("/setup", methods=("GET", "POST"))
 def setup():
-    if request.args.get("success"):
-        return redirect("/index")
     if RESTART.lock.locked():
         return redirect("/restarting")
-
     if request.method == "POST" and request.form.get("submit") == "go":
         lat, lng, alt, form_timezone, mlat_name, agg = (
             request.form[key]
@@ -335,7 +391,7 @@ def setup():
         )
         print_err(f"got lat: {lat}, lng: {lng}, alt: {alt}, TZ: {form_timezone}, mlat-name: {mlat_name}, agg: {agg}")
         if all([lat, lng, alt, form_timezone]):
-            net = ENV_FILE.generate_ultrafeeder_config(request.form)
+            # first set the base data
             ENV_FILE.update(
                 {
                     "FEEDER_LAT": lat,
@@ -344,10 +400,22 @@ def setup():
                     "FEEDER_TZ": form_timezone,
                     "MLAT_SITE_NAME": mlat_name,
                     "FEEDER_AGG": agg,
-                    "FEEDER_ULTRAFEEDER_CONFIG": net,
-                    "BASE_CONFIG": "1",
                 }
             )
+            # with the data just stored, we can now create the Ultrafeeder config
+            # and the remaining base settings
+            net = ENV_FILE.generate_ultrafeeder_config(request.form)
+            num, access, serials = check_sdrs()
+            ENV_FILE.update(
+                {
+                    "FEEDER_ULTRAFEEDER_CONFIG": net,
+                    "UF": "1" if net else "0",
+                    "BASE_CONFIG": "1",
+                    "NUM_SDRS": num
+                }
+            )
+            if num > 1 and not ENV_FILE.envs.get("ADSB_SDR_SERIAL"):
+                return redirect(url_for("advanced"))
             return redirect(url_for("restarting"))
 
     return render_template(
