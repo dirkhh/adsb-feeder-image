@@ -313,6 +313,11 @@ def handle_expert_post_request():
         cmdline = "/usr/bin/docker-update-adsb-im"
         subprocess.run(cmdline, timeout=600.0, shell=True)
         return redirect("/expert")
+    if request.form.get("nightly_update") == "go":
+        ENV_FILE.update({
+            "NIGHTLY_BASE_UPDATE": "1" if request.form.get("nightly_base") else "0",
+            "NIGHTLY_CONTAINER_UPDATE": "1" if request.form.get("nightly_container") else "0",
+        })
     if request.form.get("you-asked-for-it") == "you-got-it":
         # well - let's at least try to save the old stuff
         if not path.exists("/opt/adsb/env-working"):
@@ -350,7 +355,7 @@ def handle_expert_post_request():
         return redirect("restarting")
 
     print("request_form", request.form)
-    return redirect("/advanced")
+    return redirect("/")
 
 
 @app.route("/aggregators", methods=("GET", "POST"))
