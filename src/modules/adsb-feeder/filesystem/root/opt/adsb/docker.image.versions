@@ -9,3 +9,4 @@ OS_CONTAINER=ghcr.io/sdr-enthusiasts/docker-opensky-network@sha256:e7163994d557d
 PF_CONTAINER=ghcr.io/sdr-enthusiasts/docker-planefinder@sha256:1b851e89bb218b143969a5ae100695d4cd0d169b045688386a6736557f0ed61c
 AH_CONTAINER=ghcr.io/sdr-enthusiasts/docker-adsbhub@sha256:724147635c0b7f28d89d33822baeae1ce6ebfff400acb9a8fe1c349e65d8583d
 PW_CONTAINER=ghcr.io/plane-watch/docker-plane-watch@sha256:ad23b82227eaae304f01a4c8be2f47a4560f51087bbafaa8623cba436f86b958
+ZEROTIER_CONTAINER=zerotier/zerotier@sha256:591e4772efa17e1a581039cbadaffde03d02e1f58a0d8add1b64d56a2cf99dab

@@ -42,6 +42,19 @@
   </div>
 </form>
 
+<h2 class="mt-5">Add Zerotier</h2>
+<form method="POST" onsubmit="show_spinner(); return true;">
+  <div class="row">
+    <label for="zerotierid" class="col-12">
+        Zerotier support allows to connect your ADSB Feeder to you own global area network. Please add your
+        your Zerotier Network ID below.<br/>
+        Once this process has completed, you need to accept the new device into the network on the Zerotier website.
+    </label>
+    <input class="col-8 ml-2" id="zerotierid" name="zerotierid" type="text" placeholder=" Enter your Zerotier Network ID" required>
+    <button type="submit" class="btn btn-primary mb-1 ml-3" name="zerotier" value="go">Submit</button>
+  </div>
+</form>
+
 <h2 class="mt-5">Edit or replace main docker-compose file and .env file</h2>
 <p>
     This is not designed for normal users. Unless you really know what you are doing, click the back button or
