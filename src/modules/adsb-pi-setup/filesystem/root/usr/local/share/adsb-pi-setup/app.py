@@ -11,7 +11,7 @@ import zipfile
 from aggregators import handle_aggregators_post_request
 from flask import Flask, flash, render_template, request, redirect, send_file, url_for
 from os import urandom, path
-from typing import List
+from typing import List, Tuple
 from utils import RESTART, ENV_FILE, print_err
 from werkzeug.utils import secure_filename
 
@@ -199,7 +199,7 @@ def executerestore():
 # first number (num) tells us how many SDRs there are (or -1 if unknown),
 # second bool (access) tells us if we have full access
 # third list of strings gives us the serial numbers (assuming num > 0 and access True)
-def check_sdrs() -> (int, bool, List[str]):
+def check_sdrs() -> Tuple[int, bool, List[str]]:
     num = -1
     access = False
     serials: List[str] = []
