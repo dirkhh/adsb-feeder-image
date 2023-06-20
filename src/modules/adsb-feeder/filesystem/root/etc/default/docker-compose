@@ -36,7 +36,4 @@ if [ -f /opt/adsb/.env ] ; then
 	if grep "PORTAINER=1" /opt/adsb/.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "/opt/adsb/portainer.yml" )
 	fi
-	if grep "ZEROTIER=1" /opt/adsb/.env > /dev/null 2>&1 ; then
-		COMPOSE_FILES+=( "-f" "/opt/adsb/zerotier.yml" )
-	fi
 fi

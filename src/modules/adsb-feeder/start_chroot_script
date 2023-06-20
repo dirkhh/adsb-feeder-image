@@ -21,6 +21,13 @@ install_cleanup_trap
 unpack /filesystem/root /
 apt install -y socat
 
+# install zerotier
+DEBIAN_DISTRO=$(cat /etc/apt/sources.list | head -1 | cut -d\   -f 3)
+echo "deb http://download.zerotier.com/debian/${DEBIAN_DISTRO} ${DEBIAN_DISTRO} main" > /etc/apt/sources.list.d/zerotier.list
+apt update
+apt install -y zerotier-one
+systemctl enable zerotier-one
+
 if [ "$BASE_DISTRO" = "armbian" ] ; then
 	apt install -y network-manager net-tools
 

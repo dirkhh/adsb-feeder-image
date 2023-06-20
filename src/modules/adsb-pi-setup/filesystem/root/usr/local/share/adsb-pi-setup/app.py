@@ -323,10 +323,11 @@ def handle_expert_post_request():
             "ZEROTIER": "1",
             "ZEROTIER_NETWORK_ID": request.form.get("zerotierid"),
         })
-        # the .env file now contains "ZEROTIER=1" which will cause the Zerotier container to start:
-        subprocess.call("/usr/bin/docker-compose-start", shell=True)
+        # make sure the service is enabled (it really should be)
+        subprocess.call("/usr/bin/systemctl enable --now zerotier", shell=True)
+
         # now we need to connect to the network:
-        subprocess.call(f"/usr/bin/docker exec zerotier /usr/sbin/zerotier-cli join {ENV_FILE.envs.get('ZEROTIER_NETWORK_ID')}")
+        subprocess.call(f"/usr/sbin/zerotier-cli join {ENV_FILE.envs.get('ZEROTIER_NETWORK_ID')}")
     if request.form.get("you-asked-for-it") == "you-got-it":
         # well - let's at least try to save the old stuff
         if not path.exists("/opt/adsb/env-working"):
