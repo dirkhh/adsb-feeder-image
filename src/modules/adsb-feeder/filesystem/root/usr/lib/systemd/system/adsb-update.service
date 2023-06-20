@@ -1,15 +1,11 @@
 # run the updates - this will then be triggered by a timer
 [Unit]
 Description=ADSB Feeder Image Update Service
-Requires=adsb-bootstrap.service
-After=adsb-bootstrap.service
 Wants=adsb-update.timer
 
 [Service]
-Type=simple
 WorkingDirectory=/opt/adsb
 ExecStart=/usr/bin/bash /usr/bin/nightly-update-adsb-im
-Restart=always
 
 [Install]
 WantedBy=multi-user.target
