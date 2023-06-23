@@ -2,7 +2,7 @@
 {% set active_page = "index" %}
 
 {% block content %}
-<h1>ADSB Feeder Homepage</h1>
+<h1>{% block title %} ADSB Feeder Homepage {% endblock %}</h1>
 <div id="UF" style="display: {% if env_values['UF'] == "1" %} block {% else %} none {% endif %};">
 	<h4>TAR1090 Mapping Interface</h4>
 	<ul>
