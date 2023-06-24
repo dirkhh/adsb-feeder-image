@@ -2,7 +2,7 @@ version: '2.0'
 
 services:
   fr24feed:
-    image: ${FR_CONTAINER}
+    image: ${FR24_CONTAINER}
     tty: true
     container_name: fr24feed
     restart: always
