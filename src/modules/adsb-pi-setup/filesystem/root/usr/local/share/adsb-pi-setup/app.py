@@ -104,7 +104,7 @@ def restart():
 
 @app.route("/backup")
 def backup():
-    return render_template("/backup.html", metadata=ENV_FILE.metadata)
+    return render_template("/backup.html", env_values=ENV_FILE.envs, metadata=ENV_FILE.metadata)
 
 
 @app.route("/backupexecute")
@@ -148,7 +148,7 @@ def restore():
             flash("Please only submit ADSB Feeder Image backup files")
             return redirect(request.url)
     else:
-        return render_template("/restore.html", metadata=ENV_FILE.metadata)
+        return render_template("/restore.html", env_values=ENV_FILE.envs, metadata=ENV_FILE.metadata)
 
 
 @app.route("/executerestore", methods=["GET", "POST"])
