@@ -1,7 +1,9 @@
 #!/bin/bash
 #
 # set up the initial .env file to start from
-cp docker.image.versions .env
+if [ ! -f .env ] ; then
+	cp docker.image.versions .env
+fi
 
 # pull the Ultrafeeder container... do this in a loop in case networking isn't
 # quite ready, yet.
