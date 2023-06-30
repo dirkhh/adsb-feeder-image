@@ -117,7 +117,6 @@ def backup_execute():
             backup_zip.write(f, arcname=os.path.basename(f))
         uf_path = pathlib.Path(adsb_path / "ultrafeeder")
         if uf_path.is_dir():
-            backup_zip.mkdir("ultrafeeder")
             for f in uf_path.rglob("*"):
                 backup_zip.write(f, arcname=f.relative_to(adsb_path))
     data.seek(0)
