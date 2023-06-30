@@ -120,6 +120,10 @@ class EnvFile:
 
     def set_default_envs(self):
         env_values = self.envs.copy()
+        basev = "unknown"
+        if path.isfile("/etc/adsb.im.version"):
+            with open("/etc/adsb.im.version", "r") as v:
+                basev = v.read().strip()
         default_envs = {
             "FEEDER_TAR1090_USEROUTEAPI": "1",
             "ADSBLOL_UUID": str(uuid4()),
@@ -142,6 +146,8 @@ class EnvFile:
             "BASE_CONFIG": "0",
             "NIGHTLY_BASE_UPDATE": "1",
             "NIGHTLY_CONTAINER_UPDATE": "1",
+            "BASE_VERSION": basev,
+            "CONTAINER_VERSION": basev,
         }
         for key, value in default_envs.items():
             if key not in env_values:
