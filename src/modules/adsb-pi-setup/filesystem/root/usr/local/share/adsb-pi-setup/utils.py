@@ -231,6 +231,9 @@ class EnvFile:
         metadata["privacy"] = (
             "checked" if env_values["MLAT_PRIVACY"] == "--privacy" else ""
         )
+        metadata["biast"] = (
+            "checked" if env_values.get["FEEDER_READSB_ENABLE_BIASTEE"] == "true" else ""
+        )
         metadata["heywhatsthat"] = (
             "checked" if env_values["HEYWHATSTHAT"] == "1" else ""
         )

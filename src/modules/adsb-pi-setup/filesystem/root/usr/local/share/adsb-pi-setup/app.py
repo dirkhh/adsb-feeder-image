@@ -265,6 +265,7 @@ def handle_advanced_post_request():
                 "MLAT_PRIVACY": "--privacy" if request.form.get("privacy") else "",
                 "HEYWHATSTHAT": "1" if request.form.get("heywhatsthat") else "",
                 "FEEDER_HEYWHATSTHAT_ID": request.form.get("FEEDER_HEYWHATSTHAT_ID", default=""),
+                "FEEDER_READSB_ENABLE_BIASTEE": "true" if request.form.get("biast") else "",
             }
         serial1090 = request.form.get("1090", default="")
         serial978 = request.form.get("978", default="")

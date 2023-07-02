@@ -34,6 +34,8 @@
             <input type="text" id="HEYWHATSTHAT_ID" name="FEEDER_HEYWHATSTHAT_ID" class="form-control col-sm-6 ml-1 mb-2"
                placeholder=" HeyWhat'sThat Panorama ID" value="{{ env_values['FEEDER_HEYWHATSTHAT_ID'] }}">
         </div>
+        <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="biast" id="biast" {{ metadata['biast'] }}/>
+        <label for="biast" class="mb-3 col-sm-11">Enable bias-T for ADS-B/1090 SDR.</label>
     </div>
     <div class="row" style="display: {% if env_values.get('NUM_SDRS')|int > 1 %} flex {% else %} none {% endif %};">
         <div class="col-sm-12 mt-5 mb-3">
