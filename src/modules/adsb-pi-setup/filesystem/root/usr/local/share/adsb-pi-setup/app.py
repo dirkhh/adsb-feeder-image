@@ -72,7 +72,6 @@ def function_factory(orig_endpoint, new_port, new_path):
 
 for endpoint, port, url_path in proxy_routes:
     r = function_factory(endpoint, port, url_path)
-    print_err(f"{r} for {endpoint}")
     app.add_url_rule(endpoint, endpoint, r)
 
 
