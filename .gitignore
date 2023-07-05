@@ -1,0 +1,9 @@
+.DS_Store
+.idea/
+__pycache__/
+vagrant/
+workspace*/
+image*/
+!image/README
+build.log
+custompios_path
