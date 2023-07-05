@@ -3,6 +3,7 @@
 
 {% block content %}
 <h1>{% block title %} Expert setup {% endblock %}</h1>
+<!-- SECURE_IMAGE_START -->
 <h2>Install ssh credentials</h2>
 <form method="POST">
   <div style="display: {% if env_values.get('SSH_CONFIGURED') == "1" %} none {% else %} block {% endif %}" class="row">
@@ -13,6 +14,19 @@
     <button type="submit" class="btn btn-primary mb-1 ml-3" name="ssh" value="go">Submit</button>
   </div>
 </form>
+
+<h2>Secure feeder system</h2>
+<form method="POST" onsubmit="show_spinner(); return true;">
+  <div class="row">
+    <label for="secure_image" class="col-8">Attempt to make it somewhat harder for a local user to
+      gain access to the image. Of course, anyone with physical access to the feeder hardware can circumvent
+      the protection attemted here. Make sure you have an ssh key set up and tested before doing this, or
+      you will permanently log yourself out of this image.
+    </label>
+    <button type="submit" class="btn btn-primary mb-3 mt-3 ml-3 col-3" name="secure_image" value="go">Update Settings</button>
+  </div>
+</form>
+<!-- SECURE_IMAGE_END -->
 
 <h2 class="mt-5">Nightly system update settings</h2>
 <form method="POST" onsubmit="show_spinner(); return true;">
@@ -55,6 +69,7 @@
   </div>
 </form>
 
+<!-- SECURE_IMAGE_START -->
 <h2 class="mt-5">Edit or replace main docker-compose file and .env file</h2>
 <p>
     This is not designed for normal users. Unless you really know what you are doing, click the back button or
@@ -78,4 +93,6 @@
             <textarea class="mb-3 col-11" id="env" name="env" rows="20" cols="100">{{ filecontent['env'] }}</textarea>
         </div>
     </form>
+<!-- SECURE_IMAGE_END -->
+
 {% endblock %}

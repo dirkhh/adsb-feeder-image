@@ -297,8 +297,25 @@ def expert():
     )
 
 
+def secure_image():
+    output: str = ""
+    try:
+        result = subprocess.run("/usr/bin/secure-image", shell=True, capture_output=True)
+    except subprocess.TimeoutError as exc:
+        output = exc.stdout.decode()
+    else:
+        output = result.stdout.decode()
+    print_err(f"secure_image: {output}")
+
+
 def handle_expert_post_request():
-    if request.form.get("ssh") == "go":
+    env_values = ENV_FILE.envs
+    allow_insecure = False if env_values.get("SECURE_IMAGE", "0") == "1" else True
+    if request.form.get("secure_image") == "go":
+        ENV_FILE.update({"SECURE_IMAGE": "1"})
+        secure_image()
+        return redirect("/expert")
+    if allow_insecure and request.form.get("ssh") == "go":
         ssh_pub = request.form.get("ssh-pub")
         ssh_dir = pathlib.Path("/root/.ssh")
         ssh_dir.mkdir(mode=0o700, exist_ok=True)
@@ -327,7 +344,7 @@ def handle_expert_post_request():
 
         # now we need to connect to the network:
         subprocess.call(f"/usr/sbin/zerotier-cli join {ENV_FILE.envs.get('ZEROTIER_NETWORK_ID')}")
-    if request.form.get("you-asked-for-it") == "you-got-it":
+    if allow_insecure and request.form.get("you-asked-for-it") == "you-got-it":
         # well - let's at least try to save the old stuff
         if not path.exists("/opt/adsb/env-working"):
             try:
@@ -347,7 +364,7 @@ def handle_expert_post_request():
         RESTART.restart_systemd()
         return redirect("restarting")
 
-    if request.form.get("you-got-it") == "give-it-back":
+    if allow_insecure and request.form.get("you-got-it") == "give-it-back":
         # do we have saved old files?
         if path.exists("/opt/adsb/env-working"):
             try:
@@ -397,7 +414,7 @@ def index():
         "index.html", env_values=ENV_FILE.envs, metadata=ENV_FILE.metadata
     )
 
-    
+
 @app.route("/setup", methods=("GET", "POST"))
 def setup():
     if RESTART.lock.locked():

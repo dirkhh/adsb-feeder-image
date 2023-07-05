@@ -1,0 +1,15 @@
+#!/bin/bash
+#
+# first replace the 'dangerous' parts of the expert setup
+mkdir -p /usr/local/share/adsb-pi-setup/backup
+mv /usr/local/share/adsb-pi-setup/templates/expert.html /usr/local/share/adsb-pi-setup/backup/expert.html
+awk '/SECURE_IMAGE_START/,/SECURE_IMAGE_END/{ next }; { print $0 }' < /usr/local/share/adsb-pi-setup/backup/expert.html > /usr/local/share/adsb-pi-setup/templates/expert.html
+echo "restricted expert page"
+
+# I don't see a reason to disable the running getty's
+# systemctl disable --now getty@tty1
+# systemctl disable --now serial-getty@ttyAMA0
+
+# on Armbian images, we need to kill the running shells
+# TODO
+echo "not yet disabling Arbian shells"
