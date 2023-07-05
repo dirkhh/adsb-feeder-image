@@ -124,6 +124,19 @@ class EnvFile:
         if path.isfile("/etc/adsb.im.version"):
             with open("/etc/adsb.im.version", "r") as v:
                 basev = v.read().strip()
+        if basev == "":
+            # something went wrong setting up the version info when
+            # the image was crated - try to get an approximation
+            output: str = ""
+            try:
+                result = subprocess.run('ls -o -g --time-style="+%y%m%d" /etc/adsb.im.version | cut -d\  -f 4',
+                                        shell=True, capture_output=True, timeout=5.0)
+            except subprocess.TimeoutExpired as exc:
+                output = exc.stdout.decode().strip()
+            else:
+                output = result.stdout.decode().strip()
+            if len(output) == 6:
+                basev = f"{output}-0"
         default_envs = {
             "FEEDER_TAR1090_USEROUTEAPI": "1",
             "ADSBLOL_UUID": str(uuid4()),
