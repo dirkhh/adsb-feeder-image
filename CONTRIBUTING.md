@@ -9,3 +9,5 @@ In addition, you can assist with testing the project and providing feedback on a
 By contributing to ADSB.im, you can help make this hobby more accessible to a wider audience, and encourage more people to get involved in the world of ADS-B tracking.
 
 For simple changes, simply submit a PR. For more complex changes, please first create an issue where you outline your ideas and discuss the direction with the maintainer(s).
+
+The main branch is where releases happen and it should always move in a 'fast-forward' style. The dev branch is mostly for testing things with the GitHub Actions pipeline and will see the occasional force-push.
