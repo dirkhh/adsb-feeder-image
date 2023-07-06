@@ -311,6 +311,14 @@ def secure_image():
 def handle_expert_post_request():
     env_values = ENV_FILE.envs
     allow_insecure = False if env_values.get("SECURE_IMAGE", "0") == "1" else True
+    if request.form.get("shutdown") == "go":
+        # do shutdown
+        subprocess.run("/usr/sbin/halt", shell=True)
+        return "System halted"  # that return statement is of course a joke
+    if request.form.get("reboot") == "go":
+        # initiate reboot
+        subprocess.run("/usr/sbin/reboot now &", shell=True)
+        return "System rebooting, please refresh in about a minute"
     if request.form.get("secure_image") == "go":
         ENV_FILE.update({"SECURE_IMAGE": "1"})
         secure_image()
