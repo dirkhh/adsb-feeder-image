@@ -24,7 +24,7 @@ def handle_aggregators_post_request():
         return ah_setup()
     elif request.form.get("get-os-info") == "go":
         return os_setup()
-    elif request.form.get("get_rv_feeder_key") == "go":
+    elif request.form.get("get-rv-feeder-key") == "go":
         return rv_setup()
     else:
         # how did we get here???
