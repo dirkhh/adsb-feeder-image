@@ -108,10 +108,10 @@ jobs:
 
 
     steps:
-    # check if the python code at src/modules/adsb-pi-setup/filesystem/root/usr/local/share/adsb-pi-setup is valid
-    - name: Checkout Project Repository again with the new tag
+    - name: Checkout Project Repository again with the new tag - and make sure we have the full history for the version code
       uses: actions/checkout@v3
       with:
+        fetch-depth: 0
         path: repository
 
     - name: Install Dependencies
