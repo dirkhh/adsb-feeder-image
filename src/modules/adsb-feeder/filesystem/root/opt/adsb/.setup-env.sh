@@ -9,7 +9,7 @@ fi
 # quite ready, yet.
 while :
 do
-	docker pull $(grep "ULTRAFEEDER_CONTAINER=" docker.image.versions | cut -d\   -f 1) && break
+	docker pull $(grep "ULTRAFEEDER_CONTAINER=" docker.image.versions | cut -d= -f 2) && break
 	sleep 5
 done
 
