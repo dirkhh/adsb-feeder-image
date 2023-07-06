@@ -195,7 +195,7 @@ jobs:
       id: compress
       run: |
         export IMAGE="${{ steps.copy.outputs.image }}"
-        sudo xz -z -3 -T0 -e "${IMAGE}"
+        sudo xz -z -1 -T0 "${IMAGE}"
         ls -l "${IMAGE}.xz"
         echo "image=${IMAGE}.xz" >> $GITHUB_OUTPUT
 
