@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  airspy_adsb:
+    image: ${AIRSPY_CONTAINER}
+    tty: true
+    container_name: airspy_adsb
+    hostname: airspy_adsb
+    restart: always
+    devices:
+      - /dev/bus/usb:/dev/bus/usb
+    environment:
+      - AIRSPY_ADSB_VERBOSE=true
+      - AIRSPY_ADSB_TIMEOUT=90
+      - AIRSPY_ADSB_FEC_BITS=1
+      - AIRSPY_ADSB_WHITELIST_THRESHOLD=5
+      - AIRSPY_ADSB_PREAMBLE_FILTER_NONCRC=8
+      - AIRSPY_ADSB_CPUTIME_TARGET=60
+      - AIRSPY_ADSB_PREAMBLE_FILTER_MAX=20
+      - AIRSPY_ADSB_MLAT_FREQ=12
+      - AIRSPY_ADSB_RF_GAIN=auto

@@ -139,6 +139,7 @@ class EnvFile:
                 basev = f"{output}-0"
         default_envs = {
             "FEEDER_TAR1090_USEROUTEAPI": "1",
+            "FEEDER_RTL_SDR": "rtlsdr",
             "ADSBLOL_UUID": str(uuid4()),
             "ULTRAFEEDER_UUID": str(uuid4()),
             "MLAT_PRIVACY": "--privacy",
@@ -155,6 +156,7 @@ class EnvFile:
             "OS": "0",
             "RV": "0",
             "UF": "0",
+            "AIRSPY": "0",
             "PORTAINER": "0",
             "BASE_CONFIG": "0",
             "NIGHTLY_BASE_UPDATE": "1",
@@ -280,6 +282,9 @@ class EnvFile:
         metadata["RV"] = (
             "checked" if env_values["RV"] == "1" else ""
         )
+        metadata["airspy"] = (
+            "checked" if env_values["AIRSPY"] == "1" else ""
+        )
         return metadata
 
     def generate_ultrafeeder_config(self, form_data = {}):
@@ -298,6 +303,8 @@ class EnvFile:
                     net_configs_list.append(config_string)
         if self.envs.get("UAT_SDR_SERIAL"):
             net_configs_list.append("adsb,dump978,30978,uat_in")
+        if self.envs.get("AIRSPY"):
+            net_configs_list.append("adsb,airspy_adsb,30005,beast_in")
         print_err("net_configs_list", net_configs_list)
         return ";".join(net_configs_list)
 
