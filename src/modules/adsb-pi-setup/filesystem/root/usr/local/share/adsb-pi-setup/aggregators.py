@@ -138,7 +138,7 @@ def os_setup():
     # here we should check if the feeder id looks about right - reg exp
     ENV_FILE.update({"FEEDER_OPENSKY_USERNAME": username,
                      "FEEDER_OPENSKY_SERIAL": serial,
-                     "AH": "1"})
+                     "OS": "1"})
     RESTART.restart_systemd()
     return redirect("/aggregators")
 
