@@ -247,12 +247,9 @@ def handle_advanced_post_request():
         if serial1090:
             if not serial1090.startswith(("AIRSPY", "airspy")):
                 advanced_settings["FEEDER_1090"] = serial1090
-                advanced_settings["AIRSPY"] = "0"
-                advanced_settings["FEEDER_RTL_SDR"] = "rtlsdr"
             else:
                 advanced_settings["FEEDER_1090"] = "airspy"
-                advanced_settings["AIRSPY"] = "1"
-                advanced_settings["FEEDER_RTL_SDR"] = ""
+            advanced_settings.update(setup_airspy_or_rtl())
         if serial978:
             advanced_settings["FEEDER_978"] = serial978
             advanced_settings["FEEDER_ENABLE_UAT978"] = "yes"
@@ -271,6 +268,21 @@ def handle_advanced_post_request():
         })
         print_err(f"calculated ultrafeeder config of {net}")
     return redirect("/restarting")
+
+
+def setup_airspy_or_rtl():
+    envs = ENV_FILE.envs
+    update = {}
+    if envs.get("FEEDER_1090") == "airspy":
+        update["AIRSPY"] = "1"
+        update["FEEDER_RTL_SDR"] = ""
+    elif envs.get("FEEDER_1090"):
+        update["AIRSPY"] = "0"
+        update["FEEDER_RTL_SDR"] = "rtlsdr"
+    else:
+        update["AIRSPY"] = "0"
+        update["FEEDER_RTL_SDR"] = ""
+    return update
 
 
 @app.route("/expert", methods=("GET", "POST"))
@@ -443,8 +455,10 @@ def setup():
             # while we are at it, set the local time zone
             subprocess.call(f"/usr/bin/timedatectl set-timezone {form_timezone}", shell=True)
             # with the data just stored, we can now take a guess at the Ultrafeeder config
+            # using the SDR mapping (in most cases this will be just one)
             # and the remaining base settings
             sdr_mapping = map_sdrs()
+            sdr_mapping.update(setup_airspy_or_rtl())
             ENV_FILE.update(sdr_mapping)
             net = ENV_FILE.generate_ultrafeeder_config(request.form)
             num = get_sdr_info()["num"]
