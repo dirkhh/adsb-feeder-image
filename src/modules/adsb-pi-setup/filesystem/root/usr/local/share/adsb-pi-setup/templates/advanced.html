@@ -37,10 +37,6 @@
         <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="biast" id="biast" {{ metadata['biast'] }}/>
         <label for="biast" class="mb-3 col-sm-11">Enable bias-T for ADS-B/1090/airspy SDR.</label>
     </div>
-    <div class="row no-gutters">
-        <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="airspy" id="airspy" {{ metadata['airspy'] }}/>
-        <label for="airspy" class="mb-3 col-sm-11">Use airspy instead of RTL based SDR</label><br/>
-    </div>
     <div class="row" style="display: {% if env_values.get('NUM_SDRS')|int > 1 %} flex {% else %} none {% endif %};">
         <div class="col-sm-12 mt-5 mb-3">
             You have more than one SDR connected. Please assign them for their roles.
@@ -54,51 +50,23 @@
                 <p class="col-sm-3 bg-info mr-2">Serial</p>
                 <p class="col-sm-6 bg-info mr-2">Used for</p>
             </div>
-            <div class="row" id="sdr0" style="display: none">
-                <p class="col-sm-2" id="sdr0-tag">SDR 0</p>
-                <p class="col-sm-3" id="sdr0-serial"></p>
-                <p class="col-sm-6 small" id="sdr0-puprpose">
+            {% for sdr in [ "0", "1", "2", "3"] %}
+            <div class="row" id="sdr{{ sdr }}" style="display: none">
+                <p class="col-sm-2" id="sdr{{ sdr }}-tag">SDR {{ sdr }}</p>
+                <p class="col-sm-3" id="sdr{{ sdr }}-serial"></p>
+                <p class="col-sm-6 small" id="sdr{{ sdr }}-puprpose">
                     <label class="checkbox-inline mr-2">
-                        <input type="radio" id="1090-0" name="1090" value="0"> 1090
+                        <input type="radio" id="1090-{{ sdr }}" name="1090" value="0"> 1090
                     </label>
                     <label class="checkbox-inline mr-2">
-                        <input type="radio" id="978-0" name="978" value="0"> 978
+                        <input type="radio" id="978-{{ sdr }}" name="978" value="0"> 978
                     </label>
                     <label class="checkbox-inline mr-2">
-                        <input type="radio" id="other-0" name="other" value="0"> Other
-                    </label>
-                </p>
-            </div>
-            <div class="row" id="sdr1" style="display: none">
-                <p class="col-sm-2" id="sdr1-tag">SDR 1</p>
-                <p class="col-sm-3" id="sdr1-serial"></p>
-                <p class="col-sm-6 small" id="sdr1-puprpose">
-                    <label class="checkbox-inline mr-2">
-                        <input type="radio" id="1090-1" name="1090" value="1"> 1090
-                    </label>
-                    <label class="checkbox-inline mr-2">
-                        <input type="radio" id="978-1" name="978" value="1"> 978
-                    </label>
-                    <label class="checkbox-inline mr-2">
-                        <input type="radio" id="other-1" name="other" value="1"> Other
+                        <input type="radio" id="other-{{ sdr }}" name="other" value="0"> Other
                     </label>
                 </p>
             </div>
-            <div class="row" id="sdr2" style="display: none">
-                <p class="col-sm-2" id="sdr2-tag">SDR 2</p>
-                <p class="col-sm-3" id="sdr2-serial"></p>
-                <p class="col-sm-6 small" id="sdr2-puprpose">
-                    <label class="checkbox-inline mr-2">
-                        <input type="radio" id="1090-2" name="1090" value="2"> 1090
-                    </label>
-                    <label class="checkbox-inline mr-2">
-                        <input type="radio" id="978-2" name="978" value="2"> 978
-                    </label>
-                    <label class="checkbox-inline mr-2">
-                        <input type="radio" id="other-2" name="other" value="2"> Other
-                    </label>
-                </p>
-            </div>
+            {% endfor %}
         </div>
     </div>
     <div class="form-group">
@@ -107,33 +75,33 @@
     <p>{{ message }} </p>
 </form>
 <script>
+    document.addEventListener('readystatechange', event => {
+            if (event.target.readyState === "complete") { can_read_sdr() }
+    })
     function can_read_sdr() {
         fetch(`${SCRIPT_ROOT}/api/can_read_sdr`)
             .then( response => response.json() )
             .then( data => {
                 console.log("received back", data);
-                if(data.access == true) {
-                    let num = data['num'];
-                    for (let i = 0; i < num; i++) {
-                        let id = 'sdr' + i;
-                        let serials = data['serials'];
-                        document.getElementById(id).style.display = 'flex';
-                        document.getElementById(id + "-serial").innerHTML = serials[i];
-                        document.getElementById('1090-' + i).value = serials[i];
-                        document.getElementById('978-' + i).value = serials[i];
-                        document.getElementById('other-' + i).value = serials[i];
-                        if (serials[i].endsWith("1090")) {
-                            document.getElementById('1090-' + i).checked = true;
-                        } else if (serials[i].endsWith("978")) {
-                            document.getElementById('978-' + i).checked = true;
-                        }
+                let num = data['num'];
+                let serials = data['serials'];
+                let use = data['use'];
+                for (let i = 0; i < num; i++) {
+                    let id = 'sdr' + i;
+                    document.getElementById(id).style.display = 'flex';
+                    document.getElementById(id + "-serial").innerHTML = serials[i];
+                    document.getElementById('1090-' + i).value = serials[i];
+                    document.getElementById('978-' + i).value = serials[i];
+                    document.getElementById('other-' + i).value = serials[i];
+                    if (use[i] == "1090") {
+                        document.getElementById('1090-' + i).checked = true;
+                    } else if (use[i] == "978") {
+                        document.getElementById('978-' + i).checked = true;
                     }
-                    for (let i = num; i < 3; i++) {
-                        let id = 'sdr' + i;
-                        document.getElementById(id).style.display = 'none'
-                    }
-                } else {
-                    console.log("need to shut down docker")
+                }
+                for (let i = num; i < 4; i++) {
+                    let id = 'sdr' + i;
+                    document.getElementById(id).style.display = 'none'
                 }
             });
     }

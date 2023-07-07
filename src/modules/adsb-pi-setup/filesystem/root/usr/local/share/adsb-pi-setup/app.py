@@ -10,8 +10,9 @@ import zipfile
 
 from aggregators import handle_aggregators_post_request
 from flask import Flask, flash, render_template, request, redirect, send_file, url_for
+from sdrs import get_sdr_info, map_sdrs
 from os import urandom, path
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 from utils import RESTART, ENV_FILE, print_err
 from werkzeug.utils import secure_filename
 
@@ -195,64 +196,23 @@ def executerestore():
             shutil.move(restore_path / name, adsb_path / name)
         return redirect("/advanced")  # that's a good place from where the user can continue
 
-# first number (num) tells us how many SDRs there are (or -1 if unknown),
-# second bool (access) tells us if we have full access
-# third list of strings gives us the serial numbers (assuming num > 0 and access True)
-def check_sdrs() -> Tuple[int, bool, List[str]]:
-    num = 0
-    access = False
-    serials: List[str] = []
-    output: str = ""
-    # find airspy
-    try:
-        result = subprocess.run("/usr/bin/identify-airspy", shell=True, capture_output=True, timeout=5.0)
-    except subprocess.TimeoutExpired as exc:
-        output = exc.stdout.decode()
-    else:
-        output = result.stdout.decode()
-    if output:
-        num = 1
-        serials = [ output ]
-    if not os.path.isfile("/usr/bin/rtl_eeprom"):
-        print_err("can't find rtl_eeprom")
-        return num, False, serials
-    try:
-        result = subprocess.run("/usr/bin/rtl_eeprom", shell=True, capture_output=True, timeout=20.0)
-    except subprocess.TimeoutExpired as exc:
-        output = exc.stderr.decode()
-    else:
-        output = result.stderr.decode()
-    print_err(f"coming back from first call with {output}")
-    match = re.search("Found (\\d+) device", output)
-    if match:
-        rtl_sdrs = int(match.group(1))
-        num += rtl_sdrs
-    match = re.search("usb_claim_interface error",output)
-    if not match:
-        access = True
-        match = re.search("Serial number:\\s+(\\S+)", output)
-        if match:
-            serials.append(match.group(1))
-        for i in range(1, rtl_sdrs):
-            try:
-                result = subprocess.run(f"/usr/bin/rtl_eeprom -d {i}", shell=True, capture_output=True, timeout=20.0)
-            except subprocess.TimeoutExpired as exc:
-                output = exc.stderr.decode()
-            else:
-                output = result.stderr.decode()
-            print_err(f"coming back from call number {i} with {output}")
-            match = re.search("Serial number:\\s+(\\S+)", output)
-            if match:
-                serials.append(match.group(1))
-    if 0 < num != len(serials):
-        print_err(f"found {num} SDRs but only {len(serials)} serial numbers")
-    return num, access, serials
-
 
 @app.route("/api/can_read_sdr")
 def can_read_sdr():
-    num, access, serials = check_sdrs()
-    sdr_state = {"num": num, "access": access, "serials": serials}
+    env_values = ENV_FILE.envs
+    sdrs = get_sdr_info()
+    serials = [sdr["serial"] for sdr in sdrs["sdrs"]]
+    use = []
+    for i in range(len(serials)):
+        if serials[i] == env_values.get("FEEDER_1090"):
+            use.append("1090")
+        elif serials[i] == env_values.get("FEEDER_978"):
+            use.append("978")
+        elif serials[i].startswith(("AIRSPY", "airspy")) and env_values.get("FEEDER_1090") == "airspy":
+            use.append("1090")
+        else:
+            use.append("")
+    sdr_state = {"num": sdrs["num"], "serials": serials, "use": use}
     return json.dumps(sdr_state)
 
 
@@ -263,7 +223,7 @@ def advanced():
     if RESTART.lock.locked():
         return redirect("/restarting")
     # just in case things have changed (the user plugged in a new device for example)
-    num, _, _ = check_sdrs()
+    num = get_sdr_info()["num"]
     ENV_FILE.update({ "NUM_SDRS": num })
     env_values = ENV_FILE.envs
     return render_template(
@@ -278,32 +238,38 @@ def handle_advanced_post_request():
                 "FEEDER_TAR1090_USEROUTEAPI": "1" if request.form.get("route") else "0",
                 "MLAT_PRIVACY": "--privacy" if request.form.get("privacy") else "",
                 "HEYWHATSTHAT": "1" if request.form.get("heywhatsthat") else "",
-                "AIRSPY": "1" if request.form.get("airspy") else "",
                 "FEEDER_HEYWHATSTHAT_ID": request.form.get("FEEDER_HEYWHATSTHAT_ID", default=""),
                 "FEEDER_ENABLE_BIASTEE": "true" if request.form.get("biast") else "",
             }
-        serial1090 = request.form.get("1090", default="")
-        serial978 = request.form.get("978", default="")
+        serial1090: str = request.form.get("1090", default="")
+        serial978: str = request.form.get("978", default="")
+        print_err(f"received serial1090 of {serial1090} and serial978 of {serial978}")
         if serial1090:
-            advanced_settings["ADSB_SDR_SERIAL"] = serial1090
+            if not serial1090.startswith(("AIRSPY", "airspy")):
+                advanced_settings["FEEDER_1090"] = serial1090
+                advanced_settings["AIRSPY"] = "0"
+                advanced_settings["FEEDER_RTL_SDR"] = "rtlsdr"
+            else:
+                advanced_settings["FEEDER_1090"] = "airspy"
+                advanced_settings["AIRSPY"] = "1"
+                advanced_settings["FEEDER_RTL_SDR"] = ""
         if serial978:
-            advanced_settings["UAT_SDR_SERIAL"] = serial978
+            advanced_settings["FEEDER_978"] = serial978
             advanced_settings["FEEDER_ENABLE_UAT978"] = "yes"
             advanced_settings["FEEDER_URL_978"] = "http://dump978/skyaware978"
-        if advanced_settings["AIRSPY"] == "1":
-            # for now we assume that means NO OTHER SDR - this needs to be improved
-            net = ENV_FILE.generate_ultrafeeder_config(request.form)
-            num, _, _ = check_sdrs()
-            feeder_rtl = "rtlsdr" if serial1090 or (num == 2 and not serial978) else ""
-            ENV_FILE.update(
-                {
-                    "FEEDER_ULTRAFEEDER_CONFIG": net,
-                    "UF": "1",
-                    "FEEDER_RTL_SDR": feeder_rtl,
-                }
-            )
-
+        num = get_sdr_info()["num"]
+        advanced_settings["NUM_SDRS"] = num
+        advanced_settings["SDR_MANUALLY_ASSIGNED"] = "1"
+        # now we need to update the ENV_FILE so that the ultrafeeder configuration below is correct
         ENV_FILE.update(advanced_settings)
+        envs = ENV_FILE.envs
+        print_err(f"after the update, FEEDER_1090 is {envs.get('FEEDER_1090')} and FEEDER_978 is {envs.get('FEEDER_978')}")
+        net = ENV_FILE.generate_ultrafeeder_config(request.form)
+        ENV_FILE.update({
+            "FEEDER_ULTRAFEEDER_CONFIG": net,
+            "UF": "1"
+        })
+        print_err(f"calculated ultrafeeder config of {net}")
     return redirect("/restarting")
 
 
@@ -440,7 +406,7 @@ def director():
     if env_values.get("BASE_CONFIG") != "1":
         return setup()
     num_sdrs = env_values.get("NUM_SDRS")
-    if num_sdrs and int(num_sdrs) > 1 and not (env_values.get("ADSB_SDR_SERIAL") or env_values.get("AIRSPY") == "1"):
+    if num_sdrs and int(num_sdrs) > 1 and not (env_values.get("FEEDER_1090") or env_values.get("AIRSPY") == "1"):
         return advanced()
     return index()
 
@@ -476,10 +442,12 @@ def setup():
             )
             # while we are at it, set the local time zone
             subprocess.call(f"/usr/bin/timedatectl set-timezone {form_timezone}", shell=True)
-            # with the data just stored, we can now create the Ultrafeeder config
+            # with the data just stored, we can now take a guess at the Ultrafeeder config
             # and the remaining base settings
+            sdr_mapping = map_sdrs()
+            ENV_FILE.update(sdr_mapping)
             net = ENV_FILE.generate_ultrafeeder_config(request.form)
-            num, access, serials = check_sdrs()
+            num = get_sdr_info()["num"]
             ENV_FILE.update(
                 {
                     "FEEDER_ULTRAFEEDER_CONFIG": net,
@@ -488,7 +456,7 @@ def setup():
                     "NUM_SDRS": num
                 }
             )
-            if num > 1 and not ENV_FILE.envs.get("ADSB_SDR_SERIAL"):
+            if not ENV_FILE.envs.get("FEEDER_1090"):
                 return redirect(url_for("advanced"))
             if agg == "ind":
                 return redirect(url_for("aggregators"))

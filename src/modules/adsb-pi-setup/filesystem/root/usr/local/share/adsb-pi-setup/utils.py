@@ -289,7 +289,8 @@ class EnvFile:
 
     def generate_ultrafeeder_config(self, form_data = {}):
         net_configs_list = []
-        agg = self.envs["FEEDER_AGG"]
+        env_values = self.envs
+        agg = env_values["FEEDER_AGG"]
         for key in NetConfigs().get_keys():
             if agg == "all" or agg == "priv" or \
                agg == "ind" and form_data.get(key):
@@ -297,13 +298,14 @@ class EnvFile:
                 net_config = NetConfigs().get_config(key)
                 if agg != "priv" or net_config.has_policy:
                     config_string = net_config.generate(
-                        mlat_privacy=self.envs["MLAT_PRIVACY"] == "--privacy",
-                        uuid=self.envs["ADSBLOL_UUID"] if key == "adsblol" else None,
+                        mlat_privacy=env_values["MLAT_PRIVACY"] == "--privacy",
+                        uuid=env_values["ADSBLOL_UUID"] if key == "adsblol" else None,
                     )
                     net_configs_list.append(config_string)
-        if self.envs.get("UAT_SDR_SERIAL"):
+        print_err(f"1090: {env_values.get('FEEDER_1090')}, 978: {env_values.get('FEEDER_978')}")
+        if env_values.get("FEEDER_978"):
             net_configs_list.append("adsb,dump978,30978,uat_in")
-        if self.envs.get("AIRSPY"):
+        if env_values.get("FEEDER_1090", "").startswith("airspy"):
             net_configs_list.append("adsb,airspy_adsb,30005,beast_in")
         print_err("net_configs_list", net_configs_list)
         return ";".join(net_configs_list)
