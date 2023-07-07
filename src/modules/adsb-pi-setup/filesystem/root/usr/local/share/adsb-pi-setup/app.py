@@ -260,9 +260,12 @@ def can_read_sdr():
 def advanced():
     if request.method == "POST":
         return handle_advanced_post_request()
-    env_values = ENV_FILE.envs
     if RESTART.lock.locked():
         return redirect("/restarting")
+    # just in case things have changed (the user plugged in a new device for example)
+    num, _, _ = check_sdrs()
+    ENV_FILE.update({ "NUM_SDRS": num })
+    env_values = ENV_FILE.envs
     return render_template(
         "advanced.html", env_values=env_values, metadata=ENV_FILE.metadata
     )
