@@ -3,7 +3,7 @@
 
 {% block content %}
 <h1>{% block title %} ADSB Feeder Homepage {% endblock %}</h1>
-<div id="UF" style="display: {% if env_values['UF'] == "1" %} block {% else %} none {% endif %};">
+<div id="UF" style="display: {% if env_values['UF'] == '1' %} block {% else %} none {% endif %};">
 	<h4>TAR1090 Mapping Interface</h4>
 	<ul>
 	<li><a href="/map">TAR1090 map</a>
@@ -11,6 +11,8 @@
 	<li><a href="/map/?replay">Timelapse / Replay</a>
 	<li><a href="/map/?heatmap&realheat">Heatmap</a>
 	<li><a href="/map/?ptracks">Tracks</a>
+	<li style="display: {% if env_values.get('FEEDER_URL_978', '') != '' %} block {% else %} none {% endif %};">
+		<a href="/dump978" style="display: {% if env_values.get('FEEDER_URL_978', '') != '' %} block {% else %} none {% endif %};">Dump978 map</a>
 	</ul>
 </div>
 <body>

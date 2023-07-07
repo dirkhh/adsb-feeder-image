@@ -41,6 +41,7 @@ proxy_routes = [
     ["/flightradar/", 8754, "/"],
     ["/flightradar24/", 8754, "/"],
     ["/portainer/", 9443, "/"],
+    ["/dump978/", 9780, "/skyaware978/"],
 ]
 
 
