@@ -7,3 +7,4 @@ image*/
 !image/README
 build.log
 custompios_path
+src/modules/adsb-feeder/filesystem/root/etc/adsb.im.version
