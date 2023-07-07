@@ -282,9 +282,6 @@ class EnvFile:
         metadata["RV"] = (
             "checked" if env_values["RV"] == "1" else ""
         )
-        metadata["airspy"] = (
-            "checked" if env_values["AIRSPY"] == "1" else ""
-        )
         return metadata
 
     def generate_ultrafeeder_config(self, form_data = {}):
