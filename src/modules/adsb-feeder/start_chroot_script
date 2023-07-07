@@ -19,17 +19,26 @@ install_cleanup_trap
 
 # Unpack root at the end, so files are modified before
 unpack /filesystem/root /
-apt install -y socat
 
-# install zerotier
+# Install dependencies
+
+apt-get install -y socat gnupg
+
+# install zerotier and tailscale, first get their repo
+
 DEBIAN_DISTRO=$(cat /etc/apt/sources.list | head -1 | cut -d\   -f 3)
 echo "deb http://download.zerotier.com/debian/${DEBIAN_DISTRO} ${DEBIAN_DISTRO} main" > /etc/apt/sources.list.d/zerotier.list
-apt update
-apt install -y zerotier-one
-systemctl enable zerotier-one
+curl -fsSL "https://pkgs.tailscale.com/stable/debian/$(DEBIAN_DISTRO).noarmor.gpg" | sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
+curl -fsSL "https://pkgs.tailscale.com/stable/debian/$(DEBIAN_DISTRO).tailscale-keyring.list" | sudo tee /etc/apt/sources.list.d/tailscale.list
 
+# Update and install
+
+apt-get update
+apt-get install -y zerotier-one tailscale
+
+# If we are armbian, we do something with networking
 if [ "$BASE_DISTRO" = "armbian" ] ; then
-	apt install -y network-manager net-tools
+	apt-get install -y network-manager net-tools
 
 	echo "127.0.0.1 adsb-feeder.local" >> /etc/hosts
 
@@ -39,11 +48,15 @@ if [ "$BASE_DISTRO" = "armbian" ] ; then
 	sed -i 's/Wants=network-online.target/Wants=network-pre.target/;s/After=network.target network-online.target/Before=wpa_supplicant.service network.target network-online.target/' /usr/lib/systemd/system/armbian-firstrun-config.service
 	systemctl enable armbian-firstrun-config
 fi
+
+# Enable services at boot
 systemctl enable adsb-docker
 systemctl enable adsb-init.service
 systemctl enable adsb-bootstrap.service
 systemctl enable adsb-web-forward.service
 systemctl enable adsb-update.timer
+systemctl enable zerotier-one
+
 export ROOT_PWD=$(openssl rand -base64 9)
 echo -e "$ROOT_PWD\n$ROOT_PWD" | (passwd root)
 export PI_PWD=$(openssl rand -base64 9)
