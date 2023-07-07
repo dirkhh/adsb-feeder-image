@@ -198,10 +198,20 @@ def executerestore():
 # second bool (access) tells us if we have full access
 # third list of strings gives us the serial numbers (assuming num > 0 and access True)
 def check_sdrs() -> Tuple[int, bool, List[str]]:
-    num = -1
+    num = 0
     access = False
     serials: List[str] = []
     output: str = ""
+    # find airspy
+    try:
+        result = subprocess.run("/usr/bin/identify-airspy", shell=True, capture_output=True, timeout=5.0)
+    except subprocess.TimeoutExpired as exc:
+        output = exc.stdout.decode()
+    else:
+        output = result.stdout.decode()
+    if output:
+        num = 1
+        serials = [ output ]
     if not os.path.isfile("/usr/bin/rtl_eeprom"):
         print_err("can't find rtl_eeprom")
         return num, False, serials
@@ -214,14 +224,15 @@ def check_sdrs() -> Tuple[int, bool, List[str]]:
     print_err(f"coming back from first call with {output}")
     match = re.search("Found (\\d+) device", output)
     if match:
-        num = int(match.group(1))
+        rtl_sdrs = int(match.group(1))
+        num += rtl_sdrs
     match = re.search("usb_claim_interface error",output)
     if not match:
         access = True
         match = re.search("Serial number:\\s+(\\S+)", output)
         if match:
             serials.append(match.group(1))
-        for i in range(1, num):
+        for i in range(1, rtl_sdrs):
             try:
                 result = subprocess.run(f"/usr/bin/rtl_eeprom -d {i}", shell=True, capture_output=True, timeout=20.0)
             except subprocess.TimeoutExpired as exc:
@@ -279,7 +290,7 @@ def handle_advanced_post_request():
             # for now we assume that means NO OTHER SDR - this needs to be improved
             net = ENV_FILE.generate_ultrafeeder_config(request.form)
             num, _, _ = check_sdrs()
-            feeder_rtl = "rtldsr" if serial1090 or num == 1 else ""
+            feeder_rtl = "rtlsdr" if serial1090 or (num == 2 and not serial978) else ""
             ENV_FILE.update(
                 {
                     "FEEDER_ULTRAFEEDER_CONFIG": net,
@@ -425,7 +436,7 @@ def director():
     if env_values.get("BASE_CONFIG") != "1":
         return setup()
     num_sdrs = env_values.get("NUM_SDRS")
-    if num_sdrs and int(num_sdrs) > 1 and not env_values.get("ADSB_SDR_SERIAL"):
+    if num_sdrs and int(num_sdrs) > 1 and not (env_values.get("ADSB_SDR_SERIAL") or env_values.get("AIRSPY") == "1"):
         return advanced()
     return index()
 

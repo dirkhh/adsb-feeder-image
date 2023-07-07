@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# painfully parse the (likely not very stable) output of lsusb
+DEVICE=$(lsusb | grep -i Airspy | awk 'BEGIN { FS="[ :]" }; /Airspy/ { print $2":"$4 }')
+[ "$DEVICE" = "" ] && exit
+lsusb -v -s $DEVICE | grep iSerial | awk 'BEGIN { FS="[ ]+" }; { print $4" "$5 }'
