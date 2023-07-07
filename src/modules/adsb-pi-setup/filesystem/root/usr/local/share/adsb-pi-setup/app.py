@@ -374,10 +374,10 @@ def handle_expert_post_request():
             "ZEROTIER_NETWORK_ID": request.form.get("zerotierid"),
         })
         # make sure the service is enabled (it really should be)
-        subprocess.call("/usr/bin/systemctl enable --now zerotier", shell=True)
+        subprocess.call("/usr/bin/systemctl enable --now zerotier-one", shell=True)
 
         # now we need to connect to the network:
-        subprocess.call(f"/usr/sbin/zerotier-cli join {ENV_FILE.envs.get('ZEROTIER_NETWORK_ID')}")
+        subprocess.call(f"/usr/sbin/zerotier-cli join {ENV_FILE.envs.get('ZEROTIER_NETWORK_ID')}", shell=True)
     if allow_insecure and request.form.get("you-asked-for-it") == "you-got-it":
         # well - let's at least try to save the old stuff
         if not path.exists("/opt/adsb/env-working"):
