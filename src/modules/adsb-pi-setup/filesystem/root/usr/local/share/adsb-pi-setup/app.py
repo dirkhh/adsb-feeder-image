@@ -475,6 +475,8 @@ def setup():
             )
             if num > 1 and not ENV_FILE.envs.get("ADSB_SDR_SERIAL"):
                 return redirect(url_for("advanced"))
+            if agg == "ind":
+                return redirect(url_for("aggregators"))
             return redirect(url_for("restarting"))
 
     return render_template(
