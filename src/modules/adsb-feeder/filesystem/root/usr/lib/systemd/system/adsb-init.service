@@ -6,8 +6,7 @@ After=network-online.target
 Type=oneshot
 RemainAfterExit=yes
 WorkingDirectory=/opt/adsb
-ExecStartPre=/usr/bin/bash /opt/adsb/.setup-env.sh
-ExecStart=/usr/bin/bash /opt/adsb/docker-pull.sh
+ExecStart=/usr/bin/bash /opt/adsb/.setup-env.sh
 TimeoutStartSec=0
 
 [Install]
