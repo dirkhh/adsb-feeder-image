@@ -11,11 +11,14 @@
 	<li><a href="/map/?replay">Timelapse / Replay</a>
 	<li><a href="/map/?heatmap&realheat">Heatmap</a>
 	<li><a href="/map/?ptracks">Tracks</a>
-	<li style="display: {% if env_values.get('FEEDER_URL_978', '') != '' %} block {% else %} none {% endif %};">
-		<a href="/dump978" style="display: {% if env_values.get('FEEDER_URL_978', '') != '' %} block {% else %} none {% endif %};">Dump978 map</a>
 	</ul>
 </div>
-<body>
+<div id="UAT978" style="display: {% if env_values.get('FEEDER_URL_978', '') != '' %} block {% else %} none {% endif %};">
+	<h4>UAT978 Mapping Interface</h4>
+	<ul>
+	<li><a href="/dump978">Dump978 map</a>
+	</ul>
+</div>
 <div id="FA" style="display: {% if env_values['FA'] == "1" %} block {% else %} none {% endif %};">
 	<h4>FlightAware</h4>
 	<ul>
