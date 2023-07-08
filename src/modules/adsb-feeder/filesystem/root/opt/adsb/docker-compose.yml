@@ -64,7 +64,8 @@ services:
       - /opt/adsb/ultrafeeder/graphs1090:/var/lib/collectd
       - /proc/diskstats:/proc/diskstats:ro
       - /dev:/dev:ro
+      - /run/adsb-feeder-ultrafeeder:/run
+      - /run/adsb-feeder-shared:/run/airspy_adsb
     tmpfs:
-      - /run:exec,size=256M
       - /tmp:size=128M
       - /var/log:size=32M
