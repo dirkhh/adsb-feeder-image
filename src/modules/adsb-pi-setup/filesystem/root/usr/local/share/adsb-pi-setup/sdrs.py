@@ -41,18 +41,15 @@ def get_sdr_info():
         print_err("lsusb failed")
     output = io.StringIO(result.stdout.decode())
     for line in output:
-        rtl_sdr_match = re.search("Bus ([0-9a-fA-F]+) Device ([0-9a-fA-F]+): ID 0bda:2838", line)
-        if rtl_sdr_match:
-            address = f"{rtl_sdr_match.group(1)}:{rtl_sdr_match.group(2)}"
-            print_err(f"get_sdr_info() found RTL SDR at {address}")
-            sdrs["num"] += 1
-            sdrs["sdrs"].append({"type": "rtlsdr", "address": address, "serial": get_serial(address)})
-        airspy_match = re.search("Bus ([0-9a-fA-F]+) Device ([0-9a-fA-F]+): ID 1d50:60a1", line)
-        if airspy_match:
-            address = f"{airspy_match.group(1)}:{airspy_match.group(2)}"
-            print_err(f"get_sdr_info() found Airspy at {address}")
-            sdrs["num"] += 1
-            sdrs["sdrs"].append({"type": "airspy", "address": address, "serial": get_serial(address)})
+        for pidvid in ("1d50:60a1", "0bda:2838", "0bda:2832"):
+            address = get_address_for_pid_vid(pidvid, line)
+            if address:
+                print_err(f"get_sdr_info() found SDR {pidvid} at {address}")
+                sdrs["num"] += 1
+                if pidvid == "1d50:60a1":
+                    sdrs["sdrs"].append({"type": "airspy", "address": address, "serial": get_serial(address)})
+                else:
+                    sdrs["sdrs"].append({"type": "rtlsdr", "address": address, "serial": get_serial(address)})
     return sdrs
 
 
@@ -67,3 +64,10 @@ def get_serial(address: str) -> str:
         return serial_match.group(1)
     return ""
 
+
+def get_address_for_pid_vid(pidvid: str, line: str):
+    address = ""
+    match = re.search(f"Bus ([0-9a-fA-F]+) Device ([0-9a-fA-F]+): ID {pidvid}", line)
+    if match:
+        address = f"{match.group(1)}:{match.group(2)}"
+    return address
