@@ -1,235 +1,330 @@
-    # def fr24_setup(self):
-    #     sharing_key = request.form.get("FEEDER_FR24_SHARING_KEY")
-    #     print_err(f"form.get of sharing key results in {sharing_key}")
-    #     if not sharing_key:
-    #         print_err("no sharing key - reload")
-    #         return redirect("/aggegators")  # basically just a page reload
-    #     if re.match(
-    #         r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b", sharing_key
-    #     ):
-    #         # that's an email address, so we are looking to get a sharing key
-    #         print_err("got email address, going to request a sharing key")
-    #         return self.request_fr24_sharing_key()
-    #     if re.match("[0-9a-zA-Z]*", sharing_key):
-    #         # that might be a valid key
-    #         print_err(f"{sharing_key} looks like a valid sharing key")
-    #         self._envfile.update({"FEEDER_FR24_SHARING_KEY": sharing_key, "FR24": "1"})
-    #     else:
-    #         # hmm, that's weird. we need some error return, I guess
-    #         print_err(
-    #             f"we got a text that's neither email address nor sharing key: {sharing_key}"
-    #         )
-    #         return "that's not a valid sharing key"
-    #     # we have a sharing key, let's just enable the container
-    #     self._restart.restart_systemd()
-    #     return redirect("/aggregators")
+from .constants import Constants
+from flask import request, redirect
 
-    # def pw_setup(self):
-    #     api_key = request.form.get("FEEDER_PLANEWATCH_API_KEY")
-    #     print_err(f"form.get of api key results in {api_key}")
-    #     if not api_key:
-    #         print_err("no api key - reload")
-    #         print_err(request.form)
-    #         return redirect(
-    #             "/aggregators"
-    #         )  # basically just a page reload - needs some error instead
-    #     # here we should check if the sharing key looks about right - reg exp
-    #     self._envfile.update({"FEEDER_PLANEWATCH_API_KEY": api_key, "PW": "1"})
-    #     self._restart.restart_systemd()
-    #     return redirect("/aggregators")
+import re
+import sys
+from flask import redirect
+import subprocess
 
-    # def fa_setup(self):
-    #     feeder_id = request.form.get("FEEDER_PIAWARE_FEEDER_ID")
-    #     print_err(f"form.get of feeder id results in {feeder_id}")
-    #     if not feeder_id:
-    #         print_err("no feeder ID - request one")
-    #         return self.request_fa_feeder_id()
-    #     # here we should check if the feeder id looks about right - reg exp
-    #     self._envfile.update({"FEEDER_PIAWARE_FEEDER_ID": feeder_id, "FA": "1"})
-    #     self._restart.restart_systemd()
-    #     return redirect("/aggregators")
+from .system import System
 
-    # def rb_setup(self):
-    #     sharing_key = request.form.get("FEEDER_RADARBOX_SHARING_KEY")
-    #     print_err(f"form.get of sharing key results in {sharing_key}")
-    #     if not sharing_key:
-    #         print_err("no sharing key - request one")
-    #         return self.request_rb_feeder_id()
-    #     # here we should check if the feeder id looks about right - reg exp
-    #     self._envfile.update({"FEEDER_RADARBOX_SHARING_KEY": sharing_key, "RB": "1"})
-    #     self._restart.restart_systemd()
-    #     return redirect("/aggregators")
 
-    # def pf_setup(self):
-    #     sharecode = request.form.get("FEEDER_PLANEFINDER_SHARECODE")
-    #     print_err(f"form.get of sharecode results in {sharecode}")
-    #     if not sharecode:
-    #         print_err("no sharecode - reload")
-    #         return redirect(
-    #             "/aggregators"
-    #         )  # basically just a page reload - needs some error instead
-    #     # here we should check if the feeder id looks about right - reg exp
-    #     self._envfile.update({"FEEDER_PLANEFINDER_SHARECODE": sharecode, "PF": "1"})
-    #     self._restart.restart_systemd()
-    #     return redirect("/aggregators")
+def print_err(*args, **kwargs):
+    print(*args, **kwargs, file=sys.stderr)
 
-    # def ah_setup(self):
-    #     station_key = request.form.get("FEEDER_ADSBHUB_STATION_KEY")
-    #     print_err(f"form.get of station key results in {station_key}")
-    #     if not station_key:
-    #         print_err("no station key - reload")
-    #         return redirect(
-    #             "/aggregators"
-    #         )  # basically just a page reload - needs some error instead
-    #     # here we should check if the feeder id looks about right - reg exp
-    #     self._envfile.update({"FEEDER_ADSBHUB_STATION_KEY": station_key, "AH": "1"})
-    #     self._restart.restart_systemd()
-    #     return redirect("/aggregators")
 
-    # def os_setup(self):
-    #     username = request.form.get("FEEDER_OPENSKY_USERNAME")
-    #     serial = request.form.get("FEEDER_OPENSKY_SERIAL")
-    #     print_err(f"form.get of username results in {username}")
-    #     print_err(f"form.get of serial results in {serial}")
-    #     if not username or not serial:
-    #         print_err("no username or serial - reload")
-    #         return redirect(
-    #             "/aggregators"
-    #         )  # basically just a page reload - needs some error instead
-    #     # here we should check if the feeder id looks about right - reg exp
-    #     self._envfile.update(
-    #         {
-    #             "FEEDER_OPENSKY_USERNAME": username,
-    #             "FEEDER_OPENSKY_SERIAL": serial,
-    #             "OS": "1",
-    #         }
-    #     )
-    #     self._restart.restart_systemd()
-    #     return redirect("/aggregators")
+class Aggregator:
+    def __init__(
+        self,
+        name: str,
+        system: System,
+        tags: list = None,
+    ):
+        self._name = name
+        self._tags = tags
+        self._system = system
+        self._constants = system._constants
+        # self._key_tags = ["key"] + tags
+        # self._enabled_tags = ["is_enabled", "other_aggregator"] + tags
 
-    # def rv_setup(self):
-    #     feeder_key = request.form.get("FEEDER_RV_FEEDER_KEY")
-    #     print_err(f"form.get of feeder key results in {feeder_key}")
-    #     if not feeder_key:
-    #         print_err("no feeder key - reload")
-    #         return redirect(
-    #             "/aggregators"
-    #         )  # basically just a page reload - needs some error instead
-    #     # here we should check if the feeder id looks about right - reg exp
-    #     self._envfile.update({"FEEDER_RV_FEEDER_KEY": feeder_key, "RV": "1"})
-    #     self._restart.restart_systemd()
-    #     return redirect("/aggregators")
+    @property
+    def name(self):
+        return self._name
 
-    # def download_docker_container(container: str) -> bool:
-    #     cmdline = f"docker pull {container}"
-    #     try:
-    #         result = subprocess.run(cmdline, timeout=180.0, shell=True)
-    #     except subprocess.TimeoutExpired:
-    #         return False
-    #     return True
+    @property
+    def tags(self):
+        return self._tags
 
-    # def docker_run_with_timeout(arguments: str, timeout: float) -> str:
-    #     cmdline = f"docker run --name temp_container {arguments}"
-    #     try:
-    #         result = subprocess.run(
-    #             cmdline, timeout=timeout, shell=True, capture_output=True
-    #         )
-    #     except subprocess.TimeoutExpired as exc:
-    #         # for several of these containers "timeout" is actually the expected behavior;
-    #         # they don't stop on their own. So just grab the output and kill the container
-    #         output = str(exc.stdout)
-    #         try:
-    #             result = subprocess.run(
-    #                 "docker rm -f temp_container",
-    #                 timeout=10.0,
-    #                 shell=True,
-    #                 capture_output=True,
-    #             )
-    #         except subprocess.TimeoutExpired:
-    #             print_err(
-    #                 f"failed to remove the temp container {str(result.stdout)} / {str(result.stderr)}"
-    #             )
-    #     else:
-    #         output = str(result.stdout)
-    #     return output
+    @property
+    def _key_tags(self):
+        return ["key"] + self.tags
 
-    # def request_fr24_sharing_key(self):
-    #     env_values = self._envfile.envs
-    #     lat = float(env_values["FEEDER_LAT"])
-    #     lng = float(env_values["FEEDER_LONG"])
-    #     alt = int(int(env_values["FEEDER_ALT_M"]) / 0.308)
-    #     email = request.form.get("FEEDER_FR24_SHARING_KEY")
-    #     container_name = env_values["FR24_CONTAINER"]
-    #     if self.download_docker_container(container_name):
-    #         cmdline = (
-    #             f'--rm -i -e FEEDER_LAT="{lat}" -e FEEDER_LONG="{lng}" -e FEEDER_ALT_FT="{alt}" '
-    #             f'-e FR24_EMAIL="{email}" --entrypoint /scripts/signup.sh {container_name}'
-    #         )
-    #         output = self.docker_run_with_timeout(cmdline, 45.0)
-    #         sharing_key_match = re.search(
-    #             "Your sharing key \\(([a-zA-Z0-9]*)\\) has been", output
-    #         )
-    #         if sharing_key_match:
-    #             sharing_key = sharing_key_match.group(1)
-    #             self._envfile.update(
-    #                 {"FEEDER_FR24_SHARING_KEY": sharing_key, "FR24": "1"}
-    #             )
-    #             self._restart.restart_systemd()
-    #         else:
-    #             print_err(
-    #                 f"couldn't find a sharing key in the container output: {output}"
-    #             )
-    #     else:
-    #         print_err("failed to download the FR24 docker image")
-    #     return redirect("/aggregators")
+    @property
+    def _enabled_tags(self):
+        return ["is_enabled", "other_aggregator"] + self.tags
 
-    # def request_fa_feeder_id(self):
-    #     container_name = self._envfile.envs["FA_CONTAINER"]
-    #     if self.download_docker_container(container_name):
-    #         cmdline = f"--rm {container_name}"
-    #         output = self.docker_run_with_timeout(cmdline, 45.0)
-    #         feeder_id_match = re.search(" feeder ID is ([-a-zA-Z0-9]*)", output)
-    #         if feeder_id_match:
-    #             feeder_id = feeder_id_match.group(1)
-    #             self._envfile.update({"FEEDER_PIAWARE_FEEDER_ID": feeder_id, "FA": "1"})
-    #             self._restart.restart_systemd()
-    #         else:
-    #             print_err(
-    #                 f"couldn't find a feeder ID in the container output: {output}"
-    #             )
-    #     else:
-    #         print_err("failed to download the piaware docker image")
-    #     return redirect("/aggregators")
+    @property
+    def lat(self):
+        return self._constants.envs["FEEDER_LAT"].value
 
-    # def request_rb_feeder_id(self):
-    #     env_values = self._envfile.envs
-    #     lat = float(env_values["FEEDER_LAT"])
-    #     lng = float(env_values["FEEDER_LONG"])
-    #     alt = int(env_values["FEEDER_ALT_M"])
-    #     container_name = env_values["RB_CONTAINER"]
-    #     if self.download_docker_container(container_name):
-    #         cmdline = (
-    #             f"--rm -i --network adsb_default -e BEASTHOST=ultrafeeder -e LAT=${lat} "
-    #             f"-e LONG=${lng} -e ALT=${alt} {container_name}"
-    #         )
-    #         output = self.docker_run_with_timeout(cmdline, 45.0)
-    #         sharing_key_match = re.search("Your new key is ([a-zA-Z0-9]*)", output)
-    #         if sharing_key_match:
-    #             sharing_key = sharing_key_match.group(1)
-    #             self._envfile.update(
-    #                 {"FEEDER_RADARBOX_SHARING_KEY": sharing_key, "RB": "1"}
-    #             )
-    #             self._restart.restart_systemd()
-    #         else:
-    #             print_err(
-    #                 f"couldn't find a sharing key in the container output: {output}"
-    #             )
-    #     else:
-    #         print_err("failed to download the radarbox docker image")
-    #     return redirect("/aggregators")
-# generalise this
+    @property
+    def lng(self):
+        return self._constants.envs["FEEDER_LONG"].value
 
-class OtherAggregator:
-    def __init__(self,
-                name: str,
-                form_name: str,
+    @property
+    def alt(self):
+        return self._constants.envs["FEEDER_ALT_M"].value
+
+    @property
+    def alt_ft(self):
+        return int(self.alt / 0.308)
+
+    @property
+    def container(self):
+        return self._constants.env_by_tags(self.tags + ["container"]).value
+
+    @property
+    def is_enabled(self):
+        return self._constants.env_by_tags(self._enabled_tags).value == "1"
+
+    def _activate(self, user_input: str):
+        raise NotImplementedError
+
+    def _deactivate(self):
+        raise NotImplementedError
+
+    def _download_docker_container(self, container: str) -> bool:
+        cmdline = f"docker pull {container}"
+        try:
+            result = subprocess.run(cmdline, timeout=180.0, shell=True)
+        except subprocess.TimeoutExpired:
+            return False
+        return True
+
+    def _docker_run_with_timeout(self, cmdline: str, timeout: float) -> str:
+        try:
+            result = subprocess.run(
+                cmdline, timeout=timeout, shell=True, capture_output=True
+            )
+        except subprocess.TimeoutExpired as exc:
+            # for several of these containers "timeout" is actually the expected behavior;
+            # they don't stop on their own. So just grab the output and kill the container
+            output = str(exc.stdout)
+            try:
+                result = subprocess.run(
+                    "docker rm -f temp_container",
+                    timeout=10.0,
+                    shell=True,
+                    capture_output=True,
+                )
+            except subprocess.TimeoutExpired:
+                print_err(
+                    f"failed to remove the temp container {str(result.stdout)} / {str(result.stderr)}"
+                )
+        else:
+            output = str(result.stdout)
+        return output
+
+class ADSBHub(Aggregator):
+    def __init__(self, system: System):
+        super().__init__(
+            name="ADSBHub",
+            tags=["adsb_hub"],
+            system=system,
+        )
+
+    def _activate(self, user_input: str):
+        if not user_input:
+            return False
+        self._constants.env_by_tags(self._key_tags).value = user_input
+        self._constants.env_by_tags(self._enabled_tags).value = "1"
+        self._system._restart.restart_systemd()
+        return True
+
+
+class FlightRadar24(Aggregator):
+    def __init__(self, system: System):
+        super().__init__(
+            name="FlightRadar24",
+            tags=["fr24"],
+            system=system,
+        )
+
+    def _request_fr24_sharing_key(self, email: str):
+        if not self.download_docker_container(self.container):
+            print_err("failed to download the FR24 docker image")
+            return redirect("/aggregators")
+
+        cmdline = (
+            f'--rm -i -e FEEDER_LAT="{self.lat}" -e FEEDER_LONG="{self.lng}" -e FEEDER_ALT_FT="{self.alt_ft}" '
+            f'-e FR24_EMAIL="{email}" --entrypoint /scripts/signup.sh {self.container}'
+        )
+        output = self.docker_run_with_timeout(cmdline, 45.0)
+        sharing_key_match = re.search(
+            "Your sharing key \\(([a-zA-Z0-9]*)\\) has been", output
+        )
+        if not sharing_key_match:
+            print_err(f"couldn't find a sharing key in the container output: {output}")
+            return redirect("/aggregators")
+
+        return sharing_key_match.group(1)
+
+    def _activate(self, user_input: str):
+        if not user_input:
+            return False
+        if re.match(
+            r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b", user_input
+        ):
+            # that's an email address, so we are looking to get a sharing key
+            sharing_key = self._request_fr24_sharing_key(user_input)
+        if re.match("[0-9a-zA-Z]*", user_input):
+            # that might be a valid key
+            sharing_key = user_input
+        else:
+            # hmm, that's weird. we need some error return, I guess
+            print_err(
+                f"we got a text that's neither email address nor sharing key: {user_input}"
+            )
+            return False
+        # we have a sharing key, let's just enable the container
+        self._constants.env_by_tags(self._key_tags).value = sharing_key
+        self._constants.env_by_tags(self._enabled_tags).value = "1"
+        self._system._restart.restart_systemd()
+
+        return redirect("/aggregators")
+
+
+class PlaneWatch(Aggregator):
+    def __init__(self, system: System):
+        super().__init__(
+            name="PlaneWatch",
+            tags=["plane_watch"],
+            system=system,
+        )
+
+    def _activate(self, user_input: str):
+        if not user_input:
+            return False
+        self._constants.env_by_tags(self._key_tags).value = user_input
+        self._constants.env_by_tags(self._enabled_tags).value = "1"
+        self._system._restart.restart_systemd()
+
+        return redirect("/aggregators")
+
+
+class FlightAware(Aggregator):
+    def __init__(self, system: System):
+        super().__init__(
+            name="FlightAware",
+            tags=["flightaware"],
+            system=system,
+        )
+
+    def _request_fa_feeder_id(self):
+        if not self.download_docker_container(self.container):
+            print_err("failed to download the piaware docker image")
+            return redirect("/aggregators")
+
+        cmdline = f"--rm {self.container}"
+        output = self.docker_run_with_timeout(cmdline, 45.0)
+        feeder_id_match = re.search(" feeder ID is ([-a-zA-Z0-9]*)", output)
+        if feeder_id_match:
+            return feeder_id_match.group(1)
+        else:
+            print_err(f"couldn't find a feeder ID in the container output: {output}")
+
+        return None
+
+    def _activate(self, user_input: str):
+        if not user_input:
+            return False
+        if re.match("[0-9a-zA-Z]*", user_input):
+            # that might be a valid key
+            feeder_id = user_input
+        else:
+            feeder_id = self._request_fa_feeder_id()
+        if not feeder_id:
+            return False
+
+        self._constants.env_by_tags(self._key_tags).value = feeder_id
+        self._constants.env_by_tags(self._enabled_tags).value = "1"
+
+
+class RadarBox24(Aggregator):
+    def __init__(self, system: System):
+        super().__init__(
+            name="RadarBox24",
+            tags=["radarbox24"],
+            system=system,
+        )
+
+    def _request_rb_sharing_key(self):
+        # env_values = self._envfile.envs
+        docker_image = self._constants.env_by_tags(["radarbox24", "container"]).value
+
+        if not self.download_docker_container(docker_image):
+            print_err("failed to download the RadarBox24 docker image")
+            return redirect("/aggregators")
+
+        cmdline = (
+            f"--rm -i --network adsb_default -e BEASTHOST=ultrafeeder -e LAT=${self.lat} "
+            f"-e LONG=${self.lng} -e ALT=${self.alt} {docker_image}"
+        )
+        output = self.docker_run_with_timeout(cmdline, 45.0)
+        sharing_key_match = re.search("Your new key is ([a-zA-Z0-9]*)", output)
+        if not sharing_key_match:
+            print_err(f"couldn't find a sharing key in the container output: {output}")
+            return None
+
+        return sharing_key_match.group(1)
+
+    def _activate(self, user_input: str):
+        if not user_input:
+            return False
+        if re.match("[0-9a-zA-Z]*", user_input):
+            # that might be a valid key
+            sharing_key = user_input
+        else:
+            # try to get a key
+            sharing_key = self._request_rb_sharing_key()
+        if not sharing_key:
+            return False
+
+        self._constants.env_by_tags(self._key_tags).value = sharing_key
+        self._constants.env_by_tags(self._enabled_tags).value = "1"
+        self._system._restart.restart_systemd()
+        return True
+
+
+class OpenSky(Aggregator):
+    def __init__(self, system: System):
+        super().__init__(
+            name="OpenSky Network",
+            tags=["opensky"],
+            system=system,
+        )
+
+    def _activate(self, user: str, serial: str):
+        if not user or not serial:
+            return False
+        # FIXME
+        self._constants.env_by_tags(self.tags + ["user"]).value = user
+        self._constants.env_by_tags(self.tags + ["pass"]).value = serial
+        self._constants.env_by_tags(self.tags + ["is_enabled"]).value = "1"
+        self._system._restart.restart_systemd()
+        return True
+
+
+
+class RadarVirtuel(Aggregator):
+    def __init__(self, system: System):
+        super().__init__(
+            name="RadarVirtuel",
+            tags=["radar_virtuel"],
+            system=system,
+        )
+
+    def _activate(self, user_input: str):
+        if not user_input:
+            return False
+        self._constants.env_by_tags(self._key_tags).value = user_input
+        self._constants.env_by_tags(self._enabled_tags).value = "1"
+        self._system._restart.restart_systemd()
+        return True
+
+
+class PlaneFinder(Aggregator):
+    def __init__(self, system: System):
+        super().__init__(
+            name="PlaneFinder",
+            tags=["planefinder"],
+            system=system,
+        )
+
+    def _activate(self, user_input: str):
+        if not user_input:
+            return False
+        self._constants.env_by_tags(self._key_tags).value = user_input
+        self._constants.env_by_tags(self._enabled_tags).value = "1"
+        self._system._restart.restart_systemd()
+        return True

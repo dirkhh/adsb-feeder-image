@@ -6,7 +6,6 @@ import threading
 import zipfile
 
 from .constants import Constants
-import path
 class Lock:
     # This class is used to lock the system from being modified while
     # pending changes are being made.
@@ -58,7 +57,8 @@ class Restart:
 
 class System:
     def __init__(self, constants: Constants):
-        self._restart = Restart(Lock())
+        self._restart_lock = Lock()
+        self._restart = Restart(self._restart_lock)
         self._constants = constants
 
     @property
@@ -86,11 +86,15 @@ class System:
 class Version:
     def __init__(self):
         self._version = None
-        self.constants = Constants()
+
+        self.file_path = Constants().version_file
+        # We have to initialise Constants() here to avoid a circular import
+        # Usually that sucks. But in this case, we're only using the version file path.
+        # So it's not too bad.
 
     def _get_base_version(self):
         basev = "unknown"
-        if path.isfile(self.constants.version_file):
+        if os.path.isfile(self.constants.version_file):
             with open(self.constants.version_file, "r") as v:
                 basev = v.read().strip()
         if basev == "":

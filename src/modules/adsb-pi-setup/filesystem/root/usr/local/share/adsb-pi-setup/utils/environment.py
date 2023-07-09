@@ -1,12 +1,7 @@
-import re
-import subprocess
-import sys
 from os import path
 from typing import Dict
-from uuid import uuid4
 
-from .constants import Constants
-
+FILE_PATH = "/opt/adsb/.env"  # FIXME
 
 class Env:
     def __init__(
@@ -31,13 +26,13 @@ class Env:
         if default_call:
             self._default = default_call()
 
-        # Always reconcile from Constants.env_file_path
+        # Always reconcile from FILE_PATH
         self._reconcile(pull=True)
 
     def _reconcile(self, pull: bool = False):
-        if not path.isfile(Constants.env_file_path):
+        if not path.isfile(FILE_PATH):
             # Let's create it
-            open(Constants.env_file_path, "w").close()
+            open(FILE_PATH, "w").close()
 
         var_in_file = self._get_value_from_file()
         if pull and var_in_file:
@@ -51,7 +46,7 @@ class Env:
     def _get_values_from_file(self):
         ret = {}
         try:
-            with open(Constants.env_file_path, "r") as f:
+            with open(FILE_PATH, "r") as f:
                 for line in f.readlines():
                     if line.strip().startswith("#"):
                         continue
@@ -74,7 +69,7 @@ class Env:
     def _write_value_to_file(self):
         values = self._get_values_from_file()
         values[self._name] = self._value
-        with open(Constants.env_file_path, "w") as f:
+        with open(FILE_PATH, "w") as f:
             for key, value in values.items():
                 f.write(f"{key}={value}\n")
 
@@ -92,9 +87,15 @@ class Env:
             return self._value
         if self._value:
             return self._value
-        return self._default_value
+        return self._default
 
     @value.setter
     def value(self, value):
         self._value = value
         self._reconcile()
+
+    @property
+    def tags(self):
+        if not self._tags:
+            return []
+        return self._tags

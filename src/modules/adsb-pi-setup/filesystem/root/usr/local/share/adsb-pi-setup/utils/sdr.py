@@ -2,8 +2,6 @@ import io
 import re
 import subprocess
 import sys
-from functools import lru_cache
-from .envfile import EnvFile
 
 
 class SDR:
@@ -42,7 +40,7 @@ class SDR:
 
 
 class SDRDevices:
-    def __init__(self, envfile: EnvFile):
+    def __init__(self):
         self.sdrs = []
 
     def __len__(self):
