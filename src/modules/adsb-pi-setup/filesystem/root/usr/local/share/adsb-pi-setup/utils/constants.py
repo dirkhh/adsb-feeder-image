@@ -95,16 +95,15 @@ class Constants:
         Env("FEEDER_RTL_SDR", True, default="rtlsdr"),
         Env("FEEDER_ENABLE_BIASTEE", True, default="false"),
         Env("FEEDER_READSB_GAIN", True, default="autogain"),
-        Env("FEEDER_SERIAL_1090", False),  # FIXME
-        Env("FEEDER_SERIAL_978", False),  # FIXME
+        Env("FEEDER_SERIAL_1090", False, frontend_names=["1090"]),  # FIXME
+        Env("FEEDER_978", False, frontend_names=["978"]),  # FIXME
         # Feeder
         Env("ADSBLOL_UUID", True, default_call=lambda: str(uuid4())),
         Env("ULTRAFEEDER_UUID", True, default_call=lambda: str(uuid4())),
         Env("MLAT_PRIVACY", True, default="--privacy", frontend_names=["mlat_privacy"]),
         Env("FEEDER_TAR1090_USEROUTEAPI", True, default="1"),
         # Misc
-        Env("FEEDER_HEYWHATSTHAT_ID", False),  # FIXME
-
+        Env("FEEDER_HEYWHATSTHAT_ID", False, frontend_names=["FEEDER_HEYWHATSTHAT_ID"]),  # FIXME
         # Other aggregators keys
         Env("FEEDER_FR24_SHARING_KEY", False, tags=["fr24", "key"]),
         Env("FEEDER_PIAWARE_FEEDER_ID", False, tags=["flightaware", "user"]),
@@ -115,10 +114,13 @@ class Constants:
         Env("FEEDER_OPENSKY_SERIAL", False, tags=["opensky", "pass"]),
         Env("FEEDER_RV_FEEDER_KEY", False, tags=["radar_virtuel", "key"]),
         Env("FEEDER_PLANEWATCH_API_KEY", False, tags=["plane_watch", "key"]),
-
-
-
         # ADSB.im specific
+        Env(
+            "_ADSB_IM_AGGREGATORS_SELECTION",
+            True,
+            default="",
+            frontend_names=["aggregators"],
+        ),
         Env("_ADSBIM_VERSION", False, tags=["version"]),
         Env("_ADSBIM_VERSION_DATE", False),
         Env("_ADSBIM_VERSION_HASH", False),
@@ -177,7 +179,12 @@ class Constants:
         ),
         Env("_ADSBIM_IS_AIRSPY_ENABLED", False, tags=["airspy", "enabled"]),
         Env("_ADSBIM_IS_PORTAINER_ENABLED", False, tags=["portainer", "enabled"]),
-        Env("_ADSBIM_IS_BASE_CONFIG_FINISHED", True, default="0", tags=["base_config", "finished"]),
+        Env(
+            "_ADSBIM_IS_BASE_CONFIG_FINISHED",
+            True,
+            default="0",
+            tags=["base_config", "finished"],
+        ),
         Env(
             "_ADSBIM_IS_NIGHTLY_BASE_UPDATE_ENABLED",
             False,
@@ -191,7 +198,9 @@ class Constants:
         Env("_ADSBIM_CONTAINER_PLANEFINDER", True, tags=["planefinder", "container"]),
         Env("_ADSBIM_CONTAINER_ADSBHUB", True, tags=["adsb_hub", "container"]),
         Env("_ADSBIM_CONTAINER_OPENSKY", True, tags=["opensky", "container"]),
-        Env("_ADSBIM_CONTAINER_RADARVIRTUEL", True, tags=["radar_virtuel", "container"]),
+        Env(
+            "_ADSBIM_CONTAINER_RADARVIRTUEL", True, tags=["radar_virtuel", "container"]
+        ),
         Env("_ADSBIM_CONTAINER_ULTRAFEEDER", True, tags=["ultrafeeder", "container"]),
         Env("_ADSBIM_CONTAINER_PLANEWATCH", True, tags=["plane_watch", "container"]),
     }

@@ -18,6 +18,8 @@ from utils import (
     RouteManager,
     SDRDevices,
     check_restart_lock,
+)
+from utils import (
     ADSBHub,
     FlightAware,
     FlightRadar24,
@@ -81,7 +83,7 @@ class AdsbIm:
 
     def run(self):
         self._routemanager.add_proxy_routes(self.proxy_routes)
-        debug = os.environ.get("FLASK_DEBUG") is not None
+        debug = os.environ.get("ADSBIM_DEBUG") is not None
         self._debug_cleanup()
         self.app.run(host="0.0.0.0", port=80, debug=debug)
 
