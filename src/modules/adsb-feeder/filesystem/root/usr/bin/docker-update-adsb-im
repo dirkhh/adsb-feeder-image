@@ -7,7 +7,7 @@ TIME=$(date -Iseconds)
 cp docker.image.versions docker.image.versions.${TIME}
 cp .env env.${TIME}
 
-if curl -s https://github.com/dirkhh/adsb-feeder-image/tree/main/src/modules/adsb-pi-setup/filesystem/root/etc/docker.image.versions ; then
+if curl -s https://github.com/dirkhh/adsb-feeder-image/tree/main/src/modules/adsb-pi-setup/filesystem/root/opt/adsm/docker.image.versions ; then
 	echo "${TIME}: successfully retrieved new image versions from server" >> /var/log/update.log
 else
 	echo "${TIME}: failed to retrieved new image versions from server" >> /var/log/update.log
