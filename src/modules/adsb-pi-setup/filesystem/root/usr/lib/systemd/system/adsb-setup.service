@@ -5,7 +5,8 @@ After=network-online.target
 [Service]
 RemainAfterExit=yes
 WorkingDirectory=/usr/local/share/adsb-pi-setup
-ExecStart=/usr/bin/flask --app app run --host 0.0.0.0
+# ppa deadsnakes python 3.11
+ExecStart=/usr/bin/python3 /usr/local/share/adsb-pi-setup/app.py
 Restart=always
 
 [Install]
