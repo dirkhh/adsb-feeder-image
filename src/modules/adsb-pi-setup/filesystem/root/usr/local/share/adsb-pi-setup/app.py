@@ -15,10 +15,9 @@ from flask import Flask, flash, redirect, render_template, request, send_file, u
 from utils import (
     Constants,
     EnvFile,
-    Restart,
+    System,
     RouteManager,
     SDRDevices,
-    Lock,
     check_restart_lock,
 )
 from werkzeug.utils import secure_filename
@@ -35,13 +34,9 @@ class AdsbIm:
 
         self._routemanager = RouteManager(self.app)
 
-        self._lock = Lock()
-        self._restart = Restart(self._lock)
-        self._envfile = EnvFile(
-            constants=Constants(), restart=self._restart,
-        )
+        self._system = System()
+        self._envfile = EnvFile(constants=Constants())
         self._sdrdevices = SDRDevices(envfile=self._envfile)
-
 
         self.proxy_routes = Constants.proxy_routes
         self.app.add_url_rule("/propagateTZ", "propagateTZ", self.get_tz)
@@ -74,9 +69,9 @@ class AdsbIm:
         self.app.run(host="0.0.0.0", port=80, debug=debug)
 
     def _debug_cleanup(self):
-        '''
+        """
         This is a debug function to clean up the docker-starting.lock file
-        '''
+        """
         # rm /opt/adsb/docker-starting.lock
         try:
             os.remove("/opt/adsb/docker-starting.lock")
@@ -113,19 +108,7 @@ class AdsbIm:
         )
 
     def backup_execute(self):
-        adsb_path = pathlib.Path("/opt/adsb")
-        data = io.BytesIO()
-        with zipfile.ZipFile(data, mode="w") as backup_zip:
-            backup_zip.write(adsb_path / ".env", arcname=".env")
-            for f in adsb_path.glob("*.yml"):
-                backup_zip.write(f, arcname=os.path.basename(f))
-            for f in adsb_path.glob("*.yaml"):  # FIXME merge with above
-                backup_zip.write(f, arcname=os.path.basename(f))
-            uf_path = pathlib.Path(adsb_path / "ultrafeeder")
-            if uf_path.is_dir():
-                for f in uf_path.rglob("*"):
-                    backup_zip.write(f, arcname=f.relative_to(adsb_path))
-        data.seek(0)
+        self._system.backup()
         return send_file(
             data,
             mimetype="application/zip",
@@ -219,7 +202,7 @@ class AdsbIm:
             "frequencies": self._sdrdevices.addresses_per_frequency,
         }
 
-    #@app.route("/advanced", methods=("GET", "POST"))
+    # @app.route("/advanced", methods=("GET", "POST"))
     @check_restart_lock
     def advanced(self):
         if request.method == "POST":
@@ -517,22 +500,18 @@ class AdsbIm:
             self.update_env()
             self._restart.restart_systemd()
             return redirect("/restarting")
-        if request.form.get("get-fr24-sharing-key") == "go":
-            return self.fr24_setup()
-        elif request.form.get("get-pw-api-key") == "go":
-            return self.pw_setup()
-        elif request.form.get("get-fa-api-key") == "go":
-            return self.fa_setup()
-        elif request.form.get("get-rb-sharing-key") == "go":
-            return self.rb_setup()
-        elif request.form.get("get-pf-sharecode") == "go":
-            return self.pf_setup()
-        elif request.form.get("get-ah-station-key") == "go":
-            return self.ah_setup()
-        elif request.form.get("get-os-info") == "go":
-            return self.os_setup()
-        elif request.form.get("get-rv-feeder-key") == "go":
-            return self.rv_setup()
+        for key, value in [
+            ("get-fr24-sharing-key", self.fr24_setup),
+            ("get-pw-api-key", self.pw_setup),
+            ("get-fa-api-key", self.fa_setup),
+            ("get-rb-sharing-key", self.rb_setup),
+            ("get-pf-sharecode", self.pf_setup),
+            ("get-ah-station-key", self.ah_setup),
+            ("get-os-info", self.os_setup),
+            ("get-rv-feeder-key", self.rv_setup),
+        ]:
+            if request.form.get(key) == "go":
+                return value()
         else:
             # how did we get here???
             return "something went wrong"
@@ -540,7 +519,7 @@ class AdsbIm:
     def update_env(self):
         env_updates = {
             box: "1" if request.form.get(box) == "on" else "0"
-            for box in ["FR24", "PW", "FA", "RB", "PF", "AH", "OS", "RV"] # FIXME
+            for box in ["FR24", "PW", "FA", "RB", "PF", "AH", "OS", "RV"]  # FIXME
         }
         net = self._envfile.generate_ultrafeeder_config(request.form)
         # ^ WTF? why are we messing with it here? FIXME

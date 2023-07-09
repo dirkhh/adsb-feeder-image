@@ -5,15 +5,12 @@ from os import path
 from typing import Dict
 from uuid import uuid4
 
-from .netconfig import NetConfig
 from .constants import Constants
-from .system import Restart
 
 
 class EnvFile:
-    def __init__(self, constants: Constants, restart: Restart = None):
+    def __init__(self, constants: Constants):
         self.constants = constants
-        self.restart = restart
         self._setup()
         self.set_default_envs()
         self.netconfigs = self.constants.netconfigs
