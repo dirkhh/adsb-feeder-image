@@ -2,7 +2,7 @@
 
 Easy to use turn-key SD card image for a number of single board computers.
 Currently we are building images for
-- Raspberry Pi Zero 2, 3a/b, and 4 (tested on 3a and 4 - note that Pi Zero W will NOT work)
+- Raspberry Pi Zero 2, 3a/b, and 4 (tested on Zero 2W, 3a, and 4 - note that Pi Zero W will NOT work)
 - Asus Tinkerboard (tested)
 - Libre Computing Le Potato (tested) and Renegade (tested)
 - Orange Pi 3LTS (tested - no wifi support), 4LTS, and 5
@@ -41,13 +41,14 @@ an indoor or (much better) outdoor antenna is all you need
 - if doing this with the RPi image, only use the 'wifi setup' option to make sure the image can connect to your wifi - everything else should be
 kept unchanged
 - boot from the image
-- wait a couple of minutes for the initial boot to complete, then connect to the [ADSB-PI Setup Page](http://adsb-feeder.local:5000) -- this link
+- wait a couple of minutes for the initial boot to complete, then connect to the [ADSB-PI Setup Page](http://adsb-feeder.local) -- this link
 _should_ work to find the freshly booted system on your local network - assuming you have a reasonably standard setup with mDNS enabled. If this fails. got to the [adsb.im redirector](http://my.adsb.im) - which should forward you to the right local address on your network.
 - on the setup website enter the latitude, longitude, and elevation of your receiver as well as a name.
 - there's a convenient button to get the correct time zone from your browser
+- finally there's a quick selection of the 'semi anonymous' aggregators to submit data to - the ones where you need accounts are on a separate config page
 - click on Submit and then be patient while everything gets installed and setup - depending on your internet speed this could take several minutes
 - there are two more pages to choose some options and decide which aggregators to feed
-- once the setup is completed, there's a big blue button - once you click that, you'll be automatically forwarded you to your local [feeder website](http://adsb-pi.local:8080) and you should see the aircraft that you are tracking. And in the background, all these plane positions are fed to the ADS-B aggregators that you selected earlier.
+- once the setup is completed, you'll be forwarded to your feeder home page from where you can go to all of the various pages that your feeder offers. Usually a good one to start with is the TAR1090 Map at the top.
 
 # for developers
 
