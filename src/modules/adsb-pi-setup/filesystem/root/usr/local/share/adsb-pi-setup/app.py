@@ -15,7 +15,6 @@ from flask import Flask, flash, redirect, render_template, request, send_file, u
 from utils import (
     Constants,
     EnvFile,
-    NetConfigs,
     Restart,
     RouteManager,
     SDRDevices,
@@ -38,9 +37,8 @@ class AdsbIm:
 
         self._lock = Lock()
         self._restart = Restart(self._lock)
-        self._netconfigs = NetConfigs()
         self._envfile = EnvFile(
-            Constants.env_file_path, restart=self._restart, netconfigs=self._netconfigs
+            constants=Constants(), restart=self._restart,
         )
         self._sdrdevices = SDRDevices(envfile=self._envfile)
 

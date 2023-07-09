@@ -1,7 +1,7 @@
 # dataclass
 
 from dataclasses import dataclass
-
+from .netconfig import NetConfig
 
 @dataclass
 class Constants:
@@ -55,3 +55,46 @@ class Constants:
     }
 
     env_file_path = "/opt/adsb/.env"
+
+    netconfigs = {
+        "adsblol": NetConfig(
+            "adsb,feed.adsb.lol,30004,beast_reduce_plus_out",
+            "mlat,feed.adsb.lol,31090,39001",
+            has_policy=True,
+        ),
+        "flyitaly": NetConfig(
+            "adsb,dati.flyitalyadsb.com,4905,beast_reduce_plus_out",
+            "mlat,dati.flyitalyadsb.com,30100,39002",
+            has_policy=True,
+        ),
+        "adsbx": NetConfig(
+            "adsb,feed1.adsbexchange.com,30004,beast_reduce_plus_out",
+            "mlat,feed.adsbexchange.com,31090,39003",
+            has_policy=True,
+        ),
+        "tat": NetConfig(
+            "adsb,feed.theairtraffic.com,30004,beast_reduce_plus_out",
+            "mlat,feed.theairtraffic.com,31090,39004",
+            has_policy=False,
+        ),
+        "ps": NetConfig(
+            "adsb,feed.planespotters.net,30004,beast_reduce_plus_out",
+            "mlat,mlat.planespotters.net,31090,39005",
+            has_policy=True,
+        ),
+        "adsbone": NetConfig(
+            "adsb,feed.adsb.one,64004,beast_reduce_plus_out",
+            "mlat,feed.adsb.one,64006,39006",
+            has_policy=False,
+        ),
+        "adsbfi": NetConfig(
+            "adsb,feed.adsb.fi,30004,beast_reduce_plus_out",
+            "mlat,feed.adsb.fi,31090,39007",
+            has_policy=False,
+        ),
+        "avdelphi": NetConfig(
+            "adsb,data.avdelphi.com,24999,beast_reduce_plus_out",
+            "",
+            has_policy=True,
+        ),
+    }

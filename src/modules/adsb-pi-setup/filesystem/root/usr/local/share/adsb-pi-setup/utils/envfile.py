@@ -5,25 +5,23 @@ from os import path
 from typing import Dict
 from uuid import uuid4
 
+from .netconfig import NetConfig
 from .constants import Constants
-from .netconfig import CurrentNetConfig, NetConfig, NetConfigs
 from .system import Restart
 
 
 class EnvFile:
-    def __init__(
-        self, env_file_path: str, restart: Restart = None, netconfigs: NetConfigs = None
-    ):
-        self.env_file_path = env_file_path
+    def __init__(self, constants: Constants, restart: Restart = None):
+        self.constants = constants
         self.restart = restart
         self._setup()
         self.set_default_envs()
-        self.netconfigs = netconfigs
+        self.netconfigs = self.constants.netconfigs
 
     def _setup(self):
         # if file does not exist, create it
-        if not path.isfile(self.env_file_path):
-            open(self.env_file_path, "w").close()
+        if not path.isfile(self.constants.env_file_path):
+            open(self.constants.env_file_path, "w").close()
 
     def _get_base_version(self):
         basev = "unknown"
@@ -79,7 +77,7 @@ class EnvFile:
     def envs(self):
         env_values = {}
 
-        with open(self.env_file_path) as f:
+        with open(self.constants.env_file_path) as f:
             for line in f.readlines():
                 if line.strip().startswith("#"):
                     continue
@@ -89,7 +87,7 @@ class EnvFile:
         return env_values
 
     def update(self, values: Dict[str, str]):
-        with open(self.env_file_path, "r") as f:
+        with open(self.constants.env_file_path, "r") as f:
             lines = f.readlines()
 
         updated_lines = []
@@ -111,15 +109,15 @@ class EnvFile:
                 continue
             updated_lines.append(f"{key}={value}\n")
 
-        with open(self.env_file_path, "w") as f:
+        with open(self.constants.env_file_path, "w") as f:
             f.writelines(updated_lines)
 
     @property
     def metadata(self):
         metadata = {}
         ultrafeeder = self.envs.get("FEEDER_ULTRAFEEDER_CONFIG", "").split(";")
-        for key in self.netconfigs.get_keys():
-            adsb_normal, mlat_normal = self.netconfigs.configs[key].normal.split(";")
+        for key in self.constants.netconfigs.keys():
+            adsb_normal, mlat_normal = self.constants.netconfigs[key].normal.split(";")
             # check that in ultrafeeder,
             # these lines exist (checking if it starts with this is enough,
             # because we might change UUID or mlat privacy)
@@ -170,7 +168,6 @@ class EnvFile:
         if metadata_override:
             metadata.update(metadata_override)
 
-
         # This is the magic that generates the ultrafeeder config
         # FIXME make this more readable... split it up
         candidate = set(
@@ -191,8 +188,8 @@ class EnvFile:
             # let's switch based on 3 options, all, priv, ind
             if initial_setup in ["all", "priv"]:
                 # add all netconfigs
-                for key in self.netconfigs.get_keys():
-                    net_config = self.netconfigs.get_config(key).generate(
+                for key in self.constants.netconfigs.keys():
+                    net_config = self.constants.netconfigs[key].generate(
                         mlat_privacy=mlat_privacy,
                         uuid=self.envs.get("ADSBLOL_UUID")
                         if key == "adsblol"
@@ -201,7 +198,7 @@ class EnvFile:
                     # If we are only privacy policy, skip netconfigs without policy
                     if (
                         initial_setup == "priv"
-                        and not self.netconfigs.get_config(key).has_policy
+                        and not self.constants.netconfigs[key].has_policy
                     ):
                         continue
                     candidate.add(net_config)
@@ -215,19 +212,26 @@ class EnvFile:
             # If metadata[key] is in netconfigs and not "on"; add it to keys_to_remove
 
             keys_to_add = [
-                key for key in metadata if metadata[key] == "on" and key in self.netconfigs.get_keys()
+                key
+                for key in metadata
+                if metadata[key] == "on" and key in self.constants.netconfigs.keys()
             ]
             keys_to_remove = [
-                key for key in metadata if metadata[key] != "on" and key in self.netconfigs.get_keys()
+                key
+                for key in metadata
+                if metadata[key] != "on" and key in self.constants.netconfigs.keys()
             ]
 
+
             for key in keys_to_remove:
-                normal_lines = self.netconfigs.get_config(key).normal.split(";")
+                normal_lines = self.constants.netconfigs[key].normal.split(";")
                 for line in candidate.copy():
-                    if any(line.startswith(normal_line) for normal_line in normal_lines):
+                    if any(
+                        line.startswith(normal_line) for normal_line in normal_lines
+                    ):
                         candidate.remove(line)
             for key in keys_to_add:
-                net_config = self.netconfigs.get_config(key).generate(
+                net_config = self.constants.netconfigs[key].generate(
                     mlat_privacy=mlat_privacy,
                     uuid=self.envs.get("ADSBLOL_UUID") if key == "adsblol" else None,
                 )
@@ -236,7 +240,7 @@ class EnvFile:
         if self.envs.get("FEEDER_978"):
             candidate.add("adsb,dump978,30978,uat_in")
         if self.envs.get("FEEDER_1090", "").startswith("airspy"):
-                candidate.add("adsb,airspy_adsb,30005,beast_in")
+            candidate.add("adsb,airspy_adsb,30005,beast_in")
 
         # Remove empty value from set, if any
         candidate.discard("")
