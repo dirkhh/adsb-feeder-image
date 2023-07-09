@@ -254,6 +254,11 @@ def handle_advanced_post_request():
             advanced_settings["FEEDER_978"] = serial978
             advanced_settings["FEEDER_ENABLE_UAT978"] = "yes"
             advanced_settings["FEEDER_URL_978"] = "http://dump978/skyaware978"
+            advanced_settings["FEEDER_UAT978_HOST"] = "dump978"
+            advanced_settings["FEEDER_PIAWARE_UAT978"] = "relay"
+        else:
+            for key in ("FEEDER_978", "FEEDER_ENABLE_UAT978", "FEEDER_URL_978", "FEEDER_UAT978_HOST", "FEEDER_PIAWARE_UAT978"):
+                advanced_settings[key] = ""
         num = get_sdr_info()["num"]
         advanced_settings["NUM_SDRS"] = num
         advanced_settings["SDR_MANUALLY_ASSIGNED"] = "1"

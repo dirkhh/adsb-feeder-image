@@ -11,6 +11,8 @@ services:
       - 8082:80
     environment:
       - BEASTHOST=ultrafeeder
+      - UAT_RECEIVER_TYPE=${FEEDER_PIAWARE_UAT978}
+      - UAT_RECEIVER_HOST=${FEEDER_UAT978_HOST}
       - LAT=${FEEDER_LAT}
       - LONG=${FEEDER_LONG}
       - TZ=${FEEDER_TZ}

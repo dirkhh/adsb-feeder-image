@@ -8,6 +8,7 @@ services:
     restart: always
     environment:
       - BEASTHOST=ultrafeeder
+      - UAT_RECEIVER_HOST=${FEEDER_UAT978_HOST}
       - LAT=${FEEDER_LAT}
       - LONG=${FEEDER_LONG}
       - ALT=${FEEDER_ALT_M}
