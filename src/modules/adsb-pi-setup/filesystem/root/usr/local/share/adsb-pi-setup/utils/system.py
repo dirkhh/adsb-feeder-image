@@ -6,6 +6,7 @@ import threading
 import zipfile
 
 from .constants import Constants
+import path
 class Lock:
     # This class is used to lock the system from being modified while
     # pending changes are being made.
@@ -81,3 +82,37 @@ class System:
                     backup_zip.write(f, arcname=f.relative_to(self._constants.data_path))
         data.seek(0)
         return data
+
+class Version:
+    def __init__(self):
+        self._version = None
+        self.constants = Constants()
+
+    def _get_base_version(self):
+        basev = "unknown"
+        if path.isfile(self.constants.version_file):
+            with open(self.constants.version_file, "r") as v:
+                basev = v.read().strip()
+        if basev == "":
+            # something went wrong setting up the version info when
+            # the image was crated - try to get an approximation
+            output: str = ""
+            try:
+                result = subprocess.run(
+                    'ls -o -g --time-style="+%y%m%d" /etc/adsb.im.version | cut -d\  -f 4',
+                    shell=True,
+                    capture_output=True,
+                    timeout=5.0,
+                )
+            except subprocess.TimeoutExpired as exc:
+                output = exc.stdout.decode().strip()
+            else:
+                output = result.stdout.decode().strip()
+            if len(output) == 6:
+                basev = f"{output}-0"
+            return basev
+
+    def __str__(self):
+        if self._version is None:
+            self._version = self._get_base_version()
+        return self._version
