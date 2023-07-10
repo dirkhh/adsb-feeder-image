@@ -127,6 +127,12 @@ class Constants:
         Env("_ADSBIM_VERSION_DATE", False),
         Env("_ADSBIM_VERSION_HASH", False),
         Env(
+            "_ADSB_STATE_IS_SECURE_IMAGE",
+            is_mandatory=False,
+            default=False,
+            tags=["secure_image", "is_enabled"]
+        ),
+        Env(
             "_ADSBIM_STATE_IS_FLIGHTRADAR24_ENABLED",
             False,
             tags=["other_aggregator", "is_enabled", "fr24"],
@@ -185,9 +191,17 @@ class Constants:
         Env(
             "_ADSBIM_STATE_IS_NIGHTLY_BASE_UPDATE_ENABLED",
             False,
-            tags=["nightly_base_update", "enabled"],
+            tags=["nightly_base_update", "is_enabled"],
+        ),Env(
+            "_ADSBIM_STATE_IS_NIGHTLY_FEEDER_UPDATE_ENABLED",
+            False,
+            tags=["nightly_feeder_update", "is_enabled"],
         ),
-        Env("_ADSBIM_STATE_IS_NIGHTLY_CONTAINER_UPDATE_ENABLED", False),
+        Env(
+            "_ADSBIM_STATE_IS_NIGHTLY_CONTAINER_UPDATE_ENABLED",
+            False,
+            tags=["nightly_container_update", "is_enabled"]),
+        )
         # Other aggregator images
         Env("_ADSBIM_CONTAINER_FR24", True, tags=["fr24", "container"]),
         Env("_ADSBIM_CONTAINER_FLIGHTAWARE", True, tags=["flightaware", "container"]),
