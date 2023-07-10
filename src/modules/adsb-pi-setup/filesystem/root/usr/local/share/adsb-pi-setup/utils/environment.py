@@ -9,7 +9,6 @@ class Env:
         name: str,
         value: str = None,
         is_mandatory: bool = True,
-        frontend_names: List[str] = None,
         default: str = "",
         default_call: callable = None,
         value_call: callable = None,
@@ -18,7 +17,6 @@ class Env:
         self._name = name
         self._value = value
         self._is_mandatory = is_mandatory
-        self._frontend_names = frontend_names
         self._default = default
         self._value_call = value_call
         self._tags = tags

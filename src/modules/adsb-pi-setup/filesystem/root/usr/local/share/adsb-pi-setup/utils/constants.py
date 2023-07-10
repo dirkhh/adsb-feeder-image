@@ -86,25 +86,25 @@ class Constants:
     _env = {
         # Mandatory!
         # Position
-        Env("FEEDER_LAT", True, frontend_names=["lat"]),
-        Env("FEEDER_LONG", True, frontend_names=["lng"]),
-        Env("FEEDER_ALT_M", True, frontend_names=["alt"]),
-        Env("FEEDER_TZ", True, frontend_names=["form_timezone"]),
-        Env("MLAT_SITE_NAME", True, frontend_names=["mlat_name"]),
+        Env("FEEDER_LAT", True, tags=["lat"]),
+        Env("FEEDER_LONG", True, tags=["lng"]),
+        Env("FEEDER_ALT_M", True, tags=["alt"]),
+        Env("FEEDER_TZ", True, tags=["form_timezone"]),
+        Env("MLAT_SITE_NAME", True, tags=["mlat_name"]),
         # SDR
         Env("FEEDER_RTL_SDR", True, default="rtlsdr"),
         Env("FEEDER_ENABLE_BIASTEE", True, default="false"),
         Env("FEEDER_READSB_GAIN", True, default="autogain"),
-        Env("FEEDER_SERIAL_1090", False, frontend_names=["1090"]),  # FIXME
-        Env("FEEDER_978", False, frontend_names=["978"]),  # FIXME
+        Env("FEEDER_SERIAL_1090", False, tags=["1090"]),  # FIXME
+        Env("FEEDER_978", False, tags=["978"]),  # FIXME
         # Feeder
         Env("ADSBLOL_UUID", True, default_call=lambda: str(uuid4())),
         Env("ULTRAFEEDER_UUID", True, default_call=lambda: str(uuid4())),
-        Env("MLAT_PRIVACY", True, default="--privacy", frontend_names=["mlat_privacy"]),
+        Env("MLAT_PRIVACY", True, default="--privacy", tags=["mlat_privacy"]),
         Env("FEEDER_TAR1090_USEROUTEAPI", True, default="1"),
         # Misc
         Env(
-            "FEEDER_HEYWHATSTHAT_ID", False, frontend_names=["FEEDER_HEYWHATSTHAT_ID"]
+            "FEEDER_HEYWHATSTHAT_ID", False, tags=["FEEDER_HEYWHATSTHAT_ID"]
         ),  # FIXME
         # Other aggregators keys
         Env("FEEDER_FR24_SHARING_KEY", False, tags=["fr24", "key"]),
@@ -121,13 +121,13 @@ class Constants:
             "_ADSB_IM_AGGREGATORS_SELECTION",
             True,
             default="",
-            frontend_names=["aggregators"],
+            tags=["aggregators"],
         ),
         Env("_ADSBIM_VERSION", False, tags=["version"]),
         Env("_ADSBIM_VERSION_DATE", False),
         Env("_ADSBIM_VERSION_HASH", False),
         Env(
-            "_ADSB_STATE_IS_SECURE_IMAGE",
+            "_ADSBIM_STATE_IS_SECURE_IMAGE",
             is_mandatory=False,
             default=False,
             tags=["secure_image", "is_enabled"]
@@ -136,49 +136,41 @@ class Constants:
             "_ADSBIM_STATE_IS_FLIGHTRADAR24_ENABLED",
             False,
             tags=["other_aggregator", "is_enabled", "fr24"],
-            frontend_names=["FR"],
         ),
         Env(
             "_ADSBIM_STATE_IS_PLANEWATCH_ENABLED",
             False,
             tags=["other_aggregator", "is_enabled", "plane_watch"],
-            frontend_names=["PW"],
         ),
         Env(
             "_ADSBIM_STATE_IS_FLIGHTAWARE_ENABLED",
             False,
             tags=["other_aggregator", "is_enabled", "flightaware"],
-            frontend_names=["FA"],
         ),
         Env(
             "_ADSBIM_STATE_IS_RADARBOX24_ENABLED",
             False,
             tags=["other_aggregator", "is_enabled", "radarbox24"],
-            frontend_names=["RB"],
         ),
         Env(
             "_ADSBIM_STATE_IS_PLANEFINDER_ENABLED",
             False,
             tags=["other_aggregator", "is_enabled", "planefinder"],
-            frontend_names=["PF"],
         ),
         Env(
             "_ADSBIM_STATE_IS_ADSBHUB_ENABLED",
             False,
             tags=["other_aggregator", "is_enabled", "adsb_hub"],
-            frontend_names=["AH"],
         ),
         Env(
             "_ADSBIM_STATE_IS_OPENSKY_ENABLED",
             False,
             tags=["other_aggregator", "is_enabled", "opensky"],
-            frontend_names=["OS"],
         ),
         Env(
             "_ADSBIM_STATE_IS_RADARVIRTUEL_ENABLED",
             False,
             tags=["other_aggregator", "is_enabled", "radar_virtuel"],
-            frontend_names=["RV"],
         ),
         Env("_ADSBIM_STATE_IS_AIRSPY_ENABLED", False, tags=["airspy", "enabled"]),
         Env("_ADSBIM_STATE_IS_PORTAINER_ENABLED", False, tags=["portainer", "enabled"]),
@@ -263,13 +255,6 @@ class Constants:
     def env(self, name: str):
         for e in self._env:
             if e.name == name:
-                return e
-        return None
-
-    # helper function to find env by frontend name
-    def env_by_frontend(self, name: str):
-        for e in self._env:
-            if name in e.frontend_names:
                 return e
         return None
 
