@@ -3,31 +3,35 @@
 cd /opt/adsb
 TIME=$(date -Iseconds)
 
-# just in case - make some backups
-cp docker.image.versions docker.image.versions.${TIME}
-cp .env env.${TIME}
+if [ "$1" != "-no-fetch" ] ; then
+    # just in case - make some backups
+    cp docker.image.versions docker.image.versions.${TIME}
+    cp .env env.${TIME}
 
-if curl -s https://github.com/dirkhh/adsb-feeder-image/tree/main/src/modules/adsb-pi-setup/filesystem/root/opt/adsb/docker.image.versions ; then
-	echo "${TIME}: successfully retrieved new image versions from server" >> /var/log/update.log
-else
-	echo "${TIME}: failed to retrieved new image versions from server" >> /var/log/update.log
-	exit 1
+    UPSTREAM_PATH=https://github.com/dirkhh/adsb-feeder-image/tree/main/src/modules/adsb-pi-setup/filesystem/root/opt/adsb/docker.image.versions
+    if curl -s $UPSTREAM_PATH > docker.image.versions.new ; then
+        mv docker.image.versions.new docker.image.versions
+        echo "${TIME}: successfully retrieved new image versions from server" >> /var/log/update.log
+    else
+        echo "${TIME}: failed to retrieved new image versions from server" >> /var/log/update.log
+        exit 1
+    fi
+
+    # let's check if this really brings in anything new:
+    # if any of them are label based (instead of SHA), we have to do the docker pull, anyway
+    LABELS=$(grep -v "^#" docker.image.versions.${TIME} | grep -v @sha | wc -l)
+    if [ "$LABELS" = "0" ] ; then
+        sort < docker.image.versions.${TIME} > /tmp/old.div
+        sort < docker.image.versions > /tmp/new.div
+
+        if diff /tmp/old.div /tmp/new.div > /dev/null 2>&1 ; then
+            echo "${TIME}: no new container images" >> /var/log/update.log
+            exit 0
+        fi
+    fi
 fi
 
-# let's check if this really brings in anything new:
-# if any of them are label based (instead of SHA), we have to do the docker pull, anyway
-LABELS=$(grep -v "^#" docker.image.versions.${TIME} | grep -v @sha | wc -l)
-if [ "$LABELS" = "0" ] ; then
-	sort < docker.image.versions.${TIME} > /tmp/old.div
-	sort < docker.image.versions > /tmp/new.div
-
-	if diff /tmp/old.div /tmp/new.div > /dev/null 2>&1 ; then
-		echo "${TIME}: no new container images" >> /var/log/update.log
-		exit 0
-	fi
-fi
-
-grep -v "_CONTAINER=" env.${TIME} > env.new
+grep -v "_CONTAINER=" .env > env.new
 cat docker.image.versions >> env.new
 mv env.new .env
 

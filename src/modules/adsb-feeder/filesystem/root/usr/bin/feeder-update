@@ -1,0 +1,79 @@
+#!/bin/bash
+
+exec 2>&1 1>>/var/log/feeder-update.log
+
+# first - move this script to /opt/feeder-update and run it there
+DIR=$(dirname -- "$(readlink -f "${BASH_SOURCE}")")
+if [ "${DIR}" != "/opt/feeder-update" ]; then
+    echo "move $(basename $0) to /opt/feeder-update"
+    mkdir -p /opt/feeder-update
+    cp "${BASH_SOURCE}" /opt/feeder-update
+    bash /opt/feeder-update/$(basename $0) "$@"
+    exit
+fi
+echo "running $(basename $0) in ${DIR}"
+
+echo "checkout the upstream feeder image"
+cd ${DIR}
+if [ -d adsb-feeder-image ] ; then
+    cd adsb-feeder-image
+    git checkout main
+    git config pull.ff only
+    if ! git pull ; then
+        echo "git pull wasn't a fast forward, giving up"
+        exit
+    fi
+else
+    if ! git clone https://github.com/dirkhh/adsb-feeder-image; then
+        echo "git clone failed, giving up"
+        exit
+    fi
+    cd adsb-feeder-image
+fi
+
+if [ "$1" != "" ] ; then
+    TARGET="$1"
+    echo "trying to find the reference given: $TARGET"
+    if ! git checkout -B explicitTarget "$TARGET" ; then
+        echo "cannot find reference $TARGET, giving up"
+        exit
+    fi
+else
+    TARGET=$(git tag --sort=version:refname|tail -1)
+    git branch -D ${TARGET} 2> /dev/null
+    git checkout -b ${TARGET} ${TARGET}
+fi
+
+DATE_COMPONENT=$(git log -20 --date=format:%y%m%d --format="%ad" | uniq -c | head -1 | awk '{ print $2"."$1 }')
+TAG_COMPONENT=$(git describe --match "v[0-9]*" | cut -d- -f1)
+VERSION="${TAG_COMPONENT}-${DATE_COMPONENT}"
+echo "updating to ${VERSION}"
+
+echo "prepare the files that we need to replace"
+mkdir -p ${DIR}/root
+cp -r src/modules/adsb-feeder/filesystem/root ${DIR}
+cp -r src/modules/adsb-pi-setup/filesystem/root ${DIR}
+
+echo "stop the running services"
+for svc in adsb-web-forward.service adsb-setup.service ; do
+    systemctl stop $svc
+done
+
+echo "copy the updated files in place"
+cd ${DIR}/root
+cp -r . /
+
+# make sure the version information is correct
+echo $VERSION > /etc/adsb.im.version
+sed -i "s/BASE_VERSION=.*/BASE_VERSION=$VERSION/" /opt/adsb/.env
+
+echo "restart the services"
+systemctl daemon-reload
+for svc in adsb-web-forward.service adsb-setup.service ; do
+    systemctl start $svc
+done
+
+echo "finally, trigger a container upgrade so that they match the new image"
+/usr/bin/docker-update-adsb-im -no-fetch
+
+echo "update to ${VERSION} complete"

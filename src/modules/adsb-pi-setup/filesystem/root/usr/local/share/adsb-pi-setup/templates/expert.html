@@ -48,6 +48,9 @@
         <input type="checkbox" class="mb-3 col-sm-2" name="nightly_base" id="nightly_base"
             {% if env_values.get("NIGHTLY_BASE_UPDATE") == "1" %} checked {% endif %}>
         <label for="nightly_base" class="col-sm-10">Update the ADSB Feeder base OS every night</label>
+        <input type="checkbox" class="mb-3 col-sm-2" name="nightly_feeder" id="nightly_feeder"
+            {% if env_values.get("NIGHTLY_FEEDER_UPDATE") == "1" %} checked {% endif %}>
+        <label for="nightly_feeder" class="col-sm-10">Update the ADSB Feeder applications every night</label>
         <input type="checkbox" class="mb-3 col-sm-2" name="nightly_container" id="nightly_container"
             {% if env_values.get("NIGHTLY_CONTAINER_UPDATE") == "1" %} checked {% endif %}>
         <label for="nightly_container" class="col-sm-10">Update the ADSB Feeder containers every night</label>
@@ -61,10 +64,21 @@
 <form method="POST" onsubmit="show_spinner(); return true;">
   <div class="row">
     <label for="update" class="col-8">Update to the currently recommended container images.
-        This could take several minutes (depending on the speed of your internet connection and the amount of the
+        This could take several minutes, depending on the speed of your internet connection and the amount of the
         changes made in the containers.
     </label>
     <button type="submit" class="btn btn-primary mb-3 mt-3 ml-3 col-3" name="update" value="go">Update now</button>
+  </div>
+</form>
+
+<h2 class="mt-5">Update feeder applications</h2>
+<form method="POST" onsubmit="show_spinner(); return true;">
+  <div class="row">
+    <label for="update_feeder_aps" class="col-8">Update to the current ADSB feeder applications (i.e. the web UI and setup apps).
+        This could take several minutes, depending on the speed of your internet connection and the amount of the
+        changes made.
+    </label>
+    <button type="submit" class="btn btn-primary mb-3 mt-3 ml-3 col-3" name="update_feeder_aps" value="go">Update now</button>
   </div>
 </form>
 
