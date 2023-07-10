@@ -105,9 +105,12 @@ class AdsbIm:
         # Add to .env
         self._constants.env("FEEDER_tZ").value = browser_timezone
         # Set it as datetimectl too
-        subprocess.run(  # FIXME scary!
-            f"timedatectl set-timezone {browser_timezone}", shell=True, check=True
-        )
+        try:
+            subprocess.run(
+                f"timedatectl set-timezone {browser_timezone}", shell=True, check=True
+            )
+        except subprocess.SubprocessError:
+            print_err("failed to set up timezone")
         return render_template(
             "setup.html",
             env_values=self._constants.envs,
