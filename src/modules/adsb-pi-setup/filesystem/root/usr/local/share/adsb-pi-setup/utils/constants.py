@@ -74,7 +74,7 @@ class Constants:
         "adsbfi": NetConfig(
             "adsb,feed.adsb.fi,30004,beast_reduce_plus_out",
             "mlat,feed.adsb.fi,31090,39007",
-            has_policy=False,
+            has_policy=True,
         ),
         "avdelphi": NetConfig(
             "adsb,data.avdelphi.com,24999,beast_reduce_plus_out",
