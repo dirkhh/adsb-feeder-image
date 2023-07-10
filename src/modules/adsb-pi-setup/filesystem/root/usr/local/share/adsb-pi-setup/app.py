@@ -312,12 +312,54 @@ class AdsbIm:
             result = subprocess.run(
                 "/usr/bin/secure-image", shell=True, capture_output=True
             )
-
         except subprocess.TimeoutError as exc:
             output = exc.stdout.decode()
         else:
             output = result.stdout.decode()
         print_err(f"secure_image: {output}")
+
+    def handle_expert_post_request():
+        env_values = ENV_FILE.envs
+        allow_insecure = False if env_values.get("SECURE_IMAGE", "0") == "1" else True
+        if request.form.get("shutdown") == "go":
+            # do shutdown
+            subprocess.run("/usr/sbin/halt", shell=True)
+            return "System halted"  # that return statement is of course a joke
+        if request.form.get("reboot") == "go":
+            # initiate reboot
+            subprocess.run("/usr/sbin/reboot now &", shell=True)
+            return "System rebooting, please refresh in about a minute"
+        if request.form.get("secure_image") == "go":
+            ENV_FILE.update({"SECURE_IMAGE": "1"})
+            secure_image()
+            return redirect("/expert")
+        if allow_insecure and request.form.get("ssh") == "go":
+            ssh_pub = request.form.get("ssh-pub")
+            ssh_dir = pathlib.Path("/root/.ssh")
+            ssh_dir.mkdir(mode=0o700, exist_ok=True)
+            with open(ssh_dir / "authorized_keys", "a+") as authorized_keys:
+                authorized_keys.write(f"{ssh_pub}\n")
+            flash("Public key for root account added.", "Notice")
+            ENV_FILE.update({"SSH_CONFIGURED": "1"})
+            return redirect("/expert")
+        if request.form.get("update") == "go":
+            # this needs a lot more checking and safety, but for now, just go
+            cmdline = "/usr/bin/docker-update-adsb-im"
+            subprocess.run(cmdline, timeout=600.0, shell=True)
+            return redirect("/expert")
+        if request.form.get("nightly_update") == "go":
+            ENV_FILE.update({
+                "NIGHTLY_BASE_UPDATE": "1" if request.form.get("nightly_base") else "0",
+                "NIGHTLY_FEEDER_UPDATE": "1" if request.form.get("nightly_feeder") else "0",
+                "NIGHTLY_CONTAINER_UPDATE": "1" if request.form.get("nightly_container") else "0",
+            })
+        if request.form.get("zerotier") == "go":
+            ENV_FILE.update({
+                "ZEROTIER": "1",
+                "ZEROTIER_NETWORK_ID": request.form.get("zerotierid"),
+            })
+            # make sure the service is enabled (it really should be)
+            subprocess.call("/usr/bin/systemctl enable --now zerotier-one", shell=True)
 
     @check_restart_lock
     def aggregators(self):
