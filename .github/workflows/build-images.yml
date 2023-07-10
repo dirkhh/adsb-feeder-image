@@ -29,7 +29,6 @@ jobs:
         tag_exists_error: false
         force_push_tag: true
         message: "latest commit"
-        github_token: ${{ secrets.PAT_GITHUB_TOKEN }}
   # next run all the board builds
   build:
     runs-on: ubuntu-latest
@@ -204,7 +203,7 @@ jobs:
       uses: softprops/action-gh-release@v1
       if: ${{ startsWith(steps.tag.outputs.tag, 'v') }}
       with:
-        github_token: ${{ secrets.PAT_GITHUB_TOKEN }}
+        token: ${{ secrets.PAT_GITHUB_TOKEN }}
         files: "*.img.xz"
         generate_release_notes: true
 
@@ -213,7 +212,7 @@ jobs:
       uses: softprops/action-gh-release@v1
       if: ${{ startsWith(steps.tag.outputs.tag, 'g') }}
       with:
-        github_token: ${{ secrets.PAT_GITHUB_TOKEN }}
+        token: ${{ secrets.PAT_GITHUB_TOKEN }}
         files: "*.img.xz"
         generate_release_notes: true
         prerelease: true
