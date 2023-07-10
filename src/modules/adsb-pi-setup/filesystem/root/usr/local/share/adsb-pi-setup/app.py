@@ -238,11 +238,12 @@ class AdsbIm:
             return self.handle_advanced_post_request()
 
         # just in case things have changed (the user plugged in a new device for example)
+        # FIXME - SDR handling
         return render_template(
             "advanced.html",
             env_values=self._constants.envs,
         )
-
+    ''' -- poor man's multi line comment
     def handle_advanced_post_request(self):
         print_err("request_form", request.form)
         if request.form.get("submit") == "go":
@@ -284,8 +285,8 @@ class AdsbIm:
             "UF": "1"
         })
         print_err(f"calculated ultrafeeder config of {net}")
-    return redirect("/restarting")
-
+        return redirect("/restarting")
+    '''
     def handle_advanced_post_request(self):
         # Refactoring the above function to use the new self._constants._env objects.
 
