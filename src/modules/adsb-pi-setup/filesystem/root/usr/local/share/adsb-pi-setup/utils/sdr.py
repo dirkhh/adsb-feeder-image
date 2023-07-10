@@ -53,28 +53,26 @@ class SDRDevices:
             print("lsusb failed", file=sys.stderr)
         output = io.StringIO(result.stdout.decode())
         for line in output:
-            rtl_sdr_match = re.search(
-                "Bus ([0-9a-fA-F]+) Device ([0-9a-fA-F]+): ID 0bda:2838", line
-            )
-            if rtl_sdr_match:
-                address = f"{rtl_sdr_match.group(1)}:{rtl_sdr_match.group(2)}"
-                print(f"get_sdr_info() found RTL SDR at {address}", file=sys.stderr)
-                # If it already exists, don't add it again
-                candidate = SDR("rtlsdr", address)
-                if candidate not in self.sdrs:
-                    self.sdrs.append(candidate)
-            airspy_match = re.search(
-                "Bus ([0-9a-fA-F]+) Device ([0-9a-fA-F]+): ID 1d50:60a1", line
-            )
-            if airspy_match:
-                address = f"{airspy_match.group(1)}:{airspy_match.group(2)}"
-                print(f"get_sdr_info() found Airspy at {address}", file=sys.stderr)
-                candidate = SDR("airspy", address)
-                if candidate not in self.sdrs:
-                    self.sdrs.append(candidate)
+            for pidvid in ("1d50:60a1", "0bda:2838", "0bda:2832"):
+                address = self._get_address_for_pid_vid(pidvid, line)
+                if address:
+                    print(f"get_sdr_info() found SDR {pidvid} at {address}")
+                    if pidvid == "1d50:60a1":
+                        candidate = SDR("airspy", address)
+                    else:
+                        candidate = SDR("rtlsdr", address)
+                    if candidate not in self.sdrs:
+                        self.sdrs.append(candidate)
 
     def _ensure_populated(self):
         self.get_sdr_info()
+
+    def _get_address_for_pid_vid(self, pidvid: str, line: str):
+        address = ""
+        match = re.search(f"Bus ([0-9a-fA-F]+) Device ([0-9a-fA-F]+): ID {pidvid}", line)
+        if match:
+            address = f"{match.group(1)}:{match.group(2)}"
+        return address
 
     @property
     def addresses_per_frequency(self, frequencies: list = [1090, 978]):
@@ -95,6 +93,6 @@ class SDRDevices:
                     ret[1090] = sdr
                 elif sdr._serial == "978":
                     ret[978] = sdr
-                elif not ret[1090]:
-                    ret[1090] = sdr
+        if not ret[1090] and len(self.sdrs) == 1:
+            ret[1090] = self.sdrs[0]
         return ret
