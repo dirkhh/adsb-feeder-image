@@ -79,7 +79,7 @@ class AdsbIm:
         self.app.add_url_rule("/", "director", self.director)
         self.app.add_url_rule("/index", "index", self.index)
         self.app.add_url_rule("/setup", "setup", self.setup, methods=["GET", "POST"])
-        self.app.add_url_rule("/api/can_read_sdr", "can_read_sdr", self.can_read_sdr)
+        self.app.add_url_rule("/api/sdr_info", "sdr_info", self.sdr_info)
 
     def run(self):
         self._routemanager.add_proxy_routes(self.proxy_routes)
@@ -221,7 +221,7 @@ class AdsbIm:
                 "/advanced"
             )  # that's a good place from where the user can continue
 
-    def can_read_sdr(self):
+    def sdr_info(self):
         return {
             # FIXME
             "sdrdevices": [sdr._json for sdr in self._sdrdevices.sdrs],

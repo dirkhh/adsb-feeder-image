@@ -42,7 +42,7 @@
             You have more than one SDR connected. Please assign them for their roles.
         </div>
         <div class="col-sm-3 no-gutters">
-            <button type="button" name="sdr_can_read" onclick="can_read_sdr()">Check SDRs</button>
+            <button type="button" name="update_sdr_info" onclick="sdr_info()">Check SDRs</button>
         </div>
         <div class="col-sm-9 no-gutters">
             <div class="row">
@@ -76,10 +76,10 @@
 </form>
 <script>
     document.addEventListener('readystatechange', event => {
-            if (event.target.readyState === "complete") { can_read_sdr() }
+            if (event.target.readyState === "complete") { sdr_info() }
     })
-    function can_read_sdr() {
-        fetch(`${SCRIPT_ROOT}/api/can_read_sdr`)
+    function sdr_info() {
+        fetch(`${SCRIPT_ROOT}/api/sdr_info`)
             .then( response => response.json() )
             .then( data => {
                 console.log("received back", data);
