@@ -393,17 +393,17 @@ class AdsbIm:
     @check_restart_lock
     def setup(self):
         if request.method != "POST" and request.form.get("submit") != "go":
+            def env_value_by_tag(tag: str):
+                return self._constants.env_by_tags(tag)
             return render_template(
                 "setup.html",
-                env_values=self._constants.envs,
+                env_value_by_tag=env_value_by_tag,
             )
 
         # in the HTML, every input field needs to have a name that is concatenated by "--"
         # and that matches the tags of one Env
         for key, value in request.form:
             self._constants.env_by_tags(key.split("--")).value = value
-
-
         # FIXME finish me
 
     # FIXME tear me up into my own class please.

@@ -5,7 +5,7 @@
 <h1>{% block title %} Setup required parameters {% endblock %}</h1>
 
 <p>If you are new to the ADSB Feeder Image, please fill out the data below. You can use the
-<a href="https://www.freemaptools.com/elevation-finder.htm">location and elevation finder tool</a>
+<a href="https://www.freemaptools.com/elevation-finder.htm" target="_blank">location and elevation finder tool</a>
 to find your lat / long / altitude</p>
 <p>If you are upgrading from a previous version of the ADSB Feeder Image, you can also
 <a class="btn btn-secondary" href="{{  url_for('restore') }}">restore your configuration backup</a></p>
@@ -14,29 +14,29 @@ to find your lat / long / altitude</p>
         <label for="mlat_name">Station Name (shows up on public maps if enabled later)</label>
         <input type="text" name="mlat_name"
                required
-               placeholder="my-awesome-antenna-AMS" class="form-control"
-               value="{{ env_values['MLAT_SITE_NAME'] }}"></input>
+               placeholder="my-awesome-antenna" class="form-control"
+               value="{{ env_value_by_tag('mlat_name') }}"></input>
     </div>
     <div class="form-group">
         <label for="lat">Latitude</label>
         <input type="text" name="lat"
                required
                placeholder="Antenna latitude" class="form-control"
-               value="{{ env_values['FEEDER_LAT'] }}"></input>
+               value="{{ env_value_by_tag('lat') }}"></input>
     </div>
     <div class="form-group">
         <label for="lng">Longitude</label>
         <input type="text" name="lng"
                required
                placeholder="Antenna longitude" class="form-control"
-               value="{{ env_values['FEEDER_LONG'] }}"></input>
+               value="{{ env_value_by_tag('lng')] }}"></input>
     </div>
     <div class="form-group">
         <label for="alt">Altitude above mean sealevel in meters</label>
         <input type="text" name="alt"
                required
                placeholder="Antenna MSL altitude (in m)" class="form-control"
-               value="{{ env_values['FEEDER_ALT_M'] }}"></input>
+               value="{{ env_value_by_tag('alt') }}"></input>
     </div>
     <div class="form-group">
         <label for="tz">Timezone</label>
@@ -45,20 +45,20 @@ to find your lat / long / altitude</p>
                required
                placeholder="populate from the browser timezone by clicking the button above"
                class="form-control mt-2"
-               value="{{ env_values['FEEDER_TZ'] }}"></input>
+               value="{{ env_value_by_tag('tz') }}"></input>
     </div>
     <div class="form-group">
             <label >Which <a href="#" title="aggregators that don't require you to create an account or provide an email address">semi-anonymous </a>
                    aggregators do you want to feed?</label><br/>
             <div>
-                <input type="radio" name="aggregators" id="all" value="all" required {% if env_values["_ADSB_IM_AGGREGATORS_SELECTION"] == "all" %} checked {% endif %}>
+                <input type="radio" name="aggregators" id="all" value="all" required {% if env_value_by_tag("aggregators") == "all" %} checked {% endif %}>
                 <label class="form-check-label mr-3" for="all">All</label>
-                <input type="radio" name="aggregators" id="privacy" value="privacy"  {% if env_values["_ADSB_IM_AGGREGATORS_SELECTION"] == "privacy" %} checked {% endif %}>
+                <input type="radio" name="aggregators" id="privacy" value="privacy"  {% if env_value_by_tag("aggregators") == "privacy" %} checked {% endif %}>
                 <label class="form-check-label mr-3" for="privacy">Aggregators with privacy policy</label>
-                <input type="radio" name="aggregators" id="individual" value="individual"  {% if env_values["_ADSB_IM_AGGREGATORS_SELECTION"] == "individual" %} checked {% endif %}>
+                <input type="radio" name="aggregators" id="individual" value="individual"  {% if env_value_by_tag("aggregators") == "individual" %} checked {% endif %}>
                 <label class="form-check-label " for="individual">Pick individually</label>
             </div>
-            <div id="explain-all" style="display: {% if env_values['_ADSB_IM_AGGREGATORS_SELECTION'] == 'all' %} block {% else %} none {% endif %}; font-size: smaller;">
+            <div id="explain-all" style="display: {% if env_value_by_tag("aggregators") == 'all' %} block {% else %} none {% endif %}; font-size: smaller;">
                 With this option you will feed data to
                        <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
                        <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/">Fly Italy ADSB</a>,
@@ -69,15 +69,16 @@ to find your lat / long / altitude</p>
                        <a href="https://adsb.fi/">adsb.fi</a>,
                        <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
             </div>
-            <div id="explain-privacy" style="display: {% if env_values['_ADSB_IM_AGGREGATORS_SELECTION'] == 'priv' %} block {% else %} none {% endif %}; font-size: smaller;">
+            <div id="explain-privacy" style="display: {% if env_value_by_tag("aggregators") == 'priv' %} block {% else %} none {% endif %}; font-size: smaller;">
                 With this option you will feed data to
                        <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
                        <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/">Fly Italy ADSB</a>,
                        <a href="https://www.avdelphi.com/privacy.html">AVDelphi</a>,
                        <a href="https://www.planespotters.net/legal/privacypolicy/">planespotters.net</a>,
+                       <a href="https://adsb.fi/">adsb.fi</a>
                        <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
             </div>
-            <div id="explain-individual" style="display: {% if env_values['_ADSB_IM_AGGREGATORS_SELECTION'] == 'ind' %} block {% else %} none {% endif %}; font-size: smaller;">
+            <div id="explain-individual" style="display: {% if env_value_by_tag("aggregators") == 'ind' %} block {% else %} none {% endif %}; font-size: smaller;">
                 With this option you can make detailed selections on the Aggregator page.
             </div>
     </div>
