@@ -66,7 +66,10 @@ class System:
         return self._restart
 
     def halt(self):
-        subprocess.call("sudo halt", shell=True)
+        subprocess.call("halt", shell=True)
+
+    def reboot(self) -> None:
+        subprocess.call("reboot", shell=True)
 
     def _get_backup_data(self):
         data = io.BytesIO()
