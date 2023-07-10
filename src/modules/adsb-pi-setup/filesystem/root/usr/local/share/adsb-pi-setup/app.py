@@ -398,16 +398,11 @@ class AdsbIm:
                 env_values=self._constants.envs,
             )
 
-        # For each item in the form, try getting an env object with the matching frontend_name
-        envs = {
-            env.frontend_name: env
-            for env in self._constants.envs.values()
-            if env.frontend_name in request.form
-        }
+        # in the HTML, every input field needs to have a name that is concatenated by "--"
+        # and that matches the tags of one Env
+        for key, value in request.form:
+            self._constants.env_by_tags(key.split("--")).value = value
 
-        # Now we have a dict of env objects, we can update them all at once. How beautiful.
-        for env in envs.values():
-            env.value = request.form.get(env.frontend_name)
 
         # FIXME finish me
 
