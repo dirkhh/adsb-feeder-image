@@ -51,14 +51,14 @@ to find your lat / long / altitude</p>
             <label >Which <a href="#" title="aggregators that don't require you to create an account or provide an email address">semi-anonymous </a>
                    aggregators do you want to feed?</label><br/>
             <div>
-                <input type="radio" name="aggregators" id="all" value="all" required {% if env_values["FEEDER_AGG"] == "all" %} checked {% endif %}>
+                <input type="radio" name="aggregators" id="all" value="all" required {% if env_values["_ADSB_IM_AGGREGATORS_SELECTION"] == "all" %} checked {% endif %}>
                 <label class="form-check-label mr-3" for="all">All</label>
-                <input type="radio" name="aggregators" id="priv" value="priv"  {% if env_values["FEEDER_AGG"] == "priv" %} checked {% endif %}>
-                <label class="form-check-label mr-3" for="priv">Aggregators with privacy policy</label>
-                <input type="radio" name="aggregators" id="ind" value="ind"  {% if env_values["FEEDER_AGG"] == "ind" %} checked {% endif %}>
-                <label class="form-check-label " for="ind">Pick individually</label>
+                <input type="radio" name="aggregators" id="privacy" value="privacy"  {% if env_values["_ADSB_IM_AGGREGATORS_SELECTION"] == "privacy" %} checked {% endif %}>
+                <label class="form-check-label mr-3" for="privacy">Aggregators with privacy policy</label>
+                <input type="radio" name="aggregators" id="individual" value="individual"  {% if env_values["_ADSB_IM_AGGREGATORS_SELECTION"] == "individual" %} checked {% endif %}>
+                <label class="form-check-label " for="individual">Pick individually</label>
             </div>
-            <div id="explain-all" style="display: {% if env_values['FEEDER_AGG'] == 'all' %} block {% else %} none {% endif %}; font-size: smaller;">
+            <div id="explain-all" style="display: {% if env_values['_ADSB_IM_AGGREGATORS_SELECTION'] == 'all' %} block {% else %} none {% endif %}; font-size: smaller;">
                 With this option you will feed data to
                        <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
                        <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/">Fly Italy ADSB</a>,
@@ -69,7 +69,7 @@ to find your lat / long / altitude</p>
                        <a href="https://adsb.fi/">adsb.fi</a>,
                        <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
             </div>
-            <div id="explain-priv" style="display: {% if env_values['FEEDER_AGG'] == 'priv' %} block {% else %} none {% endif %}; font-size: smaller;">
+            <div id="explain-privacy" style="display: {% if env_values['_ADSB_IM_AGGREGATORS_SELECTION'] == 'priv' %} block {% else %} none {% endif %}; font-size: smaller;">
                 With this option you will feed data to
                        <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
                        <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/">Fly Italy ADSB</a>,
@@ -77,7 +77,7 @@ to find your lat / long / altitude</p>
                        <a href="https://www.planespotters.net/legal/privacypolicy/">planespotters.net</a>,
                        <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
             </div>
-            <div id="explain-ind" style="display: {% if env_values['FEEDER_AGG'] == 'ind' %} block {% else %} none {% endif %}; font-size: smaller;">
+            <div id="explain-individual" style="display: {% if env_values['_ADSB_IM_AGGREGATORS_SELECTION'] == 'ind' %} block {% else %} none {% endif %}; font-size: smaller;">
                 With this option you can make detailed selections on the Aggregator page.
             </div>
     </div>
@@ -94,18 +94,18 @@ function sendTimeToServer(){
     document.getElementById("form_timezone").value = dateTimeFormat.resolvedOptions()['timeZone'];
 }
 const explainAll = document.getElementById('explain-all');
-const explainPriv = document.getElementById('explain-priv');
-const explainInd = document.getElementById('explain-ind');
+const explainPriv = document.getElementById('explain-privacy');
+const explainInd = document.getElementById('explain-individual');
 function aggregatorClick() {
   if (document.getElementById('all').checked) {
     explainAll.style.display = 'block';
     explainPriv.style.display = 'none';
     explainInd.style.display = 'none';
-  } else if (document.getElementById('priv').checked) {
+  } else if (document.getElementById('privacy').checked) {
     explainAll.style.display = 'none';
     explainPriv.style.display = 'block';
     explainInd.style.display = 'none';
-  } else if (document.getElementById('ind').checked) {
+  } else if (document.getElementById('individual').checked) {
     explainAll.style.display = 'none';
     explainPriv.style.display = 'none';
     explainInd.style.display = 'block';

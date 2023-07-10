@@ -19,7 +19,6 @@
             (url_for('aggregators'), 'aggregators', 'Aggregators'),
             (url_for('backup'), 'backup', 'Backup'),
             (url_for('restore'), 'restore', 'Restore'),
-            (url_for('expert'), 'expert', 'Expert')
         ] -%}
         {% set active_page = active_page|default('index') -%}
         <a class="navbar-brand" href="{{ url_for('director') }}">ADSB Feeder</a>

@@ -5,31 +5,32 @@
     <h1>{% block title %} Setup additional aggregators {% endblock %}</h1>
 
     <div id="non-loader">
-        <form method="post" onsubmit="show_spinner(); return true;">
+        <!-- we send to /update to get the data to the backend -->
+        <form method="post" onsubmit="show_spinner(); return true;" action="{{ url_for('api_update') }}">
             <button type="submit" class="bigbigbutton" name="tar1090" value="go">
                 I'm done here - submit my changes
             </button>
-            <div class="row no-gutters" style="display: {%  if metadata['indagg'] == '1' %} block {% else %} none {% endif %} ">
-                <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="adsblol" id="adsblol" {{ metadata['adsblol'] }}/>
+            <div class="row no-gutters" style="display: {%  if env_values['_ADSB_IM_AGGREGATORS_SELECTION'] == 'individual' %} block {% else %} none {% endif %} ">
+                <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="adsblol" id="adsblol" {{ env_values['adsblol'] }}/>
                 <label for="adsblol" class="mb-3 col-sm-10">Submit your data to <a href="https://adsb.lol/privacy-license/">adsb.lol</a></label><br/>
-                <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="flyitaly" id="flyitaly" {{ metadata['flyitaly'] }}/>
+                <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="flyitaly" id="flyitaly" {{ env_values['flyitaly'] }}/>
                 <label for="flyitaly" class="mb-3 col-sm-10">Submit your data to <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/">Fly Italy ADSB</a></label><br/>
-                <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="avdelphi" id="avdelphi" {{ metadata['avdelphi'] }}/>
+                <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="avdelphi" id="avdelphi" {{ env_values['avdelphi'] }}/>
                 <label for="avdelphi" class="mb-3 col-sm-10">Submit your data to <a href="https://www.avdelphi.com/privacy.html">AVDelphi</a></label><br/>
-                <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="ps" id="ps" {{ metadata['ps'] }}/>
+                <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="ps" id="ps" {{ env_values['ps'] }}/>
                 <label for="ps" class="mb-3 col-sm-10">Submit your data to <a href="https://www.planespotters.net/legal/privacypolicy/">planespotters.net</a></label><br/>
-                <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="adsbone" id="adsbone" {{ metadata['adsbone'] }}/>
+                <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="adsbone" id="adsbone" {{ env_values['adsbone'] }}/>
                 <label for="adsbone" class="mb-3 col-sm-10">Submit your data to <a href="https://adsb.one/privacy-license/">adsb.one</a> <small>(please note that this site is missing a clear data/privacy policy)</small></label><br/>
-                <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="tat" id="tat" {{ metadata['tat'] }}/>
+                <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="tat" id="tat" {{ env_values['tat'] }}/>
                 <label for="tat" class="mb-3 col-sm-10">Submit your data to <a href="https://theairtraffic.com/privacy-license/">TheAirTraffic.com</a> <small>(please note that this site is missing a clear data/privacy policy)</small></label><br/>
-                <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="adsbfi" id="adsbfi" {{ metadata['adsbfi'] }}/>
+                <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="adsbfi" id="adsbfi" {{ env_values['adsbfi'] }}/>
                 <label for="adsbfi" class="mb-3 col-sm-10">Submit your data to <a href="https://adsb.fi/">adsb.fi</a> <small>(please note that this site is missing a clear data/privacy policy)</small></label><br/>
-                <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="adsbx" id="adsbx" {{ metadata['adsbx'] }}/>
+                <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="adsbx" id="adsbx" {{ env_values['adsbx'] }}/>
                 <label for="adsbx" class="mb-3 col-sm-10">Submit your data to <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a> <br/><small>(please note that this site has been aquired by a private equity company with unknown plans for the data submitted; it does, however, provide the best MLAT coverage of all the sites listed)</small></label><br/>
             </div>
             <div class="row no-gutters">
                 <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="FR24"
-                       id="FR24" {{ metadata['FR24'] }}/>
+                       id="FR24" {{ env_values['FR24'] }}/>
                 <label for="FR24" class="mb-3 col-sm-10">
                     Submit your data to <a href="https://www.flightradar24.com/privacy-policy">flightradar24</a>
                 </label>
@@ -42,7 +43,7 @@
                             (or enter you email address and click the button to request a sharing key)
                         </label>
                         <input type="text" id="FRSK" name="FEEDER_FR24_SHARING_KEY" class="form-control col-sm-6 mr-1"
-                                {{ metadata["FR24"] | replace("checked", "required") }}
+                                {{ env_values["FR24"] | replace("checked", "required") }}
                                placeholder="existing flightradar24 sharing key or email address"
                                value="{{ env_values['FEEDER_FR24_SHARING_KEY'] }}">
                         <button type="submit" class="btn btn-primary col-sm-3 ml-1"
@@ -55,7 +56,7 @@
 
             <div class="row no-gutters">
                 <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="PW"
-                       id="PW" {{ metadata['PW'] }}/>
+                       id="PW" {{ env_values['PW'] }}/>
                 <label for="PW" class="mb-3 col-sm-10">
                     Submit your data to <a href="https://plane.watch">Plane.watch</a>
                 </label>
@@ -71,7 +72,7 @@
                             here.
                         </label>
                         <input type="text" id="PWAK" name="FEEDER_PLANEWATCH_API_KEY" class="form-control col-sm-6 ml-1"
-                                {{ metadata["PW"] | replace("checked", "required") }}
+                                {{ env_values["PW"] | replace("checked", "required") }}
                                placeholder=" Plane.watch API key"
                                value="{{ env_values['FEEDER_PLANEWATCH_API_KEY'] }}">
                         <button type="submit" class="btn btn-primary col-sm-3 ml-1"
@@ -84,7 +85,7 @@
 
             <div class="row no-gutters">
                 <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="FA"
-                       id="FA" {{ metadata['FA'] }}/>
+                       id="FA" {{ env_values['FA'] }}/>
                 <label for="FA" class="mb-3 col-sm-10">
                     Submit your data to <a href="https://flightaware.com/">FlightAware</a>
                 </label>
@@ -105,7 +106,7 @@
                                 link.setAttribute('href', window.location.protocol + "//" + window.location.hostname + ":8081/");
                         </script>
                         <input type="text" id="FAFI" name="FEEDER_PIAWARE_FEEDER_ID" class="form-control col-sm-6 ml-1"
-                                {{ metadata["FA"] | replace("checked", "required") }}
+                                {{ env_values["FA"] | replace("checked", "required") }}
                                placeholder=" Piaware key"
                                value="{{ env_values['FEEDER_PIAWARE_FEEDER_ID'] }}">
                         <button type="submit" class="btn btn-primary col-sm-3 ml-1"
@@ -118,7 +119,7 @@
 
             <div class="row no-gutters">
                 <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="RB"
-                       id="RB" {{ metadata['RB'] }}/>
+                       id="RB" {{ env_values['RB'] }}/>
                 <label for="RB" class="mb-3 col-sm-10">
                     Submit your data to <a href="https://www.radarbox.com/">RadarBox</a>
                 </label>
@@ -136,7 +137,7 @@
                         </label>
                         <input type="text" id="RBSK" name="FEEDER_RADARBOX_SHARING_KEY"
                                class="form-control col-sm-6 ml-1"
-                                {{ metadata["RB"] | replace("checked", "required") }}
+                                {{ env_values["RB"] | replace("checked", "required") }}
                                placeholder=" RadarBox sharing key"
                                value="{{ env_values['FEEDER_RADARBOX_SHARING_KEY'] }}">
                         <button type="submit" class="btn btn-primary col-sm-3 ml-1"
@@ -149,7 +150,7 @@
 
             <div class="row no-gutters">
                 <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="PF"
-                       id="PF" {{ metadata['PF'] }}/>
+                       id="PF" {{ env_values['PF'] }}/>
                 <label for="PF" class="mb-3 col-sm-10">
                     Submit your data to <a href="https://planefinder.net/">PlaneFinder</a>
                 </label>
@@ -165,7 +166,7 @@
                         </label>
                         <input type="text" id="PFSC" name="FEEDER_PLANEFINDER_SHARECODE"
                                class="form-control col-sm-6 ml-1"
-                                {{ metadata["PF"] | replace("checked", "required") }}
+                                {{ env_values["PF"] | replace("checked", "required") }}
                                placeholder=" PlaneFinder sharecode"
                                value="{{ env_values['FEEDER_PLANEFINDER_SHARECODE'] }}">
                         <button type="submit" class="btn btn-primary col-sm-3 ml-1"
@@ -178,7 +179,7 @@
 
             <div class="row no-gutters">
                 <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="AH"
-                       id="AH" {{ metadata['AH'] }}/>
+                       id="AH" {{ env_values['AH'] }}/>
                 <label for="AH" class="mb-3 col-sm-10">
                     Submit your data to <a href="https://adsbhub.org">ADSBHub</a>
                 </label>
@@ -198,7 +199,7 @@
                         </label>
                         <input type="text" id="AHSK" name="FEEDER_ADSBHUB_STATION_KEY"
                                class="form-control col-sm-6 ml-1"
-                                {{ metadata["AH"] | replace("checked", "required") }}
+                                {{ env_values["AH"] | replace("checked", "required") }}
                                placeholder=" ADSBHub station key"
                                value="{{ env_values['FEEDER_ADSBHUB_STATION_KEY'] }}">
                         <button type="submit" class="btn btn-primary col-sm-3 ml-1"
@@ -211,7 +212,7 @@
 
             <div class="row no-gutters">
                 <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="OS"
-                       id="OS" {{ metadata['OS'] }}/>
+                       id="OS" {{ env_values['OS'] }}/>
                 <label for="OS" class="mb-3 col-sm-10">
                     Submit your data to <a href="https://opensky-network.org/">OpenSky Network</a>
                 </label>
@@ -228,11 +229,11 @@
                             are a new user will be added in a future release.
                         </label>
                         <input type="text" id="OSUN" name="FEEDER_OPENSKY_USERNAME" class="form-control col-sm-3 ml-1"
-                                {{ metadata["OS"] | replace("checked", "required") }}
+                                {{ env_values["OS"] | replace("checked", "required") }}
                                placeholder=" OpenSky username"
                                value="{{ env_values['FEEDER_OPENSKY_USERNAME'] }}">
                         <input type="text" id="OSSN" name="FEEDER_OPENSKY_SERIAL" class="form-control col-sm-3 ml-1"
-                                {{ metadata["OS"] | replace("checked", "required") }}
+                                {{ env_values["OS"] | replace("checked", "required") }}
                                placeholder=" OpenSky serial number"
                                value="{{ env_values['FEEDER_OPENSKY_SERIAL'] }}">
                         <button type="submit" class="btn btn-primary col-sm-3 ml-1"
@@ -245,7 +246,7 @@
 
             <div class="row no-gutters">
                 <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="RV"
-                       id="RV" {{ metadata['RV'] }}/>
+                       id="RV" {{ env_values['RV'] }}/>
                 <label for="RV" class="mb-3 col-sm-10">
                     Submit your data to <a href="https://www.radarvirtuel.com/">RadarVirtuel</a>
                 </label>
@@ -261,7 +262,7 @@
                             They will respond with a feeder key that you can enter here
                         </label>
                         <input type="text" id="RVFK" name="FEEDER_RV_FEEDER_KEY" class="form-control col-sm-6 ml-1"
-                                {{ metadata["RV"] | replace("checked", "required") }}
+                                {{ env_values["RV"] | replace("checked", "required") }}
                                placeholder=" RadarVirtuel feeder key"
                                value="{{ env_values['FEEDER_RV_FEEDER_KEY'] }}">
                         <button type="submit" class="btn btn-primary col-sm-3 ml-1"
