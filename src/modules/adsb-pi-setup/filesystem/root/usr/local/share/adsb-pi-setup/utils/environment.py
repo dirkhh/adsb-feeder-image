@@ -1,5 +1,5 @@
 from os import path
-from typing import Dict
+from typing import List
 
 FILE_PATH = "/opt/adsb/.env"  # FIXME
 
@@ -9,7 +9,7 @@ class Env:
         name: str,
         value: str = None,
         is_mandatory: bool = True,
-        frontend_names: Dict[str, str] = None,
+        frontend_names: List[str] = None,
         default: str = "",
         default_call: callable = None,
         value_call: callable = None,
