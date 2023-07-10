@@ -90,6 +90,8 @@ class Env:
     @value.setter
     def value(self, value):
         self._value = value
+        # FIXME: this is just annoying debugging stuff
+        print(f"set value of {self.name} to {value}")
         self._reconcile()
 
     @property
