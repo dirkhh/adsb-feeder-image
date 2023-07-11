@@ -12,6 +12,12 @@ sync-py-control:
 	src/modules/adsb-pi-setup/filesystem/root/usr/local/share/adsb-pi-setup/ \
 	root@adsb-feeder.local:/usr/local/share/adsb-pi-setup/
 
+	rsync -av \
+	--exclude="*.pyc" --progress \
+	-e "ssh -S /tmp/adsb-pi-setup-ssh-control" \
+	src/modules/adsb-feeder/filesystem/root/opt/adsb/ \
+	root@adsb-feeder.local:/opt/adsb/
+
 # For good measure, copy this Makefile too
 	rsync -av \
 	-e "ssh -S /tmp/adsb-pi-setup-ssh-control" \
