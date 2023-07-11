@@ -1,5 +1,12 @@
+import sys
+
 from os import path
 from typing import List
+
+
+def print_err(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+
 
 FILE_PATH = "/opt/adsb/.env"  # FIXME
 
@@ -91,7 +98,7 @@ class Env:
     def value(self, value):
         self._value = value
         # FIXME: this is just annoying debugging stuff
-        print(f"set value of {self.name} to {value}")
+        print_err(f"set value of {self.name} to {value}")
         self._reconcile()
 
     @property

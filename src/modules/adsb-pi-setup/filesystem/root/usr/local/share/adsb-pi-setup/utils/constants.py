@@ -123,9 +123,8 @@ class Constants:
             default="",
             tags=["aggregators"],
         ),
-        Env("_ADSBIM_VERSION", False, tags=["version"]),
-        Env("_ADSBIM_VERSION_DATE", False),
-        Env("_ADSBIM_VERSION_HASH", False),
+        Env("_ADSBIM_BASE_VERSION", False, tags=["base_version"]),
+        Env("_ADSBIM_CONTAINER_VERSION", False, tags=["container_version"]),
         Env(
             "_ADSBIM_STATE_IS_SECURE_IMAGE",
             is_mandatory=False,
@@ -192,8 +191,13 @@ class Constants:
         Env(
             "_ADSBIM_STATE_IS_NIGHTLY_CONTAINER_UPDATE_ENABLED",
             False,
-            tags=["nightly_container_update", "is_enabled"]),
-        )
+            tags=["nightly_container_update", "is_enabled"],
+        ),
+        Env(
+            "_ADSBIM_STATE_ZEROTIER_KEY",
+            False,
+            tags=["zerotierid", "key"],
+        ),
         # Other aggregator images
         Env("_ADSBIM_CONTAINER_FR24", True, tags=["fr24", "container"]),
         Env("_ADSBIM_CONTAINER_FLIGHTAWARE", True, tags=["flightaware", "container"]),

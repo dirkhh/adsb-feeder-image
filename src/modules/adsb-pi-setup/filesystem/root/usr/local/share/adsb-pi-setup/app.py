@@ -103,7 +103,7 @@ class AdsbIm:
         if not re.match(r"^[A-Z][a-z]+/[A-Z][a-z]+$", browser_timezone):
             return "invalid"
         # Add to .env
-        self._constants.env("FEEDER_tZ").value = browser_timezone
+        self._constants.env("FEEDER_TZ").value = browser_timezone
         # Set it as datetimectl too
         try:
             subprocess.run(
@@ -354,11 +354,7 @@ class AdsbIm:
             for key in ("nightly_base", "nightly_feeder", "nightly_container"):
                 self._constants._env.env_by_tags(key).value = "1" if request.form.get(key) else "0"
         if request.form.get("zerotier") == "go":
-
-            ENV_FILE.update({
-                "ZEROTIER": "1",
-                "ZEROTIER_NETWORK_ID": request.form.get("zerotierid"),
-            })
+            self._constants.env_by_tags(["zerotierid", "key"]).value = request.form.get("zerotierid")
             # make sure the service is enabled (it really should be)
             subprocess.call("/usr/bin/systemctl enable --now zerotier-one", shell=True)
 
@@ -368,7 +364,7 @@ class AdsbIm:
             return self.handle_aggregators_post_request()
         return render_template(
             "aggregators.html",
-            env_values=env_values,
+            env_values=self._constants.envs,
         )
 
     # @app.route("/")
@@ -402,9 +398,15 @@ class AdsbIm:
 
         # in the HTML, every input field needs to have a name that is concatenated by "--"
         # and that matches the tags of one Env
-        for key, value in request.form:
-            self._constants.env_by_tags(key.split("--")).value = value
+        form: Dict = request.form
+        for key, value in form.items():
+            e = self._constants.env_by_tags(key.split("--"))
+            print_err(f"key {key} value {value} env {e}")
+            if e:
+                e.value = value
+
         # FIXME finish me
+        return redirect(url_for("director"))
 
     # FIXME tear me up into my own class please.
 

@@ -29,7 +29,7 @@ to find your lat / long / altitude</p>
         <input type="text" name="lng"
                required
                placeholder="Antenna longitude" class="form-control"
-               value="{{ env_value_by_tag('lng')] }}"></input>
+               value="{{ env_value_by_tag('lng') }}"></input>
     </div>
     <div class="form-group">
         <label for="alt">Altitude above mean sealevel in meters</label>
@@ -39,13 +39,13 @@ to find your lat / long / altitude</p>
                value="{{ env_value_by_tag('alt') }}"></input>
     </div>
     <div class="form-group">
-        <label for="tz">Timezone</label>
+        <label for="form_timezone">Timezone</label>
         <button class="btn btn-secondary" onclick="sendTimeToServer()">update timezone</button>
         <input type="text" name="form_timezone" id="form_timezone"
                required
                placeholder="populate from the browser timezone by clicking the button above"
                class="form-control mt-2"
-               value="{{ env_value_by_tag('tz') }}"></input>
+               value="{{ env_value_by_tag('form_timezone') }}"></input>
     </div>
     <div class="form-group">
             <label >Which <a href="#" title="aggregators that don't require you to create an account or provide an email address">semi-anonymous </a>

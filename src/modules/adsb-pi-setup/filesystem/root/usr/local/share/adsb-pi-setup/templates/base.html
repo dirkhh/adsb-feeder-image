@@ -30,7 +30,7 @@
             <ul class="navbar-nav">
                 {% for href, id, caption in navigation_bar %}
                     <li {% if id == active_page %}class="active"{% endif %}
-                        style="display: {% if env_values['BASE_CONFIG'] == "1" or
+                        style="display: {% if env_value_by_tag('base_config') == "1" or
                                            id == 'setup' or
                                            id == 'restore' %} block {% else %} none {% endif %};">
                         <a class="nav-link" href="{{ href|e }}">{{ caption|e }}</a></li>
@@ -45,7 +45,7 @@
     </div>
     <div class="footer">
         <hr/>
-        Running ADSB Feeder Image {{ env_values['BASE_VERSION'] }} with containers from {{ env_values['CONTAINER_VERSION'] }} from <a href="http://adsb.im">ADSB.im</a>.<br/>
+        Running ADSB Feeder Image {{ env_value_by_tag("base_version") }} with containers from {{ env_value_by_tag("container_version") }} from <a href="http://adsb.im">ADSB.im</a>.<br/>
         For help and questions, please go to the
         <a href="https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image">adsb-feeder-image Zulip channel</a>
     </div>
