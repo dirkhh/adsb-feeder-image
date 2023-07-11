@@ -108,3 +108,7 @@ class Env:
         if not self._tags:
             return []
         return self._tags
+
+    @property
+    def isset(self) -> bool:
+        return self.value and any(self.value == "1", self.value.lower() == "true", self.value.lower() == "on")

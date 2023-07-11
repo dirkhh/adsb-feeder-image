@@ -371,7 +371,7 @@ class AdsbIm:
 
     def director(self):
         # figure out where to go:
-        if self._constants.env_by_tags(["base_config", "finished"]).value != "1":
+        if not self._constants.env_by_tags(["base_config", "finished"]).isset:
             return self.setup()
 
         # If we have more than one SDR, or one of them is an airspy,
@@ -413,6 +413,8 @@ class AdsbIm:
                 e.value = value
 
         # FIXME finish me
+        # populate ultrafeeder
+        self._constants.env_by_tags(["base_config"]).value = "1"
         return redirect(url_for("director"))
 
     # FIXME tear me up into my own class please.
