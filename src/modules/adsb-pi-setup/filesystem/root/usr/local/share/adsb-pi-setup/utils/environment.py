@@ -35,6 +35,7 @@ class Env:
         self._reconcile(pull=True)
 
     def _reconcile(self, pull: bool = False):
+        print_err(f"reconcile for {self.name}")
         if not path.isfile(FILE_PATH):
             # Let's create it
             open(FILE_PATH, "w").close()
@@ -72,6 +73,7 @@ class Env:
         return var
 
     def _write_value_to_file(self):
+        print_err(f"write_value_to_file for {self.name}")
         values = self._get_values_from_file()
         values[self._name] = self._value
         with open(FILE_PATH, "w") as f:

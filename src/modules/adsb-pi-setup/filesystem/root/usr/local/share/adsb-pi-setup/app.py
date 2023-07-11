@@ -390,7 +390,14 @@ class AdsbIm:
     def setup(self):
         if request.method != "POST" and request.form.get("submit") != "go":
             def env_value_by_tag(tag: str):
-                return self._constants.env_by_tags(tag)
+                e = self._constants.env_by_tags([tag])
+                if e:
+                    print_err(f"env_value_by_tag for {tag} results in {e}")
+                    return e.value
+                else:
+                    print_err(f"env_value_by_tag for {tag} returned nothing")
+                    return ""
+
             return render_template(
                 "setup.html",
                 env_value_by_tag=env_value_by_tag,
