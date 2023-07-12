@@ -65,7 +65,7 @@ class System:
     def restart(self):
         return self._restart
 
-    def halt(self):
+    def halt(self) -> None:
         subprocess.call("halt", shell=True)
 
     def reboot(self) -> None:
