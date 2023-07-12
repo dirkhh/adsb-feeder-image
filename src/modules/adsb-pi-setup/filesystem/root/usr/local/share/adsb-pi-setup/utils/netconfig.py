@@ -15,13 +15,3 @@ class NetConfig:
         if mlat_line and mlat_privacy:
             mlat_line += ",--privacy"
         return f"{adsb_line};{mlat_line}"
-
-    @property
-    def normal(self):
-        return self.generate(False, None)  # without uuid or mlat privacy flag
-
-    @property
-    def domain(self):
-        # avdelphi.com -> avdelphi.com
-        # feed.adsb.lol -> adsb.lol
-        return ".".join(self.adsb_config.split(",")[1].split(".")[-2:])
