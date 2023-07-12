@@ -225,11 +225,11 @@ class AdsbIm:
             )  # that's a good place from where the user can continue
 
     def sdr_info(self):
-        return {
-            # FIXME
+        self._sdrdevices._ensure_populated()
+        return json.dumps({
             "sdrdevices": [sdr._json for sdr in self._sdrdevices.sdrs],
             "frequencies": self._sdrdevices.addresses_per_frequency,
-        }
+        })
 
     # @app.route("/advanced", methods=("GET", "POST"))
     @check_restart_lock

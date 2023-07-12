@@ -2,25 +2,34 @@ import io
 import re
 import subprocess
 import sys
+from typing import List
+
+
+def print_err(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+
 
 
 class SDR:
     def __init__(self, type_: str, address: str):
         self._type = type_
         self._address = address
+        self._serial_probed = None
 
     @property
-    def _serial(self):
+    def _serial(self) -> str:
+        if self._serial_probed:
+            return self._serial_probed
+        cmdline = f"lsusb -s {self._address} -v"
         try:
-            result = subprocess.run(
-                f"lsusb -s {self._address} -v", shell=True, capture_output=True
-            )
+            result = subprocess.run(cmdline, shell=True, capture_output=True)
         except subprocess.SubprocessError:
             print(f"'lsusb -s {self._address} -v' failed", file=sys.stderr)
         output = result.stdout.decode()
         serial_match = re.search(r"iSerial\s+\d+\s+(.*)", output, flags=re.M)
         if serial_match:
-            return serial_match.group(1).strip().rstrip("0")
+            self._serial_probed = serial_match.group(1).strip()
+            return self._serial_probed
 
         return ""
 
@@ -38,13 +47,19 @@ class SDR:
             return self._json == other._json
         return False
 
+    def __repr__(self):
+        return f"SDR(type: {self._type} address: {self._address})"
+
 
 class SDRDevices:
     def __init__(self):
-        self.sdrs = []
+        self.sdrs: List[SDR] = []
 
     def __len__(self):
         return len(self.sdrs)
+
+    def __repr__(self):
+        return f"SDRDevices({','.join([s for s in self.sdrs])})"
 
     def get_sdr_info(self):
         try:
@@ -87,12 +102,12 @@ class SDRDevices:
         ret = {frequency: None for frequency in frequencies}
         for sdr in self.sdrs:
             if sdr._type == "airspy":
-                ret[1090] = sdr
+                ret[1090] = sdr._serial
             elif sdr._type == "rtlsdr":
                 if sdr._serial == "1090":
-                    ret[1090] = sdr
+                    ret[1090] = sdr._serial
                 elif sdr._serial == "978":
-                    ret[978] = sdr
+                    ret[978] = sdr._serial
         if not ret[1090] and len(self.sdrs) == 1:
-            ret[1090] = self.sdrs[0]
+            ret[1090] = self.sdrs[0]._serial
         return ret
