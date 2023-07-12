@@ -61,7 +61,7 @@ class Constants:
             "mlat,feed.theairtraffic.com,31090,39004",
             has_policy=False,
         ),
-        "ps": NetConfig(
+        "planespotters": NetConfig(
             "adsb,feed.planespotters.net,30004,beast_reduce_plus_out",
             "mlat,mlat.planespotters.net,31090,39005",
             has_policy=True,
@@ -269,3 +269,10 @@ class Constants:
         if len(matches) > 1:
             raise Exception("More than one match for tags")
         return matches[0]
+
+
+    # helper function to see if something is enabled
+    def is_enabled(self, *tags):
+        # we append is_enabled to tags
+        tags = list(tags).append("is_enabled")
+        return self.env_by_tags(set(tags)).value == "1"

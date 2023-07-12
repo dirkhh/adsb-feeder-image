@@ -8,19 +8,14 @@ import shutil
 import subprocess
 import sys
 import zipfile
+from functools import partial
 from os import path, urandom
 from typing import Dict, List, Tuple
 
 from flask import Flask, flash, redirect, render_template, request, send_file, url_for
 from utils import (
-    Constants,
-    System,
-    RouteManager,
-    SDRDevices,
-    check_restart_lock,
-)
-from utils import (
     ADSBHub,
+    Constants,
     FlightAware,
     FlightRadar24,
     OpenSky,
@@ -28,6 +23,10 @@ from utils import (
     PlaneWatch,
     RadarBox24,
     RadarVirtuel,
+    RouteManager,
+    SDRDevices,
+    System,
+    check_restart_lock,
 )
 from werkzeug.utils import secure_filename
 
@@ -226,10 +225,12 @@ class AdsbIm:
 
     def sdr_info(self):
         self._sdrdevices._ensure_populated()
-        return json.dumps({
-            "sdrdevices": [sdr._json for sdr in self._sdrdevices.sdrs],
-            "frequencies": self._sdrdevices.addresses_per_frequency,
-        })
+        return json.dumps(
+            {
+                "sdrdevices": [sdr._json for sdr in self._sdrdevices.sdrs],
+                "frequencies": self._sdrdevices.addresses_per_frequency,
+            }
+        )
 
     # @app.route("/advanced", methods=("GET", "POST"))
     @check_restart_lock
@@ -243,7 +244,8 @@ class AdsbIm:
             "advanced.html",
             env_values=self._constants.envs,
         )
-    ''' -- poor man's multi line comment
+
+    """ -- poor man's multi line comment
     def handle_advanced_post_request(self):
         print_err("request_form", request.form)
         if request.form.get("submit") == "go":
@@ -286,7 +288,8 @@ class AdsbIm:
         })
         print_err(f"calculated ultrafeeder config of {net}")
         return redirect("/restarting")
-    '''
+    """
+
     def handle_advanced_post_request(self):
         # Refactoring the above function to use the new self._constants._env objects.
 
@@ -319,7 +322,7 @@ class AdsbIm:
         print_err(f"secure_image: {output}")
 
     def handle_expert_post_request(self):
-        allow_insecure = self._constants.envs['SECURE_IMAGE'] is "1"
+        allow_insecure = self._constants.envs["SECURE_IMAGE"] is "1"
 
         if request.form.get("shutdown") == "go":
             # do shutdown
@@ -352,9 +355,13 @@ class AdsbIm:
             return redirect("/expert")
         if request.form.get("nightly_update") == "go":
             for key in ("nightly_base", "nightly_feeder", "nightly_container"):
-                self._constants._env.env_by_tags(key).value = "1" if request.form.get(key) else "0"
+                self._constants._env.env_by_tags(key).value = (
+                    "1" if request.form.get(key) else "0"
+                )
         if request.form.get("zerotier") == "go":
-            self._constants.env_by_tags(["zerotierid", "key"]).value = request.form.get("zerotierid")
+            self._constants.env_by_tags(["zerotierid", "key"]).value = request.form.get(
+                "zerotierid"
+            )
             # make sure the service is enabled (it really should be)
             subprocess.call("/usr/bin/systemctl enable --now zerotier-one", shell=True)
 
@@ -362,9 +369,24 @@ class AdsbIm:
     def aggregators(self):
         if request.method == "POST":
             return self.handle_aggregators_post_request()
+            # FIXME rip me into /update
+        # we have self._constants.is_enabled,
+        #     def is_enabled(self, *tags):
+        # we create a partial with ultrafeeder as a value, to infer if ultrafeeder
+        # stuff should be enabled.
+        uf_enabled = partial(
+            self._constants.is_enabled, "ultrafeeder"
+        )
+        others_enabled = partial(
+            self._constants.is_enabled, "other_aggregators"
+        )
+
         return render_template(
             "aggregators.html",
             env_values=self._constants.envs,
+            uf_enabled=uf_enabled,
+            others_enabled=others_enabled,
+            env_by_tags=self._constants.env_by_tags,
         )
 
     # @app.route("/")
@@ -389,6 +411,7 @@ class AdsbIm:
     @check_restart_lock
     def setup(self):
         if request.method != "POST" and request.form.get("submit") != "go":
+
             def env_value_by_tag(tag: str):
                 e = self._constants.env_by_tags([tag])
                 if e:
