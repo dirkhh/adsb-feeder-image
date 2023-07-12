@@ -93,38 +93,63 @@ class Constants:
         Env("MLAT_SITE_NAME", tags=["mlat_name"]),
         # SDR
         Env("FEEDER_RTL_SDR", default="rtlsdr"),
-        Env("FEEDER_ENABLE_BIASTEE", default="false"),
+        Env("FEEDER_ENABLE_BIASTEE", default="false", tags=["biast", "is_enabled"]),
         Env("FEEDER_READSB_GAIN", default="autogain"),
         Env("FEEDER_SERIAL_1090", is_mandatory=False, tags=["1090"]),  # FIXME
         Env("FEEDER_978", is_mandatory=False, tags=["978"]),  # FIXME
         # Feeder
         Env("ADSBLOL_UUID", default_call=lambda: str(uuid4())),
         Env("ULTRAFEEDER_UUID", default_call=lambda: str(uuid4())),
-        Env("MLAT_PRIVACY", default="--privacy", tags=["mlat_privacy"]),
-        Env("FEEDER_TAR1090_USEROUTEAPI", default="true"),
+        Env("MLAT_PRIVACY", default="--privacy", tags=["mlat_privacy", "is_enabled"]),
+        Env(
+            "FEEDER_TAR1090_USEROUTEAPI",
+            default="true",
+            tags=["route_api", "is_enabled"],
+        ),
         # Misc
         Env(
-            "FEEDER_HEYWHATSTHAT_ID", is_mandatory=False, tags=["FEEDER_HEYWHATSTHAT_ID"]
+            "_ADSBIM_HEYWHATSTHAT_ENABLED",
+            is_mandatory=False,
+            tags={"heywhatsthat", "is_enabled"},
+        ),
+        Env(
+            "FEEDER_HEYWHATSTHAT_ID",
+            is_mandatory=False,
+            tags=["heywhatsthat_id", "key"],
         ),
         # Other aggregators keys
         Env("FEEDER_FR24_SHARING_KEY", is_mandatory=False, tags=["fr24", "key"]),
-        Env("FEEDER_PIAWARE_FEEDER_ID", is_mandatory=False, tags=["flightaware", "user"]),
-        Env("FEEDER_RADARBOX_SHARING_KEY", is_mandatory=False, tags=["radarbox24", "key"]),
-        Env("FEEDER_PLANEFINDER_SHARECODE", is_mandatory=False, tags=["planefinder", "key"]),
+        Env(
+            "FEEDER_PIAWARE_FEEDER_ID", is_mandatory=False, tags=["flightaware", "user"]
+        ),
+        Env(
+            "FEEDER_RADARBOX_SHARING_KEY",
+            is_mandatory=False,
+            tags=["radarbox24", "key"],
+        ),
+        Env(
+            "FEEDER_PLANEFINDER_SHARECODE",
+            is_mandatory=False,
+            tags=["planefinder", "key"],
+        ),
         Env("FEEDER_ADSBHUB_STATION_KEY", is_mandatory=False, tags=["adsb_hub", "key"]),
         Env("FEEDER_OPENSKY_USERNAME", is_mandatory=False, tags=["opensky", "user"]),
         Env("FEEDER_OPENSKY_SERIAL", is_mandatory=False, tags=["opensky", "pass"]),
         Env("FEEDER_RV_FEEDER_KEY", is_mandatory=False, tags=["radar_virtuel", "key"]),
-        Env("FEEDER_PLANEWATCH_API_KEY", is_mandatory=False, tags=["plane_watch", "key"]),
+        Env(
+            "FEEDER_PLANEWATCH_API_KEY", is_mandatory=False, tags=["plane_watch", "key"]
+        ),
         # ADSB.im specific
         Env("_ADSB_IM_AGGREGATORS_SELECTION", tags=["aggregators"]),
         Env("_ADSBIM_BASE_VERSION", is_mandatory=False, tags=["base_version"]),
-        Env("_ADSBIM_CONTAINER_VERSION", is_mandatory=False, tags=["container_version"]),
+        Env(
+            "_ADSBIM_CONTAINER_VERSION", is_mandatory=False, tags=["container_version"]
+        ),
         Env(
             "_ADSBIM_STATE_IS_SECURE_IMAGE",
             is_mandatory=False,
             default="false",
-            tags=["secure_image", "is_enabled"]
+            tags=["secure_image", "is_enabled"],
         ),
         Env(
             "_ADSBIM_STATE_IS_FLIGHTRADAR24_ENABLED",
@@ -166,18 +191,27 @@ class Constants:
             is_mandatory=False,
             tags=["other_aggregator", "is_enabled", "radar_virtuel"],
         ),
-        Env("_ADSBIM_STATE_IS_AIRSPY_ENABLED", is_mandatory=False, tags=["airspy", "enabled"]),
-        Env("_ADSBIM_STATE_IS_PORTAINER_ENABLED", is_mandatory=False, tags=["portainer", "enabled"]),
+        Env(
+            "_ADSBIM_STATE_IS_AIRSPY_ENABLED",
+            is_mandatory=False,
+            tags=["airspy", "enabled"],
+        ),
+        Env(
+            "_ADSBIM_STATE_IS_PORTAINER_ENABLED",
+            is_mandatory=False,
+            tags=["portainer", "enabled"],
+        ),
         Env(
             "_ADSBIM_STATE_IS_BASE_CONFIG_FINISHED",
             default="0",
-            tags=["base_config", "finished"],
+            tags=["base_config", "is_enabled"],
         ),
         Env(
             "_ADSBIM_STATE_IS_NIGHTLY_BASE_UPDATE_ENABLED",
             is_mandatory=False,
             tags=["nightly_base_update", "is_enabled"],
-        ),Env(
+        ),
+        Env(
             "_ADSBIM_STATE_IS_NIGHTLY_FEEDER_UPDATE_ENABLED",
             is_mandatory=False,
             tags=["nightly_feeder_update", "is_enabled"],
@@ -199,9 +233,7 @@ class Constants:
         Env("_ADSBIM_CONTAINER_PLANEFINDER", tags=["planefinder", "container"]),
         Env("_ADSBIM_CONTAINER_ADSBHUB", tags=["adsb_hub", "container"]),
         Env("_ADSBIM_CONTAINER_OPENSKY", tags=["opensky", "container"]),
-        Env(
-            "_ADSBIM_CONTAINER_RADARVIRTUEL", tags=["radar_virtuel", "container"]
-        ),
+        Env("_ADSBIM_CONTAINER_RADARVIRTUEL", tags=["radar_virtuel", "container"]),
         Env("_ADSBIM_CONTAINER_ULTRAFEEDER", tags=["ultrafeeder", "container"]),
         Env("_ADSBIM_CONTAINER_PLANEWATCH", tags=["plane_watch", "container"]),
         # Ultrafeeder config
@@ -226,7 +258,9 @@ class Constants:
             tags=["tat", "ultrafeeder", "is_enabled"],
         ),
         Env(
-            "_ADSBIM_STATE_IS_ULTRAFEEDER_PS_ENABLED", is_mandatory=False, tags=["ps", "ultrafeeder"]
+            "_ADSBIM_STATE_IS_ULTRAFEEDER_PS_ENABLED",
+            is_mandatory=False,
+            tags=["ps", "ultrafeeder"],
         ),
         Env(
             "_ADSBIM_STATE_IS_ULTRAFEEDER_ADSBONE_ENABLED",
@@ -270,9 +304,9 @@ class Constants:
             raise Exception("More than one match for tags")
         return matches[0]
 
-
     # helper function to see if something is enabled
     def is_enabled(self, *tags):
         # we append is_enabled to tags
         tags = list(tags).append("is_enabled")
-        return self.env_by_tags(set(tags)).value == "1"
+        e = self.env_by_tags(set(tags))
+        return e and any[e.value == "1", e.value == "true", e.value == "on"]

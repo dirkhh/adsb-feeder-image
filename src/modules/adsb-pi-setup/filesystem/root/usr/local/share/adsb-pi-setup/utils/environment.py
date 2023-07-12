@@ -10,6 +10,7 @@ def print_err(*args, **kwargs):
 
 FILE_PATH = "/opt/adsb/.env"  # FIXME
 
+
 class Env:
     def __init__(
         self,
@@ -108,7 +109,3 @@ class Env:
         if not self._tags:
             return []
         return self._tags
-
-    @property
-    def isset(self) -> bool:
-        return self.value and any(self.value == "1", self.value.lower() == "true", self.value.lower() == "on")

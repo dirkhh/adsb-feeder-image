@@ -1,6 +1,7 @@
 import filecmp
 import io
 import json
+from operator import is_
 import os.path
 import pathlib
 import re
@@ -27,6 +28,7 @@ from utils import (
     SDRDevices,
     System,
     check_restart_lock,
+    constants,
 )
 from werkzeug.utils import secure_filename
 
@@ -239,10 +241,15 @@ class AdsbIm:
             return self.handle_advanced_post_request()
 
         # just in case things have changed (the user plugged in a new device for example)
-        # FIXME - SDR handling
+        self._sdrdevices._ensure_populated()
+
+        def is_enabled(tag: str):
+            return self._constants._env.env_by_tags(tag).is_enabled()
+
         return render_template(
             "advanced.html",
             env_values=self._constants.envs,
+            is_enabled=self._constants.env_by_tags(),
         )
 
     """ -- poor man's multi line comment
@@ -374,12 +381,8 @@ class AdsbIm:
         #     def is_enabled(self, *tags):
         # we create a partial with ultrafeeder as a value, to infer if ultrafeeder
         # stuff should be enabled.
-        uf_enabled = partial(
-            self._constants.is_enabled, "ultrafeeder"
-        )
-        others_enabled = partial(
-            self._constants.is_enabled, "other_aggregators"
-        )
+        uf_enabled = partial(self._constants.is_enabled, "ultrafeeder")
+        others_enabled = partial(self._constants.is_enabled, "other_aggregators")
 
         return render_template(
             "aggregators.html",
@@ -393,7 +396,7 @@ class AdsbIm:
 
     def director(self):
         # figure out where to go:
-        if not self._constants.env_by_tags(["base_config", "finished"]).isset:
+        if not self._constants.is_enabled("base_config"):
             return self.setup()
 
         # If we have more than one SDR, or one of them is an airspy,

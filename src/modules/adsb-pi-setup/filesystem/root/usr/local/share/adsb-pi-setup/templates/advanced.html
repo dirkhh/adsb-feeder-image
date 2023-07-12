@@ -11,11 +11,11 @@
 <p>
 <form method="post" action="/advanced">
     <div class="row no-gutters">
-        <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="privacy" id="privacy" {{ metadata['privacy'] }}/>
-        <label for="privacy" class="mb-3 col-sm-11">Enable privacy flag (ON = does not show on <a href="https://map.adsb.lol/syncmap/">public aggregator maps</a>)</label><br/>
-        <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="route" id="route" {{ metadata['route'] }}/>
-        <label for="route" class="mb-3 col-sm-11">Use adsb.lol Route API to show flight routes when known.</label>
-        <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="heywhatsthat" id="heywhatsthat" {{ metadata['heywhatsthat'] }}/>
+        <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="mlat_privacy" id="mlat_privacy" {% if is_enabled("mlat_privacy") %}checked{% endif %}/>
+        <label for="mlat_privacy" class="mb-3 col-sm-11">Enable privacy flag (ON = does not show on <a href="https://map.adsb.lol/syncmap/">public aggregator maps</a>)</label><br/>
+        <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="route_api" id="route_api" {% if is_enabled("route_api") %}checked{% endif %}/>
+        <label for="route_api" class="mb-3 col-sm-11">Use adsb.lol Route API to show flight routes when known.</label>
+        <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="heywhatsthat" id="heywhatsthat" {% if is_enabled("heywhatsthat") %}checked{% endif %}/>
         <div class="col-sm-11 no-gutters">
             <label for="heywhatsthat" class="mb-3 col-sm-11">
                 <a href="https://www.heywhatsthat.com/">HeyWhat'sThat</a> is an incredibly cool web service that allows you
@@ -24,17 +24,17 @@
                 obstructions).
             </label>
             <div class="col-sm-11 mb-1" id="hwt-text"
-                 style="display: {% if metadata['heywhatsthat'] == '1' and metadata['FEEDER_HEYWHATSTHAT_ID'] == '' %} block {% else %} none {% endif %}">
+                 style="display: {% if is_enabled('heywhatsthat') and env_value_by_tag(heywhatsthat_id) == '' %} block {% else %} none {% endif %}">
                 Click on the link, select "New Panorama" at the top, enter your address (or find the location
                 on the map), enter a title on the lower left and click "Submit request". After a couple of minutes you'll
                 be offered to look at your panorama. At the top left you'll see the title you just entered, the latitude
                 and longitude and elevation - and below that a link that starts ends with <code>/?view=CODE</code>.
                 Enter this code here to see the theoretical range information on your receiver map.
             </div>
-            <input type="text" id="HEYWHATSTHAT_ID" name="FEEDER_HEYWHATSTHAT_ID" class="form-control col-sm-6 ml-1 mb-2"
-               placeholder=" HeyWhat'sThat Panorama ID" value="{{ env_values['FEEDER_HEYWHATSTHAT_ID'] }}">
+            <input type="text" id="heywhatsthat_id" name="heywhatsthat_id" class="form-control col-sm-6 ml-1 mb-2"
+               placeholder=" HeyWhat'sThat Panorama ID" value="{{ env_value_by_tag(heywhatsthat_id) }}">
         </div>
-        <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="biast" id="biast" {{ metadata['biast'] }}/>
+        <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="biast" id="biast" {% if is_enabled("biast") %}checked{% endif %}/>
         <label for="biast" class="mb-3 col-sm-11">Enable bias-T for ADS-B/1090/airspy SDR.</label>
     </div>
     <div class="row" style="display: {% if metadata.get('NUM_SDRS')|int > 1 %} flex {% else %} none {% endif %};">
