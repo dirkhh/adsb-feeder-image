@@ -40,7 +40,7 @@
                 Enter this code here to see the theoretical range information on your receiver map.
             </div>
             <input type="text" id="heywhatsthat_id" name="heywhatsthat_id" class="form-control col-sm-6 ml-1 mb-2"
-                placeholder=" HeyWhat'sThat Panorama ID" value="{{ env_value_by_tag(heywhatsthat_id) }}">
+                placeholder=" HeyWhat'sThat Panorama ID" value="{{ env_value_by_tag('heywhatsthat_id') }}">
         </div>
         <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="biast" id="biast" {% if
             is_enabled("biast") %}checked{% endif %} />

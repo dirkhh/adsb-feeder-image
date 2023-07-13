@@ -58,29 +58,23 @@ class AdsbIm:
             "radarbox24": RadarBox24(self._system),
             "radarvirtuel": RadarVirtuel(self._system),
         }
-
+        # fmt: off
         self.proxy_routes = self._constants.proxy_routes
         self.app.add_url_rule("/propagateTZ", "propagateTZ", self.get_tz)
         self.app.add_url_rule("/restarting", "restarting", self.restarting)
-        self.app.add_url_rule(
-            "/restart", "restart", self.restart, methods=["GET", "POST"]
-        )
+        self.app.add_url_rule("/restart", "restart", self.restart, methods=["GET", "POST"])
         self.app.add_url_rule("/backup", "backup", self.backup)
         self.app.add_url_rule("/backupexecute", "backupexecute", self.backup_execute)
-        self.app.add_url_rule(
-            "/restore", "restore", self.restore, methods=["GET", "POST"]
-        )
+        self.app.add_url_rule("/restore", "restore", self.restore, methods=["GET", "POST"])
         self.app.add_url_rule("/executerestore", "executerestore", self.executerestore)
-        self.app.add_url_rule(
-            "/advanced", "advanced", self.advanced, methods=["GET", "POST"]
-        )
-        self.app.add_url_rule(
-            "/aggregators", "aggregators", self.aggregators, methods=["GET", "POST"]
-        )
+        self.app.add_url_rule("/advanced", "advanced", self.advanced, methods=["GET", "POST"])
+        self.app.add_url_rule("/expert", "expert", self.expert, methods=["GET", "POST"])
+        self.app.add_url_rule("/aggregators", "aggregators", self.aggregators, methods=["GET", "POST"])
         self.app.add_url_rule("/", "director", self.director)
         self.app.add_url_rule("/index", "index", self.index)
         self.app.add_url_rule("/setup", "setup", self.setup, methods=["GET", "POST"])
         self.app.add_url_rule("/api/sdr_info", "sdr_info", self.sdr_info)
+        # fmt: on
 
     def run(self):
         self._routemanager.add_proxy_routes(self.proxy_routes)
@@ -325,6 +319,24 @@ class AdsbIm:
         for env in envs.values():
             env.value = request.form.get(env.frontend_name)
         # FIXME the rest of the function got lost in the refactoring
+
+    @check_restart_lock
+    def expert(self):
+        if request.method == "POST":
+            return self.handle_expert_post_request()
+
+        def is_enabled(tag: str):
+            return self._constants.is_enabled(tag)
+
+        def env_value_by_tag(tag: str):
+            return self._constants.env_by_tags([tag]).value
+
+        return render_template(
+            "expert.html",
+            env_values=self._constants.envs,
+            is_enabled=is_enabled,
+            env_value_by_tag=env_value_by_tag,
+        )
 
     def secure_image(self):
         output: str = ""

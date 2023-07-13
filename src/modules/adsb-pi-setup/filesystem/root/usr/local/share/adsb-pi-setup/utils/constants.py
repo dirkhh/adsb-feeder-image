@@ -212,6 +212,11 @@ class Constants:
             tags=["portainer", "enabled"],
         ),
         Env(
+            "_ADSBIM_STATE_IS_SSH_CONFIGURED",
+            is_mandatory=False,
+            tags=["ssh_configured", "is_enabled"],
+        ),
+        Env(
             "_ADSBIM_STATE_IS_BASE_CONFIG_FINISHED",
             default="0",
             tags=["base_config", "is_enabled"],
