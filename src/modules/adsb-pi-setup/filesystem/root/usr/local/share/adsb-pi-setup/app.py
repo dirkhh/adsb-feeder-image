@@ -244,12 +244,22 @@ class AdsbIm:
         self._sdrdevices._ensure_populated()
 
         def is_enabled(tag: str):
-            return self._constants._env.env_by_tags(tag).is_enabled()
+            return self._constants.is_enabled(tag)
+
+        def env_value_by_tag(tag: str):
+            e = self._constants.env_by_tags([tag])
+            if e:
+                print_err(f"env_value_by_tag for {tag} results in {e}")
+                return e.value
+            else:
+                print_err(f"env_value_by_tag for {tag} returned nothing")
+                return ""
 
         return render_template(
             "advanced.html",
             env_values=self._constants.envs,
-            is_enabled=self._constants.env_by_tags(),
+            is_enabled=is_enabled,
+            env_value_by_tag=env_value_by_tag,
         )
 
     """ -- poor man's multi line comment

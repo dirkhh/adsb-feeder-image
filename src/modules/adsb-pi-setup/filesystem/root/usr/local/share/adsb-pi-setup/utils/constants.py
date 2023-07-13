@@ -1,11 +1,17 @@
 # dataclass
+import sys
 
 from dataclasses import dataclass
+from os import name
 from pathlib import Path
 from uuid import uuid4
 
 from .environment import Env
 from .netconfig import NetConfig
+
+
+def print_err(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
 
 
 @dataclass
@@ -92,14 +98,18 @@ class Constants:
         Env("FEEDER_TZ", tags=["form_timezone"]),
         Env("MLAT_SITE_NAME", tags=["mlat_name"]),
         # SDR
-        Env("FEEDER_RTL_SDR", default="rtlsdr"),
+        Env("FEEDER_RTL_SDR", default="rtlsdr", tags=["rtlsdr"]),
         Env("FEEDER_ENABLE_BIASTEE", default="false", tags=["biast", "is_enabled"]),
-        Env("FEEDER_READSB_GAIN", default="autogain"),
+        Env("FEEDER_READSB_GAIN", default="autogain", tags=["autogain", "is_enabled"]),
         Env("FEEDER_SERIAL_1090", is_mandatory=False, tags=["1090"]),  # FIXME
         Env("FEEDER_978", is_mandatory=False, tags=["978"]),  # FIXME
         # Feeder
-        Env("ADSBLOL_UUID", default_call=lambda: str(uuid4())),
-        Env("ULTRAFEEDER_UUID", default_call=lambda: str(uuid4())),
+        Env("ADSBLOL_UUID", default_call=lambda: str(uuid4()), tags=["adsblol_uuid"]),
+        Env(
+            "ULTRAFEEDER_UUID",
+            default_call=lambda: str(uuid4()),
+            tags=["ultrafeeder_uuid"],
+        ),
         Env("MLAT_PRIVACY", default="--privacy", tags=["mlat_privacy", "is_enabled"]),
         Env(
             "FEEDER_TAR1090_USEROUTEAPI",
@@ -295,7 +305,11 @@ class Constants:
     # Raise error if there are more than one match
     def env_by_tags(self, tags: list):
         matches = []
+        if not tags:
+            return None
         for e in self._env:
+            if not e.tags:
+                print_err(f"{e} has no tags")
             if all(t in e.tags for t in tags):
                 matches.append(e)
         if len(matches) == 0:
@@ -306,7 +320,8 @@ class Constants:
 
     # helper function to see if something is enabled
     def is_enabled(self, *tags):
+        print_err(f"is_enabled called for {tags}")
         # we append is_enabled to tags
         tags = list(tags).append("is_enabled")
-        e = self.env_by_tags(set(tags))
+        e = self.env_by_tags(tags)
         return e and any[e.value == "1", e.value == "true", e.value == "on"]
