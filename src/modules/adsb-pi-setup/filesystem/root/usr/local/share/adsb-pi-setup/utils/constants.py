@@ -216,6 +216,7 @@ class Constants:
             is_mandatory=False,
             tags=["ssh_configured", "is_enabled"],
         ),
+        Env("_ADSB_STATE_SSH_KEY", is_mandatory=False, tags=["ssh_pub", "key"]),
         Env(
             "_ADSBIM_STATE_IS_BASE_CONFIG_FINISHED",
             default="0",

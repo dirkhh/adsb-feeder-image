@@ -89,6 +89,10 @@ class Env:
         return self._name
 
     @property
+    def is_mandatory(self) -> bool:
+        return self._is_mandatory
+
+    @property
     def value(self):
         if self._value_call:
             self.value = self._value_call()

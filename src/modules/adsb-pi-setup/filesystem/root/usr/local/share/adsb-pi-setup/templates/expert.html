@@ -7,10 +7,10 @@
 <h2>Install ssh credentials</h2>
 <form method="POST">
   <div style="display: {% if is_enabled('ssh_configured') %} none {% else %} block {% endif %}" class="row">
-    <label for="ssh-pub" class="col-12">
+    <label for="ssh_pub" class="col-12">
       Enter or paste your public key below. This will allow you to then log in as root on the feeder SBC.
     </label>
-    <input class="col-8 ml-2" id="ssh-pub" name="ssh-pub" type="text" placeholder=" Enter your public key" required>
+    <input class="col-8 ml-2" id="ssh_pub" name="ssh_pub" type="text" placeholder=" Enter your public key" required>
     <button type="submit" class="btn btn-primary mb-1 ml-3" name="ssh" value="go">Submit</button>
   </div>
 </form>

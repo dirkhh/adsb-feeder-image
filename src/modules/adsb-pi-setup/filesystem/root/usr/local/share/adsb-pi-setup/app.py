@@ -17,6 +17,7 @@ from flask import Flask, flash, redirect, render_template, request, send_file, u
 from utils import (
     ADSBHub,
     Constants,
+    Env,
     FlightAware,
     FlightRadar24,
     OpenSky,
@@ -28,7 +29,6 @@ from utils import (
     SDRDevices,
     System,
     check_restart_lock,
-    constants,
 )
 from werkzeug.utils import secure_filename
 
@@ -219,6 +219,16 @@ class AdsbIm:
                 "/advanced"
             )  # that's a good place from where the user can continue
 
+    def base_is_configured(self):
+        base_config: set[Env] = {
+            env for env in self._constants._env if env.is_mandatory
+        }
+        for env in base_config:
+            if not env.value:
+                print_err(f"base_is_configured: {env} isn't set up yet")
+                return False
+        return True
+
     def sdr_info(self):
         self._sdrdevices._ensure_populated()
         return json.dumps(
@@ -228,11 +238,10 @@ class AdsbIm:
             }
         )
 
-    # @app.route("/advanced", methods=("GET", "POST"))
     @check_restart_lock
     def advanced(self):
         if request.method == "POST":
-            return self.handle_advanced_post_request()
+            return self.update()
 
         # just in case things have changed (the user plugged in a new device for example)
         self._sdrdevices._ensure_populated()
@@ -301,7 +310,41 @@ class AdsbIm:
         return redirect("/restarting")
     """
 
+    def update(self):
+        description = """
+            This is the one endpoint that handles all the updates coming in from the UI.
+            It walks through the form data and figures out what to do about the information provided.
+        """
+        # in the HTML, every input field needs to have a name that is concatenated by "--"
+        # and that matches the tags of one Env
+        form: Dict = request.form
+        allow_insecure = self._constants.env["_ADSBIM_STATE_IS_SECURE_IMAGE"]
+        for key, value in form.items():
+            e = self._constants.env_by_tags(key.split("--"))
+            print_err(f"key {key} value {value} env {e}")
+            if e:
+                if allow_insecure and key == "ssh_pub":
+                    ssh_dir = pathlib.Path("/root/.ssh")
+                    ssh_dir.mkdir(mode=0o700, exist_ok=True)
+                    with open(ssh_dir / "authorized_keys", "a+") as authorized_keys:
+                        authorized_keys.write(f"{ssh_pub}\n")
+                    self._constants.envs["_ADSBIM_STATE_IS_SSH_CONFIGURED"].value = "1"
+                e.value = value
+
+        # FIXME finish me
+        # populate ultrafeeder
+
+        # finally, check if this has given us enouch configuration info to
+        # start the containers
+        if self.base_is_configured():
+            self._constants.env_by_tags(["base_config"]).value = "1"
+            return redirect(url_for("restarting"))
+        return redirect(url_for("director"))
+
+    # FIXME tear me up into my own class please.
+
     def handle_advanced_post_request(self):
+        # FIXME: this needs to move into /update
         # Refactoring the above function to use the new self._constants._env objects.
 
         # Get the submit=go out of the way to avoid indenting hard
@@ -323,7 +366,7 @@ class AdsbIm:
     @check_restart_lock
     def expert(self):
         if request.method == "POST":
-            return self.handle_expert_post_request()
+            return self.update()
 
         def is_enabled(tag: str):
             return self._constants.is_enabled(tag)
@@ -351,6 +394,7 @@ class AdsbIm:
         print_err(f"secure_image: {output}")
 
     def handle_expert_post_request(self):
+        # FIXME: move to /update
         allow_insecure = self._constants.envs["SECURE_IMAGE"] is "1"
 
         if request.form.get("shutdown") == "go":
@@ -397,8 +441,8 @@ class AdsbIm:
     @check_restart_lock
     def aggregators(self):
         if request.method == "POST":
-            return self.handle_aggregators_post_request()
-            # FIXME rip me into /update
+            return self.update()
+
         # we have self._constants.is_enabled,
         #     def is_enabled(self, *tags):
         # we create a partial with ultrafeeder as a value, to infer if ultrafeeder
@@ -435,33 +479,19 @@ class AdsbIm:
 
     @check_restart_lock
     def setup(self):
-        if request.method != "POST" and request.form.get("submit") != "go":
+        if request.method == "POST" and request.form.get("submit") == "go":
+            return self.update()
 
-            def env_value_by_tag(tag: str):
-                return self._constants.env_by_tags([tag]).value
+        def env_value_by_tag(tag: str):
+            return self._constants.env_by_tags([tag]).value
 
-            return render_template(
-                "setup.html",
-                env_value_by_tag=env_value_by_tag,
-            )
-
-        # in the HTML, every input field needs to have a name that is concatenated by "--"
-        # and that matches the tags of one Env
-        form: Dict = request.form
-        for key, value in form.items():
-            e = self._constants.env_by_tags(key.split("--"))
-            print_err(f"key {key} value {value} env {e}")
-            if e:
-                e.value = value
-
-        # FIXME finish me
-        # populate ultrafeeder
-        self._constants.env_by_tags(["base_config"]).value = "1"
-        return redirect(url_for("director"))
-
-    # FIXME tear me up into my own class please.
+        return render_template(
+            "setup.html",
+            env_value_by_tag=env_value_by_tag,
+        )
 
     def handle_aggregators_post_request(self):
+        # FIXME -- this needs to move into /update
         print_err(request.form)
         if request.form.get("tar1090") == "go":
             self.update_env()
