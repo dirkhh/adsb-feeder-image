@@ -120,7 +120,7 @@ class Constants:
         Env(
             "_ADSBIM_HEYWHATSTHAT_ENABLED",
             is_mandatory=False,
-            tags={"heywhatsthat", "is_enabled"},
+            tags=["heywhatsthat", "is_enabled"],
         ),
         Env(
             "FEEDER_HEYWHATSTHAT_ID",
