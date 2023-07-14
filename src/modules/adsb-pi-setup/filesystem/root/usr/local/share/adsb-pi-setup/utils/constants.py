@@ -328,8 +328,9 @@ class Constants:
 
     # helper function to see if something is enabled
     def is_enabled(self, *tags):
-        print_err(f"is_enabled called for {tags}")
         # we append is_enabled to tags
-        tags = list(tags).append("is_enabled")
-        e = self.env_by_tags(tags)
-        return e and any[e.value == "1", e.value == "true", e.value == "on"]
+        taglist = list(tags)
+        taglist.append("is_enabled")
+        e = self.env_by_tags(taglist)
+        print_err(f"is_enabled called for {tags} -> {e}")
+        return e and any({e.value == "1", e.value == "true", e.value == "on"})
