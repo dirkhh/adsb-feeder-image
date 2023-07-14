@@ -36,7 +36,6 @@ class Env:
         self._reconcile(value=None, pull=True)
 
     def _reconcile(self, value, pull: bool = False):
-        print_err(f"reconcile for {self.name} in {self._file}")
         if not path.isfile(self._file):
             # Let's create it
             open(self._file, "w").close()
@@ -45,10 +44,9 @@ class Env:
         if pull and value_in_file:
             self._value = value_in_file
             return
-
-        if self.value == value_in_file:
+        if value == value_in_file:
             return  # do not write to file if value is the same
-        self._write_value_to_file()
+        self._write_value_to_file(value)
 
     def _get_values_from_file(self):
         ret = {}
@@ -67,10 +65,9 @@ class Env:
     def _get_value_from_file(self):
         return self._get_values_from_file().get(self._name, None)
 
-    def _write_value_to_file(self):
-        print_err(f"write_value_to_file for {self.name}")
+    def _write_value_to_file(self, new_value):
         values = self._get_values_from_file()
-        values[self._name] = self.value
+        values[self._name] = new_value
         with open(self._file, "w") as f:
             for key, value in values.items():
                 f.write(f"{key}={value}\n")
@@ -95,25 +92,16 @@ class Env:
 
     @property
     def value(self):
-        value = None
-        if self.is_bool:
-            value = True if self._value == "1" else False
-        elif self._value_call:
-            value = self._value_call()
-        elif self._value:
-            value = self._value
-        else:
-            value = self._default
-        if value != self._value:
-            self._value = value
-            self._reconcile(value)
-        return value
+        if self._value_call:
+            return self._value_call()
+        elif self._value != None:
+            return self._value
+        return self._default
 
     @value.setter
     def value(self, value):
-        print_err(f"setting value of {self.name} to {value}...")
         # mess with value in case we are a bool
-        if self.is_bool:
+        if self.is_bool and value not in {True, False}:
             value = True if value == "1" else False
 
         if value != self._value:

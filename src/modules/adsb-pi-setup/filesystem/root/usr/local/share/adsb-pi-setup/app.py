@@ -222,7 +222,7 @@ class AdsbIm:
             env for env in self._constants._env if env.is_mandatory
         }
         for env in base_config:
-            if not env.value:
+            if env.value == None:
                 print_err(f"base_is_configured: {env} isn't set up yet")
                 return False
         return True

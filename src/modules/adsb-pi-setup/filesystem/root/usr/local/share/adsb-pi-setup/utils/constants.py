@@ -223,6 +223,7 @@ class Constants:
         Env(
             "_ADSBIM_STATE_IS_BASE_CONFIG_FINISHED",
             default="0",
+            is_mandatory=False,
             tags=["base_config", "is_enabled"],
         ),
         Env(
@@ -341,5 +342,4 @@ class Constants:
         taglist = list(tags)
         taglist.append("is_enabled")
         e = self.env_by_tags(taglist)
-        print_err(f"is_enabled called for {tags} -> {e}")
-        return e and any({e.value == "1", e.value == "true", e.value == "on"})
+        return e and e.value
