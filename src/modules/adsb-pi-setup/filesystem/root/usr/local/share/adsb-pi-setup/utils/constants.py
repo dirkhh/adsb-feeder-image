@@ -104,6 +104,7 @@ class Constants:
         Env("FEEDER_SERIAL_1090", is_mandatory=False, tags=["1090"]),  # FIXME
         Env("FEEDER_978", is_mandatory=False, tags=["978"]),  # FIXME
         # Feeder
+        Env("ULTRAFEEDER_CONFIG", is_mandatory=True, tags=["ultrafeeder_config"]),
         Env("ADSBLOL_UUID", default_call=lambda: str(uuid4()), tags=["adsblol_uuid"]),
         Env(
             "ULTRAFEEDER_UUID",

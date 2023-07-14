@@ -29,6 +29,7 @@ from utils import (
     SDRDevices,
     System,
     check_restart_lock,
+    UltrafeederConfig,
 )
 from werkzeug.utils import secure_filename
 
@@ -41,23 +42,24 @@ class AdsbIm:
     def __init__(self):
         self.app = Flask(__name__)
         self.app.secret_key = urandom(16).hex()
+
         @self.app.context_processor
         def env_functions():
-            def is_enabled(tag: str):
-                return self._constants.is_enabled(tag)
-            def env_value_by_tag(tag: str):
-                return self._constants.env_by_tags([tag]).value
             return {
-                "is_enabled": is_enabled,
-                "env_value_by_tag": env_value_by_tag,
+                "is_enabled": lambda tag: self._constants.is_enabled(tag),
+                "env_value_by_tag": lambda tag: self._constants.env_by_tags([tag]).value,
                 "env_values": self._constants.envs,
-                }
+            }
 
         self._routemanager = RouteManager(self.app)
         self._constants = Constants()
 
         self._system = System(constants=self._constants)
         self._sdrdevices = SDRDevices()
+        self._ultrafeeder = UltrafeederConfig(constants=self._constants)
+
+        # update Env ultrafeeder to have value self._ultrafeed.generate()
+        self._constants.env_by_tags(["ultrafeeder"]).
 
         self._other_aggregators = {
             "adsb_hub": ADSBHub(self._system),
@@ -335,7 +337,9 @@ class AdsbIm:
                     ssh_dir = pathlib.Path("/root/.ssh")
                     ssh_dir.mkdir(mode=0o700, exist_ok=True)
                     with open(ssh_dir / "authorized_keys", "a+") as authorized_keys:
-                        authorized_keys.write(f"{self._constants.env_by_tags('ssh_pub')}\n")
+                        authorized_keys.write(
+                            f"{self._constants.env_by_tags('ssh_pub')}\n"
+                        )
                     self._constants.env_by_tags("ssh_configured").value = "1"
                 e.value = value
 

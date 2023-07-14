@@ -8,7 +8,7 @@ def print_err(*args, **kwargs):
 
 
 ENV_FILE_PATH = "/opt/adsb/.env"  # FIXME
-ADSBIM_ENV_FILE_PATH = "/opt/adsb/.adsbim.env"  # FIXME
+#fixed ADSBIM_ENV_FILE_PATH = "/opt/adsb/.adsbim.env"  # FIXME
 
 
 class Env:
@@ -36,19 +36,19 @@ class Env:
         self._reconcile(pull=True)
 
     def _reconcile(self, pull: bool = False):
-        filepath = ADSBIM_ENV_FILE_PATH if self._name.startswith("_ADSBIM") else ENV_FILE_PATH
-        print_err(f"reconcile for {self.name} in {filepath}")
-        if not path.isfile(filepath):
+        #fixed ENV_FILE_PATH = ADSBIM_ENV_FILE_PATH if self._name.startswith("_ADSBIM") else ENV_FILE_PATH
+        print_err(f"reconcile for {self.name} in {ENV_FILE_PATH}")
+        if not path.isfile(ENV_FILE_PATH):
             # Let's create it
-            open(filepath, "w").close()
+            open(ENV_FILE_PATH, "w").close()
 
-        var_in_file = self._get_value_from_file(filepath)
+        var_in_file = self._get_value_from_file(ENV_FILE_PATH)
         if pull and var_in_file:
             self._value = var_in_file
             return
 
         if self._value:
-            self._write_value_to_file(filepath)
+            self._write_value_to_file(ENV_FILE_PATH)
             return
 
     def _get_values_from_file(self, filepath):
@@ -66,37 +66,12 @@ class Env:
         return ret
 
     def _get_value_from_file(self, filepath):
-        var = None
-        try:
-            values = self._get_values_from_file(filepath)
-            var = values[self._name]
-        except:
-            pass
-        return var
+        return self._get_values_from_file(filepath).get(self._name, None)
 
     def _write_value_to_file(self, filepath):
-        # other parts of the code rely on fixed names and on
-        # having the prefix values in the .env file as an indication
-        # of whether this particular container is in use
-        # this could of course all be replaced - but for now it seems
-        # easier to simply duplicate this here in Python code
-        container_prefix = {
-            "_ADSBIM_STATE_IS_FLIGHTRADAR24_ENABLED": "FR24",
-            "_ADSBIM_STATE_IS_PLANEWATCH_ENABLED": "PW",
-            "_ADSBIM_STATE_IS_FLIGHTAWARE_ENABLED": "FA",
-            "_ADSBIM_STATE_IS_RADARBOX_ENABLED": "RB",
-            "_ADSBIM_STATE_IS_PLANEFINDER_ENABLED": "PF",
-            "_ADSBIM_STATE_IS_ADSBHUB_ENABLED": "AH",
-            "_ADSBIM_STATE_IS_RADARVIRTUEL_ENABLED": "RV",
-            "_ADSBIM_STATE_IS_OPENSKY_ENABLED": "OS",
-            "_ADSBIM_STATE_IS_AIRSPY_ENABLED": "AIRSPY",
-            "_ADSBIM_STATE_IS_PORTAINER_ENABLED": "PORTAINER",
-        }
         print_err(f"write_value_to_file for {self.name}")
         values = self._get_values_from_file(filepath)
         values[self._name] = self._value
-        if self._name in container_prefix.keys():
-            values[container_prefix[self._name]] = "1" if self._value.lower in { "1", "true", "on" } else "0"
         with open(filepath, "w") as f:
             for key, value in values.items():
                 f.write(f"{key}={value}\n")
@@ -119,6 +94,7 @@ class Env:
             return self._value
         if self._value:
             return self._value
+        self._reconcile()
         return self._default
 
     @value.setter
