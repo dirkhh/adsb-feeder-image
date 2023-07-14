@@ -41,6 +41,17 @@ class AdsbIm:
     def __init__(self):
         self.app = Flask(__name__)
         self.app.secret_key = urandom(16).hex()
+        @self.app.context_processor
+        def env_functions():
+            def is_enabled(tag: str):
+                return self._constants.is_enabled(tag)
+            def env_value_by_tag(tag: str):
+                return self._constants.env_by_tags([tag]).value
+            return {
+                "is_enabled": is_enabled,
+                "env_value_by_tag": env_value_by_tag,
+                "env_values": self._constants.envs,
+                }
 
         self._routemanager = RouteManager(self.app)
         self._constants = Constants()
@@ -106,24 +117,11 @@ class AdsbIm:
             )
         except subprocess.SubprocessError:
             print_err("failed to set up timezone")
-        def env_value_by_tag(tag: str):
-            return self._constants.env_by_tags([tag]).value
 
-        return render_template(
-            "setup.html",
-            env_values=self._constants.envs,
-            env_value_by_tag=env_value_by_tag,
-        )
+        return render_template("setup.html")
 
     def restarting(self):
-        def env_value_by_tag(tag: str):
-            return self._constants.env_by_tags([tag]).value
-
-        return render_template(
-            "restarting.html",
-            env_values=self._constants.envs,
-            env_value_by_tag=env_value_by_tag,
-        )
+        return render_template("restarting.html")
 
     def restart(self):
         if request.method == "POST":
@@ -133,14 +131,7 @@ class AdsbIm:
             return self._system._restart.state
 
     def backup(self):
-        def env_value_by_tag(tag: str):
-            return self._constants.env_by_tags([tag]).value
-
-        return render_template(
-            "/backup.html",
-            env_values=self._constants.envs,
-            env_value_by_tag=env_value_by_tag,
-        )
+        return render_template("/backup.html")
 
     def backup_execute(self):
         data = self._system.backup()
@@ -174,14 +165,7 @@ class AdsbIm:
                 flash("Please only submit ADSB Feeder Image backup files")
                 return redirect(request.url)
         else:
-            def env_value_by_tag(tag: str):
-                return self._constants.env_by_tags([tag]).value
-
-            return render_template(
-                "/restore.html",
-                env_values=self._constants.envs,
-                env_value_by_tag=env_value_by_tag,
-            )
+            return render_template("/restore.html")
 
     def executerestore(self):
         if request.method == "GET":
@@ -218,13 +202,7 @@ class AdsbIm:
                         changed.append(name)
                 elif name == "ultrafeeder/":
                     changed.append("ultrafeeder")
-            def env_value_by_tag(tag: str):
-                return self._constants.env_by_tags([tag]).value
-
-            return render_template(
-                "/restoreexecute.html",
-                env_value_by_tag=env_value_by_tag,
-                )
+            return render_template("/restoreexecute.html")
         else:
             # they have selected the files to restore
             restore_path = pathlib.Path("/opt/adsb/restore")
@@ -270,19 +248,7 @@ class AdsbIm:
 
         # just in case things have changed (the user plugged in a new device for example)
         self._sdrdevices._ensure_populated()
-
-        def is_enabled(tag: str):
-            return self._constants.is_enabled(tag)
-
-        def env_value_by_tag(tag: str):
-            return self._constants.env_by_tags([tag]).value
-
-        return render_template(
-            "advanced.html",
-            env_values=self._constants.envs,
-            is_enabled=is_enabled,
-            env_value_by_tag=env_value_by_tag,
-        )
+        return render_template("advanced.html")
 
     """ -- poor man's multi line comment
     def handle_advanced_post_request(self):
@@ -410,18 +376,7 @@ class AdsbIm:
         if request.method == "POST":
             return self.update()
 
-        def is_enabled(tag: str):
-            return self._constants.is_enabled(tag)
-
-        def env_value_by_tag(tag: str):
-            return self._constants.env_by_tags([tag]).value
-
-        return render_template(
-            "expert.html",
-            env_values=self._constants.envs,
-            is_enabled=is_enabled,
-            env_value_by_tag=env_value_by_tag,
-        )
+        return render_template("expert.html")
 
     def secure_image(self):
         output: str = ""
@@ -449,10 +404,8 @@ class AdsbIm:
 
         return render_template(
             "aggregators.html",
-            env_values=self._constants.envs,
             uf_enabled=uf_enabled,
             others_enabled=others_enabled,
-            env_by_tags=self._constants.env_by_tags,
         )
 
     # @app.route("/")
@@ -472,26 +425,13 @@ class AdsbIm:
 
     # @app.route("/index")
     def index(self):
-        def env_value_by_tag(tag: str):
-            return self._constants.env_by_tags([tag]).value
-        return render_template(
-            "index.html",
-            env_values=self._constants.envs,
-            env_value_by_tag=env_value_by_tag,
-            )
+        return render_template("index.html")
 
     @check_restart_lock
     def setup(self):
         if request.method == "POST" and request.form.get("submit") == "go":
             return self.update()
-
-        def env_value_by_tag(tag: str):
-            return self._constants.env_by_tags([tag]).value
-
-        return render_template(
-            "setup.html",
-            env_value_by_tag=env_value_by_tag,
-        )
+        return render_template("setup.html")
 
     def handle_aggregators_post_request(self):
         # FIXME -- this needs to move into /update

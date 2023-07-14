@@ -24,6 +24,7 @@
         (url_for('restore'), 'restore', 'Restore'),
         ] -%}
         {% set active_page = active_page|default('index') -%}
+        {% set config_complete = is_enabled('base_config') %}
         <a class="navbar-brand" href="{{ url_for('director') }}">ADSB Feeder</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
             aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,7 +34,7 @@
             <ul class="navbar-nav">
                 {% for href, id, caption in navigation_bar %}
                 <li {% if id==active_page %}class="active" {% endif %}
-                    style="display: {% if env_value_by_tag('base_config') == " 1" or id=='setup' or id=='restore' %}
+                    style="display: {% if config_complete or id=='setup' or id=='restore' %}
                     block {% else %} none {% endif %};">
                     <a class="nav-link" href="{{ href|e }}">{{ caption|e }}</a>
                 </li>
