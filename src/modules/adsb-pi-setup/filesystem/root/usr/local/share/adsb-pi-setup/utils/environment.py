@@ -41,12 +41,12 @@ class Env:
             # Let's create it
             open(self._file, "w").close()
 
-        var_in_file = self._get_value_from_file(self._file)
+        var_in_file = self._get_value_from_file()
         if pull and var_in_file:
             self._value = var_in_file
             return
         else:
-            self._write_value_to_file(self._file)
+            self._write_value_to_file()
 
     def _get_values_from_file(self):
         ret = {}
@@ -63,11 +63,11 @@ class Env:
         return ret
 
     def _get_value_from_file(self):
-        return self._get_values_from_file(self._file).get(self._name, None)
+        return self._get_values_from_file().get(self._name, None)
 
     def _write_value_to_file(self):
         print_err(f"write_value_to_file for {self.name}")
-        values = self._get_values_from_file(self._file)
+        values = self._get_values_from_file()
         values[self._name] = self._value
         with open(self._file, "w") as f:
             for key, value in values.items():
