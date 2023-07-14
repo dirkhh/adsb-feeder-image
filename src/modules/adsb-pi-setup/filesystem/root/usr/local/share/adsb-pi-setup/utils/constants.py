@@ -311,7 +311,13 @@ class Constants:
     # helper function to find env by tags
     # Return only if there is one env with all the tags,
     # Raise error if there are more than one match
-    def env_by_tags(self, tags: list):
+    def env_by_tags(self, _tags):
+        if type(_tags) == str:
+            tags = [_tags]
+        elif type(_tags) == list:
+            tags = _tags
+        else:
+            raise Exception(f"env_by_tags called with invalid argument {_tags} of type {type(_tags)}")
         matches = []
         if not tags:
             return None
