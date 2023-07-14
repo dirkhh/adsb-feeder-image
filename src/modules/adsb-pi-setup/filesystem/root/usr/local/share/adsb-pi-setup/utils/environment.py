@@ -33,20 +33,22 @@ class Env:
             self._default = default_call()
 
         # Always reconcile from file
-        self._reconcile(pull=True)
+        self._reconcile(value=None, pull=True)
 
-    def _reconcile(self, pull: bool = False):
+    def _reconcile(self, value, pull: bool = False):
         print_err(f"reconcile for {self.name} in {self._file}")
         if not path.isfile(self._file):
             # Let's create it
             open(self._file, "w").close()
 
-        var_in_file = self._get_value_from_file()
-        if pull and var_in_file:
-            self._value = var_in_file
+        value_in_file = self._get_value_from_file()
+        if pull and value_in_file:
+            self._value = value_in_file
             return
-        else:
-            self._write_value_to_file()
+
+        if self.value == value_in_file:
+            return  # do not write to file if value is the same
+        self._write_value_to_file()
 
     def _get_values_from_file(self):
         ret = {}
@@ -68,7 +70,7 @@ class Env:
     def _write_value_to_file(self):
         print_err(f"write_value_to_file for {self.name}")
         values = self._get_values_from_file()
-        values[self._name] = self._value
+        values[self._name] = self.value
         with open(self._file, "w") as f:
             for key, value in values.items():
                 f.write(f"{key}={value}\n")
@@ -93,25 +95,30 @@ class Env:
 
     @property
     def value(self):
+        value = None
         if self.is_bool:
-            return self._value == "1"
-        if self._value_call:
-            self.value = self._value_call()
-            return self._value
-        if self._value:
-            return self._value
-        self._reconcile()
-        return self._default
+            value = True if self._value == "1" else False
+        elif self._value_call:
+            value = self._value_call()
+        elif self._value:
+            value = self._value
+        else:
+            value = self._default
+        if value != self._value:
+            self._value = value
+            self._reconcile(value)
+        return value
 
     @value.setter
     def value(self, value):
+        print_err(f"setting value of {self.name} to {value}...")
         # mess with value in case we are a bool
         if self.is_bool:
             value = True if value == "1" else False
-        self._value = value
-        # FIXME: this is just annoying debugging stuff
-        print_err(f"set value of {self.name} to {value}")
-        self._reconcile()
+
+        if value != self._value:
+            self._value = value
+            self._reconcile(value)
 
     @property
     def tags(self):
