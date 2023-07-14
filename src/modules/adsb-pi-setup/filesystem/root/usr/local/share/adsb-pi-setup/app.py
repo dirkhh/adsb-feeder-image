@@ -320,6 +320,29 @@ class AdsbIm:
         form: Dict = request.form
         allow_insecure = self._constants.is_enabled("secure_image")
         for key, value in form.items():
+            # this seems like cheating... let's capture all of the submit buttons
+            if value == "go":
+                if key == "shutdown":
+                    # do shutdown
+                    self._system.halt()
+                    return "System halted"  # that return statement is of course a joke
+                if key == "reboot":
+                    # initiate reboot
+                    self._system.reboot()
+                    return "System rebooting, please refresh in about a minute"
+                if key == "secure_image":
+                    self._constants.env_by_tags("secure_image").value = "1"
+                    self.secure_image()
+                if key == "update":
+                    # this needs a lot more checking and safety, but for now, just go
+                    cmdline = "/usr/bin/docker-update-adsb-im"
+                    subprocess.run(cmdline, timeout=600.0, shell=True)
+                if key == "update_feeder_aps":
+                    cmdline = "/usr/bin/feeder-update"
+                    subprocess.run(cmdline, timeout=600.0, shell=True)
+                if key == "nightly_update" or key == "zerotier":
+                    # this will be handled through the separate key/value pairs
+                    pass
             e = self._constants.env_by_tags(key.split("--"))
             print_err(f"key {key} value {value} env {e}")
             if e:
@@ -392,51 +415,6 @@ class AdsbIm:
         else:
             output = result.stdout.decode()
         print_err(f"secure_image: {output}")
-
-    def handle_expert_post_request(self):
-        # FIXME: move to /update
-        allow_insecure = self._constants.envs["SECURE_IMAGE"] is "1"
-
-        if request.form.get("shutdown") == "go":
-            # do shutdown
-            self._system.halt()
-            return "System halted"  # that return statement is of course a joke
-        if request.form.get("reboot") == "go":
-            # initiate reboot
-            self._system.reboot()
-            return "System rebooting, please refresh in about a minute"
-        if request.form.get("secure_image") == "go":
-            self._constants._env.env_by_tags("secure_image").value = "1"
-            self.secure_image()
-            return redirect("/expert")
-        if allow_insecure and request.form.get("ssh") == "go":
-            ssh_pub = request.form.get("ssh-pub")
-            ssh_dir = pathlib.Path("/root/.ssh")
-            ssh_dir.mkdir(mode=0o700, exist_ok=True)
-            with open(ssh_dir / "authorized_keys", "a+") as authorized_keys:
-                authorized_keys.write(f"{ssh_pub}\n")
-            self._constants.envs["SSH_CONFIGURED"].value = "1"
-            return redirect("/expert")
-        if request.form.get("update") == "go":
-            # this needs a lot more checking and safety, but for now, just go
-            cmdline = "/usr/bin/docker-update-adsb-im"
-            subprocess.run(cmdline, timeout=600.0, shell=True)
-            return redirect("/expert")
-        if request.form.get("update_feeder_aps") == "go":
-            cmdline = "/usr/bin/feeder-update"
-            subprocess.run(cmdline, timeout=600.0, shell=True)
-            return redirect("/expert")
-        if request.form.get("nightly_update") == "go":
-            for key in ("nightly_base", "nightly_feeder", "nightly_container"):
-                self._constants._env.env_by_tags(key).value = (
-                    "1" if request.form.get(key) else "0"
-                )
-        if request.form.get("zerotier") == "go":
-            self._constants.env_by_tags(["zerotierid", "key"]).value = request.form.get(
-                "zerotierid"
-            )
-            # make sure the service is enabled (it really should be)
-            subprocess.call("/usr/bin/systemctl enable --now zerotier-one", shell=True)
 
     @check_restart_lock
     def aggregators(self):
