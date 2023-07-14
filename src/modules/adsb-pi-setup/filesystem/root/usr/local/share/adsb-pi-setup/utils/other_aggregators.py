@@ -224,20 +224,20 @@ class FlightAware(Aggregator):
         self._constants.env_by_tags(self._enabled_tags).value = "1"
 
 
-class RadarBox24(Aggregator):
+class RadarBox(Aggregator):
     def __init__(self, system: System):
         super().__init__(
-            name="RadarBox24",
-            tags=["radarbox24"],
+            name="RadarBox",
+            tags=["radarbox"],
             system=system,
         )
 
     def _request_rb_sharing_key(self):
         # env_values = self._envfile.envs
-        docker_image = self._constants.env_by_tags(["radarbox24", "container"]).value
+        docker_image = self._constants.env_by_tags(["radarbox", "container"]).value
 
         if not self.download_docker_container(docker_image):
-            print_err("failed to download the RadarBox24 docker image")
+            print_err("failed to download the RadarBox docker image")
             return redirect("/aggregators")
 
         cmdline = (

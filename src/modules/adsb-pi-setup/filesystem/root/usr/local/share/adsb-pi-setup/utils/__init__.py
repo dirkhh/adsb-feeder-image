@@ -9,7 +9,7 @@ from .other_aggregators import (
     OpenSky,
     PlaneFinder,
     PlaneWatch,
-    RadarBox24,
+    RadarBox,
     RadarVirtuel,
 )
 from .sdr import SDR, SDRDevices

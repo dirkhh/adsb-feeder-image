@@ -135,7 +135,7 @@ class Constants:
         Env(
             "FEEDER_RADARBOX_SHARING_KEY",
             is_mandatory=False,
-            tags=["radarbox24", "key"],
+            tags=["radarbox", "key"],
         ),
         Env(
             "FEEDER_PLANEFINDER_SHARECODE",
@@ -177,9 +177,9 @@ class Constants:
             tags=["other_aggregator", "is_enabled", "flightaware"],
         ),
         Env(
-            "_ADSBIM_STATE_IS_RADARBOX24_ENABLED",
+            "_ADSBIM_STATE_IS_RADARBOX_ENABLED",
             is_mandatory=False,
-            tags=["other_aggregator", "is_enabled", "radarbox24"],
+            tags=["other_aggregator", "is_enabled", "radarbox"],
         ),
         Env(
             "_ADSBIM_STATE_IS_PLANEFINDER_ENABLED",
@@ -245,7 +245,7 @@ class Constants:
         # Other aggregator images
         Env("_ADSBIM_CONTAINER_FR24", tags=["fr24", "container"]),
         Env("_ADSBIM_CONTAINER_FLIGHTAWARE", tags=["flightaware", "container"]),
-        Env("_ADSBIM_CONTAINER_RADARBOX24", tags=["radarbox24", "container"]),
+        Env("_ADSBIM_CONTAINER_radarbox", tags=["radarbox", "container"]),
         Env("_ADSBIM_CONTAINER_PLANEFINDER", tags=["planefinder", "container"]),
         Env("_ADSBIM_CONTAINER_ADSBHUB", tags=["adsb_hub", "container"]),
         Env("_ADSBIM_CONTAINER_OPENSKY", tags=["opensky", "container"]),

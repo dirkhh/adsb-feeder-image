@@ -23,7 +23,7 @@ from utils import (
     OpenSky,
     PlaneFinder,
     PlaneWatch,
-    RadarBox24,
+    RadarBox,
     RadarVirtuel,
     RouteManager,
     SDRDevices,
@@ -55,7 +55,7 @@ class AdsbIm:
             "opensky": OpenSky(self._system),
             "planefinder": PlaneFinder(self._system),
             "planewatch": PlaneWatch(self._system),
-            "radarbox24": RadarBox24(self._system),
+            "radarbox": RadarBox(self._system),
             "radarvirtuel": RadarVirtuel(self._system),
         }
         # fmt: off
@@ -501,7 +501,7 @@ class AdsbIm:
             ["get-fr24-sharing-key", self._other_aggregators["flightradar24"]],
             ["get-pw-api-key", self._other_aggregators["planewatch"]],
             ["get-fa-api-key", self._other_aggregators["flightaware"]],
-            ["get-rb-sharing-key", self._other_aggregators["radarbox24"]],
+            ["get-rb-sharing-key", self._other_aggregators["radarbox"]],
             ["get-pf-sharecode", self._other_aggregators["planefinder"]],
             ["get-ah-station-key", self._other_aggregators["adsb_hub"]],
             ["get-os-info", self._other_aggregators["opensky"]],
