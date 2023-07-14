@@ -1,63 +1,77 @@
 <!doctype html>
 <html lang="en">
+
 <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href={{url_for('.static', filename='css/style.css')}}>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href={{url_for('.static', filename='css/style.css' )}}>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
     <title>{% block title %} {% endblock %}</title>
 </head>
+
 <body>
     <nav class="navbar navbar-expand-md navbar-light bg-light">
         {% set navigation_bar = [
-            (url_for('setup'), 'setup', 'Basic Setup'),
-            (url_for('advanced'), 'advanced', 'Advanced'),
-            (url_for('aggregators'), 'aggregators', 'Aggregators'),
-            (url_for('backup'), 'backup', 'Backup'),
-            (url_for('restore'), 'restore', 'Restore'),
+        (url_for('setup'), 'setup', 'Basic Setup'),
+        (url_for('advanced'), 'advanced', 'Advanced'),
+        (url_for('aggregators'), 'aggregators', 'Aggregators'),
+        (url_for('backup'), 'backup', 'Backup'),
+        (url_for('restore'), 'restore', 'Restore'),
         ] -%}
         {% set active_page = active_page|default('index') -%}
         <a class="navbar-brand" href="{{ url_for('director') }}">ADSB Feeder</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 {% for href, id, caption in navigation_bar %}
-                    <li {% if id == active_page %}class="active"{% endif %}
-                        style="display: {% if env_value_by_tag('base_config') == "1" or
-                                           id == 'setup' or
-                                           id == 'restore' %} block {% else %} none {% endif %};">
-                        <a class="nav-link" href="{{ href|e }}">{{ caption|e }}</a></li>
+                <li {% if id==active_page %}class="active" {% endif %}
+                    style="display: {% if env_value_by_tag('base_config') == " 1" or id=='setup' or id=='restore' %}
+                    block {% else %} none {% endif %};">
+                    <a class="nav-link" href="{{ href|e }}">{{ caption|e }}</a>
+                </li>
                 {% endfor %}
             </ul>
         </div>
     </nav>
     <div id="loader" style="display: none;"></div>
-    <div id="overlay" style="display: none;"><div id="overlaytext">please wait<br/>this could take several minutes</div></div>
+    <div id="overlay" style="display: none;">
+        <div id="overlaytext">please wait<br />this could take several minutes</div>
+    </div>
     <div class="container">
         {% block content %} {% endblock %}
     </div>
     <div class="footer">
-        <hr/>
-        Running ADSB Feeder Image {{ env_value_by_tag("base_version") }} with containers from {{ env_value_by_tag("container_version") }} from <a href="http://adsb.im">ADSB.im</a>.<br/>
+        <hr />
+        Running ADSB Feeder Image {{ env_value_by_tag("base_version") }} with containers from {{
+        env_value_by_tag("container_version") }} from <a href="http://adsb.im">ADSB.im</a>.<br />
         For help and questions, please go to the
-        <a href="https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image">adsb-feeder-image Zulip channel</a>
+        <a href="https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image">adsb-feeder-image Zulip
+            channel</a>
     </div>
     <script>function show_spinner() {
-        document.getElementById("loader").style.display = "block";
-        document.getElementById("overlay").style.display = "block";
-    }
-    const SCRIPT_ROOT = {{ request.script_root|tojson }}
+            document.getElementById("loader").style.display = "block";
+            document.getElementById("overlay").style.display = "block";
+        }
+        const SCRIPT_ROOT = {{ request.script_root| tojson }}
     </script>
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-    <script>$(document).ready(function(){$('[data-toggle="tooltip"]').tooltip();});</script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    <script>$(document).ready(function () { $('[data-toggle="tooltip"]').tooltip(); });</script>
 </body>
+
 </html>
