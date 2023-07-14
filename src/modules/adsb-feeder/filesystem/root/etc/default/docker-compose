@@ -9,34 +9,34 @@ if [ -f /opt/adsb/.env ] ; then
 	if grep "FEEDER_ENABLE_UAT978=yes" /opt/adsb/.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "/opt/adsb/uat978.yml" )
 	fi
-	if grep "FR24=1" /opt/adsb/.env > /dev/null 2>&1 ; then
+	if grep "FR24=1" /opt/adsb/.adsbim.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "/opt/adsb/fr24.yml" )
 	fi
-	if grep "PW=1" /opt/adsb/.env > /dev/null 2>&1 ; then
+	if grep "PW=1" /opt/adsb/.adsbim.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "/opt/adsb/pw.yml" )
 	fi
-	if grep "FA=1" /opt/adsb/.env > /dev/null 2>&1 ; then
+	if grep "FA=1" /opt/adsb/.adsbim.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "/opt/adsb/fa.yml" )
 	fi
-	if grep "RB=1" /opt/adsb/.env > /dev/null 2>&1 ; then
+	if grep "RB=1" /opt/adsb/.adsbim.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "/opt/adsb/rb.yml" )
 	fi
-	if grep "PF=1" /opt/adsb/.env > /dev/null 2>&1 ; then
+	if grep "PF=1" /opt/adsb/.adsbim.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "/opt/adsb/pf.yml" )
 	fi
-	if grep "AH=1" /opt/adsb/.env > /dev/null 2>&1 ; then
+	if grep "AH=1" /opt/adsb/.adsbim.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "/opt/adsb/ah.yml" )
 	fi
-	if grep "OS=1" /opt/adsb/.env > /dev/null 2>&1 ; then
+	if grep "OS=1" /opt/adsb/.adsbim.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "/opt/adsb/os.yml" )
 	fi
-	if grep "RV=1" /opt/adsb/.env > /dev/null 2>&1 ; then
+	if grep "RV=1" /opt/adsb/.adsbim.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "/opt/adsb/rv.yml" )
 	fi
-	if grep "PORTAINER=1" /opt/adsb/.env > /dev/null 2>&1 ; then
+	if grep "PORTAINER=1" /opt/adsb/.adsbim.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "/opt/adsb/portainer.yml" )
 	fi
-	if grep "AIRSPY=1" /opt/adsb/.env > /dev/null 2>&1 ; then
+	if grep "AIRSPY=1" /opt/adsb/.adsbim.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "/opt/adsb/airspy.yml" )
 	fi
 fi

@@ -7,7 +7,7 @@ for image in $(grep "_CONTAINER=" .env); do
 	if [ "$pref" = "ULTRAFEEDER" ] ; then
 		docker pull $(echo $image | cut -d= -f2) >> docker-pull.log 2>&1
 	else
-		if grep "$pref=1" .env > /dev/null 2>&1 ; then
+		if grep "$pref=1" .adsbim.env > /dev/null 2>&1 ; then
 			docker pull $(echo $image | cut -d= -f2) >> docker-pull.log 2>&1
 		fi
 	fi

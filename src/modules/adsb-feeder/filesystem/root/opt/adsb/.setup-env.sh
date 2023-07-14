@@ -4,8 +4,8 @@
 cd /opt/adsb
 if [ ! -f .env ] ; then
 	cp docker.image.versions .env
-	echo "_ADSBIM_BASE_VERSION=$(cat /etc/adsb.im.version)" >> .env
-	echo "_ADSBIM_CONTAINER_VERSION=$(cat /etc/adsb.im.version)" >> .env
+	echo "_ADSBIM_BASE_VERSION=$(cat /etc/adsb.im.version)" >> .adsbim.env
+	echo "_ADSBIM_CONTAINER_VERSION=$(cat /etc/adsb.im.version)" >> .adsbim.env
 fi
 
 # pull the Ultrafeeder container... do this in a loop in case networking isn't
