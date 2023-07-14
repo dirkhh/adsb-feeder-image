@@ -249,10 +249,17 @@ class AdsbIm:
 
     def sdr_info(self):
         self._sdrdevices._ensure_populated()
+        # get our guess for the right SDR to frequency mapping
+        # and then update with the actual settings
+        frequencies: Dict[str, str] = self._sdrdevices.addresses_per_frequency
+        for freq in [1090, 978]:
+            setting = self._constants.env_by_tags(str(freq))
+            if setting:
+                frequencies[freq] = setting.value
         return json.dumps(
             {
                 "sdrdevices": [sdr._json for sdr in self._sdrdevices.sdrs],
-                "frequencies": self._sdrdevices.addresses_per_frequency,
+                "frequencies": frequencies,
             }
         )
 

@@ -92,8 +92,6 @@ class SDRDevices:
     @property
     def addresses_per_frequency(self, frequencies: list = [1090, 978]):
         self._ensure_populated()
-        # they haven't been assigned yet, so let's make some
-        # assumptions to get started:
         # - if we find an airspy, that's for 1090
         # - if we find an RTL SDR with serial 1090 - well, that's for 1090 (unless you have an airspy)
         # - if we find an RTL SDR with serial 978 - that's for 978
