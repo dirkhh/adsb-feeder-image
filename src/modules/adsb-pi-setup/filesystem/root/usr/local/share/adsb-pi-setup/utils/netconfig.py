@@ -1,3 +1,6 @@
+def print_err(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+
 class NetConfig:
     def __init__(self, adsb_config: str, mlat_config: str, has_policy: bool):
         self.adsb_config = adsb_config
@@ -34,12 +37,15 @@ class UltrafeederConfig:
             self._constants.env_by_tags(["mlat_privacy"]) == "--privacy"
         )  # FIXME this should return truthy!!!
         # the code woulld not be as ugly if it returned truthy ;)
-        ret = []
+        ret = set()
         for name, netconfig in self._enabled_aggregators.items():
             uuid = None
             if name == "adsblol":
                 uuid = self._constants.env_by_tags(["adsblol_uuid"]).value
-
-            ret.append(netconfig.generate(mlat_privacy=mlat_privacy, uuid=uuid))
+            crumb = netconfig.generate(mlat_privacy=mlat_privacy, uuid=uuid)
+            if crumb == "":
+                print_err(f"skipping {name} because it is empty?")
+            ret.add(crumb)
+        ret.discard("")
 
         return ";".join(ret)
