@@ -35,10 +35,10 @@ class UltrafeederConfig:
         )  # FIXME this should return truthy!!!
         # the code woulld not be as ugly if it returned truthy ;)
         ret = []
-        for name, netconfig in self._enabled_aggregators:
+        for name, netconfig in self._enabled_aggregators.items():
             uuid = None
             if name == "adsblol":
-                uuid = self._constants.env_by_tags(["adsblol_uuid"])
+                uuid = self._constants.env_by_tags(["adsblol_uuid"]).value
 
             ret.append(netconfig.generate(mlat_privacy=mlat_privacy, uuid=uuid))
 
