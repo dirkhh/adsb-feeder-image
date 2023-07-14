@@ -150,7 +150,7 @@ class Constants:
             "FEEDER_PLANEWATCH_API_KEY", is_mandatory=False, tags=["plane_watch", "key"]
         ),
         # ADSB.im specific
-        Env("_ADSB_IM_AGGREGATORS_SELECTION", tags=["aggregators"]),
+        Env("_ADSBIM_AGGREGATORS_SELECTION", tags=["aggregators"]),
         Env("_ADSBIM_BASE_VERSION", is_mandatory=False, tags=["base_version"]),
         Env(
             "_ADSBIM_CONTAINER_VERSION", is_mandatory=False, tags=["container_version"]
@@ -242,16 +242,18 @@ class Constants:
             is_mandatory=False,
             tags=["zerotierid", "key"],
         ),
-        # Other aggregator images
-        Env("_ADSBIM_CONTAINER_FR24", tags=["fr24", "container"]),
-        Env("_ADSBIM_CONTAINER_FLIGHTAWARE", tags=["flightaware", "container"]),
-        Env("_ADSBIM_CONTAINER_radarbox", tags=["radarbox", "container"]),
-        Env("_ADSBIM_CONTAINER_PLANEFINDER", tags=["planefinder", "container"]),
-        Env("_ADSBIM_CONTAINER_ADSBHUB", tags=["adsb_hub", "container"]),
-        Env("_ADSBIM_CONTAINER_OPENSKY", tags=["opensky", "container"]),
-        Env("_ADSBIM_CONTAINER_RADARVIRTUEL", tags=["radar_virtuel", "container"]),
-        Env("_ADSBIM_CONTAINER_ULTRAFEEDER", tags=["ultrafeeder", "container"]),
-        Env("_ADSBIM_CONTAINER_PLANEWATCH", tags=["plane_watch", "container"]),
+        # Container images
+        # -- these names are magic and are used in yaml files and the structure
+        #    of these names is used in scripting around that
+        Env("ULTRAFEEDER_CONTAINER", tags=["ultrafeeder", "container"]),
+        Env("FR24_CONTAINER", tags=["fr24", "container"]),
+        Env("FA_CONTAINER", tags=["flightaware", "container"]),
+        Env("RB_CONTAINER", tags=["radarbox", "container"]),
+        Env("PF_CONTAINER", tags=["planefinder", "container"]),
+        Env("AH_CONTAINER", tags=["adsb_hub", "container"]),
+        Env("OS_CONTAINER", tags=["opensky", "container"]),
+        Env("RV_CONTAINER", tags=["radar_virtuel", "container"]),
+        Env("PW_CONTAINER", tags=["plane_watch", "container"]),
         # Ultrafeeder config
         Env(
             "_ADSBIM_STATE_IS_ULTRAFEEDER_ADSBLOL_ENABLED",
