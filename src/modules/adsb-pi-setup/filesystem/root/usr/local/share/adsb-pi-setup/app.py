@@ -106,15 +106,23 @@ class AdsbIm:
             )
         except subprocess.SubprocessError:
             print_err("failed to set up timezone")
+        def env_value_by_tag(tag: str):
+            return self._constants.env_by_tags([tag]).value
+
         return render_template(
             "setup.html",
             env_values=self._constants.envs,
+            env_value_by_tag=env_value_by_tag,
         )
 
     def restarting(self):
+        def env_value_by_tag(tag: str):
+            return self._constants.env_by_tags([tag]).value
+
         return render_template(
             "restarting.html",
             env_values=self._constants.envs,
+            env_value_by_tag=env_value_by_tag,
         )
 
     def restart(self):
@@ -125,9 +133,13 @@ class AdsbIm:
             return self._system._restart.state
 
     def backup(self):
+        def env_value_by_tag(tag: str):
+            return self._constants.env_by_tags([tag]).value
+
         return render_template(
             "/backup.html",
             env_values=self._constants.envs,
+            env_value_by_tag=env_value_by_tag,
         )
 
     def backup_execute(self):
@@ -162,9 +174,13 @@ class AdsbIm:
                 flash("Please only submit ADSB Feeder Image backup files")
                 return redirect(request.url)
         else:
+            def env_value_by_tag(tag: str):
+                return self._constants.env_by_tags([tag]).value
+
             return render_template(
                 "/restore.html",
                 env_values=self._constants.envs,
+                env_value_by_tag=env_value_by_tag,
             )
 
     def executerestore(self):
@@ -202,11 +218,13 @@ class AdsbIm:
                         changed.append(name)
                 elif name == "ultrafeeder/":
                     changed.append("ultrafeeder")
-            # metadata = self._envfile.metadata
-            # metadata["changed"] = changed
-            # metadata["unchanged"] = unchanged
-            # ^ WTF is this for? FIXME
-            return render_template("/restoreexecute.html")  # , metadata=metadata)
+            def env_value_by_tag(tag: str):
+                return self._constants.env_by_tags([tag]).value
+
+            return render_template(
+                "/restoreexecute.html",
+                env_value_by_tag=env_value_by_tag,
+                )
         else:
             # they have selected the files to restore
             restore_path = pathlib.Path("/opt/adsb/restore")
@@ -250,13 +268,7 @@ class AdsbIm:
             return self._constants.is_enabled(tag)
 
         def env_value_by_tag(tag: str):
-            e = self._constants.env_by_tags([tag])
-            if e:
-                print_err(f"env_value_by_tag for {tag} results in {e}")
-                return e.value
-            else:
-                print_err(f"env_value_by_tag for {tag} returned nothing")
-                return ""
+            return self._constants.env_by_tags([tag]).value
 
         return render_template(
             "advanced.html",
@@ -453,7 +465,13 @@ class AdsbIm:
 
     # @app.route("/index")
     def index(self):
-        return render_template("index.html", env_values=self._constants.envs)
+        def env_value_by_tag(tag: str):
+            return self._constants.env_by_tags([tag]).value
+        return render_template(
+            "index.html",
+            env_values=self._constants.envs,
+            env_value_by_tag=env_value_by_tag,
+            )
 
     @check_restart_lock
     def setup(self):
