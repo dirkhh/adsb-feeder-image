@@ -106,7 +106,8 @@ class Env:
     @value.setter
     def value(self, value):
         # mess with value in case we are a bool
-        value = "1" if value else "0" if self.is_bool else value
+        if self.is_bool:
+            value = True if value == "1" else False
         self._value = value
         # FIXME: this is just annoying debugging stuff
         print_err(f"set value of {self.name} to {value}")
