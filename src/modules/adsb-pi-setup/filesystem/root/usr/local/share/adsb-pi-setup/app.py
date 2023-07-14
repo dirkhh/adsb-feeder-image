@@ -318,7 +318,7 @@ class AdsbIm:
                     self._system.reboot()
                     return "System rebooting, please refresh in about a minute"
                 if key == "secure_image":
-                    self._constants.env_by_tags("secure_image").value = "1"
+                    self._constants.env_by_tags("secure_image").value = True
                     self.secure_image()
                 if key == "update":
                     # this needs a lot more checking and safety, but for now, just go
@@ -340,7 +340,7 @@ class AdsbIm:
                         authorized_keys.write(
                             f"{self._constants.env_by_tags('ssh_pub')}\n"
                         )
-                    self._constants.env_by_tags("ssh_configured").value = "1"
+                    self._constants.env_by_tags("ssh_configured").value = True
                 e.value = value
 
         # FIXME finish me
@@ -349,7 +349,7 @@ class AdsbIm:
         # finally, check if this has given us enouch configuration info to
         # start the containers
         if self.base_is_configured():
-            self._constants.env_by_tags(["base_config"]).value = "1"
+            self._constants.env_by_tags(["base_config"]).value = True
             return redirect(url_for("restarting"))
         return redirect(url_for("director"))
 

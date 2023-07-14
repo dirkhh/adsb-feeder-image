@@ -19,20 +19,20 @@
 	<li><a href="/dump978">Dump978 map</a>
 	</ul>
 </div>
-<div id="FA" style="display: {% if env_values['FA'] == "1" %} block {% else %} none {% endif %};">
+<div id="FA" style="display: {% if is_enabled('flightaware') %} block {% else %} none {% endif %};">
 	<h4>FlightAware</h4>
 	<ul>
 	<li><a href="/fa">FlightAware map</a>
 	<li><a href="/fa-status">FlightAware status</a>
 	</ul>
 </div>
-<div id="FR" style="display: {% if env_values['FR24'] == "1" %} block {% else %} none {% endif %};">
+<div id="FR" style="display: {% if is_enabled('flightradar24') == "1" %} block {% else %} none {% endif %};">
 	<h4>FlightRadar 24</h4>
 	<ul>
 	<li><a href="/fr-status">FR24 status</a>
 	</ul>
 </div>
-<div id="UA" style="display: {% if env_values['UA'] == "1" %} block {% else %} none {% endif %};">
+<div id="UA" style="display: {% if is_enabled('uat978') == "1" %} block {% else %} none {% endif %};">
 	<h4>UAT 978</h4>
 	<ul>
 	<li><a href="/dump978/skyaware">UAT (978 MHz) map</a>
@@ -44,7 +44,7 @@
 	<li><a href="{{ url_for("setup") }}">Basic Setup</a>
 	<li><a href="{{ url_for("advanced") }}" style="display: {% if env_values['BASE_CONFIG'] == '1' %} block {% else %} none {% endif %};">Advanced setup</a>
 	<li><a href="{{ url_for("aggregators") }}" style="display: {% if env_values['BASE_CONFIG'] == '1' %} block {% else %} none {% endif %};">Aggregator setup</a>
-	<li style="display: {% if env_values['PORTAINER'] == "1" %} block {% else %} none {% endif %}">
+	<li style="display: {% if is_enabled('portainer') %} block {% else %} none {% endif %}">
 	    <a href="/portainer">Portainer</a> * Note - this link may give a SSL Certificate warning; feel free to ignore
     </ul>
 </div>

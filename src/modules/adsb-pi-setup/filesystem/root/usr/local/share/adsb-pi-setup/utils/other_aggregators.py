@@ -65,7 +65,7 @@ class Aggregator:
 
     @property
     def is_enabled(self):
-        return self._constants.env_by_tags(self._enabled_tags).value == "1"
+        return self._constants.env_by_tags(self._enabled_tags).value
 
     def _activate(self, user_input: str):
         raise NotImplementedError
@@ -117,7 +117,7 @@ class ADSBHub(Aggregator):
         if not user_input:
             return False
         self._constants.env_by_tags(self._key_tags).value = user_input
-        self._constants.env_by_tags(self._enabled_tags).value = "1"
+        self._constants.env_by_tags(self._enabled_tags).value = True
         return True
 
 
@@ -167,7 +167,7 @@ class FlightRadar24(Aggregator):
             return False
         # we have a sharing key, let's just enable the container
         self._constants.env_by_tags(self._key_tags).value = sharing_key
-        self._constants.env_by_tags(self._enabled_tags).value = "1"
+        self._constants.env_by_tags(self._enabled_tags).value = True
 
         return True
 
@@ -183,7 +183,7 @@ class PlaneWatch(Aggregator):
         if not user_input:
             return False
         self._constants.env_by_tags(self._key_tags).value = user_input
-        self._constants.env_by_tags(self._enabled_tags).value = "1"
+        self._constants.env_by_tags(self._enabled_tags).value = True
         return True
 
 class FlightAware(Aggregator):
@@ -221,7 +221,7 @@ class FlightAware(Aggregator):
             return False
 
         self._constants.env_by_tags(self._key_tags).value = feeder_id
-        self._constants.env_by_tags(self._enabled_tags).value = "1"
+        self._constants.env_by_tags(self._enabled_tags).value = True
 
 
 class RadarBox(Aggregator):
@@ -265,7 +265,7 @@ class RadarBox(Aggregator):
             return False
 
         self._constants.env_by_tags(self._key_tags).value = sharing_key
-        self._constants.env_by_tags(self._enabled_tags).value = "1"
+        self._constants.env_by_tags(self._enabled_tags).value = True
         self._system._restart.restart_systemd()
         return True
 
@@ -284,7 +284,7 @@ class OpenSky(Aggregator):
         # FIXME
         self._constants.env_by_tags(self.tags + ["user"]).value = user
         self._constants.env_by_tags(self.tags + ["pass"]).value = serial
-        self._constants.env_by_tags(self.tags + ["is_enabled"]).value = "1"
+        self._constants.env_by_tags(self.tags + ["is_enabled"]).value = True
         self._system._restart.restart_systemd()
         return True
 
@@ -302,7 +302,7 @@ class RadarVirtuel(Aggregator):
         if not user_input:
             return False
         self._constants.env_by_tags(self._key_tags).value = user_input
-        self._constants.env_by_tags(self._enabled_tags).value = "1"
+        self._constants.env_by_tags(self._enabled_tags).value = True
         self._system._restart.restart_systemd()
         return True
 
@@ -319,6 +319,6 @@ class PlaneFinder(Aggregator):
         if not user_input:
             return False
         self._constants.env_by_tags(self._key_tags).value = user_input
-        self._constants.env_by_tags(self._enabled_tags).value = "1"
+        self._constants.env_by_tags(self._enabled_tags).value = True
         self._system._restart.restart_systemd()
         return True

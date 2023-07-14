@@ -8,7 +8,6 @@ def print_err(*args, **kwargs):
 
 
 ENV_FILE_PATH = "/opt/adsb/.env"  # FIXME
-#fixed ADSBIM_ENV_FILE_PATH = "/opt/adsb/.adsbim.env"  # FIXME
 
 
 class Env:
@@ -28,6 +27,7 @@ class Env:
         self._default = default
         self._value_call = value_call
         self._tags = tags
+        self._file = ENV_FILE_PATH
 
         if default_call:
             self._default = default_call()
@@ -36,25 +36,22 @@ class Env:
         self._reconcile(pull=True)
 
     def _reconcile(self, pull: bool = False):
-        #fixed ENV_FILE_PATH = ADSBIM_ENV_FILE_PATH if self._name.startswith("_ADSBIM") else ENV_FILE_PATH
-        print_err(f"reconcile for {self.name} in {ENV_FILE_PATH}")
-        if not path.isfile(ENV_FILE_PATH):
+        print_err(f"reconcile for {self.name} in {self._file}")
+        if not path.isfile(self._file):
             # Let's create it
-            open(ENV_FILE_PATH, "w").close()
+            open(self._file, "w").close()
 
-        var_in_file = self._get_value_from_file(ENV_FILE_PATH)
+        var_in_file = self._get_value_from_file(self._file)
         if pull and var_in_file:
             self._value = var_in_file
             return
+        else:
+            self._write_value_to_file(self._file)
 
-        if self._value:
-            self._write_value_to_file(ENV_FILE_PATH)
-            return
-
-    def _get_values_from_file(self, filepath):
+    def _get_values_from_file(self):
         ret = {}
         try:
-            with open(filepath, "r") as f:
+            with open(self._file, "r") as f:
                 for line in f.readlines():
                     if line.strip().startswith("#"):
                         continue
@@ -65,14 +62,14 @@ class Env:
 
         return ret
 
-    def _get_value_from_file(self, filepath):
-        return self._get_values_from_file(filepath).get(self._name, None)
+    def _get_value_from_file(self):
+        return self._get_values_from_file(self._file).get(self._name, None)
 
-    def _write_value_to_file(self, filepath):
+    def _write_value_to_file(self):
         print_err(f"write_value_to_file for {self.name}")
-        values = self._get_values_from_file(filepath)
+        values = self._get_values_from_file(self._file)
         values[self._name] = self._value
-        with open(filepath, "w") as f:
+        with open(self._file, "w") as f:
             for key, value in values.items():
                 f.write(f"{key}={value}\n")
 
@@ -88,7 +85,16 @@ class Env:
         return self._is_mandatory
 
     @property
+    def is_bool(self) -> bool:
+        # if it has is_enabled in the tags, it is a bool and we
+        # accept True/False in setter,
+        # and write 0/1 to file.
+        return "is_enabled" in self._tags
+
+    @property
     def value(self):
+        if self.is_bool:
+            return self._value == "1"
         if self._value_call:
             self.value = self._value_call()
             return self._value
@@ -99,6 +105,8 @@ class Env:
 
     @value.setter
     def value(self, value):
+        # mess with value in case we are a bool
+        value = "1" if value else "0" if self.is_bool else value
         self._value = value
         # FIXME: this is just annoying debugging stuff
         print_err(f"set value of {self.name} to {value}")

@@ -117,6 +117,8 @@ class Constants:
             default="true",
             tags=["route_api", "is_enabled"],
         ),
+        # 978
+        Env("FEEDER_ENABLE_UAT978", default=False, tags=["uat978", "is_enabled"]),
         # Misc
         Env(
             "_ADSBIM_HEYWHATSTHAT_ENABLED",
@@ -205,12 +207,12 @@ class Constants:
         Env(
             "_ADSBIM_STATE_IS_AIRSPY_ENABLED",
             is_mandatory=False,
-            tags=["airspy", "enabled"],
+            tags=["airspy", "is_enabled"],
         ),
         Env(
             "_ADSBIM_STATE_IS_PORTAINER_ENABLED",
             is_mandatory=False,
-            tags=["portainer", "enabled"],
+            tags=["portainer", "is_enabled"],
         ),
         Env(
             "_ADSBIM_STATE_IS_SSH_CONFIGURED",
