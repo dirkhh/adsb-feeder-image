@@ -234,7 +234,7 @@ class AdsbIm:
         frequencies: Dict[str, str] = self._sdrdevices.addresses_per_frequency
         for freq in [1090, 978]:
             setting = self._constants.env_by_tags(str(freq))
-            if setting:
+            if setting and setting.value != "":
                 frequencies[freq] = setting.value
         return json.dumps(
             {
