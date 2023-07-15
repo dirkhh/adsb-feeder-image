@@ -29,14 +29,11 @@ class UltrafeederConfig:
         return {
             name: value
             for name, value in self._constants.netconfigs.items()
-            if self._constants.env_by_tags(["ultrafeeder", "is_enabled", name])
+            if self._constants.is_enabled("ultrafeeder", name)
         }
 
     def generate(self):
-        mlat_privacy = (
-            self._constants.env_by_tags(["mlat_privacy"]) == "--privacy"
-        )  # FIXME this should return truthy!!!
-        # the code woulld not be as ugly if it returned truthy ;)
+        mlat_privacy = self._constants.is_enabled("mlat_privacy")
         ret = set()
         for name, netconfig in self._enabled_aggregators.items():
             uuid = None
