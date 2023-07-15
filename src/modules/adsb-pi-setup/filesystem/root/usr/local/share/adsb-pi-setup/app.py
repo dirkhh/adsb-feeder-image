@@ -330,6 +330,7 @@ class AdsbIm:
                 if key == "nightly_update" or key == "zerotier":
                     # this will be handled through the separate key/value pairs
                     pass
+                continue
             e = self._constants.env_by_tags(key.split("--"))
             print_err(f"key {key} value {value} env {e}")
             if e:
