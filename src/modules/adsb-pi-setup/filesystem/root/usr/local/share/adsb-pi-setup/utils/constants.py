@@ -6,7 +6,7 @@ from os import name
 from pathlib import Path
 from uuid import uuid4
 
-from .environment import Env
+from .environment import Env, ENV_FILE_PATH
 from .netconfig import NetConfig
 
 
@@ -343,3 +343,23 @@ class Constants:
         taglist.append("is_enabled")
         e = self.env_by_tags(taglist)
         return e and e.value
+
+    # helper function to get everything that needs to be written out written out
+    def update_env(self):
+        env_vars = {}
+        with open(ENV_FILE_PATH, "r") as env_file:
+            for line in env_file.readlines():
+                if line.strip().startswith("#"):
+                    continue
+                key, var = line.partition("=")[::2]
+                env_vars[key.strip()] = var.strip()
+                print_err(f"found {key.strip()} -> {var.strip()} in .env file")
+            for e in self._env:
+                if e.value != e._default:
+                    env_vars[e.name] = e.value
+                else:
+                    env_vars.pop(e.name, None)  # there's no point in storing default values in the file
+        with open(ENV_FILE_PATH, "w") as env_file:
+            for key, value in env_vars.items():
+                env_file.write(f"{key}={value}\n")
+                print_err(f"wrote {key} -> {value} to .env file")

@@ -343,9 +343,9 @@ class AdsbIm:
                         )
                     self._constants.env_by_tags("ssh_configured").value = True
                 e.value = value
-
-        # FIXME finish me
-        # populate ultrafeeder
+        # done handling the input data
+        # let's make sure we write out the updated ultrafeeder config
+        self._constants.update_env()
 
         # finally, check if this has given us enouch configuration info to
         # start the containers
