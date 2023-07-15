@@ -36,9 +36,9 @@ class UltrafeederConfig:
         mlat_privacy = self._constants.is_enabled("mlat_privacy")
         ret = set()
         for name, netconfig in self._enabled_aggregators.items():
-            uuid = None
+            uuid = self._constants.env_by_tags("ultrafeeder_uuid")
             if name == "adsblol":
-                uuid = self._constants.env_by_tags(["adsblol_uuid"]).value
+                uuid = self._constants.env_by_tags("adsblol_uuid").value
             crumb = netconfig.generate(mlat_privacy=mlat_privacy, uuid=uuid)
             if crumb == "":
                 print_err(f"skipping {name} because it is empty?")

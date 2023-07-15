@@ -59,7 +59,7 @@ class AdsbIm:
         self._ultrafeeder = UltrafeederConfig(constants=self._constants)
 
         # update Env ultrafeeder to have value self._ultrafeed.generate()
-        self._constants.env_by_tags(["ultrafeeder_config"])._value_call = self._ultrafeeder.generate
+        self._constants.env_by_tags("ultrafeeder_config")._value_call = self._ultrafeeder.generate
 
         self._other_aggregators = {
             "adsb_hub": ADSBHub(self._system),
