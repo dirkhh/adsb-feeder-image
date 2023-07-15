@@ -92,6 +92,8 @@ class Env:
 
     @property
     def value(self):
+        if self.is_bool:
+            return self._value == True or self._value == "True" or self._value == "on"
         if self._value_call:
             return self._value_call()
         elif self._value != None:
@@ -101,8 +103,9 @@ class Env:
     @value.setter
     def value(self, value):
         # mess with value in case we are a bool
+        # we get "1" from .env files and "on" from checkboxes in HTML
         if self.is_bool and value not in {True, False}:
-            value = True if value == "1" else False
+            value = True if value == "1" or value == "on" else False
 
         if value != self._value:
             self._value = value
