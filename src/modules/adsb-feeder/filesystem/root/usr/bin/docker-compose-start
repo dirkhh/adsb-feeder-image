@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # should we even try to start?
-if grep "BASE_CONFIG=1" /opt/adsb/.env > /dev/null 2>&1 ; then
+if grep "_ADSBIM_STATE_IS_BASE_CONFIG_FINISHED=True" /opt/adsb/.env > /dev/null 2>&1 ; then
 	lockFile="/opt/adsb/docker-starting.lock"
 	if ( set -o noclobber; echo "locked" > "$lockFile") 2> /dev/null; then
 		trap 'rm -f "$lockFile"; exit $?' INT TERM EXIT
