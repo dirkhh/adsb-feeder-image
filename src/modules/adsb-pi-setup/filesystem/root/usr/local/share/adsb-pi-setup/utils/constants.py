@@ -100,7 +100,7 @@ class Constants:
         # SDR
         Env("FEEDER_RTL_SDR", default="rtlsdr", tags=["rtlsdr"]),
         Env("FEEDER_ENABLE_BIASTEE", default="false", tags=["biast", "is_enabled"]),
-        Env("FEEDER_READSB_GAIN", default="autogain", tags=["autogain", "is_enabled"]),
+        Env("FEEDER_READSB_GAIN", default="autogain", tags=["autogain"]),
         Env("FEEDER_SERIAL_1090", is_mandatory=False, tags=["1090"]),  # FIXME
         Env("FEEDER_978", is_mandatory=False, tags=["978"]),  # FIXME
         # Feeder
@@ -111,7 +111,7 @@ class Constants:
             default_call=lambda: str(uuid4()),
             tags=["ultrafeeder_uuid"],
         ),
-        Env("MLAT_PRIVACY", default="--privacy", tags=["mlat_privacy", "is_enabled"]),
+        Env("MLAT_PRIVACY", default="true", tags=["mlat_privacy", "is_enabled"]),
         Env(
             "FEEDER_TAR1090_USEROUTEAPI",
             default="true",
