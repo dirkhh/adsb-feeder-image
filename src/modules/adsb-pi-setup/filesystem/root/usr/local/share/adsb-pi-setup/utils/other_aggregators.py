@@ -86,7 +86,7 @@ class Aggregator:
         print_err(f"docker_run_with_timeout {cmdline}")
         try:
             result = subprocess.run(
-                cmdline, timeout=timeout, shell=True, capture_output=True
+                f"docker run {cmdline}", timeout=timeout, shell=True, capture_output=True
             )
         except subprocess.TimeoutExpired as exc:
             # for several of these containers "timeout" is actually the expected behavior;
