@@ -378,9 +378,13 @@ class AdsbIm:
             self._constants.env_by_tags("978host").value = ""
             self._constants.env_by_tags("978piaware").value = ""
 
-
+        self._sdrdevices._ensure_populated()
         airspy = any([sdr._type == "airspy" for sdr in self._sdrdevices.sdrs])
         self._constants.env_by_tags(["airspy", "is_enabled"]).value = airspy
+        if (len(self._sdrdevices.sdrs) == 1
+            and not airspy
+            and not self._constants.env_by_tags("978serial").value):
+            self._constants.env_by_tags("1090serial").value = self._sdrdevices.sdrs[0]._serial
         rtlsdr = not airspy and self._constants.env_by_tags("1090serial").value != ""
         self._constants.env_by_tags("rtlsdr").value = "rtlsdr" if rtlsdr else ""
 
