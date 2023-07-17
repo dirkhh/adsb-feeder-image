@@ -74,6 +74,7 @@ class Aggregator:
         raise NotImplementedError
 
     def _download_docker_container(self, container: str) -> bool:
+        print_err(f"download_docker_container {container}")
         cmdline = f"docker pull {container}"
         try:
             result = subprocess.run(cmdline, timeout=180.0, shell=True)
@@ -82,6 +83,7 @@ class Aggregator:
         return True
 
     def _docker_run_with_timeout(self, cmdline: str, timeout: float) -> str:
+        print_err(f"docker_run_with_timeout {cmdline}")
         try:
             result = subprocess.run(
                 cmdline, timeout=timeout, shell=True, capture_output=True
@@ -125,7 +127,7 @@ class FlightRadar24(Aggregator):
     def __init__(self, system: System):
         super().__init__(
             name="FlightRadar24",
-            tags=["fr24"],
+            tags=["flightradar"],
             system=system,
         )
 
@@ -144,7 +146,7 @@ class FlightRadar24(Aggregator):
         )
         if not sharing_key_match:
             print_err(f"couldn't find a sharing key in the container output: {output}")
-            return redirect("/aggregators")
+            return None
 
         return sharing_key_match.group(1)
 
@@ -175,7 +177,7 @@ class PlaneWatch(Aggregator):
     def __init__(self, system: System):
         super().__init__(
             name="PlaneWatch",
-            tags=["plane_watch"],
+            tags=["planewatch"],
             system=system,
         )
 
@@ -238,7 +240,7 @@ class RadarBox(Aggregator):
 
         if not self.download_docker_container(docker_image):
             print_err("failed to download the RadarBox docker image")
-            return redirect("/aggregators")
+            return None
 
         cmdline = (
             f"--rm -i --network adsb_default -e BEASTHOST=ultrafeeder -e LAT=${self.lat} "
@@ -266,7 +268,6 @@ class RadarBox(Aggregator):
 
         self._constants.env_by_tags(self._key_tags).value = sharing_key
         self._constants.env_by_tags(self._enabled_tags).value = True
-        self._system._restart.restart_systemd()
         return True
 
 
@@ -278,14 +279,14 @@ class OpenSky(Aggregator):
             system=system,
         )
 
-    def _activate(self, user: str, serial: str):
+    def _activate(self, user_input: str):
+        user, serial = user_input.split("::")
         if not user or not serial:
+            print_err(f"can't parse {user_input} as user/serial for OpenSky")
             return False
-        # FIXME
         self._constants.env_by_tags(self.tags + ["user"]).value = user
         self._constants.env_by_tags(self.tags + ["pass"]).value = serial
         self._constants.env_by_tags(self.tags + ["is_enabled"]).value = True
-        self._system._restart.restart_systemd()
         return True
 
 
@@ -294,7 +295,7 @@ class RadarVirtuel(Aggregator):
     def __init__(self, system: System):
         super().__init__(
             name="RadarVirtuel",
-            tags=["radar_virtuel"],
+            tags=["radarvirtuel"],
             system=system,
         )
 

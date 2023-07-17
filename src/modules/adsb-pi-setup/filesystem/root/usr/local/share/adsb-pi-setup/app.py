@@ -61,16 +61,15 @@ class AdsbIm:
 
         # update Env ultrafeeder to have value self._ultrafeed.generate()
         self._constants.env_by_tags("ultrafeeder_config")._value_call = self._ultrafeeder.generate
-
         self._other_aggregators = {
-            "adsb_hub": ADSBHub(self._system),
-            "flightaware": FlightAware(self._system),
-            "flightradar24": FlightRadar24(self._system),
-            "opensky": OpenSky(self._system),
-            "planefinder": PlaneFinder(self._system),
-            "planewatch": PlaneWatch(self._system),
-            "radarbox": RadarBox(self._system),
-            "radarvirtuel": RadarVirtuel(self._system),
+            "adsbhub--submit": ADSBHub(self._system),
+            "flightaware--submit": FlightAware(self._system),
+            "flightradar--submit": FlightRadar24(self._system),
+            "opensky--submit": OpenSky(self._system),
+            "planefinder--submit": PlaneFinder(self._system),
+            "planewatch--submit": PlaneWatch(self._system),
+            "radarbox--submit": RadarBox(self._system),
+            "radarvirtuel--submit": RadarVirtuel(self._system),
         }
         # fmt: off
         self.proxy_routes = self._constants.proxy_routes
@@ -333,7 +332,29 @@ class AdsbIm:
                 if key == "nightly_update" or key == "zerotier":
                     # this will be handled through the separate key/value pairs
                     pass
+                if key in self._other_aggregators:
+                    is_successful = False
+                    base = key.replace("--submit", "")
+                    aggregator_argument = form.get(f"{base}--key", None)
+                    if not aggregator_argument:
+                        print_err(f"missing value for {base}--key")
+                        continue
+                    if base == "opensky":
+                        user = form.get(f"{base}--user", None)
+                        if not user:
+                            print_err(f"missing value for {base}--user")
+                        aggregator_argument += f"::{user}"
+                    aggregator_object = self._other_aggregators[key]
+                    try:
+                        is_successful = aggregator_object._activate(aggregator_argument)
+                    except Exception as e:
+                        print_err(f"error activating {key}: {e}")
+                    if not is_successful:
+                        print_err(f"did not successfully enable {base}")
+
+                # we had the magic value of 'go' - so we should be done with this one
                 continue
+            # now handle other form input
             e = self._constants.env_by_tags(key.split("--"))
             if e:
                 if allow_insecure and key == "ssh_pub":

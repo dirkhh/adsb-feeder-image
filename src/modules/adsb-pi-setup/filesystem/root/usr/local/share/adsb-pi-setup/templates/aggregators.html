@@ -50,9 +50,9 @@
                     does, however, provide the best MLAT coverage of all the sites listed)</small></label><br />
         </div>
         <div class="row no-gutters">
-            <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="FR24" id="FR24" {{
-                others_enabled('fr24') }} />
-            <label for="FR24" class="mb-3 col-sm-10">
+            <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="flightradar--is_enabled"
+                id="flightradar--is_enabled" {{ others_enabled('fr24') }} />
+            <label for="flightradar--is_enabled" class="mb-3 col-sm-10">
                 Submit your data to <a href="https://www.flightradar24.com/privacy-policy">flightradar24</a>
             </label>
             <div class="col-sm-1">&nbsp;</div>
@@ -60,14 +60,14 @@
             <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
             <div class="form-group col-sm-11 no-gutters" id="FR_FIELDS"> <!-- <-- WHAT IS THIS? FIXME -->
                 <div class="row no-gutters">
-                    <label for="fr24--key" class="col-sm-11">Enter your flightradar24 sharing key<br />
+                    <label for="flightradar--key" class="col-sm-11">Enter your flightradar24 sharing key<br />
                         (or enter your email address and click the button to request a sharing key)
                     </label>
-                    <input type="text" id="fr24--key" name="FEEDER_FR24_SHARING_KEY" class="form-control col-sm-6 mr-1"
-                        {{ others_enabled('fr24') | replace("1", "required" ) }} <!-- FIXME WTF does this do? -->
-                    placeholder="existing flightradar24 sharing key or email address"
-                    value="{{ env_value_by_tags(['fr24', 'key']) }}">
-                    <button type="submit" class="btn btn-primary col-sm-3 ml-1" name="fr24--key" value="go">
+                    <input type="text" id="flightradar--key" name="FEEDER_FR24_SHARING_KEY"
+                        class="form-control col-sm-6 mr-1"
+                        placeholder="existing flightradar24 sharing key or email address"
+                        value="{{ env_value_by_tags(['flightradar', 'key']) }}">
+                    <button type="submit" class="btn btn-primary col-sm-3 ml-1" name="flightradar--submit" value="go">
                         Submit or request key
                     </button>
                 </div>
@@ -75,9 +75,9 @@
         </div>
 
         <div class="row no-gutters">
-            <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="plane_watch--is_enabled"
-                id="plane_watch--is_enabled" {{ others_enabled('plane_watch') }} />
-            <label for="plane_watch--is_enabled" class="mb-3 col-sm-10">
+            <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="planewatch--is_enabled"
+                id="planewatch--is_enabled" {{ others_enabled('planewatch') }} />
+            <label for="planewatch--is_enabled" class="mb-3 col-sm-10">
                 Submit your data to <a href="https://plane.watch">Plane.watch</a>
             </label>
             <div class="col-sm-1">&nbsp;</div>
@@ -85,16 +85,16 @@
             <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
             <div class="form-group col-sm-11 no-gutters" id="PW_FIELDS"> <!-- <--- FIXME -->
                 <div class="row no-gutters">
-                    <label for="plane_watch--key" class="col-sm-11">
+                    <label for="planewatch--key" class="col-sm-11">
                         To sign up for an API key go to <a href="https://atc.plane.watch/">atc.plane.watch</a>,
                         sign up for an account, log in and click on <b>Feeders, + New Feeder</b>.
                         Fill out the details and save the data. This will show you an API key that you can enter
                         here.
                     </label>
-                    <input type="text" id="plane_watch--key" name="plane_watch--key" class="form-control col-sm-6 ml-1"
-                        {{ env_values["PW"] | replace("checked", "required" ) }} placeholder=" Plane.watch API key"
-                        value="{{ env_values['FEEDER_PLANEWATCH_API_KEY'] }}">
-                    <button type="submit" class="btn btn-primary col-sm-3 ml-1" name="get-pw-api-key" value="go">
+                    <input type="text" id="planewatch--key" name="planewatch--key" class="form-control col-sm-6 ml-1" {{
+                        others_enabled("planewatch") | replace("checked", "required" ) }}
+                        placeholder=" Plane.watch API key" value="{{ env_value_by_tags(['planewatch', 'key']) }}">
+                    <button type="submit" class="btn btn-primary col-sm-3 ml-1" name="planewatch--submit" value="go">
                         Submit to activate
                     </button>
                 </div>
@@ -102,8 +102,8 @@
         </div>
 
         <div class="row no-gutters">
-            <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="FA" id="FA" {{ env_values['FA']
-                }} />
+            <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="flightaware--is_enabled"
+                id="flightaware--is_enabled" {{ others_enabled('flightware') }} />
             <label for="FA" class="mb-3 col-sm-10">
                 Submit your data to <a href="https://flightaware.com/">FlightAware</a>
             </label>
@@ -112,7 +112,7 @@
             <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
             <div class="form-group col-sm-11 no-gutters" id="FA_FIELDS">
                 <div class="row no-gutters">
-                    <label for="FAFI" class="col-sm-11">
+                    <label for="flightaware--key" class="col-sm-11">
                         You need a FlightAware / Piaware feeder ID.
                         If you already have one, please enter it below. Otherwise, leave the field empty and
                         click on the button and we will try to get one for you. Once this process completes
@@ -123,10 +123,10 @@
                     <script>var link = document.getElementById('piaware');
                         link.setAttribute('href', window.location.protocol + "//" + window.location.hostname + ":8081/");
                     </script>
-                    <input type="text" id="FAFI" name="FEEDER_PIAWARE_FEEDER_ID" class="form-control col-sm-6 ml-1" {{
-                        env_values["FA"] | replace("checked", "required" ) }} placeholder=" Piaware key"
-                        value="{{ env_values['FEEDER_PIAWARE_FEEDER_ID'] }}">
-                    <button type="submit" class="btn btn-primary col-sm-3 ml-1" name="get-fa-api-key" value="go">
+                    <input type="text" id="flighaware--key" name="flightaware--key" class="form-control col-sm-6 ml-1"
+                        {{ others_enabled("flightaware") | replace("checked", "required" ) }} placeholder=" Piaware key"
+                        value="{{ env_value_by_tags(['flightaware', 'key']) }}">
+                    <button type="submit" class="btn btn-primary col-sm-3 ml-1" name="flightaware--submit" value="go">
                         Submit or request key
                     </button>
                 </div>
@@ -134,9 +134,9 @@
         </div>
 
         <div class="row no-gutters">
-            <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="RB" id="RB" {{ env_values['RB']
-                }} />
-            <label for="RB" class="mb-3 col-sm-10">
+            <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="radarbox--is_enabled"
+                id="radarbox--is_enabled" {{ others_enabled('radarbox') }} />
+            <label for="radarbox--is_enabled" class="mb-3 col-sm-10">
                 Submit your data to <a href="https://www.radarbox.com/">RadarBox</a>
             </label>
             <div class="col-sm-1">&nbsp;</div>
@@ -144,17 +144,17 @@
             <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
             <div class="form-group col-sm-11 no-gutters" id="RB_FIELDS">
                 <div class="row no-gutters">
-                    <label for="RBSK" class="col-sm-11">
+                    <label for="radarbox--key" class="col-sm-11">
                         You need an RadarBox sharing key.
                         If you already have one, please enter it below. Otherwise, leave the field empty and
                         click on the button and we will try to get one for you. Please log into the
                         <a href="https://www.radarbox.com/sharing-data/claim">RadarBox website</a> once this
                         process has completed in order to claim the key for your account.
                     </label>
-                    <input type="text" id="RBSK" name="FEEDER_RADARBOX_SHARING_KEY" class="form-control col-sm-6 ml-1"
-                        {{ env_values["RB"] | replace("checked", "required" ) }} placeholder=" RadarBox sharing key"
-                        value="{{ env_values['FEEDER_RADARBOX_SHARING_KEY'] }}">
-                    <button type="submit" class="btn btn-primary col-sm-3 ml-1" name="get-rb-sharing-key" value="go">
+                    <input type="text" id="radarbox--key" name="radarbox--key" class="form-control col-sm-6 ml-1" {{
+                        env_values["RB"] | replace("checked", "required" ) }} placeholder=" RadarBox sharing key"
+                        value="{{ env_value_by_tags(['radarbox', 'key']) }}">
+                    <button type="submit" class="btn btn-primary col-sm-3 ml-1" name="radarbox--submit" value="go">
                         Submit or request key
                     </button>
                 </div>
@@ -162,8 +162,8 @@
         </div>
 
         <div class="row no-gutters">
-            <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="PF" id="PF" {{ env_values['PF']
-                }} />
+            <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="planefinder--is_enabled"
+                id="planefinder--is_enabled" {{ others_enabled('planefinder') }} />
             <label for="PF" class="mb-3 col-sm-10">
                 Submit your data to <a href="https://planefinder.net/">PlaneFinder</a>
             </label>
@@ -172,15 +172,15 @@
             <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
             <div class="form-group col-sm-11 no-gutters" id="PF_FIELDS">
                 <div class="row no-gutters">
-                    <label for="PFSC" class="col-sm-11">
+                    <label for="planefinder--key" class="col-sm-11">
                         You need an PlaneFinder sharecode.
                         If you already have one, please enter it below. The setup for a new feeder is fairly
                         complicated - we are trying to add this for a future release.
                     </label>
-                    <input type="text" id="PFSC" name="FEEDER_PLANEFINDER_SHARECODE" class="form-control col-sm-6 ml-1"
-                        {{ env_values["PF"] | replace("checked", "required" ) }} placeholder=" PlaneFinder sharecode"
-                        value="{{ env_values['FEEDER_PLANEFINDER_SHARECODE'] }}">
-                    <button type="submit" class="btn btn-primary col-sm-3 ml-1" name="get-pf-sharecode" value="go">
+                    <input type="text" id="planefinder--key" name="planefinder--key" class="form-control col-sm-6 ml-1"
+                        {{ others_enabled("planefinder") | replace("checked", "required" ) }}
+                        placeholder=" PlaneFinder sharecode" value="{{ env_value_by_tags(['planefinder', 'key']) }}">
+                    <button type="submit" class="btn btn-primary col-sm-3 ml-1" name="planefinder--submit" value="go">
                         Submit to activate
                     </button>
                 </div>
@@ -188,8 +188,8 @@
         </div>
 
         <div class="row no-gutters">
-            <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="AH" id="AH" {{ env_values['AH']
-                }} />
+            <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="adsbhub--is_enabled"
+                id="adsbhub--is_enabled" {{ others_enabled("adsbhub") }} />
             <label for="AH" class="mb-3 col-sm-10">
                 Submit your data to <a href="https://adsbhub.org">ADSBHub</a>
             </label>
@@ -198,7 +198,7 @@
             <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
             <div class="form-group col-sm-11 no-gutters" id="AH_FIELDS">
                 <div class="row no-gutters">
-                    <label for="AHSK" class="col-sm-11">
+                    <label for="adsbhub--key" class="col-sm-11">
                         To sign up for an ADSBHub station key go to <a
                             href="https://www.adsbhub.org/howtofeed.php">ADSBHub
                             how to feed</a>,
@@ -208,10 +208,10 @@
                         Settings page
                         of the ADSBHub site.
                     </label>
-                    <input type="text" id="AHSK" name="FEEDER_ADSBHUB_STATION_KEY" class="form-control col-sm-6 ml-1" {{
-                        env_values["AH"] | replace("checked", "required" ) }} placeholder=" ADSBHub station key"
-                        value="{{ env_values['FEEDER_ADSBHUB_STATION_KEY'] }}">
-                    <button type="submit" class="btn btn-primary col-sm-3 ml-1" name="get-ah-station-key" value="go">
+                    <input type="text" id="adsbhub--key" name="FEEDER_ADSBHUB_STATION_KEY"
+                        class="form-control col-sm-6 ml-1" {{ others_enabled('adsbhub') | replace("checked", "required"
+                        ) }} placeholder=" ADSBHub station key" value="{{ env_value_by_tags(['adsbhub', 'key']) }}">
+                    <button type="submit" class="btn btn-primary col-sm-3 ml-1" name="adsbhub--submit" value="go">
                         Submit to activate
                     </button>
                 </div>
@@ -219,8 +219,8 @@
         </div>
 
         <div class="row no-gutters">
-            <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="OS" id="OS" {{ env_values['OS']
-                }} />
+            <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="opensky--is_enabled"
+                id="opensky--is_enabled" {{ others_enabled('opensky') }} />
             <label for="OS" class="mb-3 col-sm-10">
                 Submit your data to <a href="https://opensky-network.org/">OpenSky Network</a>
             </label>
@@ -232,17 +232,17 @@
                   -->
             <div class="form-group col-sm-11 no-gutters" id="OS_FIELDS">
                 <div class="row no-gutters">
-                    <label for="OSUN" class="col-sm-11">You need an OpenSky username and serial number.
+                    <label for="opensky--key" class="col-sm-11">You need an OpenSky username and serial number.
                         If you already have these, please enter them below. Automation to get them for you if you
                         are a new user will be added in a future release.
                     </label>
-                    <input type="text" id="OSUN" name="FEEDER_OPENSKY_USERNAME" class="form-control col-sm-3 ml-1" {{
-                        env_values["OS"] | replace("checked", "required" ) }} placeholder=" OpenSky username"
-                        value="{{ env_values['FEEDER_OPENSKY_USERNAME'] }}">
-                    <input type="text" id="OSSN" name="FEEDER_OPENSKY_SERIAL" class="form-control col-sm-3 ml-1" {{
-                        env_values["OS"] | replace("checked", "required" ) }} placeholder=" OpenSky serial number"
-                        value="{{ env_values['FEEDER_OPENSKY_SERIAL'] }}">
-                    <button type="submit" class="btn btn-primary col-sm-3 ml-1" name="get-os-info" value="go">
+                    <input type="text" id="opensky--user" name="opensky--user" class="form-control col-sm-3 ml-1" {{
+                        others_enabled('opensky') | replace("checked", "required" ) }} placeholder=" OpenSky username"
+                        value="{{ env_value_by_tags(['opensky', 'user']) }}">
+                    <input type="text" id="opensky--key" name="opensky--key" class="form-control col-sm-3 ml-1" {{
+                        others_enabled('opensy') | replace("checked", "required" ) }}
+                        placeholder=" OpenSky serial number" value="{{ env_value_by_tags(['opensky', 'key'])}}">
+                    <button type="submit" class="btn btn-primary col-sm-3 ml-1" name="opensky--submit" value="go">
                         Submit to activate
                     </button>
                 </div>
@@ -250,9 +250,9 @@
         </div>
 
         <div class="row no-gutters">
-            <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="RV" id="RV" {{ env_values['RV']
-                }} />
-            <label for="RV" class="mb-3 col-sm-10">
+            <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="radarvirtuel--is_enabled"
+                id="radarvirtuel--is_enabled" {{ others_enabled('radarvirtuel') }} />
+            <label for="radarvirtuel--is_enabled" class="mb-3 col-sm-10">
                 Submit your data to <a href="https://www.radarvirtuel.com/">RadarVirtuel</a>
             </label>
             <div class="col-sm-1">&nbsp;</div>
@@ -260,16 +260,17 @@
             <div class="col-sm-1">&nbsp;</div> <!-- space to match the checkbox above -->
             <div class="form-group col-sm-11 no-gutters" id="RV_FIELDS">
                 <div class="row no-gutters">
-                    <label for="RVFK" class="col-sm-11">To sign up for an feeder key send email to
+                    <label for="radarvirtuel--key" class="col-sm-11">To sign up for an feeder key send email to
                         <a href="mailto://support@adsbnetwork.com">support@adsbnetwork.com</a>.
                         Include your name, Lat/Lon of nearest airport, and mention that you are using a Docker
                         setup.
                         They will respond with a feeder key that you can enter here
                     </label>
-                    <input type="text" id="RVFK" name="FEEDER_RV_FEEDER_KEY" class="form-control col-sm-6 ml-1" {{
-                        env_values["RV"] | replace("checked", "required" ) }} placeholder=" RadarVirtuel feeder key"
-                        value="{{ env_values['FEEDER_RV_FEEDER_KEY'] }}">
-                    <button type="submit" class="btn btn-primary col-sm-3 ml-1" name="get-rv-feeder-key" value="go">
+                    <input type="text" id="radarvirtuel--key" name="radarvirtuel--key"
+                        class="form-control col-sm-6 ml-1" {{ others_enabled("radarvirtuel") |
+                        replace("checked", "required" ) }} placeholder=" RadarVirtuel feeder key"
+                        value="{{ env_value_by_tags(['radarvirtuel', 'key']) }}">
+                    <button type="submit" class="btn btn-primary col-sm-3 ml-1" name="radarvirtuel--submit" value="go">
                         Submit to activate
                     </button>
                 </div>
@@ -288,14 +289,14 @@
     document.addEventListener('readystatechange', event => {
         if (event.target.readyState === "complete") {
             const box_fields = [
-                ["FR24", "FR_FIELDS", ["FRSK"]],
-                ["PW", "PW_FIELDS", ["PWAK"]],
-                ["FA", "FA_FIELDS", []],
-                ["RB", "RB_FIELDS", []],
-                ["PF", "PF_FIELDS", ["PFSC"]],
-                ["AH", "AH_FIELDS", ["AHSK"]],
-                ["OS", "OS_FIELDS", ["OSUN", "OSSN"]],
-                ["RV", "RV_FIELDS", ["RVFK"]]];
+                ["flightradare--is_enabled", "FR_FIELDS", ["FRSK"]],
+                ["planewatch--is_enabled", "PW_FIELDS", ["PWAK"]],
+                ["flightaware--is_enabled", "FA_FIELDS", []],
+                ["radarbox--is_enabled", "RB_FIELDS", []],
+                ["planefinder--is_enabled", "PF_FIELDS", ["PFSC"]],
+                ["adsbhug--is_enabled", "AH_FIELDS", ["AHSK"]],
+                ["opensky--is_enabled", "OS_FIELDS", ["OSUN", "OSSN"]],
+                ["radarvirtuel--is_enabled", "RV_FIELDS", ["RVFK"]]];
             for (const ids of box_fields) {
                 console.log("adding event listener for " + ids[0] + " affecting " + ids[1])
                 let box = document.getElementById(ids[0]);

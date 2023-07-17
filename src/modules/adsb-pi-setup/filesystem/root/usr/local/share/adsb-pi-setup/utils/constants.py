@@ -150,7 +150,7 @@ class Constants:
         ),
         Env("FEEDER_ADSBHUB_STATION_KEY", is_mandatory=False, tags=["adsb_hub", "key"]),
         Env("FEEDER_OPENSKY_USERNAME", is_mandatory=False, tags=["opensky", "user"]),
-        Env("FEEDER_OPENSKY_SERIAL", is_mandatory=False, tags=["opensky", "pass"]),
+        Env("FEEDER_OPENSKY_SERIAL", is_mandatory=False, tags=["opensky", "key"]),
         Env("FEEDER_RV_FEEDER_KEY", is_mandatory=False, tags=["radar_virtuel", "key"]),
         Env(
             "FEEDER_PLANEWATCH_API_KEY", is_mandatory=False, tags=["plane_watch", "key"]
@@ -253,14 +253,14 @@ class Constants:
         # -- these names are magic and are used in yaml files and the structure
         #    of these names is used in scripting around that
         Env("ULTRAFEEDER_CONTAINER", tags=["ultrafeeder", "container"]),
-        Env("FR24_CONTAINER", tags=["fr24", "container"]),
+        Env("FR24_CONTAINER", tags=["flightradar", "container"]),
         Env("FA_CONTAINER", tags=["flightaware", "container"]),
         Env("RB_CONTAINER", tags=["radarbox", "container"]),
         Env("PF_CONTAINER", tags=["planefinder", "container"]),
-        Env("AH_CONTAINER", tags=["adsb_hub", "container"]),
+        Env("AH_CONTAINER", tags=["adsbhub", "container"]),
         Env("OS_CONTAINER", tags=["opensky", "container"]),
-        Env("RV_CONTAINER", tags=["radar_virtuel", "container"]),
-        Env("PW_CONTAINER", tags=["plane_watch", "container"]),
+        Env("RV_CONTAINER", tags=["radarvirtuel", "container"]),
+        Env("PW_CONTAINER", tags=["planewatch", "container"]),
         # Ultrafeeder config
         Env(
             "_ADSBIM_STATE_IS_ULTRAFEEDER_ADSBLOL_ENABLED",
