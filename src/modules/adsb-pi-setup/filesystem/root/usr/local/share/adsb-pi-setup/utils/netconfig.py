@@ -27,7 +27,7 @@ class UltrafeederConfig:
         self._constants = constants
 
     @property
-    def _enabled_aggregators(self):
+    def enabled_aggregators(self):
         aggregator_selection = self._constants.env_by_tags("aggregators").value
         return {
             name: value
@@ -42,7 +42,7 @@ class UltrafeederConfig:
     def generate(self):
         mlat_privacy = self._constants.is_enabled("mlat_privacy")
         ret = set()
-        for name, netconfig in self._enabled_aggregators.items():
+        for name, netconfig in self.enabled_aggregators.items():
             uuid = self._constants.env_by_tags("ultrafeeder_uuid").value
             if name == "adsblol":
                 uuid = self._constants.env_by_tags("adsblol_uuid").value

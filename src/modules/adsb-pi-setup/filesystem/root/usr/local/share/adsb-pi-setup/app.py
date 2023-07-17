@@ -421,11 +421,18 @@ class AdsbIm:
             return self.setup()
 
         # If we have more than one SDR, or one of them is an airspy,
-        # we need to go to advanced
-        if len(self._sdrdevices) > 1 or any(
-            [sdr._type == "airspy" for sdr in self._sdrdevices.sdrs]
-        ):
+        # we need to go to advanced - unless we have at least one of the serials set up
+        # for 978 or 1090 reporting
+        self._sdrdevices._ensure_populated()
+        if ((len(self._sdrdevices) > 1 or any([sdr._type == "airspy" for sdr in self._sdrdevices.sdrs]))
+            and not (self._constants.env_by_tags("1090").value or self._constants.env_by_tags("978").value)):
             return self.advanced()
+
+        # if the user chose to individually pick aggregators but hasn't done so,
+        # they need to go to the aggregator page
+        if not self._ultrafeeder.enabled_aggregators:
+            return self.aggregators()
+
         return self.index()
 
     # @app.route("/index")
