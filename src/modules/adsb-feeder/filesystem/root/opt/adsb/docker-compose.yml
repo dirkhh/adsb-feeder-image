@@ -17,7 +17,7 @@ services:
       # --------------------------------------------------
       # SDR related parameters:
       - READSB_DEVICE_TYPE=${FEEDER_RTL_SDR}
-      - READSB_RTLSDR_DEVICE=${FEEDER_1090}
+      - READSB_RTLSDR_DEVICE=${FEEDER_SERIAL_1090}
       - READSB_RTLSDR_PPM=${ADSB_SDR_PPM}
       - READSB_ENABLE_BIASTEE=${FEEDER_ENABLE_BIASTEE}
       #

@@ -351,7 +351,7 @@ class AdsbIm:
                 e.value = value
         # done handling the input data
         # what implied settings do we have (and could we simplify them?)
-        if self._constants.env_by_tags("978").value:
+        if self._constants.env_by_tags("978serial").value:
             self._constants.env_by_tags(["uat978", "is_enabled"]).value = True
             self._constants.env_by_tags("978url").value = "http://dump978/skyaware978"
             self._constants.env_by_tags("978host").value = "dump978"
@@ -365,7 +365,7 @@ class AdsbIm:
 
         airspy = any([sdr._type == "airspy" for sdr in self._sdrdevices.sdrs])
         self._constants.env_by_tags(["airspy", "is_enabled"]).value = airspy
-        rtlsdr = not airspy and self._constants.env_by_tags("1090").value != ""
+        rtlsdr = not airspy and self._constants.env_by_tags("1090serial").value != ""
         self._constants.env_by_tags("rtlsdr").value = "rtlsdr" if rtlsdr else ""
 
         # let's make sure we write out the updated ultrafeeder config
@@ -447,7 +447,7 @@ class AdsbIm:
         # for 978 or 1090 reporting
         self._sdrdevices._ensure_populated()
         if ((len(self._sdrdevices) > 1 or any([sdr._type == "airspy" for sdr in self._sdrdevices.sdrs]))
-            and not (self._constants.env_by_tags("1090").value or self._constants.env_by_tags("978").value)):
+            and not (self._constants.env_by_tags("1090serial").value or self._constants.env_by_tags("978serial").value)):
             return self.advanced()
 
         # if the user chose to individually pick aggregators but hasn't done so,
