@@ -4,48 +4,52 @@
 {% block content %}
 <h1>{% block title %} ADSB Feeder Homepage {% endblock %}</h1>
 <div id="UF" style="display: block;">
-	<h4>TAR1090 Mapping Interface</h4>
-	<ul>
-	<li><a href="/map">TAR1090 map</a>
-	<li><a href="/stats">System Statistics and Graphs</a>
-	<li><a href="/map/?replay">Timelapse / Replay</a>
-	<li><a href="/map/?heatmap&realheat">Heatmap</a>
-	<li><a href="/map/?ptracks">Tracks</a>
-	</ul>
+    <h4>TAR1090 Mapping Interface</h4>
+    <ul>
+        <li><a href="/map">TAR1090 map</a>
+        <li><a href="/stats">System Statistics and Graphs</a>
+        <li><a href="/map/?replay">Timelapse / Replay</a>
+        <li><a href="/map/?heatmap&realheat">Heatmap</a>
+        <li><a href="/map/?ptracks">Tracks</a>
+    </ul>
 </div>
-<div id="UAT978" style="display: {% if env_values.get('FEEDER_URL_978', '') != '' %} block {% else %} none {% endif %};">
-	<h4>UAT978 Mapping Interface</h4>
-	<ul>
-	<li><a href="/dump978">Dump978 map</a>
-	</ul>
+<div id="UAT978"
+    style="display: {% if env_values.get('FEEDER_URL_978', '') != '' %} block {% else %} none {% endif %};">
+    <h4>UAT978 Mapping Interface</h4>
+    <ul>
+        <li><a href="/dump978">Dump978 map</a>
+    </ul>
 </div>
 <div id="FA" style="display: {% if is_enabled('flightaware') %} block {% else %} none {% endif %};">
-	<h4>FlightAware</h4>
-	<ul>
-	<li><a href="/fa">FlightAware map</a>
-	<li><a href="/fa-status">FlightAware status</a>
-	</ul>
+    <h4>FlightAware</h4>
+    <ul>
+        <li><a href="/fa">FlightAware map</a>
+        <li><a href="/fa-status">FlightAware status</a>
+    </ul>
 </div>
-<div id="FR" style="display: {% if is_enabled('flightradar24') == "1" %} block {% else %} none {% endif %};">
-	<h4>FlightRadar 24</h4>
-	<ul>
-	<li><a href="/fr-status">FR24 status</a>
-	</ul>
+<div id="FR" style="display: {% if is_enabled('flightradar24') == " 1" %} block {% else %} none {% endif %};">
+    <h4>FlightRadar 24</h4>
+    <ul>
+        <li><a href="/fr-status">FR24 status</a>
+    </ul>
 </div>
-<div id="UA" style="display: {% if is_enabled('uat978') == "1" %} block {% else %} none {% endif %};">
-	<h4>UAT 978</h4>
-	<ul>
-	<li><a href="/dump978/skyaware">UAT (978 MHz) map</a>
-	</ul>
+<div id="UA" style="display: {% if is_enabled('uat978') == " 1" %} block {% else %} none {% endif %};">
+    <h4>UAT 978</h4>
+    <ul>
+        <li><a href="/dump978/skyaware">UAT (978 MHz) map</a>
+    </ul>
 </div>
 <div id="CF" style="display: block;">
-	<h4>Device Configuration and Administration</h4>
-	<ul>
-	<li><a href="{{ url_for("setup") }}">Basic Setup</a>
-	<li><a href="{{ url_for("advanced") }}" style="display: {% if env_values['BASE_CONFIG'] == '1' %} block {% else %} none {% endif %};">Advanced setup</a>
-	<li><a href="{{ url_for("aggregators") }}" style="display: {% if env_values['BASE_CONFIG'] == '1' %} block {% else %} none {% endif %};">Aggregator setup</a>
-	<li style="display: {% if is_enabled('portainer') %} block {% else %} none {% endif %}">
-	    <a href="/portainer">Portainer</a> * Note - this link may give a SSL Certificate warning; feel free to ignore
+    <h4>Device Configuration and Administration</h4>
+    <ul>
+        <li><a href="{{ url_for('setup') }}">Basic Setup</a>
+        <li style="display: {% if is_enabled('base_config') %} list-item {% else %} none {% endif %};"><a
+                href="{{ url_for('advanced') }}">Advanced setup</a>
+        <li style="display: {% if is_enabled('base_config') %} list-item {% else %} none {% endif %};"><a
+                href="{{ url_for('aggregators') }}">Aggregator setup</a>
+        <li style="display: {% if is_enabled('portainer') %} list-item {% else %} none {% endif %};"><a
+                href="/portainer">Portainer</a> * Note - this link may give a SSL Certificate warning; feel free to
+            ignore
     </ul>
 </div>
 {% endblock %}
