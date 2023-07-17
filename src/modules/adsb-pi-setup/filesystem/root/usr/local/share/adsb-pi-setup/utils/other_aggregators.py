@@ -107,6 +107,14 @@ class Aggregator:
             output = str(result.stdout)
         return output
 
+    # the default case is straight forward. Remember the key and enable the aggregator
+    def _simple_activate(self, user_input: str):
+        if not user_input:
+            return False
+        self._constants.env_by_tags(self._key_tags).value = user_input
+        self._constants.env_by_tags(self._enabled_tags).value = True
+        return True
+
 class ADSBHub(Aggregator):
     def __init__(self, system: System):
         super().__init__(
@@ -116,11 +124,7 @@ class ADSBHub(Aggregator):
         )
 
     def _activate(self, user_input: str):
-        if not user_input:
-            return False
-        self._constants.env_by_tags(self._key_tags).value = user_input
-        self._constants.env_by_tags(self._enabled_tags).value = True
-        return True
+        return self._simple_activate(user_input)
 
 
 class FlightRadar24(Aggregator):
@@ -132,7 +136,7 @@ class FlightRadar24(Aggregator):
         )
 
     def _request_fr24_sharing_key(self, email: str):
-        if not self.download_docker_container(self.container):
+        if not self._download_docker_container(self.container):
             print_err("failed to download the FR24 docker image")
             return redirect("/aggregators")
 
@@ -140,7 +144,7 @@ class FlightRadar24(Aggregator):
             f'--rm -i -e FEEDER_LAT="{self.lat}" -e FEEDER_LONG="{self.lng}" -e FEEDER_ALT_FT="{self.alt_ft}" '
             f'-e FR24_EMAIL="{email}" --entrypoint /scripts/signup.sh {self.container}'
         )
-        output = self.docker_run_with_timeout(cmdline, 45.0)
+        output = self._docker_run_with_timeout(cmdline, 45.0)
         sharing_key_match = re.search(
             "Your sharing key \\(([a-zA-Z0-9]*)\\) has been", output
         )
@@ -158,6 +162,7 @@ class FlightRadar24(Aggregator):
         ):
             # that's an email address, so we are looking to get a sharing key
             sharing_key = self._request_fr24_sharing_key(user_input)
+            print_err(f"got back sharing_key |{sharing_key}|")
         if re.match("[0-9a-zA-Z]*", user_input):
             # that might be a valid key
             sharing_key = user_input
@@ -182,11 +187,7 @@ class PlaneWatch(Aggregator):
         )
 
     def _activate(self, user_input: str):
-        if not user_input:
-            return False
-        self._constants.env_by_tags(self._key_tags).value = user_input
-        self._constants.env_by_tags(self._enabled_tags).value = True
-        return True
+        return self._simple_activate(user_input)
 
 class FlightAware(Aggregator):
     def __init__(self, system: System):
@@ -197,29 +198,30 @@ class FlightAware(Aggregator):
         )
 
     def _request_fa_feeder_id(self):
-        if not self.download_docker_container(self.container):
+        print_err(f"request_fa_feeder_id -- download {self.container}")
+        if not self._download_docker_container(self.container):
             print_err("failed to download the piaware docker image")
             return redirect("/aggregators")
 
         cmdline = f"--rm {self.container}"
-        output = self.docker_run_with_timeout(cmdline, 45.0)
+        output = self._docker_run_with_timeout(cmdline, 45.0)
         feeder_id_match = re.search(" feeder ID is ([-a-zA-Z0-9]*)", output)
         if feeder_id_match:
             return feeder_id_match.group(1)
-        else:
-            print_err(f"couldn't find a feeder ID in the container output: {output}")
-
+        print_err(f"couldn't find a feeder ID in the container output: {output}")
         return None
 
     def _activate(self, user_input: str):
-        if not user_input:
-            return False
-        if re.match("[0-9a-zA-Z]*", user_input):
+        if re.match("[0-9a-zA-Z]+", user_input):
             # that might be a valid key
+            print_err(f"{user_input} looks like a key, let's use it")
             feeder_id = user_input
         else:
+            print_err("didn't get an fa key, requesting one")
             feeder_id = self._request_fa_feeder_id()
+            print_err(f"got back feeder_id |{feeder_id}|")
         if not feeder_id:
+            print_err("didn't end up with an fa key - bailing")
             return False
 
         self._constants.env_by_tags(self._key_tags).value = feeder_id
@@ -238,7 +240,7 @@ class RadarBox(Aggregator):
         # env_values = self._envfile.envs
         docker_image = self._constants.env_by_tags(["radarbox", "container"]).value
 
-        if not self.download_docker_container(docker_image):
+        if not self._download_docker_container(docker_image):
             print_err("failed to download the RadarBox docker image")
             return None
 
@@ -246,7 +248,7 @@ class RadarBox(Aggregator):
             f"--rm -i --network adsb_default -e BEASTHOST=ultrafeeder -e LAT=${self.lat} "
             f"-e LONG=${self.lng} -e ALT=${self.alt} {docker_image}"
         )
-        output = self.docker_run_with_timeout(cmdline, 45.0)
+        output = self._docker_run_with_timeout(cmdline, 45.0)
         sharing_key_match = re.search("Your new key is ([a-zA-Z0-9]*)", output)
         if not sharing_key_match:
             print_err(f"couldn't find a sharing key in the container output: {output}")
@@ -300,12 +302,7 @@ class RadarVirtuel(Aggregator):
         )
 
     def _activate(self, user_input: str):
-        if not user_input:
-            return False
-        self._constants.env_by_tags(self._key_tags).value = user_input
-        self._constants.env_by_tags(self._enabled_tags).value = True
-        self._system._restart.restart_systemd()
-        return True
+        return self._simple_activate(user_input)
 
 
 class PlaneFinder(Aggregator):
@@ -317,9 +314,4 @@ class PlaneFinder(Aggregator):
         )
 
     def _activate(self, user_input: str):
-        if not user_input:
-            return False
-        self._constants.env_by_tags(self._key_tags).value = user_input
-        self._constants.env_by_tags(self._enabled_tags).value = True
-        self._system._restart.restart_systemd()
-        return True
+        return self._simple_activate(user_input)
