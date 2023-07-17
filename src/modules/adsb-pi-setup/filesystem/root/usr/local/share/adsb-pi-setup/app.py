@@ -47,7 +47,8 @@ class AdsbIm:
         def env_functions():
             return {
                 "is_enabled": lambda tag: self._constants.is_enabled(tag),
-                "env_value_by_tag": lambda tag: self._constants.env_by_tags([tag]).value,
+                "env_value_by_tag": lambda tag: self._constants.env_by_tags([tag]).value,  # this one takes a single tag
+                "env_value_by_tags": lambda tags: self._constants.env_by_tags(tags).value, # this one takes a list of tags
                 "env_values": self._constants.envs,
             }
 
