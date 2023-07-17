@@ -6,7 +6,7 @@
 <!-- SECURE_IMAGE_START -->
 <h2>Install ssh credentials</h2>
 <form method="POST">
-    <div style="display: {% if is_enabled('ssh_configured') %} none {% else %} block {% endif %}" class="row">
+    <div class="row">
         <label for="ssh_pub" class="col-12">
             Enter or paste your public key below. This will allow you to then log in as root on the feeder SBC.
         </label>

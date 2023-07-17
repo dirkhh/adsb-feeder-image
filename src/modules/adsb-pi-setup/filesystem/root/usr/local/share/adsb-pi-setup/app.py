@@ -307,8 +307,9 @@ class AdsbIm:
         # in the HTML, every input field needs to have a name that is concatenated by "--"
         # and that matches the tags of one Env
         form: Dict = request.form
-        allow_insecure = self._constants.is_enabled("secure_image")
+        allow_insecure = not self._constants.is_enabled("secure_image")
         for key, value in form.items():
+            print_err(f"handling {key} -> {value} (allow insecure is {allow_insecure})")
             # this seems like cheating... let's capture all of the submit buttons
             if value == "go":
                 if key == "shutdown":
@@ -334,15 +335,12 @@ class AdsbIm:
                     pass
                 continue
             e = self._constants.env_by_tags(key.split("--"))
-            print_err(f"key {key} value {value} env {e}")
             if e:
                 if allow_insecure and key == "ssh_pub":
                     ssh_dir = pathlib.Path("/root/.ssh")
                     ssh_dir.mkdir(mode=0o700, exist_ok=True)
                     with open(ssh_dir / "authorized_keys", "a+") as authorized_keys:
-                        authorized_keys.write(
-                            f"{self._constants.env_by_tags('ssh_pub')}\n"
-                        )
+                        authorized_keys.write(f"{value}\n")
                     self._constants.env_by_tags("ssh_configured").value = True
                 e.value = value
         # done handling the input data
