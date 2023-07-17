@@ -336,13 +336,8 @@ class AdsbIm:
                     is_successful = False
                     base = key.replace("--submit", "")
                     aggregator_argument = form.get(f"{base}--key", None)
-                    if not aggregator_argument:
-                        print_err(f"missing value for {base}--key")
-                        continue
                     if base == "opensky":
                         user = form.get(f"{base}--user", None)
-                        if not user:
-                            print_err(f"missing value for {base}--user")
                         aggregator_argument += f"::{user}"
                     aggregator_object = self._other_aggregators[key]
                     try:
