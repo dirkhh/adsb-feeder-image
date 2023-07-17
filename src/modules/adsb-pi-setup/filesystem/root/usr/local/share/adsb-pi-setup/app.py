@@ -344,6 +344,9 @@ class AdsbIm:
                     self._constants.env_by_tags("ssh_configured").value = True
                 e.value = value
         # done handling the input data
+        # what implied settings do we have (and could we simplify them?)
+        if self._constants.env_by_tags("978"):
+            self._constants.env_by_tags(["uat978", "is_enabled"]).value = True
         # let's make sure we write out the updated ultrafeeder config
         self._constants.update_env()
 
