@@ -104,7 +104,7 @@ class Constants:
         Env("FEEDER_SERIAL_1090", is_mandatory=False, tags=["1090serial"]),  # this is the SDR serial
         Env("FEEDER_SERIAL_978", is_mandatory=False, tags=["978serial"]),  # this is the SDR serial
         # Feeder
-        Env("ULTRAFEEDER_CONFIG", is_mandatory=True, tags=["ultrafeeder_config"]),
+        Env("FEEDER_ULTRAFEEDER_CONFIG", is_mandatory=True, tags=["ultrafeeder_config"]),
         Env("ADSBLOL_UUID", default_call=lambda: str(uuid4()), tags=["adsblol_uuid"]),
         Env(
             "ULTRAFEEDER_UUID",
