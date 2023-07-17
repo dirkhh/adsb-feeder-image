@@ -99,7 +99,7 @@ class Constants:
         Env("MLAT_SITE_NAME", tags=["mlat_name"]),
         # SDR
         Env("FEEDER_RTL_SDR", default="rtlsdr", tags=["rtlsdr"]),
-        Env("FEEDER_ENABLE_BIASTEE", default="false", tags=["biast", "is_enabled"]),
+        Env("FEEDER_ENABLE_BIASTEE", default="False", tags=["biast", "is_enabled"]),
         Env("FEEDER_READSB_GAIN", default="autogain", tags=["autogain"]),
         Env("FEEDER_SERIAL_1090", is_mandatory=False, tags=["1090"]),  # FIXME
         Env("FEEDER_978", is_mandatory=False, tags=["978"]),  # FIXME
@@ -111,14 +111,14 @@ class Constants:
             default_call=lambda: str(uuid4()),
             tags=["ultrafeeder_uuid"],
         ),
-        Env("MLAT_PRIVACY", default="true", tags=["mlat_privacy", "is_enabled"]),
+        Env("MLAT_PRIVACY", default="True", tags=["mlat_privacy", "is_enabled"]),
         Env(
             "FEEDER_TAR1090_USEROUTEAPI",
-            default="true",
+            default="True",
             tags=["route_api", "is_enabled"],
         ),
         # 978
-        Env("FEEDER_ENABLE_UAT978", default=False, tags=["uat978", "is_enabled"]),
+        Env("FEEDER_ENABLE_UAT978", default="False", tags=["uat978", "is_enabled"]),
         # Misc
         Env(
             "_ADSBIM_HEYWHATSTHAT_ENABLED",
@@ -161,7 +161,7 @@ class Constants:
         Env(
             "_ADSBIM_STATE_IS_SECURE_IMAGE",
             is_mandatory=False,
-            default="false",
+            default="False",
             tags=["secure_image", "is_enabled"],
         ),
         Env(
