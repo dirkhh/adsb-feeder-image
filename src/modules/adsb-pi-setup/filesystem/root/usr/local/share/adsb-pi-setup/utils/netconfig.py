@@ -48,5 +48,10 @@ class UltrafeederConfig:
                 uuid = self._constants.env_by_tags("adsblol_uuid").value
             ret.add(netconfig.generate(mlat_privacy=mlat_privacy, uuid=uuid))
         ret.discard("")
+        # now we need to add the two internal inbound links (if needed)
+        if self._constants.is_enabled("uat978"):
+            ret.add("adsb,dump978,30978,uat_in")
+        if self._constants.is_enabled("airspy"):
+            ret.add("adsb,airspy_adsb,30005,beast_in")
 
         return ";".join(ret)

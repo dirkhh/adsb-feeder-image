@@ -6,7 +6,7 @@ COMPOSE_FILES=( "-f" "/opt/adsb/docker-compose.yml" )
 if [ -f /opt/adsb/.env ] ; then
 	# for each of the yml snippets check if this aggregator is enabled
 	# in the .env file
-	if grep "FEEDER_ENABLE_UAT978=yes" /opt/adsb/.env > /dev/null 2>&1 ; then
+	if grep "FEEDER_ENABLE_UAT978=True" /opt/adsb/.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "/opt/adsb/uat978.yml" )
 	fi
 	if grep "_ADSBIM_STATE_IS_FLIGHTRADAR24_ENABLED=1" /opt/adsb/.env > /dev/null 2>&1 ; then
