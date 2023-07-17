@@ -358,10 +358,7 @@ class Constants:
                 env_vars[key.strip()] = var.strip()
                 print_err(f"found {key.strip()} -> {var.strip()} in .env file")
             for e in self._env:
-                if e.value != e._default:
-                    env_vars[e.name] = e.value
-                else:
-                    env_vars.pop(e.name, None)  # there's no point in storing default values in the file
+                env_vars[e.name] = e.value
         with open(ENV_FILE_PATH, "w") as env_file:
             for key, value in env_vars.items():
                 env_file.write(f"{key}={value}\n")
