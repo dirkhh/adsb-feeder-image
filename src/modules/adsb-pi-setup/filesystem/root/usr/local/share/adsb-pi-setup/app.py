@@ -342,6 +342,12 @@ class AdsbIm:
                     with open(ssh_dir / "authorized_keys", "a+") as authorized_keys:
                         authorized_keys.write(f"{value}\n")
                     self._constants.env_by_tags("ssh_configured").value = True
+                if key == "zerotierid":
+                    try:
+                        subprocess.call("/usr/bin/systemctl enable --now zerotier-one", shell=True)
+                        subprocess.call(f"/usr/sbin/zerotier-cli join {value}", shell=True)
+                    except:
+                        print_err("exception trying to set up zerorier - giving up")
                 e.value = value
         # done handling the input data
         # what implied settings do we have (and could we simplify them?)
