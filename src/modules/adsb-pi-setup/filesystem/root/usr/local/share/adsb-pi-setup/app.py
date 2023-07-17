@@ -402,12 +402,10 @@ class AdsbIm:
         if request.method == "POST":
             return self.update()
 
-        # we have self._constants.is_enabled,
-        #     def is_enabled(self, *tags):
-        # we create a partial with ultrafeeder as a value, to infer if ultrafeeder
-        # stuff should be enabled.
-        uf_enabled = partial(self._constants.is_enabled, "ultrafeeder")
-        others_enabled = partial(self._constants.is_enabled, "other_aggregators")
+        def uf_enabled(*tags):
+            return "checked" if self._constants.is_enabled("ultrafeeder", *tags) else ""
+        def others_enabled(*tags):
+            return "checked" if self._constants.is_enabled("other_aggregators", *tags) else ""
 
         return render_template(
             "aggregators.html",
