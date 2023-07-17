@@ -283,9 +283,9 @@ class Constants:
             tags=["tat", "ultrafeeder", "is_enabled"],
         ),
         Env(
-            "_ADSBIM_STATE_IS_ULTRAFEEDER_PS_ENABLED",
+            "_ADSBIM_STATE_IS_ULTRAFEEDER_PLANESPOTTERS_ENABLED",
             is_mandatory=False,
-            tags=["ps", "ultrafeeder"],
+            tags=["planespotters", "ultrafeeder", "is_enabled"],
         ),
         Env(
             "_ADSBIM_STATE_IS_ULTRAFEEDER_ADSBONE_ENABLED",
