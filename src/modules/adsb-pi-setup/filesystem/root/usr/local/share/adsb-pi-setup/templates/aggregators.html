@@ -63,8 +63,7 @@
                     <label for="flightradar--key" class="col-sm-11">Enter your flightradar24 sharing key<br />
                         (or enter your email address and click the button to request a sharing key)
                     </label>
-                    <input type="text" id="flightradar--key" name="FEEDER_FR24_SHARING_KEY"
-                        class="form-control col-sm-6 mr-1"
+                    <input type="text" id="flightradar--key" name="flightradar--key" class="form-control col-sm-6 mr-1"
                         placeholder="existing flightradar24 sharing key or email address"
                         value="{{ env_value_by_tags(['flightradar', 'key']) }}">
                     <button type="submit" class="btn btn-primary col-sm-3 ml-1" name="flightradar--submit" value="go">
@@ -208,9 +207,9 @@
                         Settings page
                         of the ADSBHub site.
                     </label>
-                    <input type="text" id="adsbhub--key" name="FEEDER_ADSBHUB_STATION_KEY"
-                        class="form-control col-sm-6 ml-1" {{ others_enabled('adsbhub') | replace("checked", "required"
-                        ) }} placeholder=" ADSBHub station key" value="{{ env_value_by_tags(['adsbhub', 'key']) }}">
+                    <input type="text" id="adsbhub--key" name="adsbhub--key" class="form-control col-sm-6 ml-1" {{
+                        others_enabled('adsbhub') | replace("checked", "required" ) }}
+                        placeholder=" ADSBHub station key" value="{{ env_value_by_tags(['adsbhub', 'key']) }}">
                     <button type="submit" class="btn btn-primary col-sm-3 ml-1" name="adsbhub--submit" value="go">
                         Submit to activate
                     </button>

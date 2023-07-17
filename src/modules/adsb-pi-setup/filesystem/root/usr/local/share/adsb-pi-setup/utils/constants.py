@@ -170,12 +170,12 @@ class Constants:
         Env(
             "_ADSBIM_STATE_IS_FLIGHTRADAR24_ENABLED",
             is_mandatory=False,
-            tags=["other_aggregator", "is_enabled", "fr24"],
+            tags=["other_aggregator", "is_enabled", "flightradar"],
         ),
         Env(
             "_ADSBIM_STATE_IS_PLANEWATCH_ENABLED",
             is_mandatory=False,
-            tags=["other_aggregator", "is_enabled", "plane_watch"],
+            tags=["other_aggregator", "is_enabled", "planewatch"],
         ),
         Env(
             "_ADSBIM_STATE_IS_FLIGHTAWARE_ENABLED",
@@ -195,7 +195,7 @@ class Constants:
         Env(
             "_ADSBIM_STATE_IS_ADSBHUB_ENABLED",
             is_mandatory=False,
-            tags=["other_aggregator", "is_enabled", "adsb_hub"],
+            tags=["other_aggregator", "is_enabled", "adsbhub"],
         ),
         Env(
             "_ADSBIM_STATE_IS_OPENSKY_ENABLED",
@@ -205,7 +205,7 @@ class Constants:
         Env(
             "_ADSBIM_STATE_IS_RADARVIRTUEL_ENABLED",
             is_mandatory=False,
-            tags=["other_aggregator", "is_enabled", "radar_virtuel"],
+            tags=["other_aggregator", "is_enabled", "radarvirtuel"],
         ),
         Env(
             "_ADSBIM_STATE_IS_AIRSPY_ENABLED",
