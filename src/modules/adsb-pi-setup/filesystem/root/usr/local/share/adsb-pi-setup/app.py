@@ -137,7 +137,17 @@ class AdsbIm:
         return render_template("/backup.html")
 
     def backup_execute(self):
-        data = self._system.backup()
+        adsb_path = pathlib.Path("/opt/adsb")
+        data = io.BytesIO()
+        with zipfile.ZipFile(data, mode="w") as backup_zip:
+            backup_zip.write(adsb_path / ".env", arcname=".env")
+            for f in adsb_path.glob("*.yml"):
+                backup_zip.write(f, arcname=os.path.basename(f))
+            uf_path = pathlib.Path(adsb_path / "ultrafeeder")
+            if uf_path.is_dir():
+                for f in uf_path.rglob("*"):
+                    backup_zip.write(f, arcname=f.relative_to(adsb_path))
+        data.seek(0)
         return send_file(
             data,
             mimetype="application/zip",
