@@ -83,7 +83,7 @@ class AdsbIm:
         self.app.add_url_rule("/advanced", "advanced", self.advanced, methods=["GET", "POST"])
         self.app.add_url_rule("/expert", "expert", self.expert, methods=["GET", "POST"])
         self.app.add_url_rule("/aggregators", "aggregators", self.aggregators, methods=["GET", "POST"])
-        self.app.add_url_rule("/", "director", self.director)
+        self.app.add_url_rule("/", "director", self.director, methods=["GET", "POST"])
         self.app.add_url_rule("/index", "index", self.index)
         self.app.add_url_rule("/setup", "setup", self.setup, methods=["GET", "POST"])
         self.app.add_url_rule("/update", "update", self.update, methods=["POST"])
@@ -398,6 +398,8 @@ class AdsbIm:
 
     def director(self):
         # figure out where to go:
+        if request.method == "POST":
+            return self.update()
         if not self._constants.is_enabled("base_config"):
             return self.setup()
 
