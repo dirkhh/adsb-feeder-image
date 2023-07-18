@@ -73,6 +73,23 @@
         integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
         crossorigin="anonymous"></script>
     <script>$(document).ready(function () { $('[data-toggle="tooltip"]').tooltip(); });</script>
+    <script>$("form").submit(function () {
+            // stupid hack to get checkboxes that are unchecked into Flask
+            // first hide the form (so the checkboxes don't visibly turn back on)
+            // then artificially check them all, but give them values of 0/1 to represent
+            // whether they were checked or not
+            var this_master = $(this);
+            this_master.hide();
+            this_master.find('input[type="checkbox"]').each(function () {
+                var checkbox_this = $(this);
+                if (checkbox_this.is(":checked") == true) {
+                    checkbox_this.attr('value', '1');
+                } else {
+                    checkbox_this.prop('checked', true);
+                    checkbox_this.attr('value', '0');
+                }
+            })
+        })</script>
 </body>
 
 </html>
