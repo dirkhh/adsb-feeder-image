@@ -51,7 +51,7 @@ class Aggregator:
 
     @property
     def alt_ft(self):
-        return int(self.alt / 0.308)
+        return int(int(self.alt) / 0.308)
 
     @property
     def container(self):
@@ -156,7 +156,7 @@ class FlightRadar24(Aggregator):
             # that's an email address, so we are looking to get a sharing key
             sharing_key = self._request_fr24_sharing_key(user_input)
             print_err(f"got back sharing_key |{sharing_key}|")
-        if re.match("[0-9a-zA-Z]*", user_input):
+        elif re.match("[0-9a-zA-Z]+", user_input):
             # that might be a valid key
             sharing_key = user_input
         else:
