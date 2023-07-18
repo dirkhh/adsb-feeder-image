@@ -253,51 +253,6 @@ class AdsbIm:
         self._sdrdevices._ensure_populated()
         return render_template("advanced.html")
 
-    """ -- poor man's multi line comment
-    def handle_advanced_post_request(self):
-        print_err("request_form", request.form)
-        if request.form.get("submit") == "go":
-            advanced_settings = {
-                "FEEDER_TAR1090_USEROUTEAPI": "1" if request.form.get("route") else "0",
-                "MLAT_PRIVACY": "--privacy" if request.form.get("privacy") else "",
-                "HEYWHATSTHAT": "1" if request.form.get("heywhatsthat") else "",
-                "FEEDER_HEYWHATSTHAT_ID": request.form.get(
-                    "FEEDER_HEYWHATSTHAT_ID", default=""
-                ),
-                "FEEDER_ENABLE_BIASTEE": "true" if request.form.get("biast") else "",
-            }
-        serial1090: str = request.form.get("1090", default="")
-        serial978: str = request.form.get("978", default="")
-        print_err(f"received serial1090 of {serial1090} and serial978 of {serial978}")
-        if serial1090:
-            if not serial1090.startswith(("AIRSPY", "airspy")):
-                advanced_settings["FEEDER_1090"] = serial1090
-            else:
-                advanced_settings["FEEDER_1090"] = "airspy"
-            advanced_settings.update(setup_airspy_or_rtl())
-        if serial978:
-            advanced_settings["FEEDER_978"] = serial978
-            advanced_settings["FEEDER_ENABLE_UAT978"] = "yes"
-            advanced_settings["FEEDER_URL_978"] = "http://dump978/skyaware978"
-            advanced_settings["FEEDER_UAT978_HOST"] = "dump978"
-            advanced_settings["FEEDER_PIAWARE_UAT978"] = "relay"
-
-        num = get_sdr_info()["num"]
-        advanced_settings["NUM_SDRS"] = num
-        advanced_settings["SDR_MANUALLY_ASSIGNED"] = "1"
-        # now we need to update the ENV_FILE so that the ultrafeeder configuration below is correct
-        ENV_FILE.update(advanced_settings)
-        envs = ENV_FILE.envs
-        print_err(f"after the update, FEEDER_1090 is {envs.get('FEEDER_1090')} and FEEDER_978 is {envs.get('FEEDER_978')}")
-        net = ENV_FILE.generate_ultrafeeder_config(request.form)
-        ENV_FILE.update({
-            "FEEDER_ULTRAFEEDER_CONFIG": net,
-            "UF": "1"
-        })
-        print_err(f"calculated ultrafeeder config of {net}")
-        return redirect("/restarting")
-    """
-
     def update(self):
         description = """
             This is the one endpoint that handles all the updates coming in from the UI.
@@ -398,28 +353,6 @@ class AdsbIm:
             return redirect(url_for("restarting"))
         return redirect(url_for("director"))
 
-    # FIXME tear me up into my own class please.
-
-    def handle_advanced_post_request(self):
-        # FIXME: this needs to move into /update
-        # Refactoring the above function to use the new self._constants._env objects.
-
-        # Get the submit=go out of the way to avoid indenting hard
-        if request.form.get("submit") != "go":
-            return redirect("/")
-
-        # For each item in the form, try getting an env object with the matching frontend_name
-        envs = {
-            env.frontend_name: env
-            for env in self._constants.envs.values()
-            if env.frontend_name in request.form
-        }
-
-        # Now we have a dict of env objects, we can update them all at once. How beautiful.
-        for env in envs.values():
-            env.value = request.form.get(env.frontend_name)
-        # FIXME the rest of the function got lost in the refactoring
-
     @check_restart_lock
     def expert(self):
         if request.method == "POST":
@@ -455,8 +388,6 @@ class AdsbIm:
             others_enabled=others_enabled,
         )
 
-    # @app.route("/")
-
     def director(self):
         # figure out where to go:
         if not self._constants.is_enabled("base_config"):
@@ -477,7 +408,6 @@ class AdsbIm:
 
         return self.index()
 
-    # @app.route("/index")
     def index(self):
         return render_template("index.html")
 
@@ -486,35 +416,6 @@ class AdsbIm:
         if request.method == "POST" and request.form.get("submit") == "go":
             return self.update()
         return render_template("setup.html")
-
-    def handle_aggregators_post_request(self):
-        # FIXME -- this needs to move into /update
-        print_err(request.form)
-        if request.form.get("tar1090") == "go":
-            self.update_env()
-            self._restart.restart_systemd()
-            return redirect("/restarting")
-        for key, value in [
-            ["get-fr24-sharing-key", self._other_aggregators["flightradar24"]],
-            ["get-pw-api-key", self._other_aggregators["planewatch"]],
-            ["get-fa-api-key", self._other_aggregators["flightaware"]],
-            ["get-rb-sharing-key", self._other_aggregators["radarbox"]],
-            ["get-pf-sharecode", self._other_aggregators["planefinder"]],
-            ["get-ah-station-key", self._other_aggregators["adsb_hub"]],
-            ["get-os-info", self._other_aggregators["opensky"]],
-            ["get-rv-feeder-key", self._other_aggregators["radarvirtuel"]],
-        ]:
-            if request.form.get(key) == "go":
-                is_successful = False
-                try:
-                    is_successful = value._activate()
-                except Exception as e:
-                    print_err(f"error activating {key}: {e}")
-                if is_successful:
-                    return redirect("/restarting")
-        else:
-            # how did we get here???
-            return "something went wrong"
 
 
 if __name__ == "__main__":
