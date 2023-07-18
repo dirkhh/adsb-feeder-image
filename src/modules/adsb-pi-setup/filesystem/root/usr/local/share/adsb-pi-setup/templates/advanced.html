@@ -7,9 +7,6 @@
 <p>
 <form method="post">
     <button type="submit" class="bigbigbutton" name="tar1090" value="go">I'm done here - take me to the website</button>
-</form>
-<p>
-<form method="post" action="/advanced">
     <div class="row no-gutters">
         <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="mlat_privacy--is_enabled"
             id="mlat_privacy--is_enabled" {% if is_enabled("mlat_privacy") %}checked{% endif %} />
@@ -82,7 +79,6 @@
     <div class="form-group">
         <button type="submit" name="submit" value="go" class="btn btn-primary">Submit</button>
     </div>
-    <p>{{ message }} </p>
 </form>
 <script>
     document.addEventListener('readystatechange', event => {
@@ -126,7 +122,7 @@
     function show_or_hide(b, f) {
         if (b.checked) f.style.display = "block"; else f.style.display = "none";
     }
-    const hwt = document.getElementById('heywhatsthat');
+    const hwt = document.getElementById('heywhatsthat--is_enabled');
     const hwttext = document.getElementById('hwt-text');
     hwt.addEventListener("change", function () {
         show_or_hide(hwt, hwttext);
