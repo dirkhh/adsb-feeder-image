@@ -8,7 +8,7 @@ if [ "$1" != "-no-fetch" ] ; then
     cp docker.image.versions docker.image.versions.${TIME}
     cp .env env.${TIME}
 
-    UPSTREAM_PATH=https://github.com/dirkhh/adsb-feeder-image/tree/main/src/modules/adsb-pi-setup/filesystem/root/opt/adsb/docker.image.versions
+    UPSTREAM_PATH=https://raw.githubusercontent.com/dirkhh/adsb-feeder-image/latest/src/modules/adsb-feeder/filesystem/root/opt/adsb/docker.image.versions
     if curl -s $UPSTREAM_PATH > docker.image.versions.new ; then
         mv docker.image.versions.new docker.image.versions
         echo "${TIME}: successfully retrieved new image versions from server" >> /var/log/update.log
