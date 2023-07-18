@@ -45,15 +45,15 @@ class Aggregator:
 
     @property
     def lat(self):
-        return self._constants.envs["FEEDER_LAT"].value
+        return self._constants.envs["FEEDER_LAT"]
 
     @property
     def lng(self):
-        return self._constants.envs["FEEDER_LONG"].value
+        return self._constants.envs["FEEDER_LONG"]
 
     @property
     def alt(self):
-        return self._constants.envs["FEEDER_ALT_M"].value
+        return self._constants.envs["FEEDER_ALT_M"]
 
     @property
     def alt_ft(self):
