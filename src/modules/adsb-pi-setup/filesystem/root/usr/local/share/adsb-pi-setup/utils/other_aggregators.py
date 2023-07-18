@@ -79,7 +79,10 @@ class Aggregator:
     def _docker_run_with_timeout(self, cmdline: str, timeout: float) -> str:
         try:
             result = subprocess.run(
-                f"docker run {cmdline}", timeout=timeout, shell=True, capture_output=True
+                f"docker run -t temp_container {cmdline}",
+                timeout=timeout,
+                shell=True,
+                capture_output=True,
             )
         except subprocess.TimeoutExpired as exc:
             # for several of these containers "timeout" is actually the expected behavior;
@@ -107,6 +110,7 @@ class Aggregator:
         self._constants.env_by_tags(self._key_tags).value = user_input
         self._constants.env_by_tags(self._enabled_tags).value = True
         return True
+
 
 class ADSBHub(Aggregator):
     def __init__(self, system: System):
@@ -171,6 +175,7 @@ class FlightRadar24(Aggregator):
 
         return True
 
+
 class PlaneWatch(Aggregator):
     def __init__(self, system: System):
         super().__init__(
@@ -181,6 +186,7 @@ class PlaneWatch(Aggregator):
 
     def _activate(self, user_input: str):
         return self._simple_activate(user_input)
+
 
 class FlightAware(Aggregator):
     def __init__(self, system: System):
@@ -276,7 +282,6 @@ class OpenSky(Aggregator):
         self._constants.env_by_tags(self.tags + ["pass"]).value = serial
         self._constants.env_by_tags(self.tags + ["is_enabled"]).value = True
         return True
-
 
 
 class RadarVirtuel(Aggregator):
