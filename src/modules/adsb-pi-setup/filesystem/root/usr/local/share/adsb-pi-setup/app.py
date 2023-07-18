@@ -215,7 +215,7 @@ class AdsbIm:
                         changed.append(name)
                 elif name == "ultrafeeder/":
                     changed.append("ultrafeeder")
-            return render_template("/restoreexecute.html")
+            return render_template("/restoreexecute.html", changed=changed, unchanged=unchanged)
         else:
             # they have selected the files to restore
             restore_path = pathlib.Path("/opt/adsb/restore")

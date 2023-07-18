@@ -4,26 +4,26 @@
 {% block content %}
 <h1>{% block title %} Restore setup from a backup {% endblock %}</h1>
 <div>
-{%  if metadata['unchanged'] | length > 0 %}
+    {% if unchanged | length > 0 %}
     <p>The following files appear unchanged:</p>
     <ul>
-        {%  for name in metadata['unchanged'] %}
-            <li>{{ name }}</li>
-        {%  endfor %}
+        {% for name in unchanged %}
+        <li>{{ name }}</li>
+        {% endfor %}
     </ul>
-{%  endif %}
-{%  if metadata['changed'] | length > 0 %}
+    {% endif %}
+    {% if changed | length > 0 %}
     <p>The following files appear modified; select the ones you want to restore from the backup?</p>
     <form method="POST">
         <div class="row">
             <div class="form-group col-sm-11 no-gutters" id="PF_FIELDS">
                 <ul class="checkboxlist">
-                    {%  for name in metadata['changed'] %}
-                        <li class="checkboxlist">
-                            <input id={{ name }} name={{ name }} type="checkbox">
-                            <label for={{ name }} class="ml-2">{{ name }}</label>
-                        </li>
-                    {%  endfor %}
+                    {% for name in changed %}
+                    <li class="checkboxlist">
+                        <input id={{ name }} name={{ name }} type="checkbox">
+                        <label for={{ name }} class="ml-2">{{ name }}</label>
+                    </li>
+                    {% endfor %}
                 </ul>
             </div>
             <div class="form-group col-sm-11 no-gutters" id="PF_FIELDS">
@@ -32,5 +32,5 @@
         </div>
     </form>
 </div>
-{%  endif %}
+{% endif %}
 {% endblock %}
