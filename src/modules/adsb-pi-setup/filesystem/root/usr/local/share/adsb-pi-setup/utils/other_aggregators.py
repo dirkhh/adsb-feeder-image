@@ -245,8 +245,8 @@ class RadarBox(Aggregator):
             return None
 
         cmdline = (
-            f"--rm -i --network adsb_default -e BEASTHOST=ultrafeeder -e LAT=${self.lat} "
-            f"-e LONG=${self.lng} -e ALT=${self.alt} {docker_image}"
+            f"--rm -i --network adsb_default -e BEASTHOST=ultrafeeder -e LAT={self.lat} "
+            f"-e LONG={self.lng} -e ALT={self.alt} {docker_image}"
         )
         output = self._docker_run_with_timeout(cmdline, 45.0)
         sharing_key_match = re.search("Your new key is ([a-zA-Z0-9]*)", output)
