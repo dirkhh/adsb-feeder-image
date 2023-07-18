@@ -271,11 +271,11 @@ class AdsbIm:
                 if key == "shutdown":
                     # do shutdown
                     self._system.halt()
-                    return "System halted"  # that return statement is of course a joke
+                    return "Asked the system to halt. This can take several minutes to complete, and some boards don't power off."
                 if key == "reboot":
                     # initiate reboot
                     self._system.reboot()
-                    return "System rebooting, please refresh in about a minute"
+                    return "Asked the system to reboot. This can take a while, please try to refresh in about a minute or two."
                 if key == "secure_image":
                     self._constants.env_by_tags("secure_image").value = True
                     self.secure_image()
