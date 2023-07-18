@@ -261,11 +261,13 @@ class AdsbIm:
         # in the HTML, every input field needs to have a name that is concatenated by "--"
         # and that matches the tags of one Env
         form: Dict = request.form
+        seen_go = False
         allow_insecure = not self._constants.is_enabled("secure_image")
         for key, value in form.items():
             print_err(f"handling {key} -> {value} (allow insecure is {allow_insecure})")
             # this seems like cheating... let's capture all of the submit buttons
             if value == "go":
+                seen_go = True
                 if key == "shutdown":
                     # do shutdown
                     self._system.halt()
@@ -287,6 +289,8 @@ class AdsbIm:
                 if key == "nightly_update" or key == "zerotier":
                     # this will be handled through the separate key/value pairs
                     pass
+                continue
+            if value == "stay":
                 if key in self._other_aggregators:
                     is_successful = False
                     base = key.replace("--submit", "")
@@ -345,6 +349,10 @@ class AdsbIm:
 
         # let's make sure we write out the updated ultrafeeder config
         self._constants.update_env()
+
+        # if the button simply updated some field, stay on the same page
+        if not seen_go:
+            return redirect(request.url)
 
         # finally, check if this has given us enouch configuration info to
         # start the containers
