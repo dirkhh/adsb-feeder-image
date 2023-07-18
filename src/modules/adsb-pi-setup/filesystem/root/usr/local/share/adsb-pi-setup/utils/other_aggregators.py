@@ -1,9 +1,5 @@
-from .constants import Constants
-from flask import request, redirect
-
 import re
 import sys
-from flask import redirect
 import subprocess
 
 from .system import System
@@ -24,8 +20,6 @@ class Aggregator:
         self._tags = tags
         self._system = system
         self._constants = system._constants
-        # self._key_tags = ["key"] + tags
-        # self._enabled_tags = ["is_enabled", "other_aggregator"] + tags
 
     @property
     def name(self):
@@ -83,7 +77,6 @@ class Aggregator:
         return True
 
     def _docker_run_with_timeout(self, cmdline: str, timeout: float) -> str:
-        print_err(f"docker_run_with_timeout {cmdline}")
         try:
             result = subprocess.run(
                 f"docker run {cmdline}", timeout=timeout, shell=True, capture_output=True
@@ -138,7 +131,7 @@ class FlightRadar24(Aggregator):
     def _request_fr24_sharing_key(self, email: str):
         if not self._download_docker_container(self.container):
             print_err("failed to download the FR24 docker image")
-            return redirect("/aggregators")
+            return None
 
         cmdline = (
             f'--rm -i -e FEEDER_LAT="{self.lat}" -e FEEDER_LONG="{self.lng}" -e FEEDER_ALT_FT="{self.alt_ft}" '
@@ -198,10 +191,9 @@ class FlightAware(Aggregator):
         )
 
     def _request_fa_feeder_id(self):
-        print_err(f"request_fa_feeder_id -- download {self.container}")
         if not self._download_docker_container(self.container):
             print_err("failed to download the piaware docker image")
-            return redirect("/aggregators")
+            return None
 
         cmdline = f"--rm {self.container}"
         output = self._docker_run_with_timeout(cmdline, 45.0)
@@ -214,14 +206,11 @@ class FlightAware(Aggregator):
     def _activate(self, user_input: str):
         if re.match("[0-9a-zA-Z]+", user_input):
             # that might be a valid key
-            print_err(f"{user_input} looks like a key, let's use it")
             feeder_id = user_input
         else:
-            print_err("didn't get an fa key, requesting one")
             feeder_id = self._request_fa_feeder_id()
             print_err(f"got back feeder_id |{feeder_id}|")
         if not feeder_id:
-            print_err("didn't end up with an fa key - bailing")
             return False
 
         self._constants.env_by_tags(self._key_tags).value = feeder_id
@@ -237,7 +226,6 @@ class RadarBox(Aggregator):
         )
 
     def _request_rb_sharing_key(self):
-        # env_values = self._envfile.envs
         docker_image = self._constants.env_by_tags(["radarbox", "container"]).value
 
         if not self._download_docker_container(docker_image):
