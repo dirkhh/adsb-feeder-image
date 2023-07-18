@@ -388,7 +388,7 @@ class AdsbIm:
         def uf_enabled(*tags):
             return "checked" if self._constants.is_enabled("ultrafeeder", *tags) else ""
         def others_enabled(*tags):
-            return "checked" if self._constants.is_enabled("other_aggregators", *tags) else ""
+            return "checked" if self._constants.is_enabled("other_aggregator", *tags) else ""
 
         return render_template(
             "aggregators.html",
