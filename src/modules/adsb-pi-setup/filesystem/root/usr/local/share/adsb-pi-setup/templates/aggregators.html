@@ -92,9 +92,6 @@
                     <input type="text" id="planewatch--key" name="planewatch--key" class="form-control col-sm-6 ml-1" {{
                         others_enabled("planewatch") | replace("checked", "required" ) }}
                         placeholder=" Plane.watch API key" value="{{ env_value_by_tags(['planewatch', 'key']) }}">
-                    <button type="submit" class="btn btn-primary col-sm-3 ml-1" name="planewatch--submit" value="stay">
-                        Submit to activate
-                    </button>
                 </div>
             </div>
         </div>
@@ -125,7 +122,7 @@
                         {{ others_enabled("flightaware") | replace("checked", "required" ) }} placeholder=" Piaware key"
                         value="{{ env_value_by_tags(['flightaware', 'key']) }}">
                     <button type="submit" class="btn btn-primary col-sm-3 ml-1" name="flightaware--submit" value="stay">
-                        Submit or request key
+                        Request key
                     </button>
                 </div>
             </div>
@@ -153,7 +150,7 @@
                         env_values["RB"] | replace("checked", "required" ) }} placeholder=" RadarBox sharing key"
                         value="{{ env_value_by_tags(['radarbox', 'key']) }}">
                     <button type="submit" class="btn btn-primary col-sm-3 ml-1" name="radarbox--submit" value="stay">
-                        Submit or request key
+                        Request key
                     </button>
                 </div>
             </div>
@@ -178,9 +175,6 @@
                     <input type="text" id="planefinder--key" name="planefinder--key" class="form-control col-sm-6 ml-1"
                         {{ others_enabled("planefinder") | replace("checked", "required" ) }}
                         placeholder=" PlaneFinder sharecode" value="{{ env_value_by_tags(['planefinder', 'key']) }}">
-                    <button type="submit" class="btn btn-primary col-sm-3 ml-1" name="planefinder--submit" value="stay">
-                        Submit to activate
-                    </button>
                 </div>
             </div>
         </div>
@@ -209,9 +203,6 @@
                     <input type="text" id="adsbhub--key" name="adsbhub--key" class="form-control col-sm-6 ml-1" {{
                         others_enabled('adsbhub') | replace("checked", "required" ) }}
                         placeholder=" ADSBHub station key" value="{{ env_value_by_tags(['adsbhub', 'key']) }}">
-                    <button type="submit" class="btn btn-primary col-sm-3 ml-1" name="adsbhub--submit" value="stay">
-                        Submit to activate
-                    </button>
                 </div>
             </div>
         </div>
@@ -240,9 +231,6 @@
                     <input type="text" id="opensky--key" name="opensky--key" class="form-control col-sm-3 ml-1" {{
                         others_enabled('opensy') | replace("checked", "required" ) }}
                         placeholder=" OpenSky serial number" value="{{ env_value_by_tags(['opensky', 'key'])}}">
-                    <button type="submit" class="btn btn-primary col-sm-3 ml-1" name="opensky--submit" value="stay">
-                        Submit to activate
-                    </button>
                 </div>
             </div>
         </div>
@@ -268,9 +256,6 @@
                         class="form-control col-sm-6 ml-1" {{ others_enabled("radarvirtuel") |
                         replace("checked", "required" ) }} placeholder=" RadarVirtuel feeder key"
                         value="{{ env_value_by_tags(['radarvirtuel', 'key']) }}">
-                    <button type="submit" class="btn btn-primary col-sm-3 ml-1" name="radarvirtuel--submit"
-                        value="stay">Submit to activate
-                    </button>
                 </div>
             </div>
         </div>
