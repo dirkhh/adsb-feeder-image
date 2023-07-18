@@ -257,9 +257,7 @@ class RadarBox(Aggregator):
         return sharing_key_match.group(1)
 
     def _activate(self, user_input: str):
-        if not user_input:
-            return False
-        if re.match("[0-9a-zA-Z]*", user_input):
+        if re.match("[0-9a-zA-Z]+", user_input):
             # that might be a valid key
             sharing_key = user_input
         else:
