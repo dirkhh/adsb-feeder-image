@@ -301,8 +301,11 @@
                 let fields = document.getElementById(ids[1]);
                 box.addEventListener("click", function () {
                     show_or_hide(box, fields);
-                    for (const input_field of ids[2])
-                        document.getElementById(input_field).required = box.checked;
+                    for (const input_field of ids[2]) {
+                        elem = document.getElementById(input_field)
+                        if (elem)
+                            elem.required = box.checked;
+                    }
                 })
                 show_or_hide(box, fields);
             }
