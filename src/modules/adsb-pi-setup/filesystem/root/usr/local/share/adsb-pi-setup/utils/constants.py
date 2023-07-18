@@ -327,10 +327,10 @@ class Constants:
                     continue
                 key, var = line.partition("=")[::2]
                 env_vars[key.strip()] = var.strip()
-                print_err(f"found {key.strip()} -> {var.strip()} in .env file")
+                # print_err(f"found {key.strip()} -> {var.strip()} in .env file")
             for e in self._env:
                 env_vars[e.name] = e.value
         with open(ENV_FILE_PATH, "w") as env_file:
             for key, value in env_vars.items():
                 env_file.write(f"{key}={value}\n")
-                print_err(f"wrote {key} -> {value} to .env file")
+                # print_err(f"wrote {key} -> {value} to .env file")
