@@ -102,7 +102,7 @@
 
         <div class="row no-gutters">
             <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="flightaware--is_enabled"
-                id="flightaware--is_enabled" {{ others_enabled('flightware') }} />
+                id="flightaware--is_enabled" {{ others_enabled('flightaware') }} />
             <label for="FA" class="mb-3 col-sm-10">
                 Submit your data to <a href="https://flightaware.com/">FlightAware</a>
             </label>
@@ -288,12 +288,12 @@
     document.addEventListener('readystatechange', event => {
         if (event.target.readyState === "complete") {
             const box_fields = [
-                ["flightradare--is_enabled", "FR_FIELDS", ["FRSK"]],
+                ["flightradar--is_enabled", "FR_FIELDS", ["FRSK"]],
                 ["planewatch--is_enabled", "PW_FIELDS", ["PWAK"]],
                 ["flightaware--is_enabled", "FA_FIELDS", []],
                 ["radarbox--is_enabled", "RB_FIELDS", []],
                 ["planefinder--is_enabled", "PF_FIELDS", ["PFSC"]],
-                ["adsbhug--is_enabled", "AH_FIELDS", ["AHSK"]],
+                ["adsbhub--is_enabled", "AH_FIELDS", ["AHSK"]],
                 ["opensky--is_enabled", "OS_FIELDS", ["OSUN", "OSSN"]],
                 ["radarvirtuel--is_enabled", "RV_FIELDS", ["RVFK"]]];
             for (const ids of box_fields) {
