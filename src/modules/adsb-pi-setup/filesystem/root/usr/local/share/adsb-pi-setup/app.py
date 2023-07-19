@@ -203,30 +203,46 @@ class AdsbIm:
             # now check which ones are different from the installed versions
             changed: List[str] = []
             unchanged: List[str] = []
+            saw_uf = False
             for name in restored_files:
-                if not name.startswith("ultrafeeder/") and os.path.isfile(
-                    adsb_path / name
-                ):
+                if name.startswith("ultrafeeder/"):
+                    saw_uf = True
+                elif os.path.isfile(adsb_path / name):
                     if filecmp.cmp(adsb_path / name, restore_path / name):
                         print_err(f"{name} is unchanged")
                         unchanged.append(name)
                     else:
                         print_err(f"{name} is different from current version")
                         changed.append(name)
-                elif name == "ultrafeeder/":
-                    changed.append("ultrafeeder")
+            if saw_uf:
+                changed.append("ultrafeeder/")
             return render_template("/restoreexecute.html", changed=changed, unchanged=unchanged)
         else:
             # they have selected the files to restore
             restore_path = pathlib.Path("/opt/adsb/restore")
             adsb_path = pathlib.Path("/opt/adsb")
-            for name in request.form.keys():
-                print_err(f"restoring {name}")
-                shutil.move(adsb_path / name, restore_path / (name + ".dist"))
-                shutil.move(restore_path / name, adsb_path / name)
-            return redirect(
-                "/advanced"
-            )  # that's a good place from where the user can continue
+            try:
+                subprocess.call("docker-compose-adsb down -t 20", timeout=30.0, shell=True)
+            except subprocess.TimeoutError:
+                print_err("timeout expired stopping docker... trying to continue...")
+            for name, value in request.form.items():
+                if value == "1":
+                    print_err(f"restoring {name}")
+                    shutil.move(adsb_path / name, restore_path / (name + ".dist"))
+                    shutil.move(restore_path / name, adsb_path / name)
+            self._constants.re_read_env()
+            # make sure we are connected to the right Zerotier network
+            zt_network = self._constants.env_by_tags("zerotierid").value
+            if zt_network and len(zt_network) == 16:  # that's the length of a valid network id
+                try:
+                    subprocess.call(f"zerotier_cli join {zt_netowork}", timeout=30.0, shell=True)
+                except subprocess.TimeoutError:
+                    print_err("timeout expired joining Zerotier network... trying to continue...")
+            try:
+                subprocess.call("docker-compose-start", timeout=180.0, shell=True)
+            except subprocess.TimeoutError:
+                print_err("timeout expired re-starting docker... trying to continue...")
+            return redirect(url_for("director"))
 
     def base_is_configured(self):
         base_config: set[Env] = {

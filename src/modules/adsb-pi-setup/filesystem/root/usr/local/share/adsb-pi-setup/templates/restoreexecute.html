@@ -14,7 +14,7 @@
     {% endif %}
     {% if changed | length > 0 %}
     <p>The following files appear modified; select the ones you want to restore from the backup?</p>
-    <form method="POST">
+    <form method="POST" onsubmit="show_spinner(); return true;">
         <div class="row">
             <div class="form-group col-sm-11 no-gutters" id="PF_FIELDS">
                 <ul class="checkboxlist">
