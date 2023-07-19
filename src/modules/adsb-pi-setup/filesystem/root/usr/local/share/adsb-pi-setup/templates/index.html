@@ -13,8 +13,7 @@
         <li><a href="/map/?ptracks">Tracks</a>
     </ul>
 </div>
-<div id="UAT978"
-    style="display: {% if env_values.get('FEEDER_URL_978', '') != '' %} block {% else %} none {% endif %};">
+<div id="UAT978" style="display: {% if is_enabled('uat978') %} block {% else %} none {% endif %};">
     <h4>UAT978 Mapping Interface</h4>
     <ul>
         <li><a href="/dump978">Dump978 map</a>
@@ -27,16 +26,10 @@
         <li><a href="/fa-status">FlightAware status</a>
     </ul>
 </div>
-<div id="FR" style="display: {% if is_enabled('flightradar24') == " 1" %} block {% else %} none {% endif %};">
+<div id="FR" style="display: {% if is_enabled('flightradar') %} block {% else %} none {% endif %};">
     <h4>FlightRadar 24</h4>
     <ul>
         <li><a href="/fr-status">FR24 status</a>
-    </ul>
-</div>
-<div id="UA" style="display: {% if is_enabled('uat978') == " 1" %} block {% else %} none {% endif %};">
-    <h4>UAT 978</h4>
-    <ul>
-        <li><a href="/dump978/skyaware">UAT (978 MHz) map</a>
     </ul>
 </div>
 <div id="CF" style="display: block;">
