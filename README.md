@@ -36,7 +36,7 @@ The goal of this project is to make things as simple as possible for the non-tec
 source tends to be the biggest causes of issues with these SBC
 - get an SDR and antenna. There are many many choices. Availability may differ depending on where you are. But often the 'green' RadarBox SDR and
 an indoor or (much better) outdoor antenna is all you need
-- download the current release from the [Release section](https://github.com/dirkhh/adsb-feeder-image/releases/latest))
+- download the current release from the [Release section](https://github.com/dirkhh/adsb-feeder-image/releases/latest)
 - use a tool like the [Raspberry Pi Imager](https://github.com/raspberrypi/rpi-imager/releases) to write the image to a µSD card on your computer
 - if doing this with the RPi image, only use the 'wifi setup' option to make sure the image can connect to your wifi - everything else should be
 kept unchanged
