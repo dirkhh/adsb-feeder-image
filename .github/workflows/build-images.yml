@@ -146,7 +146,7 @@ jobs:
         if [ -n "${BASE_ARCH}" ]; then
           echo "export BASE_ARCH=${BASE_ARCH}" >> config
         fi
-        sudo bash -x ./build_dist "${VARIANT}"
+        sudo GH_REF_TYPE=${{ github.ref_type }} GH_TRGT_REF=${{ github.ref_name }} bash -x ./build_dist "${VARIANT}"
 
 
     - name: Release Image
