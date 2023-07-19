@@ -79,7 +79,7 @@ class AdsbIm:
         self.app.add_url_rule("/backup", "backup", self.backup)
         self.app.add_url_rule("/backupexecute", "backupexecute", self.backup_execute)
         self.app.add_url_rule("/restore", "restore", self.restore, methods=["GET", "POST"])
-        self.app.add_url_rule("/executerestore", "executerestore", self.executerestore)
+        self.app.add_url_rule("/executerestore", "executerestore", self.executerestore, methods=["GET", "POST"])
         self.app.add_url_rule("/advanced", "advanced", self.advanced, methods=["GET", "POST"])
         self.app.add_url_rule("/expert", "expert", self.expert, methods=["GET", "POST"])
         self.app.add_url_rule("/aggregators", "aggregators", self.aggregators, methods=["GET", "POST"])
