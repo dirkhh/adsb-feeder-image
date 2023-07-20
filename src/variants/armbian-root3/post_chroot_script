@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -x
+set -e
+
+sed -i -e "s@manual@dhcp@g" /boot/*-network.txt || true
+mv /etc/resolv.conf.orig /etc/resolv.conf || true

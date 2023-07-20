@@ -1,0 +1,107 @@
+# License: GPL-3.0
+name: smoketest
+
+on:
+  push:
+    branches:
+    - 'test'
+    tags:
+    - "v*"
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    env:
+      IMG_NAME: "x86_64"
+      VARIANT: "armbian-root3"
+      IMAGE_URL: "https://redirect.armbian.com/region/EU/uefi-x86/Bookworm_current_minimal"
+      MAGIC_PATH: "repository/src/image-armbian/x86_64.img.xz"
+
+
+    steps:
+    - name: Checkout project repository
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        path: repository
+
+    - name: Install Dependencies
+      run: |
+        sudo apt update
+        sudo apt install coreutils p7zip-full qemu-system-x86-microvm
+
+    - name: Checkout CustomPiOS
+      uses: actions/checkout@v3
+      with:
+        repository: 'guysoft/CustomPiOS'
+        path: CustomPiOS
+
+
+    - name: patch CustomPiOS to support running on x86_64
+      run: |
+        cd CustomPiOS
+        patch -p1 < ../repository/src/0001-allow-running-natively-on-x86_64.patch
+
+
+    - name: Update CustomPiOS Paths
+      run: |
+        cd repository/src
+        ../../CustomPiOS/src/update-custompios-paths
+
+
+    - name: Download image
+      run: |
+        MAGIC_DIR=$(dirname "${MAGIC_PATH}")
+        mkdir -p "${MAGIC_DIR}"
+        wget -qO "${MAGIC_PATH}" "$IMAGE_URL"
+
+
+    - name: Build Image
+      run: |
+        sudo modprobe loop
+        cd repository/src
+        cp config.x86_64 config
+        sudo GH_REF_TYPE=${{ github.ref_type }} GH_TRGT_REF=${{ github.ref_name }} bash -x ./build_dist "${VARIANT}"
+
+
+      # annoyingly, the resulting image often has a root partition that is a few blocks larger than the partition
+      # this is applying a very large hammer to the problem...
+    - name: Resize Image
+      run: |
+        cd repository/src/workspace-armbian-root3
+        #qemu-img info -f raw x86_64.img
+        #echo "use qemu-img to resize the raw image itself"
+        #qemu-img resize -f raw x86_64.img +100M
+        #qemu-img info -f raw x86_64.img
+        parted -s x86_64.img unit s print 2> /dev/null
+        LOOP=$(sudo losetup -f -P --show x86_64.img)
+        SIZE=$(parted -s -m x86_64.img unit s print 2> /dev/null | grep ^3 | cut -d: -f4)
+        NEWSIZE="$((${SIZE%s} - 90))s"
+        echo "shrink the file system on the 3rd partition from $SIZE to $NEWSIZE"
+        #parted -s x86_64.img resizepart 3 $NEWSIZE
+        sudo resize2fs -f ${LOOP}p3 ${NEWSIZE}
+        sudo losetup -d ${LOOP}
+
+
+    - name: Bring Up Qemu and do some simple tests
+      run: |
+        cd repository/src
+        echo "unpack the kernel that we copied from the Armbian image"
+        tar xzf workspace-armbian-root3/kernel.tar.gz
+        echo "start a headless qemu and sleep two minutes to wait for it to boot"
+        bash -x ../.github/scripts/qemu-run.sh workspace-armbian-root3/x86_64.img &
+        sleep 120
+        echo "print the console log in case something went wrong"
+        cat /tmp/qemu_console.log
+        echo "get the feeder home page"
+        curl http://localhost:10080
+        echo "post a setup for GitHub Headquarters and trigger a docker start - this can take QUITE a while, hopefully 5 minutes is enough"
+        curl -X POST http://localhost:10080/setup -d "submit=go&mlat_name=GitHubAction&lat=37.8&lng=-122.4&alt=10&form_timezone=America/Los_Angeles&aggregators=all"
+        curl -X POST --max-time 300 http://localhost:10080/restart
+        echo "get the advanced setup page (to make sure the restart has completed)"
+        curl http://localhost:10080/advanced -o out.html
+        grep " Setup optional parameters " out.html || cat out.html
+        echo "now we should be able to get to tar1090 - but that will take some more time to come up"
+        sleep 120
+        curl http://localhost:18080/ -o out.html
+        grep 'title>tar1090</title' out.html || cat out.html

@@ -1,0 +1,15 @@
+# custom variant for the x86_64 EFI armbian image
+# this is just like armbian, only with a single partition (root including boot) as partition 3
+
+VARIANT_CONFIG_DIR=$(realpath -s $(dirname $(realpath -s $BASH_SOURCE))/../..)
+BASE_ZIP_IMG=`ls -t ${DIST_PATH}/image-armbian/*.{zip,7z,xz} | head -n 1`
+BASE_APT_CACHE=no
+OCTOPI_INCLUDE_WIRINGPI=no
+export BASE_DISTRO=armbian
+# The root partiton of the image filesystem, 2 for images that start with /boot, 1 for single root armbian
+BASE_ROOT_PARTITION=3
+BASE_BOOT_PARTITION=3
+BASE_IMAGE_RESIZEROOT=800
+BASE_IMAGE_RASPBIAN=no
+BASE_IMAGE_ENLARGEROOT=1000
+BASE_ARCH=x86_64
