@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# GPL V3
+########
+set -ex
+
+# just to be sure - trying to do this late in the configuration
+echo -e "$ROOT_PWD\n$ROOT_PWD" | (passwd root)
+echo -e "$BASE_USER_PASSWORD\n$BASE_USER_PASSWORD" | (passwd pi)

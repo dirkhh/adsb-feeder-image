@@ -37,13 +37,13 @@ apt-get remove -y network-manager
 # disable first-login add user https://github.com/armbian/build/blob/master/packages/bsp/common/etc/profile.d/armbian-check-first-login.sh
 rm /etc/profile.d/armbian-check-first-login.sh
 
-password=$(perl -e 'printf("%s\n", crypt($ARGV[0], "password"))' "raspberry")
+password=$(perl -e 'printf("%s\n", crypt($ARGV[0], "password"))' "$BASE_USER_PASSWORD")
 useradd -m -p "${password}" -s /bin/bash pi
 if_group_exists_run i2c usermod -aG i2c pi
 usermod -aG video,audio,plugdev,games,netdev,sudo pi
 
 # Make root password not marked as expired
-yes 1234 | passwd
+yes "$ROOT_PWD" | passwd
 
 #cleanup
 mkdir -p /var/cache/apt/archives
