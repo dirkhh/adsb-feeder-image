@@ -90,6 +90,19 @@ class AdsbIm:
         self.app.add_url_rule("/api/sdr_info", "sdr_info", self.sdr_info)
         # fmt: on
 
+        board = "unknown system"
+        try:
+            output = subprocess.run("cat /sys/firmware/devicetree/base/model", timeout=2.0, shell=True, capture_output=True)
+        except subprocess.SubprocessError:
+            print_err("failed to get /sys/firmware/devicetree/base/model")
+        else:
+            board = output.stdout.decode()
+            if board == "Firefly roc-rk3328-cc":
+                board = f"Libre Computer Renegade ({board})"
+            elif board == "Libre Computer AML-S905X-CC":
+                board = "Libre Computer Le Potato (AML-S905X-CC)"
+        self._constants.env_by_tags("board_name").value = board
+
     def run(self):
         self._routemanager.add_proxy_routes(self.proxy_routes)
         debug = os.environ.get("ADSBIM_DEBUG") is not None

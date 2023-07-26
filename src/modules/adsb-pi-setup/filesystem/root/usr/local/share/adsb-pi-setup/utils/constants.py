@@ -132,6 +132,7 @@ class Constants:
         Env("_ADSBIM_AGGREGATORS_SELECTION", tags=["aggregators"]),
         Env("_ADSBIM_BASE_VERSION", is_mandatory=False, tags=["base_version"]),
         Env("_ADSBIM_CONTAINER_VERSION", is_mandatory=False, tags=["container_version"]),
+        Env("_ADSBIM_STATE_BOARD_NAME", is_mandatory=False, tags=["board_name"]),
         Env(
             "_ADSBIM_STATE_IS_SECURE_IMAGE",
             is_mandatory=False,

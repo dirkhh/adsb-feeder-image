@@ -51,8 +51,9 @@
     </div>
     <div class="footer">
         <hr />
-        Running ADSB Feeder Image {{ env_value_by_tag("base_version") }} with containers from {{
-        env_value_by_tag("container_version") }} from <a href="http://adsb.im">ADSB.im</a>.<br />
+        Running <a href="http://adsb.im">ADSB Feeder Image</a> {{ env_value_by_tag("base_version") }}
+        with containers from {{ env_value_by_tag("container_version") }}, running on
+        {{ env_value_by_tag("board_name") }}.<br />
         For help and questions, please go to the
         <a href="https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image">adsb-feeder-image Zulip
             channel</a>
