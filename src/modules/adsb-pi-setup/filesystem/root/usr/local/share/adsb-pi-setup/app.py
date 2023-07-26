@@ -96,7 +96,10 @@ class AdsbIm:
         except subprocess.SubprocessError:
             print_err("failed to get /sys/firmware/devicetree/base/model")
         else:
-            board = output.stdout.decode()
+            board = output.stdout.decode().strip()
+            # drop trailing '\0' if present
+            if board[-1] == chr(0):
+                board = board[0:-1]
             if board == "Firefly roc-rk3328-cc":
                 board = f"Libre Computer Renegade ({board})"
             elif board == "Libre Computer AML-S905X-CC":
