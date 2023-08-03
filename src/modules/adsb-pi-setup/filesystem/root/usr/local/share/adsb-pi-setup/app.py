@@ -456,6 +456,12 @@ class AdsbIm:
         # if the user chose to individually pick aggregators but hasn't done so,
         # they need to go to the aggregator page
         if not self._ultrafeeder.enabled_aggregators:
+            # of course, maybe they picked just one or more proprietary aggregators and that's all they want...
+            for submit_key in self._other_aggregators.keys():
+                key = submit_key.replace("--submit", "")
+                if self._constants.is_enabled(key):
+                    print_err(f"no semi-annonymous aggregator, but enabled {key}")
+                    return self.index()
             return self.aggregators()
 
         return self.index()
