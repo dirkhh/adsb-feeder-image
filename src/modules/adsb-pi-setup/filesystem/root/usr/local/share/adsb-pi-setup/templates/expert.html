@@ -3,7 +3,7 @@
 
 {% block content %}
 <h1>{% block title %} Expert setup {% endblock %}</h1>
-<h2>Set explicit gain</h2>
+<h2 class="mt-5">Set explicit gain</h2>
 <form method="POST">
     <div class="row">
         <label for="gain" class="col-8">
@@ -16,7 +16,7 @@
 </form>
 
 <!-- SECURE_IMAGE_START -->
-<h2>Install ssh credentials</h2>
+<h2 class="mt-5">Install ssh credentials</h2>
 <form method="POST">
     <div class="row">
         <label for="ssh_pub" class="col-12">
@@ -27,7 +27,7 @@
     </div>
 </form>
 
-<h2>Secure feeder system</h2>
+<h2 class="mt-5">Secure feeder system</h2>
 <form method="POST" onsubmit="show_spinner(); return true;">
     <div class="row">
         <label for="secure_image" class="col-8">Attempt to make it somewhat harder for a local user to
@@ -41,7 +41,7 @@
 </form>
 <!-- SECURE_IMAGE_END -->
 
-<h2>Shutdown/Reboot</h2>
+<h2 class="mt-5">Shutdown/Reboot</h2>
 <form method="POST">
     <div class="row">
         <label for="shutdown" class="col-8">Shutdown the feeder. Most boards won't turn off power by themselves.
