@@ -53,5 +53,9 @@ class UltrafeederConfig:
             ret.add("adsb,dump978,30978,uat_in")
         if self._constants.is_enabled("airspy"):
             ret.add("adsb,airspy_adsb,30005,beast_in")
+        # finally, add user provided things
+        ultrafeeder_extra_args = self._constants.env_by_tags("ultrafeeder_extra_args").value
+        if ultrafeeder_extra_args:
+            ret.add(ultrafeeder_extra_args)
 
         return ";".join(ret)

@@ -15,6 +15,23 @@
     </div>
 </form>
 
+<h2 class="mt-5">Add additional Ultrafeeder arguments</h2>
+<form method="POST">
+    <div class="row">
+        <label for="ultrafeeder_extra_args" class="col-8">
+            There are very few circumstances where this is something you want to manually add. One might be a situation
+            where you want to feed an aggregator that uses the 'standard' format of all the semi-anonymous aggregators,
+            but that isn't supported out of the box.
+            Add the data that you need here - it will be appended to the Ultrafeeder config; do not add a leading
+            semicolon.
+        </label>
+        <input class="col-8 ml-2" id="ultrafeeder_extra_args" name="ultrafeeder_extra_args" type="text"
+            value="{{ env_value_by_tag('ultrafeeder_extra_args') }}" required>
+        <button type="submit" class="btn btn-primary mb-1 ml-3" name="ultrafeeder_extra_args--submit"
+            value="go">Submit</button>
+    </div>
+</form>
+
 <!-- SECURE_IMAGE_START -->
 <h2 class="mt-5">Install ssh credentials</h2>
 <form method="POST">

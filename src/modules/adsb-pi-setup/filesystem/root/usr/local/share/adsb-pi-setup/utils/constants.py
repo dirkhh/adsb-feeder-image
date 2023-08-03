@@ -274,6 +274,11 @@ class Constants:
             is_mandatory=False,
             tags=["avdelphi", "ultrafeeder", "is_enabled"],
         ),
+        Env(
+            "_ADSBIM_STATE_ULTRAFEEDER_EXTRA_ARGS",
+            is_mandatory=False,
+            tags=["ultrafeeder_extra_args"],
+        ),
     }
 
     @property
