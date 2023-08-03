@@ -100,7 +100,7 @@ class Constants:
         # SDR
         Env("FEEDER_RTL_SDR", default="rtlsdr", tags=["rtlsdr"]),
         Env("FEEDER_ENABLE_BIASTEE", default="False", tags=["biast", "is_enabled"]),
-        Env("FEEDER_READSB_GAIN", default="autogain", tags=["autogain"]),
+        Env("FEEDER_READSB_GAIN", default="autogain", tags=["gain"]),
         Env("FEEDER_SERIAL_1090", is_mandatory=False, tags=["1090serial"]),  # this is the SDR serial
         Env("FEEDER_SERIAL_978", is_mandatory=False, tags=["978serial"]),  # this is the SDR serial
         # Feeder

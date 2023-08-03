@@ -3,6 +3,18 @@
 
 {% block content %}
 <h1>{% block title %} Expert setup {% endblock %}</h1>
+<h2>Set explicit gain</h2>
+<form method="POST">
+    <div class="row">
+        <label for="gain" class="col-8">
+            Normally the feeder will settle on a good gain value over time (and an AirSpy will do so almost
+            immediately). If you want to override that "autogain" behavior, you can set an explicit gain value here.
+        </label>
+        <input class="col-8 ml-2" id="gain" name="gain" type="text" value="{{ env_value_by_tag('gain') }}" required>
+        <button type="submit" class="btn btn-primary mb-1 ml-3" name="gain--submit" value="go">Submit</button>
+    </div>
+</form>
+
 <!-- SECURE_IMAGE_START -->
 <h2>Install ssh credentials</h2>
 <form method="POST">
