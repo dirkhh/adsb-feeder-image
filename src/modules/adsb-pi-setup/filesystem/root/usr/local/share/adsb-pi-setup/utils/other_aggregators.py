@@ -79,7 +79,7 @@ class Aggregator:
     def _docker_run_with_timeout(self, cmdline: str, timeout: float) -> str:
         try:
             result = subprocess.run(
-                f"docker run -t temp_container {cmdline}",
+                f"docker run --name temp_container {cmdline}",
                 timeout=timeout,
                 shell=True,
                 capture_output=True,
@@ -87,7 +87,8 @@ class Aggregator:
         except subprocess.TimeoutExpired as exc:
             # for several of these containers "timeout" is actually the expected behavior;
             # they don't stop on their own. So just grab the output and kill the container
-            output = str(exc.stdout)
+            print_err(f"docker run {cmdline} received a timeout error after {timeout} with output {exc.stdout}")
+            output = exc.stdout.decode()
             try:
                 result = subprocess.run(
                     "docker rm -f temp_container",
@@ -100,7 +101,8 @@ class Aggregator:
                     f"failed to remove the temp container {str(result.stdout)} / {str(result.stderr)}"
                 )
         else:
-            output = str(result.stdout)
+            print_err(f"docker run {cmdline} completed with output {result.stdout}")
+            output = result.stdout.decode()
         return output
 
     # the default case is straight forward. Remember the key and enable the aggregator
