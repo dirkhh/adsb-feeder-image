@@ -119,8 +119,7 @@
                         link.setAttribute('href', window.location.protocol + "//" + window.location.hostname + ":8081/");
                     </script>
                     <input type="text" id="flighaware--key" name="flightaware--key" class="form-control col-sm-6 ml-1"
-                        {{ others_enabled("flightaware") | replace("checked", "required" ) }} placeholder=" Piaware key"
-                        value="{{ env_value_by_tags(['flightaware', 'key']) }}">
+                        placeholder=" Piaware key" value="{{ env_value_by_tags(['flightaware', 'key']) }}">
                     <button type="submit" class="btn btn-primary col-sm-3 ml-1" name="flightaware--submit" value="stay">
                         Request key
                     </button>
