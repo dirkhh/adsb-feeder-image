@@ -46,7 +46,10 @@ class Env:
             return
         if value == value_in_file:
             return  # do not write to file if value is the same
-        self._write_value_to_file(value)
+        if value == None:
+            self._write_value_to_file("")
+        else:
+            self._write_value_to_file(value)
 
     def _get_values_from_file(self):
         ret = {}
