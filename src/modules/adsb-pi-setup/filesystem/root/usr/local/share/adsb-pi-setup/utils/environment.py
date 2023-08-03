@@ -46,7 +46,7 @@ class Env:
             return
         if value == value_in_file:
             return  # do not write to file if value is the same
-        if value == None:
+        if value == None or value == "None":
             self._write_value_to_file("")
         else:
             self._write_value_to_file(value)
