@@ -97,7 +97,7 @@ class SDRDevices:
         # - if we find an RTL SDR with serial 978 - that's for 978
         # - if we find just one RTL SDR and no airspy, then that RTL SDR is for 1090
         # Make sure one SDR is used per frequency at most...
-        ret = {frequency: None for frequency in frequencies}
+        ret = {frequency: "" for frequency in frequencies}
         for sdr in self.sdrs:
             if sdr._type == "airspy":
                 ret[1090] = sdr._serial
