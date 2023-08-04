@@ -9,6 +9,13 @@ def print_err(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 
+# extend the truthy concept to exclude all non-empty string except a few specific ones ([Tt]rue, [Oo]n, 1)
+def is_true(value):
+    if type(value) == str:
+        return any({value.lower() == "true", value.lower == "on", value == "1"})
+    return bool(value)
+
+
 class Env:
     def __init__(
         self,
@@ -89,14 +96,14 @@ class Env:
     @property
     def is_bool(self) -> bool:
         # if it has is_enabled in the tags, it is a bool and we
-        # accept True/False in setter,
-        # and write 0/1 to file.
+        # accept True/False, 1/0, and On/Off in setter,
+        # and write True/False to file.
         return "is_enabled" in self._tags
 
     @property
     def value(self):
         if self.is_bool:
-            return bool(self._value == True or self._value == "True" or self._value == "on")
+            return is_true(self._value)
         if self._value_call:
             return self._value_call()
         elif self._value != None:
@@ -109,9 +116,8 @@ class Env:
     def value(self, value):
         # mess with value in case we are a bool
         # we get "1" from .env files and "on" from checkboxes in HTML
-        if self.is_bool and value not in {True, False}:
-            value = True if value == "1" or value == "on" else False
-
+        if self.is_bool:
+            value = is_true(value)
         if value != self._value:
             self._value = value
             self._reconcile(value)
