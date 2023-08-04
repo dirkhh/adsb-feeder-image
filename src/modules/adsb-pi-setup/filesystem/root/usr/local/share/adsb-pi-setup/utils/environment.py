@@ -26,6 +26,7 @@ class Env:
         default_call: callable = None,
         value_call: callable = None,
         tags: list = None,
+        javascript: bool = False,
     ):
         self._name = name
         self._value = self._default = default
@@ -34,6 +35,7 @@ class Env:
         self._is_mandatory = is_mandatory
         self._value_call = value_call
         self._tags = tags
+        self._javascript = javascript
         self._file = ENV_FILE_PATH  # FIXME: storing this in every Env seems... suboptimal
 
         if default_call:
@@ -77,6 +79,8 @@ class Env:
 
     def _write_value_to_file(self, new_value):
         values = self._get_values_from_file()
+        if self._javascript:
+            new_value = "1" if is_true(value) else "0"
         values[self._name] = new_value
         with open(self._file, "w") as f:
             for key, value in values.items():

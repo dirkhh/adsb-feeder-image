@@ -108,7 +108,7 @@ class Constants:
         Env("ADSBLOL_UUID", default_call=lambda: str(uuid4()), tags=["adsblol_uuid"]),
         Env("ULTRAFEEDER_UUID", default_call=lambda: str(uuid4()), tags=["ultrafeeder_uuid"]),
         Env("MLAT_PRIVACY", default="True", tags=["mlat_privacy", "is_enabled"]),
-        Env("FEEDER_TAR1090_USEROUTEAPI", default="True", tags=["route_api", "is_enabled"]),
+        Env("FEEDER_TAR1090_USEROUTEAPI", default="true", tags=["route_api", "is_enabled"], javascript=True),
         # 978
         Env("FEEDER_ENABLE_UAT978", default="False", tags=["uat978", "is_enabled"]), # start the container
         Env("FEEDER_URL_978", default="", tags=["978url"]), # add the URL to the dump978 map
