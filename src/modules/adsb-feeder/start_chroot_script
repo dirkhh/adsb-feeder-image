@@ -31,10 +31,12 @@ echo "deb http://download.zerotier.com/debian/${DEBIAN_DISTRO} ${DEBIAN_DISTRO} 
 curl -fsSL "https://pkgs.tailscale.com/stable/debian/${DEBIAN_DISTRO}.noarmor.gpg" | sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
 curl -fsSL "https://pkgs.tailscale.com/stable/debian/${DEBIAN_DISTRO}.tailscale-keyring.list" | sudo tee /etc/apt/sources.list.d/tailscale.list
 
-# Update and install
+# Update and install - but don't enable
 
 apt-get update
 apt-get install -y zerotier-one tailscale
+systemctl disable tailscaled
+systemctl disable zerotier-one
 
 # If we are armbian, we do something with networking
 if [ "$BASE_DISTRO" = "armbian" ] ; then
@@ -55,5 +57,4 @@ systemctl enable adsb-init.service
 systemctl enable adsb-bootstrap.service
 systemctl enable adsb-web-forward.service
 systemctl enable adsb-update.timer
-systemctl enable zerotier-one
 
