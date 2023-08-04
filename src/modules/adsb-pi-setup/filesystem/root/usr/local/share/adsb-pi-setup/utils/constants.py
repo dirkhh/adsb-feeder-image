@@ -6,7 +6,7 @@ from os import name
 from pathlib import Path
 from uuid import uuid4
 
-from .environment import Env, ENV_FILE_PATH
+from .environment import Env, ENV_FILE_PATH, is_true
 from .netconfig import NetConfig
 
 
@@ -335,7 +335,11 @@ class Constants:
                 env_vars[key.strip()] = var.strip()
                 # print_err(f"found {key.strip()} -> {var.strip()} in .env file")
             for e in self._env:
-                env_vars[e.name] = e.value
+                if e._javascript:
+                    env_vars[e.name] = "1" if is_true(e.value) else "0"
+                else:
+                    env_vars[e.name] = e.value
+
         with open(ENV_FILE_PATH, "w") as env_file:
             for key, value in env_vars.items():
                 env_file.write(f"{key}={value}\n")
