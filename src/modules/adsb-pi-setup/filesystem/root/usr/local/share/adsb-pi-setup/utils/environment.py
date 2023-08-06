@@ -80,7 +80,7 @@ class Env:
     def _write_value_to_file(self, new_value):
         values = self._get_values_from_file()
         if self._javascript:
-            new_value = "1" if is_true(value) else "0"
+            new_value = "1" if is_true(new_value) else "0"
         values[self._name] = new_value
         with open(self._file, "w") as f:
             for key, value in values.items():

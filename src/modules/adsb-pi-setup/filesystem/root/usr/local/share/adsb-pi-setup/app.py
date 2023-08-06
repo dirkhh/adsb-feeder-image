@@ -251,7 +251,7 @@ class AdsbIm:
             zt_network = self._constants.env_by_tags("zerotierid").value
             if zt_network and len(zt_network) == 16:  # that's the length of a valid network id
                 try:
-                    subprocess.call(f"zerotier_cli join {zt_netowork}", timeout=30.0, shell=True)
+                    subprocess.call(f"zerotier_cli join {zt_network}", timeout=30.0, shell=True)
                 except subprocess.TimeoutError:
                     print_err("timeout expired joining Zerotier network... trying to continue...")
             try:
