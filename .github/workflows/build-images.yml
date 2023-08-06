@@ -41,6 +41,11 @@ jobs:
           variant: armbian
           url: https://redirect.armbian.com/region/EU/tinkerboard/Bookworm_current_minimal
           magic_path: "repository/src/image-armbian/asus-tinkerboard.img.xz"
+        - name: asus-tinkerboard-dietpi
+          base_arch: ""
+          variant: dietpi
+          url: https://dietpi.com/downloads/images/DietPi_ASUSTB-ARMv7-Bookworm.7z
+          magic_path: "repository/src/image-dietpi/DietPi_ASUSTB-ARMv7-Bookworm.7z"
         - name: banana-pi-m5-m2p
           base_arch: arm64
           variant: armbian
@@ -86,6 +91,11 @@ jobs:
           variant: default
           url: https://downloads.raspberrypi.org/raspios_lite_arm64/images/raspios_lite_arm64-2023-02-22/2023-02-21-raspios-bullseye-arm64-lite.img.xz
           magic_path: "repository/src/image/2023-02-21-raspios-bullseye-arm64-lite.img.xz"
+        - name: raspberrypi-dietpi-64
+          base_arch: arm64
+          variant: dietpi
+          url: https://dietpi.com/downloads/images/DietPi_RPi-ARMv8-Bookworm.7z
+          magic_path: "repository/src/image-dietpi/DietPi_RPi-ARMv8-Bookworm.7z"
         - name: renegade
           variant: armbian
           base_arch: arm64
@@ -96,6 +106,11 @@ jobs:
           base_arch: arm64
           url: https://redirect.armbian.com/region/EU/rockpi-4c/Bookworm_current_minimal
           magic_path: "repository/src/image-armbian/rockpi4.img.xz"
+        - name: Nanopi-neo3
+          variant: dietpi
+          base_arch: arm64
+          url: https://dietpi.com/downloads/images/DietPi_NanoPiNEO3-ARMv8-Bookworm.7z
+          magic_path: "repository/src/image-dietpi/DietPi_NanoPiNEO3-ARMv8-Bookworm.7z"
 
     env:
       IMG_NAME: ${{ matrix.name }}
