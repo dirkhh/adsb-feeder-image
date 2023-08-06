@@ -58,3 +58,7 @@ systemctl enable adsb-bootstrap.service
 systemctl enable adsb-web-forward.service
 systemctl enable adsb-update.timer
 
+# Disable some things we don't need and that only eat memory (assuming they exist)
+systemctl disable bluetooth.service || true
+systemctl disable ModemManager.service || true
+
