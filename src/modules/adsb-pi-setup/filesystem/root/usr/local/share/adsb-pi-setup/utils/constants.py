@@ -2,7 +2,7 @@
 import sys
 
 from dataclasses import dataclass
-from os import name
+from os import getenv
 from pathlib import Path
 from uuid import uuid4
 
@@ -211,6 +211,11 @@ class Constants:
             "_ADSBIM_CONTAINER_VERSION", is_mandatory=False, tags=["container_version"]
         ),
         Env("_ADSBIM_STATE_BOARD_NAME", is_mandatory=False, tags=["board_name"]),
+        Env(
+            "_ADSBIM_STATE_IMAGE_NAME",
+            default_call=lambda: Path("/opt/adsb/feeder-image.name").read_text(),
+            tags=["image_name"],
+        ),
         Env(
             "_ADSBIM_STATE_IS_SECURE_IMAGE",
             is_mandatory=False,

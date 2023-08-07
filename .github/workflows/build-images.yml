@@ -152,6 +152,15 @@ jobs:
         wget -qO "${MAGIC_PATH}" "$IMAGE_URL"
 
 
+    - name: create a reasonable tag for this run - either a short sha or the tag we were called with
+      id: tag
+      run: |
+        export tag=""
+        if [ "${{ github.ref_type }}" = "tag" ] ; then tag="${{ github.ref_name }}" ; else tag="${{ github.sha }}" ; fi
+        export better_tag=$(echo $tag | sed -r 's/^(.{8}).{32}$/g-\1/')
+        echo "tag=${better_tag}" >> $GITHUB_OUTPUT
+
+
     - name: Build Image
       run: |
         sudo modprobe loop
@@ -160,6 +169,7 @@ jobs:
         if [ -n "${BASE_ARCH}" ]; then
           echo "export BASE_ARCH=${BASE_ARCH}" >> config
         fi
+        echo "export FEEDER_IMAGE_NAME=adsb-feeder-${IMG_NAME}-${{ steps.tag.outputs.tag }}.img" >> config
         sudo GH_REF_TYPE=${{ github.ref_type }} GH_TRGT_REF=${{ github.ref_name }} bash -x ./build_dist "${VARIANT}"
 
 
@@ -172,15 +182,6 @@ jobs:
         export CUSTOM_PI_OS_PATH="$(realpath ../../CustomPiOS/src/)"
         source config
         sudo --preserve-env ../../CustomPiOS/src/release "${VARIANT}"
-
-
-    - name: create a reasonable tag for this run - either a short sha or the tag we were called with
-      id: tag
-      run: |
-        export tag=""
-        if [ "${{ github.ref_type }}" = "tag" ] ; then tag="${{ github.ref_name }}" ; else tag="${{ github.sha }}" ; fi
-        export better_tag=$(echo $tag | sed -r 's/^(.{8}).{32}$/g-\1/')
-        echo "tag=${better_tag}" >> $GITHUB_OUTPUT
 
 
     - name: Copy output
