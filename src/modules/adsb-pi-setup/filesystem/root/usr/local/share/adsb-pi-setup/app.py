@@ -326,8 +326,9 @@ class AdsbIm:
                     cmdline = "/usr/bin/docker-update-adsb-im"
                     subprocess.run(cmdline, timeout=600.0, shell=True)
                 if key == "update_feeder_aps":
-                    cmdline = "/usr/bin/feeder-update"
+                    cmdline = "systemctl start adsb-feeder-update.service"
                     subprocess.run(cmdline, timeout=600.0, shell=True)
+                    # we'll potentially never come back here as that process kills the adsb-setup service
                 if key == "nightly_update" or key == "zerotier":
                     # this will be handled through the separate key/value pairs
                     pass

@@ -1,0 +1,14 @@
+# simply run the script as a service so it's owned by systemd and
+# not the calling program (which we will stop as part of that script)
+[Unit]
+Description=ADSB Feeder Update Service
+
+[Service]
+Type=oneshot
+RemainAfterExit=no
+WorkingDirectory=/opt/adsb
+ExecStart=/usr/bin/bash /usr/bin/feeder-update
+TimeoutStartSec=0
+
+[Install]
+
