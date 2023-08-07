@@ -41,6 +41,7 @@ jobs:
       run: |
         cd CustomPiOS
         patch -p1 < ../repository/src/0001-allow-running-natively-on-x86_64.patch
+        patch -p1 < ../repository/src/0002-reduce-space-used-when-running-in-GitHub-action.patch
 
 
     - name: Update CustomPiOS Paths

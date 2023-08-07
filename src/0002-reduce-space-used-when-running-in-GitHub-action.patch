@@ -1,0 +1,31 @@
+From adf3ac89c63fa807a40387cb4516a66f48f89771 Mon Sep 17 00:00:00 2001
+From: Dirk Hohndel <dirk@hohndel.org>
+Date: Mon, 7 Aug 2023 21:54:35 +0000
+Subject: [PATCH] reduce space used when running in GitHub action
+
+There's no point in keeping the original image around. It's never accessed
+again and it causes some builds to run out of disk space.
+
+Signed-off-by: Dirk Hohndel <dirk@hohndel.org>
+---
+ src/custompios | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/src/custompios b/src/custompios
+index ed58934..a1c2ae6 100755
+--- a/src/custompios
++++ b/src/custompios
+@@ -117,6 +117,10 @@ pushd $BASE_WORKSPACE
+   else
+     7za x -aoa "$BASE_ZIP_IMG"
+   fi
++  if [ "$GH_REF_TYPE" != "" ] ; then
++    # running in a GitHub action - let's save some space
++    rm "$BASE_ZIP_IMG"
++  fi
+   
+   BASE_IMG_PATH=`ls | grep '.img$\|.raw$' | head -n 1`
+   if [ ! -f "$BASE_IMG_PATH" ]; then
+-- 
+2.34.1
+
