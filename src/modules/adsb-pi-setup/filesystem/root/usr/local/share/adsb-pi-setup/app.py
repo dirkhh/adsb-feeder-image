@@ -450,8 +450,16 @@ class AdsbIm:
         # we need to go to advanced - unless we have at least one of the serials set up
         # for 978 or 1090 reporting
         self._sdrdevices._ensure_populated()
-        if ((len(self._sdrdevices) > 1 or any([sdr._type == "airspy" for sdr in self._sdrdevices.sdrs]))
-            and not (self._constants.env_by_tags("1090serial").value or self._constants.env_by_tags("978serial").value)):
+
+        # check that "something" is configured as input
+        if (
+            len(self._sdrdevices) > 1
+            or any([sdr._type == "airspy" for sdr in self._sdrdevices.sdrs])
+        ) and not (
+            self._constants.env_by_tags("1090serial").value
+            or self._constants.env_by_tags("978serial").value
+            or self._constants.is_enabled("airspy")
+        ):
             return self.advanced()
 
         # if the user chose to individually pick aggregators but hasn't done so,
