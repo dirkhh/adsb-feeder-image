@@ -70,16 +70,11 @@ jobs:
     - name: Resize Image
       run: |
         cd repository/src/workspace-armbian-root3
-        #qemu-img info -f raw x86_64.img
-        #echo "use qemu-img to resize the raw image itself"
-        #qemu-img resize -f raw x86_64.img +100M
-        #qemu-img info -f raw x86_64.img
         parted -s x86_64.img unit s print 2> /dev/null
         LOOP=$(sudo losetup -f -P --show x86_64.img)
         SIZE=$(parted -s -m x86_64.img unit s print 2> /dev/null | grep ^3 | cut -d: -f4)
         NEWSIZE="$((${SIZE%s} - 90))s"
         echo "shrink the file system on the 3rd partition from $SIZE to $NEWSIZE"
-        #parted -s x86_64.img resizepart 3 $NEWSIZE
         sudo resize2fs -f ${LOOP}p3 ${NEWSIZE}
         sudo losetup -d ${LOOP}
 
@@ -91,10 +86,11 @@ jobs:
         tar xzf workspace-armbian-root3/kernel.tar.gz
         echo "start a headless qemu and sleep two minutes to wait for it to boot"
         bash -x ../.github/scripts/qemu-run.sh workspace-armbian-root3/x86_64.img &
-        sleep 120
+        # it would be smarter to wait for the right text in the console output, but for now just naively sleep a good long time
+        sleep 180
         echo "print the console log in case something went wrong"
         cat /tmp/qemu_console.log
-        echo "get the feeder home page"
+        echo "end of console log, now get the feeder home page"
         curl http://localhost:10080
         echo "post a setup for GitHub Headquarters and trigger a docker start - this can take QUITE a while, hopefully 5 minutes is enough"
         curl -X POST http://localhost:10080/setup -d "submit=go&mlat_name=GitHubAction&lat=37.8&lng=-122.4&alt=10&form_timezone=America/Los_Angeles&aggregators=all"
