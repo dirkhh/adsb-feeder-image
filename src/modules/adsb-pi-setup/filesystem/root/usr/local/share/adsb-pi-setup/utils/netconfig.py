@@ -21,7 +21,6 @@ class NetConfig:
         return self._has_policy
 
 
-
 class UltrafeederConfig:
     def __init__(self, constants):
         self._constants = constants
@@ -34,8 +33,10 @@ class UltrafeederConfig:
             for name, value in self._constants.netconfigs.items()
             if (
                 aggregator_selection == "all"
-                or aggregator_selection == "privacy" and self._constants.netconfigs[name].has_policy
-                or aggregator_selection == "individual" and self._constants.is_enabled("ultrafeeder", name)
+                or aggregator_selection == "privacy"
+                and self._constants.netconfigs[name].has_policy
+                or aggregator_selection == "individual"
+                and self._constants.is_enabled("ultrafeeder", name)
             )
         }
 
@@ -54,7 +55,9 @@ class UltrafeederConfig:
         if self._constants.is_enabled("airspy"):
             ret.add("adsb,airspy_adsb,30005,beast_in")
         # finally, add user provided things
-        ultrafeeder_extra_args = self._constants.env_by_tags("ultrafeeder_extra_args").value
+        ultrafeeder_extra_args = self._constants.env_by_tags(
+            "ultrafeeder_extra_args"
+        ).value
         if ultrafeeder_extra_args:
             ret.add(ultrafeeder_extra_args)
 

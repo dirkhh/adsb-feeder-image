@@ -6,6 +6,8 @@ import threading
 import zipfile
 
 from .constants import Constants
+
+
 class Lock:
     # This class is used to lock the system from being modified while
     # pending changes are being made.
@@ -82,9 +84,12 @@ class System:
             uf_path = pathlib.Path(self._constants.data_path / "ultrafeeder")
             if uf_path.is_dir():
                 for f in uf_path.rglob("*"):
-                    backup_zip.write(f, arcname=f.relative_to(self._constants.data_path))
+                    backup_zip.write(
+                        f, arcname=f.relative_to(self._constants.data_path)
+                    )
         data.seek(0)
         return data
+
 
 class Version:
     def __init__(self):

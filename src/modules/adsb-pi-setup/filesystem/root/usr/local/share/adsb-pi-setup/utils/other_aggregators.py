@@ -87,7 +87,9 @@ class Aggregator:
         except subprocess.TimeoutExpired as exc:
             # for several of these containers "timeout" is actually the expected behavior;
             # they don't stop on their own. So just grab the output and kill the container
-            print_err(f"docker run {cmdline} received a timeout error after {timeout} with output {exc.stdout}")
+            print_err(
+                f"docker run {cmdline} received a timeout error after {timeout} with output {exc.stdout}"
+            )
             output = exc.stdout.decode()
             try:
                 result = subprocess.run(

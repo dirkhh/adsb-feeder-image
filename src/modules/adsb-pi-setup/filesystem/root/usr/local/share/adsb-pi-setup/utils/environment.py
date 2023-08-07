@@ -22,7 +22,7 @@ class Env:
         name: str,
         value: str = None,
         is_mandatory: bool = True,
-        default = None,
+        default: any = None,
         default_call: callable = None,
         value_call: callable = None,
         tags: list = None,
@@ -30,13 +30,17 @@ class Env:
     ):
         self._name = name
         self._value = self._default = default
-        if value != None:  # only overwrite the default value if an actual Value was passed in
+        if (
+            value != None
+        ):  # only overwrite the default value if an actual Value was passed in
             self._value = value
         self._is_mandatory = is_mandatory
         self._value_call = value_call
         self._tags = tags
         self._javascript = javascript
-        self._file = ENV_FILE_PATH  # FIXME: storing this in every Env seems... suboptimal
+        self._file = (
+            ENV_FILE_PATH  # FIXME: storing this in every Env seems... suboptimal
+        )
 
         if default_call:
             self._default = default_call()

@@ -101,37 +101,115 @@ class Constants:
         Env("FEEDER_RTL_SDR", default="rtlsdr", tags=["rtlsdr"]),
         Env("FEEDER_ENABLE_BIASTEE", default="False", tags=["biast", "is_enabled"]),
         Env("FEEDER_READSB_GAIN", default="autogain", tags=["gain"]),
-        Env("FEEDER_SERIAL_1090", is_mandatory=False, tags=["1090serial"]),  # this is the SDR serial
-        Env("FEEDER_SERIAL_978", is_mandatory=False, tags=["978serial"]),  # this is the SDR serial
+        Env(
+            "FEEDER_SERIAL_1090", is_mandatory=False, tags=["1090serial"]
+        ),  # this is the SDR serial
+        Env(
+            "FEEDER_SERIAL_978", is_mandatory=False, tags=["978serial"]
+        ),  # this is the SDR serial
         # Feeder
-        Env("FEEDER_ULTRAFEEDER_CONFIG", is_mandatory=True, tags=["ultrafeeder_config"]),
+        Env(
+            "FEEDER_ULTRAFEEDER_CONFIG", is_mandatory=True, tags=["ultrafeeder_config"]
+        ),
         Env("ADSBLOL_UUID", default_call=lambda: str(uuid4()), tags=["adsblol_uuid"]),
-        Env("ULTRAFEEDER_UUID", default_call=lambda: str(uuid4()), tags=["ultrafeeder_uuid"]),
+        Env(
+            "ULTRAFEEDER_UUID",
+            default_call=lambda: str(uuid4()),
+            tags=["ultrafeeder_uuid"],
+        ),
         Env("MLAT_PRIVACY", default="True", tags=["mlat_privacy", "is_enabled"]),
-        Env("FEEDER_TAR1090_USEROUTEAPI", default="1", tags=["route_api", "is_enabled"], javascript=True),
+        Env(
+            "FEEDER_TAR1090_USEROUTEAPI",
+            default="1",
+            tags=["route_api", "is_enabled"],
+            javascript=True,
+        ),
         # 978
-        Env("FEEDER_ENABLE_UAT978", default="False", tags=["uat978", "is_enabled"]), # start the container
-        Env("FEEDER_URL_978", default="", tags=["978url"]), # add the URL to the dump978 map
-        Env("FEEDER_UAT978_HOST", default="", tags=["978host"]), # hostname ultrafeeder uses to get 978 data
-        Env("FEEDER_PIAWARE_UAT978", default="", tags=["978piaware"]), # magic setting for piaware to get 978 data
+        Env(
+            "FEEDER_ENABLE_UAT978", default="False", tags=["uat978", "is_enabled"]
+        ),  # start the container
+        Env(
+            "FEEDER_URL_978", default="", tags=["978url"]
+        ),  # add the URL to the dump978 map
+        Env(
+            "FEEDER_UAT978_HOST", default="", tags=["978host"]
+        ),  # hostname ultrafeeder uses to get 978 data
+        Env(
+            "FEEDER_PIAWARE_UAT978", default="", tags=["978piaware"]
+        ),  # magic setting for piaware to get 978 data
         # Misc
-        Env("_ADSBIM_HEYWHATSTHAT_ENABLED", is_mandatory=False, tags=["heywhatsthat", "is_enabled"]),
-        Env("FEEDER_HEYWHATSTHAT_ID", is_mandatory=False, default="", tags=["heywhatsthat_id", "key"]),
+        Env(
+            "_ADSBIM_HEYWHATSTHAT_ENABLED",
+            is_mandatory=False,
+            tags=["heywhatsthat", "is_enabled"],
+        ),
+        Env(
+            "FEEDER_HEYWHATSTHAT_ID",
+            is_mandatory=False,
+            default="",
+            tags=["heywhatsthat_id", "key"],
+        ),
         # Other aggregators keys
-        Env("FEEDER_FR24_SHARING_KEY", is_mandatory=False, default="", tags=["flightradar", "key"]),
-        Env("FEEDER_PIAWARE_FEEDER_ID", is_mandatory=False, default="", tags=["flightaware", "key"]),
-        Env("FEEDER_RADARBOX_SHARING_KEY", is_mandatory=False, default="", tags=["radarbox", "key"]),
-        Env("FEEDER_PLANEFINDER_SHARECODE", is_mandatory=False, default="", tags=["planefinder", "key"]),
-        Env("FEEDER_ADSBHUB_STATION_KEY", is_mandatory=False, default="", tags=["adsbhub", "key"]),
-        Env("FEEDER_OPENSKY_USERNAME", is_mandatory=False, default="", tags=["opensky", "user"]),
-        Env("FEEDER_OPENSKY_SERIAL", is_mandatory=False, default="", tags=["opensky", "key"]),
-        Env("FEEDER_RV_FEEDER_KEY", is_mandatory=False, default="", tags=["radarvirtuel", "key"]),
-        Env("FEEDER_PLANEWATCH_API_KEY", is_mandatory=False, default="", tags=["planewatch", "key"]),
-
+        Env(
+            "FEEDER_FR24_SHARING_KEY",
+            is_mandatory=False,
+            default="",
+            tags=["flightradar", "key"],
+        ),
+        Env(
+            "FEEDER_PIAWARE_FEEDER_ID",
+            is_mandatory=False,
+            default="",
+            tags=["flightaware", "key"],
+        ),
+        Env(
+            "FEEDER_RADARBOX_SHARING_KEY",
+            is_mandatory=False,
+            default="",
+            tags=["radarbox", "key"],
+        ),
+        Env(
+            "FEEDER_PLANEFINDER_SHARECODE",
+            is_mandatory=False,
+            default="",
+            tags=["planefinder", "key"],
+        ),
+        Env(
+            "FEEDER_ADSBHUB_STATION_KEY",
+            is_mandatory=False,
+            default="",
+            tags=["adsbhub", "key"],
+        ),
+        Env(
+            "FEEDER_OPENSKY_USERNAME",
+            is_mandatory=False,
+            default="",
+            tags=["opensky", "user"],
+        ),
+        Env(
+            "FEEDER_OPENSKY_SERIAL",
+            is_mandatory=False,
+            default="",
+            tags=["opensky", "key"],
+        ),
+        Env(
+            "FEEDER_RV_FEEDER_KEY",
+            is_mandatory=False,
+            default="",
+            tags=["radarvirtuel", "key"],
+        ),
+        Env(
+            "FEEDER_PLANEWATCH_API_KEY",
+            is_mandatory=False,
+            default="",
+            tags=["planewatch", "key"],
+        ),
         # ADSB.im specific
         Env("_ADSBIM_AGGREGATORS_SELECTION", tags=["aggregators"]),
         Env("_ADSBIM_BASE_VERSION", is_mandatory=False, tags=["base_version"]),
-        Env("_ADSBIM_CONTAINER_VERSION", is_mandatory=False, tags=["container_version"]),
+        Env(
+            "_ADSBIM_CONTAINER_VERSION", is_mandatory=False, tags=["container_version"]
+        ),
         Env("_ADSBIM_STATE_BOARD_NAME", is_mandatory=False, tags=["board_name"]),
         Env(
             "_ADSBIM_STATE_IS_SECURE_IMAGE",
@@ -301,7 +379,9 @@ class Constants:
         elif type(_tags) == list:
             tags = _tags
         else:
-            raise Exception(f"env_by_tags called with invalid argument {_tags} of type {type(_tags)}")
+            raise Exception(
+                f"env_by_tags called with invalid argument {_tags} of type {type(_tags)}"
+            )
         matches = []
         if not tags:
             return None
@@ -358,4 +438,3 @@ class Constants:
         for e in self._env:
             if e.name in env_vars:
                 e.value = env_vars[e.name]
-

@@ -9,7 +9,6 @@ def print_err(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 
-
 class SDR:
     def __init__(self, type_: str, address: str):
         self._type = type_
@@ -48,7 +47,9 @@ class SDR:
         return False
 
     def __repr__(self):
-        return f"SDR(type: {self._type} address: {self._address}, serial: {self._serial})"
+        return (
+            f"SDR(type: {self._type} address: {self._address}, serial: {self._serial})"
+        )
 
 
 class SDRDevices:
@@ -84,7 +85,9 @@ class SDRDevices:
 
     def _get_address_for_pid_vid(self, pidvid: str, line: str):
         address = ""
-        match = re.search(f"Bus ([0-9a-fA-F]+) Device ([0-9a-fA-F]+): ID {pidvid}", line)
+        match = re.search(
+            f"Bus ([0-9a-fA-F]+) Device ([0-9a-fA-F]+): ID {pidvid}", line
+        )
         if match:
             address = f"{match.group(1)}:{match.group(2)}"
         return address

@@ -47,8 +47,12 @@ class AdsbIm:
         def env_functions():
             return {
                 "is_enabled": lambda tag: self._constants.is_enabled(tag),
-                "env_value_by_tag": lambda tag: self._constants.env_by_tags([tag]).value,  # this one takes a single tag
-                "env_value_by_tags": lambda tags: self._constants.env_by_tags(tags).value, # this one takes a list of tags
+                "env_value_by_tag": lambda tag: self._constants.env_by_tags(
+                    [tag]
+                ).value,  # this one takes a single tag
+                "env_value_by_tags": lambda tags: self._constants.env_by_tags(
+                    tags
+                ).value,  # this one takes a list of tags
                 "env_values": self._constants.envs,
             }
 
@@ -60,7 +64,9 @@ class AdsbIm:
         self._ultrafeeder = UltrafeederConfig(constants=self._constants)
 
         # update Env ultrafeeder to have value self._ultrafeed.generate()
-        self._constants.env_by_tags("ultrafeeder_config")._value_call = self._ultrafeeder.generate
+        self._constants.env_by_tags(
+            "ultrafeeder_config"
+        )._value_call = self._ultrafeeder.generate
         self._other_aggregators = {
             "adsbhub--submit": ADSBHub(self._system),
             "flightaware--submit": FlightAware(self._system),
@@ -92,7 +98,12 @@ class AdsbIm:
 
         board = "unknown system"
         try:
-            output = subprocess.run("cat /sys/firmware/devicetree/base/model", timeout=2.0, shell=True, capture_output=True)
+            output = subprocess.run(
+                "cat /sys/firmware/devicetree/base/model",
+                timeout=2.0,
+                shell=True,
+                capture_output=True,
+            )
         except subprocess.SubprocessError:
             print_err("failed to get /sys/firmware/devicetree/base/model")
         else:
@@ -232,13 +243,17 @@ class AdsbIm:
                         changed.append(name)
             if saw_uf:
                 changed.append("ultrafeeder/")
-            return render_template("/restoreexecute.html", changed=changed, unchanged=unchanged)
+            return render_template(
+                "/restoreexecute.html", changed=changed, unchanged=unchanged
+            )
         else:
             # they have selected the files to restore
             restore_path = pathlib.Path("/opt/adsb/restore")
             adsb_path = pathlib.Path("/opt/adsb")
             try:
-                subprocess.call("docker-compose-adsb down -t 20", timeout=30.0, shell=True)
+                subprocess.call(
+                    "docker-compose-adsb down -t 20", timeout=30.0, shell=True
+                )
             except subprocess.TimeoutError:
                 print_err("timeout expired stopping docker... trying to continue...")
             for name, value in request.form.items():
@@ -249,11 +264,17 @@ class AdsbIm:
             self._constants.re_read_env()
             # make sure we are connected to the right Zerotier network
             zt_network = self._constants.env_by_tags("zerotierid").value
-            if zt_network and len(zt_network) == 16:  # that's the length of a valid network id
+            if (
+                zt_network and len(zt_network) == 16
+            ):  # that's the length of a valid network id
                 try:
-                    subprocess.call(f"zerotier_cli join {zt_network}", timeout=30.0, shell=True)
+                    subprocess.call(
+                        f"zerotier_cli join {zt_network}", timeout=30.0, shell=True
+                    )
                 except subprocess.TimeoutError:
-                    print_err("timeout expired joining Zerotier network... trying to continue...")
+                    print_err(
+                        "timeout expired joining Zerotier network... trying to continue..."
+                    )
             try:
                 subprocess.call("docker-compose-start", timeout=180.0, shell=True)
             except subprocess.TimeoutError:
@@ -362,8 +383,12 @@ class AdsbIm:
                     self._constants.env_by_tags("ssh_configured").value = True
                 if key == "zerotierid":
                     try:
-                        subprocess.call("/usr/bin/systemctl enable --now zerotier-one", shell=True)
-                        subprocess.call(f"/usr/sbin/zerotier-cli join {value}", shell=True)
+                        subprocess.call(
+                            "/usr/bin/systemctl enable --now zerotier-one", shell=True
+                        )
+                        subprocess.call(
+                            f"/usr/sbin/zerotier-cli join {value}", shell=True
+                        )
                     except:
                         print_err("exception trying to set up zerorier - giving up")
                 e.value = value
@@ -383,10 +408,14 @@ class AdsbIm:
         self._sdrdevices._ensure_populated()
         airspy = any([sdr._type == "airspy" for sdr in self._sdrdevices.sdrs])
         self._constants.env_by_tags(["airspy", "is_enabled"]).value = airspy
-        if (len(self._sdrdevices.sdrs) == 1
+        if (
+            len(self._sdrdevices.sdrs) == 1
             and not airspy
-            and not self._constants.env_by_tags("978serial").value):
-            self._constants.env_by_tags("1090serial").value = self._sdrdevices.sdrs[0]._serial
+            and not self._constants.env_by_tags("978serial").value
+        ):
+            self._constants.env_by_tags("1090serial").value = self._sdrdevices.sdrs[
+                0
+            ]._serial
         rtlsdr = not airspy and self._constants.env_by_tags("1090serial").value != ""
         self._constants.env_by_tags("rtlsdr").value = "rtlsdr" if rtlsdr else ""
 
@@ -430,8 +459,13 @@ class AdsbIm:
 
         def uf_enabled(*tags):
             return "checked" if self._constants.is_enabled("ultrafeeder", *tags) else ""
+
         def others_enabled(*tags):
-            return "checked" if self._constants.is_enabled("other_aggregator", *tags) else ""
+            return (
+                "checked"
+                if self._constants.is_enabled("other_aggregator", *tags)
+                else ""
+            )
 
         return render_template(
             "aggregators.html",

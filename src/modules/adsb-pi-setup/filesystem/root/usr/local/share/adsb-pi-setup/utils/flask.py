@@ -49,4 +49,5 @@ def check_restart_lock(f):
         if self._system._restart.lock.locked():
             return redirect("/restarting")
         return f(self, *args, **kwargs)
+
     return decorated_function
