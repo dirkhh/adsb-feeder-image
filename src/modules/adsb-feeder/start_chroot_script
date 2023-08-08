@@ -64,3 +64,18 @@ systemctl enable adsb-update.timer
 systemctl disable bluetooth.service || true
 systemctl disable ModemManager.service || true
 
+if grep -q "dietpi" /etc/dist_variant ; then
+	# oh, lots of things things are different here...
+	sed -i "s/AUTO_SETUP_LOCALE=.*/AUTO_SETUP_LOCALE=en_US.UTF-8/" /boot/dietpi.txt
+	sed -i "s/AUTO_SETUP_KEYBOARD_LAYOUT=.*/AUTO_SETUP_KEYBOARD_LAYOUT=us/" /boot/dietpi.txt
+	sed -i "s/AUTO_SETUP_NET_HOSTNAME=.*/AUTO_SETUP_NET_HOSTNAME=adsb-feeder/" /boot/dietpi.txt
+	sed -i "s/AUTO_SETUP_HEADLESS=.*/AUTO_SETUP_HEADLESS=1/" /boot/dietpi.txt
+	sed -i "s/AUTO_SETUP_AUTOMATED=.*/AUTO_SETUP_AUTOMATED=1/" /boot/dietpi.txt
+	QUOTED_PWD=$(echo ${ROOT_PWD} | tr '/' '\\/')
+	sed -i "s/AUTO_SETUP_GLOBAL_PASSWORD=.*/AUTO_SETUP_GLOBAL_PASSWORD=${QUOTED_PWD}/" /boot/dietpi.txt
+	sed -i "s/SURVEY_OPTED_IN=.*/SURVEY_OPTED_IN=0/" /boot/dietpi.txt
+	sed -i "s/CONFIG_NTP_MODE=.*/CONFIG_NTP_MODE=4/" /boot/dietpi.txt
+	sed -i "s/CONFIG_SERIAL_CONSOLE_ENABLE=.*/CONFIG_SERIAL_CONSOLE_ENABLE=0/" /boot/dietpi.txt
+	# sed -i "s/AUTO_SETUP_NET_WIFI_ENABLED=.*/AUTO_SETUP_NET_WIFI_ENABLED=1/" /boot/dietpi.txt
+	# sed -i "s/AUTO_SETUP_NET_WIFI_COUNTRY_CODE=.*B/AUTO_SETUP_NET_WIFI_COUNTRY_CODE=US/" /boot/dietpi.txt
+fi
