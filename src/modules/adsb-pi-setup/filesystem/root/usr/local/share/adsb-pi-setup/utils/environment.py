@@ -88,7 +88,8 @@ class Env:
         values[self._name] = new_value
         with open(self._file, "w") as f:
             for key, value in values.items():
-                f.write(f"{key}={value}\n")
+                if key:
+                    f.write(f"{key}={value}\n")
 
     def __str__(self):
         return f"Env({self._name}, {self._value})"

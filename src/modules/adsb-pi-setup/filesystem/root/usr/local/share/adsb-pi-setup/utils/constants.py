@@ -427,8 +427,8 @@ class Constants:
 
         with open(ENV_FILE_PATH, "w") as env_file:
             for key, value in env_vars.items():
-                env_file.write(f"{key}={value}\n")
-                # print_err(f"wrote {key} -> {value} to .env file")
+                if key:
+                    env_file.write(f"{key}={value}\n")
 
     # make sure our internal data is in sync with the .env file on disk
     def re_read_env(self):
