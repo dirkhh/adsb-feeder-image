@@ -78,4 +78,8 @@ if grep -q "dietpi" /etc/dist_variant ; then
 	sed -i "s/CONFIG_SERIAL_CONSOLE_ENABLE=.*/CONFIG_SERIAL_CONSOLE_ENABLE=0/" /boot/dietpi.txt
 	# sed -i "s/AUTO_SETUP_NET_WIFI_ENABLED=.*/AUTO_SETUP_NET_WIFI_ENABLED=1/" /boot/dietpi.txt
 	# sed -i "s/AUTO_SETUP_NET_WIFI_COUNTRY_CODE=.*B/AUTO_SETUP_NET_WIFI_COUNTRY_CODE=US/" /boot/dietpi.txt
+
+	# get rid of the silly "NO_NAME" label for the boot partition
+	BOOT_DEVICE=$(df --output=source /boot | tail -1)
+	fatlabel $BOOT_DEVICE ADSB-FEEDER
 fi
