@@ -106,7 +106,7 @@ jobs:
           base_arch: arm64
           url: https://redirect.armbian.com/region/EU/rockpi-4c/Bookworm_current_minimal
           magic_path: "repository/src/image-armbian/rockpi4.img.xz"
-        - name: nanopi-neo3
+        - name: nanopi-neo3-dietpi
           variant: dietarmbian
           base_arch: arm64
           url: https://dietpi.com/downloads/images/DietPi_NanoPiNEO3-ARMv8-Bookworm.7z
