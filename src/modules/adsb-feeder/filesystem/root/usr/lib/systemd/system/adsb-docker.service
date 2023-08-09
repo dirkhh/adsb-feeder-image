@@ -7,6 +7,7 @@ After=docker.service network-online.target adsb-init.service adsb-setup.service
 Type=oneshot
 RemainAfterExit=yes
 WorkingDirectory=/opt/adsb
+ExecStartPre=mount -o remount,exec /run
 ExecStart=/usr/bin/docker-compose-start
 ExecStop=/usr/bin/docker compose down -t 30
 TimeoutStartSec=0
