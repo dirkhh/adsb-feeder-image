@@ -75,7 +75,7 @@ class Constants:
         "adsbone": NetConfig(
             "adsb,feed.adsb.one,64004,beast_reduce_plus_out",
             "mlat,feed.adsb.one,64006,39006",
-            has_policy=False,
+            has_policy=True,
         ),
         "adsbfi": NetConfig(
             "adsb,feed.adsb.fi,30004,beast_reduce_plus_out",
