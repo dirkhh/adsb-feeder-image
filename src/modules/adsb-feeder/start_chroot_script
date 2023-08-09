@@ -82,4 +82,9 @@ if grep -q "dietpi" /etc/dist_variant ; then
 	# get rid of the silly "NO_NAME" label for the boot partition
 	BOOT_DEVICE=$(df --output=source /boot | tail -1)
 	fatlabel $BOOT_DEVICE ADSB-FEEDER
+
+	# make sure we have an ntp server defined
+	if ! grep ^NTP= /etc/systemd/timesyncd.conf ; then
+		echo "NTP=0.debian.pool.ntp.org 1.debian.pool.ntp.org 2.debian.pool.ntp.org 3.debian.pool.ntp.org" >> /etc/systemd/timesyncd.conf
+	fi
 fi
