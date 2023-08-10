@@ -71,8 +71,7 @@ if grep -q "^diet" /etc/dist_variant ; then
 	sed -i "s/AUTO_SETUP_NET_HOSTNAME=.*/AUTO_SETUP_NET_HOSTNAME=adsb-feeder/" /boot/dietpi.txt
 	sed -i "s/AUTO_SETUP_HEADLESS=.*/AUTO_SETUP_HEADLESS=1/" /boot/dietpi.txt
 	sed -i "s/AUTO_SETUP_AUTOMATED=.*/AUTO_SETUP_AUTOMATED=1/" /boot/dietpi.txt
-	QUOTED_PWD=$(echo ${ROOT_PWD} | tr '/' '\\/')
-	sed -i "s/AUTO_SETUP_GLOBAL_PASSWORD=.*/AUTO_SETUP_GLOBAL_PASSWORD=${QUOTED_PWD}/" /boot/dietpi.txt
+	sed -i "s/AUTO_SETUP_GLOBAL_PASSWORD=.*/AUTO_SETUP_GLOBAL_PASSWORD=${ROOT_PWD}/" /boot/dietpi.txt
 	sed -i "s/SURVEY_OPTED_IN=.*/SURVEY_OPTED_IN=0/" /boot/dietpi.txt
 	sed -i "s/CONFIG_NTP_MODE=.*/CONFIG_NTP_MODE=4/" /boot/dietpi.txt
 	sed -i "s/CONFIG_SERIAL_CONSOLE_ENABLE=.*/CONFIG_SERIAL_CONSOLE_ENABLE=0/" /boot/dietpi.txt
