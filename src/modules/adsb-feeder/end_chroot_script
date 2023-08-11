@@ -8,3 +8,4 @@ echo -e "$ROOT_PWD\n$ROOT_PWD" | (passwd root)
 echo -e "$BASE_USER_PASSWORD\n$BASE_USER_PASSWORD" | (passwd pi)
 
 sed -i "/127.0.1.1 $(hostname)/d" /etc/hosts
+
