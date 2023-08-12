@@ -19,6 +19,19 @@
         <li><a href="/dump978">Dump978 map</a>
     </ul>
 </div>
+<div id="CF" style="display: block;">
+    <h4>Device Configuration and Administration</h4>
+    <ul>
+        <li><a href="{{ url_for('setup') }}">Basic Setup</a>
+        <li style="display: {% if is_enabled('base_config') %} list-item {% else %} none {% endif %};"><a
+                href="{{ url_for('advanced') }}">Advanced setup</a>
+        <li style="display: {% if is_enabled('base_config') %} list-item {% else %} none {% endif %};"><a
+                href="{{ url_for('aggregators') }}">Aggregator setup</a>
+        <li style="display: {% if is_enabled('portainer') %} list-item {% else %} none {% endif %};"><a
+                href="/portainer">Portainer</a> * Note - this link may give a SSL Certificate warning; feel free to
+            ignore
+    </ul>
+</div>
 <div id="FA" style="display: {% if is_enabled('flightaware') %} block {% else %} none {% endif %};">
     <h4>FlightAware</h4>
     <ul>
@@ -32,17 +45,39 @@
         <li><a href="/fr-status">FR24 status</a>
     </ul>
 </div>
-<div id="CF" style="display: block;">
-    <h4>Device Configuration and Administration</h4>
+<div id="LOL" style="display: {% if is_enabled('adsblol') %} block {% else %} none {% endif %};">
+    <h4>ADSB.lol</h4>
     <ul>
-        <li><a href="{{ url_for('setup') }}">Basic Setup</a>
-        <li style="display: {% if is_enabled('base_config') %} list-item {% else %} none {% endif %};"><a
-                href="{{ url_for('advanced') }}">Advanced setup</a>
-        <li style="display: {% if is_enabled('base_config') %} list-item {% else %} none {% endif %};"><a
-                href="{{ url_for('aggregators') }}">Aggregator setup</a>
-        <li style="display: {% if is_enabled('portainer') %} list-item {% else %} none {% endif %};"><a
-                href="/portainer">Portainer</a> * Note - this link may give a SSL Certificate warning; feel free to
-            ignore
+        <li><a href="https://status.adsb.lol/">ADSB.lol status</a></li>
+        <li><a href="https://my.adsb.lol/">personal ADSB.lol URL with the planes you are sending</a></li>
+        <li><a href="https://mlat.adsb.lol/">ADSB.lol MLAT feeder map - your site will only be listed if MLAT privacy is
+                disabled</a></li>
+        <li><a href="https://api.adsb.lol/api/0/me">details about your feed as JSON</a></li>
+    </ul>
+</div>
+<div id="ONE" style="display: {% if is_enabled('adsbone') %} block {% else %} none {% endif %};">
+    <h4>ADSB.one</h4>
+    <ul>
+        <li><a href="https://api.adsb.one/feed-status">details about your feed as JSON</a></li>
+    </ul>
+</div>
+<div id="FI" style="display: {% if is_enabled('adsbfi') %} block {% else %} none {% endif %};">
+    <h4>ADSB.fi</h4>
+    <ul>
+        <li><a href="https://api.adsb.fi/v1/myip">details about your feed as JSON</a></li>
+    </ul>
+</div>
+<div id="AX" style="display: {% if is_enabled('adsbx') %} block {% else %} none {% endif %};">
+    <h4>ADS-B Exchange</h4>
+    <ul>
+        <li><a href="https://www.adsbexchange.com/myip/">your feeding status webpage</a></li>
+    </ul>
+</div>
+<div id="TAT" style="display: {% if is_enabled('tat') %} block {% else %} none {% endif %};">
+    <h4>The Air Traffic</h4>
+    <ul>
+        <li><a href="https://theairtraffic.com/feed/myip/">your feeding status webpage</a></li>
+        <li><a href="https://theairtraffic.com/iapi/ip_stats.json/">details about your feed as JSON</a></li>
     </ul>
 </div>
 {% endblock %}
