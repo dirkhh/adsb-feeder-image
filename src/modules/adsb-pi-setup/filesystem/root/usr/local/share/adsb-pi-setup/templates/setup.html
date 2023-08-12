@@ -57,7 +57,7 @@
                 env_value_by_tag("aggregators")=="individual" %} checked {% endif %}>
             <label class="form-check-label " for="individual">Pick individually</label>
         </div>
-        <div id="explain-all" style="display: {% if env_value_by_tag("aggregators")=='all' %} block {% else %} none {%
+        <div id="explain-all" style="display: {% if env_value_by_tag('aggregators')=='all' %} block {% else %} none {%
             endif %}; font-size: smaller;">
             With this option you will feed data to
             <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
@@ -69,7 +69,7 @@
             <a href="https://adsb.fi/">adsb.fi</a>,
             <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
         </div>
-        <div id="explain-privacy" style="display: {% if env_value_by_tag("aggregators")=='priv' %} block {% else %}
+        <div id="explain-privacy" style="display: {% if env_value_by_tag('aggregators')=='priv' %} block {% else %}
             none {% endif %}; font-size: smaller;">
             With this option you will feed data to
             <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
@@ -80,7 +80,7 @@
             <a href="https://adsb.fi/">adsb.fi</a>
             <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
         </div>
-        <div id="explain-individual" style="display: {% if env_value_by_tag("aggregators")=='ind' %} block {% else %}
+        <div id="explain-individual" style="display: {% if env_value_by_tag('aggregators')=='ind' %} block {% else %}
             none {% endif %}; font-size: smaller;">
             With this option you can make detailed selections on the Aggregator page.
         </div>
