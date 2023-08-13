@@ -252,9 +252,9 @@ class AdsbIm:
             adsb_path = pathlib.Path("/opt/adsb")
             try:
                 subprocess.call(
-                    "docker-compose-adsb down -t 20", timeout=30.0, shell=True
+                    "docker-compose-adsb down -t 20", timeout=40.0, shell=True
                 )
-            except subprocess.TimeoutError:
+            except subprocess.TimeoutExpired:
                 print_err("timeout expired stopping docker... trying to continue...")
             for name, value in request.form.items():
                 if value == "1":
@@ -271,13 +271,13 @@ class AdsbIm:
                     subprocess.call(
                         f"zerotier_cli join {zt_network}", timeout=30.0, shell=True
                     )
-                except subprocess.TimeoutError:
+                except subprocess.TimeoutExpired:
                     print_err(
                         "timeout expired joining Zerotier network... trying to continue..."
                     )
             try:
                 subprocess.call("docker-compose-start", timeout=180.0, shell=True)
-            except subprocess.TimeoutError:
+            except subprocess.TimeoutExpired:
                 print_err("timeout expired re-starting docker... trying to continue...")
             return redirect(url_for("director"))
 
@@ -446,7 +446,7 @@ class AdsbIm:
             result = subprocess.run(
                 "/usr/bin/secure-image", shell=True, capture_output=True
             )
-        except subprocess.TimeoutError as exc:
+        except subprocess.TimeoutExpired as exc:
             output = exc.stdout.decode()
         else:
             output = result.stdout.decode()
