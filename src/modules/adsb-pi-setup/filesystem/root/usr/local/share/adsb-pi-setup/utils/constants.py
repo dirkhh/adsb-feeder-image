@@ -87,6 +87,16 @@ class Constants:
             "",
             has_policy=True,
         ),
+        "flyovr": NetConfig(
+            "adsb,feed.flyovr.io,30004,beast_reduce_plus_out",
+            "",
+            has_policy=False,
+        ),
+        "radarplane": NetConfig(
+            "adsb,feed.radarplane.com,30001,beast_reduce_plus_out",
+            "mlat,feed.radarplane.com,31090,39010",
+            has_policy=True,
+        ),
     }
     # Other aggregator tags
     _env = {
@@ -356,6 +366,16 @@ class Constants:
             "_ADSBIM_STATE_IS_ULTRAFEEDER_AVDELPHI_ENABLED",
             is_mandatory=False,
             tags=["avdelphi", "ultrafeeder", "is_enabled"],
+        ),
+        Env(
+            "_ADSBIM_STATE_IS_ULTRAFEEDER_FLYOVR_ENABLED",
+            is_mandatory=False,
+            tags=["flyovr", "ultrafeeder", "is_enabled"],
+        ),
+        Env(
+            "_ADSBIM_STATE_IS_ULTRAFEEDER_RADARPLANE_ENABLED",
+            is_mandatory=False,
+            tags=["radarplane", "ultrafeeder", "is_enabled"],
         ),
         Env(
             "_ADSBIM_STATE_ULTRAFEEDER_EXTRA_ARGS",

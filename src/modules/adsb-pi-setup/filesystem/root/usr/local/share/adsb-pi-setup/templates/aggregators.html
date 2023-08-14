@@ -41,6 +41,14 @@
                 id="is_enabled--adsbfi" {{ uf_enabled('adsbfi') }} />
             <label for="is_enabled--adsbfi" class="mb-3 col-sm-10">Submit your data to <a
                     href="https://adsb.fi/">adsb.fi</a></label><br />
+            <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="is_enabled--flyovr"
+                id="is_enabled--flyovr" {{ uf_enabled('flyovr') }} />
+            <label for="is_enabled--flyovr" class="mb-3 col-sm-10">Submit your data to <a
+                    href="https://www.flyovr.io/">FLYOVR.IO</a></label><br />
+            <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="is_enabled--radarplane"
+                id="is_enabled--radarplane" {{ uf_enabled('radarplane') }} />
+            <label for="is_enabled--radarplane" class="mb-3 col-sm-10">Submit your data to <a
+                    href="https://radarplane.com/privacy-policy">RadarPlane</a></label><br />
             <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="is_enabled--adsbx"
                 id="is_enabled--adsbx" {{ uf_enabled('adsbx') }} />
             <label for="is_enabled--adsbx" class="mb-3 col-sm-10">Submit your data to <a
