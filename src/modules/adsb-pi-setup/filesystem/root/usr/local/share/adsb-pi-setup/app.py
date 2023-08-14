@@ -95,7 +95,9 @@ class AdsbIm:
         self.app.add_url_rule("/update", "update", self.update, methods=["POST"])
         self.app.add_url_rule("/api/sdr_info", "sdr_info", self.sdr_info)
         # fmt: on
+        self.update_boardname()
 
+    def update_boardname(self):
         board = "unknown system"
         try:
             output = subprocess.run(
@@ -262,6 +264,7 @@ class AdsbIm:
                     shutil.move(adsb_path / name, restore_path / (name + ".dist"))
                     shutil.move(restore_path / name, adsb_path / name)
             self._constants.re_read_env()
+            self.update_boardname()
             # make sure we are connected to the right Zerotier network
             zt_network = self._constants.env_by_tags("zerotierid").value
             if (
