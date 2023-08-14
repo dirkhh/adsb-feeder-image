@@ -250,8 +250,10 @@ class AdsbIm:
             )
         else:
             # they have selected the files to restore
-            restore_path = pathlib.Path("/opt/adsb/restore")
             adsb_path = pathlib.Path("/opt/adsb")
+            (adsb_path / "ultrafeeder").mkdir(mode=0o755, exist_ok=True)
+            restore_path = adsb_path / "restore"
+            restore_path.mkdir(mode=0o755, exist_ok=True)
             try:
                 subprocess.call(
                     "docker-compose-adsb down -t 20", timeout=40.0, shell=True
