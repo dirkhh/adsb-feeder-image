@@ -215,7 +215,8 @@ class AdsbIm:
             # be very careful with the content of this zip file...
             filename = request.args["zipfile"]
             adsb_path = pathlib.Path("/opt/adsb")
-            restore_path = pathlib.Path("/opt/adsb/restore")
+            restore_path = adsb_path / "restore"
+            restore_path.mkdir(mode=0o755, exist_ok=True)
             restored_files: List[str] = []
             with zipfile.ZipFile(restore_path / filename, "r") as restore_zip:
                 for name in restore_zip.namelist():
@@ -263,7 +264,8 @@ class AdsbIm:
             for name, value in request.form.items():
                 if value == "1":
                     print_err(f"restoring {name}")
-                    shutil.move(adsb_path / name, restore_path / (name + ".dist"))
+                    if pathlib.Path(adsb_path / name).exists():
+                        shutil.move(adsb_path / name, restore_path / (name + ".dist"))
                     shutil.move(restore_path / name, adsb_path / name)
             self._constants.re_read_env()
             self.update_boardname()
