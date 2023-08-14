@@ -5,6 +5,10 @@
 <h1>{% block title %} ADSB Feeder Homepage {% endblock %}</h1>
 <div id="UF" style="display: block;">
     <h4>TAR1090 Mapping Interface</h4>
+    <div class="text-muted small mb-2">
+        Please note that after a restart it can take up to two minutes for these pages above to respond, so if you get
+        an error, please wait for a minute and try again.
+    </div>
     <ul>
         <li><a href="/map">TAR1090 map</a>
         <li><a href="/stats">System Statistics and Graphs</a>
@@ -32,23 +36,11 @@
             ignore
     </ul>
 </div>
-<div id="FA" style="display: {% if is_enabled('flightaware') %} block {% else %} none {% endif %};">
-    <h4>FlightAware</h4>
-    <ul>
-        <li><a href="/fa">FlightAware map</a>
-        <li><a href="/fa-status">FlightAware status</a>
-    </ul>
-</div>
-<div id="FR" style="display: {% if is_enabled('flightradar') %} block {% else %} none {% endif %};">
-    <h4>FlightRadar 24</h4>
-    <ul>
-        <li><a href="/fr-status">FR24 status</a>
-    </ul>
-</div>
 <div id="LOL" style="display: {% if is_enabled('adsblol') %} block {% else %} none {% endif %};">
     <h4>ADSB.lol</h4>
     <ul>
         <li><a href="https://status.adsb.lol/">ADSB.lol status</a></li>
+        <li><a href="https://www.adsb.lol/docs/feeders-only/introduction/">ADSB.lol feeder introduction</a></li>
         <li><a href="https://my.adsb.lol/">personal ADSB.lol URL with the planes you are sending</a></li>
         <li><a href="https://mlat.adsb.lol/">ADSB.lol MLAT feeder map - your site will only be listed if MLAT privacy is
                 disabled</a></li>
@@ -78,6 +70,19 @@
     <ul>
         <li><a href="https://theairtraffic.com/feed/myip/">your feeding status webpage</a></li>
         <li><a href="https://theairtraffic.com/iapi/ip_stats.json/">details about your feed as JSON</a></li>
+    </ul>
+</div>
+<div id="FA" style="display: {% if is_enabled('flightaware') %} block {% else %} none {% endif %};">
+    <h4>FlightAware</h4>
+    <ul>
+        <li><a href="/fa">FlightAware map</a>
+        <li><a href="/fa-status">FlightAware status</a>
+    </ul>
+</div>
+<div id="FR" style="display: {% if is_enabled('flightradar') %} block {% else %} none {% endif %};">
+    <h4>FlightRadar 24</h4>
+    <ul>
+        <li><a href="/fr-status">FR24 status</a>
     </ul>
 </div>
 {% endblock %}
