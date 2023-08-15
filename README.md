@@ -12,7 +12,7 @@ Currently we are building images for
 
 The idea is to create a "complete" ADS-B feeder that feeds pretty much all of the ADS-B flight trackers / aggregators.
 
-These aggregators have a comittment to open data:
+These aggregators have a comittment to open data ([daily release of the data](https://github.com/adsblol/globe_history)):
 - [adsb.lol](https://adsb.lol)
 - [Fly Italy Adsb](https://flyitalyadsb.com)
 - [TheAirTraffic](http://theairtraffic.com)
@@ -60,4 +60,3 @@ _should_ work to find the freshly booted system on your local network - assuming
 This repo actually contains the scripting to create the SD card image for some common SBCs to run an ADS-B feeder. And as 'releases' it publishes such images.
 
 This requires [CustomPiOS](https://github.com/guysoft/CustomPiOS) - unpack this next to the `CustomPiOS` folder in order for the scripts to work.
-
