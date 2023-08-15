@@ -11,16 +11,20 @@ Currently we are building images for
 - Rockpi 4 (tested)
 
 The idea is to create a "complete" ADS-B feeder that feeds pretty much all of the ADS-B flight trackers / aggregators.
-At this point it supports:
-- [adsb.fi](https://adsb.fi)
+
+These aggregators have a comittment to open data:
 - [adsb.lol](https://adsb.lol)
+- [Fly Italy Adsb](https://flyitalyadsb.com)
+- [TheAirTraffic](http://theairtraffic.com)
+
+These aggregators are also supported:
+- [adsb.fi](https://adsb.fi)
 - [ADS-B Exchange](https://adsbexchange.com)
 - [ADSBHub](https://adsbhub.org)
 - [ADS-B One](https://adsb.one)
 - [AVDelphi](https://www.avdelphi.com)
 - [FlightAware](https://flightaware.com)
 - [FlightRadar24](https://www.flightradar24.com)
-- [Fly Italy Adsb](https://flyitalyadsb.com)
 - [FLYOVR.io](https://www.flyovr.io/)
 - [OpenSky Network](https://opensky-network.org)
 - [Plane.watch](https://plane.watch)
@@ -29,7 +33,6 @@ At this point it supports:
 - [RadarBox](https://www.radarbox.com)
 - [RadarPlane](https://radarplane.com/)
 - [Radar Virtuel](https://www.radarvirtuel.com)
-- [TheAirTraffic](http://theairtraffic.com)
 
 The goal of this project is to make things as simple as possible for the non-technical user.
 
