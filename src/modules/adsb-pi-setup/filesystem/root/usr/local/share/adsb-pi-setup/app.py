@@ -362,6 +362,9 @@ class AdsbIm:
                     # this will be handled through the separate key/value pairs
                     pass
                 if key == "tailscale":
+                    # grab extra arguments if given
+                    args = form.get("tailscale_extras", "")
+                    print_err(f"starting tailscale (args='{args}')")
                     try:
                         subprocess.run(
                             "/usr/bin/systemctl enable --now tailscaled",
@@ -369,7 +372,7 @@ class AdsbIm:
                             timeout=20.0,
                         )
                         result = subprocess.run(
-                            "/usr/bin/tailscale up 2> /tmp/out &",
+                            f"/usr/bin/tailscale up {args} 2> /tmp/out &",
                             shell=True,
                             capture_output=False,
                         )

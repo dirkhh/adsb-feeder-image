@@ -326,6 +326,11 @@ class Constants:
             tags=["tailscale_name"],
             default="",
         ),
+        Env(
+            "_ADSBIM_STATE_TAILSCALE_EXTRA_ARGS",
+            is_mandatory=False,
+            tags=["tailscale_extras"],
+        ),
         # Container images
         # -- these names are magic and are used in yaml files and the structure
         #    of these names is used in scripting around that
