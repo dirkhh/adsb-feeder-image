@@ -2,7 +2,7 @@
 {% set active_page = "index" %}
 
 {% block content %}
-<h1>{% block title %} ADSB Feeder Homepage {% endblock %}</h1>
+<h1>{% block title %} ADSB Feeder Homepage for {{ env_value_by_tag("mlat_name") }} {% endblock %}</h1>
 <div id="UF" style="display: block;">
     <h4>TAR1090 Mapping Interface</h4>
     <div class="text-muted small mb-2">
@@ -42,8 +42,9 @@
         <li><a href="https://status.adsb.lol/">ADSB.lol status</a></li>
         <li><a href="https://www.adsb.lol/docs/feeders-only/introduction/">ADSB.lol feeder introduction</a></li>
         <li><a href="https://my.adsb.lol/">personal ADSB.lol URL with the planes you are sending</a></li>
-        <li><a href="https://mlat.adsb.lol/">ADSB.lol MLAT feeder map - your site will only be listed if MLAT privacy is
-                disabled</a></li>
+        <li><a href="https://mlat.adsb.lol/">ADSB.lol MLAT feeder map {% if is_enabled("mlat_privacy") %}(since you have
+                MLAT privacy enabled, your feeder won't be shown) {% else %} (your feeder will be at an approximate
+                location as {{ env_value_by_tag("mlat_name") }}) {% endif %}</a></li>
         <li><a href="https://api.adsb.lol/api/0/me">details about your feed as JSON</a></li>
     </ul>
 </div>
