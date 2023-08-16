@@ -8,6 +8,7 @@ import re
 import shutil
 import subprocess
 import sys
+from time import sleep
 import zipfile
 from functools import partial
 from os import path, urandom
@@ -360,6 +361,34 @@ class AdsbIm:
                 if key == "nightly_update" or key == "zerotier":
                     # this will be handled through the separate key/value pairs
                     pass
+                if key == "tailscale":
+                    try:
+                        subprocess.run(
+                            "/usr/bin/systemctl enable --now tailscaled",
+                            shell=True,
+                            timeout=20.0,
+                        )
+                        result = subprocess.run(
+                            "/usr/bin/tailscale up 2> /tmp/out &",
+                            shell=True,
+                            capture_output=False,
+                        )
+                    except:
+                        # this really needs a user visible error...
+                        print_err("exception trying to set up tailscale - giving up")
+                        continue
+                    while True:
+                        sleep(1.0)
+                        with open("/tmp/out") as out:
+                            output = out.read()
+                        match = re.search(r"(https://login\.tailscale.*)", output)
+                        if match:
+                            break
+
+                    login_link = match.group(1)
+                    print_err(f"found login link {login_link}")
+                    self._constants.env_by_tags("tailscale_ll").value = login_link
+                    return redirect(url_for("expert"))
                 continue
             if value == "stay":
                 if key in self._other_aggregators:
@@ -377,7 +406,6 @@ class AdsbIm:
                     if not is_successful:
                         print_err(f"did not successfully enable {base}")
 
-                # we had the magic value of 'go' - so we should be done with this one
                 continue
             # now handle other form input
             e = self._constants.env_by_tags(key.split("--"))
@@ -444,7 +472,26 @@ class AdsbIm:
     def expert(self):
         if request.method == "POST":
             return self.update()
-
+        # is tailscale set up?
+        try:
+            result = subprocess.run("tailscale status", shell=True, check=True)
+        except:
+            # a non-zero return value means tailscale isn't configured
+            self._constants.env_by_tags("tailscale_name").value = ""
+        else:
+            try:
+                result = subprocess.run(
+                    "tailscale status | head -1 | awk '{print $2}'",
+                    shell=True,
+                    capture_output=True,
+                )
+            except:
+                self._constants.env_by_tags("tailscale_name").value = ""
+            else:
+                tailscale_name = result.stdout.decode()
+                print_err(f"configured as {tailscale_name} on tailscale")
+                self._constants.env_by_tags("tailscale_name").value = tailscale_name
+                self._constants.env_by_tags("tailscale_ll").value = ""
         return render_template("expert.html")
 
     def secure_image(self):

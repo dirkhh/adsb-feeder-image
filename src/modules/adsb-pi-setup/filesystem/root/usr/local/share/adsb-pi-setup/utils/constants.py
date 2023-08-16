@@ -314,6 +314,18 @@ class Constants:
             is_mandatory=False,
             tags=["zerotierid", "key"],
         ),
+        Env(
+            "_ADSBIM_STATE_TAILSCALE_LOGIN_LINK",
+            is_mandatory=False,
+            tags=["tailscale_ll"],
+            default="",
+        ),
+        Env(
+            "_ADSBIM_STATE_TAILSCALE_NAME",
+            is_mandatory=False,
+            tags=["tailscale_name"],
+            default="",
+        ),
         # Container images
         # -- these names are magic and are used in yaml files and the structure
         #    of these names is used in scripting around that
