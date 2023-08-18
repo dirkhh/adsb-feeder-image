@@ -4,6 +4,7 @@ import json
 from operator import is_
 import os.path
 import pathlib
+import platform
 import re
 import shutil
 import subprocess
@@ -99,25 +100,34 @@ class AdsbIm:
         self.update_boardname()
 
     def update_boardname(self):
-        board = "unknown system"
-        try:
-            output = subprocess.run(
-                "cat /sys/firmware/devicetree/base/model",
-                timeout=2.0,
-                shell=True,
-                capture_output=True,
-            )
-        except subprocess.SubprocessError:
-            print_err("failed to get /sys/firmware/devicetree/base/model")
+        board = ""
+        if pathlib.Path("/sys/firmware/devicetree/base/model").exists():
+            # that's some kind of SBC most likely
+            with open("/sys/firmware/devicetree/base/model", "r") as model:
+                board = model.read().strip()
         else:
-            board = output.stdout.decode().strip()
-            # drop trailing '\0' if present
-            if board[-1] == chr(0):
-                board = board[0:-1]
-            if board == "Firefly roc-rk3328-cc":
-                board = f"Libre Computer Renegade ({board})"
-            elif board == "Libre Computer AML-S905X-CC":
-                board = "Libre Computer Le Potato (AML-S905X-CC)"
+            # are we virtualized?
+            try:
+                output = subprocess.run(
+                    "systemd-detect-virt",
+                    timeout=2.0,
+                    shell=True,
+                    capture_output=True,
+                )
+            except subprocess.SubprocessError:
+                pass  # whatever
+            else:
+                virt = output.stdout.decode().strip()
+                if virt and virt != "none":
+                    board = f"Virtualized {platform.machine()} environment under {virt}"
+                else:
+                    board = f"Native on {platform.machine()} system"
+        if board == "":
+            board = f"Unknown {platform.machine()} system"
+        if board == "Firefly roc-rk3328-cc":
+            board = f"Libre Computer Renegade ({board})"
+        elif board == "Libre Computer AML-S905X-CC":
+            board = "Libre Computer Le Potato (AML-S905X-CC)"
         self._constants.env_by_tags("board_name").value = board
 
     def run(self):
