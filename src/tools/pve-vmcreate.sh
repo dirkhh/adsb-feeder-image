@@ -1,6 +1,6 @@
 #!/bin/bash
 
-IMG=$(ls adsb-feeder*.img)
+IMG=$(ls -rt adsb-feeder*.img | tail -1)
 SIZE="16G"
 POOL="local-lvm:0"
 while (( $# ))
@@ -21,9 +21,10 @@ mkdir -p /data/images/$VMID
 # create a random mac address
 MAC=$(printf '1A:67:30:%02X:%02X:%02X\n' $[RANDOM%256] $[RANDOM%256] $[RANDOM%256])
 
-# mv the image into place and make sure it's the right size
-fallocate -l $SIZE adsb-feeder.img
-dd if=$IMG of=adsb-feeder.img bs=16M conv=notrunc
+# conver the image and make sure it's the right size
+qemu-img convert "${IMG}" -f raw -O qcow2 adsb-feeder.qcow2
+qemu-img resize -f qcow2 adsb-feeder.qcow2 "${SIZE}"
+rm "${IMG}"
 
 qm create $VMID \
    -cores 2 \
@@ -31,6 +32,7 @@ qm create $VMID \
    -memory 1024 \
    -name adsb-feeder \
    -ostype l26 \
-   -sata0 ${POOL},import-from=$PWD/adsb-feeder.img \
+   -sata0 ${POOL},import-from=$PWD/adsb-feeder.qcow2 \
    -boot order=sata0 \
+   -net0 virtio=$MAC,bridge=vmbr0,firewall=1
 
