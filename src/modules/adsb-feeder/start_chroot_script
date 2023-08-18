@@ -28,7 +28,7 @@ fi
 echo "Using feeder image name $(cat /opt/adsb/feeder-image.name)"
 
 # Install dependencies
-
+apt-get update
 apt-get install -y socat gnupg
 
 # install zerotier and tailscale, first get their repo
