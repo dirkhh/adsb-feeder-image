@@ -1,0 +1,30 @@
+From bab9fa430bdb29a53f422f0c86343b1db4d44c22 Mon Sep 17 00:00:00 2001
+From: Dirk Hohndel <dirk@hohndel.org>
+Date: Thu, 17 Aug 2023 20:07:48 -0700
+Subject: [PATCH 3/3] don't try to configure wifi if it isn't there
+
+Signed-off-by: Dirk Hohndel <dirk@hohndel.org>
+---
+ src/modules/network/start_chroot_script | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/src/modules/network/start_chroot_script b/src/modules/network/start_chroot_script
+index c2be6a0..2ee6a7a 100755
+--- a/src/modules/network/start_chroot_script
++++ b/src/modules/network/start_chroot_script
+@@ -14,6 +14,12 @@ install_cleanup_trap
+ 
+ unpack /filesystem/boot /"${BASE_BOOT_MOUNT_PATH}"
+ 
++# if we are running on an image that doesn't have wifi support, stop
++if [ ! -f /etc/wpa_supplicant/wpa_supplicant.conf ] ; then
++    echo "no wifi configured, moving on"
++    exit 0
++fi
++
+ DIST_NETWORK_FILE=/"${BASE_BOOT_MOUNT_PATH}"/${DIST_NAME,,}-wpa-supplicant.txt
+ 
+ # allow configuring multiple wifi networks via /boot/DIST_NAME-wpa-supplicant.txt
+-- 
+2.35.1
+
