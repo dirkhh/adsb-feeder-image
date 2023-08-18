@@ -55,6 +55,16 @@ _should_ work to find the freshly booted system on your local network - assuming
 - there are two more pages to choose some options and decide which aggregators to feed
 - once the setup is completed, you'll be forwarded to your feeder home page from where you can go to all of the various pages that your feeder offers. Usually a good one to start with is the TAR1090 Map at the top.
 
+# for advanced users wanting to run this image on x86 under Proxmox
+
+You need to be able to ssh into your Proxmox system with the root account.
+- download the VM-x86_64 image
+- copy it to the proxmox server: `scp adsb-feeder-dietpi-x86-64-vm*.tar.xz root@<proxmox-ip or name>`
+- unpack the image on the server and create a fresh VM: `ssh root@192.168.66.103 "tar xJf adsb-feeder-dietpi-x86-64-vm*.tar.xz && bash ./pve-vmcreate.sh -s 16G"`
+- after this process completes, you should see the new VM in the Proxmox web UI
+- start the VM, wait for the first boot to complete, and then connect to it's web interface as usual
+- remember to pass through the SDR USB device to the VM before trying to configure the feeder
+
 # for developers
 
 This repo actually contains the scripting to create the SD card image for some common SBCs to run an ADS-B feeder. And as 'releases' it publishes such images.
