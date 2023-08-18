@@ -13,40 +13,59 @@ if [ "${DIR}" != "/opt/feeder-update" ]; then
 fi
 echo "running $(basename $0) in ${DIR}"
 
-echo "checkout the upstream feeder image"
+BRANCH=$(sed 's/.*(\(.*\)).*/\1/' < /etc/adsb.im.version)
+if [ "$BRANCH" = "$(cat /etc/adsb.im.version)" ] ; then
+    BRANCH="main"
+fi
+
+echo "checkout the ${BRANCH} branch of the upstream feeder image"
 cd ${DIR}
 if [ -d adsb-feeder-image ] ; then
     cd adsb-feeder-image
-    git checkout main
+    git checkout $BRANCH
     git config pull.ff only
     if ! git pull ; then
         echo "git pull wasn't a fast forward, giving up"
         exit
     fi
 else
-    if ! git clone https://github.com/dirkhh/adsb-feeder-image; then
+    if ! git clone -b $BRANCH https://github.com/dirkhh/adsb-feeder-image; then
         echo "git clone failed, giving up"
         exit
     fi
     cd adsb-feeder-image
 fi
 
+TARGET=$BRANCH
 if [ "$1" != "" ] ; then
     TARGET="$1"
     echo "trying to find the reference given: $TARGET"
-    if ! git checkout -B explicitTarget "$TARGET" ; then
-        echo "cannot find reference $TARGET, giving up"
-        exit
+    if ! git checkout "$TARGET" ; then
+        if ! git checkout -B explicitTarget "$TARGET" ; then
+            echo "cannot find reference $TARGET, giving up"
+            exit
+        else
+            # that was a reference, not a branch, so clear out BRANCH
+            BRANCH=""
+        fi
+    else
+        BRANCH="$TARGET"
     fi
 else
-    TARGET=$(git tag --sort=version:refname|tail -1)
+    if [ "$TARGET" = "main" ] ; then
+        # on the main branch, grab the last tag, otherwise check out what's there
+        TARGET=$(git tag --sort=version:refname|tail -1)
+    fi
     git branch -D ${TARGET} 2> /dev/null
     git checkout -b ${TARGET} ${TARGET}
 fi
 
+if [ "$BRANCH" != "" ] ; then
+    BRANCH="(${BRANCH})"
+fi
 DATE_COMPONENT=$(git log -20 --date=format:%y%m%d --format="%ad" | uniq -c | head -1 | awk '{ print $2"."$1 }')
 TAG_COMPONENT=$(git describe --match "v[0-9]*" | cut -d- -f1)
-VERSION="${TAG_COMPONENT}-${DATE_COMPONENT}"
+VERSION="${TAG_COMPONENT}${BRANCH}-${DATE_COMPONENT}"
 echo "updating to ${VERSION}"
 
 echo "prepare the files that we need to replace"
