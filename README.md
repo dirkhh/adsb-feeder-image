@@ -60,7 +60,7 @@ _should_ work to find the freshly booted system on your local network - assuming
 You need to be able to ssh into your Proxmox system with the root account.
 - download the VM-x86_64 image
 - copy it to the proxmox server: `scp adsb-feeder-dietpi-x86-64-vm*.tar.xz root@<proxmox-ip or name>`
-- unpack the image on the server and create a fresh VM: `ssh root@192.168.66.103 "tar xJf adsb-feeder-dietpi-x86-64-vm*.tar.xz && bash ./pve-vmcreate.sh -s 16G"`
+- unpack the image on the server and create a fresh VM: `ssh root@<proxmox-ip or name> "tar xJf adsb-feeder-dietpi-x86-64-vm*.tar.xz && bash ./pve-vmcreate.sh -s 16G"`
 - after this process completes, you should see the new VM in the Proxmox web UI
 - start the VM, wait for the first boot to complete, and then connect to it's web interface as usual
 - remember to pass through the SDR USB device to the VM before trying to configure the feeder
