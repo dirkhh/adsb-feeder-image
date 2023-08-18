@@ -3,10 +3,7 @@ import sys
 import subprocess
 
 from .system import System
-
-
-def print_err(*args, **kwargs):
-    print(*args, **kwargs, file=sys.stderr)
+from .util import print_err
 
 
 class Aggregator:

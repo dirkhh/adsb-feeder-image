@@ -8,10 +8,7 @@ from uuid import uuid4
 
 from .environment import Env, ENV_FILE_PATH, is_true
 from .netconfig import NetConfig
-
-
-def print_err(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
+from .util import print_err
 
 
 @dataclass

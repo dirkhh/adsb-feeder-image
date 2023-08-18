@@ -3,10 +3,7 @@ import re
 import subprocess
 import sys
 from typing import List
-
-
-def print_err(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
+from .util import print_err
 
 
 class SDR:

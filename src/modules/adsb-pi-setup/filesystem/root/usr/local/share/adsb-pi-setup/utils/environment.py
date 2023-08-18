@@ -1,12 +1,9 @@
 import sys
 
 from os import path
+from .util import print_err
 
 ENV_FILE_PATH = "/opt/adsb/.env"
-
-
-def print_err(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
 
 
 # extend the truthy concept to exclude all non-empty string except a few specific ones ([Tt]rue, [Oo]n, 1)

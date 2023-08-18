@@ -8,7 +8,6 @@ import platform
 import re
 import shutil
 import subprocess
-import sys
 from time import sleep
 import zipfile
 from functools import partial
@@ -32,12 +31,10 @@ from utils import (
     System,
     check_restart_lock,
     UltrafeederConfig,
+    cleanup_str,
+    print_err,
 )
 from werkzeug.utils import secure_filename
-
-
-def print_err(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
 
 
 class AdsbIm:
@@ -104,7 +101,7 @@ class AdsbIm:
         if pathlib.Path("/sys/firmware/devicetree/base/model").exists():
             # that's some kind of SBC most likely
             with open("/sys/firmware/devicetree/base/model", "r") as model:
-                board = model.read().strip()
+                board = cleanup_str(model.read().strip())
         else:
             # are we virtualized?
             try:
