@@ -43,7 +43,7 @@ jobs:
           magic_path: "repository/src/image-armbian/asus-tinkerboard.img.xz"
         - name: asus-tinkerboard-dietpi
           base_arch: ""
-          variant: dietarmbian
+          variant: dietpi-root1
           url: https://dietpi.com/downloads/images/DietPi_ASUSTB-ARMv7-Bookworm.7z
           magic_path: "repository/src/image-dietpi/DietPi_ASUSTB-ARMv7-Bookworm.7z"
         - name: banana-pi-m5-m2p
@@ -107,12 +107,12 @@ jobs:
           url: https://redirect.armbian.com/region/EU/rockpi-4c/Bookworm_current_minimal
           magic_path: "repository/src/image-armbian/rockpi4.img.xz"
         - name: nanopi-neo3-dietpi
-          variant: dietarmbian
+          variant: dietpi-root1
           base_arch: arm64
           url: https://dietpi.com/downloads/images/DietPi_NanoPiNEO3-ARMv8-Bookworm.7z
           magic_path: "repository/src/image-dietpi/DietPi_NanoPiNEO3-ARMv8-Bookworm.7z"
         - name: dietpi-x86-64-vm
-          variant: dietarmbian
+          variant: dietpi-root1
           base_arch: x86_64
           url: https://dietpi.com/downloads/images/DietPi_VM-x86_64-Bookworm.7z
           magic_path: "repository/src/image-dietpi/DietPi_VM-x86_64-Bookworm.7z"
