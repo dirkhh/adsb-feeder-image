@@ -144,6 +144,13 @@ jobs:
         path: CustomPiOS
 
 
+    - name: patch CustomPiOS to support running on x86_64
+      run: |
+        cd CustomPiOS
+        patch -p1 < ../repository/src/0001-allow-running-natively-on-x86_64.patch
+        patch -p1 < ../repository/src/0002-reduce-space-used-when-running-in-GitHub-action.patch
+
+
     - name: Update CustomPiOS Paths
       run: |
         cd repository/src
@@ -214,9 +221,19 @@ jobs:
       id: compress
       run: |
         export IMAGE="${{ steps.copy.outputs.image }}"
-        sudo xz -z -1 -T0 "${IMAGE}"
-        ls -l "${IMAGE}.xz"
-        echo "image=${IMAGE}.xz" >> $GITHUB_OUTPUT
+        case ${IMAGE} in
+        *-x86-64-vm*)
+          cp repository/src/tools/pve-vmcreate.sh .
+          tar cJf ${IMAGE%.img}.tar.xz ${IMAGE} pve-vmcreate.sh
+          ls -l "${IMAGE%.img}.tar.xz"
+          echo "image=${IMAGE%.img}.tar.xz" >> $GITHUB_OUTPUT
+          ;;
+        *)
+          sudo xz -z -1 -T0 "${IMAGE}"
+          ls -l "${IMAGE}.xz"
+          echo "image=${IMAGE}.xz" >> $GITHUB_OUTPUT
+          ;;
+        esac
 
 
     - name: Upload to GitHub Releases
@@ -224,7 +241,7 @@ jobs:
       if: ${{ startsWith(steps.tag.outputs.tag, 'v') }}
       with:
         token: ${{ secrets.PAT_GITHUB_TOKEN }}
-        files: "*.img.xz"
+        files: "${{ steps.compress.outputs.image }}"
         generate_release_notes: true
 
 
@@ -233,7 +250,7 @@ jobs:
       if: ${{ startsWith(steps.tag.outputs.tag, 'g') }}
       with:
         token: ${{ secrets.PAT_GITHUB_TOKEN }}
-        files: "*.img.xz"
+        files: "${{ steps.compress.outputs.image }}"
         generate_release_notes: true
         prerelease: true
         tag_name: latest
