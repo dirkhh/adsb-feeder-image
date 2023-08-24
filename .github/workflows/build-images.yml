@@ -34,7 +34,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [asus-tinkerboard, banana-pi-m5-m2p, lepotato, odroidc4, orangepi3-lts, orangepi4-lts, orangepi5, pine64, raspberrypi32, raspberrypi64, renegade, rockpi4, dietpi-x86-64-vm]
+        name: [asus-tinkerboard, banana-pi-m5-m2p, lepotato, odroidc4, orangepi3-lts, orangepi4-lts, orangepi5, pine64, raspberrypi32, raspberrypi64, renegade, rockpi4, x86-64-vm]
         include:
         - name: asus-tinkerboard
           base_arch: ""
@@ -111,7 +111,7 @@ jobs:
           base_arch: arm64
           url: https://dietpi.com/downloads/images/DietPi_NanoPiNEO3-ARMv8-Bookworm.7z
           magic_path: "repository/src/image-dietpi/DietPi_NanoPiNEO3-ARMv8-Bookworm.7z"
-        - name: dietpi-x86-64-vm
+        - name: x86-64-vm
           variant: dietpi-root1
           base_arch: x86_64
           url: https://dietpi.com/downloads/images/DietPi_VM-x86_64-Bookworm.7z
@@ -224,18 +224,19 @@ jobs:
         export IMAGE="${{ steps.copy.outputs.image }}"
         case ${IMAGE} in
         *-x86-64-vm*)
-          qemu-img convert -f raw "${IMAGE}" -O vmdk ${IMAGE%.img}.vmdk
-          qemu-img convert -f raw "${IMAGE}" -O qcow2 ${IMAGE%.img}.qcow2
+          NAME=${IMAGE%.img}
           cp repository/src/tools/pve-vmcreate.sh .
-          XZ_OPT="-T0 --fast" tar cJf ${IMAGE%.img}-proxmox.tar.xz ${IMAGE%.img}.qcow2 pve-vmcreate.sh
-          XZ_OPT="-T0 --fast" tar cJf ${IMAGE%.img}-vmdk.tar.xz ${IMAGE%.img}.vmdk
-          ls -l "${IMAGE%.img}.tar.xz"
-          echo "image=${IMAGE%.img}-proxmox.tar.xz" >> $GITHUB_OUTPUT
-          echo "image2=${IMAGE%.img}-vmdk.tar.xz" >> $GITHUB_OUTPUT
+          qemu-img convert -f raw ${IMAGE} -O qcow2 ${NAME}.qcow2
+          XZ_OPT="-T0 --fast" tar cJf ${NAME}-proxmox.tar.xz ${NAME}.qcow2 pve-vmcreate.sh
+          sudo rm -f ${NAME}.qcow2
+          qemu-img convert -f raw "${IMAGE}" -O vmdk ${NAME}.vmdk
+          XZ_OPT="-T0 --fast" tar cJf ${NAME}-vmdk.tar.xz ${NAME}.vmdk
+          sudo rm -f ${NAME}.vmdk ${IMAGE}
+          echo "image=${NAME}-proxmox.tar.xz" >> $GITHUB_OUTPUT
+          echo "image2=${NAME}-vmdk.tar.xz" >> $GITHUB_OUTPUT
           ;;
         *)
           sudo xz -z -1 -T0 "${IMAGE}"
-          ls -l "${IMAGE}.xz"
           echo "image=${IMAGE}.xz" >> $GITHUB_OUTPUT
           echo "image2=''" >> $GITHUB_OUTPUT
           ;;
