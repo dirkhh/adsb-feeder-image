@@ -234,22 +234,27 @@ jobs:
         case ${IMAGE} in
         *-x86-64-vm*)
           NAME=${IMAGE%.img}
+          echo "name: ${NAME}"
           cp repository/src/tools/pve-vmcreate.sh .
           qemu-img convert -f raw ${IMAGE} -O qcow2 ${NAME}.qcow2
           XZ_OPT="-T0 --fast" tar cJf ${NAME}-proxmox.tar.xz ${NAME}.qcow2 pve-vmcreate.sh
+          echo "created tar file ${NAME}-proxmox.tar.xz"
+          ls -l ${NAME}-proxmox.tar.xz
           sudo rm -f ${NAME}.qcow2
           qemu-img convert -f raw "${IMAGE}" -O vmdk ${NAME}.vmdk
           XZ_OPT="-T0 --fast" tar cJf ${NAME}-vmdk.tar.xz ${NAME}.vmdk
+          echo "created tar file ${NAME}-vmdk.tar.xz"
+          ls -l ${NAME}-vmdk.tar.xz
           sudo rm -f ${NAME}.vmdk ${IMAGE}
-          echo "image=${NAME}-proxmox.tar.xz" >> $GITHUB_OUTPUT
-          echo "image2=${NAME}-vmdk.tar.xz" >> $GITHUB_OUTPUT
+          echo "image=${NAME}-*.tar.xz" >> $GITHUB_OUTPUT
           ;;
         *)
+          echo "simply compress ${IMAGE}"
           sudo xz -z -1 -T0 "${IMAGE}"
           echo "image=${IMAGE}.xz" >> $GITHUB_OUTPUT
-          echo "image2=''" >> $GITHUB_OUTPUT
           ;;
         esac
+        ls -lh .
 
 
     - name: Upload to GitHub Releases
@@ -258,9 +263,7 @@ jobs:
       with:
         token: ${{ secrets.PAT_GITHUB_TOKEN }}
         generate_release_notes: true
-        files: |
-          "${{ steps.compress.outputs.image }}"
-          "${{ steps.compress.outputs.image2 }}"
+        files: ${{ steps.compress.outputs.image }}
 
 
     - name: Upload non-release artifacts
@@ -272,6 +275,4 @@ jobs:
         prerelease: true
         tag_name: latest
         name: testbuild-${{ steps.tag.outputs.tag }}
-        files: |
-          "${{ steps.compress.outputs.image }}"
-          "${{ steps.compress.outputs.image2 }}"
+        files: ${{ steps.compress.outputs.image }}
