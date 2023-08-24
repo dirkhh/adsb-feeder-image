@@ -436,6 +436,12 @@ class AdsbIm:
                         )
                     except:
                         print_err("exception trying to set up zerorier - giving up")
+                if key in {"lat", "lng", "alt"}:
+                    # remove letters, spaces, degree symbols
+                    value = str(float(re.sub("[a-zA-Z° ]", "", value)))
+                if key == "alt":
+                    # remove decimals as well
+                    value = str(int(float(value)))
                 e.value = value
         # done handling the input data
         # what implied settings do we have (and could we simplify them?)
