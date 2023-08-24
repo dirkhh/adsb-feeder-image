@@ -9,10 +9,7 @@ export RPI_IMAGER_ICON="https://raw.githubusercontent.com/guysoft/CustomPiOS/dev
 
 export BASE_USER=pi
 export BASE_ADD_USER=yes
-export BASE_USER_PASSWORD=raspberry
 export BASE_OVERRIDE_HOSTNAME=adsb-feeder
 
 export MODULES="base(network,adsb-feeder(adsb-docker,adsb-pi-setup))"
 
-export ROOT_PWD=$(openssl rand -base64 9 | tr '\\' '^' | tr '/' '#')
-export BASE_USER_PASSWORD=$(openssl rand -base64 9  | tr '\\' '^' | tr '/' '#')

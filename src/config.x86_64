@@ -13,5 +13,3 @@ export BASE_OVERRIDE_HOSTNAME=adsb-feeder
 
 export MODULES="base(network,adsb-feeder(adsb-docker,adsb-pi-setup,copy-kernel))"
 
-export ROOT_PWD=$(openssl rand -base64 9 | tr '\\' '^' | tr '/' '#')
-export BASE_USER_PASSWORD=$(openssl rand -base64 9  | tr '\\' '^' | tr '/' '#')
