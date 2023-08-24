@@ -135,7 +135,7 @@ jobs:
     - name: Install Dependencies
       run: |
         sudo apt update
-        sudo apt install coreutils p7zip-full qemu-user-static
+        sudo apt-get install -y coreutils p7zip-full qemu-user-static qemu-utils
 
     - name: Checkout CustomPiOS
       uses: actions/checkout@v3
@@ -218,21 +218,26 @@ jobs:
         echo "image=${IMAGE}" >> $GITHUB_OUTPUT
 
 
-    - name: Compress img to img.xz
+    - name: Compress img
       id: compress
       run: |
         export IMAGE="${{ steps.copy.outputs.image }}"
         case ${IMAGE} in
         *-x86-64-vm*)
+          qemu-img convert -f raw "${IMAGE}" -O vmdk ${IMAGE%.img}.vmdk
+          qemu-img convert -f raw "${IMAGE}" -O qcow2 ${IMAGE%.img}.qcow2
           cp repository/src/tools/pve-vmcreate.sh .
-          XZ_OPT="-T0 --fast" tar cJf ${IMAGE%.img}.tar.xz ${IMAGE} pve-vmcreate.sh
+          XZ_OPT="-T0 --fast" tar cJf ${IMAGE%.img}-proxmox.tar.xz ${IMAGE%.img}.qcow2 pve-vmcreate.sh
+          XZ_OPT="-T0 --fast" tar cJf ${IMAGE%.img}-vmdk.tar.xz ${IMAGE%.img}.vmdk
           ls -l "${IMAGE%.img}.tar.xz"
-          echo "image=${IMAGE%.img}.tar.xz" >> $GITHUB_OUTPUT
+          echo "image=${IMAGE%.img}-proxmox.tar.xz" >> $GITHUB_OUTPUT
+          echo "image2=${IMAGE%.img}-vmdk.tar.xz" >> $GITHUB_OUTPUT
           ;;
         *)
           sudo xz -z -1 -T0 "${IMAGE}"
           ls -l "${IMAGE}.xz"
           echo "image=${IMAGE}.xz" >> $GITHUB_OUTPUT
+          echo "image2=''" >> $GITHUB_OUTPUT
           ;;
         esac
 
@@ -242,8 +247,10 @@ jobs:
       if: ${{ startsWith(steps.tag.outputs.tag, 'v') }}
       with:
         token: ${{ secrets.PAT_GITHUB_TOKEN }}
-        files: "${{ steps.compress.outputs.image }}"
         generate_release_notes: true
+        files: |
+          "${{ steps.compress.outputs.image }}"
+          "${{ steps.compress.outputs.image2 }}"
 
 
     - name: Upload non-release artifacts
@@ -251,8 +258,10 @@ jobs:
       if: ${{ startsWith(steps.tag.outputs.tag, 'g') }}
       with:
         token: ${{ secrets.PAT_GITHUB_TOKEN }}
-        files: "${{ steps.compress.outputs.image }}"
         generate_release_notes: true
         prerelease: true
         tag_name: latest
         name: testbuild-${{ steps.tag.outputs.tag }}
+        files: |
+          "${{ steps.compress.outputs.image }}"
+          "${{ steps.compress.outputs.image2 }}"
