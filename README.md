@@ -1,14 +1,16 @@
 # adsb-feeder-image
 
-Easy to use turn-key SD card image for a number of single board computers.
+Easy to use turn-key SD card image for a number of single board computers (or to run in an x86 VM).
 Currently we are building images for
 - Raspberry Pi Zero 2, 3a/b, and 4 (tested on Zero 2W, 3a, and 4 - note that Pi Zero W will NOT work)
 - Asus Tinkerboard (tested)
 - Libre Computing Le Potato (tested) and Renegade (tested)
-- Orange Pi 3LTS (tested - no wifi support), 4LTS, and 5
+- Orange Pi 3LTS (tested - no wifi support), 4LTS, and 5 (tested)
 - Banana Pi M5 / M2P
 - Odriod C4
 - Rockpi 4 (tested)
+
+- VM setup under VirtualBox (easy), VMware (almost as easy), or Proxmox (advanced users)
 
 The idea is to create a "complete" ADS-B feeder that feeds pretty much all of the ADS-B flight trackers / aggregators.
 
@@ -37,6 +39,7 @@ These aggregators are also supported:
 
 The goal of this project is to make things as simple as possible for the non-technical user.
 
+## Feed from a Single Board Computer (like the Raspberry Pi)
 - buy one of the supported boards (at least the Le Potato seems to be easily and cheaply available in most places)
 - invest in a decent power supply - while many of these can be driven from a powered hub or a cheap 'charger' plug, not having a stable 5V power
 source tends to be the biggest causes of issues with these SBC
@@ -45,6 +48,7 @@ an indoor or (much better) outdoor antenna is all you need
 - download the current release from the [Release section](https://github.com/dirkhh/adsb-feeder-image/releases/latest)
 - use a tool like the [Raspberry Pi Imager](https://github.com/raspberrypi/rpi-imager/releases) to write the image to a µSD card on your computer
 - if doing this with the RPi image, only use the 'wifi setup' option to make sure the image can connect to your wifi - everything else should be
+- using a DietPi or non-Raspberry image, WiFi is either unsupported (non-Raspberry boards) or needs to be setup using a text editor making changes to two files on the mountable partifion of the feeder image. There's a README file with instructions in the same folder.
 kept unchanged
 - boot from the image
 - wait a couple of minutes for the initial boot to complete, then connect to the [ADSB-PI Setup Page](http://adsb-feeder.local) -- this link
@@ -56,11 +60,19 @@ _should_ work to find the freshly booted system on your local network - assuming
 - there are two more pages to choose some options and decide which aggregators to feed
 - once the setup is completed, you'll be forwarded to your feeder home page from where you can go to all of the various pages that your feeder offers. Usually a good one to start with is the TAR1090 Map at the top.
 
-# for advanced users wanting to run this image on x86 under Proxmox
+## Feed from an x86 virtual machine
+
+### for VirtualBox or VMware Workstation / Fusion
+
+Download the `adsb-feeder-x86-64-vm-*.ova` for the latest release. Double click on the OVA (which should open your virtualization software). Finish the import (under VMware you'll get a warning about a compatibility issue, simply clicking retry should get you past that). Before you start the VM, pass your SDR (which should be connected to a USB port of your PC or Mac) through to that VM. How this is done varries by product and the OS you are running on (Windows, macOS, Linux), but basically in all cases there is an option to pass a USB device to a VM - select your SDR in that list.
+
+Now boot the image and wait a brief while until the console screen stops scrolling and shows a DietPi startup screen that below the two yellow lines presents you with an IP address. Connect to this IP address from your browser and you'll be able to set up the feeder and start sending data to the aggregators of your choice.
+
+### for advanced users wanting to run this image on x86 under Proxmox
 
 You need to be able to ssh into your Proxmox system with the root account.
-- download the VM-x86_64 image
-- copy it to the proxmox server: `scp adsb-feeder-dietpi-x86-64-vm*.tar.xz root@<proxmox-ip or name>`
+- download the x86-64-vm proxmox image
+- copy it to the proxmox server: `scp adsb-feeder-x86-64-vm*.tar.xz root@<proxmox-ip or name>`
 - unpack the image on the server and create a fresh VM: `ssh root@<proxmox-ip or name> "tar xJf adsb-feeder-dietpi-x86-64-vm*.tar.xz && bash ./pve-vmcreate.sh -s 16G"`
 - after this process completes, you should see the new VM in the Proxmox web UI
 - start the VM, wait for the first boot to complete, and then connect to it's web interface as usual
