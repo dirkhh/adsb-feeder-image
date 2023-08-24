@@ -39,6 +39,9 @@ echo "${TIME}: pulling new container images and restarting docker" >> /var/log/u
 bash ./docker-pull.sh
 bash /usr/bin/docker-compose-start
 
+# finally remove the images we no longer use
+docker image prune -a
+
 sed -i "s/CONTAINER_VERSION=.*/CONTAINER_VERSION=$TIME/" /opt/adsb/.env
 
 echo "${TIME}: done" >> /var/log/update.log
