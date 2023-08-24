@@ -28,16 +28,21 @@ class UltrafeederConfig:
     @property
     def enabled_aggregators(self):
         aggregator_selection = self._constants.env_by_tags("aggregators").value
+        # be careful to set the correct values for the individual aggregators;
+        # these values are used in the main landing page for the feeder to provide
+        # additional links for the enabled aggregators
+        for name in self._constants.netconfigs.keys():
+            aggregator_env = self._constants.env_by_tags(
+                [name, "ultrafeeder", "is_enabled"]
+            )
+            if aggregator_selection == "all":
+                aggregator_env.value = True
+            elif aggregator_selection == "privacy":
+                aggregator_env.value = self._constants.netconfigs[name].has_policy
         return {
             name: value
             for name, value in self._constants.netconfigs.items()
-            if (
-                aggregator_selection == "all"
-                or aggregator_selection == "privacy"
-                and self._constants.netconfigs[name].has_policy
-                or aggregator_selection == "individual"
-                and self._constants.is_enabled("ultrafeeder", name)
-            )
+            if (self._constants.is_enabled("ultrafeeder", name))
         }
 
     def generate(self):
