@@ -15,6 +15,7 @@ from os import path, urandom
 from typing import Dict, List, Tuple
 
 from flask import Flask, flash, redirect, render_template, request, send_file, url_for
+
 from utils import (
     ADSBHub,
     Constants,
@@ -91,6 +92,7 @@ class AdsbIm:
         self.app.add_url_rule("/", "director", self.director, methods=["GET", "POST"])
         self.app.add_url_rule("/index", "index", self.index)
         self.app.add_url_rule("/setup", "setup", self.setup, methods=["GET", "POST"])
+        self.app.add_url_rule("/logs", "logs", self.logs)
         self.app.add_url_rule("/update", "update", self.update, methods=["POST"])
         self.app.add_url_rule("/api/sdr_info", "sdr_info", self.sdr_info)
         # fmt: on
@@ -320,6 +322,27 @@ class AdsbIm:
                 "sdrdevices": [sdr._json for sdr in self._sdrdevices.sdrs],
                 "frequencies": frequencies,
             }
+        )
+
+    def logs(self):
+        try:
+            result = subprocess.run(
+                "journalctl -u adsb-setup", shell=True, capture_output=True, text=True
+            )
+        except:
+            feeder_output = "error getting feeder logfile"
+        else:
+            feeder_output = result.stdout
+        try:
+            result = subprocess.run(
+                "docker-compose-adsb logs", shell=True, capture_output=True, text=True
+            )
+        except:
+            docker_output = "error getting docker logfile"
+        else:
+            docker_output = result.stdout
+        return render_template(
+            "logger.html", feederlogs=feeder_output, dockerlogs=docker_output
         )
 
     @check_restart_lock

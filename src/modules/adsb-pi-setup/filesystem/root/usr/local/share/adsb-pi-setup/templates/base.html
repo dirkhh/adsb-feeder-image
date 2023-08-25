@@ -23,6 +23,7 @@
         (url_for('backup'), 'backup', 'Backup'),
         (url_for('restore'), 'restore', 'Restore'),
         (url_for('expert'), 'expert', 'Expert'),
+        (url_for('logs'), 'logs', 'Logs'),
         ] -%}
         {% set active_page = active_page|default('index') -%}
         {% set config_complete = is_enabled('base_config') %}
