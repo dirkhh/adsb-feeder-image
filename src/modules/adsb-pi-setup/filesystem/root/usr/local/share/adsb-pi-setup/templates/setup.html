@@ -30,7 +30,8 @@
             value="{{ env_value_by_tag('lng') }}"></input>
     </div>
     <div class="form-group">
-        <label for="alt">Altitude above mean sealevel in meters</label>
+        <label for="alt">Altitude above mean sealevel in meters (round to whole meters, don't enter the unit, e.g.
+            160)</label>
         <input type="text" name="alt" required placeholder="Antenna MSL altitude (in m)" class="form-control"
             pattern="(?:\+|-|)\d+" value="{{ env_value_by_tag('alt') }}"></input>
     </div>
