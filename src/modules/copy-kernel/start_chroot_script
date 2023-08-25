@@ -15,5 +15,5 @@ install_cleanup_trap
 
 # all we do is save the correct kernel for later use
 # first copy is to make sure we don't end up with a symlink
-cp /vmlinuz /tmp/vmlinuz
+cp /boot/vmlinuz* /tmp/vmlinuz
 custompios_export kernel /tmp/vmlinuz

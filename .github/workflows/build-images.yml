@@ -188,9 +188,7 @@ jobs:
           echo "export BASE_ARCH=${BASE_ARCH}" >> config
         fi
         echo "export BASE_USER_PASSWORD=${{ secrets.USER_PASSWORD }}" >> config
-        echo "export BASE_USER_PASSWORD=${{ secrets.USER_PASSWORD }}" >> config.x86_64
         echo "export ROOT_PWD=${{ secrets.ROOT_PASSWORD }}" >> config
-        echo "export ROOT_PWD=${{ secrets.ROOT_PASSWORD }}" >> config.x86_64
         echo "export FEEDER_IMAGE_NAME=adsb-feeder-${IMG_NAME}-${{ steps.tag.outputs.tag }}.img" >> config
         sudo GH_REF_TYPE=${{ github.ref_type }} GH_TRGT_REF=${{ github.ref_name }} bash -x ./build_dist "${VARIANT}"
 

@@ -13,14 +13,23 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     env:
-      IMG_NAME: "x86_64"
-      VARIANT: "armbian-root3"
-      IMAGE_URL: "https://redirect.armbian.com/region/EU/uefi-x86/Bookworm_current_minimal"
-      MAGIC_PATH: "repository/src/image-armbian/x86_64.img.xz"
-
+      IMG_NAME: "x86-64-vm"
+      VARIANT: "dietpi-root1"
+      IMAGE_URL: "https://dietpi.com/downloads/images/DietPi_VM-x86_64-Bookworm.7z"
+      MAGIC_PATH: "repository/src/image-dietpi/DietPi_VM-x86_64-Bookworm.7z"
+      BASE_ARCH: x86_64
 
     steps:
-    - name: Checkout project repository
+    - name: make space in the background
+      run: |
+        sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost "$AGENT_TOOLSDIRECTORY" /usr/local/lib/android &
+
+    - name: mask secrets
+      run: |
+        echo "::add-mask::${{ secrets.USER_PASSWORD }}"
+        echo "::add-mask::${{ secrets.ROOT_PASSWORD }}"
+
+    - name: checkout project repository
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
@@ -29,7 +38,7 @@ jobs:
     - name: Install Dependencies
       run: |
         sudo apt update
-        sudo apt install coreutils p7zip-full qemu-system-x86-microvm
+        sudo apt-get install -y coreutils p7zip-full qemu-user-static qemu-utils qemu-system-x86
 
     - name: Checkout CustomPiOS
       uses: actions/checkout@v3
@@ -43,6 +52,7 @@ jobs:
         cd CustomPiOS
         patch -p1 < ../repository/src/0001-allow-running-natively-on-x86_64.patch
         patch -p1 < ../repository/src/0002-reduce-space-used-when-running-in-GitHub-action.patch
+        patch -p1 < ../repository/src/0003-don-t-try-to-configure-wifi-if-it-isn-t-there.patch
 
 
     - name: Update CustomPiOS Paths
@@ -58,35 +68,70 @@ jobs:
         wget -qO "${MAGIC_PATH}" "$IMAGE_URL"
 
 
+    - name: create a reasonable tag for this run - either a short sha or the tag we were called with
+      id: tag
+      run: |
+        export tag=""
+        if [ "${{ github.ref_type }}" = "tag" ] ; then tag="${{ github.ref_name }}" ; else tag="${{ github.sha }}" ; fi
+        export better_tag=$(echo $tag | sed -r 's/^(.{8}).{32}$/g-\1/')
+        echo "tag=${better_tag}" >> $GITHUB_OUTPUT
+
+
     - name: Build Image
       run: |
         sudo modprobe loop
         cd repository/src
+        # the config.x86_64 contains the extra step to extract the kernel that we need for qemu
+        echo "export BASE_USER_PASSWORD=${{ secrets.USER_PASSWORD }}" >> config.x86_64
+        echo "export ROOT_PWD=${{ secrets.ROOT_PASSWORD }}" >> config.x86_64
+        echo "export FEEDER_IMAGE_NAME=adsb-feeder-${IMG_NAME}-${{ steps.tag.outputs.tag }}.img" >> config.x86_64
         cp config.x86_64 config
         sudo GH_REF_TYPE=${{ github.ref_type }} GH_TRGT_REF=${{ github.ref_name }} bash -x ./build_dist "${VARIANT}"
 
 
-      # annoyingly, the resulting image often has a root partition that is a few blocks larger than the partition
-      # this is applying a very large hammer to the problem...
-    - name: Resize Image
+    - name: Copy output
+      id: copy
       run: |
-        cd repository/src/workspace-armbian-root3
-        parted -s x86_64.img unit s print 2> /dev/null
-        LOOP=$(sudo losetup -f -P --show x86_64.img)
-        SIZE=$(parted -s -m x86_64.img unit s print 2> /dev/null | grep ^3 | cut -d: -f4)
-        NEWSIZE="$((${SIZE%s} - 90))s"
-        echo "shrink the file system on the 3rd partition from $SIZE to $NEWSIZE"
-        sudo resize2fs -f ${LOOP}p3 ${NEWSIZE}
-        sudo losetup -d ${LOOP}
+        find -name "*.img*" || true
+        CURRENT_IMAGE_NAME="$(basename $MAGIC_PATH)"
+        echo "${CURRENT_IMAGE_NAME}"
+        IMAGE="adsb-feeder-${IMG_NAME}-${{ steps.tag.outputs.tag }}.img"
+        if [ "${VARIANT}" = "default" ]; then
+          WORKSPACE="repository/src/workspace"
+        else
+          WORKSPACE="repository/src/workspace-${VARIANT}"
+        fi
+        sudo chmod 777 -R "$WORKSPACE"
+
+        sudo chmod 777 .
+        BUILT_IMAGE="$(find $WORKSPACE -name "*.img" | head -n 1)"
+        mv -v "${BUILT_IMAGE}" "${IMAGE}"
+        sudo chmod 777 "${IMAGE}"
+        echo "image=${IMAGE}" >> $GITHUB_OUTPUT
+
+
+    - name: create vmdk copy of the image and set it up for upload
+      id: package
+      run: |
+        export IMAGE="${{ steps.copy.outputs.image }}"
+        NAME=${IMAGE%.img}
+        echo "remaining space now $(df -h .)"
+        echo "name: ${NAME}"
+        # we do this before the tests below so we have a clean image to package at the end
+        # but we do the packaging / compression after those tests so we don't waste time on
+        # it if the test fails
+        qemu-img convert -f raw "${IMAGE}" -O vmdk ${NAME}.vmdk
+        ls -lh .
+        echo "image=${NAME}.vmdk" >> $GITHUB_OUTPUT
 
 
     - name: Bring Up Qemu and do some simple tests
       run: |
-        cd repository/src
-        echo "unpack the kernel that we copied from the Armbian image"
-        tar xzf workspace-armbian-root3/kernel.tar.gz
+        export IMAGE="${{ steps.copy.outputs.image }}"
+        echo "unpack the kernel that we copied from the image"
+        tar xzf repository/src/workspace-dietpi-root1/kernel.tar.gz
         echo "start a headless qemu and sleep two minutes to wait for it to boot"
-        bash -x ../.github/scripts/qemu-run.sh workspace-armbian-root3/x86_64.img &
+        bash -x repository/.github/scripts/qemu-run.sh ${IMAGE} &
         # it would be smarter to wait for the right text in the console output, but for now just naively sleep a good long time
         sleep 180
         echo "print the console log in case something went wrong"
@@ -103,3 +148,15 @@ jobs:
         sleep 120
         curl http://localhost:18080/ -o out.html
         grep 'title>tar1090</title' out.html || cat out.html
+
+
+    - name: Upload non-release artifacts
+      uses: softprops/action-gh-release@v1
+      if: ${{ startsWith(steps.tag.outputs.tag, 'g') }}
+      with:
+        token: ${{ secrets.PAT_GITHUB_TOKEN }}
+        generate_release_notes: true
+        prerelease: true
+        tag_name: latest
+        name: testbuild-${{ steps.tag.outputs.tag }}
+        files: ${{ steps.package.outputs.image }}
