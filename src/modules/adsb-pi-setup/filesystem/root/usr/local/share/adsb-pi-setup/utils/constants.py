@@ -96,7 +96,7 @@ class Constants:
         ),
         "hpradar": NetConfig(
             "adsb,skyfeed.hpradar.com,30004,beast_reduce_plus_out",
-            "mlat,skyfeed.hpradar.com,32007",
+            "mlat,skyfeed.hpradar.com,31090",
             has_policy=False,
         ),
     }
