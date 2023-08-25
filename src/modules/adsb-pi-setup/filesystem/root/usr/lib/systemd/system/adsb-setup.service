@@ -5,9 +5,10 @@ After=network-online.target
 [Service]
 RemainAfterExit=yes
 WorkingDirectory=/usr/local/share/adsb-pi-setup
-# ppa deadsnakes python 3.11
 ExecStart=/usr/bin/python3 /usr/local/share/adsb-pi-setup/app.py
 Restart=always
+StandardOutput=append:/var/log/adsb-setup.log
+StandardError=append:/var/log/adsb-setup.log
 
 [Install]
 WantedBy=multi-user.target

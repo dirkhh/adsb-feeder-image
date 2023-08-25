@@ -39,6 +39,8 @@ class Constants:
         ["/flightradar24/", 8754, "/"],
         ["/portainer/", 9443, "/"],
         ["/dump978/", 9780, "/skyaware978/"],
+        ["/logs/", 9999, "/"],
+        ["/dozzle/", 9999, "/"],
     ]
 
     # these are the default values for the env file
@@ -280,6 +282,12 @@ class Constants:
             "_ADSBIM_STATE_IS_AIRSPY_ENABLED",
             is_mandatory=False,
             tags=["airspy", "is_enabled"],
+        ),
+        Env(
+            "_ADSBIM_STATE_IS_DOZZLE_ENABLED",
+            is_mandatory=False,
+            default=True,
+            tags=["dozzle", "is_enabled"],
         ),
         Env(
             "_ADSBIM_STATE_IS_PORTAINER_ENABLED",

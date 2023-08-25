@@ -33,6 +33,9 @@ if [ -f /opt/adsb/.env ] ; then
 	if grep "_ADSBIM_STATE_IS_RADARVIRTUEL_ENABLED=True" /opt/adsb/.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "/opt/adsb/rv.yml" )
 	fi
+	if grep "_ADSBIM_STATE_IS_DOZZLE_ENABLED=True" /opt/adsb/.env > /dev/null 2>&1 ; then
+		COMPOSE_FILES+=( "-f" "/opt/adsb/dozzle.yml" )
+	fi
 	if grep "_ADSBIM_STATE_IS_PORTAINER_ENABLED=True" /opt/adsb/.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "/opt/adsb/portainer.yml" )
 	fi

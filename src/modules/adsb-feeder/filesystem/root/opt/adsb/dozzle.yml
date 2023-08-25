@@ -1,0 +1,18 @@
+version: "3"
+services:
+  dozzle:
+    container_name: dozzle
+    image: amir20/dozzle:latest
+    environment:
+      - DOZZLE_NO_ANALYTICS=1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 9999:8080
+
+  adsb-setup-proxy:
+    container_name: adsb-setup-proxy
+    image: alpine
+    command: tail -f /var/log/adsb-setup.log
+    volumes:
+      - /var/log/adsb-setup.log:/var/log/adsb-setup.log

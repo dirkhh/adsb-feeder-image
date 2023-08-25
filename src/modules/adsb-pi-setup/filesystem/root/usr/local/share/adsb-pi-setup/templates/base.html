@@ -35,7 +35,7 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 {% for href, id, caption in navigation_bar %}
-                <li {% if id==active_page %}class="active" {% endif %} style="display: {% if config_complete or id=='setup' or id=='restore' %}
+                <li {% if id==active_page %}class="active" {% endif %} style="display: {% if config_complete or id=='setup' or id=='restore' or id=='logs' %}
                     block {% else %} none {% endif %};">
                     <a class="nav-link" href="{{ href|e }}">{{ caption|e }}</a>
                 </li>
