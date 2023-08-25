@@ -225,7 +225,9 @@ class Constants:
         Env("_ADSBIM_STATE_BOARD_NAME", is_mandatory=False, tags=["board_name"]),
         Env(
             "_ADSBIM_STATE_IMAGE_NAME",
-            default_call=lambda: Path("/opt/adsb/feeder-image.name").read_text(),
+            default_call=lambda: Path("/opt/adsb/feeder-image.name").read_text()
+            if Path("/opt/adsb/feeder-image.name").exists()
+            else "ADSB Feeder Image prior to v0.11",
             tags=["image_name"],
         ),
         Env(
