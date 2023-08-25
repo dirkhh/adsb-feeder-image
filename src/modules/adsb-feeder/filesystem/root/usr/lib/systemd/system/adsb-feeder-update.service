@@ -1,5 +1,7 @@
 # simply run the script as a service so it's owned by systemd and
 # not the calling program (which we will stop as part of that script)
+# also give the calling program a chance to show a transition screen
+# before being killed
 [Unit]
 Description=ADSB Feeder Update Service
 
@@ -7,6 +9,7 @@ Description=ADSB Feeder Update Service
 Type=oneshot
 RemainAfterExit=no
 WorkingDirectory=/opt/adsb
+ExecStartPre=/usr/bin/sleep 5
 ExecStart=/usr/bin/bash /usr/bin/feeder-update
 TimeoutStartSec=0
 

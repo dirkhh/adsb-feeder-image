@@ -82,6 +82,7 @@ class AdsbIm:
         self.app.add_url_rule("/propagateTZ", "propagateTZ", self.get_tz)
         self.app.add_url_rule("/restarting", "restarting", self.restarting)
         self.app.add_url_rule("/restart", "restart", self.restart, methods=["GET", "POST"])
+        self.app.add_url_rule("/running", "running", self.running)
         self.app.add_url_rule("/backup", "backup", self.backup)
         self.app.add_url_rule("/backupexecute", "backupexecute", self.backup_execute)
         self.app.add_url_rule("/restore", "restore", self.restore, methods=["GET", "POST"])
@@ -171,6 +172,9 @@ class AdsbIm:
             return "restarting" if resp else "already restarting"
         if request.method == "GET":
             return self._system._restart.state
+
+    def running(self):
+        return "OK"
 
     def backup(self):
         return render_template("/backup.html")
@@ -385,9 +389,10 @@ class AdsbIm:
                     cmdline = "/usr/bin/docker-update-adsb-im"
                     subprocess.run(cmdline, timeout=600.0, shell=True)
                 if key == "update_feeder_aps":
-                    cmdline = "systemctl start adsb-feeder-update.service"
-                    subprocess.run(cmdline, timeout=600.0, shell=True)
-                    # we'll potentially never come back here as that process kills the adsb-setup service
+                    # start this in the background so it doesn't prevent showing the waiting screen
+                    cmdline = "systemctl start adsb-feeder-update.service &"
+                    subprocess.run(cmdline, timeout=5.0, shell=True)
+                    return render_template("/waitandredirect.html")
                 if key == "nightly_update" or key == "zerotier":
                     # this will be handled through the separate key/value pairs
                     pass
