@@ -133,6 +133,7 @@ class AdsbIm:
         self._routemanager.add_proxy_routes(self.proxy_routes)
         debug = os.environ.get("ADSBIM_DEBUG") is not None
         self._debug_cleanup()
+        self._constants.update_env()
         self.app.run(host="0.0.0.0", port=80, debug=debug)
 
     def _debug_cleanup(self):
