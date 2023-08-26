@@ -138,6 +138,11 @@ class Constants:
             tags=["route_api", "is_enabled"],
             javascript=True,
         ),
+        Env(  # this has no UI component, but we want to enable the advanced user to modify it in .env
+            "TAR1090_RANGE_OUTLINE_DASH",
+            default="[2,3]",
+            tags=["range_outline_dash"],
+        ),
         # 978
         Env(
             "FEEDER_ENABLE_UAT978", default="False", tags=["uat978", "is_enabled"]
