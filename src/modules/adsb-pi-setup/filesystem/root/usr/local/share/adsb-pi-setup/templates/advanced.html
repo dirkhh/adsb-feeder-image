@@ -81,9 +81,22 @@
     </div>
 </form>
 <script>
-    document.addEventListener('readystatechange', event => {
-        if (event.target.readyState === "complete") { sdr_info() }
+    $(document).ready(function () {
+        sdr_info();
+        $("input[type=radio]").click(function () {
+            myid = this.id;
+            let components = myid.split("-");
+            console.log("clicked on", myid, "with components", components);
+            for (const usage of ["1090", "978", "other"]) {
+                otherid = usage + "-" + components[1];
+                if (otherid != myid) {
+                    console.log("turning off ", otherid);
+                    document.getElementById(otherid).checked = false;
+                }
+            }
+        });
     })
+
     function sdr_info() {
         fetch(`${SCRIPT_ROOT}/api/sdr_info`)
             .then(response => response.json())
@@ -95,22 +108,20 @@
                     document.getElementById('multipleSdrs').style.display = 'none'
                     return
                 }
-                console.log("set multipleSdrs to flex")
                 document.getElementById('multipleSdrs').style.display = 'flex'
                 let sdrs = data['sdrdevices'];
                 let use = data['frequencies'];
+                let consumers = ["1090", "978", "other"]
                 for (let i = 0; i < num; i++) {
                     let id = 'sdr' + i;
                     let serial = sdrs[i]['serial'];
                     document.getElementById(id).style.display = 'flex';
                     document.getElementById(id + "-serial").innerHTML = serial;
-                    document.getElementById('1090-' + i).value = serial;
-                    document.getElementById('978-' + i).value = serial;
-                    document.getElementById('other-' + i).value = serial;
-                    if (use['1090'] == serial) {
-                        document.getElementById('1090-' + i).checked = true;
-                    } else if (use['978'] == serial) {
-                        document.getElementById('978-' + i).checked = true;
+                    for (const c of consumers) {
+                        document.getElementById(c + '-' + i).value = serial;
+                        if (use[c] == serial) {
+                            document.getElementById(c + '-' + i).checked = true;
+                        }
                     }
                 }
                 for (let i = num; i < 4; i++) {
