@@ -23,9 +23,11 @@ cd ${DIR}
 if [ -d adsb-feeder-image ] ; then
     cd adsb-feeder-image
     git checkout $BRANCH
+    # let's make sure we get a clean checkout, no conflicts, no issues
+    git reset --hard HEAD~50
     git config pull.ff only
     if ! git pull ; then
-        echo "git pull wasn't a fast forward, giving up"
+        echo "even after going back 50 commits, the git pull wasn't a fast forward, giving up"
         exit
     fi
 else
@@ -60,13 +62,15 @@ else
     git checkout -b ${TARGET} ${TARGET}
 fi
 
+# wow, that was a lot of work... but now we should have the correct stuff checked out
+
 if [ "$BRANCH" != "" ] ; then
     BRANCH="(${BRANCH})"
 fi
 DATE_COMPONENT=$(git log -20 --date=format:%y%m%d --format="%ad" | uniq -c | head -1 | awk '{ print $2"."$1 }')
 TAG_COMPONENT=$(git describe --match "v[0-9]*" | cut -d- -f1)
 VERSION="${TAG_COMPONENT}${BRANCH}-${DATE_COMPONENT}"
-echo "updating to ${VERSION}"
+echo "${TARGET} checked out successfully, starting the actual upgrade to ${VERSION}"
 
 echo "prepare the files that we need to replace"
 mkdir -p ${DIR}/root
@@ -94,5 +98,8 @@ done
 
 echo "finally, trigger a container upgrade so that they match the new image"
 /usr/bin/docker-update-adsb-im -no-fetch
+
+echo "in an abundance of caution, restart the adsb-setup service"
+systemctl restart adsb-setup.service
 
 echo "update to ${VERSION} complete"
