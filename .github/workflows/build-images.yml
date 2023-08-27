@@ -140,7 +140,7 @@ jobs:
     - name: Install Dependencies
       run: |
         sudo apt update
-        sudo apt-get install -y coreutils p7zip-full qemu-user-static qemu-utils
+        sudo apt-get install -y coreutils p7zip-full qemu-user-static qemu-utils lz4
 
     - name: Checkout CustomPiOS
       uses: actions/checkout@v3
@@ -281,11 +281,11 @@ jobs:
           ls -l ${NAME}-proxmox.tar.xz
           sudo rm -f ${NAME}.qcow2
           qemu-img convert -f raw "${IMAGE}" -O vmdk ${NAME}.vmdk
-          XZ_OPT="-T0 --fast" tar cJf ${NAME}-vmdk.tar.xz ${NAME}.vmdk
-          echo "created tar file ${NAME}-vmdk.tar.xz"
-          ls -l ${NAME}-vmdk.tar.xz
-          sudo rm -f ${NAME}.vmdk ${IMAGE}
-          echo "image=${NAME}-*.tar.xz" >> $GITHUB_OUTPUT
+          lz4 --fast --favor-decSpeed ${NAME}.vmdk ${NAME}.vmdk.lz4
+          rm ${NAME}.vmdk
+          ls -l ${NAME}*
+          sudo rm -f ${IMAGE}
+          echo "image=${NAME}*" >> $GITHUB_OUTPUT
           ;;
         *)
           echo "simply compress ${IMAGE}"
