@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# adsb-pi-setup python web app
-# <Description what this module does>
+# extract the kernel for use with qemu in a CI/CD
+# highly experimental
 # Written by Dirk Hohndel <dirk@hohndel.org>
 # AGPL V3
 ########

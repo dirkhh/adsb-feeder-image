@@ -20,6 +20,20 @@ df -h
 mount
 echo "127.0.1.1 $(hostname)" 2>/dev/null >> /etc/hosts
 
+# setup Python/Flask
+apt-get update --allow-releaseinfo-change
+
+if  grep -q "bullseye" /etc/os-release ; then
+	# for older Debian the packaged flask is still v1 and too old for our code
+	# on the flipside, bullseye still allows us to use pip to install
+	# systemwide packages - so let's do it this way
+	apt-get install -y --no-install-recommends python3 python3-pip
+	pip install --no-cache-dir -r /usr/local/share/adsb-setup/requirements.txt
+	ln -s /usr/local/bin/flask /usr/bin
+else
+	apt-get install -y --no-install-recommends python3 python3-flask
+fi
+
 if [ "$FEEDER_IMAGE_NAME" != "" ] ; then
 	echo "$FEEDER_IMAGE_NAME" > /opt/adsb/feeder-image.name
 else
@@ -59,7 +73,8 @@ if [ "$BASE_DISTRO" = "armbian" ] ; then
 fi
 
 # Enable services at boot
-systemctl enable adsb-docker
+systemctl enable adsb-setup.service
+systemctl enable adsb-docker.service
 systemctl enable adsb-init.service
 systemctl enable adsb-bootstrap.service
 systemctl enable adsb-web-forward.service

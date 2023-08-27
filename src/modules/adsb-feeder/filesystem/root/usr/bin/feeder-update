@@ -75,7 +75,6 @@ echo "${TARGET} checked out successfully, starting the actual upgrade to ${VERSI
 echo "prepare the files that we need to replace"
 mkdir -p ${DIR}/root
 cp -r src/modules/adsb-feeder/filesystem/root ${DIR}
-cp -r src/modules/adsb-pi-setup/filesystem/root ${DIR}
 
 echo "stop the running services"
 for svc in adsb-web-forward.service adsb-setup.service ; do

@@ -1,7 +1,6 @@
 export DIST_NAME=adsb-feeder-dist
 export DIST_VERSION=0.1.0
 
-# rpi-imager json generator settings
 export RPI_IMAGER_NAME="${DIST_NAME}"
 export RPI_IMAGER_DESCRIPTION="A distro built with CustomPiOS"
 export RPI_IMAGER_WEBSITE="https://github.com/guysoft/CustomPiOS"
@@ -12,5 +11,5 @@ export BASE_ADD_USER=yes
 export BASE_OVERRIDE_HOSTNAME=adsb-feeder
 
 export BASE_ARCH=x86_64
-export MODULES="base(network,adsb-feeder(adsb-docker,adsb-pi-setup,copy-kernel))"
+export MODULES="base(network,adsb-feeder(adsb-docker,copy-kernel))"
 
