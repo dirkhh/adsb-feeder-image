@@ -96,7 +96,7 @@ for svc in adsb-web-forward.service adsb-setup.service ; do
 done
 
 echo "finally, trigger a container upgrade so that they match the new image"
-/usr/bin/docker-update-adsb-im -no-fetch
+/opt/adsb/docker-update-adsb-im -no-fetch
 
 echo "in an abundance of caution, restart the adsb-setup service"
 systemctl restart adsb-setup.service

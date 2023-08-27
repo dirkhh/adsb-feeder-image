@@ -37,7 +37,7 @@ mv env.new .env
 
 echo "${TIME}: pulling new container images and restarting docker" >> /var/log/update.log
 bash ./docker-pull.sh
-bash /usr/bin/docker-compose-start
+bash /opt/adsb/docker-compose-start
 
 # finally remove the images we no longer use
 docker image prune -a -f

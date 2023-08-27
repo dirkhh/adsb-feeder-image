@@ -10,7 +10,7 @@ Type=oneshot
 RemainAfterExit=no
 WorkingDirectory=/opt/adsb
 ExecStartPre=/usr/bin/sleep 5
-ExecStart=/usr/bin/bash /usr/bin/feeder-update
+ExecStart=/usr/bin/bash /opt/adsb/feeder-update
 TimeoutStartSec=0
 
 [Install]

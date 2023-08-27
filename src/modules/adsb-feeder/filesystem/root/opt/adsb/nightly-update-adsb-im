@@ -5,9 +5,9 @@ TIME=$(date -Iseconds)
 
 # check in the .env file what we should do
 if grep "^NIGHTLY_BASE_UPDATE=1$" .env ; then
-	apt update >> /var/log/update.log 2>&1
-	apt upgrade -y >> /var/log/update.log 2>&1
+	apt update >> /var/log/adsb-setup.log 2>&1
+	apt upgrade -y >> /var/log/adsb-setup.log 2>&1
 fi
 if grep "^NIGHTLY_CONTAINER_UPDATE=1$" .env ; then
-	bash /usr/bin/docker-update-adsb-im
+	bash /opt/adsb/docker-update-adsb-im
 fi

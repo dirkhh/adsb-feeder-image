@@ -271,7 +271,7 @@ class AdsbIm:
             restore_path.mkdir(mode=0o755, exist_ok=True)
             try:
                 subprocess.call(
-                    "docker-compose-adsb down -t 20", timeout=40.0, shell=True
+                    "/opt/adsb/docker-compose-adsb down -t 20", timeout=40.0, shell=True
                 )
             except subprocess.TimeoutExpired:
                 print_err("timeout expired stopping docker... trying to continue...")
@@ -297,7 +297,9 @@ class AdsbIm:
                         "timeout expired joining Zerotier network... trying to continue..."
                     )
             try:
-                subprocess.call("docker-compose-start", timeout=180.0, shell=True)
+                subprocess.call(
+                    "/opt/adsb/docker-compose-start", timeout=180.0, shell=True
+                )
             except subprocess.TimeoutExpired:
                 print_err("timeout expired re-starting docker... trying to continue...")
             return redirect(url_for("director"))
@@ -365,7 +367,7 @@ class AdsbIm:
                     self.secure_image()
                 if key == "update":
                     # this needs a lot more checking and safety, but for now, just go
-                    cmdline = "/usr/bin/docker-update-adsb-im"
+                    cmdline = "/opt/adsb/docker-update-adsb-im"
                     subprocess.run(cmdline, timeout=600.0, shell=True)
                 if key == "update_feeder_aps":
                     # start this in the background so it doesn't prevent showing the waiting screen
@@ -524,7 +526,7 @@ class AdsbIm:
         output: str = ""
         try:
             result = subprocess.run(
-                "/usr/bin/secure-image", shell=True, capture_output=True
+                "/opt/adsb/secure-image", shell=True, capture_output=True
             )
         except subprocess.TimeoutExpired as exc:
             output = exc.stdout.decode()

@@ -12,6 +12,6 @@ if [ ! -f /opt/adsb/init-complete ] ; then
 	/usr/bin/systemctl stop adsb-init
 else
 	echo "adsb-system-restart: trigger docker compose up" 1>&2
-	/usr/bin/docker-compose-start
+	/opt/adsb/docker-compose-start
 fi
 

@@ -5,7 +5,7 @@ Wants=adsb-update.timer
 
 [Service]
 WorkingDirectory=/opt/adsb
-ExecStart=/usr/bin/bash /usr/bin/nightly-update-adsb-im
+ExecStart=/usr/bin/bash /opt/adsb/nightly-update-adsb-im
 
 [Install]
 WantedBy=multi-user.target
