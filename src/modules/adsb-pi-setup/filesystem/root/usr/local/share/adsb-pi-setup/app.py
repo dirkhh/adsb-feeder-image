@@ -474,6 +474,9 @@ class AdsbIm:
             self._constants.env_by_tags("1090serial").value = self._sdrdevices.sdrs[
                 0
             ]._serial
+        if airspy:
+            self._constants.env_by_tags("1090serial").value = ""
+
         rtlsdr = not airspy and self._constants.env_by_tags("1090serial").value != ""
         self._constants.env_by_tags("rtlsdr").value = "rtlsdr" if rtlsdr else ""
 
