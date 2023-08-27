@@ -28,7 +28,7 @@ if  grep -q "bullseye" /etc/os-release ; then
 	# on the flipside, bullseye still allows us to use pip to install
 	# systemwide packages - so let's do it this way
 	apt-get install -y --no-install-recommends python3 python3-pip
-	pip install --no-cache-dir -r /usr/local/share/adsb-setup/requirements.txt
+	pip install --no-cache-dir -r /opt/adsb/adsb-setup/requirements.txt
 	ln -s /usr/local/bin/flask /usr/bin
 else
 	apt-get install -y --no-install-recommends python3 python3-flask

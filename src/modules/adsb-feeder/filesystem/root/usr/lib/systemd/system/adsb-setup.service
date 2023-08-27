@@ -4,8 +4,8 @@ After=network-online.target
 
 [Service]
 RemainAfterExit=yes
-WorkingDirectory=/usr/local/share/adsb-setup
-ExecStart=/usr/bin/python3 /usr/local/share/adsb-setup/app.py
+WorkingDirectory=/opt/adsb/adsb-setup
+ExecStart=/usr/bin/python3 /opt/adsb/adsb-setup/app.py
 Restart=always
 StandardOutput=append:/var/log/adsb-setup.log
 StandardError=append:/var/log/adsb-setup.log

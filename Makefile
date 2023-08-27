@@ -9,8 +9,8 @@ sync-py-control:
 	rsync -av \
 	--delete --exclude="*.pyc" --progress \
 	-e "ssh -S /tmp/adsb-setup-ssh-control" \
-	src/modules/adsb-feeder/filesystem/root/usr/local/share/adsb-setup/ \
-	root@adsb-feeder.local:/usr/local/share/adsb-setup/
+	src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup/ \
+	root@adsb-feeder.local:/opt/adsb/adsb-setup/
 
 	rsync -av \
 	--exclude="*.pyc" --progress \
@@ -34,7 +34,7 @@ sync-py-control:
 	rsync -av \
 	-e "ssh -S /tmp/adsb-setup-ssh-control" \
 	Makefile \
-	root@adsb-feeder.local:/usr/local/share/adsb-setup/Makefile
+	root@adsb-feeder.local:/opt/adsb/adsb-setup/Makefile
 
 run-loop:
 # python3 app.py in a loop

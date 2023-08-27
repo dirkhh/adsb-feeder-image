@@ -19,7 +19,7 @@ jobs:
       uses: actions/checkout@v3
     - name: Check Python Code
       run: |
-        cd src/modules/adsb-feeder/filesystem/root/usr/local/share/adsb-setup
+        cd src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup
         python3 -m py_compile *.py
     - name: tag current version as latest (regardless of other tags)
       uses: rickstaa/action-create-tag@v1

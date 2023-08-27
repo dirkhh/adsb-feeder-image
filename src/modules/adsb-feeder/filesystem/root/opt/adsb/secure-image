@@ -1,9 +1,9 @@
 #!/bin/bash
 #
 # first replace the 'dangerous' parts of the expert setup
-mkdir -p /usr/local/share/adsb-setup/backup
-mv /usr/local/share/adsb-setup/templates/expert.html /usr/local/share/adsb-setup/backup/expert.html
-awk '/SECURE_IMAGE_START/,/SECURE_IMAGE_END/{ next }; { print $0 }' < /usr/local/share/adsb-setup/backup/expert.html > /usr/local/share/adsb-setup/templates/expert.html
+mkdir -p /opt/adsb/adsb-setup/backup
+mv /opt/adsb/adsb-setup/templates/expert.html /opt/adsb/adsb-setup/backup/expert.html
+awk '/SECURE_IMAGE_START/,/SECURE_IMAGE_END/{ next }; { print $0 }' < /opt/adsb/adsb-setup/backup/expert.html > /opt/adsb/adsb-setup/templates/expert.html
 echo "restricted expert page"
 
 # I don't see a reason to disable the running getty's
