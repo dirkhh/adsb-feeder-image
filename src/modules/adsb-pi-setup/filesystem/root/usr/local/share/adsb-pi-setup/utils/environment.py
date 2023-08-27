@@ -51,7 +51,7 @@ class Env:
             open(self._file, "w").close()
 
         value_in_file = self._get_value_from_file()
-        if pull and value_in_file:
+        if pull and value_in_file != None:
             self._value = value_in_file
             return
         if value == value_in_file:
