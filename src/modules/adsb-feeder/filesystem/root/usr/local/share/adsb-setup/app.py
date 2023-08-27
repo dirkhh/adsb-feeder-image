@@ -354,14 +354,15 @@ class AdsbIm:
             # this seems like cheating... let's capture all of the submit buttons
             if value == "go":
                 seen_go = True
+            if value == "go" or value == "wait":
                 if key == "shutdown":
                     # do shutdown
                     self._system.halt()
-                    return "Asked the system to halt. This can take several minutes to complete, and some boards don't power off."
+                    return render_template("/waitandredirect.html")
                 if key == "reboot":
                     # initiate reboot
                     self._system.reboot()
-                    return "Asked the system to reboot. This can take a while, please try to refresh in about a minute or two."
+                    return render_template("/waitandredirect.html")
                 if key == "secure_image":
                     self._constants.env_by_tags("secure_image").value = True
                     self.secure_image()

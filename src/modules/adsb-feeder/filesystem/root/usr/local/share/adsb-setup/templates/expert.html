@@ -40,7 +40,7 @@
             Enter or paste your public key below. This will allow you to then log in as root on the feeder SBC.
         </label>
         <input class="col-8 ml-2" id="ssh_pub" name="ssh_pub" type="text" placeholder=" Enter your public key" required>
-        <button type="submit" class="btn btn-primary mb-1 ml-3" name="ssh" value="go">Submit</button>
+        <button type="submit" class="btn btn-primary mb-1 ml-3" name="ssh" value="stay">Submit</button>
     </div>
 </form>
 
@@ -63,11 +63,12 @@
     <div class="row">
         <label for="shutdown" class="col-8">Shutdown the feeder. Most boards won't turn off power by themselves.
         </label>
-        <button type="submit" class="btn btn-primary mb-3 mt-3 ml-3 col-3" name="shutdown" value="go">Shutdown</button>
+        <button type="submit" class="btn btn-primary mb-3 mt-3 ml-3 col-3" name="shutdown"
+            value="wait">Shutdown</button>
         <label for="reboot" class="col-8">Reboot the feeder. Please note that some boards are not able to reboot without
             manually power cycling.
         </label>
-        <button type="submit" class="btn btn-primary mb-3 mt-3 ml-3 col-3" name="reboot" value="go">Reboot</button>
+        <button type="submit" class="btn btn-primary mb-3 mt-3 ml-3 col-3" name="reboot" value="wait">Reboot</button>
     </div>
 </form>
 
