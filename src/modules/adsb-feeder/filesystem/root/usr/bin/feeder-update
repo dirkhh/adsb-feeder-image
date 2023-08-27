@@ -1,6 +1,6 @@
 #!/bin/bash
 
-exec 2>&1 1>>/var/log/feeder-update.log
+exec 2>&1 1>>/var/log/adsb-setup.log
 
 # first - move this script to /opt/feeder-update and run it there
 DIR=$(dirname -- "$(readlink -f "${BASH_SOURCE}")")
