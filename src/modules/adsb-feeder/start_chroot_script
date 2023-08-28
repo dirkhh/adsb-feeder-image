@@ -108,7 +108,6 @@ if [ "$NATIVE_DIETPI" != "1" ] ; then
 	# Enable services at boot
 	systemctl enable adsb-setup.service
 	systemctl enable adsb-docker.service
-	systemctl enable adsb-init.service
 	systemctl enable adsb-bootstrap.service
 	systemctl enable adsb-update.timer
 
@@ -127,7 +126,6 @@ else
 
 	# Enable services
 	systemctl enable adsb-setup.service
-	systemctl enable adsb-init.service
 	systemctl enable adsb-bootstrap.service
 	systemctl enable adsb-update.timer
 fi

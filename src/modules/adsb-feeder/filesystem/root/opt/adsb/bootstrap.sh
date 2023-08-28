@@ -1,8 +1,13 @@
 #!/bin/bash
 
-# while the user is getting ready, let's try to pull the remaining docker containers
-# in the background -- that way startup will feel quicker
+# while the user is getting ready, let's try to pull the ultrafeeder docker
+# container in the background -- that way startup will feel quicker
 cd /opt/adsb
+if [ ! -f .env ] ; then
+	cp docker.image.versions .env
+	echo "_ADSBIM_BASE_VERSION=$(cat /etc/adsb.im.version)" >> .env
+	echo "_ADSBIM_CONTAINER_VERSION=$(cat /etc/adsb.im.version)" >> .env
+fi
 bash docker-pull.sh &
 
 # get the local IP address

@@ -7,9 +7,7 @@ if [ ! -f /opt/adsb/init-complete ] ; then
 	/usr/bin/systemctl daemon-reload
 	/usr/bin/systemctl restart adsb-docker
 	/usr/bin/systemctl disable adsb-bootstrap
-	/usr/bin/systemctl disable adsb-init
 	/usr/bin/systemctl stop adsb-bootstrap
-	/usr/bin/systemctl stop adsb-init
 else
 	echo "adsb-system-restart: trigger docker compose up" 1>&2
 	/opt/adsb/docker-compose-start

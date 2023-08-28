@@ -1,6 +1,6 @@
 [Unit]
 Description=ADSB Bootstrap Service
-After=network-online.target adsb-init.service
+After=network-online.target
 
 [Service]
 Type=oneshot
