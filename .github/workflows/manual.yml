@@ -16,6 +16,7 @@ jobs:
     - name: figure out what to build
       id: pick
       run: |
+        echo "Building ${{ github.event.inputs.target }}"
         echo "IMG_NAME=${{ github.event.inputs.target }}" >> $GITHUB_ENV
         if [ ${{ github.event.inputs.target }} = "raspberrypi64" ] ; then
           echo "BASE_ARCH=arm64" >> $GITHUB_ENV
@@ -41,6 +42,7 @@ jobs:
         else
           echo "can't figure out what to build"
           exit 1
+        fi
 
     - name: mask secrets
       run: |
