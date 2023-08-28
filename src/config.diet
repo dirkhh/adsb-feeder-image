@@ -1,0 +1,14 @@
+export DIST_NAME=adsb-feeder-dist
+
+export RPI_IMAGER_NAME="${DIST_NAME}"
+export RPI_IMAGER_DESCRIPTION="A distro built with CustomPiOS"
+export RPI_IMAGER_WEBSITE="https://github.com/guysoft/CustomPiOS"
+export RPI_IMAGER_ICON="https://raw.githubusercontent.com/guysoft/CustomPiOS/devel/media/rpi-imager-CustomPiOS.png"
+
+export BASE_USER=pi
+export BASE_ADD_USER=yes
+export BASE_OVERRIDE_HOSTNAME=adsb-feeder
+
+export MODULES="base(network,adsb-feeder)"
+
+export NATIVE_DIETPI=1

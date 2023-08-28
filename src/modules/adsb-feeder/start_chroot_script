@@ -41,49 +41,6 @@ else
 fi
 echo "Using feeder image name $(cat /opt/adsb/feeder-image.name)"
 
-# Install dependencies
-apt-get update
-apt-get install -y socat gnupg
-
-# install zerotier and tailscale, first get their repo
-
-DEBIAN_DISTRO=$(cat /etc/apt/sources.list | head -1 | cut -d\   -f 3)
-echo "deb http://download.zerotier.com/debian/${DEBIAN_DISTRO} ${DEBIAN_DISTRO} main" > /etc/apt/sources.list.d/zerotier.list
-curl -fsSL "https://pkgs.tailscale.com/stable/debian/${DEBIAN_DISTRO}.noarmor.gpg" | sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
-curl -fsSL "https://pkgs.tailscale.com/stable/debian/${DEBIAN_DISTRO}.tailscale-keyring.list" | sudo tee /etc/apt/sources.list.d/tailscale.list
-
-# Update and install - but don't enable
-
-apt-get update
-apt-get install -y zerotier-one tailscale
-systemctl disable tailscaled
-systemctl disable zerotier-one
-
-# If we are armbian, we do something with networking
-if [ "$BASE_DISTRO" = "armbian" ] ; then
-	apt-get install -y network-manager net-tools
-
-	echo "127.0.0.1 adsb-feeder.local" >> /etc/hosts
-
-	# ensure that we get predictable interface names
-	echo "extraargs=net.ifnames=0" >> /boot/armbianEnv.txt
-
-	sed -i 's/Wants=network-online.target/Wants=network-pre.target/;s/After=network.target network-online.target/Before=wpa_supplicant.service network.target network-online.target/' /usr/lib/systemd/system/armbian-firstrun-config.service
-	systemctl enable armbian-firstrun-config
-fi
-
-# Enable services at boot
-systemctl enable adsb-setup.service
-systemctl enable adsb-docker.service
-systemctl enable adsb-init.service
-systemctl enable adsb-bootstrap.service
-systemctl enable adsb-web-forward.service
-systemctl enable adsb-update.timer
-
-# Disable some things we don't need and that only eat memory (assuming they exist)
-systemctl disable bluetooth.service || true
-systemctl disable ModemManager.service || true
-
 if grep -q "^diet" /etc/dist_variant ; then
 	# oh, lots of things things are different here...
 	sed -i "s/AUTO_SETUP_LOCALE=.*/AUTO_SETUP_LOCALE=en_US.UTF-8/" /boot/dietpi.txt
@@ -114,4 +71,66 @@ if grep -q "^diet" /etc/dist_variant ; then
 	rm -f /boot/${DIST_NAME,,}-wpa-supplicant.txt
 else
 	rm -f /boot/ADSB-README.txt
+fi
+
+if [ "$NATIVE_DIETPI" != "1" ] ; then
+	# Install dependencies
+	apt-get update
+	apt-get install -y socat gnupg
+
+	# install zerotier and tailscale, first get their repo
+
+	DEBIAN_DISTRO=$(cat /etc/apt/sources.list | head -1 | cut -d\   -f 3)
+	echo "deb http://download.zerotier.com/debian/${DEBIAN_DISTRO} ${DEBIAN_DISTRO} main" > /etc/apt/sources.list.d/zerotier.list
+	curl -fsSL "https://pkgs.tailscale.com/stable/debian/${DEBIAN_DISTRO}.noarmor.gpg" | sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
+	curl -fsSL "https://pkgs.tailscale.com/stable/debian/${DEBIAN_DISTRO}.tailscale-keyring.list" | sudo tee /etc/apt/sources.list.d/tailscale.list
+
+	# Update and install - but don't enable
+
+	apt-get update
+	apt-get install -y zerotier-one tailscale
+	systemctl disable tailscaled
+	systemctl disable zerotier-one
+
+	# If we are armbian, we do something with networking
+	if [ "$BASE_DISTRO" = "armbian" ] ; then
+		apt-get install -y network-manager net-tools
+	
+		echo "127.0.0.1 adsb-feeder.local" >> /etc/hosts
+	
+		# ensure that we get predictable interface names
+		echo "extraargs=net.ifnames=0" >> /boot/armbianEnv.txt
+
+		sed -i 's/Wants=network-online.target/Wants=network-pre.target/;s/After=network.target network-online.target/Before=wpa_supplicant.service network.target network-online.target/' /usr/lib/systemd/system/armbian-firstrun-config.service
+		systemctl enable armbian-firstrun-config
+	fi
+
+	# Enable services at boot
+	systemctl enable adsb-setup.service
+	systemctl enable adsb-docker.service
+	systemctl enable adsb-init.service
+	systemctl enable adsb-bootstrap.service
+	systemctl enable adsb-web-forward.service
+	systemctl enable adsb-update.timer
+
+	# Disable some things we don't need and that only eat memory (assuming they exist)
+	systemctl disable bluetooth.service || true
+	systemctl disable ModemManager.service || true
+
+else
+	# so this is DietPi based. Set up their way of installing stuff
+	echo "AUTO_SETUP_INSTALL_SOFTWARE_ID=134 # docker compose and docker" >> /boot/dietpi.txt
+	echo "AUTO_SETUP_INSTALL_SOFTWARE_ID=58  # tailscale" >> /boot/dietpi.txt
+	echo "AUTO_SETUP_INSTALL_SOFTWARE_ID=201 # zerotier" >> /boot/dietpi.txt
+
+	# Install dependencies
+	apt-get update
+	apt-get install -y socat
+
+	# Enable services
+	systemctl enable adsb-setup.service
+	systemctl enable adsb-init.service
+	systemctl enable adsb-bootstrap.service
+	systemctl enable adsb-web-forward.service
+	systemctl enable adsb-update.timer
 fi
