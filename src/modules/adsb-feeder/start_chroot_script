@@ -76,7 +76,7 @@ fi
 if [ "$NATIVE_DIETPI" != "1" ] ; then
 	# Install dependencies
 	apt-get update
-	apt-get install -y socat gnupg
+	apt-get install -y gnupg
 
 	# install zerotier and tailscale, first get their repo
 
@@ -110,7 +110,6 @@ if [ "$NATIVE_DIETPI" != "1" ] ; then
 	systemctl enable adsb-docker.service
 	systemctl enable adsb-init.service
 	systemctl enable adsb-bootstrap.service
-	systemctl enable adsb-web-forward.service
 	systemctl enable adsb-update.timer
 
 	# Disable some things we don't need and that only eat memory (assuming they exist)
@@ -125,12 +124,10 @@ else
 
 	# Install dependencies
 	apt-get update
-	apt-get install -y socat
 
 	# Enable services
 	systemctl enable adsb-setup.service
 	systemctl enable adsb-init.service
 	systemctl enable adsb-bootstrap.service
-	systemctl enable adsb-web-forward.service
 	systemctl enable adsb-update.timer
 fi

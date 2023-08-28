@@ -76,10 +76,8 @@ echo "prepare the files that we need to replace"
 mkdir -p ${DIR}/root
 cp -r src/modules/adsb-feeder/filesystem/root ${DIR}
 
-echo "stop the running services"
-for svc in adsb-web-forward.service adsb-setup.service ; do
-    systemctl stop $svc
-done
+echo "stop the running service"
+systemctl stop adsb-setup.service
 
 echo "copy the updated files in place"
 cd ${DIR}/root
@@ -89,11 +87,9 @@ cp -r . /
 echo $VERSION > /etc/adsb.im.version
 sed -i "s/BASE_VERSION=.*/BASE_VERSION=$VERSION/" /opt/adsb/.env
 
-echo "restart the services"
+echo "restart the service"
 systemctl daemon-reload
-for svc in adsb-web-forward.service adsb-setup.service ; do
-    systemctl start $svc
-done
+systemctl start adsb-setup.service
 
 echo "finally, trigger a container upgrade so that they match the new image"
 /opt/adsb/docker-update-adsb-im -no-fetch
