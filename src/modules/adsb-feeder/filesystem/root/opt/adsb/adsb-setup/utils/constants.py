@@ -15,7 +15,7 @@ from .util import print_err
 class Constants:
     data_path = Path("/opt/adsb")
     env_file_path = data_path / ".env"
-    version_file = Path("/etc/adsb.im.version")
+    version_file = data_path / "adsb.im.version"
 
     proxy_routes = [
         # endpoint, port, url_path

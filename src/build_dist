@@ -23,6 +23,6 @@ fi
 
 DATE_COMPONENT=$(git log -30 --date=format:%y%m%d --format="%ad" | uniq -c | head -1 | awk '{ print $2"."$1 }')
 VERSION="${TAG_COMPONENT}${BRANCH_COMPONENT}-${DATE_COMPONENT}"
-echo $VERSION > modules/adsb-feeder/filesystem/root/etc/adsb.im.version
+echo $VERSION > modules/adsb-feeder/filesystem/root/opt/adsb/adsb.im.version
 
 ${CUSTOM_PI_OS_PATH}/build_custom_os $@

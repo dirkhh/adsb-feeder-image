@@ -13,8 +13,8 @@ if [ "${DIR}" != "/opt/feeder-update" ]; then
 fi
 echo "running $(basename $0) in ${DIR}"
 
-BRANCH=$(sed 's/.*(\(.*\)).*/\1/' < /etc/adsb.im.version)
-if [ "$BRANCH" = "$(cat /etc/adsb.im.version)" ] ; then
+BRANCH=$(sed 's/.*(\(.*\)).*/\1/' < /opt/adsb/adsb.im.version)
+if [ "$BRANCH" = "$(cat /opt/adsb/adsb.im.version)" ] ; then
     BRANCH="main"
 fi
 
@@ -84,7 +84,7 @@ cd ${DIR}/root
 cp -r . /
 
 # make sure the version information is correct
-echo $VERSION > /etc/adsb.im.version
+echo $VERSION > /opt/adsb/adsb.im.version
 sed -i "s/BASE_VERSION=.*/BASE_VERSION=$VERSION/" /opt/adsb/.env
 
 echo "restart the service"
