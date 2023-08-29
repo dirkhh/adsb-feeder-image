@@ -5,8 +5,8 @@
 cd /opt/adsb
 if [ ! -f .env ] ; then
 	cp docker.image.versions .env
-	echo "_ADSBIM_BASE_VERSION=$(cat /etc/adsb.im.version)" >> .env
-	echo "_ADSBIM_CONTAINER_VERSION=$(cat /etc/adsb.im.version)" >> .env
+	echo "_ADSBIM_BASE_VERSION=$(cat /opt/adsb/adsb.im.version)" >> .env
+	echo "_ADSBIM_CONTAINER_VERSION=$(cat /opt/adsb/adsb.im.version)" >> .env
 fi
 bash docker-pull.sh &
 

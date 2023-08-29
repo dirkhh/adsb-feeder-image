@@ -111,7 +111,7 @@ class Version:
             output: str = ""
             try:
                 result = subprocess.run(
-                    'ls -o -g --time-style="+%y%m%d" /etc/adsb.im.version | cut -d\  -f 4',
+                    'ls -o -g --time-style="+%y%m%d" /opt/adsb/adsb.im.version | cut -d\  -f 4',
                     shell=True,
                     capture_output=True,
                     timeout=5.0,
