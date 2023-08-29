@@ -85,7 +85,7 @@ cp -r . /
 
 # make sure the version information is correct
 echo $VERSION > /opt/adsb/adsb.im.version
-sed -i "s/BASE_VERSION=.*/BASE_VERSION=$VERSION/" /opt/adsb/.env
+sed -i "s/BASE_VERSION=.*/BASE_VERSION=$VERSION/" /opt/adsb/config/.env
 
 echo "restart the service"
 systemctl daemon-reload

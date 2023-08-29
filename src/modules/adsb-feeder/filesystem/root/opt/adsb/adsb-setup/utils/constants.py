@@ -14,7 +14,7 @@ from .util import print_err
 @dataclass
 class Constants:
     data_path = Path("/opt/adsb")
-    env_file_path = data_path / ".env"
+    env_file_path = data_path / "config" / ".env"
     version_file = data_path / "adsb.im.version"
 
     proxy_routes = [

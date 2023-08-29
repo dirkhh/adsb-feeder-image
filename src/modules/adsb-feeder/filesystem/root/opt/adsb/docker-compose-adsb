@@ -3,7 +3,7 @@
 # set up the right config files and then pass the arguments
 # on to docker compose
 
-if grep "_ADSBIM_STATE_IS_BASE_CONFIG_FINISHED=True" /opt/adsb/.env > /dev/null 2>&1 ; then
+if grep "_ADSBIM_STATE_IS_BASE_CONFIG_FINISHED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
 	lockFile="/opt/adsb/docker-starting.lock"
 	if ( set -o noclobber; echo "locked" > "$lockFile") 2> /dev/null; then
 		trap 'rm -f "$lockFile"; exit $?' INT TERM EXIT
@@ -13,6 +13,7 @@ if grep "_ADSBIM_STATE_IS_BASE_CONFIG_FINISHED=True" /opt/adsb/.env > /dev/null 
 	fi
 	echo "calling docker compose"
 	source /opt/adsb/default.docker-compose
+	cd /opt/adsb/config
 	/usr/bin/docker compose ${COMPOSE_FILES[@]} "$@"
 else
 	echo "things aren't configured, yet, not starting docker"

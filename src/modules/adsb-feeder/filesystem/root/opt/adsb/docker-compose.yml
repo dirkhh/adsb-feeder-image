@@ -64,8 +64,8 @@ services:
       - URL_978=${FEEDER_URL_978}
       #
     volumes:
-      - /opt/adsb/ultrafeeder/globe_history:/var/globe_history
-      - /opt/adsb/ultrafeeder/graphs1090:/var/lib/collectd
+      - /opt/adsb/config/ultrafeeder/globe_history:/var/globe_history
+      - /opt/adsb/config/ultrafeeder/graphs1090:/var/lib/collectd
       - /proc/diskstats:/proc/diskstats:ro
       - /dev:/dev:ro
       - /run/adsb-feeder-ultrafeeder:/run
