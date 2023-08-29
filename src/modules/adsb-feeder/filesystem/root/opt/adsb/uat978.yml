@@ -18,7 +18,7 @@ services:
       - DUMP978_SDR_PPM=${UAT_SDR_PPM}
       - AUTOGAIN_INITIAL_PERIOD=7200
     volumes:
-      - /opt/adsb/dump978/autogain:/run/autogain
+      - /opt/adsb/config/dump978/autogain:/run/autogain
       - /dev:/dev:ro
     ports:
       - 9780:80

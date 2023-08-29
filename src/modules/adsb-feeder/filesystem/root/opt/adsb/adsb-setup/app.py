@@ -180,7 +180,7 @@ class AdsbIm:
         return render_template("/backup.html")
 
     def backup_execute(self):
-        adsb_path = pathlib.Path("/opt/adsb")
+        adsb_path = pathlib.Path("/opt/adsb/config")
         data = io.BytesIO()
         with zipfile.ZipFile(data, mode="w") as backup_zip:
             backup_zip.write(adsb_path / ".env", arcname=".env")
@@ -212,7 +212,7 @@ class AdsbIm:
                 return redirect(request.url)
             if file.filename.endswith(".zip"):
                 filename = secure_filename(file.filename)
-                restore_path = pathlib.Path("/opt/adsb/restore")
+                restore_path = pathlib.Path("/opt/adsb/config/restore")
                 restore_path.mkdir(mode=0o644, exist_ok=True)
                 file.save(restore_path / filename)
                 print_err(f"saved restore file to {restore_path / filename}")
@@ -228,7 +228,7 @@ class AdsbIm:
             # the user has uploaded a zip file and we need to take a look.
             # be very careful with the content of this zip file...
             filename = request.args["zipfile"]
-            adsb_path = pathlib.Path("/opt/adsb")
+            adsb_path = pathlib.Path("/opt/adsb/config")
             restore_path = adsb_path / "restore"
             restore_path.mkdir(mode=0o755, exist_ok=True)
             restored_files: List[str] = []
@@ -265,7 +265,7 @@ class AdsbIm:
             )
         else:
             # they have selected the files to restore
-            adsb_path = pathlib.Path("/opt/adsb")
+            adsb_path = pathlib.Path("/opt/adsb/config")
             (adsb_path / "ultrafeeder").mkdir(mode=0o755, exist_ok=True)
             restore_path = adsb_path / "restore"
             restore_path.mkdir(mode=0o755, exist_ok=True)
@@ -603,4 +603,34 @@ class AdsbIm:
 
 
 if __name__ == "__main__":
+    # setup the config folder if that hasn't happened yet
+    # this is designed for two scenarios:
+    # (a) /opt/adsb/config is a subdirectory of /opt/adsb (that gets created if necessary)
+    #     and the config files are moved to reside there
+    # (b) prior to starting this app, /opt/adsb/config is created as a symlink to the
+    #     OS designated config dir (e.g., /mnt/dietpi_userdata/adsb-feeder) and the config
+    #     files are moved to that place instead
+    config_files = {
+        ".env",
+        "ah.yml",
+        "airspy.yml",
+        "docker-compose.yml",
+        "dozzle.yml",
+        "fa.yml",
+        "fr24.yml",
+        "os.yml",
+        "pf.yml",
+        "pw.yml",
+        "rb.yml",
+        "rv.yml",
+        "uat978.yml",
+    }
+    adsb_dir = pathlib.Path("opt/adsb")
+    config_dir = pathlib.Path("/opt/adsb/config")
+    if not config_dir.exists():
+        config_dir.mkdir()
+    for cf in config_files:
+        if (adsb_dir / cf).exists():
+            (adsb_dir / cf).rename(config_dir / cf)
+
     AdsbIm().run()

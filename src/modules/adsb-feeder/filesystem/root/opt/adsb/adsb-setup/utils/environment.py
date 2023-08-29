@@ -3,7 +3,7 @@ import sys
 from os import path
 from .util import print_err
 
-ENV_FILE_PATH = "/opt/adsb/.env"
+ENV_FILE_PATH = "/opt/adsb/config/.env"
 
 
 # extend the truthy concept to exclude all non-empty string except a few specific ones ([Tt]rue, [Oo]n, 1)
