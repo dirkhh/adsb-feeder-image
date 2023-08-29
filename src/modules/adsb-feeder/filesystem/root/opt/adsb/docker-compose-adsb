@@ -12,7 +12,7 @@ if grep "_ADSBIM_STATE_IS_BASE_CONFIG_FINISHED=True" /opt/adsb/.env > /dev/null 
 		exit
 	fi
 	echo "calling docker compose"
-	source /etc/default/docker-compose
+	source /opt/adsb/default.docker-compose
 	/usr/bin/docker compose ${COMPOSE_FILES[@]} "$@"
 else
 	echo "things aren't configured, yet, not starting docker"
