@@ -134,6 +134,18 @@ class AdsbIm:
         debug = os.environ.get("ADSBIM_DEBUG") is not None
         self._debug_cleanup()
         self._constants.update_env()
+        # prepare for app use (vs ADSB Feeder Image use)
+        feeder_readme = pathlib.Path("/boot/ADSB-README.txt")
+        if not feeder_readme.exists():
+            # we are running as an app under DietPi or some other OS
+            self._constants.is_feeder_image = False
+            with open(self._constants.data_path / "adsb-setup/templates/expert.html", "r+") as expert_file:
+                expert_html = expert_file.read()
+                re.sub("<!-- FULL_IMAGE_ONLY_START -->.*<!-- FULL_IMAGE_ONLY_END -->", "", expert_html)
+                expert_file.seek(0)
+                expert_file.write(expert_html)
+                expert_file.truncate()
+
         self.app.run(host="0.0.0.0", port=80, debug=debug)
 
     def _debug_cleanup(self):

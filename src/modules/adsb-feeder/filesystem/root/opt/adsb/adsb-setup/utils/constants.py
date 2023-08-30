@@ -16,6 +16,7 @@ class Constants:
     data_path = Path("/opt/adsb")
     env_file_path = data_path / "config" / ".env"
     version_file = data_path / "adsb.im.version"
+    is_feeder_image = True
 
     proxy_routes = [
         # endpoint, port, url_path
