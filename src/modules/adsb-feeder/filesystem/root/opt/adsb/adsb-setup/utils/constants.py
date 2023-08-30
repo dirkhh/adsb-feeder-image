@@ -14,7 +14,8 @@ from .util import print_err
 @dataclass
 class Constants:
     data_path = Path("/opt/adsb")
-    env_file_path = data_path / "config" / ".env"
+    config_path = data_path / "config"
+    env_file_path = config_path / ".env"
     version_file = data_path / "adsb.im.version"
     is_feeder_image = True
 
@@ -234,6 +235,7 @@ class Constants:
         Env("_ADSBIM_STATE_BOARD_NAME", is_mandatory=False, tags=["board_name"]),
         Env(
             "_ADSBIM_STATE_IMAGE_NAME",
+            # somehow I can't make a path relative to data_path work here...
             default_call=lambda: Path("/opt/adsb/feeder-image.name").read_text()
             if Path("/opt/adsb/feeder-image.name").exists()
             else "ADSB Feeder Image prior to v0.11",
