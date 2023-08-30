@@ -154,7 +154,7 @@ class AdsbIm:
         """
         # rm /opt/adsb/docker-starting.lock
         try:
-            os.remove("/opt/adsb/docker-starting.lock")
+            os.remove(self._constants.data_path / "docker-starting.lock")
         except FileNotFoundError:
             pass
 
