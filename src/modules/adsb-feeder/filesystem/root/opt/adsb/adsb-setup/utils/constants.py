@@ -233,6 +233,7 @@ class Constants:
             "_ADSBIM_CONTAINER_VERSION", is_mandatory=False, tags=["container_version"]
         ),
         Env("_ADSBIM_STATE_BOARD_NAME", is_mandatory=False, tags=["board_name"]),
+        Env("_ADSBIM_STATE_WEBPORT", default=80, tags=["webport"]),
         Env(
             "_ADSBIM_STATE_IMAGE_NAME",
             # somehow I can't make a path relative to data_path work here...

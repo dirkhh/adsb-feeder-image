@@ -146,7 +146,7 @@ class AdsbIm:
                 expert_file.write(expert_html)
                 expert_file.truncate()
 
-        self.app.run(host="0.0.0.0", port=80, debug=debug)
+        self.app.run(host="0.0.0.0", port=int(self._constants.env_by_tags("webport").value), debug=debug)
 
     def _debug_cleanup(self):
         """
