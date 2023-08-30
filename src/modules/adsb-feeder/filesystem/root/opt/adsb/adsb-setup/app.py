@@ -625,12 +625,15 @@ if __name__ == "__main__":
         "rv.yml",
         "uat978.yml",
     }
-    adsb_dir = pathlib.Path("opt/adsb")
+    adsb_dir = pathlib.Path("/opt/adsb")
     config_dir = pathlib.Path("/opt/adsb/config")
     if not config_dir.exists():
         config_dir.mkdir()
-    for cf in config_files:
-        if (adsb_dir / cf).exists():
-            (adsb_dir / cf).rename(config_dir / cf)
+    for file_name in config_files:
+        config_file = pathlib.Path(adsb_dir / file_name)
+        if config_file.exists():
+            new_file = pathlib.Path(config_dir / file_name)
+            config_file.rename(new_file)
+            print_err(f"moved {config_file} to {new_file}")
 
     AdsbIm().run()
