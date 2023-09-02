@@ -20,23 +20,14 @@ fi
 
 echo "checkout the ${BRANCH} branch of the upstream feeder image"
 cd ${DIR}
-if [ -d adsb-feeder-image ] ; then
-    cd adsb-feeder-image
-    git checkout $BRANCH
-    # let's make sure we get a clean checkout, no conflicts, no issues
-    git reset --hard HEAD~50
-    git config pull.ff only
-    if ! git pull ; then
-        echo "even after going back 50 commits, the git pull wasn't a fast forward, giving up"
-        exit
-    fi
-else
+if [ ! -d adsb-feeder-image ] ; then
     if ! git clone -b $BRANCH https://github.com/dirkhh/adsb-feeder-image; then
         echo "git clone failed, giving up"
         exit
     fi
-    cd adsb-feeder-image
 fi
+cd adsb-feeder-image
+git fetch
 
 TARGET=$BRANCH
 if [ "$1" != "" ] ; then
@@ -58,8 +49,14 @@ else
         # on the main branch, grab the last tag, otherwise check out what's there
         TARGET=$(git tag --sort=version:refname|tail -1)
     fi
-    git branch -D ${TARGET} 2> /dev/null
-    git checkout -b ${TARGET} ${TARGET}
+    # make sure we get a clean checkout... simply remove the branch if it exists
+    # but in order for that to always work we need to be on a different branch
+    # what a silly dance...
+    git branch -D "tmp${TARGET}$$" 2>&1 > /dev/null
+    git checkout -b "tmp${TARGET}$$"
+    git branch -D ${TARGET} 2>&1 > /dev/null
+    git checkout -b ${TARGET} ${TARGET} 2>&1 > /dev/null || git checkout ${TARGET}
+    git branch -D "tmp${TARGET}$$" 2>&1 > /dev/null
 fi
 
 # wow, that was a lot of work... but now we should have the correct stuff checked out
