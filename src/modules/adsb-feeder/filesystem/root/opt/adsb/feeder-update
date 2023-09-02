@@ -89,6 +89,14 @@ else
     # copy the complete tree into the / filesystem
     cp -r . /
 fi
+# since the next run won't be a clean first start, we need to manually
+# mv the potentially updated .yml files into place and keep backups of
+# any that might have been changed
+cd /opt/adsb
+for ymlfile in *.yml; do
+    cmp $ymlfile config/$ymlfile 2>&1 > /dev/null || mv -f config/$ymlfile config/$ymlfile.bak
+    mv -f $ymlfile config/$ymlfile
+done
 
 # make sure the version information is correct
 echo $VERSION > /opt/adsb/adsb.im.version
