@@ -512,26 +512,27 @@ class AdsbIm:
     def expert(self):
         if request.method == "POST":
             return self.update()
-        # is tailscale set up?
-        try:
-            result = subprocess.run("tailscale status", shell=True, check=True)
-        except:
-            # a non-zero return value means tailscale isn't configured
-            self._constants.env_by_tags("tailscale_name").value = ""
-        else:
+        if self._constants.is_feeder_image:
+            # is tailscale set up?
             try:
-                result = subprocess.run(
-                    "tailscale status | head -1 | awk '{print $2}'",
-                    shell=True,
-                    capture_output=True,
-                )
+                result = subprocess.run("tailscale status", shell=True, check=True)
             except:
+                # a non-zero return value means tailscale isn't configured
                 self._constants.env_by_tags("tailscale_name").value = ""
             else:
-                tailscale_name = result.stdout.decode()
-                print_err(f"configured as {tailscale_name} on tailscale")
-                self._constants.env_by_tags("tailscale_name").value = tailscale_name
-                self._constants.env_by_tags("tailscale_ll").value = ""
+                try:
+                    result = subprocess.run(
+                        "tailscale status | head -1 | awk '{print $2}'",
+                        shell=True,
+                        capture_output=True,
+                    )
+                except:
+                    self._constants.env_by_tags("tailscale_name").value = ""
+                else:
+                    tailscale_name = result.stdout.decode()
+                    print_err(f"configured as {tailscale_name} on tailscale")
+                    self._constants.env_by_tags("tailscale_name").value = tailscale_name
+                    self._constants.env_by_tags("tailscale_ll").value = ""
         return render_template("expert.html")
 
     def secure_image(self):
