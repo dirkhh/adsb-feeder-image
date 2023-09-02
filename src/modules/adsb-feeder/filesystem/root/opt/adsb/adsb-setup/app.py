@@ -142,7 +142,7 @@ class AdsbIm:
             with open(self._constants.data_path / "adsb-setup/templates/expert.html", "r+") as expert_file:
                 expert_html = expert_file.read()
                 expert_file.seek(0)
-                expert_file.write(re.sub("FULL_IMAGE_ONLY_START.* FULL_IMAGE_ONLY_END", "", expert_html, flags=re.DOTALL))
+                expert_file.write(re.sub("FULL_IMAGE_ONLY_START.*? FULL_IMAGE_ONLY_END", "", expert_html, flags=re.DOTALL))
                 expert_file.truncate()
 
         self.app.run(host="0.0.0.0", port=int(self._constants.env_by_tags("webport").value), debug=debug)
