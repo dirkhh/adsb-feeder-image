@@ -466,6 +466,11 @@ class AdsbIm:
                 e.value = value
         # done handling the input data
         # what implied settings do we have (and could we simplify them?)
+        # first grab the SDRs plugged in and check if we have one identified for UAT
+        self._sdrdevices._ensure_populated()
+        s978 = self._constants.env_by_tags("978serial").value
+        if s978 != "" and not any([sdr._serial == s978 for sdr in self._sdrdevices.sdrs]):
+            self._constants.env_by_tags("978serial").value = ""
         if self._constants.env_by_tags("978serial").value:
             self._constants.env_by_tags(["uat978", "is_enabled"]).value = True
             self._constants.env_by_tags("978url").value = "http://dump978/skyaware978"
@@ -477,7 +482,7 @@ class AdsbIm:
             self._constants.env_by_tags("978host").value = ""
             self._constants.env_by_tags("978piaware").value = ""
 
-        self._sdrdevices._ensure_populated()
+        # next check for airspy devices
         airspy = any([sdr._type == "airspy" for sdr in self._sdrdevices.sdrs])
         self._constants.env_by_tags(["airspy", "is_enabled"]).value = airspy
         if (
