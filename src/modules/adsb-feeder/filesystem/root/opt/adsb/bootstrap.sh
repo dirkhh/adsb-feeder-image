@@ -2,6 +2,7 @@
 
 # while the user is getting ready, let's try to pull the ultrafeeder docker
 # container in the background -- that way startup will feel quicker
+mkdir -p /opt/adsb/config
 cd /opt/adsb/config
 if [ ! -f .env ] ; then
 	cp /opt/adsb/docker.image.versions .env
