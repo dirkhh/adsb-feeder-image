@@ -646,6 +646,12 @@ if __name__ == "__main__":
     config_dir = pathlib.Path("/opt/adsb/config")
     if not config_dir.exists():
         config_dir.mkdir()
+        env_file = adsb_dir / ".env"
+        if env_file.exists():
+            env_file.rename(config_dir / ".env")
+        else:
+            # I don't understand how that could happen
+            open(config_dir / ".env", "w").close()
     for file_name in config_files:
         config_file = pathlib.Path(adsb_dir / file_name)
         if config_file.exists():
