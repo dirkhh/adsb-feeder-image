@@ -91,16 +91,10 @@
         <li><a href="https://globe.flyovr.io/">FLYOVR.IO map</a></li>
     </ul>
 </div>
-<div style="display: {% if is_enabled('hpradar') %} block {% else %} none {% endif %};">
+<div style="display: {% if is_enabled('radarplane') %} block {% else %} none {% endif %};">
     <h4>RadarPlane</h4>
     <ul>
         <li><a href="https://radarplane.com/feed">RadarPlane feed status page</a></li>
-    </ul>
-</div>
-<div style="display: {% if is_enabled('radarplane') %} block {% else %} none {% endif %};">
-    <h4>HPRadar</h4>
-    <ul>
-        <li><a href="https://skylink.hpradar.com/">HPRadar map</a></li>
     </ul>
 </div>
 <div style="display: {% if is_enabled('adsbx') %} block {% else %} none {% endif %};">

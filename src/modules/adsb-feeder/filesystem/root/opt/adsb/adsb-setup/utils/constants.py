@@ -98,11 +98,6 @@ class Constants:
             "mlat,feed.radarplane.com,31090,39010",
             has_policy=True,
         ),
-        "hpradar": NetConfig(
-            "adsb,skyfeed.hpradar.com,30004,beast_reduce_plus_out",
-            "mlat,skyfeed.hpradar.com,31090",
-            has_policy=False,
-        ),
     }
     # Other aggregator tags
     _env = {
@@ -415,11 +410,6 @@ class Constants:
             "_ADSBIM_STATE_IS_ULTRAFEEDER_RADARPLANE_ENABLED",
             is_mandatory=False,
             tags=["radarplane", "ultrafeeder", "is_enabled"],
-        ),
-        Env(
-            "_ADSBIM_STATE_IS_ULTRAFEEDER_HPRADAR_ENABLED",
-            is_mandatory=False,
-            tags=["hpradar", "ultrafeeder", "is_enabled"],
         ),
         Env(
             "_ADSBIM_STATE_ULTRAFEEDER_EXTRA_ARGS",

@@ -28,7 +28,6 @@ These aggregators are also supported:
 - [FlightAware](https://flightaware.com)
 - [FlightRadar24](https://www.flightradar24.com)
 - [FLYOVR.io](https://www.flyovr.io/)
-- [hpradar](https://skylink.hpradar.com/)
 - [OpenSky Network](https://opensky-network.org)
 - [Plane.watch](https://plane.watch)
 - [Plane Finder](https://planefinder.net)
