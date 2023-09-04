@@ -16,6 +16,8 @@ services:
       - DUMP978_RTLSDR_DEVICE=${FEEDER_SERIAL_978}
       - DUMP978_SDR_GAIN=${UAT_SDR_GAIN}
       - DUMP978_SDR_PPM=${UAT_SDR_PPM}
+      - DUMP978_DEVICE_TYPE=rtlsdr
+      - DUMP978_ENABLE_BIASTEE=${FEEDER_ENABLE_UATBIASTEE}
       - AUTOGAIN_INITIAL_PERIOD=7200
     volumes:
       - /opt/adsb/config/dump978/autogain:/run/autogain

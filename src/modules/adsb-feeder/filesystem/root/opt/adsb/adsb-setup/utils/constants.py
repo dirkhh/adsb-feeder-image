@@ -116,6 +116,7 @@ class Constants:
         # SDR
         Env("FEEDER_RTL_SDR", default="rtlsdr", tags=["rtlsdr"]),
         Env("FEEDER_ENABLE_BIASTEE", default="False", tags=["biast", "is_enabled"]),
+        Env("FEEDER_ENABLE_UATBIASTEE", default="False", tags=["uatbiast", "is_enabled"]),
         Env("FEEDER_READSB_GAIN", default="autogain", tags=["gain"]),
         Env("UAT_SDR_GAIN", default="autogain", tags=["uatgain"]),
         Env(

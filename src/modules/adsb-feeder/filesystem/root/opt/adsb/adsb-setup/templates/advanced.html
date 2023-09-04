@@ -43,6 +43,11 @@
         <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="biast--is_enabled"
             id="biast--is_enabled" {% if is_enabled("biast") %}checked{% endif %} />
         <label for="biast--is_enabled" class="mb-3 col-sm-11">Enable bias-T for ADS-B/1090/airspy SDR.</label>
+        <div class="no-gutters" style="display: {% if is_enabled('uat978') %} flex {% else %} none {% endif %}">
+            <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="uatbiast--is_enabled"
+                id="uatbiast--is_enabled" {% if is_enabled("uatbiast") %}checked{% endif %} />
+            <label for="uatbiast--is_enabled" class="mb-3 col-sm-11">Enable bias-T for ADS-B/1090/airspy SDR.</label>
+        </div>
     </div>
     <div class="row" id="multipleSdrs" style="display: none;">
         <div class="col-sm-12 mt-5 mb-3">
