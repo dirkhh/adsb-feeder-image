@@ -9,7 +9,7 @@ if [ ! -f .env ] ; then
 	echo "_ADSBIM_BASE_VERSION=$(cat /opt/adsb/adsb.im.version)" >> .env
 	echo "_ADSBIM_CONTAINER_VERSION=$(cat /opt/adsb/adsb.im.version)" >> .env
 fi
-bash docker-pull.sh &
+bash /opt/adsb/docker-pull.sh &
 
 # get the local IP address
 IP=$(ip -4 ad li dev $(ip ro li | head -1 | awk '/default/{ print $5 }') up | awk '/inet/{ print $2 }' | cut -d/ -f1 | head -1)
