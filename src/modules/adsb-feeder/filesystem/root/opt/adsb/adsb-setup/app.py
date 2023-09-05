@@ -139,13 +139,26 @@ class AdsbIm:
         if not feeder_readme.exists():
             # we are running as an app under DietPi or some other OS
             self._constants.is_feeder_image = False
-            with open(self._constants.data_path / "adsb-setup/templates/expert.html", "r+") as expert_file:
+            with open(
+                self._constants.data_path / "adsb-setup/templates/expert.html", "r+"
+            ) as expert_file:
                 expert_html = expert_file.read()
                 expert_file.seek(0)
-                expert_file.write(re.sub("FULL_IMAGE_ONLY_START.*? FULL_IMAGE_ONLY_END", "", expert_html, flags=re.DOTALL))
+                expert_file.write(
+                    re.sub(
+                        "FULL_IMAGE_ONLY_START.*? FULL_IMAGE_ONLY_END",
+                        "",
+                        expert_html,
+                        flags=re.DOTALL,
+                    )
+                )
                 expert_file.truncate()
 
-        self.app.run(host="0.0.0.0", port=int(self._constants.env_by_tags("webport").value), debug=debug)
+        self.app.run(
+            host="0.0.0.0",
+            port=int(self._constants.env_by_tags("webport").value),
+            debug=debug,
+        )
 
     def _debug_cleanup(self):
         """
@@ -482,7 +495,9 @@ class AdsbIm:
         # first grab the SDRs plugged in and check if we have one identified for UAT
         self._sdrdevices._ensure_populated()
         s978 = self._constants.env_by_tags("978serial").value
-        if s978 != "" and not any([sdr._serial == s978 for sdr in self._sdrdevices.sdrs]):
+        if s978 != "" and not any(
+            [sdr._serial == s978 for sdr in self._sdrdevices.sdrs]
+        ):
             self._constants.env_by_tags("978serial").value = ""
         if self._constants.env_by_tags("978serial").value:
             self._constants.env_by_tags(["uat978", "is_enabled"]).value = True
