@@ -325,6 +325,19 @@ class AdsbIm:
                 return False
         return True
 
+    def at_least_one_aggregator(self) -> bool:
+        if self._ultrafeeder.enabled_aggregators:
+            return True
+
+        # of course, maybe they picked just one or more proprietary aggregators and that's all they want...
+        for submit_key in self._other_aggregators.keys():
+            key = submit_key.replace("--submit", "")
+            if self._constants.is_enabled(key):
+                print_err(f"no semi-annonymous aggregator, but enabled {key}")
+                return True
+
+        return False
+
     def sdr_info(self):
         self._sdrdevices._ensure_populated()
         # get our guess for the right SDR to frequency mapping
@@ -506,11 +519,13 @@ class AdsbIm:
         if not seen_go:
             return redirect(request.url)
 
-        # finally, check if this has given us enouch configuration info to
+        # finally, check if this has given us enough configuration info to
         # start the containers
         if self.base_is_configured():
             self._constants.env_by_tags(["base_config"]).value = True
-            return redirect(url_for("restarting"))
+            if self.at_least_one_aggregator():
+                return redirect(url_for("restarting"))
+            return redirect(url_for("aggregators"))
         return redirect(url_for("director"))
 
     @check_restart_lock
@@ -598,16 +613,9 @@ class AdsbIm:
 
         # if the user chose to individually pick aggregators but hasn't done so,
         # they need to go to the aggregator page
-        if not self._ultrafeeder.enabled_aggregators:
-            # of course, maybe they picked just one or more proprietary aggregators and that's all they want...
-            for submit_key in self._other_aggregators.keys():
-                key = submit_key.replace("--submit", "")
-                if self._constants.is_enabled(key):
-                    print_err(f"no semi-annonymous aggregator, but enabled {key}")
-                    return self.index()
-            return self.aggregators()
-
-        return self.index()
+        if self.at_least_one_aggregator():
+            return self.index()
+        return self.aggregators()
 
     def index(self):
         return render_template("index.html")
