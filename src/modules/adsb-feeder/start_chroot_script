@@ -129,3 +129,9 @@ else
 	systemctl enable adsb-bootstrap.service
 	systemctl enable adsb-update.timer
 fi
+# finally, remove the service used for the app and not the image and create a
+# flag file as indicator that this is a complete ADSB Feeder Image, and not
+# just the app running on a different OS.
+rm /usr/lib/systemd/system/adsb-nonimage.service
+touch /opt/adsb/os.adsb.feeder.image
+

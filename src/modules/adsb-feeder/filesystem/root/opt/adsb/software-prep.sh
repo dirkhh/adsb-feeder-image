@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# this is the script that replaces part of the bootstrap code in the feeder image.
+# let's first make sure that we mark this as an app, not an image:
+touch /opt/adsb/app.adsb.feeder.image
+
 # while the user is getting ready, let's try to pull the ultrafeeder docker
 # container in the background -- that way startup will feel quicker
 cd /opt/adsb/config
@@ -16,3 +20,6 @@ bash docker-pull.sh &
 
 # this version does not enable the my.adsb.im trick as it will be running on
 # a different port
+
+# finally, turn off this service
+systemctl disable adsb-nonimage.service

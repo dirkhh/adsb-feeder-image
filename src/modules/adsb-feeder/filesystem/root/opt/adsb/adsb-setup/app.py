@@ -135,8 +135,20 @@ class AdsbIm:
         self._debug_cleanup()
         self._constants.update_env()
         # prepare for app use (vs ADSB Feeder Image use)
-        feeder_readme = pathlib.Path("/boot/ADSB-README.txt")
-        if not feeder_readme.exists():
+        # newer images will include a flag file that indicates that this is indeed
+        # a full image - but in case of upgrades from older version, this heuristic
+        # should be sufficient to guess if this is an image or an app
+        os_flag_file = self._constants.data_path / "os.adsb.feeder.image"
+        if not os_flag_file.exists():
+            # so this could be a pre-0.15 image, or it could indeed be the app
+            app_flag_file = adsb_dir / "app.adsb.feeder.image"
+            if not app_flag_file.exists():
+                # there should be no app without the app flag file, so assume that
+                # this is an older image that was upgraded and hence didn't get the
+                # os flag file at install time
+                open(os_flag_file, "w").close()
+
+        if not os_flag_file.exists():
             # we are running as an app under DietPi or some other OS
             self._constants.is_feeder_image = False
             with open(

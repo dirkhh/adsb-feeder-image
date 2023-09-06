@@ -81,7 +81,7 @@ cd ${DIR}/root
 
 # if this an app and not the full image, prune some of the files that aren't
 # wanted for the app and copy the trees we need over
-if [ ! -f /boot/ADSB-README.txt ] ; then
+if [ ! -f /opt/adsb/os.adsb.feeder.im ] ; then
     rm -f ./usr/lib/systemd/system/adsb-bootstrap.service
     cp -a ./usr/lib/systemd/system/* /etc/systemd/system/
     cp -a ./opt/adsb/* /opt/adsb

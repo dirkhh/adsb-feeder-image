@@ -1,7 +1,7 @@
 
 #!/bin/bash
 
-if [[ ! -f /opt/adsb/init-complete && -f /boot/ADSB-README.txt ]] ; then
+if [[ ! -f /opt/adsb/init-complete && -f /opt/adsb/os.adsb.feeder.image ]] ; then
 	# first time we do this on a Feeder Image, we need to do some more housekeeping
 	echo "first time adsb-system-restart: restart docker and stop bootstrap" 1>&2
 	touch /opt/adsb/init-complete
