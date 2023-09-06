@@ -33,16 +33,17 @@ class Constants:
         ["/pa-stats/", 8082, "/"],
         ["/fa-stats/", 8082, "/"],
         ["/fa-status/", 8082, "/"],
-        ["/config/", 5000, "/setup"],
         ["/fr-status/", 8754, "/"],
         ["/fr/", 8754, "/"],
         ["/fr24/", 8754, "/"],
         ["/flightradar/", 8754, "/"],
         ["/flightradar24/", 8754, "/"],
+        ["/planefinder/", 30053, "/"],
         ["/portainer/", 9443, "/"],
         ["/dump978/", 9780, "/skyaware978/"],
         ["/logs/", 9999, "/"],
         ["/dozzle/", 9999, "/"],
+        ["/config/", 80, "/setup"],
     ]
 
     # these are the default values for the env file
