@@ -3,7 +3,7 @@
 
 {% block content %}
 <h1>{% block title %} Expert setup {% endblock %}</h1>
-<h2 class="mt-5">Set explicit ADSB SDR gain</h2>
+<h3 class="mt-5">Set explicit ADSB SDR gain</h3>
 <form method="POST">
     <div class="row">
         <label for="gain" class="col-8">
@@ -11,11 +11,11 @@
             immediately). If you want to override that "autogain" behavior, you can set an explicit gain value here.
         </label>
         <input class="col-8 ml-2" id="gain" name="gain" type="text" value="{{ env_value_by_tag('gain') }}" required>
-        <button type="submit" class="btn btn-primary mb-1 ml-3" name="gain--submit" value="go">Submit</button>
+        <button type="submit" class="btn btn-primary mb-1 ml-3 col-sm-2" name="gain--submit" value="go">Submit</button>
     </div>
 </form>
 <div style="display: {% if is_enabled('uat978') %} block {% else %} none {% endif %};">
-    <h2 class="mt-5">Set explicit UAT SDR gain</h2>
+    <h3 class="mt-5">Set explicit UAT SDR gain</h3>
     <form method="POST">
         <div class="row">
             <label for="uatgain" class="col-8">
@@ -24,11 +24,12 @@
             </label>
             <input class="col-8 ml-2" id="uatgain" name="uatgain" type="text" value="{{ env_value_by_tag('uatgain') }}"
                 required>
-            <button type="submit" class="btn btn-primary mb-1 ml-3" name="uatgain--submit" value="go">Submit</button>
+            <button type="submit" class="btn btn-primary mb-1 ml-3 col-sm-2" name="uatgain--submit"
+                value="go">Submit</button>
         </div>
     </form>
 </div>
-<h2 class="mt-5">Add additional Ultrafeeder arguments</h2>
+<h3 class="mt-5">Add additional Ultrafeeder arguments</h3>
 <form method="POST">
     <div class="row">
         <label for="ultrafeeder_extra_args" class="col-8">
@@ -40,25 +41,25 @@
         </label>
         <input class="col-8 ml-2" id="ultrafeeder_extra_args" name="ultrafeeder_extra_args" type="text"
             value="{{ env_value_by_tag('ultrafeeder_extra_args') }}" required>
-        <button type="submit" class="btn btn-primary mb-1 ml-3" name="ultrafeeder_extra_args--submit"
+        <button type="submit" class="btn btn-primary mb-1 ml-3 col-sm-2" name="ultrafeeder_extra_args--submit"
             value="go">Submit</button>
     </div>
 </form>
 
 <!-- FULL_IMAGE_ONLY_START -->
 <!-- SECURE_IMAGE_START -->
-<h2 class="mt-5">Install ssh credentials</h2>
+<h3 class="mt-5">Install ssh credentials</h3>
 <form method="POST">
     <div class="row">
         <label for="ssh_pub" class="col-12">
             Enter or paste your public key below. This will allow you to then log in as root on the feeder SBC.
         </label>
         <input class="col-8 ml-2" id="ssh_pub" name="ssh_pub" type="text" placeholder=" Enter your public key" required>
-        <button type="submit" class="btn btn-primary mb-1 ml-3" name="ssh" value="stay">Submit</button>
+        <button type="submit" class="btn btn-primary mb-1 ml-3 col-sm-2" name="ssh" value="stay">Submit</button>
     </div>
 </form>
 
-<h2 class="mt-5">Secure feeder system</h2>
+<h3 class="mt-5">Secure feeder system</h3>
 <form method="POST" onsubmit="show_spinner(); return true;">
     <div class="row">
         <label for="secure_image" class="col-8">Attempt to make it somewhat harder for a local user to
@@ -66,27 +67,27 @@
             the protection attemted here. Make sure you have an ssh key set up and tested before doing this, or
             you will permanently log yourself out of this image.
         </label>
-        <button type="submit" class="btn btn-primary mb-3 mt-3 ml-3 col-3" name="secure_image" value="go">Update
+        <button type="submit" class="btn btn-primary mb-3 mt-3 ml-3 col-sm-2" name="secure_image" value="go">Update
             Settings</button>
     </div>
 </form>
 <!-- SECURE_IMAGE_END -->
 
-<h2 class="mt-5">Shutdown/Reboot</h2>
+<h3 class="mt-5">Shutdown/Reboot</h3>
 <form method="POST">
     <div class="row">
         <label for="shutdown" class="col-8">Shutdown the feeder. Most boards won't turn off power by themselves.
         </label>
-        <button type="submit" class="btn btn-primary mb-3 mt-3 ml-3 col-3" name="shutdown"
+        <button type="submit" class="btn btn-primary mb-3 mt-3 ml-3 col-sm-2" name="shutdown"
             value="wait">Shutdown</button>
         <label for="reboot" class="col-8">Reboot the feeder. Please note that some boards are not able to reboot without
             manually power cycling.
         </label>
-        <button type="submit" class="btn btn-primary mb-3 mt-3 ml-3 col-3" name="reboot" value="wait">Reboot</button>
+        <button type="submit" class="btn btn-primary mb-3 mt-3 ml-3 col-sm-2" name="reboot" value="wait">Reboot</button>
     </div>
 </form>
 
-<h2 class="mt-5">Nightly system update settings</h2>
+<h3 class="mt-5">Nightly system update settings</h3>
 <form method="POST" onsubmit="show_spinner(); return true;">
     <div class="row">
         <div class="col-8">
@@ -109,23 +110,24 @@
                     night</label>
             </div>
         </div>
-        <button type="submit" class="btn btn-primary mb-3 mt-3 ml-3 col-3" name="nightly_update" value="go">Update
+        <button type="submit" class="btn btn-primary mb-3 mt-3 ml-3 col-sm-2" name="nightly_update" value="go">Update
             Settings</button>
     </div>
 </form>
 
-<h2 class="mt-5">Update feeder containers</h2>
+<h3 class="mt-5">Update feeder containers</h3>
 <form method="POST" onsubmit="show_spinner(); return true;">
     <div class="row">
         <label for="update" class="col-8">Update to the currently recommended container images.
             This could take several minutes, depending on the speed of your internet connection and the amount of the
             changes made in the containers.
         </label>
-        <button type="submit" class="btn btn-primary mb-3 mt-3 ml-3 col-3" name="update" value="go">Update now</button>
+        <button type="submit" class="btn btn-primary mb-3 mt-3 ml-3 col-sm-2" name="update" value="go">Update
+            now</button>
     </div>
 </form>
 <!-- FULL_IMAGE_ONLY_END -->
-<h2 class="mt-5">Update feeder applications</h2>
+<h3 class="mt-5">Update feeder applications</h3>
 <form method="POST" onsubmit="show_spinner(); return true;">
     <div class="row">
         <label for="update_feeder_aps" class="col-8">Update to the current ADSB feeder applications (i.e. the web UI and
@@ -133,12 +135,12 @@
             This could take several minutes, depending on the speed of your internet connection and the amount of the
             changes made.
         </label>
-        <button type="submit" class="btn btn-primary mb-3 mt-3 ml-3 col-3" name="update_feeder_aps" value="go">Update
+        <button type="submit" class="btn btn-primary mb-3 mt-3 ml-3 col-sm-2" name="update_feeder_aps" value="go">Update
             now</button>
     </div>
 </form>
 <!-- FULL_IMAGE_ONLY_START -->
-<h2 class="mt-5">Add Zerotier</h2>
+<h3 class="mt-5">Add Zerotier</h3>
 <form method="POST" onsubmit="show_spinner(); return true;">
     <div class="row">
         <label for="zerotierid" class="col-8">
@@ -148,11 +150,11 @@
         </label>
         <input class="col-8 ml-2" id="zerotierid" name="zerotierid" type="text"
             value="{{ env_value_by_tag('zerotierid') }}" placeholder=" Enter your Zerotier Network ID" required>
-        <button type="submit" class="btn btn-primary mb-1 ml-3" name="zerotier" value="go">Submit</button>
+        <button type="submit" class="btn btn-primary mb-1 ml-3 col-sm-2" name="zerotier" value="go">Submit</button>
     </div>
 </form>
 
-<h2 class="mt-5">Add Tailscale</h2>
+<h3 class="mt-5">Add Tailscale</h3>
 <form method="POST" onsubmit="show_spinner(); return true;">
     <div class="row">
         <label for="tailscale" class="col-8">
@@ -173,7 +175,7 @@
             value="{{ env_value_by_tag('tailscale_extras') }}"
             placeholder=" Enter additional tailscale options you need" {% if env_value_by_tag("tailscale_name") !="" or
             env_value_by_tag("tailscale_ll") !="" %}style="display: none;" {% endif %}>
-        <button type="submit" class="btn btn-primary mb-1 ml-3" name="tailscale" value="go" {% if
+        <button type="submit" class="btn btn-primary mb-1 ml-3 col-sm-2" name="tailscale" value="go" {% if
             env_value_by_tag("tailscale_name") !="" or env_value_by_tag("tailscale_ll") !="" %}style="display: none;" {%
             endif %}>Submit</button>
     </div>
