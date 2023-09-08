@@ -78,7 +78,7 @@ class AdsbIm:
             "radarvirtuel--submit": RadarVirtuel(self._system),
         }
         # fmt: off
-        self.proxy_routes = self._constants.proxy_routes
+        self.proxy_routes = convert_routes(self._constants.proxy_routes)
         self.app.add_url_rule("/propagateTZ", "propagateTZ", self.get_tz)
         self.app.add_url_rule("/restarting", "restarting", self.restarting)
         self.app.add_url_rule("/restart", "restart", self.restart, methods=["GET", "POST"])
@@ -97,6 +97,11 @@ class AdsbIm:
         self.app.add_url_rule("/api/sdr_info", "sdr_info", self.sdr_info)
         # fmt: on
         self.update_boardname()
+
+    def convert_routes(self, route_array: List[List[str]]):
+        ret = []
+        for [endpoint, env, path] in route_array:
+            ret.append([endpoint, self._constants.env(env).value, path])
 
     def update_boardname(self):
         board = ""
