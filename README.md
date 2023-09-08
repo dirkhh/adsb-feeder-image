@@ -83,3 +83,7 @@ You need to be able to ssh into your Proxmox system with the root account.
 This repo actually contains the scripting to create the SD card image for some common SBCs to run an ADS-B feeder. And as 'releases' it publishes such images.
 
 This requires [CustomPiOS](https://github.com/guysoft/CustomPiOS) - unpack this next to the `CustomPiOS` folder in order for the scripts to work.
+
+## python app
+
+at [src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup](https://github.com/dirkhh/adsb-feeder-image/tree/master/src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup)
