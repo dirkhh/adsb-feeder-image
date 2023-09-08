@@ -7,7 +7,7 @@ services:
     container_name: fr24feed
     restart: always
     ports:
-      - 8754:8754
+      - ${_ADSBIM_STATE_FLIGHTRADAR_PORT:-8754}:8754
     environment:
       - BEASTHOST=ultrafeeder
       - FR24KEY=${FEEDER_FR24_SHARING_KEY}

@@ -7,7 +7,7 @@ services:
     container_name: pfclient
     restart: always
     ports:
-      - 30053:30053
+      - ${_ADSBIM_STATE_PLANEFINDER_PORT:-30053}:30053
     environment:
       - TZ=${FEEDER_TZ}
       - BEASTHOST=ultrafeeder

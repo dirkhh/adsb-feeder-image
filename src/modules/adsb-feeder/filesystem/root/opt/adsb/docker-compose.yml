@@ -8,7 +8,7 @@ services:
     device_cgroup_rules:
       - 'c 189:* rwm'
     ports:
-      - 8080:80               # to expose the web interface
+      - ${_ADSBIM_STATE_TAR1090_PORT:-8080}:80 # to expose the web interface
     environment:
       # --------------------------------------------------
       # general parameters:

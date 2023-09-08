@@ -23,6 +23,6 @@ services:
       - /opt/adsb/config/dump978/autogain:/run/autogain
       - /dev:/dev:ro
     ports:
-      - 9780:80
+      - ${_ADSBIM_STATE_UAT978_PORT:-9780}:80
     tmpfs:
       - /run/readsb
