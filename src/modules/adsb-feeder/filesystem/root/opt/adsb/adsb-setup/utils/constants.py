@@ -19,7 +19,7 @@ class Constants:
     version_file = data_path / "adsb.im.version"
     is_feeder_image = True
 
-    proxy_routes = [
+    _proxy_routes = [
         # endpoint, port, url_path
         ["/map/", "_ADSBIM_STATE_TAR1090_PORT", "/"],
         ["/tar1090/", "_ADSBIM_STATE_TAR1090_PORT", "/"],
@@ -44,6 +44,13 @@ class Constants:
         ["/dozzle/", "_ADSBIM_STATE_DAZZLE_PORT", "/"],
         ["/config/", "_ADSBIM_STATE_DAZZLE_PORT", "/setup"],
     ]
+
+    @property
+    def proxy_routes(self):
+        ret = []
+        for [endpoint, env, path] in self._proxy_routes:
+            ret.append([endpoint, self.env(env).value, path])
+        return ret
 
     # these are the default values for the env file
 
