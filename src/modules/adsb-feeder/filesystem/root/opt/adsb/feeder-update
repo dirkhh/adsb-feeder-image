@@ -42,6 +42,18 @@ if [ "$1" != "" ] ; then
             BRANCH=""
         fi
     else
+        # if we already have this branch, let's make sure we pull in the latest changes
+        # if that fails, do the delete branch shuffle
+        if ! git pull -ffonly; then
+            # make sure we get a clean checkout... simply remove the branch if it exists
+            # but in order for that to always work we need to be on a different branch
+            # what a silly dance...
+            git branch -D "tmp${TARGET}$$" 2>&1 > /dev/null
+            git checkout -b "tmp${TARGET}$$"
+            git branch -D ${TARGET} 2>&1 > /dev/null
+            git checkout -b ${TARGET} ${TARGET} 2>&1 > /dev/null || git checkout ${TARGET}
+            git branch -D "tmp${TARGET}$$" 2>&1 > /dev/null
+        fi
         BRANCH="$TARGET"
     fi
 else
