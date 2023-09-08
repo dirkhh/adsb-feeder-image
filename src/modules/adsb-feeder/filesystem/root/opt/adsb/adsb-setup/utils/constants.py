@@ -21,34 +21,35 @@ class Constants:
 
     _proxy_routes = [
         # endpoint, port, url_path
-        ["/map/", "_ADSBIM_STATE_TAR1090_PORT", "/"],
-        ["/tar1090/", "_ADSBIM_STATE_TAR1090_PORT", "/"],
-        ["/graphs1090/", "_ADSBIM_STATE_TAR1090_PORT", "/graphs1090/"],
-        ["/graphs/", "_ADSBIM_STATE_TAR1090_PORT", "/graphs1090/"],
-        ["/stats/", "_ADSBIM_STATE_TAR1090_PORT", "/graphs1090/"],
-        ["/piaware/", "_ADSBIM_STATE_PIAWAREMAP_PORT", "/"],
-        ["/fa/", "_ADSBIM_STATE_PIAWAREMAP_PORT", "/"],
-        ["/flightaware/", "_ADSBIM_STATE_PIAWAREMAP_PORT", "/"],
-        ["/piaware-stats/", "_ADSBIM_STATE_PIAWARESTAT_PORT", "/"],
-        ["/pa-stats/", "_ADSBIM_STATE_PIAWARESTAT_PORT", "/"],
-        ["/fa-stats/", "_ADSBIM_STATE_PIAWARESTAT_PORT", "/"],
-        ["/fa-status/", "_ADSBIM_STATE_PIAWARESTAT_PORT", "/"],
-        ["/fr-status/", "_ADSBIM_STATE_FLIGHTRADAR_PORT", "/"],
-        ["/fr/", "_ADSBIM_STATE_FLIGHTRADAR_PORT", "/"],
-        ["/fr24/", "_ADSBIM_STATE_FLIGHTRADAR_PORT", "/"],
-        ["/flightradar/", "_ADSBIM_STATE_FLIGHTRADAR_PORT", "/"],
-        ["/flightradar24/", "_ADSBIM_STATE_FLIGHTRADAR_PORT", "/"],
-        ["/planefinder/", "_ADSBIM_STATE_PLANEFINDER_PORT", "/"],
-        ["/dump978/", "_ADSBIM_STATE_UAT978_PORT", "/skyaware978/"],
-        ["/logs/", "_ADSBIM_STATE_DAZZLE_PORT", "/"],
-        ["/dozzle/", "_ADSBIM_STATE_DAZZLE_PORT", "/"],
-        ["/config/", "_ADSBIM_STATE_DAZZLE_PORT", "/setup"],
+        ["/map/", "TAR1090", "/"],
+        ["/tar1090/", "TAR1090", "/"],
+        ["/graphs1090/", "TAR1090", "/graphs1090/"],
+        ["/graphs/", "TAR1090", "/graphs1090/"],
+        ["/stats/", "TAR1090", "/graphs1090/"],
+        ["/piaware/", "PIAWAREMAP", "/"],
+        ["/fa/", "PIAWAREMAP", "/"],
+        ["/flightaware/", "PIAWAREMAP", "/"],
+        ["/piaware-stats/", "PIAWARESTAT", "/"],
+        ["/pa-stats/", "PIAWARESTAT", "/"],
+        ["/fa-stats/", "PIAWARESTAT", "/"],
+        ["/fa-status/", "PIAWARESTAT", "/"],
+        ["/fr-status/", "FLIGHTRADAR", "/"],
+        ["/fr/", "FLIGHTRADAR", "/"],
+        ["/fr24/", "FLIGHTRADAR", "/"],
+        ["/flightradar/", "FLIGHTRADAR", "/"],
+        ["/flightradar24/", "FLIGHTRADAR", "/"],
+        ["/planefinder/", "PLANEFINDER", "/"],
+        ["/dump978/", "UAT978", "/skyaware978/"],
+        ["/logs/", "DAZZLE", "/"],
+        ["/dozzle/", "DAZZLE", "/"],
+        ["/config/", "DAZZLE", "/setup"],
     ]
 
     @property
     def proxy_routes(self):
         ret = []
-        for [endpoint, env, path] in self._proxy_routes:
+        for [endpoint, _env, path] in self._proxy_routes:
+            env = "_ADSBIM_STATE_" + _env.upper() + "_PORT"
             ret.append([endpoint, self.env(env).value, path])
         return ret
 
