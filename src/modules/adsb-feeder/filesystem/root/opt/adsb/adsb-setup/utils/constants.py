@@ -124,7 +124,9 @@ class Constants:
         # SDR
         Env("FEEDER_RTL_SDR", default="rtlsdr", tags=["rtlsdr"]),
         Env("FEEDER_ENABLE_BIASTEE", default="False", tags=["biast", "is_enabled"]),
-        Env("FEEDER_ENABLE_UATBIASTEE", default="False", tags=["uatbiast", "is_enabled"]),
+        Env(
+            "FEEDER_ENABLE_UATBIASTEE", default="False", tags=["uatbiast", "is_enabled"]
+        ),
         Env("FEEDER_READSB_GAIN", default="autogain", tags=["gain"]),
         Env("UAT_SDR_GAIN", default="autogain", tags=["uatgain"]),
         Env(
@@ -243,13 +245,13 @@ class Constants:
         ),
         Env("_ADSBIM_STATE_BOARD_NAME", is_mandatory=False, tags=["board_name"]),
         Env("_ADSBIM_STATE_WEBPORT", default=80, tags=["webport"]),
-        Env("_ADSBIM_STATE_DAZZLE_PORT", default=9999, tags=["webport"]),
-        Env("_ADSBIM_STATE_TAR1090_PORT", default=8080, tags=["webport"]),
-        Env("_ADSBIM_STATE_UAT978_PORT", default=9780, tags=["webport"]),
-        Env("_ADSBIM_STATE_PIAWAREMAP_PORT", default=8081, tags=["webport"]),
-        Env("_ADSBIM_STATE_PIAWARESTAT_PORT", default=8082, tags=["webport"]),
-        Env("_ADSBIM_STATE_FLIGHTRADAR_PORT", default=8754, tags=["webport"]),
-        Env("_ADSBIM_STATE_PLANEFINDER_PORT", default=30053, tags=["webport"]),
+        Env("_ADSBIM_STATE_DAZZLE_PORT", default=9999, tags=["dazzleport"]),
+        Env("_ADSBIM_STATE_TAR1090_PORT", default=8080, tags=["tar1090port"]),
+        Env("_ADSBIM_STATE_UAT978_PORT", default=9780, tags=["uatport"]),
+        Env("_ADSBIM_STATE_PIAWAREMAP_PORT", default=8081, tags=["piamapport"]),
+        Env("_ADSBIM_STATE_PIAWARESTAT_PORT", default=8082, tags=["piastatport"]),
+        Env("_ADSBIM_STATE_FLIGHTRADAR_PORT", default=8754, tags=["frport"]),
+        Env("_ADSBIM_STATE_PLANEFINDER_PORT", default=30053, tags=["pfport"]),
         Env(
             "_ADSBIM_STATE_IMAGE_NAME",
             # somehow I can't make a path relative to data_path work here...
