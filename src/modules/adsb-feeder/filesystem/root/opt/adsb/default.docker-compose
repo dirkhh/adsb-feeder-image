@@ -36,9 +36,6 @@ if [ -f /opt/adsb/config/.env ] ; then
 	if grep "_ADSBIM_STATE_IS_DOZZLE_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "/opt/adsb/config/dozzle.yml" )
 	fi
-	if grep "_ADSBIM_STATE_IS_PORTAINER_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
-		COMPOSE_FILES+=( "-f" "/opt/adsb/config/portainer.yml" )
-	fi
 	if grep "_ADSBIM_STATE_IS_AIRSPY_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "/opt/adsb/config/airspy.yml" )
 	fi

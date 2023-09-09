@@ -31,9 +31,6 @@
                 href="{{ url_for('advanced') }}">Advanced setup</a>
         <li style="display: {% if is_enabled('base_config') %} list-item {% else %} none {% endif %};"><a
                 href="{{ url_for('aggregators') }}">Aggregator setup</a>
-        <li style="display: {% if is_enabled('portainer') %} list-item {% else %} none {% endif %};"><a
-                href="/portainer">Portainer</a> * Note - this link may give a SSL Certificate warning; feel free to
-            ignore
     </ul>
 </div>
 <h3>You are feeding</h3>

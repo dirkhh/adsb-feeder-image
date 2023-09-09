@@ -318,11 +318,6 @@ class Constants:
             tags=["dozzle", "is_enabled"],
         ),
         Env(
-            "_ADSBIM_STATE_IS_PORTAINER_ENABLED",
-            is_mandatory=False,
-            tags=["portainer", "is_enabled"],
-        ),
-        Env(
             "_ADSBIM_STATE_IS_SSH_CONFIGURED",
             is_mandatory=False,
             tags=["ssh_configured", "is_enabled"],
