@@ -2,13 +2,13 @@
 
 exec 2>&1 1>>/var/log/adsb-setup.log
 
-# first - move this script to /opt/feeder-update and run it there
+# first - move this script to /opt/adsb-feeder-update and run it there
 DIR=$(dirname -- "$(readlink -f "${BASH_SOURCE}")")
-if [ "${DIR}" != "/opt/feeder-update" ]; then
-    echo "move $(basename $0) to /opt/feeder-update"
-    mkdir -p /opt/feeder-update
-    cp "${BASH_SOURCE}" /opt/feeder-update
-    bash /opt/feeder-update/$(basename $0) "$@"
+if [ "${DIR}" != "/opt/adsb-feeder-update" ]; then
+    echo "move $(basename $0) to /opt/adsb-feeder-update"
+    mkdir -p /opt/adsb-feeder-update
+    cp "${BASH_SOURCE}" /opt/adsb-feeder-update
+    bash /opt/adsb-feeder-update/$(basename $0) "$@"
     exit
 fi
 echo "running $(basename $0) in ${DIR}"
