@@ -3,157 +3,184 @@
 
 {% block content %}
 <h1>{% block title %} ADSB Feeder Homepage for {{ env_value_by_tag("mlat_name") }} {% endblock %}</h1>
-<div id="UF" style="display: block;">
-    <h4>TAR1090 Mapping Interface</h4>
-    <div class="text-muted small mb-2">
-        Please note that after a restart it can take up to two minutes for the pages below to respond, so if you get
-        an error, please wait a moment and try again.
+<div class="row">
+    <div class="col-sm-8">
+        <div id="UF" style="display: block;">
+            <h4>TAR1090 Mapping Interface</h4>
+            <div class="text-muted small mb-2">
+                Please note that after a restart it can take up to two minutes for the pages below to respond, so if you
+                get
+                an error, please wait a moment and try again.
+            </div>
+            <ul>
+                <li><a href="/map">TAR1090 map</a>
+                <li><a href="/stats">System Statistics and Graphs</a>
+                <li><a href="/map/?replay">Timelapse / Replay</a>
+                <li><a href="/map/?heatmap&realheat">Heatmap</a>
+                <li><a href="/map/?ptracks">Tracks</a>
+            </ul>
+        </div>
+        <div id="UAT978" style="display: {% if is_enabled('uat978') %} block {% else %} none {% endif %};">
+            <h4>UAT978 Mapping Interface</h4>
+            <ul>
+                <li><a href="/dump978">Dump978 map</a>
+            </ul>
+        </div>
+        <div id="CF" style="display: block;">
+            <h4>Device Configuration and Administration</h4>
+            <ul>
+                <li><a href="{{ url_for('setup') }}">Basic Setup</a>
+                <li style="display: {% if is_enabled('base_config') %} list-item {% else %} none {% endif %};"><a
+                        href="{{ url_for('advanced') }}">Advanced setup</a>
+                <li style="display: {% if is_enabled('base_config') %} list-item {% else %} none {% endif %};"><a
+                        href="{{ url_for('aggregators') }}">Aggregator setup</a>
+            </ul>
+        </div>
     </div>
-    <ul>
-        <li><a href="/map">TAR1090 map</a>
-        <li><a href="/stats">System Statistics and Graphs</a>
-        <li><a href="/map/?replay">Timelapse / Replay</a>
-        <li><a href="/map/?heatmap&realheat">Heatmap</a>
-        <li><a href="/map/?ptracks">Tracks</a>
-    </ul>
-</div>
-<div id="UAT978" style="display: {% if is_enabled('uat978') %} block {% else %} none {% endif %};">
-    <h4>UAT978 Mapping Interface</h4>
-    <ul>
-        <li><a href="/dump978">Dump978 map</a>
-    </ul>
-</div>
-<div id="CF" style="display: block;">
-    <h4>Device Configuration and Administration</h4>
-    <ul>
-        <li><a href="{{ url_for('setup') }}">Basic Setup</a>
-        <li style="display: {% if is_enabled('base_config') %} list-item {% else %} none {% endif %};"><a
-                href="{{ url_for('advanced') }}">Advanced setup</a>
-        <li style="display: {% if is_enabled('base_config') %} list-item {% else %} none {% endif %};"><a
-                href="{{ url_for('aggregators') }}">Aggregator setup</a>
-    </ul>
-</div>
-<h3>You are feeding</h3>
-<div style="display: {% if is_enabled('adsblol') %} block {% else %} none {% endif %};">
-    <h4>ADSB.lol</h4>
-    <ul>
-        <li><a href="https://status.adsb.lol/">ADSB.lol status</a></li>
-        <li><a href="https://www.adsb.lol/docs/feeders-only/introduction/">ADSB.lol feeder introduction</a></li>
-        <li><a href="https://my.adsb.lol/">personal ADSB.lol URL with the planes you are sending</a></li>
-        <li><a href="https://mlat.adsb.lol/">ADSB.lol MLAT feeder map {% if is_enabled("mlat_privacy") %}(since you have
-                MLAT privacy enabled, your feeder won't be shown) {% else %} (your feeder will be at an approximate
-                location as {{ env_value_by_tag("mlat_name") }}) {% endif %}</a></li>
-        <li><a href="https://api.adsb.lol/api/0/me">details about your feed as JSON</a></li>
-    </ul>
-</div>
-<div style="display: {% if is_enabled('flyitaly') %} block {% else %} none {% endif %};">
-    <h4>Fly Italy ADSB</h4>
-    <ul>
-        <li><a href="https://flyitalyadsb.com">Fly Italy ADSB home page</a></li>
-    </ul>
-</div>
-<div style="display: {% if is_enabled('avdelphi') %} block {% else %} none {% endif %};">
-    <h4>AVDelphi</h4>
-    <ul>
-        <li><a href="https://www.avdelphi.com/coverage.html">AVDelphi coverage page</a></li>
-    </ul>
-</div>
-<div style="display: {% if is_enabled('planespotters') %} block {% else %} none {% endif %};">
-    <h4>Planespotters</h4>
-    <ul>
-        <li><a href="https://radar.planespotters.net/">Planespotters map around you</a></li>
-    </ul>
-</div>
-<div style="display: {% if is_enabled('adsbone') %} block {% else %} none {% endif %};">
-    <h4>ADSB.one</h4>
-    <ul>
-        <li><a href="https://api.adsb.one/feed-status">details about your feed as JSON</a></li>
-    </ul>
-</div>
-<div style="display: {% if is_enabled('tat') %} block {% else %} none {% endif %};">
-    <h4>The Air Traffic</h4>
-    <ul>
-        <li><a href="https://theairtraffic.com/feed/myip/">your feeding status webpage</a></li>
-    </ul>
-</div>
-<div style="display: {% if is_enabled('adsbfi') %} block {% else %} none {% endif %};">
-    <h4>ADSB.fi</h4>
-    <ul>
-        <li><a href="https://api.adsb.fi/v1/myip">details about your feed as JSON</a></li>
-    </ul>
-</div>
-<div style="display: {% if is_enabled('flyovr') %} block {% else %} none {% endif %};">
-    <h4>FLYOVR.IO</h4>
-    <ul>
-        <li><a href="https://globe.flyovr.io/">FLYOVR.IO map</a></li>
-    </ul>
-</div>
-<div style="display: {% if is_enabled('hpradar') %} block {% else %} none {% endif %};">
-    <h4>RadarPlane</h4>
-    <ul>
-        <li><a href="https://radarplane.com/feed">RadarPlane feed status page</a></li>
-    </ul>
-</div>
-<div style="display: {% if is_enabled('radarplane') %} block {% else %} none {% endif %};">
-    <h4>HPRadar</h4>
-    <ul>
-        <li><a href="https://skylink.hpradar.com/">HPRadar map</a></li>
-    </ul>
-</div>
-<div style="display: {% if is_enabled('adsbx') %} block {% else %} none {% endif %};">
-    <h4>ADS-B Exchange</h4>
-    <ul>
-        <li><a href="https://www.adsbexchange.com/myip/">your feeding status webpage</a></li>
-    </ul>
-</div>
-<div style="display: {% if is_enabled('flightradar') %} block {% else %} none {% endif %};">
-    <h4>FlightRadar 24</h4>
-    <ul>
-        <li><a href="/fr-status">FR24 status</a>
-    </ul>
-</div>
-<div style="display: {% if is_enabled('planewatch') %} block {% else %} none {% endif %};">
-    <h4>Plane.watch</h4>
-    <ul>
-        <li><a href="https://plane.watch/desktop.html">Plane.watch map</a>
-    </ul>
-</div>
-<div style="display: {% if is_enabled('flightaware') %} block {% else %} none {% endif %};">
-    <h4>FlightAware</h4>
-    <ul>
-        <li><a href="/fa">FlightAware map</a>
-        <li><a href="/fa-status">FlightAware status</a>
-    </ul>
-</div>
-<div style="display: {% if is_enabled('radarbox') %} block {% else %} none {% endif %};">
-    <h4>Radarbox</h4>
-    <ul>
-        <li><a href="https://www.radarbox.com/coverage-map">Radarbox map</a>
-    </ul>
-</div>
-<div style="display: {% if is_enabled('planefinder') %} block {% else %} none {% endif %};">
-    <h4>PlaneFinder</h4>
-    <ul>
-        <li><a href="/planefinder">Local Planefinder map</a></li>
-        <li><a href="https://planefinder.net/">Global PlaneFinder map</a>
-    </ul>
-</div>
-<div style="display: {% if is_enabled('adsbhub') %} block {% else %} none {% endif %};">
-    <h4>ADSBHub</h4>
-    <ul>
-        <li><a href="https://www.adsbhub.org/coverage.php">ADSBHub map</a>
-    </ul>
-</div>
-<div style="display: {% if is_enabled('opensky') %} block {% else %} none {% endif %};">
-    <h4>OpenSky</h4>
-    <ul>
-        <li><a href="https://opensky-network.org/network/explorer">OpenSky map</a>
-    </ul>
-</div>
-<div style="display: {% if is_enabled('radarvirtuel') %} block {% else %} none {% endif %};">
-    <h4>RadarVirtuel</h4>
-    <ul>
-        <li><a href="https://www.radarvirtuel.com">RadarVirtuel map</a>
-    </ul>
+    <div class="col-sm-4">
+        <h3>You are feeding</h3>
+        <div class="row ml-3">
+            <div class="col-sm1">
+                <table id="aggregatortable" class="table table-bordered table-sm">
+                    <tbody>
+                        {% for agg, name in aggregators %}
+                        {% if is_enabled(agg) %}
+                        <tr>
+                            <td>{{ name }}</td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6">
+        <h3>Additional aggregator links</h3>
+        <div style="display: {% if is_enabled('adsblol') %} block {% else %} none {% endif %};">
+            <h5>ADSB.lol</h5>
+            <ul>
+                <li><a href="https://status.adsb.lol/">ADSB.lol status</a></li>
+                <li><a href="https://www.adsb.lol/docs/feeders-only/introduction/">ADSB.lol feeder introduction</a></li>
+                <li><a href="https://my.adsb.lol/">personal ADSB.lol URL with the planes you are sending</a></li>
+                <li><a href="https://mlat.adsb.lol/">ADSB.lol MLAT feeder map {% if is_enabled("mlat_privacy") %}(since
+                        you have
+                        MLAT privacy enabled, your feeder won't be shown) {% else %} (your feeder will be at an
+                        approximate
+                        location as {{ env_value_by_tag("mlat_name") }}) {% endif %}</a></li>
+                <li><a href="https://api.adsb.lol/api/0/me">details about your feed as JSON</a></li>
+            </ul>
+        </div>
+        <div style="display: {% if is_enabled('flyitaly') %} block {% else %} none {% endif %};">
+            <h5>Fly Italy ADSB</h5>
+            <ul>
+                <li><a href="https://flyitalyadsb.com">Fly Italy ADSB home page</a></li>
+            </ul>
+        </div>
+        <div style="display: {% if is_enabled('avdelphi') %} block {% else %} none {% endif %};">
+            <h5>AVDelphi</h5>
+            <ul>
+                <li><a href="https://www.avdelphi.com/coverage.html">AVDelphi coverage page</a></li>
+            </ul>
+        </div>
+        <div style="display: {% if is_enabled('planespotters') %} block {% else %} none {% endif %};">
+            <h5>Planespotters</h5>
+            <ul>
+                <li><a href="https://radar.planespotters.net/">Planespotters map around you</a></li>
+            </ul>
+        </div>
+        <div style="display: {% if is_enabled('adsbone') %} block {% else %} none {% endif %};">
+            <h5>ADSB.one</h5>
+            <ul>
+                <li><a href="https://api.adsb.one/feed-status">details about your feed as JSON</a></li>
+            </ul>
+        </div>
+        <div style="display: {% if is_enabled('tat') %} block {% else %} none {% endif %};">
+            <h5>The Air Traffic</h5>
+            <ul>
+                <li><a href="https://theairtraffic.com/feed/myip/">your feeding status webpage</a></li>
+            </ul>
+        </div>
+        <div style="display: {% if is_enabled('adsbfi') %} block {% else %} none {% endif %};">
+            <h5>ADSB.fi</h5>
+            <ul>
+                <li><a href="https://api.adsb.fi/v1/myip">details about your feed as JSON</a></li>
+            </ul>
+        </div>
+        <div style="display: {% if is_enabled('flyovr') %} block {% else %} none {% endif %};">
+            <h5>FLYOVR.IO</h5>
+            <ul>
+                <li><a href="https://globe.flyovr.io/">FLYOVR.IO map</a></li>
+            </ul>
+        </div>
+        <div style="display: {% if is_enabled('hpradar') %} block {% else %} none {% endif %};">
+            <h5>RadarPlane</h5>
+            <ul>
+                <li><a href="https://radarplane.com/feed">RadarPlane feed status page</a></li>
+            </ul>
+        </div>
+        <div style="display: {% if is_enabled('radarplane') %} block {% else %} none {% endif %};">
+            <h5>HPRadar</h5>
+            <ul>
+                <li><a href="https://skylink.hpradar.com/">HPRadar map</a></li>
+            </ul>
+        </div>
+        <div style="display: {% if is_enabled('adsbx') %} block {% else %} none {% endif %};">
+            <h5>ADS-B Exchange</h5>
+            <ul>
+                <li><a href="https://www.adsbexchange.com/myip/">your feeding status webpage</a></li>
+            </ul>
+        </div>
+        <div style="display: {% if is_enabled('flightradar') %} block {% else %} none {% endif %};">
+            <h5>FlightRadar 24</h5>
+            <ul>
+                <li><a href="/fr-status">FR24 status</a>
+            </ul>
+        </div>
+        <div style="display: {% if is_enabled('planewatch') %} block {% else %} none {% endif %};">
+            <h5>Plane.watch</h5>
+            <ul>
+                <li><a href="https://plane.watch/desktop.html">Plane.watch map</a>
+            </ul>
+        </div>
+        <div style="display: {% if is_enabled('flightaware') %} block {% else %} none {% endif %};">
+            <h5>FlightAware</h5>
+            <ul>
+                <li><a href="/fa">FlightAware map</a>
+                <li><a href="/fa-status">FlightAware status</a>
+            </ul>
+        </div>
+        <div style="display: {% if is_enabled('radarbox') %} block {% else %} none {% endif %};">
+            <h5>Radarbox</h5>
+            <ul>
+                <li><a href="https://www.radarbox.com/coverage-map">Radarbox map</a>
+            </ul>
+        </div>
+        <div style="display: {% if is_enabled('planefinder') %} block {% else %} none {% endif %};">
+            <h5>PlaneFinder</h5>
+            <ul>
+                <li><a href="/planefinder">Local Planefinder map</a></li>
+                <li><a href="https://planefinder.net/">Global PlaneFinder map</a>
+            </ul>
+        </div>
+        <div style="display: {% if is_enabled('adsbhub') %} block {% else %} none {% endif %};">
+            <h5>ADSBHub</h5>
+            <ul>
+                <li><a href="https://www.adsbhub.org/coverage.php">ADSBHub map</a>
+            </ul>
+        </div>
+        <div style="display: {% if is_enabled('opensky') %} block {% else %} none {% endif %};">
+            <h5>OpenSky</h5>
+            <ul>
+                <li><a href="https://opensky-network.org/network/explorer">OpenSky map</a>
+            </ul>
+        </div>
+        <div style="display: {% if is_enabled('radarvirtuel') %} block {% else %} none {% endif %};">
+            <h5>RadarVirtuel</h5>
+            <ul>
+                <li><a href="https://www.radarvirtuel.com">RadarVirtuel map</a>
+            </ul>
+        </div>
+    </div>
 </div>
 {% endblock %}

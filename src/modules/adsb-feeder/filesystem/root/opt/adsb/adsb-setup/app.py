@@ -77,6 +77,27 @@ class AdsbIm:
             "radarbox--submit": RadarBox(self._system),
             "radarvirtuel--submit": RadarVirtuel(self._system),
         }
+        self.all_aggregators = [
+            ["adsblol", "adsb.lol"],
+            ["flyitaly", "Fly Italy ADSB"],
+            ["avdelphy", "AVDelphi"],
+            ["planespotters", "planespotters.net"],
+            ["tat", "TheAirTraffic.com"],
+            ["flyovr", "FLYOVR.com"],
+            ["radarplane", "RadarPlane"],
+            ["adsbone", "adsb.one"],
+            ["adsbfi", "adsb.fi"],
+            ["hpradar", "HPRadar"],
+            ["adsbx", "ADSBExchange"],
+            ["flightradar", "flightradar24"],
+            ["planewatch", "Plane.watch"],
+            ["flightaware", "FlightAware"],
+            ["radarbox", "RadarBox"],
+            ["planefinder", "PlaneFinder"],
+            ["adsbhub", "ADSBHub"],
+            ["opensky", "OpenSky"],
+            ["radarvirtuel", "RadarVirtuel"],
+        ]
         # fmt: off
         self.proxy_routes = self._constants.proxy_routes
         self.app.add_url_rule("/propagateTZ", "propagateTZ", self.get_tz)
@@ -97,7 +118,6 @@ class AdsbIm:
         self.app.add_url_rule("/api/sdr_info", "sdr_info", self.sdr_info)
         # fmt: on
         self.update_boardname()
-
 
     def update_boardname(self):
         board = ""
@@ -646,7 +666,7 @@ class AdsbIm:
         return self.aggregators()
 
     def index(self):
-        return render_template("index.html")
+        return render_template("index.html", aggregators=self.all_aggregators)
 
     @check_restart_lock
     def setup(self):
