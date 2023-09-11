@@ -1,4 +1,4 @@
-# adsb-feeder-image
+# ADS-B Feeder Image
 
 Easy to use turn-key SD card image for a number of single board computers (or to run in an x86 VM).
 Currently we are building images for
@@ -37,7 +37,11 @@ These aggregators are also supported:
 - [RadarPlane](https://radarplane.com/)
 - [Radar Virtuel](https://www.radarvirtuel.com)
 
-The goal of this project is to make things as simple as possible for the non-technical user.
+### Home page of an installed ADS-B Feeder Image
+
+![ADS-B Feeder home page](/../screenshots/screenshots/ADSB-im-v0.15.0.png "Feeder Home Page")
+
+### The goal of this project is to make things as simple as possible for the non-technical user.
 
 ## Feed from a Single Board Computer (like the Raspberry Pi)
 - buy one of the supported boards (at least the Le Potato seems to be easily and cheaply available in most places)
