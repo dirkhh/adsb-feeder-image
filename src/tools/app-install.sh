@@ -56,31 +56,31 @@ if [[ $CONF_DIR != "" && ! -d "$CONF_DIR" ]] ; then
 fi
 
 # now that we know that there isn't anything obviously wrong with
-# the command line arguments, let's ask the user if the dependencies
-# are installed (checking this generically for any Linux distro
-# seemd more work than it's likely worth)
-MESSAGE="
- App installer for ADS-B Feeder
- ------------------------------
+# the command line arguments, let's check if all the dependencies
+# are installed
+# - Python 3.6 or later and Flask 2 or later
+# - git
+# - docker
+# - docker compose
+missing=""
+if which python3 &> /dev/null ; then
+	python3 -c "import sys; sys.exit(1) if sys.version_info.major != 3 or sys.version_info.minor < 6" &> /dev/null && missing="Python3.6 or newer "
+	python3 -c "import flask" &>/dev/null || missing="Flask 2 "
+	python3 -c "import sys; import flask; sys.exit(1) if flask.__version__ < '2.0' else sys.exit(0)" &> /dev/null || missing="Flask 2 "
+else
+	missing="Python3 Flask 2 "
+fi
+which git &> /dev/null || missing+="git "
+if which docker &> /dev/null ; then
+	docker compose version &> /dev/null || missing+="Docker compose module "
+else
+	missing+="Docker and Docker compose module "
+fi
 
- Please confirm that you have
- - Docker
- - Docker compose module (not the old docker-compose app)
- - Python 3
- - Flask 2
- - git
- installed before continuing
-"
-QUESTION="(C)ontinue (S)top: "
-echo "$MESSAGE"
-while true; do
-    read -r -p "$QUESTION" ans
-    case $ans in
-        [Cc]* ) echo ; echo "Continuing install" ; break;;
-        [Ss]* ) echo ; echo "Please install missing components with system tools"; exit;;
-        * ) echo "Please answer with 'c' or 's'" ;;
-    esac
-done
+if [[ $missing != "" ]] ; then
+	echo "Please install $missing before re-running this script"
+	exit 1
+fi
 
 # ok, now we should have all we need, let's get started
 
