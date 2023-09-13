@@ -13,7 +13,6 @@ USAGE="
 
 APP_DIR="/opt/adsb"
 BRANCH=""
-CONF_DIR=""
 GIT_PARENT_DIR=""
 TAG=""
 
@@ -48,11 +47,8 @@ if [[ ! -d "$APP_DIR" ]] ; then
         exit 1
     fi
 fi
-if [[ $CONF_DIR != "" && ! -d "$CONF_DIR" ]] ; then
-    if ! mkdir -p "$CONF_DIR" ; then
-        echo "failed to create $CONF_DIR"
-        exit 1
-    fi
+if [[ ! -d "$APP_DIR"/config ]] ; then
+    mkdir -p "$APP_DIR"/config
 fi
 
 # now that we know that there isn't anything obviously wrong with
@@ -117,10 +113,6 @@ fi
 # copy the software in place
 cp -a "${SRC_ROOT}/opt/adsb/"* "${APP_DIR}/"
 rm -f "${SRC_ROOT}/usr/lib/systemd/system/adsb-bootstrap.service"
-if [[ ${CONF_DIR} != '' && "$CONF_DIR" != "${APP_DIR}/config" ]] ; then
-    mkdir -p "$CONF_DIR"
-    ln -s "$CONF_DIR" "${APP_DIR}/config"
-fi
 cp -a "${SRC_ROOT}/usr/lib/systemd/system/"* "/usr/lib/systemd/system/"
 rm -rf "${GIT_PARENT_DIR}/adsb-feeder"
 
@@ -151,11 +143,26 @@ else
 fi
 echo "ADSB Feeder app running on ${OS}" > feeder-image.name
 echo "$ADSB_IM_VERSION" > adsb.im.version
+touch /opt/adsb/app.adsb.feeder.image
+
+cd /opt/adsb/config
+cat /opt/adsb/docker.image.versions >> .env
+echo "_ADSBIM_BASE_VERSION=$(cat /opt/adsb/adsb.im.version)" >> .env
+echo "_ADSBIM_CONTAINER_VERSION=$(cat /opt/adsb/adsb.im.version)" >> .env
+echo "_ADSBIM_STATE_WEBPORT=1099" >> .env
+echo "_ADSBIM_STATE_TAR1090_PORT=1090" >> .env
+echo "_ADSBIM_STATE_UAT978_PORT=1091" >> .env
+echo "_ADSBIM_STATE_PIAWAREMAP_PORT=1092" >> .env
+echo "_ADSBIM_STATE_PIAWARESTAT_PORT=1093" >> .env
+echo "_ADSBIM_STATE_DAZZLE_PORT=1094" >> .env
 
 # run the final steps of the setup and then enable the services
 systemctl daemon-reload
-systemctl start adsb-nonimage
 systemctl enable --now adsb-docker
 systemctl enable --now adsb-setup
+
+# while the user is getting ready, let's try to pull the key docker
+# containers in the background -- that way startup will feel quicker
+bash /opt/adsb/docker-pull.sh &
 
 echo "done instaling"
