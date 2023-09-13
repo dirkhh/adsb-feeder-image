@@ -40,7 +40,7 @@ bash ./docker-pull.sh
 bash /opt/adsb/docker-compose-start
 
 # finally remove the images and files we no longer use
-docker system prunea -f
+docker system prune -f
 
 sed -i "s/CONTAINER_VERSION=.*/CONTAINER_VERSION=$TIME/" /opt/adsb/config/.env
 
