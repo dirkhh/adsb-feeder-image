@@ -36,26 +36,6 @@
                         href="{{ url_for('aggregators') }}">Aggregator setup</a>
             </ul>
         </div>
-    </div>
-    <div class="col-sm-4">
-        <h3>You are feeding</h3>
-        <div class="row ml-3">
-            <div class="col-sm1">
-                <table id="aggregatortable" class="table table-bordered table-sm">
-                    <tbody>
-                        {% for agg, name in aggregators %}
-                        {% if is_enabled(agg) %}
-                        <tr>
-                            <td>{{ name }}</td>
-                        </tr>
-                        {% endif %}
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-    <div class="col-sm-6">
         <h3>Additional aggregator links</h3>
         <div style="display: {% if is_enabled('adsblol') %} block {% else %} none {% endif %};">
             <h5>ADSB.lol</h5>
@@ -188,5 +168,58 @@
             </ul>
         </div>
     </div>
+
+    <div class="col-sm-4">
+        <h4>You are feeding</h4>
+        <div class="row ml-3 small">
+            <div class="col-sm1">
+                <table id="aggregatortable" class="table table-bordered table-sm">
+                    <thead>
+                        <td>Aggregator</td>
+                        <td>Enabled</td>
+                        <td>Data</td>
+                        <td>MLAT</td>
+                    </thead>
+                    <tbody>
+                        {% for agg, name in aggregators %}
+                        <tr>
+                            <td>{{ name }}</td>
+                            <td class="text-center"><span id="{{ agg + 'span'}}">{% if is_enabled(agg) %} &#10003; {%
+                                    endif %}</span></td>
+                            <td class="text-center"><span id="{{ agg + 'beast' }}"></span></td>
+                            <td class="text-center"><span id="{{ agg + 'mlat' }}"></span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
+<script>
+    $(document).ready(function () {
+        console.log("executing ready function");
+        {% for agg, name in aggregators %}
+        {% if is_enabled(agg) %}
+        get_status("{{ agg }}");
+        {% endif %}
+        {% endfor %}
+    });
+
+    function get_status(agg) {
+        console.log("get_status for", agg);
+        fetch(`${SCRIPT_ROOT}/api/status/${agg}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log("received back", data);
+                $("#" + agg + "beast").text(data["beast"]);
+                $("#" + agg + "mlat").text(data["mlat"]);
+                if (data["beast"] == "+" && data["mlat"] == "+") {
+                    $("#" + agg + "span").css('color', 'green')
+                } else {
+                    $("#" + agg + "span").css('color', 'red')
+                }
+            });
+    }
+</script>
 {% endblock %}

@@ -29,6 +29,7 @@ from utils import (
     RadarVirtuel,
     RouteManager,
     SDRDevices,
+    AggStatus,
     System,
     check_restart_lock,
     UltrafeederConfig,
@@ -80,7 +81,7 @@ class AdsbIm:
         self.all_aggregators = [
             ["adsblol", "adsb.lol"],
             ["flyitaly", "Fly Italy ADSB"],
-            ["avdelphy", "AVDelphi"],
+            ["avdelphi", "AVDelphi"],
             ["planespotters", "planespotters.net"],
             ["tat", "TheAirTraffic.com"],
             ["flyovr", "FLYOVR.com"],
@@ -88,7 +89,7 @@ class AdsbIm:
             ["adsbone", "adsb.one"],
             ["adsbfi", "adsb.fi"],
             ["hpradar", "HPRadar"],
-            ["alive", "airplanes.live"]["adsbx", "ADSBExchange"],
+            ["alive", "airplanes.live"],
             ["adsbx", "ADSBExchange"],
             ["flightradar", "flightradar24"],
             ["planewatch", "Plane.watch"],
@@ -117,6 +118,7 @@ class AdsbIm:
         self.app.add_url_rule("/setup", "setup", self.setup, methods=["GET", "POST"])
         self.app.add_url_rule("/update", "update", self.update, methods=["POST"])
         self.app.add_url_rule("/api/sdr_info", "sdr_info", self.sdr_info)
+        self.app.add_url_rule(f"/api/status/<agg>", "beast", self.agg_status)
         # fmt: on
         self.update_boardname()
 
@@ -400,6 +402,10 @@ class AdsbIm:
                 "frequencies": frequencies,
             }
         )
+
+    def agg_status(self, agg):
+        status = AggStatus(agg)
+        return json.dumps({"beast": status.beast, "mlat": status.mlat})
 
     @check_restart_lock
     def advanced(self):
