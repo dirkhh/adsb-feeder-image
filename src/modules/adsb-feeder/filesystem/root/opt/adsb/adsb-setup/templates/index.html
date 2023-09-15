@@ -216,8 +216,10 @@
                 $("#" + agg + "mlat").text(data["mlat"]);
                 if (data["beast"] == "+" && data["mlat"] == "+") {
                     $("#" + agg + "span").css('color', 'green')
-                } else {
+                } else if (data["beast"] == "-" || data["mlat"] == "-") {
                     $("#" + agg + "span").css('color', 'red')
+                } else {
+                    $("#" + agg + "span").css('color', 'black')
                 }
             });
     }
