@@ -162,6 +162,14 @@ class AggStatus:
                     print_err(f"can't parse mlat part of tat response {tat_text}")
                     # but since we got someting we could parse for beast above, let's keep going
                 self._last_check = datetime.now()
+        elif self._agg == "planespotters":
+            html_url = f"https://www.planespotters.net/feed/status/{self._uuid}"
+            ps_text = self.get_plain(html_url)
+            if ps_text:
+                self._beast = (
+                    T.No if re.search("Feeder client not connected", ps_text) else T.Yes
+                )
+                self._last_check = datetime.now()
 
     def __repr__(self):
         return f"Aggregator({self._agg} last_check: {str(self._last_check)}, beast: {self._beast} mlat: {self._mlat})"
