@@ -88,6 +88,7 @@ class AdsbIm:
             ["adsbone", "adsb.one"],
             ["adsbfi", "adsb.fi"],
             ["hpradar", "HPRadar"],
+            ["alive", "airplanes.live"]["adsbx", "ADSBExchange"],
             ["adsbx", "ADSBExchange"],
             ["flightradar", "flightradar24"],
             ["planewatch", "Plane.watch"],

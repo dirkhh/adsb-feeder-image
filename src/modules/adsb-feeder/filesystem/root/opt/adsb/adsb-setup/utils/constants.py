@@ -108,8 +108,13 @@ class Constants:
         ),
         "hpradar": NetConfig(
             "adsb,skyfeed.hpradar.com,30004,beast_reduce_plus_out",
-            "mlat,skyfeed.hpradar.com,31090",
+            "mlat,skyfeed.hpradar.com,31090,39011",
             has_policy=False,
+        ),
+        "airplaneslive": NetConfig(
+            "adsb,feed.airplanes.live,30004,beast_reduce_plus_out",
+            "mlat,feed.airplanes.live,31090,39012",
+            has_policy=True,
         ),
     }
     # Other aggregator tags
@@ -433,6 +438,11 @@ class Constants:
             "_ADSBIM_STATE_IS_ULTRAFEEDER_HPRADAR_ENABLED",
             is_mandatory=False,
             tags=["hpradar", "ultrafeeder", "is_enabled"],
+        ),
+        Env(
+            "_ADSBIM_STATE_IS_ULTRAFEEDER_ALIVE_ENABLED",
+            is_mandatory=False,
+            tags=["alive", "ultrafeeder", "is_enabled"],
         ),
         Env(
             "_ADSBIM_STATE_ULTRAFEEDER_EXTRA_ARGS",

@@ -113,7 +113,7 @@
                 <li><a href="https://globe.flyovr.io/">FLYOVR.IO map</a></li>
             </ul>
         </div>
-        <div style="display: {% if is_enabled('hpradar') %} block {% else %} none {% endif %};">
+        <div style="display: {% if is_enabled('radarplane') %} block {% else %} none {% endif %};">
             <h5>RadarPlane</h5>
             <ul>
                 <li><a href="https://radarplane.com/feed">RadarPlane feed status page</a></li>
@@ -123,6 +123,12 @@
             <h5>HPRadar</h5>
             <ul>
                 <li><a href="https://skylink.hpradar.com/">HPRadar map</a></li>
+            </ul>
+        </div>
+        <div style="display: {% if is_enabled('alive') %} block {% else %} none {% endif %};">
+            <h5>airplanes.live</h5>
+            <ul>
+                <li><a href="https://globe.airplanes.live/">airplanes.live map</a></li>
             </ul>
         </div>
         <div style="display: {% if is_enabled('adsbx') %} block {% else %} none {% endif %};">

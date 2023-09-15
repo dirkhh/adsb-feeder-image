@@ -54,6 +54,10 @@
             <label for="is_enabled--hpradar" class="mb-3 col-sm-10">Submit your data to <a
                     href="https://skylink.hpradar.com/">HPRadar</a><small> (please note that this site is missing
                     a clear data/privacy policy)</small></label><br />
+            <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="is_enabled--alive"
+                id="is_enabled--alive" {{ uf_enabled('alive') }} />
+            <label for="is_enabled--alive" class="mb-3 col-sm-10">Submit your data to <a
+                    href="https://airplanes.live/privacy">airplanes.live</a></label><br />
             <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="is_enabled--adsbx"
                 id="is_enabled--adsbx" {{ uf_enabled('adsbx') }} />
             <label for="is_enabled--adsbx" class="mb-3 col-sm-10">Submit your data to <a
