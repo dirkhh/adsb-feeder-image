@@ -37,6 +37,7 @@ class Constants:
         ["/fr-status/", "FLIGHTRADAR", "/"],
         ["/fr/", "FLIGHTRADAR", "/"],
         ["/fr24/", "FLIGHTRADAR", "/"],
+        ["/fr24-monitor.json", "FLIGHTRADAR", "/monitor.json"],
         ["/flightradar/", "FLIGHTRADAR", "/"],
         ["/flightradar24/", "FLIGHTRADAR", "/"],
         ["/planefinder/", "PLANEFINDER", "/"],

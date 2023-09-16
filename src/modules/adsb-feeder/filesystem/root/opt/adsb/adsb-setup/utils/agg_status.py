@@ -125,12 +125,18 @@ class AggStatus:
                 self._last_check = datetime.now()
         elif self._agg == "flightaware":
             json_url = f"{self._url}/fa-status.json/"
-            print_err(f"getting {json_url}")
             fa_dict = self.get_json(json_url)
             if fa_dict:
                 print_err(f"fa status.json returned {fa_dict}")
                 self._beast = T.Yes if fa_dict["adept"]["status"] == "green" else T.No
                 self._mlat = T.Yes if fa_dict["mlat"]["status"] == "green" else T.No
+                self._last_check = datetime.now()
+        elif self._agg == "flightradar":
+            json_url = f"{self._url}/fr24-monitor.json"
+            fr_dict = self.get_json(json_url)
+            if fr_dict:
+                print_err(f"fr monitor.json returned {fr_dict}")
+                self._beast = T.Yes if fr_dict["feed_status"] == "connected" else T.No
                 self._last_check = datetime.now()
         elif self._agg == "adsbx":
             html_url = "https://www.adsbexchange.com/myip/"
