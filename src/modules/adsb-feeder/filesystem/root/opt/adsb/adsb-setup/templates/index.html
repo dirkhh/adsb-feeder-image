@@ -4,77 +4,13 @@
 {% block content %}
 <h1>{% block title %} ADSB Feeder Homepage for {{ env_value_by_tag("mlat_name") }} {% endblock %}</h1>
 <div class="row">
-    <div class="col-sm-8">
-        <div id="UF" style="display: block;">
-            <h4>TAR1090 Mapping Interface</h4>
-            <div class="text-muted small mb-2">
-                Please note that after a restart it can take up to two minutes for the pages below to respond, so if you
-                get
-                an error, please wait a moment and try again.
-            </div>
-            <ul>
-                <li><a href="/map">TAR1090 map</a>
-                <li><a href="/stats">System Statistics and Graphs</a>
-                <li><a href="/map/?replay">Timelapse / Replay</a>
-                <li><a href="/map/?heatmap&realheat">Heatmap</a>
-                <li><a href="/map/?ptracks">Tracks</a>
-            </ul>
-        </div>
-        <div id="UAT978" style="display: {% if is_enabled('uat978') %} block {% else %} none {% endif %};">
-            <h4>UAT978 Mapping Interface</h4>
-            <ul>
-                <li><a href="/dump978">Dump978 map</a>
-            </ul>
-        </div>
-        <div id="CF" style="display: block;">
-            <h4>Device Configuration and Administration</h4>
-            <ul>
-                <li><a href="{{ url_for('setup') }}">Basic Setup</a>
-                <li style="display: {% if is_enabled('base_config') %} list-item {% else %} none {% endif %};"><a
-                        href="{{ url_for('advanced') }}">Advanced setup</a>
-                <li style="display: {% if is_enabled('base_config') %} list-item {% else %} none {% endif %};"><a
-                        href="{{ url_for('aggregators') }}">Aggregator setup</a>
-            </ul>
-        </div>
-        <div class="no-gutters small">
-            <h5 class="mt-5">Additional aggregator links</h4>
-                <div style="display: {% if is_enabled('adsblol') %} block {% else %} none {% endif %};">
-                    <div class="lead">ADSB.lol</div>
-                    <ul>
-                        <li><a href="https://status.adsb.lol/">ADSB.lol status</a></li>
-                        <li><a href="https://www.adsb.lol/docs/feeders-only/introduction/">ADSB.lol feeder
-                                introduction</a>
-                        </li>
-                        <li><a href="https://my.adsb.lol/">personal ADSB.lol URL with the planes you are sending</a>
-                        </li>
-                        <li><a href="https://mlat.adsb.lol/">ADSB.lol MLAT feeder map {% if is_enabled("mlat_privacy")
-                                %}(since
-                                you have
-                                MLAT privacy enabled, your feeder won't be shown) {% else %} (your feeder will be at an
-                                approximate
-                                location as {{ env_value_by_tag("mlat_name") }}) {% endif %}</a></li>
-                    </ul>
-                </div>
-                <div style="display: {% if is_enabled('flightradar') %} block {% else %} none {% endif %};">
-                    <div class="lead">FlightRadar 24</div>
-                    <ul>
-                        <li><a href="/fr-status">FR24 status</a>
-                    </ul>
-                </div>
-                <div style="display: {% if is_enabled('planefinder') %} block {% else %} none {% endif %};">
-                    <div class="lead">PlaneFinder</div>
-                    <ul>
-                        <li><a href="/planefinder">Local Planefinder map</a></li>
-                    </ul>
-                </div>
-        </div>
-    </div>
 
-    <div class="col-sm-4">
+    <div class="col-12">
         <h4>You are feeding</h4>
         <div class="row small">
-            <div class="col-sm1">
-                <table id="aggregatortable" class="table table-bordered table-sm">
+            {% for tc in [0,1] %}
+            <div class="col-12 col-md-6">
+                <table class="table table-bordered table-sm">
                     <thead>
                         <td>Aggregator</td>
                         <td>Enabled</td>
@@ -84,17 +20,105 @@
                     </thead>
                     <tbody>
                         {% for agg, name, map, status in aggregators %}
+                        {% set is_first = ((loop.length + 1) / 2 >= loop.index) %}
+                        {% if (tc==0 and is_first) or (tc==1 and not is_first) %}
                         <tr>
                             <td><a href="{{ map }}">{{ name }}</a></td>
-                            <td class="text-center"><span id="{{ agg + 'span'}}">{% if is_enabled(agg) %} &#10003; {%
-                                    endif %}</span></td>
+                            <td class="text-center">
+                                <span id="{{ agg + 'span'}}">{% if is_enabled(agg) %} &#10003; {% endif %}</span>
+                            </td>
                             <td class="text-center"><span id="{{ agg + 'beast' }}"></span></td>
                             <td class="text-center"><span id="{{ agg + 'mlat' }}"></span></td>
-                            <td class="text-center">{% if status != "" %}<a href="{{ status }}">...</a>{% endif %}</td>
+                            <td class="text-center">{% if status != "" %}<a href="{{ status }}">&#x1f517;</a>{% endif %}
+                            </td>
                         </tr>
+                        {% endif %}
                         {% endfor %}
                     </tbody>
                 </table>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="col-12">
+        <div id="UF" class="row">
+            <div class="col-12">
+                <h5>TAR1090 Mapping Interface</h5>
+            </div>
+            <div class="col col-md-4 col-lg-3">
+                <ul>
+                    <li><a href="/map">map</a>
+                    <li><a href="/stats">statistics and graphs</a>
+                </ul>
+            </div>
+            <div class="col col-md-4 col-lg-3">
+                <ul>
+                    <li><a href="/map/?replay">timelapse / replay</a>
+                    <li><a href="/map/?heatmap&realheat">heatmap</a>
+                    <li><a href="/map/?ptracks">tracks</a>
+                </ul>
+            </div>
+            <div class="text-muted small mb-4 col-12">
+                Please note that after a restart it can take up to a couple of minutes for the pages below to respond,
+                so if you get an error, please wait a moment and try again.
+            </div>
+        </div>
+        <div id="UAT978" style="display: {% if is_enabled('uat978') %} flex {% else %} none {% endif %};" class="row">
+            <div class="col-12">
+                <h5>UAT978 Mapping Interface</h5>
+            </div>
+            <div class="col-12">
+                <ul>
+                    <li><a href="/dump978">Dump978 map</a>
+                </ul>
+            </div>
+        </div>
+        <div id="CF" class="row mt-2">
+            <div class="col-12">
+                <h5>Device Configuration and Administration</h5>
+            </div>
+            <div class="col-12">
+                <ul>
+                    <li><a href="{{ url_for('setup') }}">Basic Setup</a>
+                    <li style="display: {% if is_enabled('base_config') %} list-item {% else %} none {% endif %};"><a
+                            href="{{ url_for('advanced') }}">Advanced setup</a>
+                    <li style="display: {% if is_enabled('base_config') %} list-item {% else %} none {% endif %};"><a
+                            href="{{ url_for('aggregators') }}">Aggregator setup</a>
+                </ul>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-12">
+                <h5>Additional aggregator links</h5>
+            </div>
+            <div style="display: {% if is_enabled('adsblol') %} block {% else %} none {% endif %};" class="col-12">
+                <div class="lead">ADSB.lol</div>
+                <ul>
+                    <li><a href="https://status.adsb.lol/">ADSB.lol status</a></li>
+                    <li><a href="https://www.adsb.lol/docs/feeders-only/introduction/">ADSB.lol feeder
+                            introduction</a>
+                    </li>
+                    <li><a href="https://my.adsb.lol/">personal ADSB.lol URL with the planes you are sending</a>
+                    </li>
+                    <li><a href="https://mlat.adsb.lol/">ADSB.lol MLAT feeder map</a><br />
+                        {% if is_enabled("mlat_privacy") %}
+                        (since you have MLAT privacy enabled, your feeder won't be shown)
+                        {% else %}
+                        (your feeder will be at an approximate location as {{ env_value_by_tag("mlat_name") }})
+                        {% endif %}</li>
+                </ul>
+            </div>
+            <div style="display: {% if is_enabled('flightradar') %} block {% else %} none {% endif %};" class="col-12">
+                <div class="lead">FlightRadar 24</div>
+                <ul>
+                    <li><a href="/fr-status">FR24 status</a>
+                </ul>
+            </div>
+            <div style="display: {% if is_enabled('planefinder') %} block {% else %} none {% endif %};" class="col-12">
+                <div class="lead">PlaneFinder</div>
+                <ul>
+                    <li><a href="/planefinder">Local Planefinder map</a></li>
+                </ul>
             </div>
         </div>
     </div>

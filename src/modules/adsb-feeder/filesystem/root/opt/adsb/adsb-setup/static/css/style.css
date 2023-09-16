@@ -1,8 +1,9 @@
 h1 {
-    color: brown;
-    text-align: center;
-    padding: 10px;
+  color: brown;
+  text-align: center;
+  padding: 10px;
 }
+
 .bigbigbutton {
   display: block;
   width: 90%;
@@ -19,7 +20,8 @@ h1 {
 }
 
 .red {
-  background-color: #CC4411; !important
+  background-color: #CC4411;
+  !important
 }
 
 #loader {
@@ -38,42 +40,60 @@ h1 {
 }
 
 @-webkit-keyframes spin {
-  0% { -webkit-transform: rotate(0deg); }
-  100% { -webkit-transform: rotate(360deg); }
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 #overlay {
-  position: fixed; /* Sit on top of the page content */
-  display: none; /* Hidden by default */
-  width: 100%; /* Full width (cover the whole page) */
-  height: 100%; /* Full height (cover the whole page) */
+  position: fixed;
+  /* Sit on top of the page content */
+  display: none;
+  /* Hidden by default */
+  width: 100%;
+  /* Full width (cover the whole page) */
+  height: 100%;
+  /* Full height (cover the whole page) */
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0,0,0,0.5); /* Black background with opacity */
-  z-index: 10; /* Specify a stack order in case you're using a different order for other elements */
-  cursor: pointer; /* Add a pointer on hover */
+  background-color: rgba(0, 0, 0, 0.5);
+  /* Black background with opacity */
+  z-index: 10;
+  /* Specify a stack order in case you're using a different order for other elements */
+  cursor: pointer;
+  /* Add a pointer on hover */
 }
 
-#overlaytext{
+#overlaytext {
   position: absolute;
   top: 50%;
   left: 50%;
   font-size: 50px;
   color: white;
-  transform: translate(-50%,-50%);
-  -ms-transform: translate(-50%,-50%);
+  transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
 }
 
 .container {
   min-height: 100%vh;
-  padding-bottom: 5rem; # height of the footer
+  padding-bottom: 5rem;
+  # height of the footer
 }
 
 .footer {
@@ -88,4 +108,9 @@ ul.checkboxlist {
   float: left;
   list-style: none;
   margin: 0;
+}
+
+ul {
+  margin-left: 1.25em;
+  padding-left: 0;
 }

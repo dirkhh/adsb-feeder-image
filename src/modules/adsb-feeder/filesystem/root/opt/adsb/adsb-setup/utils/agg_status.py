@@ -102,7 +102,7 @@ class AggStatus:
             adsblol_dict = self.get_json(json_url)
             if adsblol_dict:
                 feeding = adsblol_dict["feeding"]
-                print_err(f"adsblol returned {feeding}")
+                # print_err(f"adsblol returned {feeding}")
                 self._beast = T.Yes if feeding["beast"] else T.No
                 self._mlat = T.Yes if feeding["mlat"] else T.No
                 self._last_check = datetime.now()
@@ -111,7 +111,7 @@ class AggStatus:
             json_url = "https://api.adsb.fi/v1/myip"
             adsbfi_dict = self.get_json(json_url)
             if adsbfi_dict:
-                print_err(f"adsbfi returned {adsbfi_dict}")
+                # print_err(f"adsbfi returned {adsbfi_dict}")
                 self._beast = T.No if adsbfi_dict["beast"] == [] else T.Yes
                 self._mlat = T.No if adsbfi_dict["mlat"] == [] else T.Yes
                 self._last_check = datetime.now()
@@ -119,7 +119,7 @@ class AggStatus:
             json_url = "https://radarplane.com/api/v1/feed/check"
             radarplane_dict = self.get_json(json_url)
             if radarplane_dict:
-                print_err(f"radarplane returned {radarplane_dict}")
+                # print_err(f"radarplane returned {radarplane_dict}")
                 self._beast = T.Yes if radarplane_dict["data"]["beast"] else T.No
                 self._mlat = T.Yes if radarplane_dict["data"]["mlat"] else T.No
                 self._last_check = datetime.now()
@@ -127,7 +127,7 @@ class AggStatus:
             json_url = f"{self._url}/fa-status.json/"
             fa_dict = self.get_json(json_url)
             if fa_dict:
-                print_err(f"fa status.json returned {fa_dict}")
+                # print_err(f"fa status.json returned {fa_dict}")
                 self._beast = T.Yes if fa_dict["adept"]["status"] == "green" else T.No
                 self._mlat = T.Yes if fa_dict["mlat"]["status"] == "green" else T.No
                 self._last_check = datetime.now()
@@ -135,7 +135,7 @@ class AggStatus:
             json_url = f"{self._url}/fr24-monitor.json"
             fr_dict = self.get_json(json_url)
             if fr_dict:
-                print_err(f"fr monitor.json returned {fr_dict}")
+                # print_err(f"fr monitor.json returned {fr_dict}")
                 self._beast = T.Yes if fr_dict["feed_status"] == "connected" else T.No
                 self._last_check = datetime.now()
         elif self._agg == "adsbx":
@@ -163,7 +163,7 @@ class AggStatus:
             text_url = "https://theairtraffic.com/iapi/feeder_status"
             tat_text = self.get_plain(text_url)
             if text_url:
-                print_err(f"tat returned {tat_text}")
+                # print_err(f"tat returned {tat_text}")
                 if re.search(r" No ADS-B feed", tat_text):
                     self._beast = T.No
                 elif re.search(r"  ADS-B feed", tat_text):
