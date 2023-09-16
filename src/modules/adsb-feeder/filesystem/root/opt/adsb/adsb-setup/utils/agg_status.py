@@ -27,21 +27,21 @@ class AggStatus:
     def beast(self) -> str:
         now = datetime.now()
         if now - self._last_check < timedelta(minutes=5.0):
-            return "+" if self._beast == T.Yes else "-" if self._beast == T.No else "?"
+            return "+" if self._beast == T.Yes else "-" if self._beast == T.No else "."
         self.check()
         if now - self._last_check < timedelta(minutes=5.0):
-            return "+" if self._beast == T.Yes else "-" if self._beast == T.No else "?"
-        return "?"
+            return "+" if self._beast == T.Yes else "-" if self._beast == T.No else "."
+        return "."
 
     @property
     def mlat(self) -> str:
         now = datetime.now()
         if now - self._last_check < timedelta(minutes=5.0):
-            return "+" if self._mlat == T.Yes else "-" if self._mlat == T.No else "?"
+            return "+" if self._mlat == T.Yes else "-" if self._mlat == T.No else "."
         self.check()
         if now - self._last_check < timedelta(minutes=5.0):
-            return "+" if self._mlat == T.Yes else "-" if self._mlat == T.No else "?"
-        return "?"
+            return "+" if self._mlat == T.Yes else "-" if self._mlat == T.No else "."
+        return "."
 
     def get_json(self, json_url):
         try:
