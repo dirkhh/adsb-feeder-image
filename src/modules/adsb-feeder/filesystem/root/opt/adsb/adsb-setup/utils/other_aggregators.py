@@ -80,6 +80,7 @@ class Aggregator:
                 timeout=timeout,
                 shell=True,
                 capture_output=True,
+                text=True,
             )
         except subprocess.TimeoutExpired as exc:
             # for several of these containers "timeout" is actually the expected behavior;
@@ -99,9 +100,11 @@ class Aggregator:
                 print_err(
                     f"failed to remove the temp container {str(result.stdout)} / {str(result.stderr)}"
                 )
+        except subprocess.SubprocessError as exc:
+            print_err(f"docker run {cmdline} ended with an exception {exc}")
         else:
-            print_err(f"docker run {cmdline} completed with output {result.stdout}")
-            output = result.stdout.decode()
+            output = result.stdout
+            print_err(f"docker run {cmdline} completed with output {output}")
         return output
 
     # the default case is straight forward. Remember the key and enable the aggregator
@@ -240,7 +243,7 @@ class RadarBox(Aggregator):
             return None
 
         cmdline = (
-            f"--rm -i --network adsb_default -e BEASTHOST=ultrafeeder -e LAT={self.lat} "
+            f"--rm -i --network config_default -e BEASTHOST=ultrafeeder -e LAT={self.lat} "
             f"-e LONG={self.lng} -e ALT={self.alt} {docker_image}"
         )
         output = self._docker_run_with_timeout(cmdline, 45.0)
@@ -274,13 +277,41 @@ class OpenSky(Aggregator):
             system=system,
         )
 
+    def _request_fr_serial(self, user):
+        docker_image = self._constants.env_by_tags(["opensky", "container"]).value
+
+        if not self._download_docker_container(docker_image):
+            print_err("failed to download the OpenSky docker image")
+            return None
+
+        cmdline = (
+            f"--rm -i --network config_default -e BEASTHOST=ultrafeeder -e LAT={self.lat} "
+            f"-e LONG={self.lng} -e ALT={self.alt} -e OPENSKY_USERNAME={user} {docker_image}"
+        )
+        output = self._docker_run_with_timeout(cmdline, 60.0)
+        serial_match = re.search("Got a new serial number: ([-a-zA-Z0-9]*)", output)
+        if not serial_match:
+            print_err(
+                f"couldn't find a serial number in the container output: {output}"
+            )
+            return None
+
+        return serial_match.group(1)
+
     def _activate(self, user_input: str):
-        user, serial = user_input.split("::")
-        if not user or not serial:
-            print_err(f"can't parse {user_input} as user/serial for OpenSky")
+        serial, user = user_input.split("::")
+        print_err(f"passed in {user_input} seeing user |{user}| and serial |{serial}|")
+        if not user:
+            print_err(f"missing user name for OpenSky")
             return False
+        if not serial:
+            print_err(f"need to request serial for OpenSky")
+            serial = self._request_fr_serial(user)
+            if not serial:
+                print_err("failed to get OpenSky serial")
+                return False
         self._constants.env_by_tags(self.tags + ["user"]).value = user
-        self._constants.env_by_tags(self.tags + ["pass"]).value = serial
+        self._constants.env_by_tags(self.tags + ["key"]).value = serial
         self._constants.env_by_tags(self.tags + ["is_enabled"]).value = True
         return True
 

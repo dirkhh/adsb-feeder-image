@@ -236,15 +236,19 @@
             <div class="form-group col-sm-11 no-gutters" id="OS_FIELDS">
                 <div class="row no-gutters">
                     <label for="opensky--key" class="col-sm-11">You need an OpenSky username and serial number.
-                        If you already have these, please enter them below. Automation to get them for you if you
-                        are a new user will be added in a future release.
+                        If you already have these, please enter them below.
+                        Otherwise, please go to the <a href="https://opensky-network.org/">OpenSky website</a>
+                        and register (button should be in the top right corner). Once you have an OpenSky username,
+                        enter it below and click Request Key; we will get a serial for you.
                     </label>
                     <input type="text" id="opensky--user" name="opensky--user" class="form-control col-sm-3 ml-1" {{
                         others_enabled('opensky') | replace("checked", "required" ) }} placeholder=" OpenSky username"
                         value="{{ env_value_by_tags(['opensky', 'user']) }}">
-                    <input type="text" id="opensky--key" name="opensky--key" class="form-control col-sm-3 ml-1" {{
-                        others_enabled('opensy') | replace("checked", "required" ) }}
+                    <input type="text" id="opensky--key" name="opensky--key" class="form-control col-sm-3 ml-1"
                         placeholder=" OpenSky serial number" value="{{ env_value_by_tags(['opensky', 'key'])}}">
+                    <button type="submit" class="btn btn-primary col-sm-3 ml-1" name="opensky--submit" value="stay">
+                        Request key
+                    </button>
                 </div>
             </div>
         </div>

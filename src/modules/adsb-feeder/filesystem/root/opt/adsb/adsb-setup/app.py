@@ -428,7 +428,7 @@ class AdsbIm:
         seen_go = False
         allow_insecure = not self._constants.is_enabled("secure_image")
         for key, value in form.items():
-            print_err(f"handling {key} -> {value} (allow insecure is {allow_insecure})")
+            # print_err(f"handling {key} -> {value} (allow insecure is {allow_insecure})")
             # this seems like cheating... let's capture all of the submit buttons
             if value == "go":
                 seen_go = True
