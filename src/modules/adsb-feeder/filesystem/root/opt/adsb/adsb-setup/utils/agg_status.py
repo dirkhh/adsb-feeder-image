@@ -138,6 +138,30 @@ class AggStatus:
                 # print_err(f"fr monitor.json returned {fr_dict}")
                 self._beast = T.Yes if fr_dict["feed_status"] == "connected" else T.No
                 self._last_check = datetime.now()
+        elif self._agg == "adsbone":
+            json_url = "https://api.adsb.one/feed-status"
+            aone_dict = self.get_json(json_url)
+            if aone_dict:
+                print_err(f"aone returned {aone_dict}")
+                for bc in aone_dict["beast_clients"]:
+                    print_err(f"beast uuid |{bc['rId']}|")
+                for mc in aone_dict["mlat_clients"]:
+                    print_err(f"mlat uuid |{mc['uuid'][0]}|")
+                my_uuid = self._constants.env_by_tags("ultrafeeder_uuid").value
+                print_err(f"my uuid |{my_uuid}|")
+                self._beast = (
+                    T.Yes
+                    if any({bc["rId"] == my_uuid for bc in aone_dict["beast_clients"]})
+                    else T.No
+                )
+                self._mlat = (
+                    T.Yes
+                    if any(
+                        {mc["uuid"][0] == my_uuid for mc in aone_dict["mlat_clients"]}
+                    )
+                    else T.No
+                )
+                self._last_check = datetime.now()
         elif self._agg == "adsbx":
             html_url = "https://www.adsbexchange.com/myip/"
             adsbx_text = self.get_plain(html_url)
