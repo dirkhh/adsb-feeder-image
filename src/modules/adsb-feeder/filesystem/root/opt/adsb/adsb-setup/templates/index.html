@@ -179,15 +179,17 @@
                         <td>Enabled</td>
                         <td>Data</td>
                         <td>MLAT</td>
+                        <td>Status</td>
                     </thead>
                     <tbody>
-                        {% for agg, name in aggregators %}
+                        {% for agg, name, map, status in aggregators %}
                         <tr>
-                            <td>{{ name }}</td>
+                            <td><a href="{{ map }}">{{ name }}</a></td>
                             <td class="text-center"><span id="{{ agg + 'span'}}">{% if is_enabled(agg) %} &#10003; {%
                                     endif %}</span></td>
                             <td class="text-center"><span id="{{ agg + 'beast' }}"></span></td>
                             <td class="text-center"><span id="{{ agg + 'mlat' }}"></span></td>
+                            <td class="text-center">{% if status != "" %}<a href="{{ status }}">...</a>{% endif %}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -199,7 +201,7 @@
 <script>
     $(document).ready(function () {
         console.log("executing ready function");
-        {% for agg, name in aggregators %}
+        {% for agg, name, m, s in aggregators %}
         {% if is_enabled(agg) %}
         get_status("{{ agg }}");
         {% endif %}

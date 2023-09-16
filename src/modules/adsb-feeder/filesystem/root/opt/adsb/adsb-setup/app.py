@@ -78,29 +78,30 @@ class AdsbIm:
             "radarbox--submit": RadarBox(self._system),
             "radarvirtuel--submit": RadarVirtuel(self._system),
         }
-        self.all_aggregators = [
-            ["adsblol", "adsb.lol"],
-            ["flyitaly", "Fly Italy ADSB"],
-            ["avdelphi", "AVDelphi"],
-            ["planespotters", "planespotters.net"],
-            ["tat", "TheAirTraffic.com"],
-            ["flyovr", "FLYOVR.com"],
-            ["radarplane", "RadarPlane"],
-            ["adsbone", "adsb.one"],
-            ["adsbfi", "adsb.fi"],
-            ["hpradar", "HPRadar"],
-            ["alive", "airplanes.live"],
-            ["adsbx", "ADSBExchange"],
-            ["flightradar", "flightradar24"],
-            ["planewatch", "Plane.watch"],
-            ["flightaware", "FlightAware"],
-            ["radarbox", "RadarBox"],
-            ["planefinder", "PlaneFinder"],
-            ["adsbhub", "ADSBHub"],
-            ["opensky", "OpenSky"],
-            ["radarvirtuel", "RadarVirtuel"],
-        ]
         # fmt: off
+        self.all_aggregators = [
+            # tag, name, map link, status link
+            ["adsblol", "adsb.lol", "https://adsb.lol/", "https://api.adsb.lol/api/0/me"],
+            ["flyitaly", "Fly Italy ADSB", "https://mappa.flyitalyadsb.com/", ""],
+            ["avdelphi", "AVDelphi", "https://www.avdelphi.com/coverage.html", ""],
+            ["planespotters", "Planespotters", "https://radar.planespotters.net/", "https://www.planespotters.net/feed/status"],
+            ["tat", "TheAirTraffic", "https://globe.theairtraffic.com/", "https://theairtraffic.com/feed/myip/"],
+            ["flyovr", "FLYOVR.com", "https://globe.flyovr.io/", ""],
+            ["radarplane", "RadarPlane", "https://radarplane.com/", "https://radarplane.com/feed"],
+            ["adsbone", "adsb.one", "https://globe.adsb.one/", "https://api.adsb.one/feed-status"],
+            ["adsbfi", "adsb.fi", "https://globe.adsb.fi/", "https://api.adsb.fi/v1/myip"],
+            ["hpradar", "HPRadar", "https://skylink.hpradar.com/", ""],
+            ["alive", "airplanes.live", "https://globe.airplanes.live/", ""],
+            ["adsbx", "ADSBExchange", "https://globe.adsbexchange.com/", "https://www.adsbexchange.com/myip/"],
+            ["flightradar", "flightradar24", "https://www.flightradar24.com/", "/fr24-monitor.json"],
+            ["planewatch", "Plane.watch", "https:/plane.watch/desktop", ""],
+            ["flightaware", "FlightAware", "https://www.flightaware.com/#home-live-map", "/fa-status"],
+            ["radarbox", "RadarBox", "https://www.radarbox.com/coverage-map", ""],
+            ["planefinder", "PlaneFinder", "https://planefinder.net/", "/planefinder-stat"],
+            ["adsbhub", "ADSBHub", "https://www.adsbhub.org/coverage.php", ""],
+            ["opensky", "OpenSky", "https://opensky-network.org/network/explorer", "https://opensky-network.org/receiver-profile?s=<FEEDER_OPENSKY_SERIAL>"],
+            ["radarvirtuel", "RadarVirtuel", "https://www.radarvirtuel.com/", ""],
+        ]
         self.proxy_routes = self._constants.proxy_routes
         self.app.add_url_rule("/propagateTZ", "propagateTZ", self.get_tz)
         self.app.add_url_rule("/restarting", "restarting", self.restarting)
@@ -673,7 +674,22 @@ class AdsbIm:
         return self.aggregators()
 
     def index(self):
-        return render_template("index.html", aggregators=self.all_aggregators)
+        aggregators = self.all_aggregators
+        for idx in range(len(aggregators)):
+            if aggregators[idx][3]:
+                if aggregators[idx][3][0] == "/":
+                    aggregators[idx][3] = (
+                        request.host_url.rstrip("/ ") + aggregators[idx][3]
+                    )
+                match = re.search("<([^>]*)>", aggregators[idx][3])
+                if match:
+                    print_err(
+                        f"found {match.group(0)} - replace with {self._constants.env(match.group(1)).value}"
+                    )
+                    aggregators[idx][3] = aggregators[idx][3].replace(
+                        match.group(0), self._constants.env(match.group(1)).value
+                    )
+        return render_template("index.html", aggregators=aggregators)
 
     @check_restart_lock
     def setup(self):

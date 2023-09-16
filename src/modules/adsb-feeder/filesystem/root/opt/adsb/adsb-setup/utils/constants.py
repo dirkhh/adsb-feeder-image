@@ -41,6 +41,7 @@ class Constants:
         ["/flightradar/", "FLIGHTRADAR", "/"],
         ["/flightradar24/", "FLIGHTRADAR", "/"],
         ["/planefinder/", "PLANEFINDER", "/"],
+        ["/planefinder-stat/", "PLANEFINDER", "/stats.html"],
         ["/dump978/", "UAT978", "/skyaware978/"],
         ["/logs/", "DAZZLE", "/"],
         ["/dozzle/", "DAZZLE", "/"],
