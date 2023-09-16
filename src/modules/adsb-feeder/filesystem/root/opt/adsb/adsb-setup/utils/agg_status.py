@@ -8,17 +8,19 @@ from enum import Enum
 from typing import List
 from urllib import error, request
 from .util import print_err
+from .constants import Constants
 
 T = Enum("T", ["Yes", "No", "Unknown"])
 
 
 class AggStatus:
-    def __init__(self, agg: str, uuid: str):
+    def __init__(self, agg: str, constants: Constants, url: str):
         self._agg = agg
         self._last_check = datetime.fromtimestamp(0.0)
         self._beast = T.Unknown
         self._mlat = T.Unknown
-        self._uuid = uuid
+        self._constants = constants
+        self._url = url
         self.check()
 
     @property
@@ -121,6 +123,15 @@ class AggStatus:
                 self._beast = T.Yes if radarplane_dict["data"]["beast"] else T.No
                 self._mlat = T.Yes if radarplane_dict["data"]["mlat"] else T.No
                 self._last_check = datetime.now()
+        elif self._agg == "flightaware":
+            json_url = f"{self._url}/fa-status.json/"
+            print_err(f"getting {json_url}")
+            fa_dict = self.get_json(json_url)
+            if fa_dict:
+                print_err(f"fa status.json returned {fa_dict}")
+                self._beast = T.Yes if fa_dict["adept"]["status"] == "green" else T.No
+                self._mlat = T.Yes if fa_dict["mlat"]["status"] == "green" else T.No
+                self._last_check = datetime.now()
         elif self._agg == "adsbx":
             html_url = "https://www.adsbexchange.com/myip/"
             adsbx_text = self.get_plain(html_url)
@@ -163,7 +174,8 @@ class AggStatus:
                     # but since we got someting we could parse for beast above, let's keep going
                 self._last_check = datetime.now()
         elif self._agg == "planespotters":
-            html_url = f"https://www.planespotters.net/feed/status/{self._uuid}"
+            uf_uuid = self._constants.env_by_tags("ultrafeeder_uuid").value
+            html_url = f"https://www.planespotters.net/feed/status/{uf_uuid}"
             ps_text = self.get_plain(html_url)
             if ps_text:
                 self._beast = (

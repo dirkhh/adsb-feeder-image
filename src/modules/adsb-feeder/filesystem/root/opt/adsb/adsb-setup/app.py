@@ -404,7 +404,7 @@ class AdsbIm:
         )
 
     def agg_status(self, agg):
-        status = AggStatus(agg, self._constants.env_by_tags("ultrafeeder_uuid").value)
+        status = AggStatus(agg, self._constants, request.host_url.rstrip("/ "))
         return json.dumps({"beast": status.beast, "mlat": status.mlat})
 
     @check_restart_lock

@@ -33,6 +33,7 @@ class Constants:
         ["/pa-stats/", "PIAWARESTAT", "/"],
         ["/fa-stats/", "PIAWARESTAT", "/"],
         ["/fa-status/", "PIAWARESTAT", "/"],
+        ["/fa-status.json/", "PIAWARESTAT", "/status.json"],
         ["/fr-status/", "FLIGHTRADAR", "/"],
         ["/fr/", "FLIGHTRADAR", "/"],
         ["/fr24/", "FLIGHTRADAR", "/"],
