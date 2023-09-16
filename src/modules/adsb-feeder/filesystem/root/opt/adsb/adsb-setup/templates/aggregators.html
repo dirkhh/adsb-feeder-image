@@ -131,7 +131,7 @@
                         and click on the "Claim this feeder on FlightAware" button.
                     </label>
                     <script>var link = document.getElementById('piaware');
-                        link.setAttribute('href', window.location.protocol + "//" + window.location.hostname + ":8081/");
+                        link.setAttribute('href', window.location.protocol + "//" + window.location.hostname + ":" + {{ env_value_by_tag("piamapport") }});
                     </script>
                     <input type="text" id="flighaware--key" name="flightaware--key" class="form-control col-sm-6 ml-1"
                         placeholder=" Piaware key" value="{{ env_value_by_tags(['flightaware', 'key']) }}">
