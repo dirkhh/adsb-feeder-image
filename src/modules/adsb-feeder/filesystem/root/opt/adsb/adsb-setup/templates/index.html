@@ -29,7 +29,8 @@
                             </td>
                             <td class="text-center"><span id="{{ agg + 'beast' }}"></span></td>
                             <td class="text-center"><span id="{{ agg + 'mlat' }}"></span></td>
-                            <td class="text-center">{% if status != "" %}<a href="{{ status }}">&#x1f517;</a>{% endif %}
+                            <td class="text-center">{% if status != "" and is_enabled(agg) %}
+                                <a href="{{ status }}">&#x1f517;</a>{% endif %}
                             </td>
                         </tr>
                         {% endif %}
