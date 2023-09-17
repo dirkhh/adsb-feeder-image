@@ -9,12 +9,13 @@ Currently we are building images for
 - Banana Pi M5 / M2P
 - Odriod C4
 - Rockpi 4 (tested)
+- NanoPi NEO3 (tested)
 
-- VM setup under VirtualBox (easy), VMware (almost as easy), or Proxmox (advanced users)
+- VM setup under VirtualBox (easy), VMware (almost as easy), or Proxmox (advanced users) -- note that when running in VMs, there are known issues that are outside of the control of the image with USB timing that frequently lead to MLAT issues.
 
 The idea is to create a "complete" ADS-B feeder that feeds pretty much all of the ADS-B flight trackers / aggregators.
 
-These aggregators have a comittment to open data ([daily release of the data](https://github.com/adsblol/globe_history)):
+These aggregators have a comittment to open data ([daily release of the data](https://github.com/adsblol/globe_history)); they also share with each other the data fed to them (in order to improve mlat coverage, it still makes sense to feed all of them):
 - [adsb.lol](https://adsb.lol)
 - [Fly Italy Adsb](https://flyitalyadsb.com)
 - [TheAirTraffic](http://theairtraffic.com)
@@ -24,6 +25,7 @@ These aggregators are also supported:
 - [ADS-B Exchange](https://adsbexchange.com)
 - [ADSBHub](https://adsbhub.org)
 - [ADS-B One](https://adsb.one)
+- [airplanes.live](https://airplanes.live)
 - [AVDelphi](https://www.avdelphi.com)
 - [FlightAware](https://flightaware.com)
 - [FlightRadar24](https://www.flightradar24.com)
@@ -39,24 +41,23 @@ These aggregators are also supported:
 
 ### Home page of an installed ADS-B Feeder Image
 
-![ADS-B Feeder home page](/../screenshots/screenshots/ADSB-im-v0.15.0.png "Feeder Home Page")
+![ADS-B Feeder home page](/../screenshots/screenshots/ADSB-im-v0.16.0.png "Feeder Home Page")
 
 ### The goal of this project is to make things as simple as possible for the non-technical user.
 
 ## Feed from a Single Board Computer (like the Raspberry Pi)
 - buy one of the supported boards (at least the Le Potato seems to be easily and cheaply available in most places)
 - invest in a decent power supply - while many of these can be driven from a powered hub or a cheap 'charger' plug, not having a stable 5V power
-source tends to be the biggest causes of issues with these SBC
+source tends to be the biggest cause of issues with these SBC
 - get an SDR and antenna. There are many many choices. Availability may differ depending on where you are. But often the 'green' RadarBox SDR and
-an indoor or (much better) outdoor antenna is all you need
+an indoor or (much better) outdoor antenna is all you need. More detail on the [ADSB.im website](https://adsb.im/supported).
 - download the current release from the [Release section](https://github.com/dirkhh/adsb-feeder-image/releases/latest)
 - use a tool like the [Raspberry Pi Imager](https://github.com/raspberrypi/rpi-imager/releases) to write the image to a µSD card on your computer
 - if doing this with the RPi image, only use the 'wifi setup' option to make sure the image can connect to your wifi - everything else should be
 - using a DietPi or non-Raspberry image, WiFi is either unsupported (non-Raspberry boards) or needs to be setup using a text editor making changes to two files on the mountable partifion of the feeder image. There's a README file with instructions in the same folder.
-kept unchanged
 - boot from the image
 - wait a couple of minutes for the initial boot to complete, then connect to the [ADSB-PI Setup Page](http://adsb-feeder.local) -- this link
-_should_ work to find the freshly booted system on your local network - assuming you have a reasonably standard setup with mDNS enabled. If this fails. got to the [adsb.im redirector](http://my.adsb.im) - which should forward you to the right local address on your network.
+_should_ work to find the freshly booted system on your local network - assuming you have a reasonably standard setup with mDNS enabled. If this fails. got to the [adsb.im redirector](http://my.adsb.im) - which should forward you to the right local address on your network. In the rare case where this fails as well you'll need to manually find the board's IP address - either using a connected keyboard / monitor, or via your router or other source of local IP addresses.
 - on the setup website enter the latitude, longitude, and elevation of your receiver as well as a name.
 - there's a convenient button to get the correct time zone from your browser
 - finally there's a quick selection of the 'semi anonymous' aggregators to submit data to - the ones where you need accounts are on a separate config page
@@ -71,6 +72,8 @@ _should_ work to find the freshly booted system on your local network - assuming
 Download the `adsb-feeder-x86-64-vm-*.ova` for the latest release. Double click on the OVA (which should open your virtualization software). Finish the import (under VMware you'll get a warning about a compatibility issue, simply clicking retry should get you past that). Before you start the VM, pass your SDR (which should be connected to a USB port of your PC or Mac) through to that VM. How this is done varries by product and the OS you are running on (Windows, macOS, Linux), but basically in all cases there is an option to pass a USB device to a VM - select your SDR in that list.
 
 Now boot the image and wait a brief while until the console screen stops scrolling and shows a DietPi startup screen that below the two yellow lines presents you with an IP address. Connect to this IP address from your browser and you'll be able to set up the feeder and start sending data to the aggregators of your choice.
+
+As mentioned above, there are known issues with USB timing when accessing an SDR from within a VM - these are unrelated to the ADS-B Feeder image but instead based in the implementation details of most hypervisors. As a result, it is not uncommon to see MLAT issues with feeders running in a VM.
 
 ### for advanced users wanting to run this image on x86 under Proxmox
 
@@ -90,4 +93,4 @@ This requires [CustomPiOS](https://github.com/guysoft/CustomPiOS) - unpack this 
 
 ## python app
 
-at [src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup](https://github.com/dirkhh/adsb-feeder-image/tree/master/src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup)
+If you are looking for the sources to the adsb-setup app, they are at [src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup](https://github.com/dirkhh/adsb-feeder-image/tree/master/src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup)
