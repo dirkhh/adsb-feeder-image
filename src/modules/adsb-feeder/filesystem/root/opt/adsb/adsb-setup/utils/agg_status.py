@@ -138,6 +138,14 @@ class AggStatus:
                 # print_err(f"fr monitor.json returned {fr_dict}")
                 self._beast = T.Yes if fr_dict["feed_status"] == "connected" else T.No
                 self._last_check = datetime.now()
+        elif self._agg == "radarplane":
+            uuid = self._constants.env_by_tags("ultrafeeder_uuid").value
+            json_url = f"https://radarplane.com/api/v1/feed/check/{uuid}"
+            rp_dict = self.get_json(json_url)
+            if rp_dict:
+                self._beast = T.Yes if rp_dict["data"]["beast"] else T.No
+                self._mlat = T.Yes if rp_dict["data"]["mlat"] else T.No
+                self._last_check = datetime.now()
         elif self._agg == "adsbone" or self._agg == "alive":
             json_url = (
                 "https://api.adsb.one/feed-status"
