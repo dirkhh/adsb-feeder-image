@@ -143,7 +143,7 @@ class FlightRadar24(Aggregator):
 
         cmdline = (
             f'--rm -i -e FEEDER_LAT="{self.lat}" -e FEEDER_LONG="{self.lng}" -e FEEDER_ALT_FT="{self.alt_ft}" '
-            f'-e FR24_EMAIL="{email}" --entrypoint /scripts/signup.sh {self.container}'
+            f'-e FR24_EMAIL="{email}" -e FR24_SIGNUP=1 {self.container}'
         )
         output = self._docker_run_with_timeout(cmdline, 45.0)
         sharing_key_match = re.search(
@@ -225,6 +225,7 @@ class FlightAware(Aggregator):
 
         self._constants.env_by_tags(self._key_tags).value = feeder_id
         self._constants.env_by_tags(self._enabled_tags).value = True
+        return True
 
 
 class RadarBox(Aggregator):
