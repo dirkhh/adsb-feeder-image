@@ -1,3 +1,6 @@
+from utils.util import print_err
+
+
 class NetConfig:
     def __init__(self, adsb_config: str, mlat_config: str, has_policy: bool):
         self.adsb_config = adsb_config
@@ -35,6 +38,9 @@ class UltrafeederConfig:
             aggregator_env = self._constants.env_by_tags(
                 [name, "ultrafeeder", "is_enabled"]
             )
+            if not aggregator_env:
+                print_err(f"netconfigs references tag {name} with no associated env")
+                continue
             if aggregator_selection == "all":
                 aggregator_env.value = True
             elif aggregator_selection == "privacy":
