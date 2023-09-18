@@ -114,7 +114,7 @@ class Constants:
             "mlat,skyfeed.hpradar.com,31090,39011",
             has_policy=False,
         ),
-        "airplaneslive": NetConfig(
+        "alive": NetConfig(
             "adsb,feed.airplanes.live,30004,beast_reduce_plus_out",
             "mlat,feed.airplanes.live,31090,39012",
             has_policy=True,
