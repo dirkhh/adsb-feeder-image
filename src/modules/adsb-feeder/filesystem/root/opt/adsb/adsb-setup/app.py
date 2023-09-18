@@ -86,7 +86,7 @@ class AdsbIm:
             ["avdelphi", "AVDelphi", "https://www.avdelphi.com/coverage.html", ""],
             ["planespotters", "Planespotters", "https://radar.planespotters.net/", "https://www.planespotters.net/feed/status"],
             ["tat", "TheAirTraffic", "https://globe.theairtraffic.com/", "https://theairtraffic.com/feed/myip/"],
-            ["flyovr", "FLYOVR.com", "https://globe.flyovr.io/", ""],
+            ["flyovr", "FLYOVR.io", "https://globe.flyovr.io/", ""],
             ["radarplane", "RadarPlane", "https://radarplane.com/", "https://radarplane.com/feed"],
             ["adsbone", "adsb.one", "https://globe.adsb.one/", "https://api.adsb.one/feed-status"],
             ["adsbfi", "adsb.fi", "https://globe.adsb.fi/", "https://api.adsb.fi/v1/myip"],
