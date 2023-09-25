@@ -1,16 +1,37 @@
-import io
 import json
 import re
-import subprocess
-import sys
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import List
 from urllib import error, request
 from .util import print_err
 from .constants import Constants
 
 T = Enum("T", ["Yes", "No", "Unknown"])
+
+
+def generic_get_json(url: str, data: str | None):
+    try:
+        req = request.Request(
+            url,
+            method="GET" if data == None else "POST",
+            data=data,
+            headers={
+                "Content-Type": "application/json",
+                "User-Agent": "ADS-B Image",
+            },
+        )
+        response = request.urlopen(req)
+    except error.HTTPError as err:
+        print_err(f"checking {url} failed: {err.code}: {err.reason}")
+    except error.URLError as err:
+        print_err(f"checking {url} failed: {err.reason}")
+    except:
+        # for some reason this didn't work
+        print_err("checking {url} failed: reason unknown")
+    else:
+        _json = response.read().decode("utf-8")
+        return json.loads(_json)
+    return None
 
 
 class AggStatus:
@@ -44,27 +65,7 @@ class AggStatus:
         return "."
 
     def get_json(self, json_url):
-        try:
-            response = request.urlopen(
-                request.Request(
-                    json_url,
-                    headers={
-                        "Content-Type": "application/json",
-                        "User-Agent": "ADS-B Image",
-                    },
-                )
-            )
-        except error.HTTPError as err:
-            print_err(f"checking {json_url} failed: {err.code}: {err.reason}")
-        except error.URLError as err:
-            print_err(f"checking {json_url} failed: {err.reason}")
-        except:
-            # for some reason this didn't work
-            print_err("checking {json_url} failed: reason unknown")
-        else:
-            _json = response.read().decode("utf-8")
-            return json.loads(_json)
-        return None
+        return generic_get_json(json_url, None)
 
     def get_plain(self, plain_url):
         try:
