@@ -2,7 +2,7 @@
 {% set active_page = "index" %}
 
 {% block content %}
-<h1>{% block title %} ADSB Feeder Homepage for {{ env_value_by_tag("mlat_name") }} {% endblock %}</h1>
+<h1>{% block title %} ADS-B Feeder Homepage for {{ env_value_by_tag("mlat_name") }} {% endblock %}</h1>
 <div class="row">
 
     <div class="col-12">
@@ -42,6 +42,13 @@
         </div>
     </div>
     <div class="col-12">
+        <h5>ADS-B Feeder</h5>
+        <div class="mb-4">
+            Latest version: <span id="latest_tag"></span> - <span id="latest_commit"></span><br>
+            <span id="advice" class="small"></span>
+        </div>
+    </div>
+    <div class="col-12">
         <div id="UF" class="row">
             <div class="col-12">
                 <h5>TAR1090 Mapping Interface</h5>
@@ -60,7 +67,8 @@
                 </ul>
             </div>
             <div class="text-muted small mb-4 col-12">
-                Please note that after a restart it can take up to a couple of minutes for the pages below to respond,
+                Please note that after a restart it can take up to a couple of minutes for the pages below to
+                respond,
                 so if you get an error, please wait a moment and try again.
             </div>
         </div>
@@ -70,7 +78,8 @@
             </div>
             <div class="col-12">
                 <ul>
-                    <li>The Dump978 map is currently broken - please use the default map above and filter for UAT.</li>
+                    <li>The Dump978 map is currently broken - please use the default map above and filter for UAT.
+                    </li>
                     <!--
                     <li><a href="/dump978">Dump978 map</a>
                     -->
@@ -84,10 +93,10 @@
             <div class="col-12">
                 <ul>
                     <li><a href="{{ url_for('setup') }}">Basic Setup</a>
-                    <li style="display: {% if is_enabled('base_config') %} list-item {% else %} none {% endif %};"><a
-                            href="{{ url_for('advanced') }}">Advanced setup</a>
-                    <li style="display: {% if is_enabled('base_config') %} list-item {% else %} none {% endif %};"><a
-                            href="{{ url_for('aggregators') }}">Aggregator setup</a>
+                    <li style="display: {% if is_enabled('base_config') %} list-item {% else %} none {% endif %};">
+                        <a href="{{ url_for('advanced') }}">Advanced setup</a>
+                    <li style="display: {% if is_enabled('base_config') %} list-item {% else %} none {% endif %};">
+                        <a href="{{ url_for('aggregators') }}">Aggregator setup</a>
                 </ul>
             </div>
         </div>
@@ -129,7 +138,13 @@
 </div>
 <script>
     $(document).ready(function () {
-        console.log("executing ready function");
+        fetch(`${SCRIPT_ROOT}/api/status/im`)
+            .then(response => response.json())
+            .then(data => {
+                $("#latest_tag").text(data["latest_tag"]);
+                $("#latest_commit").text(data["latest_date"]);
+                $("#advice").text(data["advice"]);
+            });
         {% for agg, name, m, s in aggregators %}
         {% if is_enabled(agg) %}
         get_status("{{ agg }}");
@@ -142,7 +157,6 @@
         fetch(`${SCRIPT_ROOT}/api/status/${agg}`)
             .then(response => response.json())
             .then(data => {
-                console.log("received back", data);
                 $("#" + agg + "beast").text(data["beast"]);
                 $("#" + agg + "mlat").text(data["mlat"]);
                 if (data["beast"] == "+" && data["mlat"] == "+") {

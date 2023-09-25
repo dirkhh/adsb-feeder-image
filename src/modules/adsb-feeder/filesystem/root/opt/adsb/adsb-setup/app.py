@@ -420,7 +420,13 @@ class AdsbIm:
     def agg_status(self, agg):
         if agg == "im":
             status = ImStatus(self._constants).check()
-            print_err(f"{status} returned from ImStatus")
+            cur_version = self._constants.env_by_tags("base_version").value
+            match = re.search(r"(v[0-9.]+)\((.*?)\)-(.*)", cur_version)
+            status["advice"] = (
+                ""
+                if not match or match.group(1) >= status["latest_tag"]
+                else f"(Please consider updating: you are running {cur_version})"
+            )
             return json.dumps(status)
         status = AggStatus(agg, self._constants, request.host_url.rstrip("/ "))
         return json.dumps({"beast": status.beast, "mlat": status.mlat})

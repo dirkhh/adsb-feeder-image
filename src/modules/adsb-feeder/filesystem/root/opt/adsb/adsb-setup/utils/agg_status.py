@@ -224,9 +224,6 @@ class AggStatus:
 
 class ImStatus:
     def __init__(self, constants: Constants):
-        self._last_check = datetime.fromtimestamp(0.0)
-        self.latest_tag = None
-        self.latest_app = None
         self._constants = constants
 
     def check(self):
