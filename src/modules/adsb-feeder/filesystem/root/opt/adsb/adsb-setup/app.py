@@ -32,6 +32,7 @@ from utils import (
     RouteManager,
     SDRDevices,
     AggStatus,
+    ImStatus,
     System,
     check_restart_lock,
     UltrafeederConfig,
@@ -417,6 +418,10 @@ class AdsbIm:
         )
 
     def agg_status(self, agg):
+        if agg == "im":
+            status = ImStatus(self._constants).check()
+            print_err(f"{status} returned from ImStatus")
+            return json.dumps(status)
         status = AggStatus(agg, self._constants, request.host_url.rstrip("/ "))
         return json.dumps({"beast": status.beast, "mlat": status.mlat})
 

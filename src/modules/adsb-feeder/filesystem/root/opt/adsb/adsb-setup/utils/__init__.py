@@ -13,6 +13,6 @@ from .other_aggregators import (
     RadarVirtuel,
 )
 from .sdr import SDR, SDRDevices
-from .agg_status import AggStatus
+from .agg_status import AggStatus, ImStatus
 from .system import System
 from .util import cleanup_str, print_err

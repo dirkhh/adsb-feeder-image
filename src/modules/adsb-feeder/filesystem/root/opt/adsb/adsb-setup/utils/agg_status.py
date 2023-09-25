@@ -220,3 +220,15 @@ class AggStatus:
 
     def __repr__(self):
         return f"Aggregator({self._agg} last_check: {str(self._last_check)}, beast: {self._beast} mlat: {self._mlat})"
+
+
+class ImStatus:
+    def __init__(self, constants: Constants):
+        self._last_check = datetime.fromtimestamp(0.0)
+        self.latest_tag = None
+        self.latest_app = None
+        self._constants = constants
+
+    def check(self):
+        json_url = f"https://adsb.im/api/status"
+        return generic_get_json(json_url, self._constants.env_by_tags("pack").value)
