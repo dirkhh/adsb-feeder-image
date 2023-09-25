@@ -96,7 +96,7 @@ class AdsbIm:
             ["adsbfi", "adsb.fi", "https://globe.adsb.fi/", "https://api.adsb.fi/v1/myip"],
             ["adsbx", "ADSBExchange", "https://globe.adsbexchange.com/", "https://www.adsbexchange.com/myip/"],
             ["hpradar", "HPRadar", "https://skylink.hpradar.com/", ""],
-            ["alive", "airplanes.live", "https://globe.airplanes.live/", ""],
+            ["alive", "airplanes.live", "https://globe.airplanes.live/", "https://airplanes.live/myfeed/"],
             ["flightradar", "flightradar24", "https://www.flightradar24.com/", "/fr24-monitor.json"],
             ["planewatch", "Plane.watch", "https:/plane.watch/desktop", ""],
             ["flightaware", "FlightAware", "https://www.flightaware.com/#home-live-map", "/fa-status"],
