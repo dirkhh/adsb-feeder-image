@@ -1,6 +1,4 @@
 # dataclass
-import sys
-
 from dataclasses import dataclass
 from os import getenv
 from pathlib import Path
@@ -260,6 +258,7 @@ class Constants:
         Env("_ADSBIM_STATE_PIAWARESTAT_PORT", default=8082, tags=["piastatport"]),
         Env("_ADSBIM_STATE_FLIGHTRADAR_PORT", default=8754, tags=["frport"]),
         Env("_ADSBIM_STATE_PLANEFINDER_PORT", default=30053, tags=["pfport"]),
+        Env("_ADSBIM_STATE_PACKAGE", tags=["pack"]),
         Env(
             "_ADSBIM_STATE_IMAGE_NAME",
             # somehow I can't make a path relative to data_path work here...

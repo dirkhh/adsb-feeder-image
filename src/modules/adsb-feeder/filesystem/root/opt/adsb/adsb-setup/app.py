@@ -4,15 +4,17 @@ import json
 from operator import is_
 import os.path
 import pathlib
+import pickle
 import platform
 import re
 import shutil
 import subprocess
 from time import sleep
 import zipfile
-from functools import partial
+from base64 import b64encode
 from os import path, urandom
-from typing import Dict, List, Tuple
+from typing import Dict, List
+from zlib import compress
 
 from flask import Flask, flash, redirect, render_template, request, send_file, url_for
 
@@ -68,6 +70,7 @@ class AdsbIm:
         self._constants.env_by_tags(
             "ultrafeeder_config"
         )._value_call = self._ultrafeeder.generate
+        self._constants.env_by_tags("pack")._value_call = self.pack_im
         self._other_aggregators = {
             "adsbhub--submit": ADSBHub(self._system),
             "flightaware--submit": FlightAware(self._system),
@@ -153,6 +156,15 @@ class AdsbIm:
         elif board == "Libre Computer AML-S905X-CC":
             board = "Libre Computer Le Potato (AML-S905X-CC)"
         self._constants.env_by_tags("board_name").value = board
+
+    def pack_im(self) -> str:
+        image = {
+            "in": self._constants.env_by_tags("image_name").value,
+            "bn": self._constants.env_by_tags("board_name").value,
+            "bv": self._constants.env_by_tags("base_version").value,
+            "cv": self._constants.env_by_tags("container_version").value,
+        }
+        return b64encode(compress(pickle.dumps(image)))
 
     def run(self):
         self._routemanager.add_proxy_routes(self.proxy_routes)
