@@ -12,7 +12,7 @@ fi
 bash /opt/adsb/docker-pull.sh &
 
 # get the local IP address
-IP=$(ip -4 ad li dev $(ip ro li | head -1 | awk '/default/{ print $5 }') up | awk '/inet/{ print $2 }' | cut -d/ -f1 | head -1)
+IP=$(ip route get 8.8.8.8 | sed -n '/src/{s/.*src *\([^ ]*\).*/\1/p;q}')
 
 # this gets stopped and disabled by the setup app
 while true; do
