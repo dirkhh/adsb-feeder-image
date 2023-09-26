@@ -105,7 +105,8 @@
                 </ul>
             </div>
         </div>
-        <div class="row mt-3">
+        <div class="row mt-3" {% if not ( is_enabled('adsblol') or is_enabled('flightradar') or
+            is_enabled('planefinder')) %} style="display: none;" {% endif %}>
             <div class="col-12">
                 <h5>Additional aggregator links</h5>
             </div>
