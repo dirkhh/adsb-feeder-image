@@ -1,4 +1,6 @@
+SRCDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export DIST_NAME=adsb-feeder-dist
+export DIST_VERSION=$(bash "${SRCDIR}/get-version.sh")
 
 export RPI_IMAGER_NAME="${DIST_NAME}"
 export RPI_IMAGER_DESCRIPTION="A distro built with CustomPiOS"
