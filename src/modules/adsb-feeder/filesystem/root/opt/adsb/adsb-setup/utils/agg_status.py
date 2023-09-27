@@ -9,7 +9,7 @@ from .constants import Constants
 T = Enum("T", ["Yes", "No", "Unknown"])
 
 
-def generic_get_json(url: str, data: str | None):
+def generic_get_json(url: str, data):
     try:
         req = request.Request(
             url,
