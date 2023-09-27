@@ -13,9 +13,19 @@ if [ "${DIR}" != "/opt/adsb-feeder-update" ]; then
 fi
 echo "running $(basename $0) in ${DIR}"
 
-BRANCH=$(sed 's/.*(\(.*\)).*/\1/' < /opt/adsb/adsb.im.version)
-if [ "$BRANCH" = "$(cat /opt/adsb/adsb.im.version)" ] ; then
-    BRANCH="main"
+# this makes sure that the user can't interact with the UI while we are potentially
+# making changes under the hood
+echo "stop the running service"
+systemctl stop adsb-setup.service
+
+# check which channel we are updating to
+if [ -f /opt/adsb/update-channel ] ; then
+    BRANCH=$(</opt/adsb/update-channel)
+else
+    BRANCH=$(sed 's/.*(\(.*\)).*/\1/' < /opt/adsb/adsb.im.version)
+    if [ "$BRANCH" = "$(cat /opt/adsb/adsb.im.version)" ] ; then
+        BRANCH="main"
+    fi
 fi
 
 echo "checkout the ${BRANCH} branch of the upstream feeder image"
@@ -49,7 +59,7 @@ if [ "$1" != "" ] ; then
             # but in order for that to always work we need to be on a different branch
             # what a silly dance...
             git branch -D "tmp${TARGET}$$" 2>&1 > /dev/null
-            git checkout -b "tmp${TARGET}$$"
+            git checkout -b "tmp${TARGET}$$" > /dev/null
             git branch -D ${TARGET} 2>&1 > /dev/null
             git checkout -b ${TARGET} ${TARGET} 2>&1 > /dev/null || git checkout ${TARGET}
             git branch -D "tmp${TARGET}$$" 2>&1 > /dev/null
@@ -57,15 +67,15 @@ if [ "$1" != "" ] ; then
         BRANCH="$TARGET"
     fi
 else
-    if [ "$TARGET" = "main" ] ; then
-        # on the main branch, grab the last tag, otherwise check out what's there
+    if [[ "$TARGET" = "beta" || "$TARGET" = "stable" ]] ; then
+        # on one of the two channels, grab the last tag, otherwise check out what's there
         TARGET=$(git tag --sort=version:refname|tail -1)
     fi
     # make sure we get a clean checkout... simply remove the branch if it exists
     # but in order for that to always work we need to be on a different branch
     # what a silly dance...
     git branch -D "tmp${TARGET}$$" 2>&1 > /dev/null
-    git checkout -b "tmp${TARGET}$$"
+    git checkout -b "tmp${TARGET}$$" > /dev/null
     git branch -D ${TARGET} 2>&1 > /dev/null
     git checkout -b ${TARGET} ${TARGET} 2>&1 > /dev/null || git checkout ${TARGET}
     git branch -D "tmp${TARGET}$$" 2>&1 > /dev/null
@@ -84,9 +94,6 @@ echo "${TARGET} checked out successfully, starting the actual upgrade to ${VERSI
 echo "prepare the files that we need to replace"
 mkdir -p ${DIR}/root
 cp -r src/modules/adsb-feeder/filesystem/root ${DIR}
-
-echo "stop the running service"
-systemctl stop adsb-setup.service
 
 echo "copy the updated files in place"
 cd ${DIR}/root
@@ -114,14 +121,11 @@ done
 echo $VERSION > /opt/adsb/adsb.im.version
 sed -i "s/BASE_VERSION=.*/BASE_VERSION=$VERSION/" /opt/adsb/config/.env
 
-echo "restart the service"
-systemctl daemon-reload
-systemctl start adsb-setup.service
-
 echo "finally, trigger a container upgrade so that they match the new image"
 /opt/adsb/docker-update-adsb-im -no-fetch
 
-echo "in an abundance of caution, restart the adsb-setup service"
-systemctl restart adsb-setup.service
+echo "restart the service"
+systemctl daemon-reload
+systemctl start adsb-setup.service
 
 echo "update to ${VERSION} complete"

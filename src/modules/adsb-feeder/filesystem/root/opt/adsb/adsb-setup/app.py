@@ -440,6 +440,10 @@ class AdsbIm:
         self._sdrdevices._ensure_populated()
         return render_template("advanced.html")
 
+    def set_channel(self, channel: str):
+        with open(self._constants.data_path / "update-channel", "w") as update_channel:
+            print(channel, file=update_channel)
+
     def update(self):
         description = """
             This is the one endpoint that handles all the updates coming in from the UI.
@@ -471,7 +475,10 @@ class AdsbIm:
                     # this needs a lot more checking and safety, but for now, just go
                     cmdline = "/opt/adsb/docker-update-adsb-im"
                     subprocess.run(cmdline, timeout=600.0, shell=True)
-                if key == "update_feeder_aps":
+                if key == "update_feeder_aps_beta" or key == "update_feeder_aps_stable":
+                    channel = "stable" if key == "update_feeder_aps_stable" else "beta"
+                    self.set_channel(channel)
+                    print_err(f"updating feeder to {channel} channel")
                     # start this in the background so it doesn't prevent showing the waiting screen
                     cmdline = "systemctl start adsb-feeder-update.service &"
                     subprocess.run(cmdline, timeout=5.0, shell=True)
