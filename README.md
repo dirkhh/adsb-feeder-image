@@ -85,6 +85,15 @@ You need to be able to ssh into your Proxmox system with the root account.
 - start the VM, wait for the first boot to complete, and then connect to it's web interface as usual
 - remember to pass through the SDR USB device to the VM before trying to configure the feeder
 
+
+## Feed from most Linux systems
+
+You can also install this software stack as an app on an existing Linux system. If you are running DietPi as the Linux OS on your system, you can simply install it using `dietpi-software` (it's app 141). Otherwise you can run a small [install script](https://raw.githubusercontent.com/dirkhh/adsb-feeder-image/main/src/tools/app-install.sh). For the trusting kinda people, all you need to do is
+```
+curl https://raw.githubusercontent.com/dirkhh/adsb-feeder-image/main/src/tools/app-install.sh | sudo bash
+```
+Or you could do the more sensible thing of downloading the script, reading it, and then executing it.
+
 # for developers
 
 This repo actually contains the scripting to create the SD card image for some common SBCs to run an ADS-B feeder. And as 'releases' it publishes such images.
