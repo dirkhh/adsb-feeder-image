@@ -5,7 +5,7 @@ Currently we are building images for
 - Raspberry Pi Zero 2, 3a/b, and 4 (tested on Zero 2W, 3a, and 4 - note that Pi Zero W will NOT work)
 - Asus Tinkerboard (tested)
 - Libre Computing Le Potato (tested) and Renegade (tested)
-- Orange Pi 3LTS (tested - no wifi support), 4LTS, and 5 (tested)
+- Orange Pi 3LTS (tested - no wifi support), 4LTS, 5, and 5plus (tested)
 - Banana Pi M5 / M2P
 - Odriod C4
 - Rockpi 4 (tested)
