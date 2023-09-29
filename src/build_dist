@@ -1,11 +1,68 @@
 #!/usr/bin/env bash
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+source "${DIR}/config"
+
 export DIST_PATH=${DIR}
 export CUSTOM_PI_OS_PATH=$(<${DIR}/custompios_path)
 export PATH=$PATH:$CUSTOM_PI_OS_PATH
 
-VERSION=$(bash "${DIR}/get_version.sh")
-echo $VERSION > modules/adsb-feeder/filesystem/root/opt/adsb/adsb.im.version
+if [[ "$1" == "dietpi-trailing-fat" ]] ; then
+    VERSION="$DIST_VERSION"
+    GIT_COMMIT_SHA=$(git rev-parse HEAD)     # this means that this image WILL FAIL if the code wasn't pushed to GitHub
 
-${CUSTOM_PI_OS_PATH}/build_custom_os $@
+    # these are done completely differently, we really don't use CustomPiOS for those, but for
+    # consistency we still use their framework so we can benefit from their tooling
+    source "${CUSTOM_PI_OS_PATH}/common.sh"
+    VARIANT_CONFIG_DIR=$(realpath -s $(dirname $(realpath -s $BASH_SOURCE))/../..)
+    BASE_ZIP_IMG=`ls -t ${DIST_PATH}/image-dietpi/*.xz | head -n 1`
+    BASE_IMG="${BASE_ZIP_IMG%.xz}"
+    7zr e -so "$BASE_ZIP_IMG" > "$BASE_IMG"
+    echo "$BASE_IMG"
+    MNT_DIR=$(mktemp -d)
+    # what we want to do is this:
+    # mount_image "$BASE_IMG" 1 "$MNT_DIR" "media" 2
+    # but that unfortunately doesn't work if the fat partition is after the root partition
+    # as that gets us a negative sizelimit
+    # so instead do it ourselves here (copying the code is fine given licenses of the respective projects)
+    image_path="$BASE_IMG"
+    root_partition=1
+    mount_path="$MNT_DIR"
+    boot_mount_path="media"
+    boot_partition=2
+    fdisk_output=$(sfdisk --json "${image_path}" )
+    boot_offset=$(($(jq ".partitiontable.partitions[] | select(.node == \"$image_path$boot_partition\").start" <<< ${fdisk_output}) * 512))
+    root_offset=$(($(jq ".partitiontable.partitions[] | select(.node == \"$image_path$root_partition\").start" <<< ${fdisk_output}) * 512))
+
+    echo "Mounting image $image_path on $mount_path, offset for boot partition is $boot_offset, offset for root partition is $root_offset"
+
+    # mount root and boot partition
+
+    detach_all_loopback $image_path
+    echo "Mounting root parition"
+    sudo losetup -f
+    sudo mount -o loop,offset=$root_offset,sizelimit=$( expr $boot_offset - $root_offset ) $image_path $mount_path/
+    if [[ "$boot_partition" != "$root_partition" ]]; then
+        echo "Mounting boot partition"
+        sudo losetup -f
+        sudo mount -o loop,offset=$boot_offset "${image_path}" "${mount_path}"/"${boot_mount_path}"
+    fi
+    sudo mkdir -p $mount_path/dev/pts
+    sudo mkdir -p $mount_path/proc
+    sudo mount -o bind /dev $mount_path/dev
+    sudo mount -o bind /dev/pts $mount_path/dev/pts
+    sudo mount -o bind /proc $mount_path/proc
+    sed -i "s/GIT_COMMIT_SHA/$GIT_COMMIT_SHA/" ${DIR}/variants/dietpi-trailing-fat/Automation_Custom_Script.sh
+    sed -i "s/FEEDER_IMAGE_NAME/$FEEDER_IMAGE_NAME/" ${DIR}/variants/dietpi-trailing-fat/Automation_Custom_Script.sh
+    sed -i "s/FEEDER_IMAGE_VERSION/$VERSION/" ${DIR}/variants/dietpi-trailing-fat/Automation_Custom_Script.sh
+    sed -i "s/ADSB_RANDOM_PASSWORD/$ROOT_PWD/" ${DIR}/variants/dietpi-trailing-fat/dietpi.txt
+    cp "${DIR}/variants/dietpi-trailing-fat/dietpi.txt" "$MNT_DIR"/media
+    cp "${DIR}/variants/dietpi-trailing-fat/Automation_Custom_Script.sh" "$MNT_DIR"/media
+    unmount_image "$MNT_DIR"
+    exit 0
+else
+    VERSION=$(bash "${DIR}/get_version.sh")
+    echo $VERSION > modules/adsb-feeder/filesystem/root/opt/adsb/adsb.im.version
+
+    ${CUSTOM_PI_OS_PATH}/build_custom_os $@
+fi
