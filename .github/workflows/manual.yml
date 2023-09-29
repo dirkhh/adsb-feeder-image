@@ -44,6 +44,11 @@ jobs:
           echo "VARIANT=dietpi-trailing-fat" >> $GITHUB_ENV
           echo "IMAGE_URL=https://dietpi.com/downloads/images/DietPi_NanoPiNEO3-ARMv8-Bookworm.img.xz" >> $GITHUB_ENV
           echo "MAGIC_PATH=repository/src/image-dietpi/DietPi_NanoPiNEO3.img.xz" >> $GITHUB_ENV
+        elif [ ${{ github.event.inputs.target }} = "orangepi-5plus-dietpi" ] ; then
+          echo "BASE_ARCH=arm64" >> $GITHUB_ENV
+          echo "VARIANT=dietpi-trailing-fat" >> $GITHUB_ENV
+          echo "IMAGE_URL=https://dietpi.com/downloads/images/DietPi_OrangePi5Plus-ARMv8-Bookworm.img.xz" >> $GITHUB_ENV
+          echo "MAGIC_PATH=repository/src/image-dietpi/DietPi_OrangePi5Plus.img.xz" >> $GITHUB_ENV
         else
           echo "can't figure out what to build"
           exit 1
