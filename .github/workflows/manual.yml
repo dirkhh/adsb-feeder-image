@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       target:
-        description: 'which image [raspberrypi64,raspberrypi-dietpi-64,x86-64-vm,x86-64-vm-native] do you want to build?'
+        description: 'which image [raspberrypi64,raspberrypi-dietpi-64,x86-64-vm,x86-64-vm-native,nanopi-neo3-dietpi] do you want to build?'
         default: 'x86-64-vm'
         required: true
         type: string
@@ -39,6 +39,11 @@ jobs:
           echo "IMAGE_URL=https://dietpi.com/downloads/images/DietPi_VM-x86_64-Bookworm.7z" >> $GITHUB_ENV
           echo "MAGIC_PATH=repository/src/image-dietpi/DietPi_VM-x86_64-Bookworm.7z" >> $GITHUB_ENV
           echo "DIETPI_NATIVE=1" >> $GITHUB_ENV
+        elif [ ${{ github.event.inputs.target }} = "nanopi-neo3-dietpi" ] ; then
+          echo "BASE_ARCH=arm64" >> $GITHUB_ENV
+          echo "VARIANT=dietpi-trailing-fat" >> $GITHUB_ENV
+          echo "IMAGE_URL=https://dietpi.com/downloads/images/DietPi_NanoPiNEO3-ARMv8-Bookworm.img.xz" >> $GITHUB_ENV
+          echo "MAGIC_PATH=repository/src/image-dietpi/DietPi_NanoPiNEO3.img.xz" >> $GITHUB_ENV
         else
           echo "can't figure out what to build"
           exit 1
@@ -118,11 +123,15 @@ jobs:
       env:
         BASE_RELEASE_COMPRESS: no
       run: |
-        cd repository/src
-        # CUSTOM_PI_OS_PATH is needed, its set in build_dist. Setting here manually
-        export CUSTOM_PI_OS_PATH="$(realpath ../../CustomPiOS/src/)"
-        source config
-        sudo --preserve-env ../../CustomPiOS/src/release "${VARIANT}"
+        if [ "${VARIANT}" = "dietpi-trailing-fat" ] ; then
+          echo "this doesn't do anything"
+        else
+          cd repository/src
+          # CUSTOM_PI_OS_PATH is needed, its set in build_dist. Setting here manually
+          export CUSTOM_PI_OS_PATH="$(realpath ../../CustomPiOS/src/)"
+          source config
+          sudo --preserve-env ../../CustomPiOS/src/release "${VARIANT}"
+        fi
 
 
     - name: Copy output
@@ -134,6 +143,8 @@ jobs:
         IMAGE="adsb-feeder-${IMG_NAME}-${{ steps.tag.outputs.tag }}.img"
         if [ "${VARIANT}" = "default" ]; then
           WORKSPACE="repository/src/workspace"
+        elif [ "${VARIANT}" = "dietpi-trailing-fat" ] ; then
+          WORKSPACE="repository/src/image-dietpi"
         else
           WORKSPACE="repository/src/workspace-${VARIANT}"
         fi
