@@ -1,0 +1,5 @@
+forward31003:
+    image: ghcr.io/katlol/containers/socat
+    command: socat TCP4-LISTEN:31003,fork,reuseaddr TCP4:ultrafeeder:31003
+    ports:
+    - 31003:31003

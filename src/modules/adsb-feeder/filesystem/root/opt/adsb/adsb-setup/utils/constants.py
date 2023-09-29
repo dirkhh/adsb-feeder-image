@@ -133,6 +133,11 @@ class Constants:
         Env(
             "FEEDER_ENABLE_UATBIASTEE", default="False", tags=["uatbiast", "is_enabled"]
         ),
+        Env(
+            "_ADSBIM_STATE_IS_FORWARD31003_ENABLED",
+            default="False",
+            tags=["forward31003", "is_enabled"],
+        ),
         Env("FEEDER_READSB_GAIN", default="autogain", tags=["gain"]),
         Env("UAT_SDR_GAIN", default="autogain", tags=["uatgain"]),
         Env(
