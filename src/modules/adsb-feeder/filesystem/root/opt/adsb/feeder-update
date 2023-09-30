@@ -67,9 +67,12 @@ if [ "$1" != "" ] ; then
         BRANCH="$TARGET"
     fi
 else
-    if [[ "$TARGET" = "beta" || "$TARGET" = "stable" ]] ; then
-        # on one of the two channels, grab the last tag, otherwise check out what's there
-        TARGET=$(git tag --sort=version:refname|tail -1)
+    if [[ "$TARGET" = "beta" ]] ; then
+        # for the beta channel, grab the last beta tag
+        TARGET=$(git tag --sort=version:refname|grep beta|tail -1)
+    elif [[ "$TARGET" = "stable" ]] ; then
+        # for the stable channel, grab the last non-beta tag
+        TARGET=$(git tag --sort=version:refname|grep -v beta|tail -1)
     fi
     # make sure we get a clean checkout... simply remove the branch if it exists
     # but in order for that to always work we need to be on a different branch
