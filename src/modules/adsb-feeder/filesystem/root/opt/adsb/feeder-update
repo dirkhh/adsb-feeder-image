@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# little silly helper function - this is overkill
+exit_with_message() { echo "$1" ; exit 1 ; }
+
 exec &>> /var/log/adsb-setup.log
 
 LAST_ARG=${!#}
@@ -28,9 +31,9 @@ else
     fi
     [ -z "$BRANCH" ] && BRANCH="$TARGET"
     mkdir -p /opt/adsb-feeder-update
-    cd /opt/adsb-feeder-update || exit
-    [ -d adsb-feeder-image ] || git clone https://github.com/dirkhh/adsb-feeder-image || echo "git clone failed, giving up" || exit
-    cd adsb-feeder-image || exit
+    cd /opt/adsb-feeder-update || exit_with_message "can't cd /opt/adsb-feeder-update"
+    [ -d adsb-feeder-image ] || git clone https://github.com/dirkhh/adsb-feeder-image || exit_with_message "git clone failed, giving up"
+    cd adsb-feeder-image || exit_with_message "can't cd /opt/adsb-feeder-update/adsb-feeder-image"
     # we're in the checked out directory - make sure it's the latest
     git fetch
     # 'stable' and 'beta' are special, they refer to tags.
@@ -52,7 +55,7 @@ else
     # add a trailing '-go' argument, and the correct target as first argument; this way the call should
     # be compatible with older versions of the script - not that anyone should want to downgrade using this script
     bash /opt/adsb-feeder-update/feeder-update "$TARGET" "$BRANCH" "$@" -go
-    exit
+    exit "$?"
 fi
 
 # now we know that we are running the right script in the right place
@@ -64,7 +67,7 @@ echo "running ${DIR}/feeder-update from $TARGET"
 echo "stop the running service"
 systemctl stop adsb-setup.service
 
-cd "${DIR}/adsb-feeder-image" || echo "can't cd to ${DIR}/adsb-feeder-image" && exit
+cd "${DIR}/adsb-feeder-image" || exit_with_message "can't cd to ${DIR}/adsb-feeder-image"
 
 DATE_COMPONENT=$(git log -20 --date=format:%y%m%d --format="%ad" | uniq -c | head -1 | awk '{ print $2"."$1 }')
 # grab the most recent tag. Forcing '--long' always adds the -<num>-g<sha> trailer to the result - which we then can remove
