@@ -13,19 +13,20 @@ else
     if [[ "$1" == "" ]] ; then
         # called without argument, so check which channel we are updating to
         if [ -f /opt/adsb/update-channel ] ; then
-            BRANCH=TARGET=$(</opt/adsb/update-channel)
+            TARGET=$(</opt/adsb/update-channel)
         else
             # ok, no channel either... can we guess from the current version?
-            BRANCH=TARGET=$(sed 's/.*(\(.*\)).*/\1/' < /opt/adsb/adsb.im.version)
+            TARGET=$(sed 's/.*(\(.*\)).*/\1/' < /opt/adsb/adsb.im.version)
             if [ "$TARGET" = "$(cat /opt/adsb/adsb.im.version)" ] ; then
                 # running out of ideas - let's just go with stable
-                BRANCH=TARGET="stable"
+                BRANCH="stable"
             fi
         fi
     else
         # the command line told us what to get. Nice.
-        BRANCH=TARGET="$1"
+        TARGET="$1"
     fi
+    [ -z "$BRANCH" ] && BRANCH="$TARGET"
     mkdir -p /opt/adsb-feeder-update
     cd /opt/adsb-feeder-update || exit
     [ -d adsb-feeder-image ] || git clone https://github.com/dirkhh/adsb-feeder-image || echo "git clone failed, giving up" || exit
