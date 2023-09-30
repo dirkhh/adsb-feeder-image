@@ -63,7 +63,7 @@ echo "running ${DIR}/feeder-update from $TARGET"
 echo "stop the running service"
 systemctl stop adsb-setup.service
 
-cd "${DIR}/adsb-feeder-update/adsb-feeder-image" || echo "can't cd to ${DIR}/adsb-feeder-update/adsb-feeder-image" && exit
+cd "${DIR}/adsb-feeder-image" || echo "can't cd to ${DIR}/adsb-feeder-image" && exit
 
 DATE_COMPONENT=$(git log -20 --date=format:%y%m%d --format="%ad" | uniq -c | head -1 | awk '{ print $2"."$1 }')
 # grab the most recent tag. Forcing '--long' always adds the -<num>-g<sha> trailer to the result - which we then can remove
