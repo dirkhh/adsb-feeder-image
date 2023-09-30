@@ -25,7 +25,7 @@ do
             ;;
         '-t') shift; TAG=$1
             ;;
-        *) echo "$USAGE"; exit 1 
+        *) echo "$USAGE"; exit 1
     esac
     shift
 done
@@ -85,7 +85,7 @@ if ! git clone 'https://github.com/dirkhh/adsb-feeder-image.git' "$GIT_PARENT_DI
     exit 1
 fi
 
-cd "$GIT_PARENT_DIR"/adsb-feeder
+cd "$GIT_PARENT_DIR"/adsb-feeder || echo "can't find $GIT_PARENT_DIR/adsb-feeder" && exit 1
 
 if [[ $BRANCH != '' ]] ; then
     if ! git checkout "$BRANCH" ; then
@@ -102,13 +102,7 @@ fi
 # determine the version
 SRC_ROOT="${GIT_PARENT_DIR}/adsb-feeder/src/modules/adsb-feeder/filesystem/root"
 cd "$SRC_ROOT" || exit 1
-DATE_COMPONENT=$(git log -20 --date=format:%y%m%d --format="%ad" | uniq -c | head -1 | awk '{ print $2"."$1 }')
-TAG_COMPONENT=$(git describe --match "v[0-9]*" | cut -d- -f1)
-if [[ $BRANCH == '' ]] ; then
-    ADSB_IM_VERSION="${TAG_COMPONENT}(main)-${DATE_COMPONENT}"
-else
-    ADSB_IM_VERSION="${TAG_COMPONENT}(${BRANCH})-${DATE_COMPONENT}"
-fi
+ADSB_IM_VERSION=$(src/get_version.sh)
 
 # copy the software in place
 cp -a "${SRC_ROOT}/opt/adsb/"* "${APP_DIR}/"
@@ -145,16 +139,18 @@ echo "ADSB Feeder app running on ${OS}" > feeder-image.name
 echo "$ADSB_IM_VERSION" > adsb.im.version
 touch /opt/adsb/app.adsb.feeder.image
 
-cd /opt/adsb/config
-cat /opt/adsb/docker.image.versions >> .env
-echo "_ADSBIM_BASE_VERSION=$(cat /opt/adsb/adsb.im.version)" >> .env
-echo "_ADSBIM_CONTAINER_VERSION=$(cat /opt/adsb/adsb.im.version)" >> .env
-echo "_ADSBIM_STATE_WEBPORT=1099" >> .env
-echo "_ADSBIM_STATE_TAR1090_PORT=1090" >> .env
-echo "_ADSBIM_STATE_UAT978_PORT=1091" >> .env
-echo "_ADSBIM_STATE_PIAWAREMAP_PORT=1092" >> .env
-echo "_ADSBIM_STATE_PIAWARESTAT_PORT=1093" >> .env
-echo "_ADSBIM_STATE_DAZZLE_PORT=1094" >> .env
+cd /opt/adsb/config || echo "can't find /opt/adsb/config" && exit 1
+{
+    cat /opt/adsb/docker.image.versions
+    echo "_ADSBIM_BASE_VERSION=$(cat /opt/adsb/adsb.im.version)"
+    echo "_ADSBIM_CONTAINER_VERSION=$(cat /opt/adsb/adsb.im.version)"
+    echo "_ADSBIM_STATE_WEBPORT=1099"
+    echo "_ADSBIM_STATE_TAR1090_PORT=1090"
+    echo "_ADSBIM_STATE_UAT978_PORT=1091"
+    echo "_ADSBIM_STATE_PIAWAREMAP_PORT=1092"
+    echo "_ADSBIM_STATE_PIAWARESTAT_PORT=1093"
+    echo "_ADSBIM_STATE_DAZZLE_PORT=1094"
+ } >> .env
 
 # run the final steps of the setup and then enable the services
 systemctl daemon-reload

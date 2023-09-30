@@ -5,15 +5,20 @@ if [ "$GH_REF_TYPE" != "" ] ; then
     # create our elaborate version info
     if [ "$GH_REF_TYPE" = "tag" ] ; then
         TAG_COMPONENT="$GH_TRGT_REF"
-        BRANCH_COMPONENT=""
+        BETA=$(echo "$TAG_COMPONENT" | grep "beta")
+        if [[ "$BETA" == "" ]] ; then
+            BRANCH_COMPONENT="(beta)"
+        else
+            BRANCH_COMPONENT="(stable)"
+        fi
     else
-        TAG_COMPONENT=$(git describe --match "v[0-9]*" | cut -d- -f1)
+        TAG_COMPONENT=$(git describe --match "v[0-9]*" --long | sed "s/-[0-9]*-g[0-9a-f]*//")
         BRANCH_COMPONENT="($GH_TRGT_REF)"
     fi
 else
-    TAG_COMPONENT=$(git describe --match "v[0-9]*" | cut -d- -f1)
+    TAG_COMPONENT=$(git describe --match "v[0-9]*" --long | sed "s/-[0-9]*-g[0-9a-f]*//")
     BRANCH_COMPONENT="($(git branch --no-color --show-current))"
 fi
-
+BRANCH_COMPONENT=${BRANCH_COMPONENT//(main)/(stable)}
 DATE_COMPONENT=$(git log -30 --date=format:%y%m%d --format="%ad" | uniq -c | head -1 | awk '{ print $2"."$1 }')
 echo -n "${TAG_COMPONENT}${BRANCH_COMPONENT}-${DATE_COMPONENT}"
