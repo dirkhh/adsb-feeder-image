@@ -1,105 +1,83 @@
 #!/bin/bash
 
-exec 2>&1 1>>/var/log/adsb-setup.log
+exec &>> /var/log/adsb-setup.log
 
-# first - move this script to /opt/adsb-feeder-update and run it there
-DIR=$(dirname -- "$(readlink -f "${BASH_SOURCE}")")
-if [ "${DIR}" != "/opt/adsb-feeder-update" ]; then
-    echo "move $(basename $0) to /opt/adsb-feeder-update"
+LAST_ARG=${!#}
+if [[ $LAST_ARG == "-go" ]]; then
+    # that means we just refreshed the git tree and the first argument is the target
+    TARGET="$1"
+    BRANCH="$2"
+else
+    # we want to get the correct (matching) update script. But to do
+    # that we need to figure out which one that is.
+    if [[ "$1" == "" ]] ; then
+        # called without argument, so check which channel we are updating to
+        if [ -f /opt/adsb/update-channel ] ; then
+            BRANCH=TARGET=$(</opt/adsb/update-channel)
+        else
+            # ok, no channel either... can we guess from the current version?
+            BRANCH=TARGET=$(sed 's/.*(\(.*\)).*/\1/' < /opt/adsb/adsb.im.version)
+            if [ "$TARGET" = "$(cat /opt/adsb/adsb.im.version)" ] ; then
+                # running out of ideas - let's just go with stable
+                BRANCH=TARGET="stable"
+            fi
+        fi
+    else
+        # the command line told us what to get. Nice.
+        BRANCH=TARGET="$1"
+    fi
     mkdir -p /opt/adsb-feeder-update
-    cp "${BASH_SOURCE}" /opt/adsb-feeder-update
-    bash /opt/adsb-feeder-update/$(basename $0) "$@"
+    cd /opt/adsb-feeder-update || exit
+    [ -d adsb-feeder-image ] || git clone https://github.com/dirkhh/adsb-feeder-image || echo "git clone failed, giving up" || exit
+    cd adsb-feeder-image || exit
+    # we're in the checked out directory - make sure it's the latest
+    git fetch
+    # 'stable' and 'beta' are special, they refer to tags.
+    # everything else is interpreted as a branch or a hash
+    if [[ "$TARGET" == "beta" ]] ; then
+        # for the beta channel, grab the last beta tag
+        TARGET=$(git tag --sort=version:refname|grep beta|tail -1)
+    elif [[ "$TARGET" == "stable" ]] ; then
+        # for the stable channel, grab the last non-beta tag
+        TARGET=$(git tag --sort=version:refname|grep -v beta|tail -1)
+    fi
+    FAKE_BRANCH="${RANDOM}-${RANDOM}"
+    git checkout -b "$FAKE_BRANCH" &> /dev/null
+    git branch -D "$TARGET" &> /dev/null || true
+    git checkout "$TARGET"
+    git branch -D "$FAKE_BRANCH" &> /dev/null
+    echo "restarting with feeder-update from $TARGET"
+    cp src/modules/adsb-feeder/filesystem/root/opt/adsb/feeder-update /opt/adsb-feeder-update/feeder-update
+    # add a trailing '-go' argument, and the correct target as first argument; this way the call should
+    # be compatible with older versions of the script - not that anyone should want to downgrade using this script
+    bash /opt/adsb-feeder-update/feeder-update "$TARGET" "$BRANCH" "$@" -go
     exit
 fi
-echo "running $(basename $0) in ${DIR}"
+
+# now we know that we are running the right script in the right place
+DIR=$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")
+echo "running ${DIR}/feeder-update from $TARGET"
 
 # this makes sure that the user can't interact with the UI while we are potentially
 # making changes under the hood
 echo "stop the running service"
 systemctl stop adsb-setup.service
 
-# check which channel we are updating to
-if [ -f /opt/adsb/update-channel ] ; then
-    BRANCH=$(</opt/adsb/update-channel)
-else
-    BRANCH=$(sed 's/.*(\(.*\)).*/\1/' < /opt/adsb/adsb.im.version)
-    if [ "$BRANCH" = "$(cat /opt/adsb/adsb.im.version)" ] ; then
-        BRANCH="main"
-    fi
-fi
+cd "${DIR}/adsb-feeder-update/adsb-feeder-image" || echo "can't cd to ${DIR}/adsb-feeder-update/adsb-feeder-image" && exit
 
-echo "checkout the ${BRANCH} branch of the upstream feeder image"
-cd ${DIR}
-if [ ! -d adsb-feeder-image ] ; then
-    if ! git clone -b $BRANCH https://github.com/dirkhh/adsb-feeder-image; then
-        echo "git clone failed, giving up"
-        exit
-    fi
-fi
-cd adsb-feeder-image
-git fetch
-
-TARGET=$BRANCH
-if [ "$1" != "" ] ; then
-    TARGET="$1"
-    echo "trying to find the reference given: $TARGET"
-    if ! git checkout "$TARGET" ; then
-        if ! git checkout -B explicitTarget "$TARGET" ; then
-            echo "cannot find reference $TARGET, giving up"
-            exit
-        else
-            # that was a reference, not a branch, so clear out BRANCH
-            BRANCH=""
-        fi
-    else
-        # if we already have this branch, let's make sure we pull in the latest changes
-        # if that fails, do the delete branch shuffle
-        if ! git pull -ffonly; then
-            # make sure we get a clean checkout... simply remove the branch if it exists
-            # but in order for that to always work we need to be on a different branch
-            # what a silly dance...
-            git branch -D "tmp${TARGET}$$" 2>&1 > /dev/null
-            git checkout -b "tmp${TARGET}$$" > /dev/null
-            git branch -D ${TARGET} 2>&1 > /dev/null
-            git checkout -b ${TARGET} ${TARGET} 2>&1 > /dev/null || git checkout ${TARGET}
-            git branch -D "tmp${TARGET}$$" 2>&1 > /dev/null
-        fi
-        BRANCH="$TARGET"
-    fi
-else
-    if [[ "$TARGET" = "beta" ]] ; then
-        # for the beta channel, grab the last beta tag
-        TARGET=$(git tag --sort=version:refname|grep beta|tail -1)
-    elif [[ "$TARGET" = "stable" ]] ; then
-        # for the stable channel, grab the last non-beta tag
-        TARGET=$(git tag --sort=version:refname|grep -v beta|tail -1)
-    fi
-    # make sure we get a clean checkout... simply remove the branch if it exists
-    # but in order for that to always work we need to be on a different branch
-    # what a silly dance...
-    git branch -D "tmp${TARGET}$$" 2>&1 > /dev/null
-    git checkout -b "tmp${TARGET}$$" > /dev/null
-    git branch -D ${TARGET} 2>&1 > /dev/null
-    git checkout -b ${TARGET} ${TARGET} 2>&1 > /dev/null || git checkout ${TARGET}
-    git branch -D "tmp${TARGET}$$" 2>&1 > /dev/null
-fi
-
-# wow, that was a lot of work... but now we should have the correct stuff checked out
-
-if [ "$BRANCH" != "" ] ; then
-    BRANCH="(${BRANCH})"
-fi
 DATE_COMPONENT=$(git log -20 --date=format:%y%m%d --format="%ad" | uniq -c | head -1 | awk '{ print $2"."$1 }')
-TAG_COMPONENT=$(git describe --match "v[0-9]*" | cut -d- -f1)
-VERSION="${TAG_COMPONENT}${BRANCH}-${DATE_COMPONENT}"
-echo "${TARGET} checked out successfully, starting the actual upgrade to ${VERSION}"
+# grab the most recent tag. Forcing '--long' always adds the -<num>-g<sha> trailer to the result - which we then can remove
+TAG_COMPONENT=$(git describe --match "v[0-9]*" --long | sed "s/-[0-9]*-g[0-9a-f]*//")
+VERSION="${TAG_COMPONENT}(${BRANCH})-${DATE_COMPONENT}"
+echo "starting the actual upgrade to ${VERSION}"
 
 echo "prepare the files that we need to replace"
-mkdir -p ${DIR}/root
-cp -r src/modules/adsb-feeder/filesystem/root ${DIR}
+mkdir -p "${DIR}/root"
+cp -r src/modules/adsb-feeder/filesystem/root "${DIR}"
 
 echo "copy the updated files in place"
-cd ${DIR}/root
+# shellcheck disable=SC2164
+cd "${DIR}/root"
 
 # if this an app and not the full image, prune some of the files that aren't
 # wanted for the app and copy the trees we need over
@@ -114,14 +92,15 @@ fi
 # since the next run won't be a clean first start, we need to manually
 # mv the potentially updated .yml files into place and keep backups of
 # any that might have been changed
+# shellcheck disable=SC2164
 cd /opt/adsb
 for ymlfile in *.yml; do
-    cmp $ymlfile config/$ymlfile 2>&1 > /dev/null || mv -f config/$ymlfile config/$ymlfile.bak
-    mv -f $ymlfile config/$ymlfile
+    cmp "$ymlfile" "config/$ymlfile" &> /dev/null || mv -f "config/$ymlfile" "config/${ymlfile}.bak"
+    mv -f "$ymlfile" "config/$ymlfile"
 done
 
 # make sure the version information is correct
-echo $VERSION > /opt/adsb/adsb.im.version
+echo "$VERSION" > /opt/adsb/adsb.im.version
 sed -i "s/BASE_VERSION=.*/BASE_VERSION=$VERSION/" /opt/adsb/config/.env
 
 echo "finally, trigger a container upgrade so that they match the new image"
