@@ -54,7 +54,8 @@ else
     cp src/modules/adsb-feeder/filesystem/root/opt/adsb/feeder-update /opt/adsb-feeder-update/feeder-update
     # add a trailing '-go' argument, and the correct target as first argument; this way the call should
     # be compatible with older versions of the script - not that anyone should want to downgrade using this script
-    bash /opt/adsb-feeder-update/feeder-update "$TARGET" "$BRANCH" "$@" -go
+    XTRACE="" && [[ -o xtrace ]] && XTRACE="-x"
+    bash "$XTRACE" /opt/adsb-feeder-update/feeder-update "$TARGET" "$BRANCH" "$@" -go
     exit "$?"
 fi
 
