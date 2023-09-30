@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       target:
-        description: 'which image [raspberrypi64,raspberrypi-dietpi-64,x86-64-vm,x86-64-vm-native,nanopi-neo3-dietpi] do you want to build?'
+        description: 'which image [raspberrypi64,raspberrypi-dietpi-64,x86-64-vm,x86-64-vm-native,nanopi-neo3-dietpi,rpi64-dietpi] do you want to build?'
         default: 'x86-64-vm'
         required: true
         type: string
@@ -49,6 +49,11 @@ jobs:
           echo "VARIANT=dietpi-trailing-fat" >> $GITHUB_ENV
           echo "IMAGE_URL=https://dietpi.com/downloads/images/DietPi_OrangePi5Plus-ARMv8-Bookworm.img.xz" >> $GITHUB_ENV
           echo "MAGIC_PATH=repository/src/image-dietpi/DietPi_OrangePi5Plus.img.xz" >> $GITHUB_ENV
+        elif [ ${{ github.event.inputs.target }} = "rpi64-dietpi" ] ; then
+          echo "BASE_ARCH=arm64" >> $GITHUB_ENV
+          echo "VARIANT=dietpi-root2" >> $GITHUB_ENV
+          echo "IMAGE_URL=https://dietpi.com/downloads/images/DietPi_RPi-ARMv8-Bookworm.img.xz" >> $GITHUB_ENV
+          echo "MAGIC_PATH=repository/src/image-dietpi/DietPi_RPi64.img.xz" >> $GITHUB_ENV
         else
           echo "can't figure out what to build"
           exit 1
@@ -128,7 +133,7 @@ jobs:
       env:
         BASE_RELEASE_COMPRESS: no
       run: |
-        if [ "${VARIANT}" = "dietpi-trailing-fat" ] ; then
+        if [[ "${VARIANT}" = "dietpi-trailing-fat" || "${VARIANT}" = "dietpi-root2" ]] ; then
           echo "this doesn't do anything"
         else
           cd repository/src
@@ -148,7 +153,7 @@ jobs:
         IMAGE="adsb-feeder-${IMG_NAME}-${{ steps.tag.outputs.tag }}.img"
         if [ "${VARIANT}" = "default" ]; then
           WORKSPACE="repository/src/workspace"
-        elif [ "${VARIANT}" = "dietpi-trailing-fat" ] ; then
+        elif [[ "${VARIANT}" = "dietpi-trailing-fat" || "${VARIANT}" = "dietpi-root2" ]] ; then
           WORKSPACE="repository/src/image-dietpi"
         else
           WORKSPACE="repository/src/workspace-${VARIANT}"

@@ -7,7 +7,7 @@ export DIST_PATH=${DIR}
 export CUSTOM_PI_OS_PATH=$(<${DIR}/custompios_path)
 export PATH=$PATH:$CUSTOM_PI_OS_PATH
 
-if [[ "$1" == "dietpi-trailing-fat" ]] ; then
+if [[ "$1" == "dietpi-trailing-fat" || "$1" == "dietpi-root2" ]] ; then
     VERSION="$DIST_VERSION"
     GIT_COMMIT_SHA=$(git rev-parse HEAD)     # this means that this image WILL FAIL if the code wasn't pushed to GitHub
 
@@ -20,38 +20,45 @@ if [[ "$1" == "dietpi-trailing-fat" ]] ; then
     7zr e -so "$BASE_ZIP_IMG" > "$BASE_IMG"
     echo "$BASE_IMG"
     MNT_DIR=$(mktemp -d)
-    # what we want to do is this:
-    # mount_image "$BASE_IMG" 1 "$MNT_DIR" "media" 2
-    # but that unfortunately doesn't work if the fat partition is after the root partition
-    # as that gets us a negative sizelimit
-    # so instead do it ourselves here (copying the code is fine given licenses of the respective projects)
-    image_path="$BASE_IMG"
-    root_partition=1
-    mount_path="$MNT_DIR"
-    boot_mount_path="media"
-    boot_partition=2
-    fdisk_output=$(sfdisk --json "${image_path}" )
-    boot_offset=$(($(jq ".partitiontable.partitions[] | select(.node == \"$image_path$boot_partition\").start" <<< ${fdisk_output}) * 512))
-    root_offset=$(($(jq ".partitiontable.partitions[] | select(.node == \"$image_path$root_partition\").start" <<< ${fdisk_output}) * 512))
+    if [[ "$1" == "dietpi-trailing-fat" ]] ; then
+        # what we want to do is this:
+        # mount_image "$BASE_IMG" 1 "$MNT_DIR" "media" 2
+        # but that unfortunately doesn't work if the fat partition is after the root partition
+        # as that gets us a negative sizelimit
+        # so instead do it ourselves here (copying the code is fine given licenses of the respective projects)
+        image_path="$BASE_IMG"
+        root_partition=1
+        mount_path="$MNT_DIR"
+        boot_mount_path="media"
+        boot_partition=2
+        fdisk_output=$(sfdisk --json "${image_path}" )
+        boot_offset=$(($(jq ".partitiontable.partitions[] | select(.node == \"$image_path$boot_partition\").start" <<< ${fdisk_output}) * 512))
+        root_offset=$(($(jq ".partitiontable.partitions[] | select(.node == \"$image_path$root_partition\").start" <<< ${fdisk_output}) * 512))
 
-    echo "Mounting image $image_path on $mount_path, offset for boot partition is $boot_offset, offset for root partition is $root_offset"
+        echo "Mounting image $image_path on $mount_path, offset for boot partition is $boot_offset, offset for root partition is $root_offset"
 
-    # mount root and boot partition
+        # mount root and boot partition
 
-    detach_all_loopback $image_path
-    echo "Mounting root parition"
-    sudo losetup -f
-    sudo mount -o loop,offset=$root_offset,sizelimit=$( expr $boot_offset - $root_offset ) $image_path $mount_path/
-    if [[ "$boot_partition" != "$root_partition" ]]; then
-        echo "Mounting boot partition"
+        detach_all_loopback $image_path
+        echo "Mounting root parition"
         sudo losetup -f
-        sudo mount -o loop,offset=$boot_offset "${image_path}" "${mount_path}"/"${boot_mount_path}"
+        sudo mount -o loop,offset=$root_offset,sizelimit=$( expr $boot_offset - $root_offset ) $image_path $mount_path/
+        if [[ "$boot_partition" != "$root_partition" ]]; then
+            echo "Mounting boot partition"
+            sudo losetup -f
+            sudo mount -o loop,offset=$boot_offset "${image_path}" "${mount_path}"/"${boot_mount_path}"
+        fi
+        sudo mkdir -p $mount_path/dev/pts
+        sudo mkdir -p $mount_path/proc
+        sudo mount -o bind /dev $mount_path/dev
+        sudo mount -o bind /dev/pts $mount_path/dev/pts
+        sudo mount -o bind /proc $mount_path/proc
+    else
+	# on a "standard" RPi/DietPi image with /boot as first and / as second partition
+	# we can use the existing mount_image helper - we still mount the /boot partition on media
+	# so the rest of the code can stay the same
+	mount_image "$BASE_IMG" 2 "$MNT_DIR" "media" 1
     fi
-    sudo mkdir -p $mount_path/dev/pts
-    sudo mkdir -p $mount_path/proc
-    sudo mount -o bind /dev $mount_path/dev
-    sudo mount -o bind /dev/pts $mount_path/dev/pts
-    sudo mount -o bind /proc $mount_path/proc
     sed -i "s/GIT_COMMIT_SHA/$GIT_COMMIT_SHA/" ${DIR}/variants/dietpi-trailing-fat/Automation_Custom_Script.sh
     sed -i "s/FEEDER_IMAGE_NAME/$FEEDER_IMAGE_NAME/" ${DIR}/variants/dietpi-trailing-fat/Automation_Custom_Script.sh
     sed -i "s/FEEDER_IMAGE_VERSION/$VERSION/" ${DIR}/variants/dietpi-trailing-fat/Automation_Custom_Script.sh
