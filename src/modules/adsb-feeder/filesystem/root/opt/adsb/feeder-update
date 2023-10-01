@@ -69,10 +69,14 @@ else
     cp src/modules/adsb-feeder/filesystem/root/opt/adsb/feeder-update /opt/adsb-feeder-update/feeder-update
     # add a trailing '-go' argument, and the correct target as first argument; this way the call should
     # be compatible with older versions of the script - not that anyone should want to downgrade using this script
-    # the cleanup trap will be re-initialized in the child script, so disable it here
-    trap - EXIT
     XTRACE="" && [[ -o xtrace ]] && XTRACE="-x"
-    bash "$XTRACE" /opt/adsb-feeder-update/feeder-update "$TARGET" "$BRANCH" "$@" -go
+    if [ -f /opt/adsb-feeder-update/feeder-update ] ; then
+        # the cleanup trap will be re-initialized in the child script, so disable it here
+        trap - EXIT
+        bash "$XTRACE" /opt/adsb-feeder-update/feeder-update "$TARGET" "$BRANCH" "$@" -go
+    else
+        echo "can't find /opt/adsb-feeder-update/feeder-update after update to $TARGET"
+    fi
     exit "$?"
 fi
 
