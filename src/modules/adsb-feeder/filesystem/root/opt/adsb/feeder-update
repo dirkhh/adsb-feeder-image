@@ -1,9 +1,20 @@
 #!/bin/bash
 
-# little silly helper function - this is overkill
+# little silly helper functions
 exit_with_message() { echo "$1" ; exit 1 ; }
+cleanup() {
+    # assuming things aren't too screwed up, let's try to start docker
+    # and the setup app
+    # that way the user might at least be able to look at the logs and figure out
+    # what went wrong (or at least ask for help with more information)
+    /opt/adsb/docker-compose-start
+    systemctl start adsb-setup.service;
+}
+
 
 exec &>> /var/log/adsb-setup.log
+
+trap cleanup EXIT
 
 LAST_ARG=${!#}
 if [[ $LAST_ARG == "-go" ]]; then
@@ -11,6 +22,10 @@ if [[ $LAST_ARG == "-go" ]]; then
     TARGET="$1"
     BRANCH="$2"
 else
+    # this makes sure that the user can't interact with the UI while we are potentially
+    # making changes under the hood
+    echo "stop the running service"
+    systemctl stop adsb-setup.service
     # we want to get the correct (matching) update script. But to do
     # that we need to figure out which one that is.
     if [[ "$1" == "" ]] ; then
@@ -54,6 +69,8 @@ else
     cp src/modules/adsb-feeder/filesystem/root/opt/adsb/feeder-update /opt/adsb-feeder-update/feeder-update
     # add a trailing '-go' argument, and the correct target as first argument; this way the call should
     # be compatible with older versions of the script - not that anyone should want to downgrade using this script
+    # the cleanup trap will be re-initialized in the child script, so disable it here
+    trap - EXIT
     XTRACE="" && [[ -o xtrace ]] && XTRACE="-x"
     bash "$XTRACE" /opt/adsb-feeder-update/feeder-update "$TARGET" "$BRANCH" "$@" -go
     exit "$?"
@@ -62,11 +79,6 @@ fi
 # now we know that we are running the right script in the right place
 DIR=$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")
 echo "running ${DIR}/feeder-update from $TARGET"
-
-# this makes sure that the user can't interact with the UI while we are potentially
-# making changes under the hood
-echo "stop the running service"
-systemctl stop adsb-setup.service
 
 cd "${DIR}/adsb-feeder-image" || exit_with_message "can't cd to ${DIR}/adsb-feeder-image"
 
@@ -112,6 +124,7 @@ echo "finally, trigger a container upgrade so that they match the new image"
 /opt/adsb/docker-update-adsb-im -no-fetch
 
 echo "restart the service"
+trap - EXIT
 systemctl daemon-reload
 systemctl start adsb-setup.service
 
