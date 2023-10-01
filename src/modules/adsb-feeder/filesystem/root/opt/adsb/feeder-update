@@ -11,6 +11,8 @@ cleanup() {
     systemctl start adsb-setup.service;
 }
 
+# we need more help debugging this
+set -ex
 
 exec &>> /var/log/adsb-setup.log
 
