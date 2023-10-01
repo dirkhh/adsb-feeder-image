@@ -174,9 +174,12 @@ jobs:
       id: tag
       run: |
         export tag=""
+        export is_release=0
         if [ "${{ github.ref_type }}" = "tag" ] ; then tag="${{ github.ref_name }}" ; else tag="${{ github.sha }}" ; fi
+        if [[ tag =~ "^v[0-9]+\.[0-9]+\.[0-9]+$" ]] ; then is_release=1 ; fi
         export better_tag=$(echo $tag | sed -r 's/^(.{8}).{32}$/g-\1/')
         echo "tag=${better_tag}" >> $GITHUB_OUTPUT
+        echo "is_release=${is_release}" >> $GITHUB_OUTPUT
 
 
     - name: Build Image
@@ -298,7 +301,7 @@ jobs:
 
     - name: Upload to GitHub Releases
       uses: softprops/action-gh-release@v1
-      if: ${{ startsWith(steps.tag.outputs.tag, 'v') }}
+      if: ${{ steps.tag.outputs.is_release == 1 }}
       with:
         token: ${{ secrets.PAT_GITHUB_TOKEN }}
         generate_release_notes: true
@@ -307,7 +310,7 @@ jobs:
 
     - name: Upload non-release artifacts
       uses: softprops/action-gh-release@v1
-      if: ${{ startsWith(steps.tag.outputs.tag, 'g') }}
+      if: ${{ steps.tag.outputs.is_release == 0 }}
       with:
         token: ${{ secrets.PAT_GITHUB_TOKEN }}
         generate_release_notes: true
