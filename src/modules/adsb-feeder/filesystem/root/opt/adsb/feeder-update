@@ -63,7 +63,7 @@ else
     FAKE_BRANCH="${RANDOM}-${RANDOM}"
     git checkout -b "$FAKE_BRANCH" &> /dev/null
     git branch -D "$TARGET" &> /dev/null || true
-    git checkout "$TARGET"
+    git checkout "$TARGET" &> /dev/null
     git branch -D "$FAKE_BRANCH" &> /dev/null
     echo "restarting with feeder-update from $TARGET"
     cp src/modules/adsb-feeder/filesystem/root/opt/adsb/feeder-update /opt/adsb-feeder-update/feeder-update
