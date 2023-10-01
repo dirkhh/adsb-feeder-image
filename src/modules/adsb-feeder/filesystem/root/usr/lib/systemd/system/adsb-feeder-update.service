@@ -9,8 +9,7 @@ Description=ADSB Feeder Update Service
 Type=oneshot
 RemainAfterExit=no
 WorkingDirectory=/opt/adsb
-ExecStartPre=/usr/bin/sleep 5
-ExecStart=/usr/bin/bash /opt/adsb/feeder-update
+ExecStart=/usr/bin/bash /opt/adsb/feeder-update -wait
 TimeoutStartSec=0
 
 [Install]
