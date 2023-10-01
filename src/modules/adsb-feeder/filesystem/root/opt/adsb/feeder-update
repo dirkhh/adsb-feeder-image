@@ -7,8 +7,9 @@ cleanup() {
     # and the setup app
     # that way the user might at least be able to look at the logs and figure out
     # what went wrong (or at least ask for help with more information)
-    [ -f /opt/adsb-feeder-update-waiting-pid ] && kill "$(</opt/adsb-feeder-update-waiting-pid)"
-    rm -f /opt/adsb-feeder-update-waiting-pid
+    # make sure this doesn't fail if the kill fails for some reason
+    if [ -f /opt/adsb-feeder-update/waiting-pid ] ; then kill "$(</opt/adsb-feeder-update/waiting-pid)" || true ; fi
+    rm -f /opt/adsb-feeder-update/waiting-pid
     /opt/adsb/docker-compose-start
     systemctl start adsb-setup.service;
 }
@@ -16,7 +17,7 @@ cleanup() {
 waiting_placeholder() {
     PORT=$(grep _ADSBIM_STATE_WEBPORT /opt/adsb/config/.env | cut -d= -f2)
     python3 /opt/adsb/adsb-setup/waiting-app.py "$PORT" &
-    echo $! > /opt/adsb-feeder-update-waiting-pid
+    echo $! > /opt/adsb-feeder-update/waiting-pid
 }
 
 # we need more help debugging this
@@ -145,8 +146,8 @@ echo "finally, trigger a container upgrade so that they match the new image"
 echo "restart the service"
 trap - EXIT
 systemctl daemon-reload
-[ -f /opt/adsb-feeder-update-waiting-pid ] && kill "$(</opt/adsb-feeder-update-waiting-pid)"
-rm -f /opt/adsb-feeder-update-waiting-pid
+if [ -f /opt/adsb-feeder-update/waiting-pid ] ; then kill "$(</opt/adsb-feeder-update/waiting-pid)" || true ; fi
+rm -f /opt/adsb-feeder-update/waiting-pid
 
 systemctl start adsb-setup.service
 

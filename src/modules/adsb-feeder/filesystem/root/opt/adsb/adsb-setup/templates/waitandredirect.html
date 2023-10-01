@@ -7,7 +7,7 @@
     document.addEventListener('readystatechange', event => {
         if (event.target.readyState === "complete") {
             show_spinner();
-            setTimeout(checkStatus, 5000);
+            setTimeout(checkStatus, 10000);
         }
     });
 
