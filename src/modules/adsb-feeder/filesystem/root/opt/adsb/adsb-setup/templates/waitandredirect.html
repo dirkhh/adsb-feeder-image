@@ -29,9 +29,8 @@
             }
         };
         request.onerror = function () {
-            console.log("request threw an error, giving up and trying to redirect (which will likely fail)");
-            alert('Something went wrong.');
-            window.location = '/';
+            console.log("request returned an error - let's hope it's just restarting and try again");
+            setTimeout(checkStatus, 2000);
         };
         request.send();
     };

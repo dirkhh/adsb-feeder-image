@@ -4,32 +4,32 @@
 <h1>{% block title %} Restarting the ADSB system {% endblock %}</h1>
 
 <script>
-    document.addEventListener('readystatechange', event => {
-        if (event.target.readyState === "complete") {
-            show_spinner();
-            // Trigger restart and then start checking the restart status
-            var restartRequest = new XMLHttpRequest();
-            restartRequest.open('POST', '/restart');
-            restartRequest.onload = function () {
-                if (restartRequest.status === 200) {
-                    checkRestartStatus();
-                } else {
-                    // ops, we got an error from the server
-                    alert('Something went wrong.');
-                }
-            };
-            restartRequest.onerror = function () {
-                // ops, we got an error trying to talk to the server
-                alert('Something went wrong.');
-            };
-            restartRequest.send();
+  document.addEventListener('readystatechange', event => {
+    if (event.target.readyState === "complete") {
+      show_spinner();
+      // Trigger restart and then start checking the restart status
+      var restartRequest = new XMLHttpRequest();
+      restartRequest.open('POST', '/restart');
+      restartRequest.onload = function () {
+        if (restartRequest.status === 200) {
+          checkRestartStatus();
+        } else {
+          // ops, we got an error from the server
+          alert('post to /restart failed - please report');
         }
-    });
+      };
+      restartRequest.onerror = function () {
+        // ops, we got an error trying to talk to the server
+        alert('cannot talk to server sending the restart request - please report');
+      };
+      restartRequest.send();
+    }
+  });
 
   function checkRestartStatus() {
     var request = new XMLHttpRequest();
     request.open('GET', '/restart');
-    request.onload = function() {
+    request.onload = function () {
       if (request.status === 200 && request.responseText === 'done') {
         // restarting the ADSB infra completed, redirect user
         window.location = '/';
@@ -37,13 +37,17 @@
         // restart is still in progress, show progress and check again after a delay
         setTimeout(checkRestartStatus, 2000);
       } else {
-        // ops, we got an error from the server
-        alert('Something went wrong.');
+        // ops, we got an error from the server - could be it is briefly turned off for
+        // an update or something
+        console.log("request to GET /restart resulted in ", request.status)
+        setTimeout(checkRestartStatus, 2000);
       }
     };
-    request.onerror = function() {
-      // ops, we got an error trying to talk to the server
-      alert('Something went wrong.');
+    request.onerror = function () {
+      // ops, we got an error trying to talk to the server - could be it is briefly turned off for
+      // an update or something
+      console.log("request to GET /restart resulted in an error: ", request.status)
+      setTimeout(checkRestartStatus, 2000);
     };
     request.send();
   }
