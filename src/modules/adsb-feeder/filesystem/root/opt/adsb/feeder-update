@@ -8,6 +8,7 @@ cleanup() {
     # that way the user might at least be able to look at the logs and figure out
     # what went wrong (or at least ask for help with more information)
     [ -f /opt/adsb-feeder-update-waiting-pid ] && kill "$(</opt/adsb-feeder-update-waiting-pid)"
+    rm -f /opt/adsb-feeder-update-waiting-pid
     /opt/adsb/docker-compose-start
     systemctl start adsb-setup.service;
 }
@@ -145,6 +146,8 @@ echo "restart the service"
 trap - EXIT
 systemctl daemon-reload
 [ -f /opt/adsb-feeder-update-waiting-pid ] && kill "$(</opt/adsb-feeder-update-waiting-pid)"
+rm -f /opt/adsb-feeder-update-waiting-pid
+
 systemctl start adsb-setup.service
 
 echo "update to ${VERSION} complete"
