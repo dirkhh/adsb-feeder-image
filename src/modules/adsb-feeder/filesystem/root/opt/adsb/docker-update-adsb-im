@@ -39,8 +39,9 @@ echo "${TIME}: pulling new container images and restarting docker" >> /var/log/a
 bash ./docker-pull.sh
 bash /opt/adsb/docker-compose-start
 
-# finally remove the images and files we no longer use
-docker system prune -f
+# finally remove the images and files we no longer use - but only if this is the image we are running
+# this would be rude to do on a system where we are one of many apps potentially using docker.
+[ -f os.adsb.feeder.image ] && docker system prune -f
 
 sed -i "s/CONTAINER_VERSION=.*/CONTAINER_VERSION=$TIME/" /opt/adsb/config/.env
 
