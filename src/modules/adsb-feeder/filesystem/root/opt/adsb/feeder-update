@@ -47,8 +47,8 @@ else
 
     # we want to get the correct (matching) update script. But to do
     # that we need to figure out which one that is.
-    # (that last arg pattern has downsides... we can't just skip them)
-    if [[ "$1" == "" || "$1" == "-wait" ]] ; then
+    # (that last arg pattern has downsides... we can't just skip them, so filter out non-branch arguments here)
+    if [[ "$1" == "" || "$1" == -* ]] ; then
         # called without argument, so check which channel we are updating to
         if [ -f /opt/adsb/update-channel ] ; then
             TARGET=$(</opt/adsb/update-channel)
