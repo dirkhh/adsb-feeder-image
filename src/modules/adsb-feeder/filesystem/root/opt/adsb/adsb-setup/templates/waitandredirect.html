@@ -16,7 +16,7 @@
         request.open('GET', '/running');
         request.timeout = 2000;
         request.ontimeout = function () {
-            console.log(`still waiting for ${url} to become available`);
+            console.log(`still waiting for /running to become available`);
             setTimeout(checkStatus, 2000);
         };
         request.onload = function () {
