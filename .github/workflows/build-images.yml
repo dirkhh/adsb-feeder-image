@@ -176,7 +176,7 @@ jobs:
         export tag=""
         export is_release=0
         if [ "${{ github.ref_type }}" = "tag" ] ; then tag="${{ github.ref_name }}" ; else tag="${{ github.sha }}" ; fi
-        if [[ tag =~ "^v[0-9]+\.[0-9]+\.[0-9]+$" ]] ; then is_release=1 ; fi
+        if [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] ; then is_release=1 ; fi
         export better_tag=$(echo $tag | sed -r 's/^(.{8}).{32}$/g-\1/')
         echo "tag=${better_tag}" >> $GITHUB_OUTPUT
         echo "is_release=${is_release}" >> $GITHUB_OUTPUT
