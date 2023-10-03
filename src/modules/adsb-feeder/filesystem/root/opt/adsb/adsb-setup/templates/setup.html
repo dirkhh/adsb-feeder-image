@@ -21,7 +21,7 @@
     <div class="form-group">
         <label for="lat">Latitude (-90 .. +90 -- please use a decimal point, e.g. 45.4)</label>
         <input type="text" name="lat" required placeholder="Antenna latitude" class="form-control"
-            pattern="(?:\+|-|)(?:(?:[0-8]\d?)(?:\.\d+)?|90(?:\.0+)?)" title="Number between -90 and 90"
+            pattern="(?:\+|-|)(?:(?:[0-8]?\d)(?:\.\d+)?|90(?:\.0+)?)" title="Number between -90 and 90"
             value="{{ env_value_by_tag('lat') }}"></input>
     </div>
     <div class="form-group">
