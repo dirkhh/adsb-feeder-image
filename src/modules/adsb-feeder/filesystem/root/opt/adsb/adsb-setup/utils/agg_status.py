@@ -177,7 +177,7 @@ class AggStatus:
                 match = re.search(r"<.*?>([a-zA-Z ]*)<.*?>ADS-B Status", adsbx_text)
                 if match:
                     self._beast = (
-                        T.Yes if match.group(1).index("Feed Ok") != -1 else T.No
+                        T.Yes if match.group(1).find("Feed Ok") != -1 else T.No
                     )
                     print_err(f"found beast status {match.group(1)} {self._beast}")
                 else:
@@ -185,9 +185,7 @@ class AggStatus:
                     return
                 match = re.search(r"<.*?>([a-zA-Z ]*)<.*?>MLAT Status", adsbx_text)
                 if match:
-                    self._mlat = (
-                        T.Yes if match.group(1).index("Feed Ok") != -1 else T.No
-                    )
+                    self._mlat = T.Yes if match.group(1).find("Feed Ok") != -1 else T.No
                     print_err(f"found mlat status {match.group(1)} {self._mlat}")
                 self._last_check = datetime.now()
         elif self._agg == "tat":
