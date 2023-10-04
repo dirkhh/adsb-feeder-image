@@ -11,3 +11,4 @@ services:
     environment:
       - BEASTHOST=ultrafeeder
       - FR24KEY=${FEEDER_FR24_SHARING_KEY}
+      - MLAT=${FEEDER_FR24_MLAT}
