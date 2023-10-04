@@ -17,11 +17,12 @@ cleanup() {
 waiting_placeholder() {
     PORT=$(grep _ADSBIM_STATE_WEBPORT /opt/adsb/config/.env | cut -d= -f2)
     python3 /opt/adsb/adsb-setup/waiting-app.py "$PORT" &
+    mkdir -p /opt/adsb-feeder-update
     echo $! > /opt/adsb-feeder-update/waiting-pid
 }
 
 # we need more help debugging this
-set -ex
+set -x
 
 exec &>> /var/log/adsb-setup.log
 
