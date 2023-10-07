@@ -97,13 +97,16 @@ class AggStatus:
 
     def check(self):
         # figure out the feeder state at this aggregator (if possible)
-        if self._agg == "adsblol" or self._agg == "flyitaly":
+        if self._agg == "adsblol":
+            json_url = "https://api.adsb.lol/0/me"
+            response_dict = self.get_json(json_url)
+            if response_dict:
+                self._beast = T.Yes if len(response_dict["beast"]) else T.No
+                self._mlat = T.Yes if len(response_dict["mlat"]) else T.No
+                self._last_check = datetime.now()
+        if self._agg == "flyitaly":
             # get the data from json
-            json_url = (
-                "https://api.adsb.lol/api/0/me"
-                if self._agg == "adsblol"
-                else "https://my.flyitalyadsb.com/am_i_feeding"
-            )
+            json_url = "https://my.flyitalyadsb.com/am_i_feeding"
             response_dict = self.get_json(json_url)
             if response_dict:
                 feeding = response_dict["feeding"]
