@@ -85,7 +85,7 @@ class AdsbIm:
         # fmt: off
         self.all_aggregators = [
             # tag, name, map link, status link
-            ["adsblol", "adsb.lol", "https://adsb.lol/", "https://api.adsb.lol/api/0/me"],
+            ["adsblol", "adsb.lol", "https://adsb.lol/", "https://api.adsb.lol/0/me"],
             ["flyitaly", "Fly Italy ADSB", "https://mappa.flyitalyadsb.com/", "https://my.flyitalyadsb.com/am_i_feeding"],
             ["avdelphi", "AVDelphi", "https://www.avdelphi.com/coverage.html", ""],
             ["planespotters", "Planespotters", "https://radar.planespotters.net/", "https://www.planespotters.net/feed/status"],
