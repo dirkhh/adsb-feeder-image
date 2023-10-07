@@ -549,6 +549,7 @@ class AdsbIm:
                         subprocess.call(
                             "/usr/bin/systemctl enable --now zerotier-one", shell=True
                         )
+                        sleep(5.0)  # this gives the service enough time to get ready
                         subprocess.call(
                             f"/usr/sbin/zerotier-cli join {value}", shell=True
                         )
