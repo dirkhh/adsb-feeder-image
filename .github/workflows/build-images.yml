@@ -110,6 +110,7 @@ jobs:
           variant: dietpi-trailing-fat
           base_arch: arm64
           url: https://dietpi.com/downloads/images/DietPi_NanoPiNEO3-ARMv8-Bookworm.img.xz
+          magic_path: "repository/src/image-dietpi/DietPi_NanoPiNEO3-ARMv8-Bookworm.img.xz"
         - name: orangepi-5plus-dietpi
           variant: dietpi-trailing-fat
           base_arch: arm64
