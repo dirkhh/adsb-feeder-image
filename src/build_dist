@@ -57,6 +57,10 @@ if [[ "$1" == "dietpi-trailing-fat" || "$1" == "dietpi-root2" || "$1" == "dietpi
     elif [[ "$1" == "dietpi-root1" ]] ; then
         # I think that's only the VM image, but let's keep it generic in the descriptor
         # here we don't need to mount a second partition at all; instead we just modify the files in /boot on the root partition
+        # we do, however, need to make sure that the image is big enough - the VM disks come only with about a gig of storage which
+        # is nowhere near enough - so let's make it 16G. The compression at the end makes this still fairly small.
+        qemu-img resize -f raw "$BASE_IMG" 16G
+        echo ", +" | sfdisk -N 1 "$BASE_IMG"
         mount_image "$BASE_IMG" 1 "$MNT_DIR"
         CONFIG_DIR="boot"
     else
