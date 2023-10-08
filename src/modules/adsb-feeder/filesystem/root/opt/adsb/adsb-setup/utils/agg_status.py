@@ -101,8 +101,8 @@ class AggStatus:
             json_url = "https://api.adsb.lol/0/me"
             response_dict = self.get_json(json_url)
             if response_dict:
-                self._beast = T.Yes if len(response_dict["beast"]) else T.No
-                self._mlat = T.Yes if len(response_dict["mlat"]) else T.No
+                self._beast = T.Yes if len(response_dict["clients"]["beast"]) else T.No
+                self._mlat = T.Yes if len(response_dict["clients"]["mlat"]) else T.No
                 self._last_check = datetime.now()
         if self._agg == "flyitaly":
             # get the data from json
