@@ -174,9 +174,10 @@ jobs:
       id: tag
       run: |
         export tag=""
-        export is_release=0
+        export is_release="test"
         if [ "${{ github.ref_type }}" = "tag" ] ; then tag="${{ github.ref_name }}" ; else tag="${{ github.sha }}" ; fi
-        if [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] ; then is_release=1 ; fi
+        if [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] ; then is_release="release" ; fi
+        if [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-beta ]] ; then is_release="beta" ; fi
         export better_tag=$(echo $tag | sed -r 's/^(.{8}).{32}$/g-\1/')
         echo "tag=${better_tag}" >> $GITHUB_OUTPUT
         echo "is_release=${is_release}" >> $GITHUB_OUTPUT
@@ -299,22 +300,31 @@ jobs:
         ls -lh .
 
 
-    - name: Upload to GitHub Releases
+    - name: Upload to GitHub as release
       uses: softprops/action-gh-release@v1
-      if: ${{ steps.tag.outputs.is_release == 1 }}
+      if: ${{ steps.tag.outputs.is_release == "release" }}
       with:
         token: ${{ secrets.PAT_GITHUB_TOKEN }}
         generate_release_notes: true
         files: ${{ steps.compress.outputs.image }}
 
 
-    - name: Upload non-release artifacts
+    - name: Upload to GitHub as beta release
       uses: softprops/action-gh-release@v1
-      if: ${{ steps.tag.outputs.is_release == 0 }}
+      if: ${{ steps.tag.outputs.is_release == "beta" }}
       with:
         token: ${{ secrets.PAT_GITHUB_TOKEN }}
         generate_release_notes: true
         prerelease: true
+        files: ${{ steps.compress.outputs.image }}
+
+
+    - name: Upload non-release artifacts
+      uses: softprops/action-gh-release@v1
+      if: ${{ steps.tag.outputs.is_release == "test" }}
+      with:
+        token: ${{ secrets.PAT_GITHUB_TOKEN }}
+        generate_release_notes: true
         tag_name: latest
         name: testbuild-${{ steps.tag.outputs.tag }}
         files: ${{ steps.compress.outputs.image }}
