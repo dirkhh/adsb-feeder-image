@@ -57,13 +57,13 @@ if [[ "$1" == "dietpi-trailing-fat" || "$1" == "dietpi-root2" || "$1" == "dietpi
     elif [[ "$1" == "dietpi-root1" ]] ; then
         # I think that's only the VM image, but let's keep it generic in the descriptor
         # here we don't need to mount a second partition at all; instead we just modify the files in /boot on the root partition
-	mount_image "$BASE_IMG" 1 "$MNT_DIR"
+        mount_image "$BASE_IMG" 1 "$MNT_DIR"
         CONFIG_DIR="boot"
     else
-	# on a "standard" RPi/DietPi image with /boot as first and / as second partition
-	# we can use the existing mount_image helper - we still mount the /boot partition on media
-	# so the rest of the code can stay the same
-	mount_image "$BASE_IMG" 2 "$MNT_DIR" "media" 1
+        # on a "standard" RPi/DietPi image with /boot as first and / as second partition
+        # we can use the existing mount_image helper - we still mount the /boot partition on media
+        # so the rest of the code can stay the same
+        mount_image "$BASE_IMG" 2 "$MNT_DIR" "media" 1
         CONFIG_DIR="media"
     fi
     sed -i "s/GIT_COMMIT_SHA/$GIT_COMMIT_SHA/" ${DIR}/variants/dietpi-trailing-fat/Automation_Custom_Script.sh
