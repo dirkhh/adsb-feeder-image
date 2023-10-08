@@ -208,7 +208,7 @@ jobs:
       env:
         BASE_RELEASE_COMPRESS: no
       run: |
-        if [ "${VARIANT}" = "dietpi-trailing-fat" ] ; then
+        if [[ "${VARIANT}" = "dietpi-trailing-fat" || "${VARIANT}" = "dietpi-root1" ]] ; then
           echo "this doesn't do anything"
         else
           cd repository/src
@@ -228,7 +228,7 @@ jobs:
         IMAGE="adsb-feeder-${IMG_NAME}-${{ steps.tag.outputs.tag }}.img"
         if [ "${VARIANT}" = "default" ]; then
           WORKSPACE="repository/src/workspace"
-        elif [ "${VARIANT}" = "dietpi-trailing-fat" ] ; then
+        elif [[ "${VARIANT}" = "dietpi-trailing-fat" || "${VARIANT}" = "dietpi-root1" ]] ; then
           WORKSPACE="repository/src/image-dietpi"
         else
           WORKSPACE="repository/src/workspace-${VARIANT}"
