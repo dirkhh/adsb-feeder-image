@@ -22,20 +22,21 @@ install_cleanup_trap
 # modified to build a base image (so intended for non-interactive use) by Dirk Hohndel <dirk@hohndel.org>
 export DEBIAN_FRONTEND=noninteractive
 
-
+    # don't try to upgrade grub in a chroot; that won't work
+    [ "$BASE_ARCH" = "x86_64" ] && apt-mark hold grub-common grub-pc grub-pc-bin grub2-common
     echo "Installing docker, each step may take a while:"
     echo -n "Updating repositories... "
-    sudo apt-get update -qq -y >/dev/null && sudo apt-get upgrade -q -y -o Dpkg::Options::=--force-confnew -o Dpkg::Options::="--force-confdef"
+    apt-get update -qq -y >/dev/null && apt-get upgrade -q -y -o Dpkg::Options::=--force-confnew -o Dpkg::Options::="--force-confdef"
     echo -n "Ensuring dependencies are installed... "
-    sudo apt-get install -qq -y apt-transport-https ca-certificates curl gnupg2 slirp4netns software-properties-common uidmap w3m jq netcat-openbsd >/dev/null
+    apt-get install -qq -y apt-transport-https ca-certificates curl gnupg2 slirp4netns software-properties-common uidmap w3m jq netcat-openbsd >/dev/null
     echo -n "Getting docker..."
     curl -fsSL https://get.docker.com -o get-docker.sh
     echo "Installing Docker... "
-    sudo sh get-docker.sh
+    sh get-docker.sh
     echo "Docker installed -- configuring docker..."
-    sudo usermod -aG docker "${BASE_USER}"
-    sudo mkdir -p /etc/docker
-    sudo chmod a+rwx /etc/docker
+    usermod -aG docker "${BASE_USER}"
+    mkdir -p /etc/docker
+    chmod a+rwx /etc/docker
     cat > /etc/docker/daemon.json <<EOF
 {
   "log-driver": "local",
@@ -45,7 +46,7 @@ export DEBIAN_FRONTEND=noninteractive
   }
 }
 EOF
-    sudo chmod u=rw,go=r /etc/docker/daemon.json
+    chmod u=rw,go=r /etc/docker/daemon.json
     echo 'export PATH=/usr/bin:$PATH' >> ~/.bashrc
     export PATH=/usr/bin:$PATH
 
@@ -62,7 +63,7 @@ then
 else
     echo "not found!"
     echo "Installing Docker-compose... "
-    sudo apt install -y docker-compose-plugin
+    apt install -y docker-compose-plugin
     echo "alias docker-compose=\"docker compose\"" >> ~/.bash_aliases
     source ~/.bash_aliases
 
@@ -86,15 +87,15 @@ LIBVERSION_MINOR="$(apt-cache policy libseccomp2 | grep -e libseccomp2: -A1 | ta
 if (( LIBVERSION_MAJOR < 2 )) || (( LIBVERSION_MAJOR == 2 && LIBVERSION_MINOR < 4 )) && [[ "${OS_VERSION}" == "BUSTER" ]]
 then
   echo "libseccomp2 needs updating. Please wait while we do this."
-  sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 04EE7237B7D453EC 648ACFD622F3D138
-  echo "deb http://deb.debian.org/debian buster-backports main" | sudo tee -a /etc/apt/sources.list.d/buster-backports.list
-  sudo apt update
-  sudo apt install -y -q -t buster-backports libseccomp2
+  apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 04EE7237B7D453EC 648ACFD622F3D138
+  echo "deb http://deb.debian.org/debian buster-backports main" | tee -a /etc/apt/sources.list.d/buster-backports.list
+  apt update
+  apt install -y -q -t buster-backports libseccomp2
 elif (( LIBVERSION_MAJOR < 2 )) || (( LIBVERSION_MAJOR == 2 && LIBVERSION_MINOR < 4 )) && [[ "${OS_VERSION}" == "STRETCH" ]]
 then
   INSTALL_CANDIDATE=$(curl -qsL http://ftp.debian.org/debian/pool/main/libs/libseccomp/ |w3m -T text/html -dump | sed -n 's/^.*\(libseccomp2_2.5.*armhf.deb\).*/\1/p' | sort | tail -1)
   curl -qsL -o /tmp/"${INSTALL_CANDIDATE}" http://ftp.debian.org/debian/pool/main/libs/libseccomp/${INSTALL_CANDIDATE}
-  sudo dpkg -i /tmp/"${INSTALL_CANDIDATE}" && rm -f /tmp/"${INSTALL_CANDIDATE}"
+  dpkg -i /tmp/"${INSTALL_CANDIDATE}" && rm -f /tmp/"${INSTALL_CANDIDATE}"
 fi
 # Now make sure all went well
 LIBVERSION_MAJOR="$(apt-cache policy libseccomp2 | grep -e libseccomp2: -A1 | tail -n1 | sed -n 's/.*:\s*\([0-9]*\).\([0-9]*\).*/\1/p')"
@@ -110,10 +111,10 @@ fi
     tmpdir=$(mktemp -d)
     pushd "$tmpdir" >/dev/null || exit
         echo -n "Getting the latest RTL-SDR packages... "
-        sudo apt-get install -qq -y git rtl-sdr >/dev/null
+        apt-get install -qq -y git rtl-sdr >/dev/null
         echo -n "Getting the latest UDEV rules... "
         # First install the UDEV rules for RTL-SDR dongles
-        sudo -E "$(which bash)" -c "curl -sL -o /etc/udev/rules.d/rtl-sdr.rules https://raw.githubusercontent.com/wiedehopf/adsb-scripts/master/osmocom-rtl-sdr.rules"
+        curl -sL -o /etc/udev/rules.d/rtl-sdr.rules https://raw.githubusercontent.com/wiedehopf/adsb-scripts/master/osmocom-rtl-sdr.rules
         # Next, exclude the drivers so the dongles stay accessible
         # Please keep the list in this order and add any additional ones to the BOTTOM.
         BLOCKED_MODULES=()
@@ -131,14 +132,14 @@ fi
         do
             if ! grep -q $module /etc/modprobe.d/exclusions-rtl2832.conf
             then
-              sudo -E "$(which bash)" -c "echo blacklist $module >>/etc/modprobe.d/exclusions-rtl2832.conf"
-              sudo -E "$(which bash)" -c "modprobe -r $module 2>/dev/null" || true
+              echo blacklist $module >>/etc/modprobe.d/exclusions-rtl2832.conf
+              modprobe -r $module 2>/dev/null || true
             fi
         done
         # Rebuild module dependency database factoring in blacklists
         which depmod >/dev/null 2>&1 && depmod -a || true
         # On systems with initramfs, this needs to be updated to make sure the exclusions take effect:
-        which update-initramfs >/dev/null 2>&1 && sudo update-initramfs -u || true
+        which update-initramfs >/dev/null 2>&1 && update-initramfs -u || true
     popd >/dev/null
     # Check tmpdir is set and not null before attempting to remove it
     if [[ -z "$tmpdir" ]]; then
@@ -150,7 +151,7 @@ fi
 if [[ -f /etc/dhcpcd.conf ]] && ! grep "denyinterfaces veth\*" /etc/dhcpcd.conf >/dev/null 2>&1
 then
   echo -n "Excluding veth interfaces from dhcp. This will prevent problems if you are connected to the internet via WiFi when running many Docker containers... "
-  sudo sh -c 'echo "denyinterfaces veth*" >> /etc/dhcpcd.conf'
+  sh -c 'echo "denyinterfaces veth*" >> /etc/dhcpcd.conf'
   # don't do that during setup: sudo systemctl restart dhcpcd.service
   echo "done!"
 fi
@@ -159,9 +160,10 @@ fi
 if ! grep localunixsocket /etc/hosts >/dev/null 2>&1
 then
   echo "Speeding up the recreation of containers when using docker-compose..."
-  sudo sed -i 's/^\(127.0.0.1\s*localhost\)\(.*\)/\1\2 localunixsocket localunixsocket.local localunixsocket.home/g' /etc/hosts
+  sed -i 's/^\(127.0.0.1\s*localhost\)\(.*\)/\1\2 localunixsocket localunixsocket.local localunixsocket.home/g' /etc/hosts
 fi
 
 #cleanup
 apt-get clean
+[ "$BASE_ARCH" = "x86_64" ] && apt-mark unhold grub-common grub-pc grub-pc-bin grub2-common
 apt-get autoremove -y
