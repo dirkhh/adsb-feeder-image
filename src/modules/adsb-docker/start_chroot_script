@@ -22,11 +22,9 @@ install_cleanup_trap
 # modified to build a base image (so intended for non-interactive use) by Dirk Hohndel <dirk@hohndel.org>
 export DEBIAN_FRONTEND=noninteractive
 
-    # don't try to upgrade grub in a chroot; that won't work
-    [ "$BASE_ARCH" = "x86_64" ] && apt-mark hold grub-common grub-pc grub-pc-bin grub2-common
     echo "Installing docker, each step may take a while:"
     echo -n "Updating repositories... "
-    apt-get update -qq -y >/dev/null && apt-get upgrade -q -y -o Dpkg::Options::=--force-confnew -o Dpkg::Options::="--force-confdef"
+    apt-get update -qq -y >/dev/null
     echo -n "Ensuring dependencies are installed... "
     apt-get install -qq -y apt-transport-https ca-certificates curl gnupg2 slirp4netns software-properties-common uidmap w3m jq netcat-openbsd >/dev/null
     echo -n "Getting docker..."
@@ -165,5 +163,4 @@ fi
 
 #cleanup
 apt-get clean
-[ "$BASE_ARCH" = "x86_64" ] && apt-mark unhold grub-common grub-pc grub-pc-bin grub2-common
 apt-get autoremove -y
