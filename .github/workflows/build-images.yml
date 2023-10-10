@@ -43,7 +43,7 @@ jobs:
           magic_path: "repository/src/image-armbian/asus-tinkerboard.img.xz"
         - name: asus-tinkerboard-dietpi
           base_arch: ""
-          variant: dietpi-trailing-fat
+          variant: iob-dietpi-fat-2
           url: https://dietpi.com/downloads/images/DietPi_ASUSTB-ARMv7-Bookworm.img.xz
           magic_path: "repository/src/image-dietpi/DietPi_ASUSTB-ARMv7-Bookworm.img.xz"
         - name: banana-pi-m5-m2p
@@ -93,7 +93,7 @@ jobs:
           magic_path: "repository/src/image/2023-02-21-raspios-bullseye-arm64-lite.img.xz"
         - name: raspberrypi-dietpi-64
           base_arch: arm64
-          variant: dietpi
+          variant: iob-dietpi-fat-1
           url: https://dietpi.com/downloads/images/DietPi_RPi-ARMv8-Bookworm.img.xz
           magic_path: "repository/src/image-dietpi/DietPi_RPi-ARMv8-Bookworm.img.xz"
         - name: renegade
@@ -107,17 +107,17 @@ jobs:
           url: https://redirect.armbian.com/region/EU/rockpi-4c/Bookworm_current_minimal
           magic_path: "repository/src/image-armbian/rockpi4.img.xz"
         - name: nanopi-neo3-dietpi
-          variant: dietpi-trailing-fat
+          variant: iob-dietpi-fat-2
           base_arch: arm64
           url: https://dietpi.com/downloads/images/DietPi_NanoPiNEO3-ARMv8-Bookworm.img.xz
           magic_path: "repository/src/image-dietpi/DietPi_NanoPiNEO3-ARMv8-Bookworm.img.xz"
         - name: orangepi-5plus-dietpi
-          variant: dietpi-trailing-fat
+          variant: iob-dietpi-fat-2
           base_arch: arm64
           url: https://dietpi.com/downloads/images/DietPi_OrangePi5Plus-ARMv8-Bookworm.img.xz
           magic_path: "repository/src/image-dietpi/DietPi_OrangePi5Plus-ARMv8-Bookworm.img.xz"
         - name: x86-64-vm
-          variant: dietpi-root1
+          variant: iob-dietpi-root-only
           base_arch: x86_64
           url: https://dietpi.com/downloads/images/DietPi_VM-x86_64-Bookworm.img.xz
           magic_path: "repository/src/image-dietpi/DietPi_VM-x86_64-Bookworm.img.xz"
@@ -209,7 +209,7 @@ jobs:
       env:
         BASE_RELEASE_COMPRESS: no
       run: |
-        if [[ "${VARIANT}" = "dietpi-trailing-fat" || "${VARIANT}" = "dietpi-root1" ]] ; then
+        if [[ "${VARIANT}" = "iob-dietpi"* ]] ; then
           echo "this doesn't do anything"
         else
           cd repository/src
@@ -229,7 +229,7 @@ jobs:
         IMAGE="adsb-feeder-${IMG_NAME}-${{ steps.tag.outputs.tag }}.img"
         if [ "${VARIANT}" = "default" ]; then
           WORKSPACE="repository/src/workspace"
-        elif [[ "${VARIANT}" = "dietpi-trailing-fat" || "${VARIANT}" = "dietpi-root1" ]] ; then
+        elif [[ "${VARIANT}" = "iob-dietpi"* ]] ; then
           WORKSPACE="repository/src/image-dietpi"
         else
           WORKSPACE="repository/src/workspace-${VARIANT}"

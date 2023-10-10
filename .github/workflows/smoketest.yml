@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       IMG_NAME: "x86-64-vm"
-      VARIANT: "dietpi-root1"
+      VARIANT: "iob-dietpi-root-only"
       IMAGE_URL: "https://dietpi.com/downloads/images/DietPi_VM-x86_64-Bookworm.7z"
       MAGIC_PATH: "repository/src/image-dietpi/DietPi_VM-x86_64-Bookworm.7z"
       BASE_ARCH: x86_64

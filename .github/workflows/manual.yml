@@ -30,28 +30,28 @@ jobs:
           echo "MAGIC_PATH=repository/src/image-dietpi/DietPi_RPi-ARMv8-Bookworm.7z" >> $GITHUB_ENV
         elif [ ${{ github.event.inputs.target }} = "x86-64-vm" ] ; then
           echo "BASE_ARCH=x86_64" >> $GITHUB_ENV
-          echo "VARIANT=dietpi-root1" >> $GITHUB_ENV
+          echo "VARIANT=iob-dietpi-root-only" >> $GITHUB_ENV
           echo "IMAGE_URL=https://dietpi.com/downloads/images/DietPi_VM-x86_64-Bookworm.7z" >> $GITHUB_ENV
           echo "MAGIC_PATH=repository/src/image-dietpi/DietPi_VM-x86_64-Bookworm.7z" >> $GITHUB_ENV
         elif [ ${{ github.event.inputs.target }} = "x86-64-vm-native" ] ; then
           echo "BASE_ARCH=x86_64" >> $GITHUB_ENV
-          echo "VARIANT=dietpi-root1" >> $GITHUB_ENV
+          echo "VARIANT=iob-dietpi-root-only" >> $GITHUB_ENV
           echo "IMAGE_URL=https://dietpi.com/downloads/images/DietPi_VM-x86_64-Bookworm.7z" >> $GITHUB_ENV
           echo "MAGIC_PATH=repository/src/image-dietpi/DietPi_VM-x86_64-Bookworm.7z" >> $GITHUB_ENV
           echo "DIETPI_NATIVE=1" >> $GITHUB_ENV
         elif [ ${{ github.event.inputs.target }} = "nanopi-neo3-dietpi" ] ; then
           echo "BASE_ARCH=arm64" >> $GITHUB_ENV
-          echo "VARIANT=dietpi-trailing-fat" >> $GITHUB_ENV
+          echo "VARIANT=iob-dietpi-fat-2" >> $GITHUB_ENV
           echo "IMAGE_URL=https://dietpi.com/downloads/images/DietPi_NanoPiNEO3-ARMv8-Bookworm.img.xz" >> $GITHUB_ENV
           echo "MAGIC_PATH=repository/src/image-dietpi/DietPi_NanoPiNEO3.img.xz" >> $GITHUB_ENV
         elif [ ${{ github.event.inputs.target }} = "orangepi-5plus-dietpi" ] ; then
           echo "BASE_ARCH=arm64" >> $GITHUB_ENV
-          echo "VARIANT=dietpi-trailing-fat" >> $GITHUB_ENV
+          echo "VARIANT=iob-dietpi-fat-2" >> $GITHUB_ENV
           echo "IMAGE_URL=https://dietpi.com/downloads/images/DietPi_OrangePi5Plus-ARMv8-Bookworm.img.xz" >> $GITHUB_ENV
           echo "MAGIC_PATH=repository/src/image-dietpi/DietPi_OrangePi5Plus.img.xz" >> $GITHUB_ENV
         elif [ ${{ github.event.inputs.target }} = "rpi64-dietpi" ] ; then
           echo "BASE_ARCH=arm64" >> $GITHUB_ENV
-          echo "VARIANT=dietpi-root2" >> $GITHUB_ENV
+          echo "VARIANT=iob-dietpi-fat-1" >> $GITHUB_ENV
           echo "IMAGE_URL=https://dietpi.com/downloads/images/DietPi_RPi-ARMv8-Bookworm.img.xz" >> $GITHUB_ENV
           echo "MAGIC_PATH=repository/src/image-dietpi/DietPi_RPi64.img.xz" >> $GITHUB_ENV
         else
@@ -133,7 +133,7 @@ jobs:
       env:
         BASE_RELEASE_COMPRESS: no
       run: |
-        if [[ "${VARIANT}" = "dietpi-trailing-fat" || "${VARIANT}" = "dietpi-root2" ]] ; then
+        if [[ "${VARIANT}" = "iob-dietpi"* ]] ; then
           echo "this doesn't do anything"
         else
           cd repository/src
@@ -153,7 +153,7 @@ jobs:
         IMAGE="adsb-feeder-${IMG_NAME}-${{ steps.tag.outputs.tag }}.img"
         if [ "${VARIANT}" = "default" ]; then
           WORKSPACE="repository/src/workspace"
-        elif [[ "${VARIANT}" = "dietpi-trailing-fat" || "${VARIANT}" = "dietpi-root2" ]] ; then
+        elif [[ "${VARIANT}" = "iob-dietpi"* ]] ; then
           WORKSPACE="repository/src/image-dietpi"
         else
           WORKSPACE="repository/src/workspace-${VARIANT}"
