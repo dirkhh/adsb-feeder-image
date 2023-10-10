@@ -1,6 +1,6 @@
 #!/bin/bash
 
-IMG=$(ls -rt adsb-feeder*.qcow2 | tail -1)
+IMG=$(ls -rt adsb-im*.qcow2 | tail -1)
 SIZE="16G"
 POOL="local-lvm:0"
 while (( $# ))

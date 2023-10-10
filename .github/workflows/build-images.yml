@@ -189,6 +189,7 @@ jobs:
 
 
     - name: Build Image
+      id: build
       run: |
         sudo modprobe loop
         cd repository/src
@@ -199,9 +200,12 @@ jobs:
         if [ -n "${BASE_ARCH}" ]; then
           echo "export BASE_ARCH=${BASE_ARCH}" >> config
         fi
+        if [[ "${VARIANT}" =~ ^iob ]] ; then fnprefix="adsb-im-iob" ; else fnprefix="adsb-im" ; fi
+        feeder_image_name="${fnprefix}-${IMG_NAME}-${{ steps.tag.outputs.tag }}.img"
         echo "export BASE_USER_PASSWORD=${{ secrets.USER_PASSWORD }}" >> config
         echo "export ROOT_PWD=${{ secrets.ROOT_PASSWORD }}" >> config
-        echo "export FEEDER_IMAGE_NAME=adsb-feeder-${IMG_NAME}-${{ steps.tag.outputs.tag }}.img" >> config
+        echo "export FEEDER_IMAGE_NAME=${feeder_image_name}" >> config
+        echo "feeder_image_name=${feeder_image_name}" >> $GITHUB_OUTPUT
         sudo GH_REF_TYPE=${{ github.ref_type }} GH_TRGT_REF=${{ github.ref_name }} bash -x ./build_dist "${VARIANT}"
 
 
@@ -226,7 +230,7 @@ jobs:
         find -name "*.img*" || true
         CURRENT_IMAGE_NAME="$(basename $MAGIC_PATH)"
         echo "${CURRENT_IMAGE_NAME}"
-        IMAGE="adsb-feeder-${IMG_NAME}-${{ steps.tag.outputs.tag }}.img"
+        IMAGE="${{ steps.build.outputs.feeder_image_name }}"
         if [ "${VARIANT}" = "default" ]; then
           WORKSPACE="repository/src/workspace"
         elif [[ "${VARIANT}" = "iob-dietpi"* ]] ; then
@@ -240,13 +244,12 @@ jobs:
         BUILT_IMAGE="$(find $WORKSPACE -name "*.img" | head -n 1)"
         mv -v "${BUILT_IMAGE}" "${IMAGE}"
         sudo chmod 777 "${IMAGE}"
-        echo "image=${IMAGE}" >> $GITHUB_OUTPUT
 
 
     - name: Compress img
       id: compress
       run: |
-        export IMAGE="${{ steps.copy.outputs.image }}"
+        export IMAGE="${{ steps.build.outputs.feeder_image_name }}"
         case ${IMAGE} in
         *-x86-64-vm*)
           # this is where we run out of space. Bugger.
