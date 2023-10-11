@@ -69,6 +69,10 @@ if [[ "$1" == "iob-dietpi"* ]] ; then
         # so the rest of the code can stay the same
         mount_image "$BASE_IMG" 2 "$MNT_DIR" "media" 1
         CONFIG_DIR="media"
+
+        # these images have the unfortunate "NO_NAME" moniker. Let's try to fix that
+        boot_dev=$(findmnt -o SOURCE "${MNT_DIR}/media" | tail -1)
+        fatlabel "$boot_dev" ADSB-FEEDER
     fi
     sed -i "s/GIT_COMMIT_SHA/$GIT_COMMIT_SHA/" ${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh
     sed -i "s/FEEDER_IMAGE_NAME/$FEEDER_IMAGE_NAME/" ${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh
