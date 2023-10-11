@@ -488,8 +488,28 @@ class AdsbIm:
                     pass
                 if key == "tailscale":
                     # grab extra arguments if given
-                    args = form.get("tailscale_extras", "")
-                    print_err(f"starting tailscale (args='{args}')")
+                    ts_args = form.get("tailscale_extras", "")
+                    if ts_args:
+                        # right now we really only want to allow the login server arg
+                        ts_cli_switch, ts_cli_value = ts_args.split("=")
+                        if ts_cli_switch != "--login-server":
+                            print_err(
+                                "at this point we only allow the --login-server argument; "
+                                "please let us know at the Zulip support link why you need "
+                                f"this to support {ts_cli_switch}"
+                            )
+                            continue
+                        print_err(f"login server arg is {ts_cli_value}")
+                        match = re.match(
+                            r"^https?://[-a-zA-Z0-9._\+~=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?::[0-9]{1,5})?(?:[-a-zA-Z0-9()_\+.~/=]*)$",
+                            ts_cli_value,
+                        )
+                        if not match:
+                            print_err(
+                                f"the login server URL didn't make sense {ts_cli_value}"
+                            )
+                            continue
+                    print_err(f"starting tailscale (args='{ts_args}')")
                     try:
                         subprocess.run(
                             "/usr/bin/systemctl enable --now tailscaled",
@@ -497,9 +517,10 @@ class AdsbIm:
                             timeout=20.0,
                         )
                         result = subprocess.run(
-                            f"/usr/bin/tailscale up {args} 2> /tmp/out &",
+                            f"/usr/bin/tailscale up {ts_args} 2> /tmp/out &",
                             shell=True,
                             capture_output=False,
+                            timeout=30.0,
                         )
                     except:
                         # this really needs a user visible error...
@@ -509,7 +530,12 @@ class AdsbIm:
                         sleep(1.0)
                         with open("/tmp/out") as out:
                             output = out.read()
+                        # standard tailscale result
                         match = re.search(r"(https://login\.tailscale.*)", output)
+                        if match:
+                            break
+                        # when using a login-server
+                        match = re.search(r"(https://.*/register/nodekey.*)", output)
                         if match:
                             break
 
@@ -517,6 +543,8 @@ class AdsbIm:
                     print_err(f"found login link {login_link}")
                     self._constants.env_by_tags("tailscale_ll").value = login_link
                     return redirect(url_for("expert"))
+                # tailscale handling uses 'continue' to avoid deep nesting - don't add other keys
+                # here at the end - instead insert them before tailscale
                 continue
             if value == "stay":
                 if key in self._other_aggregators:
