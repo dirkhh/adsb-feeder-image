@@ -110,10 +110,12 @@ echo "running ${DIR}/feeder-update from $TARGET"
 
 cd "${DIR}/adsb-feeder-image" || exit_with_message "can't cd to ${DIR}/adsb-feeder-image"
 
-DATE_COMPONENT=$(git log -20 --date=format:%y%m%d --format="%ad" | uniq -c | head -1 | awk '{ print $2"."$1 }')
-# grab the most recent tag. Forcing '--long' always adds the -<num>-g<sha> trailer to the result - which we then can remove
+# grab the most recent version tag. Forcing '--long' always adds the -<num>-g<sha> trailer to the result - which we then can remove
 TAG_COMPONENT=$(git describe --match "v[0-9]*" --long | sed "s/-[0-9]*-g[0-9a-f]*//")
-VERSION="${TAG_COMPONENT}(${BRANCH})-${DATE_COMPONENT}"
+# now comare this to a regular call to git describe so we get the SHA that we'll add at the end
+DESCRIBE=$(git describe)
+SHA_COMPONENT=${DESCRIBE//$TAG_COMPONENT/}
+VERSION="${TAG_COMPONENT}(${BRANCH})${SHA_COMPONENT}"
 echo "starting the actual upgrade to ${VERSION}"
 
 echo "prepare the files that we need to replace"

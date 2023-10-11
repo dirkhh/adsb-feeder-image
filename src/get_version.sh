@@ -28,5 +28,6 @@ else
     fi
 fi
 BRANCH_COMPONENT=${BRANCH_COMPONENT//(main)/(stable)}
-DATE_COMPONENT=$(git log -30 --date=format:%y%m%d --format="%ad" | uniq -c | head -1 | awk '{ print $2"."$1 }')
-echo -n "${TAG_COMPONENT}${BRANCH_COMPONENT}-${DATE_COMPONENT}"
+DESCRIBE=$(git describe)
+SHA_COMPONENT=${DESCRIBE//$TAG_COMPONENT/}
+echo -n "${TAG_COMPONENT}${BRANCH_COMPONENT}${SHA_COMPONENT}"
