@@ -113,7 +113,7 @@ cd "${DIR}/adsb-feeder-image" || exit_with_message "can't cd to ${DIR}/adsb-feed
 # grab the most recent version tag. Forcing '--long' always adds the -<num>-g<sha> trailer to the result - which we then can remove
 TAG_COMPONENT=$(git describe --match "v[0-9]*" --long | sed "s/-[0-9]*-g[0-9a-f]*//")
 # now comare this to a regular call to git describe so we get the SHA that we'll add at the end
-DESCRIBE=$(git describe)
+DESCRIBE=$(git describe --match "v[0-9]*")
 SHA_COMPONENT=${DESCRIBE//$TAG_COMPONENT/}
 VERSION="${TAG_COMPONENT}(${BRANCH})${SHA_COMPONENT}"
 echo "starting the actual upgrade to ${VERSION}"

@@ -28,6 +28,6 @@ else
     fi
 fi
 BRANCH_COMPONENT=${BRANCH_COMPONENT//(main)/(stable)}
-DESCRIBE=$(git describe)
+DESCRIBE=$(git describe --match "v[0-9]*")
 SHA_COMPONENT=${DESCRIBE//$TAG_COMPONENT/}
 echo -n "${TAG_COMPONENT}${BRANCH_COMPONENT}${SHA_COMPONENT}"
