@@ -1,3 +1,9 @@
+Working our way towards the next release. Notable changes since the last release include:
+- update to new adsb.lol api for status
+- improvements for zerotier and tailscale VPN configuration
+- add OrangePi 5plus image
+- switch DietPi based images to an install-on-boot setup
+
 > [!WARNING]
 > Images that start with `adsb-im-iob` can take up to **20 minutes** at first boot. Images without `iob` in their name still can take more than 5 minutes before the web interface is available. Please be patient.
 

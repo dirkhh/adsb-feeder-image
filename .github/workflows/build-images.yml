@@ -294,7 +294,7 @@ jobs:
       with:
         token: ${{ secrets.PAT_GITHUB_TOKEN }}
         generate_release_notes: true
-        body_path: repository/image-warning.md
+        body_path: repository/release-notes.md
         files: ${{ steps.compress.outputs.image }}
 
 
@@ -304,7 +304,7 @@ jobs:
       with:
         token: ${{ secrets.PAT_GITHUB_TOKEN }}
         generate_release_notes: true
-        body_path: repository/image-warning.md
+        body_path: repository/release-notes.md
         prerelease: true
         files: ${{ steps.compress.outputs.image }}
 
@@ -315,7 +315,7 @@ jobs:
       with:
         token: ${{ secrets.PAT_GITHUB_TOKEN }}
         generate_release_notes: true
-        body_path: repository/image-warning.md
+        body_path: repository/release-notes.md
         tag_name: latest
         name: testbuild-${{ steps.tag.outputs.tag }}
         files: ${{ steps.compress.outputs.image }}
