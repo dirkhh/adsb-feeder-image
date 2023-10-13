@@ -206,6 +206,9 @@ jobs:
         echo "export ROOT_PWD=${{ secrets.ROOT_PASSWORD }}" >> config
         echo "export FEEDER_IMAGE_NAME=${feeder_image_name}" >> config
         echo "feeder_image_name=${feeder_image_name}" >> $GITHUB_OUTPUT
+        # finally, try one more time to have ALL the tags - to avoid weird errors in the code
+        # creating the version name
+        git pull --tags
         sudo GH_REF_TYPE=${{ github.ref_type }} GH_TRGT_REF=${{ github.ref_name }} bash -x ./build_dist "${VARIANT}"
 
 
