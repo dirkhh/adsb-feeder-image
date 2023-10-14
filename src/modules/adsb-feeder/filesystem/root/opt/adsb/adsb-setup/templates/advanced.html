@@ -48,10 +48,11 @@
             id="uatbiast--is_enabled" {% if is_enabled("uatbiast") %}checked{% endif %} />
         <label for="uatbiast--is_enabled" class="mb-3 col-sm-11" {% if not is_enabled('uat978') %}
             style="display: none;" {% endif %}>Enable bias-T for UAT978 SDR.</label>
-        <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="forward31003--is_enabled"
-            id="forward31003--is_enabled" {% if is_enabled("forward31003") %}checked{% endif %} />
-        <label for="forward31003--is_enabled" class="mb-3 col-sm-11">Expose port 31003 on the host. This is useful if
-            you want to be able to access the MLAT data from the host OS. Most users won't enable this feature.</label>
+        <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="forwardports--is_enabled"
+            id="forwardports--is_enabled" {% if is_enabled("forwardports") %}checked{% endif %} />
+        <label for="forwardports--is_enabled" class="mb-3 col-sm-11">Expose ports 31003 and 30005 on the host. This is
+            useful if you want to be able to access the MLAT data from the host OS or make the BEAST stream available to
+            other services. Most users won't enable this feature.</label>
     </div>
     <div class="row" id="multipleSdrs" style="display: none;">
         <div class="col-sm-12 mt-5 mb-3">
