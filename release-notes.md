@@ -1,4 +1,8 @@
 Working our way towards the next release. Notable changes since the last release include:
+- update to the latest SDR-E containers which allows us to
+  - add the ADSBexchange stats package so that users can experience that website ad free
+  - re-enable the Dump978 map
+- add ability to forward port 30005 to the local host as well
 - update to new adsb.lol api for status
 - improvements for zerotier and tailscale VPN configuration
 - add OrangePi 5plus image
