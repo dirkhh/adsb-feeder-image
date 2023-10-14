@@ -35,7 +35,7 @@ grep -v "_CONTAINER=" config/.env > config/env.new
 cat docker.image.versions >> config/env.new
 mv config/env.new config/.env
 
-echo "${TIME}: pulling new container images and restarting docker" >> /var/log/adsb-setup.log
+echo "$(date -Iseconds): pulling new container images and restarting docker" >> /var/log/adsb-setup.log
 bash ./docker-pull.sh
 bash /opt/adsb/docker-compose-start
 
@@ -45,4 +45,4 @@ bash /opt/adsb/docker-compose-start
 
 sed -i "s/CONTAINER_VERSION=.*/CONTAINER_VERSION=$TIME/" /opt/adsb/config/.env
 
-echo "${TIME}: done" >> /var/log/adsb-setup.log
+echo "$(date -Iseconds): done" >> /var/log/adsb-setup.log
