@@ -429,6 +429,14 @@ class AdsbIm:
             )
             return json.dumps(status)
         status = AggStatus(agg, self._constants, request.host_url.rstrip("/ "))
+        if agg == "adsbx":
+            return json.dumps(
+                {
+                    "beast": status.beast,
+                    "mlat": status.mlat,
+                    "adsbxfeederid": self._constants.env_by_tags("adsbxfeederid").value,
+                }
+            )
         return json.dumps({"beast": status.beast, "mlat": status.mlat})
 
     @check_restart_lock

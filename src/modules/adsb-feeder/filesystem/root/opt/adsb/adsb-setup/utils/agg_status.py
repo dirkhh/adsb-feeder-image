@@ -182,15 +182,18 @@ class AggStatus:
                     self._beast = (
                         T.Yes if match.group(1).find("Feed Ok") != -1 else T.No
                     )
-                    print_err(f"found beast status {match.group(1)} {self._beast}")
                 else:
-                    print_err("failed to find ADS-B Status in response")
+                    print_err("failed to find adsbx Status in response")
                     return
                 match = re.search(r"<.*?>([a-zA-Z ]*)<.*?>MLAT Status", adsbx_text)
                 if match:
                     self._mlat = T.Yes if match.group(1).find("Feed Ok") != -1 else T.No
-                    print_err(f"found mlat status {match.group(1)} {self._mlat}")
                 self._last_check = datetime.now()
+                match = re.search(
+                    r'placeholder="([^"]+)" aria-label="Feed UID"', adsbx_text
+                )
+                if match:
+                    self._constants.env_by_tags("adsbxfeederid").value = match.group(1)
         elif self._agg == "tat":
             # get the data from the status text site
             text_url = "https://theairtraffic.com/iapi/feeder_status"

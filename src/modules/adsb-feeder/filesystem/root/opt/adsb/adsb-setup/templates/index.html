@@ -104,7 +104,7 @@
             </div>
         </div>
         <div class="row mt-3" {% if not ( is_enabled('adsblol') or is_enabled('flightradar') or
-            is_enabled('planefinder')) %} style="display: none;" {% endif %}>
+            is_enabled('planefinder') or is_enabled('adsbx')) %} style="display: none;" {% endif %}>
             <div class="col-12">
                 <h5>Additional aggregator links</h5>
             </div>
@@ -135,6 +135,13 @@
                 <div class="lead">PlaneFinder</div>
                 <ul>
                     <li><a href="/planefinder">Local Planefinder map</a></li>
+                </ul>
+            </div>
+            <div style="display: {% if is_enabled('adsbx') %} block {% else %} none {% endif %};" class="col-12">
+                <div class="lead">ADSBExchange</div>
+                <ul>
+                    <li><a id="adsbxstatlink" href="">ADSBx Anywhere Stats</a></li>
+                    <li><a id="adsbxmaplink" href="">ADSBx Anywhere Map</a></li>
                 </ul>
             </div>
         </div>
@@ -169,6 +176,10 @@
                     $("#" + agg + "span").css('color', 'red')
                 } else {
                     $("#" + agg + "span").css('color', 'black')
+                }
+                if (agg == "adsbx") {
+                    $("#adsbxstatlink").attr("href", "https://www.adsbexchange.com/api/feeders/?feed=" + data["adsbxfeederid"])
+                    $("#adsbxmaplink").attr("href", "https://globe.adsbexchange.com/?feed=" + data["adsbxfeederid"])
                 }
             });
     }

@@ -407,6 +407,11 @@ class Constants:
             tags=["adsbx", "ultrafeeder", "is_enabled"],
         ),
         Env(
+            "_ADSBIM_STATE_ADSBX_FEEDER_ID",
+            is_mandatory=False,
+            tags="adsbxfeederid",
+        ),
+        Env(
             "_ADSBIM_STATE_IS_ULTRAFEEDER_TAT_ENABLED",
             is_mandatory=False,
             tags=["tat", "ultrafeeder", "is_enabled"],
