@@ -12,3 +12,6 @@ services:
       - BEASTHOST=ultrafeeder
       - FR24KEY=${FEEDER_FR24_SHARING_KEY}
       - MLAT=${FEEDER_FR24_MLAT}
+    tmpfs:
+      - /run:exec,size=64M
+      - /var/log

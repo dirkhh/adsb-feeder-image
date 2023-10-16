@@ -10,3 +10,6 @@ services:
       - TZ=${FEEDER_TZ}
       - SBSHOST=ultrafeeder
       - CLIENTKEY=${FEEDER_ADSBHUB_STATION_KEY}
+    tmpfs:
+      - /run:exec,size=64M
+      - /var/log

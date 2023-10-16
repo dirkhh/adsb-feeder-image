@@ -20,9 +20,11 @@ services:
       - DUMP978_ENABLE_BIASTEE=${FEEDER_ENABLE_UATBIASTEE}
       - AUTOGAIN_INITIAL_PERIOD=7200
     volumes:
-      - /opt/adsb/config/dump978/autogain:/run/autogain
       - /dev:/dev:ro
     ports:
       - ${_ADSBIM_STATE_UAT978_PORT:-9780}:80
     tmpfs:
-      - /run/readsb
+      - /run:exec,size=64M
+      - /run/stats:size=32M
+      - /run/skyaware978:size=32M
+      - /var/log
