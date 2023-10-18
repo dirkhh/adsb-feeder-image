@@ -1,4 +1,9 @@
-Working our way towards the next release. Notable changes since the last release include:
+First official release of the adsb.im Feeder Image
+
+Functionally identical to v0.17.6-beta.10 (only the release notes changed)
+
+Changes since v0.17.5 include
+- reduction in I/O in order to improve SD card life expectancy
 - update to the latest SDR-E containers which allows us to
   - add the ADSBexchange stats package so that users can experience that website ad free
   - re-enable the Dump978 map
