@@ -3,18 +3,19 @@
 # set up the right config files and then pass the arguments
 # on to docker compose
 
+lockFile="/opt/adsb/docker-starting.lock"
+if ( set -o noclobber; echo "locked" > "$lockFile") 2> /dev/null; then
+	trap 'rm -f "$lockFile"; exit $?' INT TERM EXIT
+else
+	echo "docker-compose-adsb is already running" >&2
+	exit
+fi
 if grep "_ADSBIM_STATE_IS_BASE_CONFIG_FINISHED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
-	lockFile="/opt/adsb/docker-starting.lock"
-	if ( set -o noclobber; echo "locked" > "$lockFile") 2> /dev/null; then
-		trap 'rm -f "$lockFile"; exit $?' INT TERM EXIT
-	else
-		echo "docker-compose-adsb is already running" >&2
-		exit
-	fi
-	echo "calling docker compose"
+	echo "calling docker compose for the enabled containers"
 	source /opt/adsb/default.docker-compose
 	cd /opt/adsb/config
 	/usr/bin/docker compose ${COMPOSE_FILES[@]} "$@"
 else
-	echo "things aren't configured, yet, not starting docker"
+	echo "things aren't configured, yet, only starting Dozzle and the logger container"
+	/usr/bin/docker compose -f /opt/adsb/config/dozzle.yml "$@"
 fi
