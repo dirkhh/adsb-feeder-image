@@ -82,11 +82,6 @@ class Constants:
             "mlat,mlat.planespotters.net,31090,39005",
             has_policy=True,
         ),
-        "adsbone": NetConfig(
-            "adsb,feed.adsb.one,64004,beast_reduce_plus_out",
-            "mlat,feed.adsb.one,64006,39006",
-            has_policy=True,
-        ),
         "adsbfi": NetConfig(
             "adsb,feed.adsb.fi,30004,beast_reduce_plus_out",
             "mlat,feed.adsb.fi,31090,39007",
@@ -421,6 +416,8 @@ class Constants:
             is_mandatory=False,
             tags=["planespotters", "ultrafeeder", "is_enabled"],
         ),
+        # this one has been "withdrawn" - but we still need to read it from .env
+        # so we can migrate enabling adsb.one to airplanes.live
         Env(
             "_ADSBIM_STATE_IS_ULTRAFEEDER_ADSBONE_ENABLED",
             is_mandatory=False,

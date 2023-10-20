@@ -153,12 +153,8 @@ class AggStatus:
                 self._beast = T.Yes if rp_dict["data"]["beast"] else T.No
                 self._mlat = T.Yes if rp_dict["data"]["mlat"] else T.No
                 self._last_check = datetime.now()
-        elif self._agg == "adsbone" or self._agg == "alive":
-            json_url = (
-                "https://api.adsb.one/feed-status"
-                if self._agg == "adsbone"
-                else "https://api.airplanes.live/feed-status"
-            )
+        elif self._agg == "alive":
+            json_url = "https://api.airplanes.live/feed-status"
             a_dict = self.get_json(json_url)
             if a_dict:
                 uuid = self._constants.env_by_tags("ultrafeeder_uuid").value
