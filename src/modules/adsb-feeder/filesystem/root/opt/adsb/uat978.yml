@@ -27,4 +27,6 @@ services:
       - /run:exec,size=64M
       - /run/stats:size=32M
       - /run/skyaware978:size=32M
+      - /run/autogain:size=32M
       - /var/log
+
