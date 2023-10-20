@@ -620,6 +620,15 @@ class AdsbIm:
             [sdr._serial == s978 for sdr in self._sdrdevices.sdrs]
         ):
             self._constants.env_by_tags("978serial").value = ""
+        auto_assignment = self._sdrdevices.addresses_per_frequency
+        print_err(f"SDR auto_assignment would be {auto_assignment}")
+        if (
+            not self._constants.env_by_tags("1090serial").value
+            and auto_assignment[1090]
+        ):
+            self._constants.env_by_tags("1090serial").value = auto_assignment[1090]
+        if not self._constants.env_by_tags("978serial").value and auto_assignment[978]:
+            self._constants.env_by_tags("978serial").value = auto_assignment[978]
         if self._constants.env_by_tags("978serial").value:
             self._constants.env_by_tags(["uat978", "is_enabled"]).value = True
             self._constants.env_by_tags("978url").value = "http://dump978/skyaware978"
@@ -647,6 +656,16 @@ class AdsbIm:
 
         rtlsdr = not airspy and self._constants.env_by_tags("1090serial").value != ""
         self._constants.env_by_tags("rtlsdr").value = "rtlsdr" if rtlsdr else ""
+
+        print_err(f"in the end we have")
+        print_err(f"1090serial {self._constants.env_by_tags('1090serial').value}")
+        print_err(f"978serial {self._constants.env_by_tags('978serial').value}")
+        print_err(
+            f"airspy container is {self._constants.env_by_tags(['airspy', 'is_enabled']).value}"
+        )
+        print_err(
+            f"dump978 container {self._constants.env_by_tags(['uat978', 'is_enabled']).value}"
+        )
 
         # let's make sure we write out the updated ultrafeeder config
         self._constants.update_env()
