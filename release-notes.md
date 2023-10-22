@@ -1,4 +1,5 @@
 Changes since v1.0.0 include
+- fix incorrect handling of Bias-T that would lead to it being always enabled
 - make Dozzle logging via web interface available from the start
 - improve first setup behavior for some dual-SDR situations
 - work around the autogain issues for dump978
