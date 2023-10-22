@@ -111,7 +111,7 @@ class AdsbIm:
             ["hpradar", "HPRadar", "https://skylink.hpradar.com/", ""],
             ["alive", "airplanes.live", "https://globe.airplanes.live/", "https://airplanes.live/myfeed/"],
             ["flightradar", "flightradar24", "https://www.flightradar24.com/", "/fr24-monitor.json"],
-            ["planewatch", "Plane.watch", "https:/plane.watch/desktop", ""],
+            ["planewatch", "Plane.watch", "https:/plane.watch/desktop.html", ""],
             ["flightaware", "FlightAware", "https://www.flightaware.com/#home-live-map", "/fa-status"],
             ["radarbox", "RadarBox", "https://www.radarbox.com/coverage-map", ""],
             ["planefinder", "PlaneFinder", "https://planefinder.net/", "/planefinder-stat"],
