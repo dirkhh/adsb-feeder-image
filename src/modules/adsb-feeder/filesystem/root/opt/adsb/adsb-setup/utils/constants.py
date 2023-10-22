@@ -161,8 +161,7 @@ class Constants:
         Env(
             "FEEDER_TAR1090_USEROUTEAPI",
             default="1",
-            tags=["route_api", "is_enabled"],
-            javascript=True,
+            tags=["route_api", "is_enabled", "false_is_zero"],
         ),
         Env(  # this has no UI component, but we want to enable the advanced user to modify it in .env
             "TAR1090_RANGE_OUTLINE_DASH",
@@ -522,7 +521,7 @@ class Constants:
                 env_vars[key.strip()] = var.strip()
                 # print_err(f"found {key.strip()} -> {var.strip()} in .env file")
             for e in self._env:
-                if e._javascript:
+                if any(t == "false_is_zero" for t in e.tags):
                     env_vars[e.name] = "1" if is_true(e.value) else "0"
                 elif any(t == "false_is_empty" for t in e.tags):
                     env_vars[e.name] = "1" if is_true(e.value) else ""
