@@ -124,9 +124,15 @@ class Constants:
         Env("MLAT_SITE_NAME", tags=["mlat_name"]),
         # SDR
         Env("FEEDER_RTL_SDR", default="rtlsdr", tags=["rtlsdr"]),
-        Env("FEEDER_ENABLE_BIASTEE", default="False", tags=["biast", "is_enabled"]),
         Env(
-            "FEEDER_ENABLE_UATBIASTEE", default="False", tags=["uatbiast", "is_enabled"]
+            "FEEDER_ENABLE_BIASTEE",
+            default="False",
+            tags=["biast", "is_enabled", "false_is_empty"],
+        ),
+        Env(
+            "FEEDER_ENABLE_UATBIASTEE",
+            default="False",
+            tags=["uatbiast", "is_enabled", "false_is_empty"],
         ),
         Env(
             "_ADSBIM_STATE_IS_FORWARD31003_ENABLED",  # keep the old name, even though this opens more ports
@@ -518,6 +524,8 @@ class Constants:
             for e in self._env:
                 if e._javascript:
                     env_vars[e.name] = "1" if is_true(e.value) else "0"
+                elif any(t == "false_is_empty" for t in e.tags):
+                    env_vars[e.name] = "1" if is_true(e.value) else ""
                 else:
                     env_vars[e.name] = e.value
 

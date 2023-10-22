@@ -82,6 +82,8 @@ class Env:
         values = self._get_values_from_file()
         if self._javascript:
             new_value = "1" if is_true(new_value) else "0"
+        if any(t == "false_is_empty" for t in self.tags):
+            new_value = "1" if is_true(new_value) else ""
         values[self._name] = new_value
         with open(self._file, "w") as f:
             for key, value in values.items():
