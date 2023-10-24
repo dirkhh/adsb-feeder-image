@@ -1,10 +1,5 @@
-Changes since v1.0.0 include
-- fix incorrect link for Plane.watch map
-- fix incorrect handling of Bias-T that would lead to it being always enabled
-- make Dozzle logging via web interface available from the start
-- improve first setup behavior for some dual-SDR situations
-- work around the autogain issues for dump978
-- disable adsb.one aggregator and redirect to airplanes.live
+Changes since v1.0.1 include
+- add Plane.watch status indication to the feeder home page
 
 > [!WARNING]
 > Images that start with `adsb-im-iob` can take up to **20 minutes** at first boot. Images without `iob` in their name still can take more than 5 minutes before the web interface is available. Please be patient.

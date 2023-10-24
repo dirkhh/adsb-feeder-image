@@ -220,6 +220,27 @@ class AggStatus:
                     T.No if re.search("Feeder client not connected", ps_text) else T.Yes
                 )
                 self._last_check = datetime.now()
+        elif self._agg == "planewatch":
+            pw_uuid = self._constants.env_by_tags(
+                ["planewatch", "key"]
+            ).value  # they sometimes call it key, sometimes uuid
+            if not pw_uuid:
+                return
+            json_url = f"https://atc.plane.watch/api/v1/feeders/{pw_uuid}/status.json"
+            pw_dict = self.get_json(json_url)
+            if pw_dict:
+                status = pw_dict.get("status")
+                if not status:
+                    print_err(f"can't parse planewatch status {pw_dict}")
+                    return
+                adsb = status.get("adsb")
+                mlat = status.get("mlat")
+                if not adsb or not mlat:
+                    print_err(f"can't parse planewatch status {pw_dict}")
+                    return
+                self._beast = T.Yes if adsb.get("connected") else T.No
+                self._mlat = T.Yes if mlat.get("connected") else T.No
+                self._last_check = datetime.now()
 
     def __repr__(self):
         return f"Aggregator({self._agg} last_check: {str(self._last_check)}, beast: {self._beast} mlat: {self._mlat})"
