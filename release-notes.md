@@ -1,7 +1,9 @@
 Changes since v1.0.1 include
 - switch to new RadarVirtuel container that fixes an issue with newer keys
-- allow updates from the feeder homepage
+- show available update options on the feeder homepage
+- if there are updates available, allow triggering them from the feeder homepage
 - add Plane.watch status indication to the feeder home page
+- several small changes to the container config to help with stability and autogain behavior when close to an airport
 
 > [!WARNING]
 > Images that start with `adsb-im-iob` can take up to **20 minutes** at first boot. Images without `iob` in their name still can take more than 5 minutes before the web interface is available. Please be patient.
