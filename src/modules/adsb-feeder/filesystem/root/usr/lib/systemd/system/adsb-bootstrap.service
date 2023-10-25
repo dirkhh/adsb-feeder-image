@@ -1,5 +1,5 @@
 [Unit]
-Description=ADSB Bootstrap Service
+Description=ADS-B Feeder Bootstrap Service
 After=network-online.target
 
 [Service]

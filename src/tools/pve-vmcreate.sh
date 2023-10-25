@@ -26,7 +26,7 @@ qemu-img resize -f qcow2 "${IMG}" "${SIZE}"
 
 qm create $VMID \
    -cores 2 \
-   -description "ADSB Feeder image https://adsb.im/home" \
+   -description "ADS-B Feeder image https://adsb.im/home" \
    -memory 1024 \
    -name adsb-feeder \
    -ostype l26 \

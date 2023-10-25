@@ -16,7 +16,7 @@ echo "_ADSBIM_STATE_PIAWARESTAT_PORT=1093" >> .env
 echo "_ADSBIM_STATE_DAZZLE_PORT=1094" >> .env
 
 if [ ! -f /opt/adsb/feeder-image.name ] ; then
-	echo "ADSB Feeder app" > /opt/adsb/feeder-image-name
+	echo "ADS-B Feeder app" > /opt/adsb/feeder-image-name
 fi
 
 # while the user is getting ready, let's try to pull the ultrafeeder docker

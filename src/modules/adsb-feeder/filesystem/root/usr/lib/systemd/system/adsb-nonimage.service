@@ -1,5 +1,5 @@
 [Unit]
-Description=ADSB Preparation Service when not running the full feeder image
+Description=ADS-B Feeder Preparation Service when not running the full feeder image
 After=network-online.target
 Before=adsb-setup.service
 

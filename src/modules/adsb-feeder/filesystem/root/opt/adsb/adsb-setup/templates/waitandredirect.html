@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>{% block title %} Restarting the ADSB system {% endblock %}</h1>
+<h1>{% block title %} Restarting the ADS-B Feeder system {% endblock %}</h1>
 
 <script>
     document.addEventListener('readystatechange', event => {
@@ -21,7 +21,7 @@
         };
         request.onload = function () {
             if (request.readyState === 4 && request.status === 200 && request.responseText === 'OK') {
-                console.log('restarting the ADSB infra completed, redirect user');
+                console.log('restarting the ADS-B Feeder infra completed, redirect user');
                 window.location = '/';
             } else {
                 console.log(`request returned with readyState ${request.readyState}, status ${request.status} and text ${request.responseText}; keep waiting`);

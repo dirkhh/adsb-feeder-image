@@ -185,7 +185,7 @@ class AdsbIm:
         debug = os.environ.get("ADSBIM_DEBUG") is not None
         self._debug_cleanup()
         self._constants.update_env()
-        # prepare for app use (vs ADSB Feeder Image use)
+        # prepare for app use (vs ADS-B Feeder Image use)
         # newer images will include a flag file that indicates that this is indeed
         # a full image - but in case of upgrades from older version, this heuristic
         # should be sufficient to guess if this is an image or an app
@@ -305,7 +305,7 @@ class AdsbIm:
                 print_err(f"saved restore file to {restore_path / filename}")
                 return redirect(url_for("executerestore", zipfile=filename))
             else:
-                flash("Please only submit ADSB Feeder Image backup files")
+                flash("Please only submit ADS-B Feeder Image backup files")
                 return redirect(request.url)
         else:
             return render_template("/restore.html")

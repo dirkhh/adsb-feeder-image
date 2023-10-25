@@ -49,7 +49,7 @@
         </div>
     </div>
     <div class="col-12 mb-4">
-        <h5>ADS-B Feeder<small>{{ env_value_by_tag("base_version") }}</small></h5>
+        <h5>ADS-B Feeder <small class="ml-1"> running {{ env_value_by_tag("base_version") }}</small></h5>
         <div class="mb-4">
             Latest version: <span id="latest_tag"></span> - <span id="latest_commit"></span><br>
             <span id="advice" class="small"></span>
@@ -57,7 +57,7 @@
         <div id="update_buttons" style="display: none">
             <h5 class="mt-1">Update feeder applications</h5>
             <form method="POST" onsubmit="show_spinner(); return true;">
-                <label for="update_feeder_aps">Update to the current ADSB feeder applications (i.e. the
+                <label for="update_feeder_aps">Update to the current ADS-B feeder applications (i.e. the
                     web UI, setup apps, and containers). Either the latest beta or stable version.
                     If this update brings in new container images, even with a fast internet connection this can easily
                     take more than ten minutes to complete. The web UI will pause while the update is running, but the

@@ -5,7 +5,7 @@
 <h1>{% block title %} Expert setup {% endblock %}</h1>
 <div class="row small">
     <div class="col-12 col-lg-6">
-        <h5 class="mt-3">Set explicit ADSB SDR gain</h5>
+        <h5 class="mt-3">Set explicit ADS-B SDR gain</h5>
         <form method="POST">
             <div class="row">
                 <label for="gain" class="col-12">
@@ -134,7 +134,7 @@
         <h5 class="mt-5">Update feeder applications</h5>
         <form method="POST" onsubmit="show_spinner(); return true;">
             <div class="row">
-                <label for="update_feeder_aps" class="col-8">Update to the current ADSB feeder applications (i.e. the
+                <label for="update_feeder_aps" class="col-8">Update to the current ADS-B feeder applications (i.e. the
                     web UI, setup apps, and containers). Either the latest beta or stable version.
                     If this update brings in new container images, even with a fast internet connection this can easily
                     take more than ten minutes to complete. The web UI will pause while the update is running, but the
@@ -157,7 +157,7 @@
         <form method="POST" onsubmit="show_spinner(); return true;">
             <div class="row">
                 <label for="zerotierid" class="col-12">
-                    Zerotier support allows to connect your ADSB Feeder to you own global area network. Please add your
+                    Zerotier support allows to connect your ADS-B Feeder to you own global area network. Please add your
                     your Zerotier Network ID below.<br />
                     Once this process has completed, you need to accept the new device into the network on the Zerotier
                     website.
@@ -174,7 +174,7 @@
         <form method="POST" onsubmit="show_spinner(); return true;">
             <div class="row">
                 <label for="tailscale" class="col-12">
-                    Tailscale support allows to connect your ADSB Feeder to your own tailnet. <br />
+                    Tailscale support allows to connect your ADS-B Feeder to your own tailnet. <br />
                     {% if env_value_by_tag("tailscale_name") == "" %}In order to do this, we will start
                     the <code>tailscale</code> client on the feeder SBC and then redirect you back here and add a link
                     to the

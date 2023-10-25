@@ -32,7 +32,7 @@
         ] -%}
         {% set active_page = active_page|default('index') -%}
         {% set config_complete = is_enabled('base_config') %}
-        <a class="navbar-brand" href="{{ url_for('director') }}">ADSB Feeder</a>
+        <a class="navbar-brand" href="{{ url_for('director') }}">ADS-B Feeder</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
             aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -57,7 +57,7 @@
     </div>
     <div class="footer">
         <hr />
-        Running <a href="http://adsb.im">ADSB Feeder Image</a> {{ env_value_by_tag("base_version") }}
+        Running <a href="http://adsb.im">ADS-B Feeder Image</a> {{ env_value_by_tag("base_version") }}
         with containers from {{ env_value_by_tag("container_version") }}, running on
         {{ env_value_by_tag("board_name") }}.<br />
         {{ env_value_by_tag("image_name") }}<br />

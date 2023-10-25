@@ -2,7 +2,7 @@
 # for now that's UTC
 
 [Unit]
-Description=Run Nightly ADSB Feeder Image Updates
+Description=Run Nightly ADS-B Feeder Image Updates
 Requires=adsb-update.service
 
 [Timer]

@@ -1,6 +1,6 @@
 # run the updates - this will then be triggered by a timer
 [Unit]
-Description=ADSB Feeder Image Update Service
+Description=ADS-B Feeder Image Update Service
 Wants=adsb-update.timer
 
 [Service]

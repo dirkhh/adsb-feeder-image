@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>{% block title %} Restarting the ADSB system {% endblock %}</h1>
+<h1>{% block title %} Restarting the ADS-B Feeder system {% endblock %}</h1>
 
 <script>
   document.addEventListener('readystatechange', event => {
@@ -31,7 +31,7 @@
     request.open('GET', '/restart');
     request.onload = function () {
       if (request.status === 200 && request.responseText === 'done') {
-        // restarting the ADSB infra completed, redirect user
+        // restarting the ADS-B infra completed, redirect user
         window.location = '/';
       } else if (request.status === 200 && request.responseText === 'restarting') {
         // restart is still in progress, show progress and check again after a delay

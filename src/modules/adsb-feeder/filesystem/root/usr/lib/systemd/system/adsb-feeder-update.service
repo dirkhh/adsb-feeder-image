@@ -3,7 +3,7 @@
 # also give the calling program a chance to show a transition screen
 # before being killed
 [Unit]
-Description=ADSB Feeder Update Service
+Description=ADS-B Feeder Update Service
 
 [Service]
 Type=oneshot

@@ -269,7 +269,7 @@ class Constants:
             # somehow I can't make a path relative to data_path work here...
             default_call=lambda: Path("/opt/adsb/feeder-image.name").read_text()
             if Path("/opt/adsb/feeder-image.name").exists()
-            else "ADSB Feeder Image prior to v0.11",
+            else "ADS-B Feeder Image prior to v0.12",
             tags=["image_name"],
         ),
         Env(

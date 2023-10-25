@@ -1,5 +1,5 @@
 [Unit]
-Description=ADSB Docker Service
+Description=ADS-B Feeder Docker Service
 After=docker.service network-online.target adsb-setup.service
 PartOf=docker.service
 
