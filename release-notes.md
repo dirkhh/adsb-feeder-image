@@ -1,4 +1,5 @@
 Changes since v1.0.1 include
+- allow updates from the feeder homepage
 - add Plane.watch status indication to the feeder home page
 
 > [!WARNING]
