@@ -4,7 +4,7 @@ services:
     tty: true
     container_name: ultrafeeder
     hostname: ultrafeeder
-    restart: unless-stopped
+    restart: always
     device_cgroup_rules:
       - 'c 189:* rwm'
     ports:
@@ -20,6 +20,7 @@ services:
       - READSB_RTLSDR_DEVICE=${FEEDER_SERIAL_1090}
       - READSB_RTLSDR_PPM=${ADSB_SDR_PPM}
       - READSB_ENABLE_BIASTEE=${FEEDER_ENABLE_BIASTEE}
+      - READSB_AUTOGAIN_INITIAL_GAIN=29.6
       #
       # --------------------------------------------------
       # readsb/decoder parameters:
