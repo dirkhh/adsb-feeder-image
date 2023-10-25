@@ -1,4 +1,5 @@
 Changes since v1.0.1 include
+- improve ADS-B autogain handling for RTL based SDRs in situations with very strong signals
 - switch to new RadarVirtuel container that fixes an issue with newer keys
 - show available update options on the feeder homepage
 - if there are updates available, allow triggering them from the feeder homepage
