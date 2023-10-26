@@ -524,7 +524,7 @@ class Constants:
                 if any(t == "false_is_zero" for t in e.tags):
                     env_vars[e.name] = "1" if is_true(e.value) else "0"
                 elif any(t == "false_is_empty" for t in e.tags):
-                    env_vars[e.name] = "1" if is_true(e.value) else ""
+                    env_vars[e.name] = "True" if is_true(e.value) else ""
                 else:
                     env_vars[e.name] = e.value
 
