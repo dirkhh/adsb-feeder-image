@@ -24,6 +24,18 @@ h1 {
   !important
 }
 
+span.red {
+  color: red;
+}
+
+span.green {
+  color: greenyellow;
+}
+
+span.neutral {
+  color: black;
+}
+
 #loader {
   position: absolute;
   left: 50%;
