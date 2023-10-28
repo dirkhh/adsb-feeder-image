@@ -19,11 +19,6 @@ h1 {
   border-radius: 2em;
 }
 
-.red {
-  background-color: #CC4411;
-  !important
-}
-
 span.red {
   color: red;
 }
