@@ -1,5 +1,8 @@
 # ADS-B Feeder Image
 
+<a href="https://www.youtube.com/@adsb">intro videos</a> &nbsp;&nbsp;&nbsp;
+<a href="https://adsb.im/home"><img src="https://adsb.im/static/images/adsb.im.logo.png" height="30" alt="adsb.im homepage"></a>
+
 Easy to use turn-key SD card image for a number of single board computers (or to run in an x86 VM).
 Currently we are building images for
 - Raspberry Pi Zero 2, 3a/b, and 4 (tested on Zero 2W, 3a, and 4 - note that Pi Zero W will NOT work)
