@@ -112,7 +112,9 @@
         let alt_value = $("#alt").val();
         let factor = 1.0;
         if (alt_value.toLowerCase().includes("ft")) factor = 0.3048;
-        $("#alt").val(Math.round(parseFloat(alt_value) * factor))
+        let new_alt = Math.round(parseFloat(alt_value)) * factor;
+        if (new_alt.toString() == "NaN") new_alt = "";
+        $("#alt").val(new_alt)
     });
     function sendTimeToServer() {
         const dateTimeFormat = new Intl.DateTimeFormat('en-US', {})
