@@ -21,21 +21,20 @@
     <div class="form-group">
         <label for="lat">Latitude (-90 .. +90 -- please use a decimal point and ideally 5 decimals precision, e.g.
             45.12345)</label>
-        <input type="text" name="lat" required placeholder="Antenna latitude" class="form-control"
+        <input type="text" id="lat" name="lat" required placeholder="Antenna latitude" class="form-control"
             pattern="(?:\+|-|)(?:(?:[0-8]?\d)(?:\.\d+)?|90(?:\.0+)?)" title="Number between -90 and 90"
             value="{{ env_value_by_tag('lat') }}"></input>
     </div>
     <div class="form-group">
         <label for="lng">Longitude (-180 .. +180 -- please use a decimal point and ideally 5 decimals precision, e.g.
             -122.12345)</label>
-        <input type="text" name="lng" required placeholder="Antenna longitude" class="form-control"
+        <input type="text" id="lng" name="lng" required placeholder="Antenna longitude" class="form-control"
             pattern="(?:\+|-|)(:?(:?\d?\d|1[0-7]\d)(?:\.\d+)?|180(?:\.0+)?)" title="Number between -180 and 180"
             value="{{ env_value_by_tag('lng') }}"></input>
     </div>
     <div class="form-group">
-        <label for="alt">Altitude above mean sealevel in meters (round to whole meters, don't enter the unit, e.g.
-            160)</label>
-        <input type="text" name="alt" required placeholder="Antenna MSL altitude (in m)" class="form-control"
+        <label for="alt">Altitude above mean sealevel, rounded to whole meters</label>
+        <input type="text" id="alt" name="alt" required placeholder="Antenna MSL altitude (in m)" class="form-control"
             pattern="(?:\+|-|)\d+" value="{{ env_value_by_tag('alt') }}"></input>
     </div>
     <div class="form-group">
@@ -101,6 +100,20 @@
     <p>{{ message }} </p>
 </form>
 <script>
+    $("#lat").on("blur", function () {
+        let lat_value = $("#lat").val();
+        let values = lat_value.split(",");
+        if (values.length > 1) {
+            $("#lat").val(values[0])
+            $("#lng").val(values[1])
+        }
+    });
+    $("#alt").on("blur", function () {
+        let alt_value = $("#alt").val();
+        let factor = 1.0;
+        if (alt_value.toLowerCase().includes("ft")) factor = 0.3048;
+        $("#alt").val(Math.round(parseFloat(alt_value) * factor))
+    });
     function sendTimeToServer() {
         const dateTimeFormat = new Intl.DateTimeFormat('en-US', {})
         const i = document.createElement("img");
