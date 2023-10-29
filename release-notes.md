@@ -1,5 +1,5 @@
-Changes since v1.0.2 include
-- improvements to the initial setup flow
+Changes since v1.0.3 include
+- attempt to work around the IPv6 issue where aggregators return incorrect information (since docker containers have only IPv4)
 
 > [!WARNING]
 > Images that start with `adsb-im-iob` can take up to **20 minutes** at first boot. Images without `iob` in their name still can take more than 5 minutes before the web interface is available. Please be patient.
