@@ -41,6 +41,8 @@ from utils import (
 )
 from werkzeug.utils import secure_filename
 
+# Disable IPv6
+requests.packages.urllib3.util.connection.HAS_IPV6 = False
 
 class AdsbIm:
     def __init__(self):
