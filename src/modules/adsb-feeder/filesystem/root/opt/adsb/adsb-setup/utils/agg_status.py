@@ -1,8 +1,8 @@
 import json
 import re
+import requests
 from datetime import datetime, timedelta
 from enum import Enum
-from urllib import error, request
 from .util import print_err
 from .constants import Constants
 
@@ -10,27 +10,29 @@ T = Enum("T", ["Yes", "No", "Unknown"])
 
 
 def generic_get_json(url: str, data):
+    requests.packages.urllib3.util.connection.HAS_IPV6 = False
     try:
-        req = request.Request(
-            url,
+        response = requests.request(
             method="GET" if data == None else "POST",
+            url=url,
             data=data,
             headers={
                 "Content-Type": "application/json",
                 "User-Agent": "ADS-B Image",
             },
         )
-        response = request.urlopen(req)
-    except error.HTTPError as err:
-        print_err(f"checking {url} failed: {err.code}: {err.reason}")
-    except error.URLError as err:
-        print_err(f"checking {url} failed: {err.reason}")
+    except (
+        requests.HTTPError,
+        requests.ConnectionError,
+        requests.Timeout,
+        requests.RequestException,
+    ) as err:
+        print_err(f"checking {url} failed: {err}")
     except:
         # for some reason this didn't work
         print_err("checking {url} failed: reason unknown")
     else:
-        _json = response.read().decode("utf-8")
-        return json.loads(_json)
+        return response.json()
     return None
 
 
@@ -68,31 +70,33 @@ class AggStatus:
         return generic_get_json(json_url, None)
 
     def get_plain(self, plain_url):
+        requests.packages.urllib3.util.connection.HAS_IPV6 = False
         try:
-            response = request.urlopen(
-                request.Request(
-                    plain_url,
-                    headers={
-                        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/117.0",
-                        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-                        "Accept-Language": "en-US,en;q=0.5",
-                        "Upgrade-Insecure-Requests": "1",
-                        "Sec-Fetch-Dest": "document",
-                        "Sec-Fetch-Mode": "navigate",
-                        "Sec-Fetch-Site": "none",
-                        "Sec-Fetch-User": "?1",
-                    },
-                )
+            response = requests.get(
+                plain_url,
+                headers={
+                    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/117.0",
+                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+                    "Accept-Language": "en-US,en;q=0.5",
+                    "Upgrade-Insecure-Requests": "1",
+                    "Sec-Fetch-Dest": "document",
+                    "Sec-Fetch-Mode": "navigate",
+                    "Sec-Fetch-Site": "none",
+                    "Sec-Fetch-User": "?1",
+                },
             )
-        except error.HTTPError as err:
-            print_err(f"checking {plain_url} failed: {err.code}: {err.reason}")
-        except error.URLError as err:
-            print_err(f"checking {plain_url} failed: {err.reason}")
+        except (
+            requests.HTTPError,
+            requests.ConnectionError,
+            requests.Timeout,
+            requests.RequestException,
+        ) as err:
+            print_err(f"checking {url} failed: {err}")
         except:
             # for some reason this didn't work
-            print_err(f"checking {plain_url} failed: reason unknown")
+            print_err("checking {url} failed: reason unknown")
         else:
-            return response.read().decode("utf-8")
+            return response.text
         return None
 
     def check(self):

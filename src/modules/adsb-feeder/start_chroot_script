@@ -31,7 +31,7 @@ if  grep -q "bullseye" /etc/os-release ; then
 	pip install --no-cache-dir -r /opt/adsb/adsb-setup/requirements.txt
 	ln -s /usr/local/bin/flask /usr/bin
 else
-	apt-get install -y --no-install-recommends python3 python3-flask
+	apt-get install -y --no-install-recommends python3 python3-flask python3-requests
 fi
 
 if [ "$FEEDER_IMAGE_NAME" != "" ] ; then
