@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 if [[ ! -f /opt/adsb/init-complete && -f /opt/adsb/os.adsb.feeder.image ]] ; then
