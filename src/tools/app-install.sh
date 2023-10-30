@@ -61,10 +61,11 @@ fi
 missing=""
 if which python3 &> /dev/null ; then
 	python3 -c "import sys; sys.exit(1) if sys.version_info.major != 3 or sys.version_info.minor < 6" &> /dev/null && missing="Python3.6 or newer "
-	python3 -c "import flask" &>/dev/null || missing="Flask 2 "
-	python3 -c "import sys; import flask; sys.exit(1) if flask.__version__ < '2.0' else sys.exit(0)" &> /dev/null || missing="Flask 2 "
+	python3 -c "import reqests" &>/dev/null || missing="python3-requests "
+	python3 -c "import flask" &>/dev/null || missing="python3-flask "
+	python3 -c "import sys; import flask; sys.exit(1) if flask.__version__ < '2.0' else sys.exit(0)" &> /dev/null || missing="python3-flask "
 else
-	missing="Python3 Flask 2 "
+	missing="Python3 python3-flask python3-requests"
 fi
 which git &> /dev/null || missing+="git "
 if which docker &> /dev/null ; then
