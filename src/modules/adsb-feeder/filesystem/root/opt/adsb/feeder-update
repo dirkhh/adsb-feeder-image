@@ -118,6 +118,21 @@ SHA_COMPONENT=${DESCRIBE//$TAG_COMPONENT/}
 VERSION="${TAG_COMPONENT}(${BRANCH})${SHA_COMPONENT}"
 echo "starting the actual upgrade to ${VERSION}"
 
+# we now need the Python3 requests module and that may not have been installed originally
+if ! python3 -c "import requests" &>/dev/null ; then
+    # let's try to install it
+    echo "newer versions of the adsb.im ADS-B Feeder Image require the Python3 requests package - trying to install that"
+    grep -i fedora /etc/os-release &> /dev/null && dnf install -y python3-requests
+    grep -i centos /etc/os-release &> /dev/null && dnf install -y python3-requests
+    grep -i suse /etc/os-release &> /dev/null && zypper install -y python3-requests
+    grep -i debian /etc/os-release &> /dev/null && apt-get install -y python3-requests
+    # now let's check again
+    if ! python3 -c "import requests" &>/dev/null ; then
+        echo "cannot install Python3 requests package - please contact the adsb.im maintainer"
+        exit 1
+    fi
+fi
+
 echo "prepare the files that we need to replace"
 mkdir -p "${DIR}/root"
 cp -r src/modules/adsb-feeder/filesystem/root "${DIR}"
