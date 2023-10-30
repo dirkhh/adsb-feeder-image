@@ -1,7 +1,5 @@
 import json
 import re
-import http.client
-import socket
 from datetime import datetime, timedelta
 from enum import Enum
 from urllib import error, request
@@ -10,11 +8,6 @@ from .constants import Constants
 
 T = Enum("T", ["Yes", "No", "Unknown"])
 
-
-source_address = (socket.gethostbyname(socket.gethostname()), 0)
-
-http.client.HTTPConnection.source_address = source_address
-http.client.HTTPSConnection.source_address = source_address
 
 def generic_get_json(url: str, data):
     try:
