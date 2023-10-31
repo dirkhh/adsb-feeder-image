@@ -23,7 +23,7 @@
                         {% set is_first = ((loop.length + 1) / 2 >= loop.index) %}
                         {% if (tc==0 and is_first) or (tc==1 and not is_first) %}
                         <tr>
-                            <td><a href="{{ map }}">{{ name }}</a></td>
+                            <td><a href="{{ map }}" target="_blank">{{ name }}</a></td>
                             <td class="text-center">
                                 <span id="{{ agg + 'span'}}">{% if is_enabled(agg) %} &#10003; {% endif %}</span>
                             </td>
