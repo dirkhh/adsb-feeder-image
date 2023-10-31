@@ -175,5 +175,7 @@ if [ -f /opt/adsb-feeder-update/waiting-pid ] ; then kill "$(</opt/adsb-feeder-u
 rm -f /opt/adsb-feeder-update/waiting-pid
 
 systemctl start adsb-setup.service
+systemctl enable adsb-update.service
+systemctl enable adsb-update.timer
 
 echo "update to ${VERSION} complete"
