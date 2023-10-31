@@ -169,4 +169,4 @@ systemctl enable --now adsb-setup
 # containers in the background -- that way startup will feel quicker
 bash /opt/adsb/docker-pull.sh &
 
-echo "done instaling"
+echo "done installing"
