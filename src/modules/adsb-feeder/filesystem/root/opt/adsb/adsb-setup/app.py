@@ -458,6 +458,37 @@ class AdsbIm:
         with open(self._constants.data_path / "update-channel", "w") as update_channel:
             print(channel, file=update_channel)
 
+    def clear_range_outline(self):
+        # is the file where we expect it?
+        rangedirs = (
+            self._constants.config_path
+            / "ultrafeeder"
+            / "globe_history"
+            / "internal_state"
+            / "rangeDirs.gz"
+        )
+        if not rangedirs.exists() and rangedirs.is_file():
+            print_err(f"can't seem to find the range outline file {rangedirs}")
+            return
+
+        # try to stop the Ultrafeeder container, then remove the range outline, then restart everything
+        try:
+            subprocess.call(
+                "/opt/adsb/docker-compose-adsb down ultrafeeder",
+                timeout=40.0,
+                shell=True,
+            )
+        except subprocess.TimeoutExpired:
+            print_err(
+                "timeout expired stopping ultrafeeder... trying to continue anyway..."
+            )
+        rangedirs.unlink(missing_ok=True)
+        try:
+            subprocess.call("/opt/adsb/docker-compose-start", timeout=180.0, shell=True)
+        except subprocess.TimeoutExpired:
+            print_err("timeout expired re-starting docker... trying to continue...")
+        print_err("removed the range outline")
+
     def update(self):
         description = """
             This is the one endpoint that handles all the updates coming in from the UI.
@@ -561,6 +592,10 @@ class AdsbIm:
                 # here at the end - instead insert them before tailscale
                 continue
             if value == "stay":
+                if key == "clear_range":
+                    self.clear_range_outline()
+                    continue
+
                 if key in self._other_aggregators:
                     is_successful = False
                     base = key.replace("--submit", "")

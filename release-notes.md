@@ -1,4 +1,5 @@
 Changes since v1.0.3 include
+- add option in expert menu to clear the range outline
 - make the aggregator status for TheAirTraffic work correctly for feeders that have working IPv6
 - fix several bugs in the app-install script (thanks @KRG on the SDR-E discord for pointing these out to me)
 - improvements to the initial setup flow
