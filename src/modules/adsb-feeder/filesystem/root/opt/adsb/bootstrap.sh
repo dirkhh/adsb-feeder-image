@@ -9,6 +9,15 @@ if [ $(id -u) != "0" ] ; then
 	exit 1
 fi
 
+# but we only want to run this once
+lockFile="/opt/adsb/bootstrap.lock"
+if ( set -o noclobber; echo "locked" > "$lockFile") 2> /dev/null; then
+	trap 'rm -f "$lockFile"; exit $?' INT TERM EXIT
+else
+	echo "bootstrap.sh is already running" >&2
+	exit
+fi
+
 mkdir -p /opt/adsb/config
 cd /opt/adsb/config
 if [ ! -f .env ] ; then
@@ -17,6 +26,10 @@ if [ ! -f .env ] ; then
 	echo "_ADSBIM_CONTAINER_VERSION=$(cat /opt/adsb/adsb.im.version)" >> .env
 fi
 bash /opt/adsb/docker-pull.sh &
+
+# the code below enables the redirection from the my.adsb.im service to the
+# local feeder. this only needs to run if things aren't configured, yet
+grep "_ADSBIM_STATE_IS_BASE_CONFIG_FINISHED=True" /opt/adsb/config/.env &> /dev/null && exit 0
 
 # get the local IP address
 IP=$(ip route get 8.8.8.8 | sed -n '/src/{s/.*src *\([^ ]*\).*/\1/p;q}')
