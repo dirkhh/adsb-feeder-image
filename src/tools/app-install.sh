@@ -22,7 +22,16 @@ exit_message() {
     exit 1
 }
 
-[ $(id -u) != "0" ] && exit_message "$ROOT_REQUIRED"
+get_distro() {
+    local distro="unknown"
+    grep -i fedora /etc/os-release &> /dev/null && distro="fedora"
+    grep -i centos /etc/os-release &> /dev/null && distro="fedora"
+    grep -i suse /etc/os-release &> /dev/null && distro="suse"
+    grep -i debian /etc/os-release &> /dev/null && distro="debian"
+    echo $distro
+}
+
+[ "$(id -u)" != "0" ] && exit_message "$ROOT_REQUIRED"
 
 APP_DIR="/opt/adsb"
 BRANCH=""
@@ -62,6 +71,9 @@ if [[ ! -d "$APP_DIR"/config ]] ; then
     mkdir -p "$APP_DIR"/config
 fi
 
+distro=$(get_distro)
+echo "You appear ro be on a ${distro}-style distribution"
+
 # now that we know that there isn't anything obviously wrong with
 # the command line arguments, let's check if all the dependencies
 # are installed
@@ -71,22 +83,29 @@ fi
 # - docker compose
 missing=""
 if which python3 &> /dev/null ; then
-	python3 -c "import sys; sys.exit(1) if sys.version_info.major != 3 or sys.version_info.minor < 6" &> /dev/null && missing="Python3.6 or newer "
+	python3 -c "import sys; sys.exit(1) if sys.version_info.major != 3 or sys.version_info.minor < 6" &> /dev/null && missing="python3 "
 	python3 -c "import requests" &>/dev/null || missing="python3-requests "
 	python3 -c "import flask" &>/dev/null || missing="python3-flask "
 	python3 -c "import sys; import flask; sys.exit(1) if flask.__version__ < '2.0' else sys.exit(0)" &> /dev/null || missing="python3-flask "
 else
-	missing="Python3 python3-flask python3-requests"
+	missing="python3 python3-flask python3-requests "
 fi
 which git &> /dev/null || missing+="git "
 if which docker &> /dev/null ; then
-	docker compose version &> /dev/null || missing+="Docker compose module "
+	 ! docker compose version &> /dev/null && ! docker-compose version &> /dev/null && missing+="docker-compose "
 else
-	missing+="Docker and Docker compose module "
+	missing+="docker docker-compose "
 fi
 
 if [[ $missing != "" ]] ; then
-	exit_message "Please install $missing before re-running this script"
+	inst=""
+        [ "$distro" == "fedora" ] && inst="dnf install -y"
+        [ "$distro" == "suse" ] && inst="zypper install -y"
+        [ "$distro" == "debian" ] && inst="apt-get install -y"
+
+	echo "Please install the missing packages before re-running this script:"
+	echo "$inst $missing"
+	exit 1
 fi
 
 # ok, now we should have all we need, let's get started

@@ -16,12 +16,16 @@ else
 	echo "docker-compose-adsb is already running" >&2
 	exit
 fi
+
+docker_compose="docker compose"
+$docker_compose version &> /dev/null || docker_compose="docker-compose"
+
 if grep "_ADSBIM_STATE_IS_BASE_CONFIG_FINISHED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
 	echo "calling docker compose for the enabled containers"
 	source /opt/adsb/default.docker-compose
 	cd /opt/adsb/config
-	/usr/bin/docker compose ${COMPOSE_FILES[@]} "$@"
+	$docker_compose ${COMPOSE_FILES[@]} "$@"
 else
 	echo "things aren't configured, yet, only starting Dozzle and the logger container"
-	/usr/bin/docker compose -f /opt/adsb/config/dozzle.yml "$@"
+	$docker_compose -f /opt/adsb/config/dozzle.yml "$@"
 fi
