@@ -1,6 +1,13 @@
 #!/bin/bash
 #
 # pull the currently selected images
+
+# this needs to run as root
+if [ $(id -u) != "0" ] ; then
+	echo "this command requires superuser privileges - please run as sudo bash $0"
+	exit 1
+fi
+
 cd /opt/adsb/config
 [ "$1" = "-a" ] && ALL="1"
 

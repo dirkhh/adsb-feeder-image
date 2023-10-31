@@ -3,6 +3,12 @@
 # set up the right config files and then pass the arguments
 # on to docker compose
 
+# this needs to run as root
+if [ $(id -u) != "0" ] ; then
+	echo "this command requires superuser privileges - please run as sudo bash $0"
+	exit 1
+fi
+
 lockFile="/opt/adsb/docker-starting.lock"
 if ( set -o noclobber; echo "locked" > "$lockFile") 2> /dev/null; then
 	trap 'rm -f "$lockFile"; exit $?' INT TERM EXIT

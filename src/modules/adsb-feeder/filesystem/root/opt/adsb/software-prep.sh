@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# this needs to run as root
+if [ $(id -u) != "0" ] ; then
+	echo "this command requires superuser privileges - please run as sudo bash $0"
+	exit 1
+fi
+
 # this is the script that replaces part of the bootstrap code in the feeder image.
 # let's first make sure that we mark this as an app, not an image:
 touch /opt/adsb/app.adsb.feeder.image

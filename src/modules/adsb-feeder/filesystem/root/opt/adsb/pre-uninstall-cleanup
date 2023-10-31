@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# this needs to run as root
+if [ $(id -u) != "0" ] ; then
+	echo "this command requires superuser privileges - please run as sudo bash $0"
+	exit 1
+fi
+
 # clean up after ourselves
 
 # docker images that aren't needed anymore

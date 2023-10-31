@@ -2,6 +2,12 @@
 #
 # update the docker images to latest instead of the pinned versions
 
+# this needs to run as root
+if [ $(id -u) != "0" ] ; then
+	echo "this command requires superuser privileges - please run as sudo bash $0"
+	exit 1
+fi
+
 NOW=$(date -Iseconds)
 cd /opt/adsb
 cp docker.image.versions "docker.image.versions.${NOW}"

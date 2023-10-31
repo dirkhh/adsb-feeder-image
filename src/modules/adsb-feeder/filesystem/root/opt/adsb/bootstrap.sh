@@ -2,6 +2,13 @@
 
 # while the user is getting ready, let's try to pull the ultrafeeder docker
 # container in the background -- that way startup will feel quicker
+
+# this needs to run as root
+if [ $(id -u) != "0" ] ; then
+	echo "this command requires superuser privileges - please run as sudo bash $0"
+	exit 1
+fi
+
 mkdir -p /opt/adsb/config
 cd /opt/adsb/config
 if [ ! -f .env ] ; then
