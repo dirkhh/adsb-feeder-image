@@ -11,6 +11,19 @@ USAGE="
   -t tag         # alternatively the tag to use
 "
 
+ROOT_REQUIRED="
+ $0 needs to be run with superuser permissions, typically as
+ sudo bash $0 arguments
+"
+
+# simple way to provide a message and exit with an error code
+exit_message() {
+    echo "$1"
+    exit 1
+}
+
+[ $(id -u) != "0" ] && exit_message "$ROOT_REQUIRED"
+
 APP_DIR="/opt/adsb"
 BRANCH=""
 GIT_PARENT_DIR=""
@@ -25,7 +38,7 @@ do
             ;;
         '-t') shift; TAG=$1
             ;;
-        *) echo "$USAGE"; exit 1
+        *) exit_message "$USAGE"
     esac
     shift
 done
@@ -38,13 +51,11 @@ fi
 if [[ $TAG == '' && $BRANCH == '' ]] ; then
     BRANCH="main"
 elif [[ $TAG != '' && $BRANCH != '' ]] ; then
-    echo "Please set either branch or tag, not both"
-    exit 1
+    exit_message "Please set either branch or tag, not both"
 fi
 if [[ ! -d "$APP_DIR" ]] ; then
     if ! mkdir -p "$APP_DIR" ; then
-        echo "failed to create $APP_DIR"
-        exit 1
+        exit_message "failed to create $APP_DIR"
     fi
 fi
 if [[ ! -d "$APP_DIR"/config ]] ; then
@@ -61,10 +72,11 @@ fi
 missing=""
 if which python3 &> /dev/null ; then
 	python3 -c "import sys; sys.exit(1) if sys.version_info.major != 3 or sys.version_info.minor < 6" &> /dev/null && missing="Python3.6 or newer "
-	python3 -c "import flask" &>/dev/null || missing="Flask 2 "
-	python3 -c "import sys; import flask; sys.exit(1) if flask.__version__ < '2.0' else sys.exit(0)" &> /dev/null || missing="Flask 2 "
+	python3 -c "import requests" &>/dev/null || missing="python3-requests "
+	python3 -c "import flask" &>/dev/null || missing="python3-flask "
+	python3 -c "import sys; import flask; sys.exit(1) if flask.__version__ < '2.0' else sys.exit(0)" &> /dev/null || missing="python3-flask "
 else
-	missing="Python3 Flask 2 "
+	missing="Python3 python3-flask python3-requests"
 fi
 which git &> /dev/null || missing+="git "
 if which docker &> /dev/null ; then
@@ -74,35 +86,31 @@ else
 fi
 
 if [[ $missing != "" ]] ; then
-	echo "Please install $missing before re-running this script"
-	exit 1
+	exit_message "Please install $missing before re-running this script"
 fi
 
 # ok, now we should have all we need, let's get started
 
 if ! git clone 'https://github.com/dirkhh/adsb-feeder-image.git' "$GIT_PARENT_DIR"/adsb-feeder ; then
-    echo "cannot check out the git repo to ${GIT_PARENT_DIR}"
-    exit 1
+    exit_message "cannot check out the git repo to ${GIT_PARENT_DIR}"
 fi
 
-cd "$GIT_PARENT_DIR"/adsb-feeder || echo "can't find $GIT_PARENT_DIR/adsb-feeder" && exit 1
+cd "$GIT_PARENT_DIR"/adsb-feeder || exit_message "can't find $GIT_PARENT_DIR/adsb-feeder"
 
 if [[ $BRANCH != '' ]] ; then
     if ! git checkout "$BRANCH" ; then
-        echo "cannot check out the branch ${BRANCH}"
-        exit 1
+        exit_message "cannot check out the branch ${BRANCH}"
     fi
 else  # because of the sanity checks above we know that we have a tag
     if ! git checkout "$TAG" ; then
-        echo "cannot check out the tag ${TAG}"
-        exit 1
+        exit_message "cannot check out the tag ${TAG}"
     fi
 fi
 
 # determine the version
 SRC_ROOT="${GIT_PARENT_DIR}/adsb-feeder/src/modules/adsb-feeder/filesystem/root"
-cd "$SRC_ROOT" || exit 1
-ADSB_IM_VERSION=$(src/get_version.sh)
+cd "$SRC_ROOT" || exit_message "can't cd to $SRC_ROOT"
+ADSB_IM_VERSION=$(bash "${GIT_PARENT_DIR}"/adsb-feeder/src/get_version.sh)
 
 # copy the software in place
 cp -a "${SRC_ROOT}/opt/adsb/"* "${APP_DIR}/"
@@ -111,7 +119,7 @@ cp -a "${SRC_ROOT}/usr/lib/systemd/system/"* "/usr/lib/systemd/system/"
 rm -rf "${GIT_PARENT_DIR}/adsb-feeder"
 
 # set the 'image name' and version that are shown in the footer of the Web UI
-cd "$APP_DIR" || exit 1
+cd "$APP_DIR" || exit_message "can't cd to $APP_DIR"
 if [[ -d /boot/dietpi ]] ; then
     if [[ -f /boot/dietpi/.version ]] ; then
         # shellcheck disable=SC1091
@@ -139,7 +147,7 @@ echo "ADS-B Feeder app running on ${OS}" > feeder-image.name
 echo "$ADSB_IM_VERSION" > adsb.im.version
 touch /opt/adsb/app.adsb.feeder.image
 
-cd /opt/adsb/config || echo "can't find /opt/adsb/config" && exit 1
+cd /opt/adsb/config || exit_message "can't find /opt/adsb/config"
 {
     cat /opt/adsb/docker.image.versions
     echo "_ADSBIM_BASE_VERSION=$(cat /opt/adsb/adsb.im.version)"
