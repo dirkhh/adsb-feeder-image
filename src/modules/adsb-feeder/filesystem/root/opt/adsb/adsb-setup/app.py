@@ -638,6 +638,10 @@ class AdsbIm:
                 if key == "alt":
                     # remove decimals as well
                     value = str(int(float(value)))
+                if key == "gain":
+                    self._constants.env_by_tags(["gain_airspy"]).value = (
+                        "auto" if value == "autogain" else value
+                    )
                 e.value = value
         # done handling the input data
         # what implied settings do we have (and could we simplify them?)

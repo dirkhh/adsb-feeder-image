@@ -140,6 +140,7 @@ class Constants:
             tags=["forwardports", "is_enabled"],
         ),
         Env("FEEDER_READSB_GAIN", default="autogain", tags=["gain"]),
+        Env("FEEDER_AIRSPY_GAIN", default="auto", tags=["gain_airspy"]),
         Env("UAT_SDR_GAIN", default="autogain", tags=["uatgain"]),
         Env(
             "FEEDER_SERIAL_1090", is_mandatory=False, tags=["1090serial"]
