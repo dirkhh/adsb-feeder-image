@@ -505,6 +505,9 @@ class AdsbIm:
             if value == "go":
                 seen_go = True
             if value == "go" or value == "wait":
+                if key == "aggregators":
+                    # user has clicked Submit on Aggregator page
+                    self._constants.env_by_tags("aggregators_chosen").value = True
                 if key == "shutdown":
                     # do shutdown
                     self._system.halt()
@@ -710,7 +713,9 @@ class AdsbIm:
         # start the containers
         if self.base_is_configured():
             self._constants.env_by_tags(["base_config"]).value = True
-            if self.at_least_one_aggregator():
+            agg_chosen_env = self._constants.env_by_tags("aggregators_chosen")
+            if self.at_least_one_aggregator() or agg_chosen_env.value == True:
+                agg_chosen_env.value = True
                 return redirect(url_for("restarting"))
             return redirect(url_for("aggregators"))
         return redirect(url_for("director"))
@@ -800,7 +805,9 @@ class AdsbIm:
 
         # if the user chose to individually pick aggregators but hasn't done so,
         # they need to go to the aggregator page
-        if self.at_least_one_aggregator():
+        if self.at_least_one_aggregator() or self._constants.env_by_tags(
+            "aggregators_chosen"
+        ):
             return self.index()
         return self.aggregators()
 

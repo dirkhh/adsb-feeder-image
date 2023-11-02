@@ -343,6 +343,12 @@ class Constants:
             tags=["base_config", "is_enabled"],
         ),
         Env(
+            "_ADSBIM_STATE_AGGREGATORS_CHOSEN",
+            default=False,
+            is_mandatory=False,
+            tags=["aggregators_chosen"],
+        ),
+        Env(
             "_ADSBIM_STATE_IS_NIGHTLY_BASE_UPDATE_ENABLED",
             is_mandatory=False,
             tags=["nightly_base_update", "is_enabled"],
