@@ -1,152 +1,160 @@
 {% extends 'base.html' %}
 {% set active_page = "advanced" %}
-
 {% block content %}
-<h1>{% block title %} Setup optional parameters {% endblock %}</h1>
-
-<p>
-<form method="post">
-    <button type="submit" class="bigbigbutton" name="advanced" value="go">I'm done here - take me to the website</button>
-    <div class="row no-gutters">
-        <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="mlat_privacy--is_enabled"
-            id="mlat_privacy--is_enabled" {% if is_enabled("mlat_privacy") %}checked{% endif %} />
-        <label for="mlat_privacy--is_enabled" class="mb-3 col-sm-11">Enable privacy flag (ON = does not show on <a
-                href="https://mlat.adsb.lol/syncmap/">public aggregator maps</a>)</label><br />
-        <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="route_api--is_enabled"
-            id="route_api--is_enabled" {% if is_enabled("route_api") %}checked{% endif %} />
-        <label for="route_api--is_enabled" class="mb-3 col-sm-11">Use adsb.lol Route API to show flight routes when
-            known.</label>
-        <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="heywhatsthat--is_enabled"
-            id="heywhatsthat--is_enabled" {% if is_enabled("heywhatsthat") %}checked{% endif %} />
-        <div class="col-sm-11 no-gutters">
-            <label for="heywhatsthat--is_enabled" class="mb-3 col-sm-11">
-                <a href="https://www.heywhatsthat.com/">HeyWhat'sThat</a> is an incredibly cool web service that allows
-                you
-                to discover what you should be able to see from the location of your antenna - including estimates for
-                how
-                far away you should be able to detect planes (depending on their altitude - and assuming there are no
-                other
-                obstructions).
-            </label>
-            <div class="col-sm-11 mb-1" id="hwt-text"
-                style="display: {% if is_enabled('heywhatsthat') and env_value_by_tag('heywhatsthat_id') == '' %} block {% else %} none {% endif %}">
-                Click on the link, select "New Panorama" at the top, enter your address (or find the location
-                on the map), enter a title on the lower left and click "Submit request". After a couple of minutes
-                you'll
-                be offered to look at your panorama. At the top left you'll see the title you just entered, the latitude
-                and longitude and elevation - and below that a link that starts ends with <code>/?view=CODE</code>.
-                Enter this code here to see the theoretical range information on your receiver map.
-            </div>
-            <input type="text" id="heywhatsthat_id" name="heywhatsthat_id" class="form-control col-sm-6 ml-1 mb-2"
-                placeholder=" HeyWhat'sThat Panorama ID" value="{{ env_value_by_tag('heywhatsthat_id') }}">
-        </div>
-        <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="biast--is_enabled"
-            id="biast--is_enabled" {% if is_enabled("biast") %}checked{% endif %} />
-        <label for="biast--is_enabled" class="mb-3 col-sm-11">Enable bias-T for ADS-B/1090/airspy SDR.</label>
-        <input type="checkbox" {% if not is_enabled('uat978') %} style="display: none;" {% else %}
-            style="height: 1.4em;" {% endif %} class="mb-3 col-sm-1" name="uatbiast--is_enabled"
-            id="uatbiast--is_enabled" {% if is_enabled("uatbiast") %}checked{% endif %} />
-        <label for="uatbiast--is_enabled" class="mb-3 col-sm-11" {% if not is_enabled('uat978') %}
-            style="display: none;" {% endif %}>Enable bias-T for UAT978 SDR.</label>
-        <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="forwardports--is_enabled"
-            id="forwardports--is_enabled" {% if is_enabled("forwardports") %}checked{% endif %} />
-        <label for="forwardports--is_enabled" class="mb-3 col-sm-11">Expose ports 31003 and 30005 on the host. This is
-            useful if you want to be able to access the MLAT data from the host OS or make the BEAST stream available to
-            other services. Most users won't enable this feature.</label>
+<h1 class="mt-3 text-center text-danger">
+  {% block title %}Setup optional parameters{% endblock %}
+</h1>
+<form class="row gy-2 gx-3 align-items-center" method="post">
+  <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="advanced" value="go">I'm
+    done here - take me to the website</button>
+  <div class="col-12 form-check">
+    <input class="form-check-input me-1" type="checkbox" name="mlat_privacy--is_enabled" id="mlat_privacy--is_enabled"
+           {% if is_enabled("mlat_privacy") %}checked{% endif %} />
+    <label for="mlat_privacy--is_enabled">
+      Enable privacy flag (ON = does not show on <a href="https://mlat.adsb.lol/syncmap/">public aggregator
+        maps</a>)
+    </label>
+  </div>
+  <div class="col-12 form-check">
+    <input class="form-check-input me-1" type="checkbox" name="route_api--is_enabled" id="route_api--is_enabled"
+           {% if is_enabled("route_api") %}checked{% endif %} />
+    <label for="route_api--is_enabled" class="mb-3">
+      Use adsb.lol Route API to show flight routes when
+      known.
+    </label>
+  </div>
+  <div class="col-12 form-check">
+    <input class="form-check-input me-1" type="checkbox" name="heywhatsthat--is_enabled" id="heywhatsthat--is_enabled"
+           {% if is_enabled("heywhatsthat") %}checked{% endif %} />
+    <div>
+      <label class="form-check-label" for="heywhatsthat--is_enabled">
+        <a href="https://www.heywhatsthat.com/">HeyWhat'sThat</a> is an incredibly cool web service that allows
+        you to discover what you should be able to see from the location of your antenna - including estimates for
+        how far away you should be able to detect planes (depending on their altitude - and assuming there are no
+        other obstructions).
+        <span id="hwt-text"
+              {% if not is_enabled('heywhatsthat') or env_value_by_tag('heywhatsthat_id') != '' %}style="display: none;"
+              {% endif %}>
+          Click on the link, select "New Panorama" at the top, enter your address (or find the location
+          on the map), enter a title on the lower left and click "Submit request". After a couple of minutes
+          you'll be offered to look at your panorama. At the top left you'll see the title you just entered, the
+          latitude and longitude and elevation - and below that a link that starts ends with <code>/?view=CODE</code>.
+          Enter this code here to see the theoretical range information on your receiver map.
+        </span>
+        <input type="text" id="heywhatsthat_id" name="heywhatsthat_id" class="form-control col-6 ml-1 mb-2"
+               placeholder="HeyWhat'sThat Panorama ID" value="{{ env_value_by_tag("heywhatsthat_id") }}">
+      </label>
     </div>
-    <div class="row" id="multipleSdrs" style="display: none;">
-        <div class="col-sm-12 mt-5 mb-3">
-            You have more than one SDR connected. Please assign them for their roles.
-        </div>
-        <div class="col-sm-3 no-gutters">
-            <button type="button" name="update_sdr_info" onclick="sdr_info()">Check SDRs</button>
-        </div>
-        <div class="col-sm-9 no-gutters">
-            <div class="row">
-                <p class="col-sm-2 bg-info mr-2">SDR #</p>
-                <p class="col-sm-3 bg-info mr-2">Serial</p>
-                <p class="col-sm-6 bg-info mr-2">Used for</p>
-            </div>
-            {% for sdr in [ "0", "1", "2", "3"] %}
-            <div class="row" id="sdr{{ sdr }}" style="display: none">
-                <p class="col-sm-2" id="sdr{{ sdr }}-tag">SDR {{ sdr }}</p>
-                <p class="col-sm-3" id="sdr{{ sdr }}-serial"></p>
-                <p class="col-sm-6 small" id="sdr{{ sdr }}-puprpose">
-                    <label class="checkbox-inline mr-2">
-                        <input type="radio" id="1090-{{ sdr }}" name="1090serial" value="0"> 1090
-                    </label>
-                    <label class="checkbox-inline mr-2">
-                        <input type="radio" id="978-{{ sdr }}" name="978serial" value="0"> 978
-                    </label>
-                    <label class="checkbox-inline mr-2">
-                        <input type="radio" id="other-{{ sdr }}" name="other" value="0"> Other
-                    </label>
-                </p>
-            </div>
-            {% endfor %}
-        </div>
+  </div>
+  <div class="col-12 form-check">
+    <input class="form-check-input me-1" type="checkbox" name="biast--is_enabled" id="biast--is_enabled"
+           {% if is_enabled("biast") %}checked{% endif %} />
+    <label for="biast--is_enabled" class="form-check-label">Enable bias-T for ADS-B/1090/airspy SDR.</label>
+  </div>
+  <div class="col-12 form-check" {% if not is_enabled('uat978') %}style="display: none;" {% endif %}>
+    <input class="form-check-input me-1" type="checkbox" name="uatbiast--is_enabled" id="uatbiast--is_enabled"
+           {% if is_enabled("uatbiast") %}checked{% endif %} />
+    <label for="uatbiast--is_enabled">Enable bias-T for UAT978 SDR.</label>
+  </div>
+  <div class="col-12 form-check">
+    <input class="form-check-input me-1" type="checkbox" name="forwardports--is_enabled" id="forwardports--is_enabled"
+           {% if is_enabled("forwardports") %}checked{% endif %} />
+    <label for="forwardports--is_enabled">
+      Expose ports 31003 and 30005 on the host. This is useful if you want to be able to access the MLAT data from the
+      host OS or make the BEAST stream available to other services. Most users won't enable this feature.
+    </label>
+  </div>
+  <div class="row" id="multipleSdrs">
+    <div class="col-sm-12 mt-5 mb-3">In most cases the assignment below is correct. If it isn't, please update.
     </div>
-    <div class="form-group">
-        <button type="submit" name="advanced" value="go" class="btn btn-primary">Submit</button>
+    <div class="col-sm-3 no-gutters">
+      <button type="button" name="update_sdr_info" onclick="sdr_info()">Check SDRs</button>
     </div>
+    <div class="col-sm-9 no-gutters">
+      <div class="row">
+        <p class="col-sm-2 bg-info mr-2">SDR #</p>
+        <p class="col-sm-3 bg-info mr-2">Serial</p>
+        <p class="col-sm-6 bg-info mr-2">Used for</p>
+      </div>
+      {% for sdr in [ "0", "1", "2", "3"] %}
+      <div class="row" id="sdr{{ sdr }}" style="display: none">
+        <p class="col-sm-2" id="sdr{{ sdr }}-tag">SDR {{ sdr }}</p>
+        <p class="col-sm-3" id="sdr{{ sdr }}-serial"></p>
+        <p class="col-sm-6 small" id="sdr{{ sdr }}-puprpose">
+          <label class="checkbox-inline mr-2">
+            <input type="radio" id="1090-{{ sdr }}" name="1090serial" value="0">
+            1090
+          </label>
+          <label class="checkbox-inline mr-2">
+            <input type="radio" id="978-{{ sdr }}" name="978serial" value="0">
+            978
+          </label>
+          <label class="checkbox-inline mr-2">
+            <input type="radio" id="other-{{ sdr }}" name="other" value="0">
+            Other
+          </label>
+        </p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="advanced" value="go">I'm
+    done here - take me to the website</button>
 </form>
 <script>
-    $(document).ready(function () {
-        sdr_info();
-        $("input[type=radio]").click(function () {
-            myid = this.id;
-            let components = myid.split("-");
-            console.log("clicked on", myid, "with components", components);
-            for (const usage of ["1090", "978", "other"]) {
-                otherid = usage + "-" + components[1];
-                if (otherid != myid) {
-                    console.log("turning off ", otherid);
-                    document.getElementById(otherid).checked = false;
-                }
-            }
-        });
-    })
-
-    function sdr_info() {
-        fetch(`${SCRIPT_ROOT}/api/sdr_info`)
-            .then(response => response.json())
-            .then(data => {
-                console.log("received back", data);
-                let num = data['sdrdevices'].length;
-                console.log("have", num, "sdrs")
-                if (num <= 1) {
-                    document.getElementById('multipleSdrs').style.display = 'none'
-                    return
-                }
-                document.getElementById('multipleSdrs').style.display = 'flex'
-                let sdrs = data['sdrdevices'];
-                let use = data['frequencies'];
-                let consumers = ["1090", "978", "other"]
-                for (let i = 0; i < num; i++) {
-                    let id = 'sdr' + i;
-                    let serial = sdrs[i]['serial'];
-                    document.getElementById(id).style.display = 'flex';
-                    document.getElementById(id + "-serial").innerHTML = serial;
-                    for (const c of consumers) {
-                        document.getElementById(c + '-' + i).value = serial;
-                        if (use[c] == serial) {
-                            document.getElementById(c + '-' + i).checked = true;
-                        }
-                    }
-                }
-                for (let i = num; i < 4; i++) {
-                    let id = 'sdr' + i;
-                    document.getElementById(id).style.display = 'none'
-                }
-            });
-    }
-    function show_or_hide(b, f) {
-        if (b.checked) f.style.display = "block"; else f.style.display = "none";
-    }
-    const hwt = document.getElementById('heywhatsthat--is_enabled');
-    const hwttext = document.getElementById('hwt-text');
-    hwt.addEventListener("change", function () {
-        show_or_hide(hwt, hwttext);
+  $(document).ready(function () {
+    sdr_info();
+    $("input[type=radio]").click(function () {
+      myid = this.id;
+      let components = myid.split("-");
+      console.log("clicked on", myid, "with components", components);
+      for (const usage of ["1090", "978", "other"]) {
+        otherid = usage + "-" + components[1];
+        if (otherid != myid) {
+          console.log("turning off ", otherid);
+          document.getElementById(otherid).checked = false;
+        }
+      }
     });
+  })
+
+  function sdr_info() {
+    fetch(`${SCRIPT_ROOT}/api/sdr_info`)
+      .then(response => response.json())
+      .then(data => {
+        console.log("received back", data);
+        let num = data['sdrdevices'].length;
+        console.log("have", num, "sdrs")
+        let sdrs = data['sdrdevices'];
+        let use = data['frequencies'];
+        let consumers = ["1090", "978", "other"]
+        for (let i = 0; i < num; i++) {
+          let id = 'sdr' + i;
+          let serial = sdrs[i]['serial'];
+          document.getElementById(id).style.display = 'flex';
+          document.getElementById(id + "-serial").innerHTML = serial;
+          for (const c of consumers) {
+            document.getElementById(c + '-' + i).value = serial;
+            if (use[c] == serial) {
+              document.getElementById(c + '-' + i).checked = true;
+            }
+          }
+        }
+        for (let i = num; i < 4; i++) {
+          let id = 'sdr' + i;
+          document.getElementById(id).style.display = 'none'
+        }
+      });
+  }
+
+  function show_or_hide(b, f) {
+    if (b.checked) f.style.display = "block";
+    else f.style.display = "none";
+  }
+  const hwt = document.getElementById('heywhatsthat--is_enabled');
+  const hwttext = document.getElementById('hwt-text');
+  hwt.addEventListener("change", function () {
+    show_or_hide(hwt, hwttext);
+  });
 </script>
 {% endblock %}

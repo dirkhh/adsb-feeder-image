@@ -1,26 +1,26 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>{% block title %} Restarting the ADS-B Feeder system {% endblock %}</h1>
+<h1 class="mt-3 text-center text-danger">{% block title %} Restarting the ADS-B Feeder system {% endblock %}</h1>
 
 <script>
-  document.addEventListener('readystatechange', event => {
+  document.addEventListener("readystatechange", (event) => {
     if (event.target.readyState === "complete") {
       show_spinner();
       // Trigger restart and then start checking the restart status
       var restartRequest = new XMLHttpRequest();
-      restartRequest.open('POST', '/restart');
+      restartRequest.open("POST", "/restart");
       restartRequest.onload = function () {
         if (restartRequest.status === 200) {
           checkRestartStatus();
         } else {
           // ops, we got an error from the server
-          alert('post to /restart failed - please report');
+          alert("post to /restart failed - please report");
         }
       };
       restartRequest.onerror = function () {
         // ops, we got an error trying to talk to the server
-        alert('cannot talk to server sending the restart request - please report');
+        alert("cannot talk to server sending the restart request - please report");
       };
       restartRequest.send();
     }
@@ -28,25 +28,25 @@
 
   function checkRestartStatus() {
     var request = new XMLHttpRequest();
-    request.open('GET', '/restart');
+    request.open("GET", "/restart");
     request.onload = function () {
-      if (request.status === 200 && request.responseText === 'done') {
+      if (request.status === 200 && request.responseText === "done") {
         // restarting the ADS-B infra completed, redirect user
-        window.location = '/';
-      } else if (request.status === 200 && request.responseText === 'restarting') {
+        window.location = "/";
+      } else if (request.status === 200 && request.responseText === "restarting") {
         // restart is still in progress, show progress and check again after a delay
         setTimeout(checkRestartStatus, 2000);
       } else {
         // ops, we got an error from the server - could be it is briefly turned off for
         // an update or something
-        console.log("request to GET /restart resulted in ", request.status)
+        console.log("request to GET /restart resulted in ", request.status);
         setTimeout(checkRestartStatus, 2000);
       }
     };
     request.onerror = function () {
       // ops, we got an error trying to talk to the server - could be it is briefly turned off for
       // an update or something
-      console.log("request to GET /restart resulted in an error: ", request.status)
+      console.log("request to GET /restart resulted in an error: ", request.status);
       setTimeout(checkRestartStatus, 2000);
     };
     request.send();

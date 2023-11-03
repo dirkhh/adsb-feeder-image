@@ -1,206 +1,255 @@
 {% extends 'base.html' %}
 {% set active_page = "index" %}
-
 {% block content %}
-<h1>{% block title %} ADS-B Feeder Homepage for {{ env_value_by_tag("mlat_name") }} {% endblock %}</h1>
+<h1 class="mt-3 text-center text-danger">
+  {% block title %}ADS-B Feeder Homepage for {{ env_value_by_tag("mlat_name") }}{% endblock %}
+</h1>
 <div class="row">
-
-    <div class="col-12">
-        <h4>You are feeding</h4>
-        <div class="row small">
-            {% for tc in [0,1] %}
-            <div class="col-12 col-md-6">
-                <table class="table table-bordered table-sm">
-                    <thead>
-                        <td>Aggregator</td>
-                        <td>Enabled</td>
-                        <td>Data</td>
-                        <td>MLAT</td>
-                        <td>Status</td>
-                    </thead>
-                    <tbody>
-                        {% for agg, name, map, status in aggregators %}
-                        {% set is_first = ((loop.length + 1) / 2 >= loop.index) %}
-                        {% if (tc==0 and is_first) or (tc==1 and not is_first) %}
-                        <tr>
-                            <td><a href="{{ map }}">{{ name }}</a></td>
-                            <td class="text-center">
-                                <span id="{{ agg + 'span'}}">{% if is_enabled(agg) %} &#10003; {% endif %}</span>
-                            </td>
-                            <td class="text-center"><span id="{{ agg + 'beast' }}"></span></td>
-                            <td class="text-center"><span id="{{ agg + 'mlat' }}"></span></td>
-                            <td class="text-center">{% if status != "" and is_enabled(agg) %}
-                                <a href="{{ status }}">&#x1f517;</a>{% endif %}
-                            </td>
-                        </tr>
-                        {% endif %}
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+  <div class="col-12">
+    <h4>You are feeding</h4>
+    <div class="row small">
+      {% for tc in [0,1] %}
+      <div class="col-12 col-md-6">
+        <table class="table table-bordered table-sm lh-1 table-striped">
+          <thead>
+            <td>Aggregator</td>
+            <td>Enabled</td>
+            <td>Data</td>
+            <td>MLAT</td>
+            <td>Status</td>
+          </thead>
+          <tbody>
+            {% for agg, name, map, status in aggregators %}
+            {% set is_first = ((loop.length + 1) / 2 >= loop.index) %}
+            {% if (tc==0 and is_first) or (tc==1 and not is_first) %}
+            <tr>
+              <td>
+                <a href="{{ map }}">{{ name }}</a>
+              </td>
+              <td class="text-center">
+                <span id="{{ agg + 'span' }}">
+                  {% if is_enabled(agg) %}&#10003;{% endif %}
+                </span>
+              </td>
+              <td class="text-center">
+                <span id="{{ agg + 'beast' }}"></span>
+              </td>
+              <td class="text-center">
+                <span id="{{ agg + 'mlat' }}"></span>
+              </td>
+              <td class="text-center">
+                {% if status != "" and is_enabled(agg) %}<a href="{{ status }}">&#x1f517;</a>{% endif %}
+              </td>
+            </tr>
+            {% endif %}
             {% endfor %}
-            <div class="col-12 small mb-4">Enabled indicates feeding the aggregator. <span class="green">&#10003;</span>
-                known to be good, <span class="red">&#10003;</span> known to have issues, <span
-                    class="neutral">&#10003;</span> if we don't have that information.<br>
-                '+' or '-' in the Data and MLAT columns show that aggregator indicates that you are (or are not) feeding
-                ADS-B data and MLAT data to them<br>
-                '.' in those columns indicates that the aggregator isn't offering that information to the feeder
-            </div>
-        </div>
+          </tbody>
+        </table>
+      </div>
+      {% endfor %}
+      <div class="col-12 small mb-4">
+        Enabled indicates feeding the aggregator. <span class="text-success">&#10003;</span> known to be good,
+        <span class="text-danger">&#10003;</span> known to have issues, <span class="text-dark">&#10003;</span> if we
+        don't have
+        that information.
+        <br />
+        '+' or '-' in the Data and MLAT columns show that aggregator indicates that you are (or are not) feeding ADS-B
+        data and MLAT data to them
+        <br />
+        '.' in those columns indicates that the aggregator isn't offering that information to the feeder
+      </div>
     </div>
-    <div class="col-12 mb-4">
-        <h5>ADS-B Feeder <small class="ml-1"> running {{ env_value_by_tag("base_version") }}</small></h5>
-        <div class="mb-4">
-            Latest version: <span id="latest_tag"></span> - <span id="latest_commit"></span><br>
-            <span id="advice" class="small"></span>
-        </div>
-        <div id="update_buttons" style="display: none">
-            <h5 class="mt-1">Update feeder applications</h5>
-            <form method="POST" onsubmit="show_spinner(); return true;">
-                <label for="update_feeder_aps">Update to the current ADS-B feeder applications (i.e. the
-                    web UI, setup apps, and containers). Either the latest beta or stable version.
-                    If this update brings in new container images, even with a fast internet connection this can easily
-                    take more than ten minutes to complete. The web UI will pause while the update is running, but the
-                    feeder apps will only be briefly interrupted once all new components have been downloaded.
-                </label>
-                <div>
-                    <button type="submit" class="btn btn-primary mb-3 ml-3 col-2" name="update_feeder_aps_beta"
-                        value="go">Update (beta)</button>
-                    <button type="submit" class="btn btn-primary mb-3 ml-3 col-2" name="update_feeder_aps_stable"
-                        value="go">Update (stable)</button>
-                </div>
-            </form>
-        </div>
+  </div>
+  <div class="col-12 mb-4">
+    <h5>
+      ADS-B Feeder <small class="ml-1">running {{ env_value_by_tag("base_version") }}</small>
+    </h5>
+    <div class="mb-4">
+      Latest version: <span id="latest_tag"></span> - <span id="latest_commit"></span>
+      <br />
+      <span id="advice" class="small"></span>
     </div>
-    <div class="col-12">
-        <div id="UF" class="row">
-            <div class="col-12">
-                <h5>TAR1090 Mapping Interface</h5>
-            </div>
-            <div class="col col-md-4 col-lg-3">
-                <ul>
-                    <li><a href="/map">map</a>
-                    <li><a href="/stats">statistics and graphs</a>
-                </ul>
-            </div>
-            <div class="col col-md-4 col-lg-3">
-                <ul>
-                    <li><a href="/map/?replay">timelapse / replay</a>
-                    <li><a href="/map/?heatmap&realheat">heatmap</a>
-                    <li><a href="/map/?ptracks">tracks</a>
-                </ul>
-            </div>
-            <div class="text-muted small mb-4 col-12">
-                Please note that after a restart (or first install) it can take up to a couple of minutes for the pages
-                above to respond, so if you get an error, please wait a moment and try again.
-            </div>
+    <div id="update_buttons" style="display: none">
+      <h5 class="mt-1">Update feeder applications</h5>
+      <form method="POST" onsubmit="show_spinner(); return true;">
+        <label for="update_feeder_aps">
+          Update to the current ADS-B feeder applications (i.e. the web UI, setup apps, and
+          containers). Either the
+          latest beta or stable version. If this update brings in new container images, even with a fast internet
+          connection this can easily take more than ten minutes to complete. The web UI will pause while the update is
+          running, but the feeder apps will only be briefly interrupted once all new components have been downloaded.
+        </label>
+        <div>
+          <button type="submit" class="btn btn-primary mb-3 ml-3 col-2" name="update_feeder_aps_beta" value="go">Update
+            (beta)</button>
+          <button type="submit" class="btn btn-primary mb-3 ml-3 col-2" name="update_feeder_aps_stable"
+                  value="go">Update (stable)</button>
         </div>
-        <div id="UAT978" style="display: {% if is_enabled('uat978') %} flex {% else %} none {% endif %};" class="row">
-            <div class="col-12">
-                <h5>UAT978 Mapping Interface</h5>
-            </div>
-            <div class="col-12">
-                <ul>
-                    <li><a href="/dump978">Dump978 map</a>
-                </ul>
-            </div>
-        </div>
-        <div id="CF" class="row mt-2">
-            <div class="col-12">
-                <h5>Device Configuration and Administration</h5>
-            </div>
-            <div class="col-12">
-                <ul>
-                    <li><a href="{{ url_for('setup') }}">Basic Setup</a>
-                    <li style="display: {% if is_enabled('base_config') %} list-item {% else %} none {% endif %};">
-                        <a href="{{ url_for('advanced') }}">Advanced setup</a>
-                    <li style="display: {% if is_enabled('base_config') %} list-item {% else %} none {% endif %};">
-                        <a href="{{ url_for('aggregators') }}">Aggregator setup</a>
-                </ul>
-            </div>
-        </div>
-        <div class="row mt-3" {% if not ( is_enabled('adsblol') or is_enabled('flightradar') or
-            is_enabled('planefinder') or is_enabled('adsbx')) %} style="display: none;" {% endif %}>
-            <div class="col-12">
-                <h5>Additional aggregator links</h5>
-            </div>
-            <div style="display: {% if is_enabled('adsblol') %} block {% else %} none {% endif %};" class="col-12">
-                <div class="lead">ADSB.lol</div>
-                <ul>
-                    <li><a href="https://status.adsb.lol/">ADSB.lol status</a></li>
-                    <li><a href="https://www.adsb.lol/docs/feeders-only/introduction/">ADSB.lol feeder
-                            introduction</a>
-                    </li>
-                    <li><a href="https://my.adsb.lol/">personal ADSB.lol URL with the planes you are sending</a>
-                    </li>
-                    <li><a href="https://mlat.adsb.lol/">ADSB.lol MLAT feeder map</a><br />
-                        {% if is_enabled("mlat_privacy") %}
-                        (since you have MLAT privacy enabled, your feeder won't be shown)
-                        {% else %}
-                        (your feeder will be at an approximate location as {{ env_value_by_tag("mlat_name") }})
-                        {% endif %}</li>
-                </ul>
-            </div>
-            <div style="display: {% if is_enabled('flightradar') %} block {% else %} none {% endif %};" class="col-12">
-                <div class="lead">FlightRadar 24</div>
-                <ul>
-                    <li><a href="/fr-status">FR24 status</a>
-                </ul>
-            </div>
-            <div style="display: {% if is_enabled('planefinder') %} block {% else %} none {% endif %};" class="col-12">
-                <div class="lead">PlaneFinder</div>
-                <ul>
-                    <li><a href="/planefinder">Local Planefinder map</a></li>
-                </ul>
-            </div>
-            <div style="display: {% if is_enabled('adsbx') %} block {% else %} none {% endif %};" class="col-12">
-                <div class="lead">ADSBExchange</div>
-                <ul>
-                    <li><a id="adsbxstatlink" href="">ADSBx Anywhere Stats</a></li>
-                    <li><a id="adsbxmaplink" href="">ADSBx Anywhere Map</a></li>
-                </ul>
-            </div>
-        </div>
+      </form>
     </div>
+  </div>
+  <div class="col-12">
+    <div id="UF" class="row">
+      <div class="col-12">
+        <h5>TAR1090 Mapping Interface</h5>
+      </div>
+      <div class="col col-md-4 col-lg-3">
+        <ul>
+          <li>
+            <a href="/map">map</a>
+          </li>
+          <li>
+            <a href="/stats">statistics and graphs</a>
+          </li>
+        </ul>
+      </div>
+      <div class="col col-md-4 col-lg-3">
+        <ul>
+          <li>
+            <a href="/map/?replay">timelapse / replay</a>
+          </li>
+          <li>
+            <a href="/map/?heatmap&realheat">heatmap</a>
+          </li>
+          <li>
+            <a href="/map/?ptracks">tracks</a>
+          </li>
+        </ul>
+      </div>
+      <div class="text-muted small mb-4 col-12">
+        Please note that after a restart (or first install) it can take up to a couple of minutes for the pages above to
+        respond, so if you get an error, please wait a moment and try again.
+      </div>
+    </div>
+    <div id="UAT978" {% if not is_enabled('uat978') %}style="display: none;" {% endif %} class="row">
+      <div class="col-12">
+        <h5>UAT978 Mapping Interface</h5>
+      </div>
+      <div class="col-12">
+        <ul>
+          <li>
+            <a href="/dump978">Dump978 map</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div id="CF" class="row mt-2">
+      <div class="col-12">
+        <h5>Device Configuration and Administration</h5>
+      </div>
+      <div class="col-12">
+        <ul>
+          <li>
+            <a href="{{ url_for("setup") }}">Basic Setup</a>
+          </li>
+          <li {% if not is_enabled('base_config') %}style="display: none;" {% endif %}>
+            <a href="{{ url_for("advanced") }}">Advanced setup</a>
+          </li>
+          <li {% if not is_enabled('base_config') %}style="display: none;" {% endif %}>
+            <a href="{{ url_for("aggregators") }}">Aggregator setup</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="row mt-3" {% if not ( is_enabled('adsblol') or is_enabled('flightradar') or is_enabled('planefinder') or
+        is_enabled('adsbx')) %} style="display: none;" {% endif %}>
+      <div class="col-12">
+        <h5>Additional aggregator links</h5>
+      </div>
+      <div {% if not is_enabled('adsblol') %}style="display: none;" {% endif %} class="col-12">
+        <div class="lead">ADSB.lol</div>
+        <ul>
+          <li>
+            <a href="https://status.adsb.lol/">ADSB.lol status</a>
+          </li>
+          <li>
+            <a href="https://www.adsb.lol/docs/feeders-only/introduction/">ADSB.lol feeder introduction</a>
+          </li>
+          <li>
+            <a href="https://my.adsb.lol/">personal ADSB.lol URL with the planes you are sending</a>
+          </li>
+          <li>
+            <a href="https://mlat.adsb.lol/">ADSB.lol MLAT feeder map</a>
+            <br />
+            {% if is_enabled("mlat_privacy") %}
+            (since you have MLAT privacy enabled, your feeder won't be shown)
+            {% else
+                %}
+            (your feeder will be at an approximate location as {{ env_value_by_tag("mlat_name") }})
+            {% endif %}
+          </li>
+        </ul>
+      </div>
+      <div class="col-12">
+        <div class="lead">FlightRadar 24</div>
+        <ul>
+          <li>
+            <a href="/fr-status">FR24 status</a>
+          </li>
+        </ul>
+      </div>
+      <div {% if not is_enabled('planefinder') %}style="display: none;" {% endif %} class="col-12">
+        <div class="lead">PlaneFinder</div>
+        <ul>
+          <li>
+            <a href="/planefinder">Local Planefinder map</a>
+          </li>
+        </ul>
+      </div>
+      <div {% if not is_enabled('adsbx') %}style="display: none;" {% endif %} class="col-12">
+        <div class="lead">ADSBExchange</div>
+        <ul>
+          <li>
+            <a id="adsbxstatlink" href="">ADSBx Anywhere Stats</a>
+          </li>
+          <li>
+            <a id="adsbxmaplink" href="">ADSBx Anywhere Map</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
 </div>
 <script>
-    $(document).ready(function () {
-        fetch(`${SCRIPT_ROOT}/api/status/im`)
-            .then(response => response.json())
-            .then(data => {
-                $("#latest_tag").text(data["latest_tag"]);
-                $("#latest_commit").text(data["latest_date"]);
-                $("#advice").text(data["advice"]);
-                let show = "none"
-                if (data["show_update"] == "1") { show = "block" }
-                $("#update_buttons").attr("style", "display: " + show)
-            });
-        {% for agg, name, m, s in aggregators %}
-        {% if is_enabled(agg) %}
-        get_status("{{ agg }}");
-        {% endif %}
-        {% endfor %}
-    });
+  $(document).ready(function () {
+    fetch(`${SCRIPT_ROOT}/api/status/im`)
+      .then(response => response.json())
+      .then(data => {
+        $("#latest_tag").text(data["latest_tag"]);
+        $("#latest_commit").text(data["latest_date"]);
+        $("#advice").text(data["advice"]);
+        let show = "none"
+        if (data["show_update"] == "1") {
+          show = "block"
+        }
+        $("#update_buttons").attr("style", "display: " + show)
+      });
+    {% for agg, name, m, s in aggregators %}
+    {% if is_enabled(agg) %}
+    get_status("{{ agg }}");
+    {% endif %}
+    {% endfor %}
+  });
 
-    function get_status(agg) {
-        console.log("get_status for", agg);
-        fetch(`${SCRIPT_ROOT}/api/status/${agg}`)
-            .then(response => response.json())
-            .then(data => {
-                $("#" + agg + "beast").text(data["beast"]);
-                $("#" + agg + "mlat").text(data["mlat"]);
-                if (data["beast"] == "+" && data["mlat"] == "+") {
-                    $("#" + agg + "span").css('color', 'mediumseagreen')
-                } else if (data["beast"] == "-" || data["mlat"] == "-") {
-                    $("#" + agg + "span").css('color', 'red')
-                } else {
-                    $("#" + agg + "span").css('color', 'black')
-                }
-                if (agg == "adsbx") {
-                    $("#adsbxstatlink").attr("href", "https://www.adsbexchange.com/api/feeders/?feed=" + data["adsbxfeederid"])
-                    $("#adsbxmaplink").attr("href", "https://globe.adsbexchange.com/?feed=" + data["adsbxfeederid"])
-                }
-            });
-    }
+  function get_status(agg) {
+    console.log("get_status for", agg);
+    fetch(`${SCRIPT_ROOT}/api/status/${agg}`)
+      .then(response => response.json())
+      .then(data => {
+        $("#" + agg + "beast").text(data["beast"]);
+        $("#" + agg + "mlat").text(data["mlat"]);
+        if (data["beast"] == "+" && data["mlat"] == "+") {
+          $("#" + agg + "span").addClass('text-success')
+        } else if (data["beast"] == "-" || data["mlat"] == "-") {
+          $("#" + agg + "span").addClass('text-danger')
+        } else {
+          $("#" + agg + "span").addClass('text-dark')
+        }
+        if (agg == "adsbx") {
+          $("#adsbxstatlink").attr("href", "https://www.adsbexchange.com/api/feeders/?feed=" + data["adsbxfeederid"])
+          $("#adsbxmaplink").attr("href", "https://globe.adsbexchange.com/?feed=" + data["adsbxfeederid"])
+        }
+      });
+  }
 </script>
 {% endblock %}

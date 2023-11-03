@@ -2,11 +2,11 @@
 {% set active_page = "restore" %}
 
 {% block content %}
-<h1>{% block title %} Restore setup from a backup {% endblock %}</h1>
+<h1 class="mt-3 text-center text-danger">{% block title %} Restore setup from a backup {% endblock %}</h1>
 
 <p>If you have a configuration backup file, please upload it here:</p>
 <form method="post" enctype="multipart/form-data" onsubmit="show_spinner(); return true;">
-    <input class="btn btn-secondary" type="file" name="file" />
-    <input class="btn btn-primary" type="submit" value="Upload" />
+  <input class="btn btn-secondary" type="file" name="file" />
+  <input class="btn btn-primary" type="submit" value="Upload" />
 </form>
 {% endblock %}

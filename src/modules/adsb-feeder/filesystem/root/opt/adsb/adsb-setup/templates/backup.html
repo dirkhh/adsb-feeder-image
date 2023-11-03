@@ -2,10 +2,9 @@
 {% set active_page = "backup" %}
 
 {% block content %}
-<h1>{% block title %} Create a backup of your configuration {% endblock %}</h1>
-
+<h1 class="mt-3 text-center text-danger">{% block title %} Create a backup of your configuration {% endblock %}</h1>
 <p>Click on this button to download a zip file with a backup of your configuration files.</p>
 <form method="post" enctype="multipart/form-data">
-    <a class="btn btn-primary" href="/backupexecute">Backup</a>
+  <a class="btn btn-primary" href="/backupexecute">Backup</a>
 </form>
 {% endblock %}

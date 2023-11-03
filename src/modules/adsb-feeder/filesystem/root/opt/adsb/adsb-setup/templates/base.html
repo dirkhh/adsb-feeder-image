@@ -1,100 +1,128 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href={{url_for('.static', filename='css/style.css' )}}>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <title>{% block title %} {% endblock %}</title>
-
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-        crossorigin="anonymous"></script>
-
+  <!-- Required meta tags -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <!-- Google Fonts Roboto -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" />
+  <!-- MDB -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/mdb.min.css') }}" />
+  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" />
+  <title>
+    {% block title %}{% endblock %}
+  </title>
+  <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="{{ url_for("director") }}">ADS-B Feeder</a>
+      <button class="navbar-toggler" type="button" data-mdb-toggle="collapse" data-mdb-target="#navbarNav"
+              aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars"></i>
+      </button>
+      {% set navigation_bar = [
+                  (url_for('setup'), 'setup', 'Basic Setup'),
+                  (url_for('advanced'), 'advanced', 'Advanced'),
+                  (url_for('aggregators'), 'aggregators', 'Aggregators'),
+                  (url_for('backup'), 'backup', 'Backup'),
+                  (url_for('restore'), 'restore', 'Restore'),
+                  (url_for('expert'), 'expert', 'Expert'),
+                  (url_for('/logs/'), 'logs', 'Logs'),
+                ] -%}
+      {% set active_page = active_page|default('index') -%}
+      {% set config_complete = is_enabled('base_config') %}
+      <div class="collapse navbar-collapse " id="navbarNav">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          {% for href, id, caption in navigation_bar %}
+          <li class="nav-item" {% if id==active_page %}aria-current="true" {% endif %}
+              {% if not config_complete and (id=='setup' or id=='restore' or id=='logs') %}style="display: none;"
+              {% endif %}>
+            <a class="nav-link" href="{{ href|e }}">{{ caption|e }}</a>
+            {% endfor %}
+        </ul>
+      </div>
+    </div>
+    </div>
+  </nav>
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+          integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+          crossorigin="anonymous"></script>
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-md navbar-light bg-light">
-        {% set navigation_bar = [
-        (url_for('setup'), 'setup', 'Basic Setup'),
-        (url_for('advanced'), 'advanced', 'Advanced'),
-        (url_for('aggregators'), 'aggregators', 'Aggregators'),
-        (url_for('backup'), 'backup', 'Backup'),
-        (url_for('restore'), 'restore', 'Restore'),
-        (url_for('expert'), 'expert', 'Expert'),
-        (url_for('/logs/'), 'logs', 'Logs'),
-        ] -%}
-        {% set active_page = active_page|default('index') -%}
-        {% set config_complete = is_enabled('base_config') %}
-        <a class="navbar-brand" href="{{ url_for('director') }}">ADS-B Feeder</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
-            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-                {% for href, id, caption in navigation_bar %}
-                <li {% if id==active_page %}class="active" {% endif %} style="display: {% if config_complete or id=='setup' or id=='restore' or id=='logs' %}
-                    block {% else %} none {% endif %};">
-                    <a class="nav-link" href="{{ href|e }}">{{ caption|e }}</a>
-                </li>
-                {% endfor %}
-            </ul>
+  <div id="loader" style="display: none"></div>
+  <div id="overlay" style="display: none">
+    <div id="overlaytext">
+      please wait
+      <br />
+      this could take several minutes
+    </div>
+  </div>
+  <div class="container pt-5 mt-3">
+    {% block content %}{% endblock %}
+    <footer class="text-center text-lg-start bg-light text-muted">
+      <hr class="mt-5" />
+      <section class="d-flex justify-content-center justify-content-lg-between border-bottom small">
+        <div class="me-5 d-lg-block">
+          <span>
+            Running <a href="https://adsb.im/home">ADS-B Feeder Image</a> {{ env_value_by_tag("base_version") }} with
+            containers from {{ env_value_by_tag("container_version") }}, running on {{ env_value_by_tag("board_name")
+              }}.
+            <br />
+            {{ env_value_by_tag("image_name") }}
+            <br />
+          </span>
         </div>
-    </nav>
-    <div id="loader" style="display: none;"></div>
-    <div id="overlay" style="display: none;">
-        <div id="overlaytext">please wait<br />this could take several minutes</div>
-    </div>
-    <div class="container">
-        {% block content %} {% endblock %}
-    </div>
-    <div class="footer">
-        <hr />
-        Running <a href="https://adsb.im/home">ADS-B Feeder Image</a> {{ env_value_by_tag("base_version") }}
-        with containers from {{ env_value_by_tag("container_version") }}, running on
-        {{ env_value_by_tag("board_name") }}.<br />
-        {{ env_value_by_tag("image_name") }}<br />
-        For help and questions, please go to the
-        <a href="https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image">adsb-feeder-image Zulip
-            channel</a>
-    </div>
-    <script>function show_spinner() {
-            document.getElementById("loader").style.display = "block";
-            document.getElementById("overlay").style.display = "block";
+      </section>
+      <section class="d-flex justify-content-center justify-content-lg-between border-bottom small">
+        <div class="d-lg-block">
+          <span>
+            For help and questions, please go to the
+            <a href="https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image">adsb-feeder-image Zulip
+              channel</a>
+          </span>
+        </div>
+      </section>
+    </footer>
+  </div>
+  <script>
+    function show_spinner() {
+      document.getElementById("loader").style.display = "block";
+      document.getElementById("overlay").style.display = "block";
+    }
+    const SCRIPT_ROOT = {
+            {
+      request.script_root | tojson
+    }
         }
-        const SCRIPT_ROOT = {{ request.script_root| tojson }}
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-        crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-        crossorigin="anonymous"></script>
-    <script>$(document).ready(function () { $('[data-toggle="tooltip"]').tooltip(); });</script>
-    <script>$("form").submit(function () {
-            // stupid hack to get checkboxes that are unchecked into Flask
-            // first hide the form (so the checkboxes don't visibly turn back on)
-            // then artificially check them all, but give them values of 0/1 to represent
-            // whether they were checked or not
-            var this_master = $(this);
-            this_master.hide();
-            this_master.find('input[type="checkbox"]').each(function () {
-                var checkbox_this = $(this);
-                if (checkbox_this.is(":checked") == true) {
-                    checkbox_this.attr('value', '1');
-                } else {
-                    checkbox_this.prop('checked', true);
-                    checkbox_this.attr('value', '0');
-                }
-            })
-        })</script>
+  </script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/mdb.min.js') }}"></script>
+  <script>
+    $(document).ready(function () {
+      $('[data-toggle="tooltip"]').tooltip();
+    });
+  </script>
+  <script>
+    $("form").submit(function () {
+      // stupid hack to get checkboxes that are unchecked into Flask
+      // first hide the form (so the checkboxes don't visibly turn back on)
+      // then artificially check them all, but give them values of 0/1 to represent
+      // whether they were checked or not
+      var this_master = $(this);
+      this_master.hide();
+      this_master.find('input[type="checkbox"]').each(function () {
+        var checkbox_this = $(this);
+        if (checkbox_this.is(":checked") == true) {
+          checkbox_this.attr("value", "1");
+        } else {
+          checkbox_this.prop("checked", true);
+          checkbox_this.attr("value", "0");
+        }
+      });
+    });
+  </script>
 </body>
 
 </html>

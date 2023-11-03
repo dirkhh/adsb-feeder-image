@@ -2,147 +2,172 @@
 {% set active_page = "setup" %}
 
 {% block content %}
-<h1>{% block title %} Setup required parameters {% endblock %}</h1>
+<h1 class="mt-3 text-center text-danger">{% block title %} Setup required parameters {% endblock %}</h1>
 
-<p>If you are new to the ADS-B Feeder Image, please fill out the data below. You can use the
-    <a href="https://www.freemaptools.com/elevation-finder.htm" target="_blank">location and elevation finder tool</a>
-    to find your lat / long / altitude
+<p>
+  If you are new to the ADS-B Feeder Image, please fill out the data below. You can use the
+  <a href="https://www.freemaptools.com/elevation-finder.htm" target="_blank">location and elevation finder tool</a>
+  to find your lat / long / altitude
 </p>
-<p>If you re-installed the ADS-B Feeder Image and have made a backup of your configuration, you can also simply
+<p class="row">
+  <span class="col-md">
+    If you re-installed the ADS-B Feeder Image and have made a backup of your configuration, you can also simply
+  </span>
+  <span class="col-md">
     <a class="btn btn-secondary" href="{{  url_for('restore') }}">restore that backup to populate this information.</a>
+  </span>
 </p>
 <form method="post" action="{{ url_for('setup') }}">
-    <div class="form-group">
-        <label for="mlat_name">Station Name (shows up on public maps if enabled later)</label>
-        <input type="text" name="mlat_name" required placeholder="my-awesome-antenna" class="form-control"
-            pattern="[\-_.a-zA-Z0-9]+" title="Letters, numbers, -, _, ."
-            value="{{ env_value_by_tag('mlat_name') }}"></input>
+  <div class="form-group row align-items-center mb-1">
+    <span class="col-md">
+      <label for="mlat_name">Station Name (shows up on public maps if enabled later)</label>
+    </span>
+    <span class="col-md">
+      <input type="text" name="mlat_name" required placeholder="my-awesome-antenna" class="form-control"
+             pattern="[\-_.a-zA-Z0-9]+" title="Letters, numbers, -, _, ." value="{{ env_value_by_tag('mlat_name') }}" />
+    </span>
+  </div>
+  <div class="form-group row align-items-center mb-1">
+    <span class="col-md">
+      <label for="lat">Latitude (-90 .. +90 -- please use 5 decimals, e.g. 45.12345)</label>
+    </span>
+    <span class="col-md">
+      <input type="text" id="lat" name="lat" required placeholder="Antenna latitude" class="form-control"
+             pattern="(?:\+|-|)(?:(?:[0-8]?\d)(?:\.\d+)?|90(?:\.0+)?)" title="Number between -90 and 90"
+             value="{{ env_value_by_tag('lat') }}" />
+    </span>
+  </div>
+  <div class="form-group row align-items-center mb-1">
+    <span class="col-md">
+      <label for="lng">Longitude (-180 .. +180 -- please use 5 decimals , e.g. -122.12345)</label>
+    </span>
+    <span class="col-md">
+      <input type="text" id="lng" name="lng" required placeholder="Antenna longitude" class="form-control"
+             pattern="(?:\+|-|)(:?(:?\d?\d|1[0-7]\d)(?:\.\d+)?|180(?:\.0+)?)" title="Number between -180 and 180"
+             value="{{ env_value_by_tag('lng') }}" />
+    </span>
+  </div>
+  <div class="form-group row align-items-center mb-1">
+    <span class="col-md">
+      <label for="alt">Altitude above mean sealevel, rounded to whole meters</label>
+    </span>
+    <span class="col-md">
+      <input type="text" id="alt" name="alt" required placeholder="Antenna MSL altitude (in m)" class="form-control"
+             pattern="(?:\+|-|)\d+" value="{{ env_value_by_tag('alt') }}" />
+    </span>
+  </div>
+  <div class="form-group row align-items-center mb-1">
+    <span class="col-md">
+      <label for="form_timezone">Timezone</label>
+      <button class="pb-1 btn btn-secondary" onclick="sendTimeToServer()">update timezone</button>
+    </span>
+    <span class="col-md">
+      <input type="text" name="form_timezone" id="form_timezone" required
+             placeholder="populate from the browser timezone by clicking the button above" class="form-control mt-2"
+             value="{{ env_value_by_tag('form_timezone') }}" />
+    </span>
+  </div>
+  <div class="form-group mt-3">
+    <label>
+      Which
+      <a href="#"
+         title="aggregators that don't require you to create an account or provide an email address">semi-anonymous
+      </a>
+      aggregators do you want to feed?
+    </label>
+    <br />
+    <div>
+      <input type="radio" name="aggregators" id="all" value="all" required {% if env_value_by_tag("aggregators")=="all"
+      %} checked {% endif %}>
+      <label class="form-check-label mr-3" for="all">All</label>
+      <input type="radio" name="aggregators" id="privacy" value="privacy" {% if
+      env_value_by_tag("aggregators")=="privacy" %} checked {% endif %}>
+      <label class="form-check-label mr-3" for="privacy">Aggregators with privacy policy</label>
+      <input type="radio" name="aggregators" id="individual" value="individual" {% if
+      env_value_by_tag("aggregators")=="individual" %} checked {% endif %}>
+      <label class="form-check-label" for="individual">Pick individually</label>
     </div>
-    <div class="form-group">
-        <label for="lat">Latitude (-90 .. +90 -- please use a decimal point and ideally 5 decimals precision, e.g.
-            45.12345)</label>
-        <input type="text" id="lat" name="lat" required placeholder="Antenna latitude" class="form-control"
-            pattern="(?:\+|-|)(?:(?:[0-8]?\d)(?:\.\d+)?|90(?:\.0+)?)" title="Number between -90 and 90"
-            value="{{ env_value_by_tag('lat') }}"></input>
-    </div>
-    <div class="form-group">
-        <label for="lng">Longitude (-180 .. +180 -- please use a decimal point and ideally 5 decimals precision, e.g.
-            -122.12345)</label>
-        <input type="text" id="lng" name="lng" required placeholder="Antenna longitude" class="form-control"
-            pattern="(?:\+|-|)(:?(:?\d?\d|1[0-7]\d)(?:\.\d+)?|180(?:\.0+)?)" title="Number between -180 and 180"
-            value="{{ env_value_by_tag('lng') }}"></input>
-    </div>
-    <div class="form-group">
-        <label for="alt">Altitude above mean sealevel, rounded to whole meters</label>
-        <input type="text" id="alt" name="alt" required placeholder="Antenna MSL altitude (in m)" class="form-control"
-            pattern="(?:\+|-|)\d+" value="{{ env_value_by_tag('alt') }}"></input>
-    </div>
-    <div class="form-group">
-        <label for="form_timezone">Timezone</label>
-        <button class="btn btn-secondary" onclick="sendTimeToServer()">update timezone</button>
-        <input type="text" name="form_timezone" id="form_timezone" required
-            placeholder="populate from the browser timezone by clicking the button above" class="form-control mt-2"
-            value="{{ env_value_by_tag('form_timezone') }}"></input>
-    </div>
-    <div class="form-group">
-        <label>Which <a href="#"
-                title="aggregators that don't require you to create an account or provide an email address">semi-anonymous
-            </a>
-            aggregators do you want to feed?</label><br />
-        <div>
-            <input type="radio" name="aggregators" id="all" value="all" required {% if
-                env_value_by_tag("aggregators")=="all" %} checked {% endif %}>
-            <label class="form-check-label mr-3" for="all">All</label>
-            <input type="radio" name="aggregators" id="privacy" value="privacy" {% if
-                env_value_by_tag("aggregators")=="privacy" %} checked {% endif %}>
-            <label class="form-check-label mr-3" for="privacy">Aggregators with privacy policy</label>
-            <input type="radio" name="aggregators" id="individual" value="individual" {% if
-                env_value_by_tag("aggregators")=="individual" %} checked {% endif %}>
-            <label class="form-check-label " for="individual">Pick individually</label>
-        </div>
-        <div id="explain-all" style="display: {% if env_value_by_tag('aggregators')=='all' %} block {% else %} none {%
+    <div id="explain-all" style="display: {% if env_value_by_tag('aggregators')=='all' %} block {% else %} none {%
             endif %}; font-size: smaller;">
-            With this option you will feed data to
-            <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
-            <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/">Fly Italy ADSB</a>,
-            <a href="https://www.avdelphi.com/privacy.html">AVDelphi</a>,
-            <a href="https://www.planespotters.net/legal/privacypolicy/">planespotters.net</a>,
-            <a href="https://adsb.one/privacy-policy/">adsb.one</a>,
-            <a href="https://theairtraffic.com/privacy-license/">TheAirTraffic.com</a>,
-            <a href="https://adsb.fi/">adsb.fi</a>,
-            <a href="https://radarplane.com/privacy-policy">RadarPlane</a>,
-            <a href="https://www.flyovr.io/">FLYOVR.IO</a>,
-            <a href="https://skydata.hpradar.com/">hpradar</a>,
-            <a href="https://globe.airplanes.live/privacy">airplanes.live</a>,
-            <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
-        </div>
-        <div id="explain-privacy" style="display: {% if env_value_by_tag('aggregators')=='priv' %} block {% else %}
-            none {% endif %}; font-size: smaller;">
-            With this option you will feed data to
-            <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
-            <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/">Fly Italy ADSB</a>,
-            <a href="https://www.avdelphi.com/privacy.html">AVDelphi</a>,
-            <a href="https://www.planespotters.net/legal/privacypolicy/">planespotters.net</a>,
-            <a href="https://adsb.one/privacy-policy/">adsb.one</a>,
-            <a href="https://adsb.fi/">adsb.fi</a>
-            <a href="https://radarplane.com/privacy-policy">RadarPlane</a>,
-            <a href="https://globe.airplanes.live/privacy">airplanes.live</a>,
-            <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
-        </div>
-        <div id="explain-individual" style="display: {% if env_value_by_tag('aggregators')=='ind' %} block {% else %}
-            none {% endif %}; font-size: smaller;">
-            With this option you can make detailed selections on the Aggregator page.
-        </div>
+      With this option you will feed data to
+      <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
+      <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/">Fly Italy ADSB</a>,
+      <a href="https://www.avdelphi.com/privacy.html">AVDelphi</a>,
+      <a href="https://www.planespotters.net/legal/privacypolicy/">planespotters.net</a>,
+      <a href="https://adsb.one/privacy-policy/">adsb.one</a>,
+      <a href="https://theairtraffic.com/privacy-license/">TheAirTraffic.com</a>,
+      <a href="https://adsb.fi/">adsb.fi</a>, <a href="https://radarplane.com/privacy-policy">RadarPlane</a>,
+      <a href="https://www.flyovr.io/">FLYOVR.IO</a>, <a href="https://skydata.hpradar.com/">hpradar</a>,
+      <a href="https://globe.airplanes.live/privacy">airplanes.live</a>,
+      <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
     </div>
-    <div class="form-group">
-        <button type="submit" name="submit" value="go" class="btn btn-primary">Submit</button>
+    <div id="explain-privacy" style="display: {% if env_value_by_tag('aggregators')=='priv' %} block {% else %}
+            none {% endif %}; font-size: smaller;">
+      With this option you will feed data to
+      <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
+      <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/">Fly Italy ADSB</a>,
+      <a href="https://www.avdelphi.com/privacy.html">AVDelphi</a>,
+      <a href="https://www.planespotters.net/legal/privacypolicy/">planespotters.net</a>,
+      <a href="https://adsb.one/privacy-policy/">adsb.one</a>,
+      <a href="https://adsb.fi/">adsb.fi</a>
+      <a href="https://radarplane.com/privacy-policy">RadarPlane</a>,
+      <a href="https://globe.airplanes.live/privacy">airplanes.live</a>,
+      <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
     </div>
-    <p>{{ message }} </p>
+    <div id="explain-individual" style="display: {% if env_value_by_tag('aggregators')=='ind' %} block {% else %}
+            none {% endif %}; font-size: smaller;">
+      With this option you can make detailed selections on the Aggregator page.
+    </div>
+  </div>
+  <div class="form-group">
+    <button type="submit" name="submit" value="go" class="btn btn-primary">Submit</button>
+  </div>
+  <p>{{ message }}</p>
 </form>
 <script>
-    $("#lat").on("blur", function () {
-        let lat_value = $("#lat").val();
-        let values = lat_value.split(",");
-        if (values.length > 1) {
-            $("#lat").val(values[0])
-            $("#lng").val(values[1])
-        }
-    });
-    $("#alt").on("blur", function () {
-        let alt_value = $("#alt").val();
-        let factor = 1.0;
-        if (alt_value.toLowerCase().includes("ft")) factor = 0.3048;
-        let new_alt = Math.round(parseFloat(alt_value)) * factor;
-        if (new_alt.toString() == "NaN") new_alt = "";
-        $("#alt").val(new_alt)
-    });
-    function sendTimeToServer() {
-        const dateTimeFormat = new Intl.DateTimeFormat('en-US', {})
-        const i = document.createElement("img");
-        i.src = "/propagateTZ?tz=" + dateTimeFormat.resolvedOptions()['timeZone'];
-        document.getElementById("form_timezone").value = dateTimeFormat.resolvedOptions()['timeZone'];
+  $("#lat").on("blur", function () {
+    let lat_value = $("#lat").val();
+    let values = lat_value.split(",");
+    if (values.length > 1) {
+      $("#lat").val(values[0]);
+      $("#lng").val(values[1]);
     }
-    const explainAll = document.getElementById('explain-all');
-    const explainPriv = document.getElementById('explain-privacy');
-    const explainInd = document.getElementById('explain-individual');
-    function aggregatorClick() {
-        if (document.getElementById('all').checked) {
-            explainAll.style.display = 'block';
-            explainPriv.style.display = 'none';
-            explainInd.style.display = 'none';
-        } else if (document.getElementById('privacy').checked) {
-            explainAll.style.display = 'none';
-            explainPriv.style.display = 'block';
-            explainInd.style.display = 'none';
-        } else if (document.getElementById('individual').checked) {
-            explainAll.style.display = 'none';
-            explainPriv.style.display = 'none';
-            explainInd.style.display = 'block';
-        }
+  });
+  $("#alt").on("blur", function () {
+    let alt_value = $("#alt").val();
+    let factor = 1.0;
+    if (alt_value.toLowerCase().includes("ft")) factor = 0.3048;
+    let new_alt = Math.round(parseFloat(alt_value)) * factor;
+    if (new_alt.toString() == "NaN") new_alt = "";
+    $("#alt").val(new_alt);
+  });
+  function sendTimeToServer() {
+    const dateTimeFormat = new Intl.DateTimeFormat("en-US", {});
+    const i = document.createElement("img");
+    i.src = "/propagateTZ?tz=" + dateTimeFormat.resolvedOptions()["timeZone"];
+    document.getElementById("form_timezone").value = dateTimeFormat.resolvedOptions()["timeZone"];
+  }
+  const explainAll = document.getElementById("explain-all");
+  const explainPriv = document.getElementById("explain-privacy");
+  const explainInd = document.getElementById("explain-individual");
+  function aggregatorClick() {
+    if (document.getElementById("all").checked) {
+      explainAll.style.display = "block";
+      explainPriv.style.display = "none";
+      explainInd.style.display = "none";
+    } else if (document.getElementById("privacy").checked) {
+      explainAll.style.display = "none";
+      explainPriv.style.display = "block";
+      explainInd.style.display = "none";
+    } else if (document.getElementById("individual").checked) {
+      explainAll.style.display = "none";
+      explainPriv.style.display = "none";
+      explainInd.style.display = "block";
     }
-    const aggregatorBtns = document.querySelectorAll('input[name="aggregators"]');
-    aggregatorBtns.forEach(radio => {
-        radio.addEventListener('click', aggregatorClick);
-    });
+  }
+  const aggregatorBtns = document.querySelectorAll('input[name="aggregators"]');
+  aggregatorBtns.forEach((radio) => {
+    radio.addEventListener("click", aggregatorClick);
+  });
 </script>
 {% endblock %}
