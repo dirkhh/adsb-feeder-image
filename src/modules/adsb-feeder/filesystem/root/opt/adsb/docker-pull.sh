@@ -13,7 +13,7 @@ cd /opt/adsb/config
 
 # first get the two we always need:
 docker pull amir20/dozzle:latest >> docker-pull.log 2>&1
-docker pull apline:latest >> docker-pull.log 2>&1
+docker pull alpine:latest >> docker-pull.log 2>&1
 
 # then check if any other are enabled (but always get ULTRAFEEDER)
 for image in $(grep "_CONTAINER=" .env); do
