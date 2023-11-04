@@ -189,3 +189,5 @@ systemctl enable --now adsb-setup
 bash /opt/adsb/docker-pull.sh &
 
 echo "done installing"
+echo "you can uninstall this software by running"
+echo "sudo bash /opt/adsb/app-uninstall"

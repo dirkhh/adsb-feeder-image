@@ -1,0 +1,29 @@
+#!/usr/bin/bash
+
+# Helper functions
+exit_with_message() { echo "$1"; exit; }
+
+# let's make sure this is an app installation
+[ -f /opt/adsb/app.adsb.feeder.image ] || exit_with_message "This doesn't appear to be an adsb.im Feeder Image app install - giving up"
+
+# are we running as root?
+[ "$(id -u)" == "0" ] || exit_with_message "Please run this as superuser, e.g. as sudo bash $0"
+
+# stop and remove the services
+services=(adsb-docker.service adsb-feeder-update.service adsb-nonimage.service adsb-setup.service adsb-update.service adsb-update.timer)
+
+for service in "${services[@]}"
+do
+    systemctl stop "$service" &> /dev/null
+    systemctl disable "$service" &> /dev/null
+    rm -f "/usr/lib/systemd/system/$service" &> /dev/null
+done
+
+# clean up our docker images
+bash /opt/adsb/pre-uninstall-cleanup
+
+# remove the rest of the files
+rm -rf /opt/adsb &> /dev/null
+rm -rf /opt/adsb-feeder-update &> /dev/null
+
+echo "uninstall complete"
