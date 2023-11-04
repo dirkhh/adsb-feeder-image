@@ -38,8 +38,8 @@
       <div class="collapse navbar-collapse " id="navbarNav">
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
           {% for href, id, caption in navigation_bar %}
-          <li class="nav-item" {% if id==active_page %}aria-current="true" {% endif %}
-              {% if not config_complete and (id=='setup' or id=='restore' or id=='logs') %}style="display: none;"
+          <li class="nav-item" {% if id == active_page %}aria-current="true" {% endif %}
+              {% if not config_complete and id != "setup" and id != "restore" and id != "logs" %} style="display: none;"
               {% endif %}>
             <a class="nav-link" href="{{ href|e }}">{{ caption|e }}</a>
             {% endfor %}
