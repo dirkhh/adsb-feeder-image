@@ -232,7 +232,6 @@
   });
 
   function get_status(agg) {
-    console.log("get_status for", agg);
     fetch(`${SCRIPT_ROOT}/api/status/${agg}`)
       .then(response => response.json())
       .then(data => {

@@ -107,11 +107,9 @@
     $("input[type=radio]").click(function () {
       myid = this.id;
       let components = myid.split("-");
-      console.log("clicked on", myid, "with components", components);
       for (const usage of ["1090", "978", "other"]) {
         otherid = usage + "-" + components[1];
         if (otherid != myid) {
-          console.log("turning off ", otherid);
           document.getElementById(otherid).checked = false;
         }
       }
@@ -122,9 +120,7 @@
     fetch(`${SCRIPT_ROOT}/api/sdr_info`)
       .then(response => response.json())
       .then(data => {
-        console.log("received back", data);
         let num = data['sdrdevices'].length;
-        console.log("have", num, "sdrs")
         let sdrs = data['sdrdevices'];
         let use = data['frequencies'];
         let consumers = ["1090", "978", "other"]

@@ -265,7 +265,6 @@
         ["radarvirtuel--is_enabled", "RV_FIELDS", ["RVFK"]],
       ];
       for (const ids of box_fields) {
-        console.log("adding event listener for " + ids[0] + " affecting " + ids[1]);
         let box = document.getElementById(ids[0]);
         let fields = document.getElementById(ids[1]);
         box.addEventListener("click", function () {
