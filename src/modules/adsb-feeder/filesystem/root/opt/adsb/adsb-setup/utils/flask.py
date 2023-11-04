@@ -21,20 +21,12 @@ class RouteManager:
         return f
 
     def my_redirect(self, orig, new_port, new_path):
-        print(
-            f"my_redirect called for endpoint {orig} with port {new_port} and path {new_path}",
-            file=sys.stderr,
-        )
         host_url = request.host_url.rstrip("/ ")
         host_url = re.sub(":\\d+$", "", host_url)
         new_path = new_path.rstrip("/ ")
         q: str = ""
         if request.query_string:
             q = f"?{request.query_string.decode()}"
-        print(
-            f"after cleanup: host|{host_url}| path|{new_path}| query-string|{q}|",
-            file=sys.stderr,
-        )
         url = f"{host_url}:{new_port}{new_path}{q}"
         # work around oddity in tar1090
         if url.endswith("graphs1090"):
