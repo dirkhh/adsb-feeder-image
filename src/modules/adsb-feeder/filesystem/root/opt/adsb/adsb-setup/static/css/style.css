@@ -1,35 +1,3 @@
-h1 {
-  color: brown;
-  text-align: center;
-  padding: 10px;
-}
-
-.bigbigbutton {
-  display: block;
-  width: 90%;
-  height: 4em;
-  border: none;
-  background-color: #1144CC;
-  color: #CCDDFF;
-  padding: 1em 2em;
-  margin: 1em;
-  font-size: 125%;
-  cursor: pointer;
-  text-align: center;
-  border-radius: 2em;
-}
-
-span.red {
-  color: red;
-}
-
-span.green {
-  color: mediumseagreen;
-}
-
-span.neutral {
-  color: black;
-}
 
 #loader {
   position: absolute;
@@ -95,29 +63,4 @@ span.neutral {
   color: white;
   transform: translate(-50%, -50%);
   -ms-transform: translate(-50%, -50%);
-}
-
-.container {
-  min-height: 100%vh;
-  padding-bottom: 5rem;
-  # height of the footer
-}
-
-.footer {
-  font-size: small;
-  color: dimgray;
-  height: 5rem;
-  padding-left: 4em;
-  padding-right: 4em;
-}
-
-ul.checkboxlist {
-  float: left;
-  list-style: none;
-  margin: 0;
-}
-
-ul {
-  margin-left: 1.25em;
-  padding-left: 0;
 }
