@@ -72,7 +72,7 @@ if [[ ! -d "$APP_DIR"/config ]] ; then
 fi
 
 distro=$(get_distro)
-echo "You appear ro be on a ${distro}-style distribution"
+echo "You appear to be on a ${distro}-style distribution"
 
 # now that we know that there isn't anything obviously wrong with
 # the command line arguments, let's check if all the dependencies
