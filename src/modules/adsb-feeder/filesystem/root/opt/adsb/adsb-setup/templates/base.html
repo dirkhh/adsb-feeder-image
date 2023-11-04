@@ -92,11 +92,7 @@
       document.getElementById("loader").style.display = "block";
       document.getElementById("overlay").style.display = "block";
     }
-    const SCRIPT_ROOT = {
-            {
-      request.script_root | tojson
-    }
-        }
+    const SCRIPT_ROOT = {{ request.script_root | tojson }}
   </script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/mdb.min.js') }}"></script>
   <script>
