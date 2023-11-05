@@ -93,8 +93,8 @@ class SDRDevices:
     def addresses_per_frequency(self, frequencies: list = [1090, 978]):
         self._ensure_populated()
         # - if we find an airspy, that's for 1090
-        # - if we find an RTL SDR with serial 1090 - well, that's for 1090 (unless you have an airspy)
-        # - if we find an RTL SDR with serial 978 - that's for 978
+        # - if we find an RTL SDR with serial 1090 or 00001090 - well, that's for 1090 (unless you have an airspy)
+        # - if we find an RTL SDR with serial 978 or 00000978 - that's for 978
         # - if we find just one RTL SDR and no airspy, then that RTL SDR is for 1090
         # Make sure one SDR is used per frequency at most...
         ret = {frequency: "" for frequency in frequencies}
@@ -102,9 +102,9 @@ class SDRDevices:
             if sdr._type == "airspy":
                 ret[1090] = sdr._serial
             elif sdr._type == "rtlsdr":
-                if sdr._serial == "1090":
+                if sdr._serial in {"1090", "00001090"}:
                     ret[1090] = sdr._serial
-                elif sdr._serial == "978":
+                elif sdr._serial in {"978", "00000978"}:
                     ret[978] = sdr._serial
         if not ret[1090] and len(self.sdrs) == 1:
             ret[1090] = self.sdrs[0]._serial
