@@ -1,4 +1,7 @@
 Changes since v1.0.5 include
+- support zero-padded serial number when trying to find "obvious" SDR assignments (thanks to @YipYup)
+- always show the SDR assignment on the advanced page, even if there's just one SDR with an "obvious" assignment
+- make the parsing of the status checks with the aggregators significantly more robust
 - rewrite of the UI code; the overall look and feel hasn't changed dramatically, but this is now based on the free version of Material Design for Bootstrap 5, which gives us a more modern and easier to maintain code baseA
 
 > [!WARNING]
