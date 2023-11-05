@@ -11,6 +11,7 @@ T = Enum("T", ["Yes", "No", "Unknown"])
 
 def generic_get_json(url: str, data):
     requests.packages.urllib3.util.connection.HAS_IPV6 = False
+    status = -1
     try:
         response = requests.request(
             method="GET" if data == None else "POST",
@@ -28,12 +29,13 @@ def generic_get_json(url: str, data):
         requests.RequestException,
     ) as err:
         print_err(f"checking {url} failed: {err}")
+        status = err.errno
     except:
         # for some reason this didn't work
         print_err("checking {url} failed: reason unknown")
     else:
-        return response.json()
-    return None
+        return response.json(), response.status_code
+    return None, status
 
 
 class AggStatus:
@@ -71,6 +73,7 @@ class AggStatus:
 
     def get_plain(self, plain_url):
         requests.packages.urllib3.util.connection.HAS_IPV6 = False
+        status = -1
         try:
             response = requests.get(
                 plain_url,
@@ -91,20 +94,21 @@ class AggStatus:
             requests.Timeout,
             requests.RequestException,
         ) as err:
-            print_err(f"checking {url} failed: {err}")
+            print_err(f"checking {plain_url} failed: {err}")
+            status = err.errno
         except:
             # for some reason this didn't work
-            print_err("checking {url} failed: reason unknown")
+            print_err("checking {plain_url} failed: reason unknown")
         else:
-            return response.text
-        return None
+            return response.text, response.status_code
+        return None, status
 
     def check(self):
         # figure out the feeder state at this aggregator (if possible)
         if self._agg == "adsblol":
             json_url = "https://api.adsb.lol/0/me"
-            response_dict = self.get_json(json_url)
-            if response_dict:
+            response_dict, status = self.get_json(json_url)
+            if response_dict and status == 200:
                 lolclients = response_dict.get("clients")
                 if lolclients:
                     lolbeast = lolclients.get("beast")
@@ -116,38 +120,45 @@ class AggStatus:
                         T.Yes if isinstance(lolmlat, list) and len(lolmlat) else T.No
                     )
                     self._last_check = datetime.now()
+                else:
+                    print_err(f"adsblol returned status {status}")
         if self._agg == "flyitaly":
             # get the data from json
             json_url = "https://my.flyitalyadsb.com/am_i_feeding"
-            response_dict = self.get_json(json_url)
-            if response_dict:
+            response_dict, status = self.get_json(json_url)
+            if response_dict and status == 200:
                 feeding = response_dict["feeding"]
                 if feeding:
                     self._beast = T.Yes if feeding.get("beast") else T.No
                     self._mlat = T.Yes if feeding.get("mlat") else T.No
                     self._last_check = datetime.now()
+            else:
+                print_err(f"flyitaly returned {status}")
         elif self._agg == "adsbfi":
             # get the data from json
             json_url = "https://api.adsb.fi/v1/myip"
-            adsbfi_dict = self.get_json(json_url)
-            if adsbfi_dict:
-                # print_err(f"adsbfi returned {adsbfi_dict}")
+            adsbfi_dict, status = self.get_json(json_url)
+            if adsbfi_dict and status == 200:
                 self._beast = T.No if adsbfi_dict.get("beast") == [] else T.Yes
                 self._mlat = T.No if adsbfi_dict.get("mlat") == [] else T.Yes
                 self._last_check = datetime.now()
+            else:
+                print_err(f"adsbfi returned {status}")
         elif self._agg == "radarplane":
             json_url = "https://radarplane.com/api/v1/feed/check"
-            radarplane_dict = self.get_json(json_url)
-            if radarplane_dict:
+            radarplane_dict, status = self.get_json(json_url)
+            if radarplane_dict and status == 200:
                 rdata = radarplane_dict.get("data")
                 if rdata:
                     self._beast = T.Yes if rdata.get("beast") else T.No
                     self._mlat = T.Yes if rdata.get("mlat") else T.No
                     self._last_check = datetime.now()
+            else:
+                print_err(f"radarplane returned {status}")
         elif self._agg == "flightaware":
             json_url = f"{self._url}/fa-status.json/"
-            fa_dict = self.get_json(json_url)
-            if fa_dict:
+            fa_dict, status = self.get_json(json_url)
+            if fa_dict and status == 200:
                 # print_err(f"fa status.json returned {fa_dict}")
                 self._beast = (
                     T.Yes
@@ -162,27 +173,33 @@ class AggStatus:
                     else T.No
                 )
                 self._last_check = datetime.now()
+            else:
+                print_err(f"flightaware returned {status}")
         elif self._agg == "flightradar":
             json_url = f"{self._url}/fr24-monitor.json"
-            fr_dict = self.get_json(json_url)
-            if fr_dict:
+            fr_dict, status = self.get_json(json_url)
+            if fr_dict and status == 200:
                 # print_err(f"fr monitor.json returned {fr_dict}")
                 self._beast = (
                     T.Yes if fr_dict.get("feed_status") == "connected" else T.No
                 )
                 self._last_check = datetime.now()
+            else:
+                print_err(f"flightradar returned {status}")
         elif self._agg == "radarplane":
             uuid = self._constants.env_by_tags("ultrafeeder_uuid").value
             json_url = f"https://radarplane.com/api/v1/feed/check/{uuid}"
-            rp_dict = self.get_json(json_url)
-            if rp_dict and rp_dict.get("data"):
+            rp_dict, status = self.get_json(json_url)
+            if rp_dict and rp_dict.get("data") and status == 200:
                 self._beast = T.Yes if rp_dict["data"].get("beast") else T.No
                 self._mlat = T.Yes if rp_dict["data"].get("mlat") else T.No
                 self._last_check = datetime.now()
+            else:
+                print_err(f"radarplane returned {status}")
         elif self._agg == "alive":
             json_url = "https://api.airplanes.live/feed-status"
-            a_dict = self.get_json(json_url)
-            if a_dict:
+            a_dict, status = self.get_json(json_url)
+            if a_dict and status == 200:
                 uuid = self._constants.env_by_tags("ultrafeeder_uuid").value
                 beast_clients = a_dict.get("beast_clients")
                 if beast_clients:
@@ -205,10 +222,12 @@ class AggStatus:
                         else T.No
                     )
                 self._last_check = datetime.now()
+            else:
+                print_err(f"airplanes.james returned {status}")
         elif self._agg == "adsbx":
             html_url = "https://www.adsbexchange.com/myip/"
-            adsbx_text = self.get_plain(html_url)
-            if adsbx_text:
+            adsbx_text, status = self.get_plain(html_url)
+            if adsbx_text and status == 200:
                 match = re.search(r"<.*?>([a-zA-Z ]*)<.*?>ADS-B Status", adsbx_text)
                 if match:
                     self._beast = (
@@ -226,36 +245,41 @@ class AggStatus:
                 )
                 if match:
                     self._constants.env_by_tags("adsbxfeederid").value = match.group(1)
+            else:
+                print_err(f"adsbx returned {status}")
         elif self._agg == "tat":
             # get the data from the status text site
             text_url = "https://theairtraffic.com/iapi/feeder_status"
-            tat_text = self.get_plain(text_url)
-            if text_url:
-                # print_err(f"tat returned {tat_text}")
+            tat_text, status = self.get_plain(text_url)
+            if text_url and status == 200:
                 if re.search(r" No ADS-B feed", tat_text):
                     self._beast = T.No
                 elif re.search(r"  ADS-B feed", tat_text):
                     self._beast = T.Yes
                 else:
-                    print_err(f"can't parse beast part of tat response {tat_text}")
+                    print_err(f"can't parse beast part of tat response")
                     return
                 if re.search(r" No MLAT feed", tat_text):
                     self._mlat = T.No
                 elif re.search(r"  MLAT feed", tat_text):
                     self._mlat = T.Yes
                 else:
-                    print_err(f"can't parse mlat part of tat response {tat_text}")
+                    print_err(f"can't parse mlat part of tat response")
                     # but since we got someting we could parse for beast above, let's keep going
                 self._last_check = datetime.now()
+            else:
+                print_err(f"tat returned {status}")
         elif self._agg == "planespotters":
             uf_uuid = self._constants.env_by_tags("ultrafeeder_uuid").value
             html_url = f"https://www.planespotters.net/feed/status/{uf_uuid}"
-            ps_text = self.get_plain(html_url)
-            if ps_text:
+            ps_text, status = self.get_plain(html_url)
+            if ps_text and status == 200:
                 self._beast = (
                     T.No if re.search("Feeder client not connected", ps_text) else T.Yes
                 )
                 self._last_check = datetime.now()
+            else:
+                print_err(f"planespotters returned {status}")
         elif self._agg == "planewatch":
             pw_uuid = self._constants.env_by_tags(
                 ["planewatch", "key"]
@@ -263,8 +287,8 @@ class AggStatus:
             if not pw_uuid:
                 return
             json_url = f"https://atc.plane.watch/api/v1/feeders/{pw_uuid}/status.json"
-            pw_dict = self.get_json(json_url)
-            if pw_dict:
+            pw_dict, status = self.get_json(json_url)
+            if pw_dict and status == 200:
                 status = pw_dict.get("status")
                 if not status:
                     print_err(f"can't parse planewatch status {pw_dict}")
@@ -277,6 +301,8 @@ class AggStatus:
                 self._beast = T.Yes if adsb.get("connected") else T.No
                 self._mlat = T.Yes if mlat.get("connected") else T.No
                 self._last_check = datetime.now()
+            else:
+                print_err(f"planewatch returned {status}")
 
     def __repr__(self):
         return f"Aggregator({self._agg} last_check: {str(self._last_check)}, beast: {self._beast} mlat: {self._mlat})"

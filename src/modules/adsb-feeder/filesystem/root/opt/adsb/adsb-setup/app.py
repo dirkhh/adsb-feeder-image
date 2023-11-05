@@ -432,8 +432,16 @@ class AdsbIm:
 
     def agg_status(self, agg):
         if agg == "im":
-            status = ImStatus(self._constants).check()
-            return json.dumps(status)
+            im_json, status = ImStatus(self._constants).check()
+            if status == 200:
+                return json.dumps(im_json)
+            else:
+                print_err(f"adsb.im returned {status}")
+                return {
+                    "latest_tag": "unknown",
+                    "latest_commit": "",
+                    "advice": "there was an error obtaining the latest version information",
+                }
         status = AggStatus(agg, self._constants, request.host_url.rstrip("/ "))
         if agg == "adsbx":
             return json.dumps(
