@@ -7,14 +7,15 @@
 <p>
   If you are new to the ADS-B Feeder Image, please fill out the data below. You can use the
   <a href="https://www.freemaptools.com/elevation-finder.htm" target="_blank">location and elevation finder tool</a>
-  to find your lat / long / altitude
+  to find your Latitude, Longitude, and Altitude based on your address.
 </p>
 <p class="row">
   <span class="col-md">
-    If you re-installed the ADS-B Feeder Image and have made a backup of your configuration, you can also simply
+    If you re-installed the ADS-B Feeder Image and have made a backup of your configuration, you can also simply restore
+    those settings
   </span>
   <span class="col-md">
-    <a class="btn btn-secondary" href="{{  url_for('restore') }}">restore that backup to populate this information.</a>
+    <a class="btn btn-secondary" href="{{  url_for('restore') }}">restore previous backup</a>
   </span>
 </p>
 <form method="post" action="{{ url_for('setup') }}">
@@ -33,8 +34,8 @@
     </span>
     <span class="col-md">
       <input type="text" id="lat" name="lat" required placeholder="Antenna latitude" class="form-control"
-             pattern="(?:\+|-|)(?:(?:[0-8]?\d)(?:\.\d+)?|90(?:\.0+)?)" title="Number between -90 and 90"
-             value="{{ env_value_by_tag('lat') }}" />
+             pattern="(?:\+|-|)(?:(?:[0-8]?\d)(?:\.\d+)?|90(?:\.0+)?)(,(?:\+|-|)(:?(:?\d?\d|1[0-7]\d)(?:\.\d+)?|180(?:\.0+)?))?"
+             title="Number between -90 and 90" value="{{ env_value_by_tag('lat') }}" />
     </span>
   </div>
   <div class="form-group row align-items-center mb-1">
@@ -63,8 +64,8 @@
     </span>
     <span class="col-md">
       <input type="text" name="form_timezone" id="form_timezone" required
-             placeholder="populate from the browser timezone by clicking the button above" class="form-control mt-2"
-             value="{{ env_value_by_tag('form_timezone') }}" />
+             placeholder="populate from the browser timezone by clicking the 'update timezone' button"
+             class="form-control mt-2" value="{{ env_value_by_tag('form_timezone') }}" />
     </span>
   </div>
   <div class="form-group mt-3">
