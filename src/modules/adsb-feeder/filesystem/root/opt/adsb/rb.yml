@@ -17,3 +17,6 @@ services:
     tmpfs:
       - /run:exec,size=64M
       - /var/log
+    volumes:
+      - /opt/adsb/rb/thermal_zone0:${FEEDER_RB_THERMAL_HACK:-/tmp/rbt}
+      - /opt/adsb/rb/cpuinfo:${FEEDER_RB_CPUINFO_HACK:-/tmp/rbc}:ro
