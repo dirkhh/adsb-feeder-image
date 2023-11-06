@@ -1,4 +1,5 @@
 Changes since v1.0.5 include
+- update Raspbian images so that Dozzle can show memory use of the containers
 - support zero-padded serial number when trying to find "obvious" SDR assignments (thanks to @YipYup)
 - always show the SDR assignment on the advanced page, even if there's just one SDR with an "obvious" assignment
 - make the parsing of the status checks with the aggregators significantly more robust

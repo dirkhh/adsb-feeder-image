@@ -23,13 +23,17 @@ echo "127.0.1.1 $(hostname)" 2>/dev/null >> /etc/hosts
 # setup Python/Flask
 apt-get update --allow-releaseinfo-change
 
-if  grep -q "bullseye" /etc/os-release ; then
+if grep -q "bullseye" /etc/os-release ; then
 	# for older Debian the packaged flask is still v1 and too old for our code
 	# on the flipside, bullseye still allows us to use pip to install
 	# systemwide packages - so let's do it this way
 	apt-get install -y --no-install-recommends python3 python3-pip
 	pip install --no-cache-dir -r /opt/adsb/adsb-setup/requirements.txt
 	ln -s /usr/local/bin/flask /usr/bin
+	if [ "$BASE_DISTRO" = "raspbian" ] ; then
+		# for Dozzle to work, Raspbian needs a slightly modified command.txt
+		sed -i 's/rootwait/rootwait cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1/' /boot/cmdline.txt
+	fi
 else
 	apt-get install -y --no-install-recommends python3 python3-flask python3-requests
 fi
@@ -58,7 +62,7 @@ if grep -q "^diet" /etc/dist_variant ; then
 	# get rid of the silly "NO_NAME" label for the boot partition
 	if [ "$(df /boot | tail -1 | grep '/boot$')" != "" ] ; then
 		BOOT_DEVICE=$(df --output=source /boot | tail -1)
-		fatlabel $BOOT_DEVICE ADSB-FEEDER
+		fatlabel "$BOOT_DEVICE" ADSB-FEEDER
 	fi
 
 	# make sure we have an ntp server defined
@@ -68,7 +72,7 @@ if grep -q "^diet" /etc/dist_variant ; then
 	# on DietPi based distros, the wpa-supplicant file that CustomPiOS
 	# installs makes no sense, so let's remove it here
 	# on the other distros, the README makes no sense, so remove that :)
-	rm -f /boot/${DIST_NAME,,}-wpa-supplicant.txt
+	rm -f /boot/"${DIST_NAME,,}"-wpa-supplicant.txt
 else
 	rm -f /boot/ADSB-README.txt
 fi
@@ -80,7 +84,7 @@ if [ "$NATIVE_DIETPI" != "1" ] ; then
 
 	# install zerotier and tailscale, first get their repo
 
-	DEBIAN_DISTRO=$(cat /etc/apt/sources.list | head -1 | cut -d\   -f 3)
+	DEBIAN_DISTRO=$(head -1 /etc/apt/sources.list | cut -d\  -f 3)
 	echo "deb http://download.zerotier.com/debian/${DEBIAN_DISTRO} ${DEBIAN_DISTRO} main" > /etc/apt/sources.list.d/zerotier.list
 	curl -fsSL "https://pkgs.tailscale.com/stable/debian/${DEBIAN_DISTRO}.noarmor.gpg" | sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
 	curl -fsSL "https://pkgs.tailscale.com/stable/debian/${DEBIAN_DISTRO}.tailscale-keyring.list" | sudo tee /etc/apt/sources.list.d/tailscale.list
@@ -95,9 +99,9 @@ if [ "$NATIVE_DIETPI" != "1" ] ; then
 	# If we are armbian, we do something with networking
 	if [ "$BASE_DISTRO" = "armbian" ] ; then
 		apt-get install -y network-manager net-tools
-	
+
 		echo "127.0.0.1 adsb-feeder.local" >> /etc/hosts
-	
+
 		# ensure that we get predictable interface names
 		echo "extraargs=net.ifnames=0" >> /boot/armbianEnv.txt
 
