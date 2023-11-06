@@ -104,7 +104,7 @@ class AdsbIm:
             ["avdelphi", "AVDelphi", "https://www.avdelphi.com/coverage.html", ""],
             ["planespotters", "Planespotters", "https://radar.planespotters.net/", "https://www.planespotters.net/feed/status"],
             ["tat", "TheAirTraffic", "https://globe.theairtraffic.com/", "https://theairtraffic.com/feed/myip/"],
-            ["flyovr", "FLYOVR.io", "https://globe.flyovr.io/", ""],
+            # on "pause" for a while... ["flyovr", "FLYOVR.io", "https://globe.flyovr.io/", ""],
             ["radarplane", "RadarPlane", "https://radarplane.com/", "https://radarplane.com/feed"],
             ["adsbfi", "adsb.fi", "https://globe.adsb.fi/", "https://api.adsb.fi/v1/myip"],
             ["adsbx", "ADSBExchange", "https://globe.adsbexchange.com/", "https://www.adsbexchange.com/myip/"],
