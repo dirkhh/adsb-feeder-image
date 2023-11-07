@@ -339,3 +339,15 @@ class PlaneFinder(Aggregator):
 
     def _activate(self, user_input: str):
         return self._simple_activate(user_input)
+
+
+class Uk1090(Aggregator):
+    def __init__(self, system: System):
+        super().__init__(
+            name="1090Mhz UK",
+            tags=["1090uk"],
+            system=system,
+        )
+
+    def _activate(self, user_input: str):
+        return self._simple_activate(user_input)

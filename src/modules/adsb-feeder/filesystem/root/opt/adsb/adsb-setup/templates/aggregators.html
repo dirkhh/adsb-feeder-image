@@ -245,6 +245,23 @@
       </div>
     </label>
   </div>
+  <div class="ol-12 form-check">
+    <input type="checkbox" class="form-check-input me-1" name="1090uk--is_enabled" id="1090uk--is_enabled"
+           {{ others_enabled("1090uk") }} />
+    <label for="1090uk--is_enabled">
+      <a href="https://1090mhz.uk/">1090MHz UK</a>
+      <div class="form-group" id="TNUK_FIELDS">
+        <label for="1090uk--key">
+          1090MHz UK is only interested in the UK and surrounding countries out to 1000nm including Ireland, Jersey,
+          Guensey, France, Belgium, Netherlands, North Germany, Denmark, Norway, Faroe Islands. If you are in one of
+          those locations, please contact them at info@1090mhz.uk to get a sharing key.
+        </label>
+        <input type="text" id="1090uk--key" name="1090uk--key" class="form-control w-75"
+               {{ others_enabled("1090uk") | replace("checked", "required" ) }} placeholder=" 1090MHz UK sharing key"
+               value="{{ env_value_by_tags(["1090uk", "key"]) }}">
+      </div>
+    </label>
+  </div>
   <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="aggregators" value="go">I'm
     done here - take me to the website</button>
 </form>
@@ -257,14 +274,15 @@
   document.addEventListener("readystatechange", (event) => {
     if (event.target.readyState === "complete") {
       const box_fields = [
-        ["flightradar--is_enabled", "FR_FIELDS", ["FRSK"]],
-        ["planewatch--is_enabled", "PW_FIELDS", ["PWAK"]],
+        ["flightradar--is_enabled", "FR_FIELDS", ["flightradar--key"]],
+        ["planewatch--is_enabled", "PW_FIELDS", ["planewatch--key"]],
         ["flightaware--is_enabled", "FA_FIELDS", []],
         ["radarbox--is_enabled", "RB_FIELDS", []],
-        ["planefinder--is_enabled", "PF_FIELDS", ["PFSC"]],
-        ["adsbhub--is_enabled", "AH_FIELDS", ["AHSK"]],
-        ["opensky--is_enabled", "OS_FIELDS", ["OSUN", "OSSN"]],
-        ["radarvirtuel--is_enabled", "RV_FIELDS", ["RVFK"]],
+        ["planefinder--is_enabled", "PF_FIELDS", ["planefinder--key"]],
+        ["adsbhub--is_enabled", "AH_FIELDS", ["adsbhub--key"]],
+        ["opensky--is_enabled", "OS_FIELDS", ["opensky--user", "opensky--key"]],
+        ["radarvirtuel--is_enabled", "RV_FIELDS", ["radarvirtuel--key"]],
+        ["1090uk--is_enabled", "TNUK_FIELDS", ["1090uk--key"]],
       ];
       for (const ids of box_fields) {
         let box = document.getElementById(ids[0]);

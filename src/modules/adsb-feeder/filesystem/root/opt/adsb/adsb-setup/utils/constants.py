@@ -249,6 +249,12 @@ class Constants:
             default="",
             tags=["planewatch", "key"],
         ),
+        Env(
+            "FEEDER_1090UK_API_KEY",
+            is_mandatory=False,
+            default="",
+            tags=["1090uk", "key"],
+        ),
         # ADSB.im specific
         Env("_ADSBIM_AGGREGATORS_SELECTION", tags=["aggregators"]),
         Env("_ADSBIM_BASE_VERSION", is_mandatory=False, tags=["base_version"]),
@@ -318,6 +324,11 @@ class Constants:
             "_ADSBIM_STATE_IS_RADARVIRTUEL_ENABLED",
             is_mandatory=False,
             tags=["other_aggregator", "is_enabled", "radarvirtuel"],
+        ),
+        Env(
+            "_ADSBIM_STATE_IS_1090UK_ENABLED",
+            is_mandatory=False,
+            tags=["other_aggregator", "is_enabled", "1090uk"],
         ),
         Env(
             "_ADSBIM_STATE_IS_AIRSPY_ENABLED",
@@ -397,6 +408,7 @@ class Constants:
         Env("OS_CONTAINER", tags=["opensky", "container"]),
         Env("RV_CONTAINER", tags=["radarvirtuel", "container"]),
         Env("PW_CONTAINER", tags=["planewatch", "container"]),
+        Env("TNUK_CONTAINER", tags=["1090uk", "container"]),
         # Ultrafeeder config
         Env(
             "_ADSBIM_STATE_IS_ULTRAFEEDER_ADSBLOL_ENABLED",

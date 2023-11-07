@@ -1,0 +1,17 @@
+version: '2.0'
+
+services:
+  1090uk:
+    image: ${TNUK_CONTAINER}
+    tty: true
+    container_name: radar1090uk
+    restart: always
+    environment:
+      - TZ=${FEEDER_TZ}
+      - RADAR1090_KEY=${FEEDER_1090UK_API_KEY}
+      - VERBOSE=false
+      - BEASTHOST=ultrafeeder
+    tmpfs:
+      - /run:exec,size=256M
+      - /tmp:size=128M
+      - /var/log:size=32M

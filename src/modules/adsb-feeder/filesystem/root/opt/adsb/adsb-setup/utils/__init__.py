@@ -11,6 +11,7 @@ from .other_aggregators import (
     PlaneWatch,
     RadarBox,
     RadarVirtuel,
+    Uk1090,
 )
 from .sdr import SDR, SDRDevices
 from .agg_status import AggStatus, ImStatus

@@ -29,6 +29,7 @@ from utils import (
     PlaneWatch,
     RadarBox,
     RadarVirtuel,
+    Uk1090,
     RouteManager,
     SDRDevices,
     AggStatus,
@@ -95,6 +96,7 @@ class AdsbIm:
             "planewatch--submit": PlaneWatch(self._system),
             "radarbox--submit": RadarBox(self._system),
             "radarvirtuel--submit": RadarVirtuel(self._system),
+            "1090uk--submit": Uk1090(self._system),
         }
         # fmt: off
         self.all_aggregators = [
@@ -118,6 +120,7 @@ class AdsbIm:
             ["adsbhub", "ADSBHub", "https://www.adsbhub.org/coverage.php", ""],
             ["opensky", "OpenSky", "https://opensky-network.org/network/explorer", "https://opensky-network.org/receiver-profile?s=<FEEDER_OPENSKY_SERIAL>"],
             ["radarvirtuel", "RadarVirtuel", "https://www.radarvirtuel.com/", ""],
+            ["1090uk", "1090MHz UK", "https://1090mhz.uk", ""],
         ]
         self.proxy_routes = self._constants.proxy_routes
         self.app.add_url_rule("/propagateTZ", "propagateTZ", self.get_tz)
