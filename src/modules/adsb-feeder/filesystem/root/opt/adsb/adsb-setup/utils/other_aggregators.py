@@ -243,9 +243,24 @@ class RadarBox(Aggregator):
             print_err("failed to download the RadarBox docker image")
             return None
 
+        # make sure we have the RadarBox hacks in place if needed
+        cmdline = f"bash /opt/adsb/rb-hack-setup.sh"
+        try:
+            subprocess.run(cmdline, timeout=10.0, shell=True)
+        except:
+            print_err("rb-hack-setup.sh failed")
+        # the script may have updated the .env file, so pull those two values
+        rbcpuhack = self._constants.env_by_tags("rbcpuhack")
+        rbcpuhack._reconcile("", pull=True)
+        rbthermalhack = self._constants.env_by_tags("rbthermalhack")
+        rbthermalhack._reconcile("", pull=True)
+        extra_env = f"-v /opt/adsb/rb/cpuinfo:/proc/cpuinfo " if rbcpuhack.value else ""
+        extra_env += (
+            f"-v /opt/adsb/rb:/sys/class/thermal:ro " if rbthermalhack.value else ""
+        )
         cmdline = (
             f"--rm -i --network config_default -e BEASTHOST=ultrafeeder -e LAT={self.lat} "
-            f"-e LONG={self.lng} -e ALT={self.alt} {docker_image}"
+            f"-e LONG={self.lng} -e ALT={self.alt} {extra_env} {docker_image}"
         )
         output = self._docker_run_with_timeout(cmdline, 45.0)
         sharing_key_match = re.search("Your new key is ([a-zA-Z0-9]*)", output)

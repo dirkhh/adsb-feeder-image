@@ -214,6 +214,18 @@ class Constants:
             tags=["radarbox", "key"],
         ),
         Env(
+            "FEEDER_RB_CPUINFO_HACK",
+            is_mandatory=False,
+            default="",
+            tags=["rbcpuhack"],
+        ),
+        Env(
+            "FEEDER_RB_THERMAL_HACK",
+            is_mandatory=False,
+            default="",
+            tags=["rbthermalhack"],
+        ),
+        Env(
             "FEEDER_PLANEFINDER_SHARECODE",
             is_mandatory=False,
             default="",
