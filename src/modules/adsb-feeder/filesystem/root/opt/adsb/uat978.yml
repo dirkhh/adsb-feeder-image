@@ -21,6 +21,7 @@ services:
       - AUTOGAIN_INITIAL_PERIOD=7200
     volumes:
       - /dev:/dev:ro
+      - /opt/adsb/config/dump978/globe_history:/var/globe_history
     ports:
       - ${_ADSBIM_STATE_UAT978_PORT:-9780}:80
     tmpfs:

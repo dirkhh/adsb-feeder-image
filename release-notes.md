@@ -1,10 +1,5 @@
-Changes since v1.0.5 include
-- prevent segfaults when running the radarbox container on non-RPI systems
-- update Raspbian images so that Dozzle can show memory use of the containers
-- support zero-padded serial number when trying to find "obvious" SDR assignments (thanks to @YipYup)
-- always show the SDR assignment on the advanced page, even if there's just one SDR with an "obvious" assignment
-- make the parsing of the status checks with the aggregators significantly more robust
-- rewrite of the UI code; the overall look and feel hasn't changed dramatically, but this is now based on the free version of Material Design for Bootstrap 5, which gives us a more modern and easier to maintain code base
+Changes since v1.1.0 include
+- ensure that dump978 retains its autogain values across container rebuilds (i.e. getting a new version)
 
 > [!WARNING]
 > Images that start with `adsb-im-iob` can take up to **20 minutes** at first boot. Images without `iob` in their name still can take more than 5 minutes before the web interface is available. Please be patient.
