@@ -1,4 +1,5 @@
 Changes since v1.1.0 include
+- fix dump978 map
 - ensure that dump978 retains its autogain values across container rebuilds (i.e. getting a new version)
 - fix a problem where dump978 autogain would get confused and create an invalid commandline
 
