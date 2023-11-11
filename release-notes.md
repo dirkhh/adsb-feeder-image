@@ -1,4 +1,7 @@
 Changes since v1.1.1 include
+- fix an MLAT issue with FlightAware
+- fix a potential issue with bias-t support in ultrafeeder and dump978
+- add native arm64 containers for FlightRadar64.
 - add local access to re-api for advanced uses of the feeder
 - fix typos
 
