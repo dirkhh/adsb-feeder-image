@@ -9,6 +9,7 @@ services:
       - 'c 189:* rwm'
     ports:
       - ${_ADSBIM_STATE_TAR1090_PORT:-8080}:80 # to expose the web interface
+      - 30152:30152 # to expose re-api
     environment:
       # --------------------------------------------------
       # general parameters:
