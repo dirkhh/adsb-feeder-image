@@ -75,7 +75,7 @@ class AdsbIm:
                 "_ADSBIM_STATE_IS_ULTRAFEEDER_ALIVE_ENABLED"
             ).value = True
             print_err(
-                "found adsb.one enabled and made sure that airplanes.live is emabled instead"
+                "found adsb.one enabled and made sure that airplanes.live is enabled instead"
             )
 
         self._system = System(constants=self._constants)
@@ -412,7 +412,7 @@ class AdsbIm:
         for submit_key in self._other_aggregators.keys():
             key = submit_key.replace("--submit", "")
             if self._constants.is_enabled(key):
-                print_err(f"no semi-annonymous aggregator, but enabled {key}")
+                print_err(f"no semi-anonymous aggregator, but enabled {key}")
                 return True
 
         return False
