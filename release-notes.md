@@ -1,7 +1,6 @@
-Changes since v1.1.0 include
-- fix dump978 map
-- ensure that dump978 retains its autogain values across container rebuilds (i.e. getting a new version)
-- fix a problem where dump978 autogain would get confused and create an invalid commandline
+Changes since v1.1.1 include
+- add local access to re-api for advanced uses of the feeder
+- fix typos
 
 > [!WARNING]
 > Images that start with `adsb-im-iob` can take up to **20 minutes** at first boot. Images without `iob` in their name still can take more than 5 minutes before the web interface is available. Please be patient.
