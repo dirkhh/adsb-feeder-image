@@ -130,8 +130,6 @@ AUTO_SETUP_GLOBAL_PASSWORD=ADSB_RANDOM_PASSWORD
 # - Add as many entries as you wish, one each line.
 # - DietPi will automatically install all dependencies, like ALSA/X11 for desktops etc.
 # - E.g. the following (without the leading "#") will install the LXDE desktop automatically on first boot:
-AUTO_SETUP_INSTALL_SOFTWARE_ID=17   # git
-AUTO_SETUP_INSTALL_SOFTWARE_ID=130  # python
 AUTO_SETUP_INSTALL_SOFTWARE_ID=162  # docker
 AUTO_SETUP_INSTALL_SOFTWARE_ID=134  # docker compose
 AUTO_SETUP_INSTALL_SOFTWARE_ID=201  # zerotier

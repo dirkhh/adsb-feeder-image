@@ -2,7 +2,6 @@
 
 # set up ADS-B Feeder as image (and not just as app)
 # this only ever gets used on bookwork (or later)
-apt install -y --no-install-recommends python3-flask python3-requests
 git clone 'https://github.com/dirkhh/adsb-feeder-image.git' /tmp/adsb-feeder
 cd /tmp/adsb-feeder
 git checkout GIT_COMMIT_SHA  # <- gets replaced before use

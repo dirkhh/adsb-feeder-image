@@ -4,7 +4,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "${DIR}/config"
 
 export DIST_PATH=${DIR}
-export CUSTOM_PI_OS_PATH=$(<${DIR}/custompios_path)
+export CUSTOM_PI_OS_PATH=$(<"${DIR}"/custompios_path)
 export PATH=$PATH:$CUSTOM_PI_OS_PATH
 
 if [[ "$1" == "iob-dietpi"* ]] ; then
@@ -15,44 +15,44 @@ if [[ "$1" == "iob-dietpi"* ]] ; then
     # consistency we still use their framework so we can benefit from their tooling
     source "${CUSTOM_PI_OS_PATH}/common.sh"
     VARIANT_CONFIG_DIR=$(realpath -s $(dirname $(realpath -s $BASH_SOURCE))/../..)
-    BASE_ZIP_IMG=`ls -t ${DIST_PATH}/image-dietpi/*.xz | head -n 1`
+    BASE_ZIP_IMG=$(ls -t ${DIST_PATH}/image-dietpi/*.xz | head -n 1)
     BASE_IMG="${BASE_ZIP_IMG%.xz}"
     7zr e -so "$BASE_ZIP_IMG" > "$BASE_IMG"
     echo "$BASE_IMG"
+    # add 500M so we have space to maneuver
+    current=$(ls -s --block-size=M "$BASE_IMG" | cut -d\  -f 1)
+    bigger=$((${current/M/} + 500))
+    truncate -s "${bigger}M" "$BASE_IMG"
+    # dd if=/dev/zero of="$BASE_IMG" bs=1M count=1 seek="$bigger" conv=notrunc
     MNT_DIR=$(mktemp -d)
+    root_partition=1
     if [[ "$1" == "iob-dietpi-fat-2" ]] ; then
         # what we want to do is this:
         # mount_image "$BASE_IMG" 1 "$MNT_DIR" "media" 2
         # but that unfortunately doesn't work if the fat partition is after the root partition
         # as that gets us a negative sizelimit
         # so instead do it ourselves here (copying the code is fine given licenses of the respective projects)
-        image_path="$BASE_IMG"
-        root_partition=1
-        mount_path="$MNT_DIR"
+        MNT_DIR="$MNT_DIR"
         boot_mount_path="media"
         boot_partition=2
-        fdisk_output=$(sfdisk --json "${image_path}" )
-        boot_offset=$(($(jq ".partitiontable.partitions[] | select(.node == \"$image_path$boot_partition\").start" <<< ${fdisk_output}) * 512))
-        root_offset=$(($(jq ".partitiontable.partitions[] | select(.node == \"$image_path$root_partition\").start" <<< ${fdisk_output}) * 512))
-
-        echo "Mounting image $image_path on $mount_path, offset for boot partition is $boot_offset, offset for root partition is $root_offset"
-
+        # now move the 2nd partition by the 500M we have added above
+        echo '+500M,' | sfdisk --move-data "$BASE_IMG" -N 2
+        echo ',+' | sfdisk "$BASE_IMG" -N 1
+        fdisk_output=$(sfdisk --json "${BASE_IMG}" )
+        boot_offset=$(($(jq ".partitiontable.partitions[] | select(.node == \"$BASE_IMG$boot_partition\").start" <<< "${fdisk_output}") * 512))
+        root_offset=$(($(jq ".partitiontable.partitions[] | select(.node == \"$BASE_IMG$root_partition\").start" <<< "${fdisk_output}") * 512))
+        echo "Mounting image $BASE_IMG on $MNT_DIR, offset for boot partition is $boot_offset, offset for root partition is $root_offset"
         # mount root and boot partition
-
-        detach_all_loopback $image_path
-        echo "Mounting root parition"
+        detach_all_loopback "$BASE_IMG"
         sudo losetup -f
-        sudo mount -o loop,offset=$root_offset,sizelimit=$( expr $boot_offset - $root_offset ) $image_path $mount_path/
-        if [[ "$boot_partition" != "$root_partition" ]]; then
-            echo "Mounting boot partition"
-            sudo losetup -f
-            sudo mount -o loop,offset=$boot_offset "${image_path}" "${mount_path}"/"${boot_mount_path}"
-        fi
-        sudo mkdir -p $mount_path/dev/pts
-        sudo mkdir -p $mount_path/proc
-        sudo mount -o bind /dev $mount_path/dev
-        sudo mount -o bind /dev/pts $mount_path/dev/pts
-        sudo mount -o bind /proc $mount_path/proc
+        sudo mount -o loop,offset=$root_offset,sizelimit=$(( boot_offset - root_offset )) "$BASE_IMG" "$MNT_DIR"/
+        sudo losetup -f
+        sudo mount -o loop,offset=$boot_offset "${BASE_IMG}" "${MNT_DIR}"/"${boot_mount_path}"
+        sudo mkdir -p "$MNT_DIR"/dev/pts
+        sudo mkdir -p "$MNT_DIR"/proc
+        sudo mount -o bind /dev "$MNT_DIR"/dev
+        sudo mount -o bind /dev/pts "$MNT_DIR"/dev/pts
+        sudo mount -o bind /proc "$MNT_DIR"/proc
         CONFIG_DIR="media"
     elif [[ "$1" == "iob-dietpi-root-only" ]] ; then
         # I think that's only the VM image, but let's keep it generic in the descriptor
@@ -64,9 +64,12 @@ if [[ "$1" == "iob-dietpi"* ]] ; then
         mount_image "$BASE_IMG" 1 "$MNT_DIR"
         CONFIG_DIR="boot"
     else
+        root_partition=2
         # on a "standard" RPi/DietPi image with /boot as first and / as second partition
         # we can use the existing mount_image helper - we still mount the /boot partition on media
         # so the rest of the code can stay the same
+        # before we do that, enlarge the partition, though, to take advantage of the extra 500M
+        echo ',+' | sfdisk "$BASE_IMG" -N 2
         mount_image "$BASE_IMG" 2 "$MNT_DIR" "media" 1
         CONFIG_DIR="media"
 
@@ -74,18 +77,55 @@ if [[ "$1" == "iob-dietpi"* ]] ; then
         boot_dev=$(findmnt -o SOURCE "${MNT_DIR}/media" | tail -1)
         fatlabel "$boot_dev" ADSB-FEEDER
     fi
-    sed -i "s/GIT_COMMIT_SHA/$GIT_COMMIT_SHA/" ${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh
-    sed -i "s/FEEDER_IMAGE_NAME/$FEEDER_IMAGE_NAME/" ${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh
-    sed -i "s/FEEDER_IMAGE_VERSION/$VERSION/" ${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh
-    sed -i "s/ADSB_RANDOM_PASSWORD/$ROOT_PWD/" ${DIR}/variants/iob-dietpi/dietpi.txt
+    # now that the root partition is mounted at $MNT_DIR and we have enlarged that partition, let's remember the device name and resize it
+    rootpart=$(df -h --output=source "$MNT_DIR"/etc | tail -1)
+    dumpfsout=$(dumpe2fs -h "$rootpart")
+    blockcount=$(grep "Block count" <<<"$dumpfsout"| cut -d: -f2 | tail -1)
+    blocksize=$(grep "Block size" <<<"$dumpfsout"| cut -d: -f2 | tail -1)
+    sectorcount=$((blockcount * blocksize / 512))
+    echo "the original root fs used $sectorcount sectors"
+    resize2fs "$rootpart"
+    sed -i "s/GIT_COMMIT_SHA/$GIT_COMMIT_SHA/" "${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh"
+    sed -i "s/FEEDER_IMAGE_NAME/$FEEDER_IMAGE_NAME/" "${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh"
+    sed -i "s/FEEDER_IMAGE_VERSION/$VERSION/" "${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh"
+    sed -i "s/ADSB_RANDOM_PASSWORD/$ROOT_PWD/" "${DIR}/variants/iob-dietpi/dietpi.txt"
     cp "${DIR}/variants/iob-dietpi/dietpi.txt" "$MNT_DIR"/"$CONFIG_DIR"
     cp "${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh" "$MNT_DIR"/"$CONFIG_DIR"
     cp "${DIR}/modules/adsb-feeder/filesystem/root/boot/ADSB-README.txt" "$MNT_DIR"/"$CONFIG_DIR"
+    # now let's chroot into this and install a few apps that we'll need
+    cp "${DIR}/variants/iob-dietpi/pre-install.sh" "$MNT_DIR"/
+    chmod +x "$MNT_DIR"/pre-install.sh
+    chroot "$MNT_DIR" /bin/bash -c /pre-install.sh
+    rm -f "${MNT_DIR}/pre-install.sh"
     unmount_image "$MNT_DIR"
+    if [[ "$1" != "iob-dietpi-root-only" ]] ; then
+        # unless we are dealing with the VM / root-only image,
+        # shrink the root filesystem as small as possible
+        # the unmount destroys the loop device, so let's recreate this
+        newloop=$(losetup -P --show -f "$BASE_IMG")
+        newpart="${newloop}p${root_partition}"
+        e2fsck -f -p "$newpart"
+        resize2fs -M "$newpart"
+        dumpfsout=$(dumpe2fs -h "$newpart")
+        blockcount=$(grep "Block count" <<<"$dumpfsout"| cut -d: -f2 | tail -1)
+        blocksize=$(grep "Block size" <<<"$dumpfsout"| cut -d: -f2 | tail -1)
+        sectorcount=$((blockcount * blocksize / 512))
+        echo "the root fs now needs $sectorcount sectors"
+        echo ",$sectorcount" | sfdisk "$BASE_IMG" -N "$root_partition"
+        if [[ "$1" == "iob-dietpi-fat-2" ]] ; then
+            # we also need to move the trailing fat partition back - we know that partition[0] is the root partition
+            rootstart=$(sfdisk -l "$BASE_IMG" --json | jq '.partitiontable.partitions[0].start')
+            newstart=$((rootstart+sectorcount))
+            echo "$newstart," | sfdisk --move-data "$BASE_IMG" -N 2
+        fi
+        finalend=$(sfdisk -l -o END "$BASE_IMG" | sort -n | tail -1)
+        truncate -s $((512 * $((finalend+1)) )) "$BASE_IMG"
+        losetup -d "$newloop"
+    fi
     exit 0
 else
     VERSION=$(bash "${DIR}/get_version.sh")
-    echo $VERSION > modules/adsb-feeder/filesystem/root/opt/adsb/adsb.im.version
+    echo "$VERSION" > modules/adsb-feeder/filesystem/root/opt/adsb/adsb.im.version
 
-    ${CUSTOM_PI_OS_PATH}/build_custom_os $@
+    "${CUSTOM_PI_OS_PATH}/build_custom_os" "$@"
 fi
