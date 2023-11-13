@@ -1,9 +1,5 @@
-Changes since v1.1.1 include
-- fix an MLAT issue with FlightAware
-- fix a potential issue with bias-t support in ultrafeeder and dump978
-- add native arm64 containers for FlightRadar64.
-- add local access to re-api for advanced uses of the feeder
-- fix typos
+Changes since v1.1.2 include
+- add a button to reveal semi-anonymous aggregator UUIDs
 
 > [!WARNING]
 > Images that start with `adsb-im-iob` can take up to **20 minutes** at first boot. Images without `iob` in their name still can take more than 5 minutes before the web interface is available. Please be patient.

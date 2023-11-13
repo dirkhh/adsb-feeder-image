@@ -94,6 +94,17 @@
       <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
     </label>
   </div>
+  <div class="col-12 small fw-light text-muted text-end">
+    <div class="small fw-light text-muted text-end collapse" id="showuuids">
+      {% if uf_enabled("adsblol") %}adsb.lol UUID: {{ env_value_by_tags(['adsblol_uuid']) }} {% endif %}<br>
+      {% if uf_enabled("flyitaly") or uf_enabled("avdelphi") or uf_enabled("planespotters") or uf_enabled("tat") or uf_enabled("radarplane") or uf_enabled("adsbfi") or uf_enabled("hpradar") or uf_enabled("alive") or uf_enabled("adsbx") %}
+      Ultrafeeder UUID: {{ env_value_by_tags(['ultrafeeder_uuid']) }} {% endif %}
+    </div>
+    <button class="btn btn-secondary small" type="button" data-mdb-toggle="collapse" data-mdb-target="#showuuids"
+            aria-expanded="false" aria-controls="showuuids">
+      show UUIDS
+    </button>
+  </div>
   <div class="col-12 mt-3 mb-1">Select the commercial ADS-B aggregators you want to feed:</div>
   <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="flightradar--is_enabled" id="flightradar--is_enabled"
