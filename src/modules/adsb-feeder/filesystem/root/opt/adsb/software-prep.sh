@@ -10,6 +10,15 @@ fi
 # let's first make sure that we mark this as an app, not an image:
 touch /opt/adsb/app.adsb.feeder.image
 
+# the original install code didn't setup Python requests
+# so let's cheat and do that here
+source /etc/os-release
+if (( $VERSION_ID < 12 )) ; then
+	pip3 install -U requests
+else
+	apt-get install -y python3-requests
+fi
+
 cd /opt/adsb/config
 cat /opt/adsb/docker.image.versions >> .env
 echo "_ADSBIM_BASE_VERSION=$(cat /opt/adsb/adsb.im.version)" >> .env
