@@ -192,9 +192,11 @@
           and
           reload this page.{% endif %}
           {% if env_value_by_tag("tailscale_name") != "" %}
-          This device should now be on your tailnet as '{{ env_value_by_tag("tailscale_name") }}'.{% else %}
+          This device should now be on your tailnet as '{{ env_value_by_tag("tailscale_name") }}'.
+          {% elif env_value_by_tag("tailscale_ll") =="" %}
           You can add options like a specific <code>--login-server</code> below. But please note that
-          <code>--authkey</code> isn't supported at this point.{% endif %}
+          <code>--authkey</code> isn't supported at this point.
+          {% endif %}
         </label>
         <input class="col-8 ml-2" id="tailscale_extras" name="tailscale_extras" type="text"
                value="{{ env_value_by_tag('tailscale_extras') }}"

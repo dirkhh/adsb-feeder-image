@@ -1,4 +1,5 @@
 Changes since v1.1.2 include
+- improve the handling of tailscale status
 - add more altitudes to the heywhatsthat outlines
 - add a button to reveal semi-anonymous aggregator UUIDs
 

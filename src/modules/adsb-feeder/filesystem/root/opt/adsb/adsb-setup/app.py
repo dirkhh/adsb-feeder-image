@@ -738,24 +738,24 @@ class AdsbIm:
         if self._constants.is_feeder_image:
             # is tailscale set up?
             try:
-                result = subprocess.run("tailscale status", shell=True, check=True)
+                result = subprocess.run(
+                    "tailscale status --json 2>/dev/null",
+                    shell=True,
+                    check=True,
+                    capture_output=True,
+                )
             except:
                 # a non-zero return value means tailscale isn't configured
                 self._constants.env_by_tags("tailscale_name").value = ""
             else:
-                try:
-                    result = subprocess.run(
-                        "tailscale status | head -1 | awk '{print $2}'",
-                        shell=True,
-                        capture_output=True,
-                    )
-                except:
-                    self._constants.env_by_tags("tailscale_name").value = ""
-                else:
-                    tailscale_name = result.stdout.decode()
+                ts_status = json.loads(result.stdout.decode())
+                if ts_status.get("BackendState") == "Running" and ts_status.get("Self"):
+                    tailscale_name = ts_status.get("Self").get("HostName")
                     print_err(f"configured as {tailscale_name} on tailscale")
                     self._constants.env_by_tags("tailscale_name").value = tailscale_name
                     self._constants.env_by_tags("tailscale_ll").value = ""
+                else:
+                    self._constants.env_by_tags("tailscale_name").value = ""
         return render_template("expert.html")
 
     def secure_image(self):
