@@ -494,6 +494,11 @@ class Constants:
             is_mandatory=False,
             tags=["ultrafeeder_extra_args"],
         ),
+        Env(
+            "_ADSBIM_STATE_REMOTE_SDR",
+            is_mandatory=False,
+            tags=["remote_sdr"],
+        ),
     }
 
     @property

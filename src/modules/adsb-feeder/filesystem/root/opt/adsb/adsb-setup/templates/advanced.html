@@ -103,6 +103,18 @@
       {% endfor %}
     </div>
   </div>
+  <div class="row gy-2 gx-3 align-items-center form-group" id="noSdrs" style="display: none;">
+    <div class="col-12">
+      No SDRs found. If you have SDRs attached to the computer this software is running on, then a reboot may be
+      required before the web UI can see the SDRs.
+    </div>
+    <label class="form-label" for="remote_sdr">
+      If you are intending to use this computer with a remote device that has the SDR connected to it, please ensure
+      that it outputs <code>beast_out</code> and enter the IPv4 address and port here:</label>
+    <input type="text" id="remote_sdr" name="remote_sdr" class="form-control mb-2"
+           pattern="^\s*(?:\d{1,3}\.){3}\d{1,3},\s*\d+\s*$" title="IPv4 address and port, separated by a comma"
+           placeholder="IP-address,port" value="{{ env_value_by_tag("remote_sdr") }}" />
+  </div>
   <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="advanced" value="go">I'm
     done here - take me to the website</button>
 </form>
@@ -126,6 +138,10 @@
       .then(response => response.json())
       .then(data => {
         let num = data['sdrdevices'].length;
+        if (num == 0) {
+          document.getElementById('multipleSdrs').style.display = 'none';
+          document.getElementById('noSdrs').style.display = 'block';
+        }
         let sdrs = data['sdrdevices'];
         let use = data['frequencies'];
         let consumers = ["1090", "978", "other"]
