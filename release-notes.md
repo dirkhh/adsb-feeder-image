@@ -1,7 +1,8 @@
-Changes since v1.1.2 include
-- improve the handling of tailscale status
-- add more altitudes to the heywhatsthat outlines
-- add a button to reveal semi-anonymous aggregator UUIDs
+Changes since v1.1.3 include
+- create better names for backup zip files
+- warn the user if they use multiple SDRs with the same serial number
+- ensure that there are no zombie SDRs in the list in the web UI
+- allow multiple SDRs to be assigned 'other' status in the web UI
 
 > [!WARNING]
 > Images that start with `adsb-im-iob` can take up to **20 minutes** at first boot. Images without `iob` in their name still can take more than 5 minutes before the web interface is available. Please be patient.
