@@ -65,7 +65,12 @@
     </label>
   </div>
   <div class="row" id="multipleSdrs">
-    <div class="col-sm-12 mt-5 mb-3">In most cases the assignment below is correct. If it isn't, please update.
+    <div class="col-sm-12 mt-5 mb-3 text-danger" style="display: none;" id="duptext">
+      There are multiple SDRs with serial number <span id="duplicates"></span>. This will not work correctly. Please
+      ensure that all SDRs have distinct serial numbers.
+    </div>
+    <div class="col-sm-12 mt-5 mb-3" style="display: block;" id="noduptext">
+      In most cases the assignment below is correct. If it isn't, please update.
     </div>
     <div class="col-sm-3 no-gutters">
       <button type="button" name="update_sdr_info" onclick="sdr_info()">Check SDRs</button>
@@ -138,7 +143,15 @@
         }
         for (let i = num; i < 4; i++) {
           let id = 'sdr' + i;
-          document.getElementById(id).style.display = 'none'
+          document.getElementById(id).style.display = 'none';
+        }
+        if (data['duplicates'] != '') {
+          document.getElementById('duplicates').innerText = data['duplicates'];
+          document.getElementById("duptext").style.display = 'block';
+          document.getElementById("noduptext").style.display = 'none';
+        } else {
+          document.getElementById("duptext").style.display = 'none';
+          document.getElementById("noduptext").style.display = 'block';
         }
       });
   }

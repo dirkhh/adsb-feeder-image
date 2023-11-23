@@ -434,6 +434,7 @@ class AdsbIm:
             {
                 "sdrdevices": [sdr._json for sdr in self._sdrdevices.sdrs],
                 "frequencies": frequencies,
+                "duplicates": ", ".join(self._sdrdevices.duplicates),
             }
         )
 
@@ -806,6 +807,10 @@ class AdsbIm:
         # we need to go to advanced - unless we have at least one of the serials set up
         # for 978 or 1090 reporting
         self._sdrdevices._ensure_populated()
+
+        # do we have duplicate SDR serials?
+        if len(self._sdrdevices.duplicates) > 0:
+            return self.advanced()
 
         # check that "something" is configured as input
         if (

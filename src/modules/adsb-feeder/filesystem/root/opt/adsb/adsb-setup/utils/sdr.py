@@ -2,7 +2,7 @@ import io
 import re
 import subprocess
 import sys
-from typing import List
+from typing import List, Set
 from .util import print_err
 
 
@@ -52,6 +52,7 @@ class SDR:
 class SDRDevices:
     def __init__(self):
         self.sdrs: List[SDR] = []
+        self.duplicates: Set(str) = set()
 
     def __len__(self):
         return len(self.sdrs)
@@ -76,6 +77,13 @@ class SDRDevices:
                         candidate = SDR("rtlsdr", address)
                     if candidate not in self.sdrs:
                         self.sdrs.append(candidate)
+        found_serials = set()
+        self.duplicates = set()
+        for sdr in self.sdrs:
+            if sdr._serial in found_serials:
+                self.duplicates.add(sdr._serial)
+            else:
+                found_serials.add(sdr._serial)
 
     def _ensure_populated(self):
         self.get_sdr_info()
