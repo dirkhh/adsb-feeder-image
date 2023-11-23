@@ -12,6 +12,7 @@ import subprocess
 from time import sleep
 import zipfile
 from base64 import b64encode
+from datetime import datetime
 from os import path, urandom
 from typing import Dict, List
 from zlib import compress
@@ -281,11 +282,14 @@ class AdsbIm:
                 for f in uf_path.rglob("*"):
                     backup_zip.write(f, arcname=f.relative_to(adsb_path))
         data.seek(0)
+        site_name = self._constants.env_by_tags("mlat_name").value
+        now = datetime.now().replace(microsecond=0).isoformat().replace(":", "-")
+        download_name = f"adsb-feeder-config-{site_name}-{now}.zip"
         return send_file(
             data,
             mimetype="application/zip",
             as_attachment=True,
-            download_name="adsb-feeder-config.zip",
+            download_name=download_name,
         )
 
     def restore(self):
