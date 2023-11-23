@@ -671,6 +671,11 @@ class AdsbIm:
             [sdr._serial == s978 for sdr in self._sdrdevices.sdrs]
         ):
             self._constants.env_by_tags("978serial").value = ""
+        s1090 = self._constants.env_by_tags("1090serial").value
+        if s1090 != "" and not any(
+            [sdr._serial == s1090 for sdr in self._sdrdevices.sdrs]
+        ):
+            self._constants.env_by_tags("1090serial").value = ""
         auto_assignment = self._sdrdevices.addresses_per_frequency
         print_err(f"SDR auto_assignment would be {auto_assignment}")
         if (
