@@ -66,6 +66,7 @@ class SDRDevices:
         except subprocess.SubprocessError:
             print("lsusb failed", file=sys.stderr)
         output = io.StringIO(result.stdout.decode())
+        self.sdrs = []
         for line in output:
             for pidvid in ("1d50:60a1", "0bda:2838", "0bda:2832"):
                 address = self._get_address_for_pid_vid(pidvid, line)
