@@ -4,6 +4,8 @@
 {% block content %}
 <h1 class="mt-3 text-center text-danger">{% block title %} Create a backup of your configuration {% endblock %}</h1>
 <p>Click on this button to download a zip file with a backup of your configuration files.</p>
+<p>Depending on the amount of historic graph data you have, this can take a signficant amount of time and result in a
+  very large archive to be downloaded.</p>
 <form method="post" enctype="multipart/form-data">
   <a class="btn btn-primary" href="/backupexecute">Backup</a>
 </form>
