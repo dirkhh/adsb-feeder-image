@@ -134,6 +134,11 @@ class Constants:
             default="False",
             tags=["uatbiast", "is_enabled", "false_is_empty"],
         ),
+        Env(
+            "_ADSBIM_STATE_IS_FORWARD31003_ENABLED",  # keep the old name, even though this opens more ports
+            default="False",
+            tags=["forwardports", "is_enabled"],
+        ),
         Env("FEEDER_READSB_GAIN", default="autogain", tags=["gain"]),
         Env("FEEDER_AIRSPY_GAIN", default="auto", tags=["gain_airspy"]),
         Env("UAT_SDR_GAIN", default="autogain", tags=["uatgain"]),
