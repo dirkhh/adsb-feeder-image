@@ -1,5 +1,7 @@
 Changes since v1.1.4 include
+- less movement on the home screen while the feeder determines if updates are available
 - more information for the backup process
+- update to the latest docker containers
 
 > [!WARNING]
 > Images that start with `adsb-im-iob` can take up to **20 minutes** at first boot. Images without `iob` in their name still can take more than 5 minutes before the web interface is available. Please be patient.
