@@ -67,9 +67,9 @@
     <div class="mb-4">
       Latest version: <span id="latest_tag"></span> - <span id="latest_commit"></span>
       <br />
-      <span id="advice" class="small"></span>
+      <span id="advice" class="small">&nbsp;</span>
     </div>
-    <div id="update_buttons" style="display: none">
+    <div id="update_buttons" class="text-secondary">
       <h5 class="mt-1">Update feeder applications</h5>
       <form method="POST" onsubmit="show_spinner(); return true;">
         <label for="update_feeder_aps">
@@ -80,10 +80,10 @@
           running, but the feeder apps will only be briefly interrupted once all new components have been downloaded.
         </label>
         <div>
-          <button type="submit" class="btn btn-primary mb-3 ml-3 col-2" name="update_feeder_aps_beta" value="go">Update
-            (beta)</button>
+          <button type="submit" class="btn btn-primary mb-3 ml-3 col-2" name="update_feeder_aps_beta"
+                  id="update_feeder_aps_beta" disabled value="go">Update (beta)</button>
           <button type="submit" class="btn btn-primary mb-3 ml-3 col-2" name="update_feeder_aps_stable"
-                  value="go">Update (stable)</button>
+                  id="update_feeder_aps_stable" disabled value="go">Update (stable)</button>
         </div>
       </form>
     </div>
@@ -218,11 +218,15 @@
         $("#latest_tag").text(data["latest_tag"]);
         $("#latest_commit").text(data["latest_date"]);
         $("#advice").text(data["advice"]);
-        let show = "none"
         if (data["show_update"] == "1") {
-          show = "block"
+          $("#update_buttons").removeClass("text-secondary");
+          $("#update_feeder_aps_beta").attr("disabled", false);
+          $("#update_feeder_aps_stable").attr("disabled", false);
+        } else {
+          $("#update_buttons").addClass("text-secondary");
+          $("#update_feeder_aps_beta").attr("disabled", true);
+          $("#update_feeder_aps_stable").attr("disabled", true);
         }
-        $("#update_buttons").attr("style", "display: " + show)
       });
     {% for agg, name, m, s in aggregators %}
     {% if is_enabled(agg) %}
