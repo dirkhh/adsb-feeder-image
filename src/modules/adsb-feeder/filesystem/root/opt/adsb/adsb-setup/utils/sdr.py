@@ -115,6 +115,6 @@ class SDRDevices:
                     ret[1090] = sdr._serial
                 elif sdr._serial in {"978", "00000978"}:
                     ret[978] = sdr._serial
-        if not ret[1090] and len(self.sdrs) == 1:
+        if not ret[1090] and not ret[978] and len(self.sdrs) == 1:
             ret[1090] = self.sdrs[0]._serial
         return ret

@@ -422,7 +422,6 @@ class AdsbIm:
         return False
 
     def sdr_info(self):
-        self._sdrdevices._ensure_populated()
         # get our guess for the right SDR to frequency mapping
         # and then update with the actual settings
         frequencies: Dict[str, str] = self._sdrdevices.addresses_per_frequency
