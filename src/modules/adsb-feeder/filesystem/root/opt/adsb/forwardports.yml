@@ -1,9 +1,0 @@
-version: '2'
-services:
-  forwardports:
-    image: ghcr.io/katlol/containers/socat
-    restart: always
-    command: /bin/sh -c "/usr/bin/socat TCP4-LISTEN:31003,fork,reuseaddr TCP4:ultrafeeder:31003 & /usr/bin/socat TCP4-LISTEN:30005,fork,reuseaddr TCP4:ultrafeeder:30005"
-    ports:
-    - 30005:30005
-    - 31003:31003
