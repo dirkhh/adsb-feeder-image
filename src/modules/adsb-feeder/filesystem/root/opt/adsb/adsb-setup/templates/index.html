@@ -133,24 +133,6 @@
         </ul>
       </div>
     </div>
-    <div id="CF" class="row mt-2">
-      <div class="col-12">
-        <h5>Device Configuration and Administration</h5>
-      </div>
-      <div class="col-12">
-        <ul>
-          <li>
-            <a href="{{ url_for("setup") }}">Basic Setup</a>
-          </li>
-          <li {% if not is_enabled('base_config') %}style="display: none;" {% endif %}>
-            <a href="{{ url_for("advanced") }}">Advanced setup</a>
-          </li>
-          <li {% if not is_enabled('base_config') %}style="display: none;" {% endif %}>
-            <a href="{{ url_for("aggregators") }}">Aggregator setup</a>
-          </li>
-        </ul>
-      </div>
-    </div>
     <div class="row mt-3" {% if not ( is_enabled('adsblol') or is_enabled('flightradar') or is_enabled('planefinder') or
         is_enabled('adsbx')) %} style="display: none;" {% endif %}>
       <div class="col-12">
