@@ -59,7 +59,7 @@ jobs:
         - name: odroidc4
           base_arch: arm64
           variant: armbian
-          url: https://redirect.armbian.com/region/EU/odroidc4/Bookworm_current_minimal
+          url: https://redirect.armbian.com/region/EU/odroidc4/Bookworm_current
           magic_path: "repository/src/image-armbian/odroidc4.img.xz"
         - name: orangepi3-lts
           base_arch: arm64
@@ -74,7 +74,7 @@ jobs:
         - name: orangepi5
           base_arch: arm64
           variant: armbian-root2
-          url: https://redirect.armbian.com/region/EU/orangepi5/Bookworm_legacy_minimal
+          url: https://redirect.armbian.com/region/EU/orangepi5/Bookworm_legacy
           magic_path: "repository/src/image-armbian/orangepi5.img.xz"
         - name: pine64
           variant: armbian
@@ -104,7 +104,7 @@ jobs:
         - name: rockpi4
           variant: armbian
           base_arch: arm64
-          url: https://redirect.armbian.com/region/EU/rockpi-4c/Bookworm_current_minimal
+          url: https://redirect.armbian.com/region/EU/rockpi-4c/Bookworm_current
           magic_path: "repository/src/image-armbian/rockpi4.img.xz"
         - name: nanopi-neo3-dietpi
           variant: iob-dietpi-fat-2
