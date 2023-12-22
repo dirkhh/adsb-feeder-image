@@ -1,4 +1,5 @@
 Changes since v1.1.4 include
+- add a link to the map to the top level menu
 - correctly implement opening the relevant Ultrafeeder ports on the host
 - less movement on the home screen while the feeder determines if updates are available
 - more information for the backup process

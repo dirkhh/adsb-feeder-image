@@ -25,6 +25,7 @@
         <i class="fas fa-bars"></i>
       </button>
       {% set navigation_bar = [
+                  (url_for('/map/'), 'map', 'Map'),
                   (url_for('setup'), 'setup', 'Basic Setup'),
                   (url_for('advanced'), 'advanced', 'Advanced'),
                   (url_for('aggregators'), 'aggregators', 'Aggregators'),
