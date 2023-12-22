@@ -46,7 +46,8 @@
       </label>
     </div>
   </div>
-  <div class="col-12 form-check" id="1090biast">
+  <div class="col-12 form-check" id="1090biast"
+       {% if not env_value_by_tag('1090serial') and not is_enabled('airspy') %}style="display: none;" {% endif %}>
     <input class="form-check-input me-1" type="checkbox" name="biast--is_enabled" id="biast--is_enabled"
            {% if is_enabled("biast") %}checked{% endif %} />
     <label for="biast--is_enabled" class="form-check-label">Enable bias-T for ADS-B/1090/airspy SDR.</label>
