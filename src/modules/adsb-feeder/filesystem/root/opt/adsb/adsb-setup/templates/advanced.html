@@ -46,7 +46,7 @@
       </label>
     </div>
   </div>
-  <div class="col-12 form-check">
+  <div class="col-12 form-check" id="1090biast">
     <input class="form-check-input me-1" type="checkbox" name="biast--is_enabled" id="biast--is_enabled"
            {% if is_enabled("biast") %}checked{% endif %} />
     <label for="biast--is_enabled" class="form-check-label">Enable bias-T for ADS-B/1090/airspy SDR.</label>
@@ -133,6 +133,7 @@
         if (num == 0) {
           document.getElementById('multipleSdrs').style.display = 'none';
           document.getElementById('noSdrs').style.display = 'block';
+          document.getElementById('1090biast').style.display = 'none';
         }
         let sdrs = data['sdrdevices'];
         let use = data['frequencies'];
