@@ -217,7 +217,7 @@
       .then(data => {
         $("#latest_tag").text(data["latest_tag"]);
         $("#latest_commit").text(data["latest_date"]);
-        $("#advice").text(data["advice"]);
+        $("#advice").html(data["advice"] + "&nbsp;");
         if (data["show_update"] == "1") {
           $("#update_buttons").removeClass("text-secondary");
           $("#update_feeder_aps_beta").attr("disabled", false);
