@@ -205,7 +205,7 @@ class AggStatus:
                 if beast_clients:
                     self._beast = (
                         T.Yes
-                        if any({bc.get("rId") == uuid for bc in beast_clients})
+                        if any({bc.get("uuid") == uuid for bc in beast_clients})
                         else T.No
                     )
                 mlat_clients = a_dict.get("mlat_clients")

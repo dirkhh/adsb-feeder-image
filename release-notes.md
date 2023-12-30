@@ -1,10 +1,5 @@
-Changes since v1.1.4 include
-- add a link to the map to the top level menu
-- only show 1090 bias-t option if there is a 1090 SDR
-- correctly implement opening the relevant Ultrafeeder ports on the host
-- less movement on the home screen while the feeder determines if updates are available
-- more information for the backup process
-- update to the latest docker containers
+Changes since v1.1.5 include
+- track the latest change in JSON API of airplanes.james
 
 > [!WARNING]
 > Images that start with `adsb-im-iob` can take up to **20 minutes** at first boot. Images without `iob` in their name still can take more than 5 minutes before the web interface is available. Please be patient.
