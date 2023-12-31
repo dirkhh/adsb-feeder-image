@@ -1,4 +1,5 @@
 Changes since v1.1.5 include
+- update to latest containers
 - avoid potential bugs in the RB hack used for non RPi systems
 - track the latest change in JSON API of airplanes.james
 
