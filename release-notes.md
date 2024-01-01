@@ -1,4 +1,5 @@
 Changes since v1.1.5 include
+- add inconspicuous donation button
 - show changelog of available updates as tooltips on the feeder homepage
 - update to latest containers
 - avoid potential bugs in the RB hack used for non RPi systems
