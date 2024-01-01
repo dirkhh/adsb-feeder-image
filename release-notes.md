@@ -1,4 +1,5 @@
 Changes since v1.1.5 include
+- do a full dietpi-update when doing automated nightly OS updates on DietPi based images
 - add inconspicuous donation button
 - show changelog of available updates as tooltips on the feeder homepage
 - update to latest containers
