@@ -1,10 +1,5 @@
-Changes since v1.1.5 include
-- do a full dietpi-update when doing automated nightly OS updates on DietPi based images
-- add inconspicuous donation button
-- show changelog of available updates as tooltips on the feeder homepage
-- update to latest containers
-- avoid potential bugs in the RB hack used for non RPi systems
-- track the latest change in JSON API of airplanes.james
+Changes since v1.1.6 include
+- try to extract RadarBox feeder status from their website
 
 > [!WARNING]
 > Images that start with `adsb-im-iob` can take up to **20 minutes** at first boot. Images without `iob` in their name still can take more than 5 minutes before the web interface is available. Please be patient.

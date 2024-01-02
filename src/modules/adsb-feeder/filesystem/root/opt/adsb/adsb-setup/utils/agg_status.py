@@ -1,5 +1,6 @@
 import json
 import re
+import subprocess
 import requests
 from datetime import datetime, timedelta
 from enum import Enum
@@ -196,6 +197,43 @@ class AggStatus:
                 self._last_check = datetime.now()
             else:
                 print_err(f"radarplane returned {status}")
+        elif self._agg == "radarbox":
+            station_serial = self._constants.env_by_tags(["radarbox", "sn"]).value
+            if not station_serial:
+                # dang, I hate this part
+                try:
+                    result = subprocess.run(
+                        "docker logs rbfeeder | grep 'station serial number' | tail -1",
+                        shell=True,
+                        capture_output=True,
+                        text=True,
+                    )
+                except:
+                    print_err("got exception trying to look at the rbfeeder logs")
+                    return
+                serial_text = result.stdout.strip()
+                match = re.search(
+                    r"This is your station serial number: ([A-Z0-9]+)", serial_text
+                )
+                if match:
+                    station_serial = match.group(1)
+                    self._constants.env_by_tags(
+                        ["radarbox", "sn"]
+                    ).value = station_serial
+            if station_serial:
+                html_url = f"https://www.radarbox.com/stations/{station_serial}"
+                rb_page, status = self.get_plain(html_url)
+                match = re.search(r"window.init\((.*)\)", rb_page)
+                if match:
+                    rb_json = match.group(1)
+                    rb_dict = json.loads(rb_json)
+                    station = rb_dict.get("station")
+                    if station:
+                        online = station.get("online")
+                        mlat_online = station.get("mlat_online")
+                        self._beast = T.Yes if online else T.No
+                        self._mlat = T.Yes if mlat_online else T.No
+                        self._last_check = datetime.now()
         elif self._agg == "alive":
             json_url = "https://api.airplanes.live/feed-status"
             a_dict, status = self.get_json(json_url)

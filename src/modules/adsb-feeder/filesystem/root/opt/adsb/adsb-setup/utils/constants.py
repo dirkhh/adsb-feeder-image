@@ -209,6 +209,12 @@ class Constants:
             tags=["radarbox", "key"],
         ),
         Env(
+            "FEEDER_RADARBOX_SN",
+            is_mandatory=False,
+            default="",
+            tags=["radarbox", "sn"],
+        )
+        Env(
             "FEEDER_RB_CPUINFO_HACK",
             is_mandatory=False,
             default="",
