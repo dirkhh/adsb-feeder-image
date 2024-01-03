@@ -8,8 +8,8 @@ WorkingDirectory=/opt/adsb/adsb-setup
 ExecStartPre=/usr/bin/bash /opt/adsb/finish-update.sh
 ExecStart=/usr/bin/python3 /opt/adsb/adsb-setup/app.py
 Restart=always
-StandardOutput=append:/var/log/adsb-setup.log
-StandardError=append:/var/log/adsb-setup.log
+StandardOutput=append:/opt/adsb/adsb-setup.log
+StandardError=append:/opt/adsb/adsb-setup.log
 
 [Install]
 WantedBy=multi-user.target

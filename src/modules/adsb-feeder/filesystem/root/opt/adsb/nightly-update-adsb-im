@@ -12,10 +12,10 @@ cd /opt/adsb || exit 0
 if grep "^_ADSBIM_STATE_IS_NIGHTLY_BASE_UPDATE_ENABLED=True" config/.env ; then
 	# do an OS update - either using the DietPi update tool or by just using apt
 	if [ -x /boot/dietpi/dietpi-update ] ; then
-		G_INTERACTIVE=0 CONFIG_CHECK_APT_UPDATES=2 dietpi-update 1 >> /var/log/adsb-setup.log 2>&1
+		G_INTERACTIVE=0 CONFIG_CHECK_APT_UPDATES=2 dietpi-update 1 >> /opt/adsb/adsb-setup.log 2>&1
 	else
-		apt update >> /var/log/adsb-setup.log 2>&1
-		apt upgrade -y >> /var/log/adsb-setup.log 2>&1
+		apt update >> /opt/adsb/adsb-setup.log 2>&1
+		apt upgrade -y >> /opt/adsb/adsb-setup.log 2>&1
 	fi
 fi
 if grep "^_ADSBIM_STATE_IS_NIGHTLY_FEEDER_UPDATE_ENABLED=True" config/.env ; then

@@ -11,8 +11,8 @@ RemainAfterExit=yes
 ExecStop=/opt/adsb/docker-compose-adsb down -t 30
 TimeoutStartSec=0
 Restart=always
-StandardOutput=append:/var/log/adsb-setup.log
-StandardError=append:/var/log/adsb-setup.log
+StandardOutput=append:/opt/adsb/adsb-setup.log
+StandardError=append:/opt/adsb/adsb-setup.log
 
 
 [Install]

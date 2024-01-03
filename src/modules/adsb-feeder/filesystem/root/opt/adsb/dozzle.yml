@@ -14,6 +14,6 @@ services:
   adsb-setup-proxy:
     container_name: adsb-setup-proxy
     image: alpine
-    command: tail -f /var/log/adsb-setup.log
+    command: tail -f /opt/adsb-setup.log
     volumes:
-      - /var/log/adsb-setup.log:/var/log/adsb-setup.log
+      - /opt/adsb/adsb-setup.log:/opt/adsb-setup.log

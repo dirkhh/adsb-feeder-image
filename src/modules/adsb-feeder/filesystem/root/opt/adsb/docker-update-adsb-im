@@ -17,9 +17,9 @@ if [ "$1" != "-no-fetch" ] ; then
     UPSTREAM_PATH=https://raw.githubusercontent.com/dirkhh/adsb-feeder-image/latest/src/modules/adsb-feeder/filesystem/root/opt/adsb/docker.image.versions
     if curl -s $UPSTREAM_PATH > docker.image.versions.new ; then
         mv docker.image.versions.new docker.image.versions
-        echo "${TIME}: successfully retrieved new image versions from server" >> /var/log/adsb-setup.log
+        echo "${TIME}: successfully retrieved new image versions from server" >> /opt/adsb/adsb-setup.log
     else
-        echo "${TIME}: failed to retrieved new image versions from server" >> /var/log/adsb-setup.log
+        echo "${TIME}: failed to retrieved new image versions from server" >> /opt/adsb/adsb-setup.log
         exit 1
     fi
 
@@ -31,7 +31,7 @@ if [ "$1" != "-no-fetch" ] ; then
         sort < docker.image.versions > /tmp/new.div
 
         if diff /tmp/old.div /tmp/new.div > /dev/null 2>&1 ; then
-            echo "${TIME}: no new container images" >> /var/log/adsb-setup.log
+            echo "${TIME}: no new container images" >> /opt/adsb/adsb-setup.log
             exit 0
         fi
     fi
@@ -41,7 +41,7 @@ grep -v "_CONTAINER=" config/.env > config/env.new
 cat docker.image.versions >> config/env.new
 mv config/env.new config/.env
 
-echo "$(date -Iseconds): pulling new container images and restarting docker" >> /var/log/adsb-setup.log
+echo "$(date -Iseconds): pulling new container images and restarting docker" >> /opt/adsb/adsb-setup.log
 bash ./docker-pull.sh
 bash /opt/adsb/docker-compose-start
 
@@ -51,4 +51,4 @@ bash /opt/adsb/docker-compose-start
 
 sed -i "s/CONTAINER_VERSION=.*/CONTAINER_VERSION=$TIME/" /opt/adsb/config/.env
 
-echo "$(date -Iseconds): done" >> /var/log/adsb-setup.log
+echo "$(date -Iseconds): done" >> /opt/adsb/adsb-setup.log

@@ -15,7 +15,7 @@ fi
 [[ -f /etc/adsb.im.version && ! -f /opt/adsb/adsb.im.version ]] && mv -f /etc/adsb.im.version /opt/adsb/adsb.im.version
 
 NEW_VERSION=$(</opt/adsb/adsb.im.version)
-echo "final housekeeping for the update to $NEW_VERSION" >> /var/log/adsb-setup.log
+echo "final housekeeping for the update to $NEW_VERSION" >> /opt/adsb/adsb-setup.log
 
 # remove any left-over apps and files from previous versions
 USR_BIN_APPS=('docker-compose-start' 'docker-compose-adsb' 'docker-update-adsb-im' \
