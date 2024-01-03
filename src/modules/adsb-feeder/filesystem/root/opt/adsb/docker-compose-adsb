@@ -4,7 +4,7 @@
 # on to docker compose
 
 # this needs to run as root
-if [ $(id -u) != "0" ] ; then
+if [ "$(id -u)" != "0" ] ; then
 	echo "this command requires superuser privileges - please run as sudo bash $0"
 	exit 1
 fi
@@ -28,8 +28,24 @@ fi
 if grep "_ADSBIM_STATE_IS_BASE_CONFIG_FINISHED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
 	echo "calling docker compose for the enabled containers"
 	source /opt/adsb/default.docker-compose
-	cd /opt/adsb/config
+	cd /opt/adsb/config || echo "config folder is missing?" >&2
 	$docker_compose "${COMPOSE_FILES[@]}" "$@"
+	if [ "$1" = "up" ] ; then
+		# try to figure out if this was successful
+		echo "finished attempting to bring up the containers" >&2
+		tempfile=$(mktemp)
+		$docker_compose "${COMPOSE_FILES[@]}" ps > "$tempfile"
+		if ! grep -q ultrafeeder "$tempfile" ; then
+			(
+				echo "it looks like ultrafeeder didn't come up"
+				echo "docker thinks these containers are running:"
+				cat "$tempfile"
+				echo "docker thinks these networks are defined:"
+				docker network ls
+			) >&2
+		fi
+		rm -f "$tempfile"
+	fi
 else
 	echo "things aren't configured, yet, only starting Dozzle and the logger container"
 	$docker_compose -f /opt/adsb/config/dozzle.yml "$@"

@@ -800,6 +800,7 @@ class AdsbIm:
             others_enabled=others_enabled,
         )
 
+    @check_restart_lock
     def director(self):
         # figure out where to go:
         if request.method == "POST":
@@ -835,6 +836,7 @@ class AdsbIm:
             return self.index()
         return self.aggregators()
 
+    @check_restart_lock
     def index(self):
         aggregators = self.all_aggregators
         for idx in range(len(aggregators)):

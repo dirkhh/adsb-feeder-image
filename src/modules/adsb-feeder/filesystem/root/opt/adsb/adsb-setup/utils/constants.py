@@ -549,6 +549,7 @@ class Constants:
 
     # helper function to get everything that needs to be written out written out
     def update_env(self):
+        print_err("writing back .env file to persist settings")
         env_vars = {}
         with open(ENV_FILE_PATH, "r") as env_file:
             for line in env_file.readlines():
