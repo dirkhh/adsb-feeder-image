@@ -9,11 +9,35 @@ if [ "$(id -u)" != "0" ] ; then
 	exit 1
 fi
 
+# identify the calling process for better log messages
+PARENTPID=$(ps -cp $$ -o ppid="")
+if kill -0 "$PARENTPID" &> /dev/null ; then
+	# shellcheck disable=SC2086 # the ps -q call fails with quotes around the variable
+	PARENTPROC=$(ps -q$PARENTPID -o args=)
+	if [[ $PARENTPROC = */opt/adsb/docker-compose-start* ]] ; then
+		# this one is special as it's just a pretty wrapper around this script,
+		# so instead look for the process that called docker-compose-start
+		# shellcheck disable=SC2086 # the ps -p call fails with quotes around the variable
+		PARENTPID=$(ps -cp $PARENTPID -o ppid="")
+		if kill -0 "$PARENTPID" &> /dev/null ; then
+			# shellcheck disable=SC2086 # the ps -q call fails with quotes around the variable
+			PARENTPROC=$(ps -q$PARENTPID -o args=)
+		else
+			PARENTPROC="process $PARENTPID (appears already gone)"
+		fi
+	fi
+else
+	PARENTPROC="process $PARENTPID (appears already gone)"
+fi
+echo "$PARENTPROC called docker-compose-adsb" "$@" >&2
+
 lockFile="/opt/adsb/docker-starting.lock"
-if ( set -o noclobber; echo "locked" > "$lockFile") 2> /dev/null; then
+if ( set -o noclobber; echo "$@" > "$lockFile") 2> /dev/null; then
 	trap 'rm -f "$lockFile"; exit $?' INT TERM EXIT
 else
-	echo "docker-compose-adsb is already running" >&2
+	echo "docker-compose-adsb is already running for $(<$lockFile)" >&2
+	# prevent restart loop
+	sleep 1."$RANDOM"
 	exit
 fi
 
