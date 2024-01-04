@@ -3,11 +3,14 @@
 # this script can do some housekeeping tasks before the adsb-setup
 # is (re)started
 
+ACTION="update to"
 if [[ -f "/opt/adsb/finish-update.done" ]]; then
 	# so we have completed one of the 'post 0.15' updates already.
 	# let's see if the version changed (i.e. if this is another new update)
 	# if not, then we ran this script already and can exit
 	cmp /opt/adsb/finish-update.done /opt/adsb/adsb.im.version > /dev/null 2>&1 && exit 0
+else
+	ACTION="initial install of"
 fi
 
 # if we updated from a fairly old version, the feeder-update script will have written
@@ -15,7 +18,7 @@ fi
 [[ -f /etc/adsb.im.version && ! -f /opt/adsb/adsb.im.version ]] && mv -f /etc/adsb.im.version /opt/adsb/adsb.im.version
 
 NEW_VERSION=$(</opt/adsb/adsb.im.version)
-echo "final housekeeping for the update to $NEW_VERSION" >> /opt/adsb/adsb-setup.log
+echo "final housekeeping for the $ACTION $NEW_VERSION" >> /opt/adsb/adsb-setup.log
 
 # remove any left-over apps and files from previous versions
 USR_BIN_APPS=('docker-compose-start' 'docker-compose-adsb' 'docker-update-adsb-im' \
