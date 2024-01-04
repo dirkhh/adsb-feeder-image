@@ -1,4 +1,5 @@
 Changes since v1.1.6 include
+- improve data collected in logs
 - try to extract RadarBox feeder status from their website
 
 > [!WARNING]
