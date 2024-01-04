@@ -4,6 +4,8 @@ Changes since v1.1.6 include
 
 > [!WARNING]
 > Images that start with `adsb-im-iob` can take up to **20 minutes** at first boot. Images without `iob` in their name still can take more than 5 minutes before the web interface is available. Please be patient.
+>
+> Not all images support WiFi, DietPi based images that do support WiFi (e.g. DietPi images for Raspberry Pi) require editing two files on the DOS partition included with the image BEFORE the first boot. Please look at the [adsb.im FAQ](https://adsb.im/faq) for details.
 
 Depending on the target platform, there may be multiple images available.
 
