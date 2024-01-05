@@ -1,6 +1,7 @@
 Changes since v1.1.6 include
 - make update process more robust
 - improve data collected in logs
+- avoid a timeout related forced restart of Docker during the initial setup
 - try to extract RadarBox feeder status from their website
 
 > [!WARNING]
