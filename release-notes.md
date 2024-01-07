@@ -1,8 +1,5 @@
-Changes since v1.1.6 include
-- make update process more robust
-- improve data collected in logs
-- avoid a timeout related forced restart of Docker during the initial setup
-- try to extract RadarBox feeder status from their website
+Changes since v1.1.7 include
+- add 1090UK feeder status on the feeder home page
 
 > [!WARNING]
 > Images that start with `adsb-im-iob` can take up to **20 minutes** at first boot. Images without `iob` in their name still can take more than 5 minutes before the web interface is available. Please be patient.

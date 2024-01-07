@@ -121,7 +121,7 @@ class AdsbIm:
             ["adsbhub", "ADSBHub", "https://www.adsbhub.org/coverage.php", ""],
             ["opensky", "OpenSky", "https://opensky-network.org/network/explorer", "https://opensky-network.org/receiver-profile?s=<FEEDER_OPENSKY_SERIAL>"],
             ["radarvirtuel", "RadarVirtuel", "https://www.radarvirtuel.com/", ""],
-            ["1090uk", "1090MHz UK", "https://1090mhz.uk", ""],
+            ["1090uk", "1090MHz UK", "https://1090mhz.uk", "https://www.1090mhz.uk/mystatus.php?key=<FEEDER_1090UK_API_KEY>"],
         ]
         self.proxy_routes = self._constants.proxy_routes
         self.app.add_url_rule("/propagateTZ", "propagateTZ", self.get_tz)
@@ -847,9 +847,9 @@ class AdsbIm:
                     )
                 match = re.search("<([^>]*)>", aggregators[idx][3])
                 if match:
-                    print_err(
-                        f"found {match.group(0)} - replace with {self._constants.env(match.group(1)).value}"
-                    )
+                    # print_err(
+                    #    f"found {match.group(0)} - replace with {self._constants.env(match.group(1)).value}"
+                    # )
                     aggregators[idx][3] = aggregators[idx][3].replace(
                         match.group(0), self._constants.env(match.group(1)).value
                     )
