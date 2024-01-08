@@ -235,7 +235,9 @@
         $("#" + agg + "mlat").text(data["mlat"]);
         if (data["beast"] == "+" && data["mlat"] == "+") {
           $("#" + agg + "span").addClass('text-success')
-        } else if (data["beast"] == "-" || data["mlat"] == "-") {
+        } else if (data["beast"] == "+" && data["mlat"] == "-") {
+          $("#" + agg + "span").addClass('text-warning')
+        } else if (data["beast"] == "-" && data["mlat"] == "-") {
           $("#" + agg + "span").addClass('text-danger')
         } else {
           $("#" + agg + "span").addClass('text-dark')
