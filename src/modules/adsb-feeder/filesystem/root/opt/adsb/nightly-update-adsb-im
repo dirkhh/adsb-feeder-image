@@ -13,9 +13,13 @@ TIMESTAMP=$(date +%Y-%m-%d+%H:%M)
 mv adsb-setup.log adsb-setup.log."$TIMESTAMP"
 tail -n500 adsb-setup.log."$TIMESTAMP" > adsb-setup.log
 find . -name adsb-setup.log.\* -ctime +7 | xargs rm
+docker restart adsb-setup-proxy
+if grep -q "^_ADSBIM_STATE_IS_RADARBOX_ENABLED=True" config/.env ; then
+	docker restart rbfeeder
+fi
 
 # check in the .env file what we should do
-if grep "^_ADSBIM_STATE_IS_NIGHTLY_BASE_UPDATE_ENABLED=True" config/.env ; then
+if grep -q "^_ADSBIM_STATE_IS_NIGHTLY_BASE_UPDATE_ENABLED=True" config/.env ; then
 	# do an OS update - either using the DietPi update tool or by just using apt
 	if [ -x /boot/dietpi/dietpi-update ] ; then
 		G_INTERACTIVE=0 CONFIG_CHECK_APT_UPDATES=2 dietpi-update 1 >> /opt/adsb/adsb-setup.log 2>&1
