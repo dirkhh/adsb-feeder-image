@@ -116,7 +116,7 @@ class AdsbIm:
             ["flightradar", "flightradar24", "https://www.flightradar24.com/", "/fr24-monitor.json"],
             ["planewatch", "Plane.watch", "https:/plane.watch/desktop.html", ""],
             ["flightaware", "FlightAware", "https://www.flightaware.com/live/map", "/fa-status"],
-            ["radarbox", "RadarBox", "https://www.radarbox.com/coverage-map", ""],
+            ["radarbox", "RadarBox", "https://www.radarbox.com/coverage-map", "https://www.radarbox.com/stations/<FEEDER_RADARBOX_SN>"],
             ["planefinder", "PlaneFinder", "https://planefinder.net/", "/planefinder-stat"],
             ["adsbhub", "ADSBHub", "https://www.adsbhub.org/coverage.php", ""],
             ["opensky", "OpenSky", "https://opensky-network.org/network/explorer", "https://opensky-network.org/receiver-profile?s=<FEEDER_OPENSKY_SERIAL>"],
