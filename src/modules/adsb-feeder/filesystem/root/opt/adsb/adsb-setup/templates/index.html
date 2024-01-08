@@ -48,10 +48,10 @@
       </div>
       {% endfor %}
       <div class="col-12 small mb-4">
-        Enabled indicates feeding the aggregator. <span class="text-success">&#10003;</span> known to be good,
-        <span class="text-danger">&#10003;</span> known to have issues, <span class="text-dark">&#10003;</span> if we
-        don't have
-        that information.
+        Enabled indicates feeding the aggregator. <span class="text-success">&#10003;</span> feed is in good state,
+        <span class="text-danger">&#10003;</span> feed is down, 
+        <span class="text-warning">&#10003;</span> MLAT is down,
+        <span class="text-dark">&#10003;</span> if we don't have that information.
         <br />
         '+' or '-' in the Data and MLAT columns show that aggregator indicates that you are (or are not) feeding ADS-B
         data and MLAT data to them
@@ -233,7 +233,7 @@
       .then(data => {
         $("#" + agg + "beast").text(data["beast"]);
         $("#" + agg + "mlat").text(data["mlat"]);
-        if (data["beast"] == "+" && data["mlat"] == "+") {
+        if (data["beast"] == "+" && data["mlat"] != "-") {
           $("#" + agg + "span").addClass('text-success')
         } else if (data["beast"] == "+" && data["mlat"] == "-") {
           $("#" + agg + "span").addClass('text-warning')
