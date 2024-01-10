@@ -3,7 +3,9 @@
 
 {% block content %}
 <h1 class="mt-3 text-center text-danger">{% block title %} Setup required parameters {% endblock %}</h1>
-
+<div class="alert alert-danger" role="alert" {% if env_value_by_tag('dns_state') %} style="display: none;" {% endif %}>
+  The feeder cannot resolve DNS queries. This will most likely prevent it from working at all.
+</div>
 <p>
   If you are new to the ADS-B Feeder Image, please fill out the data below. You can use the
   <a href="https://www.freemaptools.com/elevation-finder.htm" target="_blank">location and elevation finder tool</a>

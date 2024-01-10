@@ -500,6 +500,7 @@ class Constants:
             is_mandatory=False,
             tags=["remote_sdr"],
         ),
+        Env("_ADSBIM_STATE_LAST_DNS_CHECK", is_mandatory=False, tags=["dns_state"]),
     }
 
     @property

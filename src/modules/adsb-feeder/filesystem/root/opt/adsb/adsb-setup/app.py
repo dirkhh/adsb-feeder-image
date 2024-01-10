@@ -185,11 +185,19 @@ class AdsbIm:
         }
         return b64encode(compress(pickle.dumps(image)))
 
+    def update_dns_state(self):
+        dns_state = self._system.check_dns()
+        self._constants.env_by_tags("dns_state").value = dns_state
+        if not dns_state:
+            print_err("we appear to have lost DNS")
+
     def run(self):
         self._routemanager.add_proxy_routes(self.proxy_routes)
         debug = os.environ.get("ADSBIM_DEBUG") is not None
         self._debug_cleanup()
         self._constants.update_env()
+        self.update_dns_state()
+        self._dns_watch = Background(3600, self.update_dns_state)
         # prepare for app use (vs ADS-B Feeder Image use)
         # newer images will include a flag file that indicates that this is indeed
         # a full image - but in case of upgrades from older version, this heuristic
@@ -839,6 +847,8 @@ class AdsbIm:
 
     @check_restart_lock
     def index(self):
+        # make sure DNS works
+        self.update_dns_state()
         aggregators = self.all_aggregators
         for idx in range(len(aggregators)):
             if aggregators[idx][3]:
@@ -860,6 +870,9 @@ class AdsbIm:
     def setup(self):
         if request.method == "POST" and request.form.get("submit") == "go":
             return self.update()
+
+        # make sure DNS works
+        self.update_dns_state()
         return render_template("setup.html")
 
 

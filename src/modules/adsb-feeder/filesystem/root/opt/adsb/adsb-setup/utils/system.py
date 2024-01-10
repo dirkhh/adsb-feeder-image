@@ -1,6 +1,7 @@
 import io
 import os
 import pathlib
+import socket
 import subprocess
 import threading
 import zipfile
@@ -72,6 +73,18 @@ class System:
 
     def reboot(self) -> None:
         subprocess.call("reboot", shell=True)
+
+    def check_dns(self):
+        try:
+            responses = list(
+                i[4][0]  # raw socket structure/internet protocol info/address
+                for i in socket.getaddrinfo("adsb.im", 0)
+                # if i[0] is socket.AddressFamily.AF_INET
+                # and i[1] is socket.SocketKind.SOCK_RAW
+            )
+        except:
+            return False
+        return responses != list()
 
     def _get_backup_data(self):
         data = io.BytesIO()
