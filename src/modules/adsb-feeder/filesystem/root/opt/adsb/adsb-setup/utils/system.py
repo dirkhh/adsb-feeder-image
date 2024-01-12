@@ -1,6 +1,7 @@
 import io
 import os
 import pathlib
+import requests
 import socket
 import subprocess
 import threading
@@ -85,6 +86,30 @@ class System:
         except:
             return False
         return responses != list()
+
+    def check_ip(self):
+        requests.packages.urllib3.util.connection.HAS_IPV6 = False
+        status = -1
+        try:
+            response = requests.get(
+                "http://v4.ipv6-test.com/api/myip.php",
+                headers={
+                    "User-Agent": "Python3/requests/adsb.im",
+                    "Accept": "text/plain",
+                },
+            )
+        except (
+            requests.HTTPError,
+            requests.ConnectionError,
+            requests.Timeout,
+            requests.RequestException,
+        ) as err:
+            status = err.errno
+        except:
+            status = -1
+        else:
+            return response.text, response.status_code
+        return None, status
 
     def _get_backup_data(self):
         data = io.BytesIO()

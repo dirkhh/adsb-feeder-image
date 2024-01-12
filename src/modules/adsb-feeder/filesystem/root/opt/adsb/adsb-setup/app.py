@@ -849,6 +849,9 @@ class AdsbIm:
     def index(self):
         # make sure DNS works
         self.update_dns_state()
+        ip, status = self._system.check_ip()
+        if status == 200:
+            self._constants.env_by_tags(["feeder_ip"]).value = ip
         aggregators = self.all_aggregators
         for idx in range(len(aggregators)):
             if aggregators[idx][3]:

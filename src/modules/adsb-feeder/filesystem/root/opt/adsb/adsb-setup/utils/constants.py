@@ -501,6 +501,7 @@ class Constants:
             tags=["remote_sdr"],
         ),
         Env("_ADSBIM_STATE_LAST_DNS_CHECK", is_mandatory=False, tags=["dns_state"]),
+        Env("_ADSBIM_STATE_FEEDER_IP", is_mandatory=False, tags=["feeder_ip"]),
     }
 
     @property

@@ -7,6 +7,10 @@
 <div class="alert alert-danger" role="alert" {% if env_value_by_tag('dns_state') %} style="display: none;" {% endif %}>
   The feeder cannot resolve DNS queries. This will most likely prevent it from working at all.
 </div>
+<div id="ip-mismatch" class="alert alert-info" role="alert" style="display: none;">
+  The external IP of your browser and the feeder are different. The information in the status links for some of the
+  aggregators below may be incorrect.
+</div>
 <div class="row">
   <div class="col-12">
     <h4>You are feeding</h4>
@@ -198,6 +202,17 @@
 </div>
 <script>
   $(document).ready(function () {
+    fetch("https://api.ipify.org?format=json")
+      .then(response => response.json())
+      .then(data => {
+        let feeder_ip = "{{ env_value_by_tags(['feeder_ip']) }}"
+        if (data["ip"] != feeder_ip) {
+          console.log("IP check: browser got", data, "feeder has", feeder_ip);
+          $("#ip-mismatch").show()
+        } else {
+          $("#ip-mismatch").hide()
+        }
+      });
     fetch(`${SCRIPT_ROOT}/api/status/im`)
       .then(response => response.json())
       .then(data => {
