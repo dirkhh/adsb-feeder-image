@@ -1,9 +1,5 @@
-Changes since v1.1.7 include
-- show information message if the external IP address of the feeder and the browser are different
-- show a warning message if DNS appears to be malfunctioning (as that will prevent the feeder from operating)
-- add a nightly restart of the rbfeeder container (if RadarBox is enabled as aggregator)
-- show orange indicator if an aggregator is reporting positive beast but negative mlat status (thank you @nhasan for the contribution)
-- add 1090UK feeder status on the feeder home page
+Changes since v1.1.8 include
+- add autogain reset buttons on expert page (and slightly improve the look and feel of that page)
 
 > [!WARNING]
 > Images that start with `adsb-im-iob` can take up to **20 minutes** at first boot. Images without `iob` in their name still can take more than 5 minutes before the web interface is available. Please be patient.

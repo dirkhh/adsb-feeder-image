@@ -555,6 +555,22 @@ class AdsbIm:
                     cmdline = "systemctl start adsb-feeder-update.service &"
                     subprocess.run(cmdline, timeout=5.0, shell=True)
                     return render_template("/waitandredirect.html")
+                if key == "resetgain":
+                    # tell the ultrafeeder container to restart the autogain processing
+                    cmdline = (
+                        "docker exec ultrafeeder /usr/local/bin/autogain1090 reset"
+                    )
+                    try:
+                        subprocess.run(cmdline, timeout=5.0, shell=True)
+                    except:
+                        print_err("Error running Ultrafeeder autogain reset")
+                if key == "resetuatgain":
+                    # tell the dump978 container to restart the autogain processing
+                    cmdline = "docker exec dump978 /usr/local/bin/autogain978 reset"
+                    try:
+                        subprocess.run(cmdline, timeout=5.0, shell=True)
+                    except:
+                        print_err("Error running UAT autogain reset")
                 if key == "nightly_update" or key == "zerotier":
                     # this will be handled through the separate key/value pairs
                     pass

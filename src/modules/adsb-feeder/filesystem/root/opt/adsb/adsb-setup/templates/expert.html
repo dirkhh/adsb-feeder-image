@@ -16,6 +16,8 @@
         <input class="col-auto ms-3" id="gain" name="gain" type="text" pattern="(?:autogain|\d+(?:.\d+)?)"
                title="A number between 0 and 50 or the word 'autogain'" value="{{ env_value_by_tag('gain') }}" required>
         <button type="submit" class="btn btn-primary mb-1 mx-3 col-3" name="gain--submit" value="go">Submit</button>
+        <button {% if env_value_by_tag('gain') != 'autogain' %}style="display:none;" {% endif %} type="submit"
+                class="btn btn-secondary mb-1 me-3 col-3" name="resetgain" value="go">Reset Autogain</button>
       </div>
     </form>
   </div>
@@ -28,10 +30,12 @@
           Normally the feeder will settle on a good gain value over time. If you want to override that
           "autogain" behavior, you can set an explicit gain value here.
         </label>
-        <input class="col-6 col-sm-12 ms-3" id="uatgain" name="uatgain" type="text" pattern="(?:autogain|\d+(?:.\d+)?)"
+        <input class="col-auto ms-3" id="uatgain" name="uatgain" type="text" pattern="(?:autogain|\d+(?:.\d+)?)"
                title="A number between 0 and 50 or the word 'autogain'" value="{{ env_value_by_tag('uatgain') }}"
                required>
         <button type="submit" class="btn btn-primary mb-1 mx-3 col-3" name="uatgain--submit" value="go">Submit</button>
+        <button {% if env_value_by_tag('uatgain') != 'autogain' %}style="display:none;" {% endif %} type="submit"
+                class="btn btn-secondary mb-1 me-3 col-3" name="resetuatgain" value="go">Reset Autogain</button>
       </div>
     </form>
   </div>
