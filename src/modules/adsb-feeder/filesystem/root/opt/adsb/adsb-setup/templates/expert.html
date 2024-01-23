@@ -13,8 +13,9 @@
           immediately). If you want to override that "autogain" behavior, you can set an explicit gain value
           here.
         </label>
-        <input class="col-8 ml-2" id="gain" name="gain" type="text" value="{{ env_value_by_tag('gain') }}" required>
-        <button type="submit" class="btn btn-primary mb-1 ml-3 col-sm-3" name="gain--submit" value="go">Submit</button>
+        <input class="col-auto ms-3" id="gain" name="gain" type="text" pattern="(?:autogain|\d+(?:.\d+)?)"
+               title="A number between 0 and 50 or the word 'autogain'" value="{{ env_value_by_tag('gain') }}" required>
+        <button type="submit" class="btn btn-primary mb-1 mx-3 col-3" name="gain--submit" value="go">Submit</button>
       </div>
     </form>
   </div>
@@ -23,14 +24,14 @@
     <h5 class="mt-3">Set explicit UAT SDR gain</h5>
     <form method="POST">
       <div class="row">
-        <label for="uatgain" class="col-8">
+        <label for="uatgain" class="col-12">
           Normally the feeder will settle on a good gain value over time. If you want to override that
           "autogain" behavior, you can set an explicit gain value here.
         </label>
-        <input class="col-8 ml-2" id="uatgain" name="uatgain" type="text" value="{{ env_value_by_tag('uatgain') }}"
+        <input class="col-6 col-sm-12 ms-3" id="uatgain" name="uatgain" type="text" pattern="(?:autogain|\d+(?:.\d+)?)"
+               title="A number between 0 and 50 or the word 'autogain'" value="{{ env_value_by_tag('uatgain') }}"
                required>
-        <button type="submit" class="btn btn-primary mb-1 ml-3 col-sm-3" name="uatgain--submit"
-                value="go">Submit</button>
+        <button type="submit" class="btn btn-primary mb-1 mx-3 col-3" name="uatgain--submit" value="go">Submit</button>
       </div>
     </form>
   </div>
@@ -48,9 +49,9 @@
           leading
           semicolon.
         </label>
-        <input class="col-8 ml-2" id="ultrafeeder_extra_args" name="ultrafeeder_extra_args" type="text"
+        <input class="col-8 ms-3" id="ultrafeeder_extra_args" name="ultrafeeder_extra_args" type="text"
                value="{{ env_value_by_tag('ultrafeeder_extra_args') }}" required>
-        <button type="submit" class="btn btn-primary mb-1 ml-3 col-sm-3" name="ultrafeeder_extra_args--submit"
+        <button type="submit" class="btn btn-primary mb-1 mx-3 col-sm-3" name="ultrafeeder_extra_args--submit"
                 value="go">Submit</button>
       </div>
     </form>
@@ -59,11 +60,11 @@
     <h5 class="mt-3">Remove existing observed range outline</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
       <div class="row">
-        <label for="clear_range" class="col-8">
+        <label for="clear_range" class="col-8 me-3">
           The tar1090 map maintains an outline for the area around your feeder where planes have been
           observed; sometimes it may be desirable to reset that (for example after you changed location).
         </label>
-        <button type="submit" class="btn btn-primary mb-1 ml-3 col-sm-3" name="clear_range" value="stay">Submit</button>
+        <button type="submit" class="btn btn-primary mb-1 mx-3 col-sm-3" name="clear_range" value="stay">Submit</button>
       </div>
     </form>
   </div>
@@ -76,8 +77,8 @@
         <label for="ssh_pub" class="col-12">
           Enter or paste your public key below. This will allow you to then log in as root on the feeder SBC.
         </label>
-        <input class="col-8 ml-2" id="ssh_pub" name="ssh_pub" type="text" placeholder=" Enter your public key" required>
-        <button type="submit" class="btn btn-primary mb-1 ml-3 col-sm-3" name="ssh" value="stay">Submit</button>
+        <input class="col-8 ms-3" id="ssh_pub" name="ssh_pub" type="text" placeholder=" Enter your public key" required>
+        <button type="submit" class="btn btn-primary mb-1 mx-3 col-sm-3" name="ssh" value="stay">Submit</button>
       </div>
     </form>
   </div>
@@ -85,13 +86,13 @@
     <h5 class="mt-3">Secure feeder system</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
       <div class="row">
-        <label for="secure_image" class="col-8">Attempt to make it somewhat harder for a local user to
+        <label for="secure_image" class="col-8 me-3">Attempt to make it somewhat harder for a local user to
           gain access to the image. Of course, anyone with physical access to the feeder hardware can
           circumvent
           the protection attempted here. Make sure you have an ssh key set up and tested before doing this, or
           you will permanently log yourself out of this image.
         </label>
-        <button type="submit" class="btn btn-primary mb-1 ml-3 col-sm-3 mb-5" name="secure_image" value="go">Update
+        <button type="submit" class="btn btn-primary mb-1 mx-3 col-sm-3 mb-5" name="secure_image" value="go">Update
           Settings</button>
       </div>
     </form>
@@ -101,14 +102,14 @@
     <h5 class="mt-3">Shutdown/Reboot</h5>
     <form method="POST">
       <div class="row">
-        <label for="shutdown" class="col-8">Shutdown the feeder. Most boards won't turn off power by themselves.
+        <label for="shutdown" class="col-8 me-3">Shutdown the feeder. Most boards won't turn off power by themselves.
         </label>
-        <button type="submit" class="btn btn-primary mb-3 ml-3 col-sm-3" name="shutdown" value="wait">Shutdown</button>
-        <label for="reboot" class="col-8">Reboot the feeder. Please note that some boards are not able to reboot
+        <button type="submit" class="btn btn-primary mb-3 mx-3 col-sm-3" name="shutdown" value="wait">Shutdown</button>
+        <label for="reboot" class="col-8 me-3">Reboot the feeder. Please note that some boards are not able to reboot
           without
           manually power cycling.
         </label>
-        <button type="submit" class="btn btn-primary mb-3 ml-3 col-sm-3" name="reboot" value="wait">Reboot</button>
+        <button type="submit" class="btn btn-primary mb-3 mx-3 col-sm-3" name="reboot" value="wait">Reboot</button>
       </div>
     </form>
   </div>
@@ -116,8 +117,8 @@
     <h5 class="mt-3">Nightly system update settings</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
       <div class="row">
-        <div class="col-8">
-          <div class="row ml-1">
+        <div class="col-8 me-3">
+          <div class="row ms-1">
             <input type="checkbox" class="mb-3 col-1" name="nightly_base_update--is_enabled"
                    id="nightly_base_update--is_enabled" {% if is_enabled("nightly_base_update") %} checked {%
                             endif %}>
@@ -130,7 +131,7 @@
               night</label>
           </div>
         </div>
-        <button type="submit" class="btn btn-primary mb-3 ml-3 col-sm-3" name="nightly_update" value="go">Update
+        <button type="submit" class="btn btn-primary mb-3 mx-3 col-sm-3" name="nightly_update" value="go">Update
           Settings</button>
       </div>
     </form>
@@ -141,7 +142,7 @@
     <h5 class="mt-3">Update feeder applications</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
       <div class="row">
-        <label for="update_feeder_aps" class="col-8">Update to the current ADS-B feeder applications (i.e. the
+        <label for="update_feeder_aps" class="col-8 me-3">Update to the current ADS-B feeder applications (i.e. the
           web UI, setup apps, and containers). Either the latest beta or stable version.
           If this update brings in new container images, even with a fast internet connection this can easily
           take more than ten minutes to complete. The web UI will pause while the update is running, but the
@@ -149,9 +150,9 @@
         </label>
         <div class="col-3">
           <div class="row">
-            <button type="submit" class="btn btn-primary mb-3 ml-3 col-12" name="update_feeder_aps_beta"
+            <button type="submit" class="btn btn-primary mb-3 mx-3 col-12" name="update_feeder_aps_beta"
                     value="go">Update (beta)</button>
-            <button type="submit" class="btn btn-primary mb-3 ml-3 col-12" name="update_feeder_aps_stable"
+            <button type="submit" class="btn btn-primary mb-3 mx-3 col-12" name="update_feeder_aps_stable"
                     value="go">Update (stable)</button>
           </div>
         </div>
@@ -170,9 +171,9 @@
           Once this process has completed, you need to accept the new device into the network on the Zerotier
           website.
         </label>
-        <input class="col-8 ml-2" id="zerotierid" name="zerotierid" type="text"
+        <input class="col-8 ms-3" id="zerotierid" name="zerotierid" type="text"
                value="{{ env_value_by_tag('zerotierid') }}" placeholder=" Enter your Zerotier Network ID" required>
-        <button type="submit" class="btn btn-primary mb-1 ml-3 col-sm-3" name="zerotier" value="go">Submit</button>
+        <button type="submit" class="btn btn-primary mb-1 mx-3 col-sm-3" name="zerotier" value="go">Submit</button>
       </div>
     </form>
   </div>
@@ -198,11 +199,11 @@
           <code>--authkey</code> isn't supported at this point.
           {% endif %}
         </label>
-        <input class="col-8 ml-2" id="tailscale_extras" name="tailscale_extras" type="text"
+        <input class="col-8 ms-3" id="tailscale_extras" name="tailscale_extras" type="text"
                value="{{ env_value_by_tag('tailscale_extras') }}"
                placeholder=" Enter additional tailscale options you need" {% if env_value_by_tag("tailscale_name")
                     !="" or env_value_by_tag("tailscale_ll") !="" %}style="display: none;" {% endif %}>
-        <button type="submit" class="btn btn-primary mb-1 ml-3 col-sm-3" name="tailscale" value="go" {% if
+        <button type="submit" class="btn btn-primary mb-1 mx-3 col-sm-3" name="tailscale" value="go" {% if
                     env_value_by_tag("tailscale_name") !="" or env_value_by_tag("tailscale_ll") !=""
                     %}style="display: none;" {% endif %}>Submit</button>
       </div>
