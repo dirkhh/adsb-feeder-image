@@ -1,4 +1,5 @@
 Changes since v1.1.8 include
+- first experimental RPi5 build - using an early DietPi test image
 - add autogain reset buttons on expert page (and slightly improve the look and feel of that page)
 
 > [!WARNING]
