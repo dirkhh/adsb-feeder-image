@@ -1,6 +1,5 @@
-Changes since v1.1.8 include
-- first experimental RPi5 build - using an early DietPi test image
-- add autogain reset buttons on expert page (and slightly improve the look and feel of that page)
+Changes since v1.1.9 include
+- update for a minor change in the 1090MHz.uk status json
 
 > [!WARNING]
 > Images that start with `adsb-im-iob` can take up to **20 minutes** at first boot. Images without `iob` in their name still can take more than 5 minutes before the web interface is available. Please be patient.

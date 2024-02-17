@@ -217,9 +217,9 @@ class AggStatus:
                 )
                 if match:
                     station_serial = match.group(1)
-                    self._constants.env_by_tags(
-                        ["radarbox", "sn"]
-                    ).value = station_serial
+                    self._constants.env_by_tags(["radarbox", "sn"]).value = (
+                        station_serial
+                    )
             if station_serial:
                 html_url = f"https://www.radarbox.com/stations/{station_serial}"
                 rb_page, status = self.get_plain(html_url)
@@ -235,19 +235,13 @@ class AggStatus:
                         self._mlat = T.Yes if mlat_online else T.No
                         self._last_check = datetime.now()
         elif self._agg == "1090uk":
-            print_err("get status for 1090uk")
             key = self._constants.env_by_tags(["1090uk", "key"]).value
-            print_err(f"key is {key}")
             json_url = f"https://www.1090mhz.uk/mystatus.php?key={key}"
-            print_err(f"url is {json_url}")
             tn_dict, status = self.get_json(json_url)
-            print_err(f"got status {status} and json {tn_dict}")
             if tn_dict and status == 200:
-                online = tn_dict.get("online")
-                self._beast = T.Yes if online and str(online) == "1" else T.No
+                online = tn_dict.get("online", False)
+                self._beast = T.Yes if online else T.No
                 self._last_check = datetime.now()
-            else:
-                print_err(f"1090uk returned status {status}")
         elif self._agg == "alive":
             json_url = "https://api.airplanes.live/feed-status"
             a_dict, status = self.get_json(json_url)
