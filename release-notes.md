@@ -1,4 +1,5 @@
 Changes since v1.1.9 include
+- update to the latest SDR-E containers
 - update for a minor change in the 1090MHz.uk status json
 
 > [!WARNING]
