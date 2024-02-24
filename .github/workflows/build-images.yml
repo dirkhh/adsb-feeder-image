@@ -34,7 +34,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [asus-tinkerboard, banana-pi-m5-m2p, lepotato, odroidc4, orangepi3-lts, orangepi4-lts, orangepi5, pine64, raspberrypi32, raspberrypi64, renegade, rockpi4, x86-64-vm]
+        name: [asus-tinkerboard, banana-pi-m5-m2p, lepotato, odroidc4, orangepi3-lts, orangepi4-lts, orangepi5, orangepi-zero3-dietpi, pine64, raspberrypi32, raspberrypi64, renegade, rockpi4, x86-64-vm]
         include:
         - name: asus-tinkerboard
           base_arch: ""
@@ -121,6 +121,11 @@ jobs:
           base_arch: arm64
           url: https://dietpi.com/downloads/images/DietPi_OrangePi5Plus-ARMv8-Bookworm.img.xz
           magic_path: "repository/src/image-dietpi/DietPi_OrangePi5Plus-ARMv8-Bookworm.img.xz"
+        - name: orangepi-zero3-dietpi
+          variant: iob-dietpi-fat-2
+          base_arch: arm64
+          url: https://dietpi.com/downloads/images/DietPi_OrangePiZero3-ARMv8-Bookworm.img.xz
+          magic_path: "repository/src/image-dietpi/DietPi_OrangePiZero3-ARMv8-Bookworm.img.xz"
         - name: x86-64-vm
           variant: iob-dietpi-root-only
           base_arch: x86_64
