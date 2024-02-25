@@ -61,7 +61,7 @@ jobs:
         - name: rpi5-dietpi-64
           base_arch: arm64
           variant: iob-dietpi-fat-1
-          url: https://dietpi.com/downloads/images/testing/DietPi_RPi5-ARMv8-Bookworm_New-Firmware.img.xz
+          url: https://dietpi.com/downloads/images/testing/DietPi_RPi5-ARMv8-Bookworm.img.xz
           magic_path: "repository/src/image-dietpi/DietPi_RPi5-ARMv8-Bookworm.img.xz"
         - name: nanopi-neo3-dietpi
           variant: iob-dietpi-fat-2
