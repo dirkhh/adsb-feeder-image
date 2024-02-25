@@ -41,7 +41,7 @@ jobs:
         - name: lepotato
           base_arch: arm64
           variant: armbian
-          url: https://redirect.armbian.com/region/EU/lepotato/Bookworm_current_minimal
+          url: https://test.adsb.im/downloads/Armbian-unofficial_23.11.0-trunk_Lepotato_bookworm_current_6.1.63_minimal.img.xz
           magic_path: "repository/src/image-armbian/le-potato.img.xz"
         - name: pine64
           variant: armbian
