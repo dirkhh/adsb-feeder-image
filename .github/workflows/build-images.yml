@@ -16,7 +16,9 @@ jobs:
     steps:
     # check the sources out in the 'expected place' for the following step that tags them
     - name: Checkout Project Repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
+      with:
+        show-progress: false
     - name: Check Python Code
       run: |
         cd src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup
@@ -147,9 +149,10 @@ jobs:
         echo "::add-mask::${{ secrets.ROOT_PASSWORD }}"
 
     - name: Checkout Project Repository again with the new tag - and make sure we have the full history for the version code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
+        show-progress: false
         path: repository
 
     - name: Install Dependencies
@@ -158,9 +161,10 @@ jobs:
         sudo apt-get install -y coreutils p7zip-full qemu-user-static qemu-utils lz4
 
     - name: Checkout CustomPiOS
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: 'guysoft/CustomPiOS'
+        show-progress: false
         path: CustomPiOS
 
 
