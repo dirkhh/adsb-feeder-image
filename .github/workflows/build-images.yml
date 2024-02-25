@@ -36,58 +36,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [asus-tinkerboard, banana-pi-m5-m2p, lepotato, odroidc4, orangepi3-lts, orangepi4-lts, orangepi5, orangepi-zero3-dietpi, pine64, raspberrypi32, raspberrypi64, renegade, rockpi4, x86-64-vm]
+        name: [lepotato, orangepi-zero3-dietpi, orangepi-5plus-dietpi,nanopi-neo3-dietpi, pine64, raspberrypi64, raspberrypi-dietpi-64, x86-64-vm]
         include:
-        - name: asus-tinkerboard
-          base_arch: ""
-          variant: armbian
-          url: https://redirect.armbian.com/region/EU/tinkerboard/Bookworm_current_minimal
-          magic_path: "repository/src/image-armbian/asus-tinkerboard.img.xz"
-        - name: asus-tinkerboard-dietpi
-          base_arch: ""
-          variant: iob-dietpi-fat-2
-          url: https://dietpi.com/downloads/images/DietPi_ASUSTB-ARMv7-Bookworm.img.xz
-          magic_path: "repository/src/image-dietpi/DietPi_ASUSTB-ARMv7-Bookworm.img.xz"
-        - name: banana-pi-m5-m2p
-          base_arch: arm64
-          variant: armbian
-          url: https://redirect.armbian.com/region/EU/bananapim5/Bookworm_current_minimal
-          magic_path: "repository/src/image-armbian/banana-pi-m5-m2p.img.xz"
         - name: lepotato
           base_arch: arm64
           variant: armbian
           url: https://redirect.armbian.com/region/EU/lepotato/Bookworm_current_minimal
           magic_path: "repository/src/image-armbian/le-potato.img.xz"
-        - name: odroidc4
-          base_arch: arm64
-          variant: armbian
-          url: https://redirect.armbian.com/region/EU/odroidc4/Bookworm_current
-          magic_path: "repository/src/image-armbian/odroidc4.img.xz"
-        - name: orangepi3-lts
-          base_arch: arm64
-          variant: armbian
-          url: https://redirect.armbian.com/region/EU/orangepi3-lts/Bookworm_current_minimal
-          magic_path: "repository/src/image-armbian/orangepi3-lts.img.xz"
-        - name: orangepi4-lts
-          base_arch: arm64
-          variant: armbian
-          url: https://redirect.armbian.com/region/EU/orangepi4-lts/Bookworm_current_minimal
-          magic_path: "repository/src/image-armbian/orangepi4-lts.img.xz"
-        - name: orangepi5
-          base_arch: arm64
-          variant: armbian-root2
-          url: https://redirect.armbian.com/region/EU/orangepi5/Bookworm_legacy
-          magic_path: "repository/src/image-armbian/orangepi5.img.xz"
         - name: pine64
           variant: armbian
           base_arch: arm64
           url: https://redirect.armbian.com/region/EU/pine64/Bookworm_current_minimal
           magic_path: "repository/src/image-armbian/pine64.img.xz"
-        - name: raspberrypi32
-          variant: default
-          base_arch: ""
-          url: https://downloads.raspberrypi.com/raspios_lite_armhf/images/raspios_lite_armhf-2023-12-11/2023-12-11-raspios-bookworm-armhf-lite.img.xz
-          magic_path: "repository/src/image/2023-12-11-raspios-bookworm-armhf-lite.img.xz"
         - name: raspberrypi64
           base_arch: arm64
           variant: default
@@ -103,16 +63,6 @@ jobs:
           variant: iob-dietpi-fat-1
           url: https://dietpi.com/downloads/images/testing/DietPi_RPi5-ARMv8-Bookworm_New-Firmware.img.xz
           magic_path: "repository/src/image-dietpi/DietPi_RPi5-ARMv8-Bookworm.img.xz"
-        - name: renegade
-          variant: armbian
-          base_arch: arm64
-          url: https://redirect.armbian.com/region/EU/renegade/Bookworm_current_minimal
-          magic_path: "repository/src/image-armbian/renegade.img.xz"
-        - name: rockpi4
-          variant: armbian
-          base_arch: arm64
-          url: https://redirect.armbian.com/region/EU/rockpi-4c/Bookworm_current
-          magic_path: "repository/src/image-armbian/rockpi4.img.xz"
         - name: nanopi-neo3-dietpi
           variant: iob-dietpi-fat-2
           base_arch: arm64
