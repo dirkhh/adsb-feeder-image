@@ -8,7 +8,7 @@ OCTOPI_INCLUDE_WIRINGPI=no
 export BASE_DISTRO=armbian
 # The root partiton of the image filesystem, 2 for images that start with /boot, 1 for single root armbian
 BASE_ROOT_PARTITION=3
-BASE_BOOT_PARTITION=3
+BASE_BOOT_MOUNT_PATH="boot"
 BASE_IMAGE_RESIZEROOT=800
 BASE_IMAGE_RASPBIAN=no
 BASE_IMAGE_ENLARGEROOT=1000
