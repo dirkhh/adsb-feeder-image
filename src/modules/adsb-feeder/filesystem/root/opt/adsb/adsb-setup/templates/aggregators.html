@@ -113,12 +113,20 @@
       <a href="https://www.flightradar24.com/privacy-policy">flightradar24</a>
       <div class="form-group" id="FR_FIELDS">
         <label for="flightradar--key">
-          Enter your flightradar24 sharing key (or enter your email address and click the button to request a sharing
-          key)
+          {% if is_enabled('uat978') %}
+          Enter your FR24 sharing key (or enter your email address and click the button to request a sharing key)
+          {% else %}
+          Enter your two FR24 sharing keys (first one for ADS-B/1090, second one for UAT). For either or both of the
+          fields you can also enter your email address and the feeder will request the corresponding key for you.
+          {% endif %}
         </label>
-        <input type="text" id="flightradar--key" name="flightradar--key" class="form-control w-75"
-               placeholder="existing flightradar24 sharing key or email address"
+        <input type="text" id="flightradar--key" name="flightradar--key" class="form-control w-50"
+               placeholder="existing flightradar24 ADS-B sharing key or email address"
                value="{{ env_value_by_tags(["flightradar", "key"]) }}" />
+        <input {% if not is_enabled('uat978') %}style="display: none;" {% endif %} type="text" id="flightradar_uat--key"
+               name="flightradar_uat--key" class="form-control w-50"
+               placeholder="existing flightradar24 UAT sharing key or email address"
+               value="{{ env_value_by_tags(["flightradar_uat", "key"]) }}" />
         <button type="submit" class="btn btn-primary mt-1" name="flightradar--submit" value="stay">Request key</button>
       </div>
     </label>

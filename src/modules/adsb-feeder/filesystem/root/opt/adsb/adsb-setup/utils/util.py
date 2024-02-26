@@ -13,3 +13,8 @@ def cleanup_str(s):
 
 def print_err(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
+
+
+# this is based on https://www.regular-expressions.info/email.html
+def is_email(text: str):
+    return re.match(r"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}", text, flags=re.IGNORECASE)

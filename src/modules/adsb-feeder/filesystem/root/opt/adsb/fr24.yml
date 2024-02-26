@@ -11,6 +11,7 @@ services:
     environment:
       - BEASTHOST=ultrafeeder
       - FR24KEY=${FEEDER_FR24_SHARING_KEY}
+      - FR24KEY_UAT=${FEEDER_FR24_UAT_SHARING_KEY}
       - MLAT=${FEEDER_FR24_MLAT}
     tmpfs:
       - /run:exec,size=64M

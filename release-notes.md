@@ -1,4 +1,5 @@
 Changes since v1.1.9 include
+- first cut at requesting independent adsb and uat feeder keys from FR24 - including requesting a second key for uat if you already have an adsb key
 - significantly pair down the number of images that are created for every release
 - switch the LePotato image to one built by myself
 - update the Raspios Raspberry Pi images to Bookworm (requires re-install, not handled via update)

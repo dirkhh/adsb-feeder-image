@@ -73,9 +73,9 @@ class AdsbIm:
         )
         if adsbone_env.value:
             adsbone_env.value = False
-            self._constants.env(
-                "_ADSBIM_STATE_IS_ULTRAFEEDER_ALIVE_ENABLED"
-            ).value = True
+            self._constants.env("_ADSBIM_STATE_IS_ULTRAFEEDER_ALIVE_ENABLED").value = (
+                True
+            )
             print_err(
                 "found adsb.one enabled and made sure that airplanes.live is enabled instead"
             )
@@ -85,9 +85,9 @@ class AdsbIm:
         self._ultrafeeder = UltrafeederConfig(constants=self._constants)
 
         # update Env ultrafeeder to have value self._ultrafeed.generate()
-        self._constants.env_by_tags(
-            "ultrafeeder_config"
-        )._value_call = self._ultrafeeder.generate
+        self._constants.env_by_tags("ultrafeeder_config")._value_call = (
+            self._ultrafeeder.generate
+        )
         self._constants.env_by_tags("pack")._value_call = self.pack_im
         self._other_aggregators = {
             "adsbhub--submit": ADSBHub(self._system),
@@ -643,6 +643,9 @@ class AdsbIm:
                     is_successful = False
                     base = key.replace("--submit", "")
                     aggregator_argument = form.get(f"{base}--key", None)
+                    if base == "flightradar":
+                        uat_arg = form.get(f"{base}_uat--key", None)
+                        aggregator_argument += f"::{uat_arg}"
                     if base == "opensky":
                         user = form.get(f"{base}--user", None)
                         aggregator_argument += f"::{user}"

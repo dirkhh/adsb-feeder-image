@@ -197,6 +197,12 @@ class Constants:
             tags=["flightradar", "key"],
         ),
         Env(
+            "FEEDER_FR24_UAT_SHARING_KEY",
+            is_mandatory=False,
+            default="",
+            tags=["flightradar_uat", "key"],
+        ),
+        Env(
             "FEEDER_PIAWARE_FEEDER_ID",
             is_mandatory=False,
             default="",
@@ -287,9 +293,11 @@ class Constants:
         Env(
             "_ADSBIM_STATE_IMAGE_NAME",
             # somehow I can't make a path relative to data_path work here...
-            default_call=lambda: Path("/opt/adsb/feeder-image.name").read_text()
-            if Path("/opt/adsb/feeder-image.name").exists()
-            else "ADS-B Feeder Image prior to v0.12",
+            default_call=lambda: (
+                Path("/opt/adsb/feeder-image.name").read_text()
+                if Path("/opt/adsb/feeder-image.name").exists()
+                else "ADS-B Feeder Image prior to v0.12"
+            ),
             tags=["image_name"],
         ),
         Env(

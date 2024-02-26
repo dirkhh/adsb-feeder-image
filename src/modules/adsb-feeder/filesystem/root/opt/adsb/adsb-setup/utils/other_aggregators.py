@@ -3,7 +3,7 @@ import sys
 import subprocess
 
 from .system import System
-from .util import print_err
+from .util import is_email, print_err
 
 
 class Aggregator:
@@ -141,41 +141,106 @@ class FlightRadar24(Aggregator):
             print_err("failed to download the FR24 docker image")
             return None
 
-        cmdline = (
-            f'--rm -i -e FEEDER_LAT="{self.lat}" -e FEEDER_LONG="{self.lng}" -e FEEDER_ALT_FT="{self.alt_ft}" '
-            f'-e FR24_EMAIL="{email}" -e FR24_SIGNUP=1 {self.container}'
+        adsb_signup_command = (
+            f"docker run --entrypoint /bin/bash --rm "
+            f'-e FEEDER_LAT="{self.lat}" -e FEEDER_LONG="{self.lng}" -e FEEDER_ALT_FT="{self.alt_ft}" '
+            f'-e FR24_EMAIL="{email}" {self.container} '
+            f'-c "apt update && apt install -y expect && $(cat handsoff_signup_expect.sh)"'
         )
-        output = self._docker_run_with_timeout(cmdline, 45.0)
+        open("/opt/adsb/handsoff_signup.sh", "w").write(
+            f"#!/bin/bash\n{adsb_signup_command}"
+        )
+        try:
+            output = subprocess.run(
+                "bash /opt/adsb/handsoff_signup.sh",
+                cwd="/opt/adsb",
+                timeout=180.0,
+                shell=True,
+                text=True,
+                capture_output=True,
+            ).stdout
+        except subprocess.TimeoutExpired:
+            print_err("timeout running the adsb signup script")
+            return None
+
         sharing_key_match = re.search(
             "Your sharing key \\(([a-zA-Z0-9]*)\\) has been", output
         )
         if not sharing_key_match:
             print_err(f"couldn't find a sharing key in the container output: {output}")
             return None
+        adsb_key = sharing_key_match.group(1)
+        print_err(f"found adsb sharing key {adsb_key} in the container output")
+        return adsb_key
 
-        return sharing_key_match.group(1)
+    def _request_fr24_uat_sharing_key(self, email: str):
+        if not self._download_docker_container(self.container):
+            print_err("failed to download the FR24 docker image")
+            return None
+
+        uat_signup_command = (
+            f"docker run --entrypoint /bin/bash --rm "
+            f'-e FEEDER_LAT="{self.lat}" -e FEEDER_LONG="{self.lng}" -e FEEDER_ALT_FT="{self.alt_ft}" '
+            f'-e FR24_EMAIL="{email}" {self.container} '
+            f'-c "apt update && apt install -y expect && $(cat handsoff_signup_expect_uat.sh)"'
+        )
+        open("/opt/adsb/handsoff_signup_uat.sh", "w").write(
+            f"#!/bin/bash\n{uat_signup_command}"
+        )
+        try:
+            output = subprocess.run(
+                "bash /opt/adsb/handsoff_signup_uat.sh",
+                cwd="/opt/adsb",
+                timeout=180.0,
+                shell=True,
+                text=True,
+                capture_output=True,
+            ).stdout
+        except subprocess.TimeoutExpired:
+            print_err("timeout running the adsb uat signup script")
+            return None
+        sharing_key_match = re.search(
+            "Your sharing key \\(([a-zA-Z0-9]*)\\) has been", output
+        )
+        if not sharing_key_match:
+            print_err(f"couldn't find a sharing key in the container output: {output}")
+            return None
+        uat_key = sharing_key_match.group(1)
+        print_err(f"found uat sharing key {uat_key} in the container output")
+        return uat_key
 
     def _activate(self, user_input: str):
         if not user_input:
             return False
-        if re.match(
-            r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b", user_input
-        ):
-            # that's an email address, so we are looking to get a sharing key
-            sharing_key = self._request_fr24_sharing_key(user_input)
-            print_err(f"got back sharing_key |{sharing_key}|")
-        elif re.match("[0-9a-zA-Z]+", user_input):
-            # that might be a valid key
-            sharing_key = user_input
-        else:
-            # hmm, that's weird. we need some error return, I guess
-            print_err(
-                f"we got a text that's neither email address nor sharing key: {user_input}"
-            )
+        input_values = user_input.count("::")
+        if input_values > 1:
             return False
-        # we have a sharing key, let's just enable the container
-        self._constants.env_by_tags(self._key_tags).value = sharing_key
-        self._constants.env_by_tags(self._enabled_tags).value = True
+        elif input_values == 1:
+            adsb_sharing_key, uat_sharing_key = user_input.split("::")
+        else:
+            adsb_sharing_key = user_input
+            uat_sharing_key = None
+        if not adsb_sharing_key and not uat_sharing_key:
+            return False
+        if is_email(adsb_sharing_key):
+            # that's an email address, so we are looking to get a sharing key
+            adsb_sharing_key = self._request_fr24_sharing_key(adsb_sharing_key)
+            print_err(f"got back sharing_key |{adsb_sharing_key}|")
+        if not re.match("[0-9a-zA-Z]+", adsb_sharing_key):
+            adsb_sharing_key = None
+        if is_email(uat_sharing_key):
+            # that's an email address, so we are looking to get a sharing key
+            uat_sharing_key = self._request_fr24_uat_sharing_key(uat_sharing_key)
+            print_err(f"got back uat_sharing_key |{uat_sharing_key}|")
+        if not re.match("[0-9a-zA-Z]+", uat_sharing_key):
+            uat_sharing_key = None
+        if adsb_sharing_key or uat_sharing_key:
+            # we have a sharing key, let's just enable the container
+            self._constants.env_by_tags(["flightradar", "key"]).value = adsb_sharing_key
+            self._constants.env_by_tags(["flightradar_uat", "key"]).value = (
+                uat_sharing_key
+            )
+            self._constants.env_by_tags(self._enabled_tags).value = True
 
         return True
 
