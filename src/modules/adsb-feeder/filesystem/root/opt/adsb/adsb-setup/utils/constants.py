@@ -461,13 +461,6 @@ class Constants:
             is_mandatory=False,
             tags=["planespotters", "ultrafeeder", "is_enabled"],
         ),
-        # this one has been "withdrawn" - but we still need to read it from .env
-        # so we can migrate enabling adsb.one to airplanes.live
-        Env(
-            "_ADSBIM_STATE_IS_ULTRAFEEDER_ADSBONE_ENABLED",
-            is_mandatory=False,
-            tags=["adsbone", "ultrafeeder", "is_enabled"],
-        ),
         Env(
             "_ADSBIM_STATE_IS_ULTRAFEEDER_ADSBFI_ENABLED",
             is_mandatory=False,

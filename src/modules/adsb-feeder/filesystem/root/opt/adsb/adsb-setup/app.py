@@ -65,21 +65,6 @@ class AdsbIm:
 
         self._routemanager = RouteManager(self.app)
         self._constants = Constants()
-
-        # the maintainer of adsb.one asked us to change users' over to feeding airplane.live
-        # I'm not thrilled with just doing that, but... it seems to make sense here?
-        adsbone_env = self._constants.env(
-            "_ADSBIM_STATE_IS_ULTRAFEEDER_ADSBONE_ENABLED"
-        )
-        if adsbone_env.value:
-            adsbone_env.value = False
-            self._constants.env("_ADSBIM_STATE_IS_ULTRAFEEDER_ALIVE_ENABLED").value = (
-                True
-            )
-            print_err(
-                "found adsb.one enabled and made sure that airplanes.live is enabled instead"
-            )
-
         self._system = System(constants=self._constants)
         self._sdrdevices = SDRDevices()
         self._ultrafeeder = UltrafeederConfig(constants=self._constants)
