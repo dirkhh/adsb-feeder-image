@@ -163,6 +163,18 @@
       </div>
     </form>
   </div>
+  <div class="col-12 col-lg-6">
+    <h5 class="mt-3">Restart all containers</h5>
+    <form method="POST" onsubmit="show_spinner(); return true;">
+      <div class="row">
+        <label for="restart_containers" class="col-8 me-3">Typically this shouldn't be necessary, but occasionally it
+          seems that for whatever reason a container doesn't pick up a setting or gets otherwise stuck. While this may
+          be overkill, it at least allows you to restart all of them at once when needed.</label>
+        <button type="submit" class="btn btn-primary mb-3 mx-3 col-3" name="restart_containers" value="go">Restart
+          Containers</button>
+      </div>
+    </form>
+  </div>
   <!-- FULL_IMAGE_ONLY_START -->
   <div class="col-12 col-lg-6">
     <h5 class="mt-3">Add Zerotier</h5>

@@ -259,6 +259,8 @@ class AdsbIm:
             return self._system._restart.state
 
     def running(self):
+        if self._system.docker_restarting():
+            return "containers restarting", 202
         return "OK"
 
     def backup(self):
@@ -524,6 +526,10 @@ class AdsbIm:
                 if key == "reboot":
                     # initiate reboot
                     self._system.reboot()
+                    return render_template("/waitandredirect.html")
+                if key == "restart_containers":
+                    # almost certainly overkill, but...
+                    self._system.restart_containers()
                     return render_template("/waitandredirect.html")
                 if key == "secure_image":
                     self._constants.env_by_tags("secure_image").value = True

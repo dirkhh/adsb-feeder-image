@@ -5,9 +5,11 @@ import requests
 import socket
 import subprocess
 import threading
+import time
 import zipfile
 
 from .constants import Constants
+from .util import print_err
 
 
 class Lock:
@@ -61,6 +63,8 @@ class Restart:
 
 class System:
     def __init__(self, constants: Constants):
+        if os.path.exists("/opt/adsb/docker.lock"):
+            os.remove("/opt/adsb/docker.lock")
         self._restart_lock = Lock()
         self._restart = Restart(self._restart_lock)
         self._constants = constants
@@ -74,6 +78,19 @@ class System:
 
     def reboot(self) -> None:
         subprocess.call("reboot", shell=True)
+
+    def restart_containers(self):
+        try:
+            subprocess.call("bash /opt/adsb/docker-compose-restart-all &", shell=True)
+        except:
+            print_err("failed to start the container restart script in the background")
+            return
+        open("/opt/adsb/docker.lock", "w").close()
+        # give the shell script a couple seconds to get going before we return the waiting page
+        time.sleep(2.0)
+
+    def docker_restarting(self):
+        return os.path.exists("/opt/adsb/docker.lock")
 
     def check_dns(self):
         try:
