@@ -1,7 +1,6 @@
 import filecmp
 import io
 import json
-from operator import is_
 import os.path
 import pathlib
 import pickle
@@ -9,14 +8,17 @@ import platform
 import re
 import shutil
 import subprocess
-from time import sleep
 import zipfile
 from base64 import b64encode
 from datetime import datetime
+from operator import is_
 from os import path, urandom
+from time import sleep
 from typing import Dict, List
 from zlib import compress
 
+# nofmt: on
+# isort: off
 from flask import Flask, flash, redirect, render_template, request, send_file, url_for
 
 from utils import (
@@ -42,6 +44,9 @@ from utils import (
     cleanup_str,
     print_err,
 )
+# nofmt: off
+# isort: on
+
 from werkzeug.utils import secure_filename
 
 
@@ -791,7 +796,14 @@ class AdsbIm:
                     self._constants.env_by_tags("tailscale_ll").value = ""
                 else:
                     self._constants.env_by_tags("tailscale_name").value = ""
-        return render_template("expert.html")
+        # embed lsusb output in the page
+        try:
+            lsusb = subprocess.run(
+                "lsusb", shell=True, check=True, capture_output=True
+            ).stdout.decode()
+        except:
+            lsusb = "lsusb failed"
+        return render_template("expert.html", lsusb=lsusb)
 
     def secure_image(self):
         output: str = ""
