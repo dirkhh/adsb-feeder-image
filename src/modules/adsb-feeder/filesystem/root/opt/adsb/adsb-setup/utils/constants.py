@@ -276,11 +276,21 @@ class Constants:
         ),
         # ADSB.im specific
         Env("_ADSBIM_AGGREGATORS_SELECTION", tags=["aggregators"]),
-        Env("_ADSBIM_BASE_VERSION", is_mandatory=False, tags=["base_version"]),
         Env(
-            "_ADSBIM_CONTAINER_VERSION", is_mandatory=False, tags=["container_version"]
+            "_ADSBIM_BASE_VERSION",
+            is_mandatory=False,
+            tags=["base_version", "norestore"],
         ),
-        Env("_ADSBIM_STATE_BOARD_NAME", is_mandatory=False, tags=["board_name"]),
+        Env(
+            "_ADSBIM_CONTAINER_VERSION",
+            is_mandatory=False,
+            tags=["container_version", "norestore"],
+        ),
+        Env(
+            "_ADSBIM_STATE_BOARD_NAME",
+            is_mandatory=False,
+            tags=["board_name", "norestore"],
+        ),
         Env("_ADSBIM_STATE_WEBPORT", default=80, tags=["webport"]),
         Env("_ADSBIM_STATE_DAZZLE_PORT", default=9999, tags=["dazzleport"]),
         Env("_ADSBIM_STATE_TAR1090_PORT", default=8080, tags=["tar1090port"]),
@@ -289,7 +299,7 @@ class Constants:
         Env("_ADSBIM_STATE_PIAWARESTAT_PORT", default=8082, tags=["piastatport"]),
         Env("_ADSBIM_STATE_FLIGHTRADAR_PORT", default=8754, tags=["frport"]),
         Env("_ADSBIM_STATE_PLANEFINDER_PORT", default=30053, tags=["pfport"]),
-        Env("_ADSBIM_STATE_PACKAGE", tags=["pack"]),
+        Env("_ADSBIM_STATE_PACKAGE", tags=["pack", "norestore"]),
         Env(
             "_ADSBIM_STATE_IMAGE_NAME",
             # somehow I can't make a path relative to data_path work here...
@@ -298,7 +308,7 @@ class Constants:
                 if Path("/opt/adsb/feeder-image.name").exists()
                 else "ADS-B Feeder Image prior to v0.12"
             ),
-            tags=["image_name"],
+            tags=["image_name", "norestore"],
         ),
         Env(
             "_ADSBIM_STATE_IS_SECURE_IMAGE",
@@ -365,9 +375,13 @@ class Constants:
         Env(
             "_ADSBIM_STATE_IS_SSH_CONFIGURED",
             is_mandatory=False,
-            tags=["ssh_configured", "is_enabled"],
+            tags=["ssh_configured", "is_enabled", "norestore"],
         ),
-        Env("_ADSB_STATE_SSH_KEY", is_mandatory=False, tags=["ssh_pub", "key"]),
+        Env(
+            "_ADSB_STATE_SSH_KEY",
+            is_mandatory=False,
+            tags=["ssh_pub", "key", "norestore"],
+        ),
         Env(
             "_ADSBIM_STATE_IS_BASE_CONFIG_FINISHED",
             default="0",
@@ -501,8 +515,16 @@ class Constants:
             is_mandatory=False,
             tags=["remote_sdr"],
         ),
-        Env("_ADSBIM_STATE_LAST_DNS_CHECK", is_mandatory=False, tags=["dns_state"]),
-        Env("_ADSBIM_STATE_FEEDER_IP", is_mandatory=False, tags=["feeder_ip"]),
+        Env(
+            "_ADSBIM_STATE_LAST_DNS_CHECK",
+            is_mandatory=False,
+            tags=["dns_state", "norestore"],
+        ),
+        Env(
+            "_ADSBIM_STATE_FEEDER_IP",
+            is_mandatory=False,
+            tags=["feeder_ip", "norestore"],
+        ),
     }
 
     @property

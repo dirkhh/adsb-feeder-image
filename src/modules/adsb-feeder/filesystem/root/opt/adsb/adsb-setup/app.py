@@ -371,6 +371,13 @@ class AdsbIm:
                     if pathlib.Path(adsb_path / name).exists():
                         shutil.move(adsb_path / name, restore_path / (name + ".dist"))
                     shutil.move(restore_path / name, adsb_path / name)
+                    if name == ".env":
+                        # this is pretty hacky, but we should at least try to not completely get this wrong
+                        for e in self._constants._env:
+                            if "norestore" in e.tags:
+                                # this overwrites the value in the file we just restored with the current value of the running image,
+                                # iow it doesn't restore that value from the backup
+                                e._reconcile(e.value)
             self._constants.re_read_env()
             self.update_boardname()
             # make sure we are connected to the right Zerotier network

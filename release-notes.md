@@ -1,12 +1,5 @@
-Changes since v1.1.9 include
-- add button to restart containers on the expert page
-- first cut at requesting independent adsb and uat feeder keys from FR24 - including requesting a second key for uat if you already have an adsb key
-- significantly pair down the number of images that are created for every release
-- switch the LePotato image to one built by myself
-- update the Raspios Raspberry Pi images to Bookworm (requires re-install, not handled via update)
-- add support for the OrangePi Zero3
-- update to the latest SDR-E containers
-- update for a minor change in the 1090MHz.uk status json
+Changes since v1.2.0 include
+- backup/restore: try to be smarter about what env values are restored vs. kept from the new image
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)
