@@ -21,7 +21,9 @@ class SDR:
             result = subprocess.run(cmdline, shell=True, capture_output=True)
         except subprocess.SubprocessError:
             print(f"'lsusb -s {self._address} -v' failed", file=sys.stderr)
+            return ""
         output = result.stdout.decode()
+        print_err(f"lsusb -s {self._address}: {output}")
         serial_match = re.search(r"iSerial\s+\d+\s+(.*)", output, flags=re.M)
         if serial_match:
             self._serial_probed = serial_match.group(1).strip()
@@ -65,7 +67,10 @@ class SDRDevices:
             result = subprocess.run("lsusb", shell=True, capture_output=True)
         except subprocess.SubprocessError:
             print("lsusb failed", file=sys.stderr)
-        output = io.StringIO(result.stdout.decode())
+            return
+        lsusb_text = result.stdout.decode()
+        print_err(f"lsusb: {lsusb_text}")
+        output = io.StringIO(lsusb_text)
         self.sdrs = []
         for line in output:
             for pidvid in ("1d50:60a1", "0bda:2838", "0bda:2832"):
