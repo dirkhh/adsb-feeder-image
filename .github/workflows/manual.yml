@@ -63,6 +63,7 @@ jobs:
       run: |
         echo "::add-mask::${{ secrets.USER_PASSWORD }}"
         echo "::add-mask::${{ secrets.ROOT_PASSWORD }}"
+        echo "::add-mask::${{ secrets.SSH_KEY }}"
 
     - name: Checkout Project Repository again with the new tag - and make sure we have the full history for the version code
       uses: actions/checkout@v3
@@ -128,6 +129,7 @@ jobs:
         feeder_image_name="${fnprefix}-${IMG_NAME}-${{ steps.tag.outputs.tag }}.img"
         echo "export BASE_USER_PASSWORD=${{ secrets.USER_PASSWORD }}" >> config
         echo "export ROOT_PWD=${{ secrets.ROOT_PASSWORD }}" >> config
+        echo "export SSH_PUB_KEY='${{ secrets.SSH_KEY }}'" >> config
         echo "export FEEDER_IMAGE_NAME=${feeder_image_name}" >> config
         echo "feeder_image_name=${feeder_image_name}" >> $GITHUB_OUTPUT
         sudo GH_REF_TYPE=${{ github.ref_type }} GH_TRGT_REF=${{ github.ref_name }} bash -x ./build_dist "${VARIANT}"

@@ -78,6 +78,7 @@ if [[ "$1" == "iob-dietpi"* ]] ; then
     sed -i "s/FEEDER_IMAGE_NAME/$FEEDER_IMAGE_NAME/" ${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh
     sed -i "s/FEEDER_IMAGE_VERSION/$VERSION/" ${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh
     sed -i "s/ADSB_RANDOM_PASSWORD/$ROOT_PWD/" ${DIR}/variants/iob-dietpi/dietpi.txt
+    echo "AUTO_SETUP_SSH_PUBKEY=$SSH_PUB_KEY" >> ${DIR}/variants/iob-dietpi/dietpi.txt
     cp "${DIR}/variants/iob-dietpi/dietpi.txt" "$MNT_DIR"/"$CONFIG_DIR"
     cp "${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh" "$MNT_DIR"/"$CONFIG_DIR"
     cp "${DIR}/modules/adsb-feeder/filesystem/root/boot/ADSB-README.txt" "$MNT_DIR"/"$CONFIG_DIR"

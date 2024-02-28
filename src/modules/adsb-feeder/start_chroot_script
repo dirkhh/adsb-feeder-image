@@ -20,6 +20,10 @@ df -h
 mount
 echo "127.0.1.1 $(hostname)" 2>/dev/null >> /etc/hosts
 
+# brute force set up an authorized_keys file for root
+mkdir -p ~root/.ssh
+echo "$SSH_PUB_KEY" >> ~root/.ssh/authorized_keys
+
 # setup Python/Flask
 apt-get update --allow-releaseinfo-change
 
