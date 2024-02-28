@@ -1,4 +1,5 @@
 Changes since v1.2.0 include
+- add lsusb output to the advanced page and with far more detail to the logs
 - backup/restore: try to be smarter about what env values are restored vs. kept from the new image
 
 > [!NOTE]

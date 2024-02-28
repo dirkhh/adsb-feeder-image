@@ -44,6 +44,7 @@ from utils import (
     cleanup_str,
     print_err,
 )
+
 # nofmt: off
 # isort: on
 
@@ -475,7 +476,15 @@ class AdsbIm:
 
         # just in case things have changed (the user plugged in a new device for example)
         self._sdrdevices._ensure_populated()
-        return render_template("advanced.html")
+        # embed lsusb output in the page
+        try:
+            lsusb = subprocess.run(
+                "lsusb", shell=True, check=True, capture_output=True
+            ).stdout.decode()
+        except:
+            lsusb = "lsusb failed"
+
+        return render_template("advanced.html", lsusb=lsusb)
 
     def set_channel(self, channel: str):
         with open(self._constants.data_path / "update-channel", "w") as update_channel:
@@ -796,14 +805,7 @@ class AdsbIm:
                     self._constants.env_by_tags("tailscale_ll").value = ""
                 else:
                     self._constants.env_by_tags("tailscale_name").value = ""
-        # embed lsusb output in the page
-        try:
-            lsusb = subprocess.run(
-                "lsusb", shell=True, check=True, capture_output=True
-            ).stdout.decode()
-        except:
-            lsusb = "lsusb failed"
-        return render_template("expert.html", lsusb=lsusb)
+        return render_template("expert.html")
 
     def secure_image(self):
         output: str = ""
