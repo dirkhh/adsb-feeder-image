@@ -122,6 +122,7 @@ class AdsbIm:
         self.app.add_url_rule("/running", "running", self.running)
         self.app.add_url_rule("/backup", "backup", self.backup)
         self.app.add_url_rule("/backupexecute", "backupexecute", self.backup_execute)
+        self.app.add_url_rule("/backupexecuteconfig", "backupexecuteconfig", self.backup_execute_config_only)
         self.app.add_url_rule("/restore", "restore", self.restore, methods=["GET", "POST"])
         self.app.add_url_rule("/executerestore", "executerestore", self.executerestore, methods=["GET", "POST"])
         self.app.add_url_rule("/advanced", "advanced", self.advanced, methods=["GET", "POST"])
@@ -272,17 +273,24 @@ class AdsbIm:
     def backup(self):
         return render_template("/backup.html")
 
+    def backup_execute_config_only(self):
+        return self.create_backup_zip(include_statistics=False)
+
     def backup_execute(self):
+        return self.create_backup_zip()
+
+    def create_backup_zip(self, include_statistics=True):
         adsb_path = pathlib.Path("/opt/adsb/config")
         data = io.BytesIO()
         with zipfile.ZipFile(data, mode="w") as backup_zip:
             backup_zip.write(adsb_path / ".env", arcname=".env")
             for f in adsb_path.glob("*.yml"):
                 backup_zip.write(f, arcname=os.path.basename(f))
-            uf_path = pathlib.Path(adsb_path / "ultrafeeder")
-            if uf_path.is_dir():
-                for f in uf_path.rglob("*"):
-                    backup_zip.write(f, arcname=f.relative_to(adsb_path))
+            if include_statistics:
+                uf_path = pathlib.Path(adsb_path / "ultrafeeder")
+                if uf_path.is_dir():
+                    for f in uf_path.rglob("*"):
+                        backup_zip.write(f, arcname=f.relative_to(adsb_path))
         data.seek(0)
         site_name = self._constants.env_by_tags("mlat_name").value
         now = datetime.now().replace(microsecond=0).isoformat().replace(":", "-")

@@ -3,10 +3,12 @@
 
 {% block content %}
 <h1 class="mt-3 text-center text-danger">{% block title %} Create a backup of your configuration {% endblock %}</h1>
-<p>Click on this button to download a zip file with a backup of your configuration files.</p>
-<p>Depending on the amount of historic graph data you have, this can take a signficant amount of time and result in a
-  very large archive to be downloaded.</p>
+<p>The Config Backup creates a zip file with your configuration settings, the Full Backup creates a zip file with a
+  backup of your configuration settings as well as the historical statistics.</p>
+<p>Depending on the amount of historic graph data you have, a Full Backup can take a signficant amount of time and
+  result in a very large archive to be downloaded. On smaller SBCs there is a chance that the full backup may fail.</p>
 <form method="post" enctype="multipart/form-data">
-  <a class="btn btn-primary" href="/backupexecute">Backup</a>
+  <a class="btn btn-primary" href="/backupexecuteconfig">Config Backup</a>
+  <a class="btn btn-primary" href="/backupexecute">Full Backup</a>
 </form>
 {% endblock %}
