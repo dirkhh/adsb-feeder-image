@@ -1,8 +1,7 @@
 Changes since v1.2.0 include
 - remove the image-provided credentials after the image is configured
 - offer both a full backup and a backup without the historical statistics
-- remove the image-provided ssh keys when securing an image
-- add per release secret ssh key to full image installs
+- add per release secret ssh key to the DietPi based builds - this should help us with debugging
 - add lsusb output to the advanced page and with far more detail to the logs
 - backup/restore: try to be smarter about what env values are restored vs. kept from the new image
 
