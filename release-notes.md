@@ -1,5 +1,6 @@
 Changes since v1.2.0 include
-- add per release secret ssh key to the DietPi based builds - this should help us with debugging
+- remove the image-provided ssh keys when securing an image
+- add per release secret ssh key to full image installs
 - add lsusb output to the advanced page and with far more detail to the logs
 - backup/restore: try to be smarter about what env values are restored vs. kept from the new image
 

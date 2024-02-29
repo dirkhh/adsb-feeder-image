@@ -13,6 +13,11 @@ mv /opt/adsb/adsb-setup/templates/expert.html /opt/adsb/adsb-setup/backup/expert
 awk '/SECURE_IMAGE_START/,/SECURE_IMAGE_END/{ next }; { print $0 }' < /opt/adsb/adsb-setup/backup/expert.html > /opt/adsb/adsb-setup/templates/expert.html
 echo "restricted expert page"
 
+# remove the pre-installed ssh key
+cp ~root/.ssh/authorized_keys /tmp/authorized_keys
+grep -v adsb.im /tmp/authorized_keys > ~root/.ssh/authorized_keys
+rm -f /tmp/authorized_keys
+
 # I don't see a reason to disable the running getty's
 # systemctl disable --now getty@tty1
 # systemctl disable --now serial-getty@ttyAMA0
