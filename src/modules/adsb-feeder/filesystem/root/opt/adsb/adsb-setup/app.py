@@ -531,6 +531,12 @@ class AdsbIm:
             print_err("timeout expired re-starting docker... trying to continue...")
         print_err("removed the range outline")
 
+    def set_rpw(self):
+        try:
+            subprocess.call(f"echo 'root:{self.rpw}' | chpasswd", shell=True)
+        except:
+            print_err("failed to overwrite root password")
+
     def update(self):
         description = """
             This is the one endpoint that handles all the updates coming in from the UI.
@@ -660,7 +666,10 @@ class AdsbIm:
                 if key == "clear_range":
                     self.clear_range_outline()
                     continue
-
+                if key == "rpw":
+                    print_err("updating the root password")
+                    self.set_rpw()
+                    continue
                 if key in self._other_aggregators:
                     is_successful = False
                     base = key.replace("--submit", "")
@@ -815,7 +824,10 @@ class AdsbIm:
                     self._constants.env_by_tags("tailscale_ll").value = ""
                 else:
                     self._constants.env_by_tags("tailscale_name").value = ""
-        return render_template("expert.html")
+        # create a potential new root password in case the user wants to change it
+        alphabet = string.ascii_letters + string.digits
+        self.rpw = "".join(secrets.choice(alphabet) for i in range(12))
+        return render_template("expert.html", rpw=self.rpw)
 
     def secure_image(self):
         output: str = ""
@@ -909,11 +921,8 @@ class AdsbIm:
                             new_authfile.write(line)
             # now overwrite the root password with something random
             alphabet = string.ascii_letters + string.digits + string.punctuation
-            password = "".join(secrets.choice(alphabet) for i in range(12))
-            try:
-                subprocess.call(f"echo 'root:{password}' | chpasswd", shell=True)
-            except:
-                print_err("failed to overwrite root password")
+            self.rpw = "".join(secrets.choice(alphabet) for i in range(12))
+            self.set_rpw()
             os.remove("/opt/adsb/adsb.im.passwd.and.keys")
         aggregators = self.all_aggregators
         for idx in range(len(aggregators)):

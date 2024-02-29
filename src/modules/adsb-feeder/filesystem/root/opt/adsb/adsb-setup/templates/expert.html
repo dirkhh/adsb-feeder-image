@@ -87,6 +87,24 @@
     </form>
   </div>
   <div class="col-12 col-lg-6">
+    <h5 class="mt-3">Create new random root password</h5>
+    <form method="POST">
+      <div class="row">
+        <label for="root_password" class="col-12">
+          The image will use the random root password displayed here. This will allow you to then log in as root
+          on the feeder SBC. Please make sure to copy this password before clicking "Accept".
+        </label>
+        <div class="row fw-light collapse align-right" id="showrpw">
+          <pre class="align-middle ms-5 mt-2 col-auto"><code class="text-light bg-danger">{{ rpw }}</code></pre>
+          <button type="submit" name="rpw" value="stay"
+                  class="align-middle btn btn-primary mb-1 mx-3 col-sm-3">Accept</button>
+        </div>
+      </div>
+      <button class="btn btn-secondary btn-rounded" type="button" data-mdb-toggle="collapse" data-mdb-target="#showrpw"
+              aria-expanded="false" aria-controls="showrpw">show password option</button>
+    </form>
+  </div>
+  <div class="col-12 col-lg-6">
     <h5 class="mt-3">Secure feeder system</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
       <div class="row">

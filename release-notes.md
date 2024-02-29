@@ -1,4 +1,5 @@
 Changes since v1.2.0 include
+- add the option to set a new known, randomly created root password
 - remove the image-provided credentials after the image is configured
 - offer both a full backup and a backup without the historical statistics
 - add per release secret ssh key to the DietPi based builds - this should help us with debugging
