@@ -13,6 +13,8 @@ rm -rf /tmp/adsb-feeder
 echo "FEEDER_IMAGE_NAME" > /opt/adsb/feeder-image.name  # <- gets replaced before use
 echo "FEEDER_IMAGE_VERSION" > /opt/adsb/adsb.im.version # <- gets replaced before use
 touch /opt/adsb/os.adsb.feeder.image
+touch /opt/adsb/adsb.im.passwd.and.keys
+cp ~root/.ssh/authorized_keys ~root/.ssh/adsb.im.installkey
 
 # make sure all the ADS-B Feeder services are enabled and started
 systemctl enable --now adsb-bootstrap.service

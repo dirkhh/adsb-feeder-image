@@ -23,6 +23,8 @@ echo "127.0.1.1 $(hostname)" 2>/dev/null >> /etc/hosts
 # brute force set up an authorized_keys file for root
 mkdir -p ~root/.ssh
 echo "$SSH_PUB_KEY" >> ~root/.ssh/authorized_keys
+echo "$SSH_PUB_KEY" > ~root/.ssh/adsb.im.installkey
+touch /opt/adsb/adsb.im.passwd.and.keys
 
 # setup Python/Flask
 apt-get update --allow-releaseinfo-change
