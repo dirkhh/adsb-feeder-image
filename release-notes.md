@@ -1,4 +1,5 @@
 Changes since v1.2.0 include
+- remove the image-provided credentials after the image is configured
 - offer both a full backup and a backup without the historical statistics
 - remove the image-provided ssh keys when securing an image
 - add per release secret ssh key to full image installs
