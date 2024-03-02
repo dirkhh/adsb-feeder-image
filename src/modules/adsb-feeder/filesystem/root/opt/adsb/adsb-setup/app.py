@@ -906,6 +906,24 @@ class AdsbIm:
         if status == 200:
             self._constants.env_by_tags(["feeder_ip"]).value = ip
 
+        # next check if there were under-voltage events (this is likely only relevant on an RPi)
+        self._constants.env_by_tags("under_voltage").value = False
+        board = self._constants.env_by_tags("board_name").value
+        if board and board.startswith("Raspberry"):
+            try:
+                # yes, the except / else is a bit unintuitive, but that seemed the easiest way to do this;
+                # if we don't find the text (the good case) we get an exception
+                # ... on my kernels the message seems to be "Undervoltage", but on the web I find references to "under-voltage"
+                subprocess.check_call(
+                    "dmesg | grep -iE under.?voltage",
+                    shell=True,
+                    stdout=subprocess.DEVNULL,
+                )
+            except subprocess.CalledProcessError:
+                pass
+            else:
+                self._constants.env_by_tags("under_voltage").value = True
+
         # if we get to show the feeder homepage, the user should have everything figured out
         # and we can remove the pre-installed ssh-keys and password
         if os.path.exists("/opt/adsb/adsb.im.passwd.and.keys"):

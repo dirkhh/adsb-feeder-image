@@ -525,6 +525,11 @@ class Constants:
             is_mandatory=False,
             tags=["feeder_ip", "norestore"],
         ),
+        Env(
+            "_ADSBIM_STATE_UNDER_VOLTAGE",
+            is_mandatory=False,
+            tags=["under_voltage", "norestore"],
+        ),
     }
 
     @property

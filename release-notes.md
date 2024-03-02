@@ -1,4 +1,5 @@
 Changes since v1.2.0 include
+- alert the user when an under-voltage was detected by the kernel
 - add the option to set a new known, randomly created root password
 - remove the image-provided credentials after the image is configured
 - offer both a full backup and a backup without the historical statistics
