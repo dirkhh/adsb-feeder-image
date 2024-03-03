@@ -143,6 +143,10 @@ class Constants:
         Env(
             "FEEDER_SERIAL_978", is_mandatory=False, tags=["978serial"]
         ),  # this is the SDR serial
+        Env("FEEDER_UNUSED_SERIAL_0", is_mandatory=False, tags=["other-0"]),
+        Env("FEEDER_UNUSED_SERIAL_1", is_mandatory=False, tags=["other-1"]),
+        Env("FEEDER_UNUSED_SERIAL_2", is_mandatory=False, tags=["other-2"]),
+        Env("FEEDER_UNUSED_SERIAL_3", is_mandatory=False, tags=["other-3"]),
         # Feeder
         Env(
             "FEEDER_ULTRAFEEDER_CONFIG", is_mandatory=True, tags=["ultrafeeder_config"]

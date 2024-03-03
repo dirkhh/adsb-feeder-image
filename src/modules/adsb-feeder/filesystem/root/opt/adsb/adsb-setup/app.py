@@ -443,11 +443,25 @@ class AdsbIm:
     def sdr_info(self):
         # get our guess for the right SDR to frequency mapping
         # and then update with the actual settings
-        frequencies: Dict[str, str] = self._sdrdevices.addresses_per_frequency
+        frequencies: Dict[str, str] = {978: "", 1090: ""}
+        default_frequencies: Dict[str, str] = self._sdrdevices.addresses_per_frequency
         for freq in [1090, 978]:
             setting = self._constants.env_by_tags(f"{freq}serial")
             if setting and setting.value != "":
                 frequencies[freq] = setting.value
+        if (
+            frequencies[1090] == ""
+            and default_frequencies[1090] != ""
+            and frequencies[978] != default_frequencies[1090]
+        ):
+            frequencies[1090] = default_frequencies[1090]
+        if (
+            frequencies[978] == ""
+            and default_frequencies[978] != ""
+            and frequencies[1090] != default_frequencies[978]
+        ):
+            frequencies[978] = default_frequencies[978]
+
         return json.dumps(
             {
                 "sdrdevices": [sdr._json for sdr in self._sdrdevices.sdrs],
@@ -544,11 +558,19 @@ class AdsbIm:
         """
         # in the HTML, every input field needs to have a name that is concatenated by "--"
         # and that matches the tags of one Env
+        purposes = (
+            "978serial",
+            "1090serial",
+            "other-0",
+            "other-1",
+            "other-2",
+            "other-3",
+        )
         form: Dict = request.form
         seen_go = False
         allow_insecure = not self._constants.is_enabled("secure_image")
         for key, value in form.items():
-            # print_err(f"handling {key} -> {value} (allow insecure is {allow_insecure})")
+            print_err(f"handling {key} -> {value} (allow insecure is {allow_insecure})")
             # this seems like cheating... let's capture all of the submit buttons
             if value == "go":
                 seen_go = True
@@ -719,31 +741,42 @@ class AdsbIm:
                     self._constants.env_by_tags(["gain_airspy"]).value = (
                         "auto" if value == "autogain" else value
                     )
+                # finally, painfully ensure that we remove explicitly asigned SDRs from other asignments
+                # this relies on the web page to ensure that each SDR is only asigned on purpose
+                if key in purposes:
+                    for clear_key in purposes:
+                        if value == self._constants.env_by_tags(clear_key).value:
+                            self._constants.env_by_tags(clear_key).value = ""
+
                 e.value = value
         # done handling the input data
         # what implied settings do we have (and could we simplify them?)
         # first grab the SDRs plugged in and check if we have one identified for UAT
         self._sdrdevices._ensure_populated()
-        s978 = self._constants.env_by_tags("978serial").value
-        if s978 != "" and not any(
-            [sdr._serial == s978 for sdr in self._sdrdevices.sdrs]
+        env978 = self._constants.env_by_tags("978serial")
+        env1090 = self._constants.env_by_tags("1090serial")
+        if env978.value != "" and not any(
+            [sdr._serial == env978.value for sdr in self._sdrdevices.sdrs]
         ):
-            self._constants.env_by_tags("978serial").value = ""
-        s1090 = self._constants.env_by_tags("1090serial").value
-        if s1090 != "" and not any(
-            [sdr._serial == s1090 for sdr in self._sdrdevices.sdrs]
+            env978.value = ""
+        if env1090.value != "" and not any(
+            [sdr._serial == env1090.value for sdr in self._sdrdevices.sdrs]
         ):
-            self._constants.env_by_tags("1090serial").value = ""
+            env1090.value = ""
         auto_assignment = self._sdrdevices.addresses_per_frequency
-        print_err(f"SDR auto_assignment would be {auto_assignment}")
-        if (
-            not self._constants.env_by_tags("1090serial").value
-            and auto_assignment[1090]
-        ):
-            self._constants.env_by_tags("1090serial").value = auto_assignment[1090]
-        if not self._constants.env_by_tags("978serial").value and auto_assignment[978]:
-            self._constants.env_by_tags("978serial").value = auto_assignment[978]
-        if self._constants.env_by_tags("978serial").value:
+        # if we have an actual asignment, that overrides the auto-assignment,
+        # delete the auto-assignment
+        for frequency in [978, 1090]:
+            if any(
+                auto_assignment[frequency] == self._constants.env_by_tags(purpose).value
+                for purpose in purposes
+            ):
+                auto_assignment[frequency] = ""
+        if not env1090.value and auto_assignment[1090]:
+            env1090.value = auto_assignment[1090]
+        if not env978.value and auto_assignment[978]:
+            env978.value = auto_assignment[978]
+        if env978.value:
             self._constants.env_by_tags(["uat978", "is_enabled"]).value = True
             self._constants.env_by_tags("978url").value = "http://dump978/skyaware978"
             self._constants.env_by_tags("978host").value = "dump978"
@@ -757,23 +790,23 @@ class AdsbIm:
         # next check for airspy devices
         airspy = any([sdr._type == "airspy" for sdr in self._sdrdevices.sdrs])
         self._constants.env_by_tags(["airspy", "is_enabled"]).value = airspy
+
+        # finally - if we have exactly one SDR and it hasn't been assigned to anything, use it for 1090
         if (
             len(self._sdrdevices.sdrs) == 1
             and not airspy
-            and not self._constants.env_by_tags("978serial").value
+            and not any(self._constants.env_by_tags(p).value for p in purposes)
         ):
-            self._constants.env_by_tags("1090serial").value = self._sdrdevices.sdrs[
-                0
-            ]._serial
+            env1090.value = self._sdrdevices.sdrs[0]._serial
         if airspy:
-            self._constants.env_by_tags("1090serial").value = ""
+            env1090.value = ""
 
-        rtlsdr = not airspy and self._constants.env_by_tags("1090serial").value != ""
+        rtlsdr = not airspy and env1090.value != ""
         self._constants.env_by_tags("rtlsdr").value = "rtlsdr" if rtlsdr else ""
 
         print_err(f"in the end we have")
-        print_err(f"1090serial {self._constants.env_by_tags('1090serial').value}")
-        print_err(f"978serial {self._constants.env_by_tags('978serial').value}")
+        print_err(f"1090serial {env1090.value}")
+        print_err(f"978serial {env978.value}")
         print_err(
             f"airspy container is {self._constants.env_by_tags(['airspy', 'is_enabled']).value}"
         )

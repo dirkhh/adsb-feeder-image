@@ -1,11 +1,5 @@
-Changes since v1.2.0 include
-- alert the user when an under-voltage was detected by the kernel
-- add the option to set a new known, randomly created root password
-- remove the image-provided credentials after the image is configured
-- offer both a full backup and a backup without the historical statistics
-- add per release secret ssh key to the the full image install - this should help us with debugging
-- add lsusb output to the advanced page and with far more detail to the logs
-- backup/restore: try to be smarter about what env values are restored vs. kept from the new image
+Changes since v1.2.1 include
+- ensure that every SDR has only one role
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)
