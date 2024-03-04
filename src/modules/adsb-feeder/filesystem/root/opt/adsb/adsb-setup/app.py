@@ -443,24 +443,25 @@ class AdsbIm:
     def sdr_info(self):
         # get our guess for the right SDR to frequency mapping
         # and then update with the actual settings
-        frequencies: Dict[str, str] = {978: "", 1090: ""}
         default_frequencies: Dict[str, str] = self._sdrdevices.addresses_per_frequency
-        for freq in [1090, 978]:
-            setting = self._constants.env_by_tags(f"{freq}serial")
-            if setting and setting.value != "":
-                frequencies[freq] = setting.value
-        if (
-            frequencies[1090] == ""
-            and default_frequencies[1090] != ""
-            and frequencies[978] != default_frequencies[1090]
-        ):
-            frequencies[1090] = default_frequencies[1090]
-        if (
-            frequencies[978] == ""
-            and default_frequencies[978] != ""
-            and frequencies[1090] != default_frequencies[978]
-        ):
-            frequencies[978] = default_frequencies[978]
+        print_err(f"default frequencies: {default_frequencies}")
+        purposes = (
+            "978serial",
+            "1090serial",
+            "other-0",
+            "other-1",
+            "other-2",
+            "other-3",
+        )
+        frequencies: Dict[str, str] = {
+            p: self._constants.env_by_tags(p).value for p in purposes
+        }
+        for f in [978, 1090]:
+            if (
+                not frequencies[f"{f}serial"]
+                and default_frequencies[f] not in frequencies.values()
+            ):
+                frequencies[f"{f}serial"] = default_frequencies[f]
 
         return json.dumps(
             {
