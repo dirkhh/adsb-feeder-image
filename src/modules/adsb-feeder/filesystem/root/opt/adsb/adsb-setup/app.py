@@ -281,21 +281,21 @@ class AdsbIm:
         return self.create_backup_zip()
 
     def backup_execute_graphs(self):
-        return self.create_backup_zip(include_statistics=True)
+        return self.create_backup_zip(include_graphs=True)
 
     def backup_execute_full(self):
-        return self.create_backup_zip(include_statistics=True, include_heatmap=True)
+        return self.create_backup_zip(include_graphs=True, include_heatmap=True)
 
-    def create_backup_zip(self, include_statistics=False, include_heatmap=False):
+    def create_backup_zip(self, include_graphs=False, include_heatmap=False):
         adsb_path = pathlib.Path("/opt/adsb/config")
         data = tempfile.TemporaryFile()
         with zipfile.ZipFile(data, mode="w") as backup_zip:
             backup_zip.write(adsb_path / ".env", arcname=".env")
             for f in adsb_path.glob("*.yml"):
                 backup_zip.write(f, arcname=os.path.basename(f))
-            if include_statistics:
-                st_path = pathlib.Path(adsb_path / "ultrafeeder/graphs1090/rrd/localhost.tar.gz")
-                backup_zip.write(st_path, arcname=st_path.relative_to(adsb_path))
+            if include_graphs:
+                graphs_path = pathlib.Path(adsb_path / "ultrafeeder/graphs1090/rrd/localhost.tar.gz")
+                backup_zip.write(graphs_path, arcname=graphs_path.relative_to(adsb_path))
             if include_heatmap:
                 uf_path = pathlib.Path(adsb_path / "ultrafeeder/globe_history")
                 if uf_path.is_dir():
