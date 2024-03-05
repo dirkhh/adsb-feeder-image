@@ -11,6 +11,7 @@ import shutil
 import string
 import subprocess
 import zipfile
+import tempfile
 from base64 import b64encode
 from datetime import datetime
 from operator import is_
@@ -283,7 +284,7 @@ class AdsbIm:
 
     def create_backup_zip(self, include_statistics=True):
         adsb_path = pathlib.Path("/opt/adsb/config")
-        data = io.BytesIO()
+        data = tempfile.TemporaryFile()
         with zipfile.ZipFile(data, mode="w") as backup_zip:
             backup_zip.write(adsb_path / ".env", arcname=".env")
             for f in adsb_path.glob("*.yml"):
