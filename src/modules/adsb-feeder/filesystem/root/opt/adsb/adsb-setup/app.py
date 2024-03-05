@@ -124,8 +124,9 @@ class AdsbIm:
         self.app.add_url_rule("/restart", "restart", self.restart, methods=["GET", "POST"])
         self.app.add_url_rule("/running", "running", self.running)
         self.app.add_url_rule("/backup", "backup", self.backup)
-        self.app.add_url_rule("/backupexecute", "backupexecute", self.backup_execute)
-        self.app.add_url_rule("/backupexecuteconfig", "backupexecuteconfig", self.backup_execute_config_only)
+        self.app.add_url_rule("/backupexecutefull", "backupexecutefull", self.backup_execute_full)
+        self.app.add_url_rule("/backupexecutegraphs", "backupexecutegraphs", self.backup_execute_graphs)
+        self.app.add_url_rule("/backupexecuteconfig", "backupexecuteconfig", self.backup_execute_config)
         self.app.add_url_rule("/restore", "restore", self.restore, methods=["GET", "POST"])
         self.app.add_url_rule("/executerestore", "executerestore", self.executerestore, methods=["GET", "POST"])
         self.app.add_url_rule("/advanced", "advanced", self.advanced, methods=["GET", "POST"])
@@ -276,13 +277,16 @@ class AdsbIm:
     def backup(self):
         return render_template("/backup.html")
 
-    def backup_execute_config_only(self):
-        return self.create_backup_zip(include_statistics=False)
-
-    def backup_execute(self):
+    def backup_execute_config(self):
         return self.create_backup_zip()
 
-    def create_backup_zip(self, include_statistics=True):
+    def backup_execute_graphs(self):
+        return self.create_backup_zip(include_statistics=True)
+
+    def backup_execute_full(self):
+        return self.create_backup_zip(include_statistics=True, include_heatmap=True)
+
+    def create_backup_zip(self, include_statistics=False, include_heatmap=False):
         adsb_path = pathlib.Path("/opt/adsb/config")
         data = tempfile.TemporaryFile()
         with zipfile.ZipFile(data, mode="w") as backup_zip:
@@ -290,7 +294,10 @@ class AdsbIm:
             for f in adsb_path.glob("*.yml"):
                 backup_zip.write(f, arcname=os.path.basename(f))
             if include_statistics:
-                uf_path = pathlib.Path(adsb_path / "ultrafeeder")
+                st_path = pathlib.Path(adsb_path / "ultrafeeder/graphs1090/rrd/localhost.tar.gz")
+                backup_zip.write(st_path, arcname=st_path.relative_to(adsb_path))
+            if include_heatmap:
+                uf_path = pathlib.Path(adsb_path / "ultrafeeder/globe_history")
                 if uf_path.is_dir():
                     for f in uf_path.rglob("*"):
                         backup_zip.write(f, arcname=f.relative_to(adsb_path))
