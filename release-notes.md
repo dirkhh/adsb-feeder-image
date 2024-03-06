@@ -1,4 +1,6 @@
 Changes since v1.2.1 include
+- tweak some of the readsb options to reduce unnecessary disk IO and in return shorten the time between writeback of graphs to disk - thank you @wiedehopf 
+- improve backup handling (use tempfile instead of in memory data, don't backup unnecessary data, offer three levels of backup) - thank you @wiedehopf 
 - ensure that every SDR has only one role
 
 > [!NOTE]
