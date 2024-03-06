@@ -558,6 +558,16 @@ class AdsbIm:
             subprocess.call(f"echo 'root:{self.rpw}' | chpasswd", shell=True)
         except:
             print_err("failed to overwrite root password")
+        if os.path.exists("/etc/ssh/sshd_config"):
+            try:
+                subprocess.call(
+                    "sed -i 's/^\(PermitRootLogin.*\)/# \\1/' /etc/ssh/sshd_config &&"
+                    "echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config && "
+                    "systemctl restart sshd",
+                    shell=True,
+                )
+            except:
+                print_err("failed to allow root ssh login")
 
     def update(self):
         description = """

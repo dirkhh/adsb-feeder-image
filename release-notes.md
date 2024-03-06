@@ -1,4 +1,5 @@
 Changes since v1.2.1 include
+- make sure root login with password is allowed when setting the root password
 - reimplement secure image function
 - disable MagicDNS for Tailnet
 - add warning when free disk space drops below 1G
