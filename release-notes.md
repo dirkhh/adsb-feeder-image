@@ -1,4 +1,5 @@
 Changes since v1.2.1 include
+- disable MagicDNS for Tailnet
 - add warning when free disk space drops below 1G
 - fix and simplify handling of SDR assignments on advanced page
 - tweak some of the readsb options to reduce unnecessary disk IO and in return shorten the time between writeback of graphs to disk - thank you @wiedehopf 

@@ -663,7 +663,7 @@ class AdsbIm:
                             timeout=20.0,
                         )
                         result = subprocess.run(
-                            f"/usr/bin/tailscale up {ts_args} 2> /tmp/out &",
+                            f"/usr/bin/tailscale up {ts_args} --accept-dns=false 2> /tmp/out &",
                             shell=True,
                             capture_output=False,
                             timeout=30.0,
