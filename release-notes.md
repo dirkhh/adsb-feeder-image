@@ -1,4 +1,5 @@
 Changes since v1.2.1 include
+- reimplement secure image function
 - disable MagicDNS for Tailnet
 - add warning when free disk space drops below 1G
 - fix and simplify handling of SDR assignments on advanced page

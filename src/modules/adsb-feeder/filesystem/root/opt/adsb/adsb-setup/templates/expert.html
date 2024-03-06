@@ -74,7 +74,7 @@
   </div>
   <!-- FULL_IMAGE_ONLY_START -->
   <!-- SECURE_IMAGE_START -->
-  <div class="col-12 col-lg-6">
+  <div class="col-12 col-lg-6 {% if is_enabled('secure_image') %} d-none {% endif %}">
     <h5 class="mt-3">Install ssh credentials</h5>
     <form method="POST">
       <div class="row">
@@ -86,7 +86,7 @@
       </div>
     </form>
   </div>
-  <div class="col-12 col-lg-6">
+  <div class="col-12 col-lg-6 {% if is_enabled('secure_image') %} d-none {% endif %}">
     <h5 class="mt-3">Create new random root password</h5>
     <form method="POST">
       <div class="row">
@@ -104,7 +104,7 @@
               aria-expanded="false" aria-controls="showrpw">show password option</button>
     </form>
   </div>
-  <div class="col-12 col-lg-6">
+  <div class="col-12 col-lg-6 {% if is_enabled('secure_image') %} d-none {% endif %}">
     <h5 class="mt-3">Secure feeder system</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
       <div class="row">
@@ -119,8 +119,7 @@
       </div>
     </form>
   </div>
-  <!-- SECURE_IMAGE_END -->
-  <div class="col-12 col-lg-6">
+  <div class="col-12 col-lg-6 {% if is_enabled('secure_image') %} d-none {% endif %}">
     <h5 class="mt-3">Shutdown/Reboot</h5>
     <form method="POST">
       <div class="row">
@@ -135,6 +134,7 @@
       </div>
     </form>
   </div>
+  <!-- SECURE_IMAGE_END -->
   <div class="col-12 col-lg-6">
     <h5 class="mt-3">Nightly system update settings</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
@@ -194,7 +194,7 @@
     </form>
   </div>
   <!-- FULL_IMAGE_ONLY_START -->
-  <div class="col-12 col-lg-6">
+  <div class="col-12 col-lg-6 {% if is_enabled('secure_image') %} d-none {% endif %}">
     <h5 class="mt-3">Add Zerotier</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
       <div class="row">
@@ -211,7 +211,7 @@
       </div>
     </form>
   </div>
-  <div class="col-12 col-lg-6">
+  <div class="col-12 col-lg-6 {% if is_enabled('secure_image') %} d-none {% endif %}">
     <h5 class="mt-3">Add Tailscale</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
       <div class="row">
@@ -243,6 +243,7 @@
       </div>
     </form>
   </div>
+
   <!-- FULL_IMAGE_ONLY_END -->
 </div>
 {% endblock %}

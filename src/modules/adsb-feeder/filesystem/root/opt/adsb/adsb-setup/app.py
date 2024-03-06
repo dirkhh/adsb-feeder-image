@@ -586,11 +586,11 @@ class AdsbIm:
                 if key == "aggregators":
                     # user has clicked Submit on Aggregator page
                     self._constants.env_by_tags("aggregators_chosen").value = True
-                if key == "shutdown":
+                if allow_insecure and key == "shutdown":
                     # do shutdown
                     self._system.halt()
                     return render_template("/waitandredirect.html")
-                if key == "reboot":
+                if allow_insecure and key == "reboot":
                     # initiate reboot
                     self._system.reboot()
                     return render_template("/waitandredirect.html")
@@ -600,7 +600,6 @@ class AdsbIm:
                     return render_template("/waitandredirect.html")
                 if key == "secure_image":
                     self._constants.env_by_tags("secure_image").value = True
-                    self.secure_image()
                 if key == "update":
                     # this needs a lot more checking and safety, but for now, just go
                     cmdline = "/opt/adsb/docker-update-adsb-im"
@@ -632,7 +631,7 @@ class AdsbIm:
                 if key == "nightly_update" or key == "zerotier":
                     # this will be handled through the separate key/value pairs
                     pass
-                if key == "tailscale":
+                if allow_insecure and key == "tailscale":
                     # grab extra arguments if given
                     ts_args = form.get("tailscale_extras", "")
                     if ts_args:
@@ -696,7 +695,7 @@ class AdsbIm:
                 if key == "clear_range":
                     self.clear_range_outline()
                     continue
-                if key == "rpw":
+                if allow_insecure and key == "rpw":
                     print_err("updating the root password")
                     self.set_rpw()
                     continue
@@ -728,7 +727,7 @@ class AdsbIm:
                     with open(ssh_dir / "authorized_keys", "a+") as authorized_keys:
                         authorized_keys.write(f"{value}\n")
                     self._constants.env_by_tags("ssh_configured").value = True
-                if key == "zerotierid":
+                if allow_insecure and key == "zerotierid":
                     try:
                         subprocess.call(
                             "/usr/bin/systemctl enable --now zerotier-one", shell=True
@@ -869,18 +868,6 @@ class AdsbIm:
         alphabet = string.ascii_letters + string.digits
         self.rpw = "".join(secrets.choice(alphabet) for i in range(12))
         return render_template("expert.html", rpw=self.rpw)
-
-    def secure_image(self):
-        output: str = ""
-        try:
-            result = subprocess.run(
-                "/opt/adsb/secure-image", shell=True, capture_output=True
-            )
-        except subprocess.TimeoutExpired as exc:
-            output = exc.stdout.decode()
-        else:
-            output = result.stdout.decode()
-        print_err(f"secure_image: {output}")
 
     @check_restart_lock
     def aggregators(self):
