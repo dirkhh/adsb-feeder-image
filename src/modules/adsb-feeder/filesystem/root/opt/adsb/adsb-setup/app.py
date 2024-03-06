@@ -965,6 +965,11 @@ class AdsbIm:
             else:
                 self._constants.env_by_tags("under_voltage").value = True
 
+        # now let's check for disk space
+        self._constants.env_by_tags("low_disk").value = (
+            shutil.disk_usage("/").free < 1024 * 1024 * 1024
+        )
+
         # if we get to show the feeder homepage, the user should have everything figured out
         # and we can remove the pre-installed ssh-keys and password
         if os.path.exists("/opt/adsb/adsb.im.passwd.and.keys"):

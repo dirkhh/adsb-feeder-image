@@ -534,6 +534,11 @@ class Constants:
             is_mandatory=False,
             tags=["under_voltage", "norestore"],
         ),
+        Env(
+            "_ADSBIM_STATE_LOW_DISK",
+            is_mandatory=False,
+            tags=["low_disk", "norestore"],
+        ),
     }
 
     @property

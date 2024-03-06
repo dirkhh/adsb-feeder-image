@@ -16,6 +16,11 @@
   The external IP of your browser and the feeder are different. The information in the status links for some of the
   aggregators below may be incorrect.
 </div>
+<div id="low-disk" class="alert alert-info" role="alert" {% if not env_value_by_tag('low_disk') %}
+     style="display: none;" {% endif %}>
+  You are running low on disk space on the your feeder. This can lead to odd problems and even crashes. Consider
+  upgrading to a larger storage device.
+</div>
 <div class="row">
   <div class="col-12">
     <h4>You are feeding</h4>
