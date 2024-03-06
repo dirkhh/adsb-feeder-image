@@ -157,9 +157,7 @@
           document.getElementById(id + "-serial").innerHTML = serial;
           for (const c of consumers) {
             document.getElementById(c + '-' + i).value = serial;
-            if (use[c] == serial) {
-              document.getElementById(c + '-' + i).checked = true;
-            }
+            document.getElementById(c + '-' + i).checked = (use[c] == serial);
           }
         }
         for (let i = num; i < 4; i++) {
