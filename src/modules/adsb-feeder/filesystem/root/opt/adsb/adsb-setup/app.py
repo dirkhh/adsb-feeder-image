@@ -11,6 +11,7 @@ import shutil
 import string
 import subprocess
 import zipfile
+import tempfile
 from base64 import b64encode
 from datetime import datetime
 from operator import is_
@@ -123,8 +124,9 @@ class AdsbIm:
         self.app.add_url_rule("/restart", "restart", self.restart, methods=["GET", "POST"])
         self.app.add_url_rule("/running", "running", self.running)
         self.app.add_url_rule("/backup", "backup", self.backup)
-        self.app.add_url_rule("/backupexecute", "backupexecute", self.backup_execute)
-        self.app.add_url_rule("/backupexecuteconfig", "backupexecuteconfig", self.backup_execute_config_only)
+        self.app.add_url_rule("/backupexecutefull", "backupexecutefull", self.backup_execute_full)
+        self.app.add_url_rule("/backupexecutegraphs", "backupexecutegraphs", self.backup_execute_graphs)
+        self.app.add_url_rule("/backupexecuteconfig", "backupexecuteconfig", self.backup_execute_config)
         self.app.add_url_rule("/restore", "restore", self.restore, methods=["GET", "POST"])
         self.app.add_url_rule("/executerestore", "executerestore", self.executerestore, methods=["GET", "POST"])
         self.app.add_url_rule("/advanced", "advanced", self.advanced, methods=["GET", "POST"])
@@ -275,21 +277,27 @@ class AdsbIm:
     def backup(self):
         return render_template("/backup.html")
 
-    def backup_execute_config_only(self):
-        return self.create_backup_zip(include_statistics=False)
-
-    def backup_execute(self):
+    def backup_execute_config(self):
         return self.create_backup_zip()
 
-    def create_backup_zip(self, include_statistics=True):
+    def backup_execute_graphs(self):
+        return self.create_backup_zip(include_graphs=True)
+
+    def backup_execute_full(self):
+        return self.create_backup_zip(include_graphs=True, include_heatmap=True)
+
+    def create_backup_zip(self, include_graphs=False, include_heatmap=False):
         adsb_path = pathlib.Path("/opt/adsb/config")
-        data = io.BytesIO()
+        data = tempfile.TemporaryFile()
         with zipfile.ZipFile(data, mode="w") as backup_zip:
             backup_zip.write(adsb_path / ".env", arcname=".env")
             for f in adsb_path.glob("*.yml"):
                 backup_zip.write(f, arcname=os.path.basename(f))
-            if include_statistics:
-                uf_path = pathlib.Path(adsb_path / "ultrafeeder")
+            if include_graphs:
+                graphs_path = pathlib.Path(adsb_path / "ultrafeeder/graphs1090/rrd/localhost.tar.gz")
+                backup_zip.write(graphs_path, arcname=graphs_path.relative_to(adsb_path))
+            if include_heatmap:
+                uf_path = pathlib.Path(adsb_path / "ultrafeeder/globe_history")
                 if uf_path.is_dir():
                     for f in uf_path.rglob("*"):
                         backup_zip.write(f, arcname=f.relative_to(adsb_path))
@@ -353,10 +361,14 @@ class AdsbIm:
             # now check which ones are different from the installed versions
             changed: List[str] = []
             unchanged: List[str] = []
-            saw_uf = False
+            saw_globe_history = False
+            saw_graphs = False
             for name in restored_files:
                 if name.startswith("ultrafeeder/"):
-                    saw_uf = True
+                    if name.startswith("ultrafeeder/globe_history/"):
+                        saw_globe_history = True
+                    if name.startswith("ultrafeeder/graphs1090/"):
+                        saw_graphs = True
                 elif os.path.isfile(adsb_path / name):
                     if filecmp.cmp(adsb_path / name, restore_path / name):
                         print_err(f"{name} is unchanged")
@@ -364,8 +376,10 @@ class AdsbIm:
                     else:
                         print_err(f"{name} is different from current version")
                         changed.append(name)
-            if saw_uf:
-                changed.append("ultrafeeder/")
+            if saw_globe_history:
+                changed.append("ultrafeeder/globe_history/")
+            if saw_graphs:
+                changed.append("ultrafeeder/graphs1090/")
             return render_template(
                 "/restoreexecute.html", changed=changed, unchanged=unchanged
             )

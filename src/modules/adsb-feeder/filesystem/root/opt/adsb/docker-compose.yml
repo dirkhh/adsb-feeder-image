@@ -45,6 +45,10 @@ services:
       - READSB_MODEAC=false
       - READSB_RX_LOCATION_ACCURACY=2
       - READSB_STATS_RANGE=true
+      # --write-state-only-on-exit only affects the heatmap/replay data and traces
+      # this configuration has no traces and the heatmap/replay data are written every 30 min anyhow
+      # docker stop ultrafeeder will result in proper readsb exit which writes the state anyhow
+      - READSB_EXTRA_ARGS=--write-state-only-on-exit
       # Sources and Aggregator connections:
       # (Note - remove the ones you are not using / feeding)
       - ULTRAFEEDER_CONFIG=${FEEDER_ULTRAFEEDER_CONFIG}
@@ -75,6 +79,8 @@ services:
       # GRAPHS1090 (Decoder and System Status Web Page) parameters:
       # The two 978 related parameters should only be included if you are running dump978 for UAT reception (USA only)
       - GRAPHS1090_REDUCE_IO=true
+      # How often the statistics data the graphs are generated from are written to disk (in seconds)
+      - GRAPHS1090_REDUCE_IO_FLUSH_IVAL=21600
       - GRAPHS1090_DARKMODE=true
       - ENABLE_978=${FEEDER_ENABLE_UAT978}
       - URL_978=${FEEDER_URL_978}
