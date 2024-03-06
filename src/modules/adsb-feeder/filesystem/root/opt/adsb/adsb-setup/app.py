@@ -294,8 +294,12 @@ class AdsbIm:
             for f in adsb_path.glob("*.yml"):
                 backup_zip.write(f, arcname=os.path.basename(f))
             if include_graphs:
-                graphs_path = pathlib.Path(adsb_path / "ultrafeeder/graphs1090/rrd/localhost.tar.gz")
-                backup_zip.write(graphs_path, arcname=graphs_path.relative_to(adsb_path))
+                graphs_path = pathlib.Path(
+                    adsb_path / "ultrafeeder/graphs1090/rrd/localhost.tar.gz"
+                )
+                backup_zip.write(
+                    graphs_path, arcname=graphs_path.relative_to(adsb_path)
+                )
             if include_heatmap:
                 uf_path = pathlib.Path(adsb_path / "ultrafeeder/globe_history")
                 if uf_path.is_dir():
@@ -457,30 +461,19 @@ class AdsbIm:
     def sdr_info(self):
         # get our guess for the right SDR to frequency mapping
         # and then update with the actual settings
-        default_frequencies: Dict[str, str] = self._sdrdevices.addresses_per_frequency
-        print_err(f"default frequencies: {default_frequencies}")
-        purposes = (
-            "978serial",
-            "1090serial",
-            "other-0",
-            "other-1",
-            "other-2",
-            "other-3",
-        )
-        frequencies: Dict[str, str] = {
-            p: self._constants.env_by_tags(p).value for p in purposes
+        serial_guess: Dict[str, str] = self._sdrdevices.addresses_per_frequency
+        print_err(f"serial guess: {serial_guess}")
+        serials: Dict[str, str] = {
+            f: self._constants.env_by_tags(f).value for f in [978, 1090]
         }
         for f in [978, 1090]:
-            if (
-                not frequencies[f"{f}serial"]
-                and default_frequencies[f] not in frequencies.values()
-            ):
-                frequencies[f"{f}serial"] = default_frequencies[f]
+            if not serials[f] and serial_guess[f] not in serials.values():
+                serials[f] = serial_guess[f]
 
         return json.dumps(
             {
                 "sdrdevices": [sdr._json for sdr in self._sdrdevices.sdrs],
-                "frequencies": frequencies,
+                "frequencies": serials,
                 "duplicates": ", ".join(self._sdrdevices.duplicates),
             }
         )
