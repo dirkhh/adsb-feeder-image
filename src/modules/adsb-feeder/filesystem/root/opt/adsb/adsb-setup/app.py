@@ -464,7 +464,7 @@ class AdsbIm:
         serial_guess: Dict[str, str] = self._sdrdevices.addresses_per_frequency
         print_err(f"serial guess: {serial_guess}")
         serials: Dict[str, str] = {
-            f: self._constants.env_by_tags(f).value for f in [978, 1090]
+            f: self._constants.env_by_tags(f"{f}serial").value for f in [978, 1090]
         }
         for f in [978, 1090]:
             if not serials[f] and serial_guess[f] not in serials.values():
