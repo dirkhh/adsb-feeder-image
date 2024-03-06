@@ -119,6 +119,9 @@
           Enter your two FR24 sharing keys (first one for ADS-B/1090, second one for UAT). For either or both of the
           fields you can also enter your email address and the feeder will request the corresponding key for you.
           {% endif %}
+          Please note that requesting a feeder key by entering an email will fail if you already have three feeders
+          associated with that email address. In that case you will need to email FR24 support and request that they
+          manually add another key for you (or simply use a different email address).
         </label>
         <input type="text" id="flightradar--key" name="flightradar--key" class="form-control w-50"
                placeholder="existing flightradar24 ADS-B sharing key or email address"
