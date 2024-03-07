@@ -15,6 +15,7 @@ class Constants:
     config_path = data_path / "config"
     env_file_path = config_path / ".env"
     version_file = data_path / "adsb.im.version"
+    secure_image_path = data_path / "adsb.im.secure_image"
     is_feeder_image = True
 
     _proxy_routes = [
@@ -314,6 +315,9 @@ class Constants:
             ),
             tags=["image_name", "norestore"],
         ),
+        # legacy secure image state, now handled via separate file
+        # keep it around to handle updates from before the changeover
+        # and easy checks in webinterface
         Env(
             "_ADSBIM_STATE_IS_SECURE_IMAGE",
             is_mandatory=False,

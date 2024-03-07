@@ -78,6 +78,10 @@ class AdsbIm:
         self._sdrdevices = SDRDevices()
         self._ultrafeeder = UltrafeederConfig(constants=self._constants)
 
+        # Ensure secure_image is set the new way if before the update it was set only as env variable
+        if self._constants.is_enabled("secure_image"):
+            self.set_secure_image()
+
         # update Env ultrafeeder to have value self._ultrafeed.generate()
         self._constants.env_by_tags("ultrafeeder_config")._value_call = (
             self._ultrafeeder.generate
@@ -180,6 +184,16 @@ class AdsbIm:
             "cv": self._constants.env_by_tags("container_version").value,
         }
         return b64encode(compress(pickle.dumps(image)))
+
+    def check_secure_image(self):
+        return self._constants.secure_image_path.exists()
+
+    def set_secure_image(self):
+        # set legacy env variable as well for webinterface
+        self._constants.env_by_tags("secure_image").value = True
+        if not self.check_secure_image():
+            self._constants.secure_image_path.touch(exist_ok=True)
+            print_err("secure_image has been set")
 
     def update_dns_state(self):
         dns_state = self._system.check_dns()
@@ -586,7 +600,7 @@ class AdsbIm:
         )
         form: Dict = request.form
         seen_go = False
-        allow_insecure = not self._constants.is_enabled("secure_image")
+        allow_insecure = not self.check_secure_image()
         for key, value in form.items():
             print_err(f"handling {key} -> {value} (allow insecure is {allow_insecure})")
             # this seems like cheating... let's capture all of the submit buttons
@@ -609,7 +623,7 @@ class AdsbIm:
                     self._system.restart_containers()
                     return render_template("/waitandredirect.html")
                 if key == "secure_image":
-                    self._constants.env_by_tags("secure_image").value = True
+                    self.set_secure_image()
                 if key == "update":
                     # this needs a lot more checking and safety, but for now, just go
                     cmdline = "/opt/adsb/docker-update-adsb-im"
