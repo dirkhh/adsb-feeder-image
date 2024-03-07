@@ -1,4 +1,4 @@
-import re, itertools, sys
+import re, itertools, sys, time, math
 
 # let's do this just once, not at every call
 _clean_control_chars = "".join(
@@ -12,7 +12,8 @@ def cleanup_str(s):
 
 
 def print_err(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
+    timestamp = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()) + ".{0:03.0f}Z".format(math.modf(time.time())[0] * 1000)
+    print(*((timestamp, ) + args), file=sys.stderr, **kwargs)
 
 
 # this is based on https://www.regular-expressions.info/email.html
