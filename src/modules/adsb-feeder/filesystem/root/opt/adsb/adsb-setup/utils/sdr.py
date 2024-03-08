@@ -24,7 +24,7 @@ class SDR:
             return ""
         output = result.stdout.decode()
         print_err(f"lsusb -s {self._address}: {output}")
-        serial_match = re.search(r"iSerial\s+\d+\s+(.*)", output, flags=re.M)
+        serial_match = re.search(r"iSerial\s+\d+\s+(.*)$", output, flags=re.M)
         if serial_match:
             self._serial_probed = serial_match.group(1).strip()
             return self._serial_probed
