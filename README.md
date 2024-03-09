@@ -4,18 +4,19 @@
 <a href="https://adsb.im/home"><img src="https://adsb.im/static/images/adsb.im.logo.png" height="30" alt="adsb.im homepage"></a>
 
 Easy to use turn-key SD card image for a number of single board computers (or to run in an x86 VM).
-Currently we are building images for
-- Raspberry Pi Zero 2, 3a/b, and 4 (tested on Zero 2W, 3a, and 4 - note that Pi Zero W will NOT work)
-- Pi 5 is in the works, but not available as integrated image, yet
-- Asus Tinkerboard (tested)
-- Libre Computing Le Potato (tested) and Renegade (tested)
-- Orange Pi 3LTS (tested - no wifi support), 4LTS, 5, and 5plus (tested)
-- Banana Pi M5 / M2P
-- Odriod C4
-- Rockpi 4 (tested)
+Currently we are building the following images:
+- Raspberry Pi Raspian based, supports Zero 2, 3a/b, and 4 (tested on Zero 2W, 3a, and 4 - note that Pi Zero W will NOT work)
+- Raspberry Pi DietPi based, supports Zero 2, 3a/b, and 4 (tested on Zero 2W, 3a, and 4 - note that Pi Zero W will NOT work)
+- Raspberry Pi 5, DietPi based (tested)
+- Libre Computing Le Potato (tested)
+- Orange Pi Zero 3 and 5plus (both tested)
 - NanoPi NEO3 (tested)
+- Pine64
 
 - VM setup under VirtualBox (easy), VMware (almost as easy), or Proxmox (advanced users) -- note that when running in VMs, there are known issues that are outside of the control of the image with USB timing that frequently lead to MLAT issues.
+
+This setup can work on many other systems - if there is enough demand, we can easily add more boards (as long as they have reasonably well supported versions of ideally DietPi or also Armbian available).
+Additionally, this software stack (with some differences in the user experience) can be installed on any DietPi board and even on most generic Linux systems running a Debian based distribution.
 
 The idea is to create a "complete" ADS-B feeder that feeds pretty much all of the ADS-B flight trackers / aggregators.
 
@@ -33,7 +34,6 @@ These aggregators are also supported:
 - [AVDelphi](https://www.avdelphi.com)
 - [FlightAware](https://flightaware.com)
 - [FlightRadar24](https://www.flightradar24.com)
-- [FLYOVR.io](https://www.flyovr.io/)
 - [hpradar](https://skylink.hpradar.com/)
 - [OpenSky Network](https://opensky-network.org)
 - [Plane.watch](https://plane.watch)
@@ -60,7 +60,7 @@ an indoor or (much better) outdoor antenna is all you need. More detail on the [
 - if doing this with the RPi image, only use the 'wifi setup' option to make sure the image can connect to your wifi - everything else should be
 - using a DietPi or non-Raspberry image, WiFi is either unsupported (non-Raspberry boards) or needs to be setup using a text editor making changes to two files on the mountable partifion of the feeder image. There's a README file with instructions in the same folder.
 - boot from the image
-- wait a couple of minutes for the initial boot to complete, then connect to the [ADSB-PI Setup Page](http://adsb-feeder.local) -- this link
+- wait a couple of minutes for the initial boot to complete (on the install-on-boot _iob_ images that can mean 20+ minutes if your internet is slow), then connect to the [ADSB-PI Setup Page](http://adsb-feeder.local) -- this link
 _should_ work to find the freshly booted system on your local network - assuming you have a reasonably standard setup with mDNS enabled. If this fails. got to the [adsb.im redirector](http://my.adsb.im) - which should forward you to the right local address on your network. In the rare case where this fails as well you'll need to manually find the board's IP address - either using a connected keyboard / monitor, or via your router or other source of local IP addresses.
 - on the setup website enter the latitude, longitude, and elevation of your receiver as well as a name.
 - there's a convenient button to get the correct time zone from your browser
