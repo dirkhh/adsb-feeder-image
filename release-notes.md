@@ -1,12 +1,5 @@
-Changes since v1.2.1 include
-- make sure root login with password is allowed when setting the root password
-- reimplement secure image function
-- disable MagicDNS for Tailnet
-- add warning when free disk space drops below 1G
-- fix and simplify handling of SDR assignments on advanced page
-- tweak some of the readsb options to reduce unnecessary disk IO and in return shorten the time between writeback of graphs to disk - thank you @wiedehopf 
-- improve backup handling (use tempfile instead of in memory data, don't backup unnecessary data, offer three levels of backup) - thank you @wiedehopf 
-- ensure that every SDR has only one role
+Changes since v1.2.2 include
+- aggregator status handling - correctly implement backoff / cache time - thank you @wiedehopf
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)
