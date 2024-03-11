@@ -49,23 +49,24 @@ class AggStatus:
         self._url = url
         self.check()
 
+    def use_cached(self, now):
+        return now - self._last_check < timedelta(seconds=10.0)
+
     @property
     def beast(self) -> str:
         now = datetime.now()
-        if now - self._last_check < timedelta(minutes=5.0):
-            return "+" if self._beast == T.Yes else "-" if self._beast == T.No else "."
-        self.check()
-        if now - self._last_check < timedelta(minutes=5.0):
+        if not self.use_cached(now):
+            self.check()
+        if self.use_cached(now):
             return "+" if self._beast == T.Yes else "-" if self._beast == T.No else "."
         return "."
 
     @property
     def mlat(self) -> str:
         now = datetime.now()
-        if now - self._last_check < timedelta(minutes=5.0):
-            return "+" if self._mlat == T.Yes else "-" if self._mlat == T.No else "."
-        self.check()
-        if now - self._last_check < timedelta(minutes=5.0):
+        if not self.use_cached(now):
+            self.check()
+        if self.use_cached(now):
             return "+" if self._mlat == T.Yes else "-" if self._mlat == T.No else "."
         return "."
 
