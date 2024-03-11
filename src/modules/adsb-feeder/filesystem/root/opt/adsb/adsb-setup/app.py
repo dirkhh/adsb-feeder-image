@@ -79,6 +79,8 @@ class AdsbIm:
         self._sdrdevices = SDRDevices()
         self._ultrafeeder = UltrafeederConfig(constants=self._constants)
 
+        self._agg_status_instances = dict()
+
         # Ensure secure_image is set the new way if before the update it was set only as env variable
         if self._constants.is_enabled("secure_image"):
             self.set_secure_image()
@@ -505,7 +507,11 @@ class AdsbIm:
                     "latest_commit": "",
                     "advice": "there was an error obtaining the latest version information",
                 }
-        status = AggStatus(agg, self._constants, request.host_url.rstrip("/ "))
+
+        status = self._agg_status_instances.get(agg)
+        if status is None:
+            status = self._agg_status_instances[agg] = AggStatus(agg, self._constants, request.host_url.rstrip("/ "))
+
         if agg == "adsbx":
             return json.dumps(
                 {
