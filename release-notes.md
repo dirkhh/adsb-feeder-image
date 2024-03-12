@@ -1,4 +1,5 @@
 Changes since v1.2.2 include
+- add micro feeder profile to the basic setup - this makes it easier to create a two stage system
 - move routeset API over to use the adsb.im API endpoint
 - aggregator status handling - correctly implement backoff / cache time - thank you @wiedehopf
 
