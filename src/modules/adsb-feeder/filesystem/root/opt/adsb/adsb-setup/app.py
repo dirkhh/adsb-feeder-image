@@ -785,6 +785,7 @@ class AdsbIm:
                 if key == "aggregators" and value == "micro":
                     self._constants.env_by_tags(["tar1090_ac_db"]).value = False
                     self._constants.env_by_tags(["mlathub_disable"]).value = True
+                    self._constants.env_by_tags("aggregators_chosen").value = True
                 else:
                     self._constants.env_by_tags(["tar1090_ac_db"]).value = True
                     self._constants.env_by_tags(["mlathub_disable"]).value = False
