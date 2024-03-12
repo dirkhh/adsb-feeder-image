@@ -22,7 +22,11 @@
   upgrading to a larger storage device.
 </div>
 <div class="row">
-  <div class="col-12">
+  <div class="col-12 mb-3 {% if env_value_by_tag('aggregators') != 'micro'%} d-none {% endif %}">
+    <h5>You are running in micro feeder mode</h5>
+    <p>Connect to a stage 2 system that feeds aggregators.</p>
+  </div>
+  <div class="col-12 {% if env_value_by_tag('aggregators') == 'micro'%} d-none {% endif %}">
     <h4>You are feeding</h4>
     <div class="row small">
       {% for tc in [0,1] %}
