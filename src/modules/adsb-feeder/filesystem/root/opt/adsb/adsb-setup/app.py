@@ -974,6 +974,7 @@ class AdsbIm:
         ip, status = self._system.check_ip()
         if status == 200:
             self._constants.env_by_tags(["feeder_ip"]).value = ip
+        local_address = request.host.split(":")[0]
 
         # next check if there were under-voltage events (this is likely only relevant on an RPi)
         self._constants.env_by_tags("under_voltage").value = False
@@ -1031,7 +1032,9 @@ class AdsbIm:
                     aggregators[idx][3] = aggregators[idx][3].replace(
                         match.group(0), self._constants.env(match.group(1)).value
                     )
-        return render_template("index.html", aggregators=aggregators)
+        return render_template(
+            "index.html", aggregators=aggregators, local_address=local_address
+        )
 
     @check_restart_lock
     def setup(self):
