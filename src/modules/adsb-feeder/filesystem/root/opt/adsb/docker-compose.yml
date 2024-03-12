@@ -76,6 +76,9 @@ services:
       - TAR1090_ROUTEAPIURL="https://adsb.im/api/0/routeset"
       - TAR1090_IMAGE_CONFIG_LINK="http://HOSTNAME:${_ADSBIM_STATE_WEBPORT}/"
       - TAR1090_IMAGE_CONFIG_TEXT="ADS-B Feeder Image Configuration"
+      # options for the µImage:
+      - TAR1090_ENABLE_AC_DB=${FEEDER_ENABLE_AC_DB}
+      - MLATHUB_DISABLE=${FEEDER_MLATHUB_DISABLE}
       # --------------------------------------------------
       # GRAPHS1090 (Decoder and System Status Web Page) parameters:
       # The two 978 related parameters should only be included if you are running dump978 for UAT reception (USA only)

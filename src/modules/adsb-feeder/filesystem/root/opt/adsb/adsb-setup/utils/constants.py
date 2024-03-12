@@ -519,6 +519,18 @@ class Constants:
             tags=["ultrafeeder_extra_args"],
         ),
         Env(
+            "FEEDER_TAR1090_ENABLE_AC_DB",
+            is_mandatory=False,
+            default=True,
+            tags=["tar1090_ac_db", "is_enabled"],
+        ),
+        Env(
+            "FEEDER_MLATHUB_DISABLE",
+            is_mandatory=False,
+            default=False,
+            tags=["mlathub_disable", "is_enabled"],
+        ),
+        Env(
             "_ADSBIM_STATE_REMOTE_SDR",
             is_mandatory=False,
             tags=["remote_sdr"],

@@ -31,6 +31,8 @@ class UltrafeederConfig:
     @property
     def enabled_aggregators(self):
         aggregator_selection = self._constants.env_by_tags("aggregators").value
+        if aggregator_selection == "micro":
+            return {}
         # be careful to set the correct values for the individual aggregators;
         # these values are used in the main landing page for the feeder to provide
         # additional links for the enabled aggregators

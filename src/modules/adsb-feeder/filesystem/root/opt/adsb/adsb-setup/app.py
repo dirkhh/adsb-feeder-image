@@ -510,7 +510,9 @@ class AdsbIm:
 
         status = self._agg_status_instances.get(agg)
         if status is None:
-            status = self._agg_status_instances[agg] = AggStatus(agg, self._constants, request.host_url.rstrip("/ "))
+            status = self._agg_status_instances[agg] = AggStatus(
+                agg, self._constants, request.host_url.rstrip("/ ")
+            )
 
         if agg == "adsbx":
             return json.dumps(
@@ -779,6 +781,13 @@ class AdsbIm:
                     self._constants.env_by_tags(["gain_airspy"]).value = (
                         "auto" if value == "autogain" else value
                     )
+                # deal with the micro feeder setup
+                if key == "aggregators" and value == "micro":
+                    self._constants.env_by_tags(["tar1090_ac_db"]).value = False
+                    self._constants.env_by_tags(["mlathub_disable"]).value = True
+                else:
+                    self._constants.env_by_tags(["tar1090_ac_db"]).value = True
+                    self._constants.env_by_tags(["mlathub_disable"]).value = False
                 # finally, painfully ensure that we remove explicitly asigned SDRs from other asignments
                 # this relies on the web page to ensure that each SDR is only asigned on purpose
                 if key in purposes:
