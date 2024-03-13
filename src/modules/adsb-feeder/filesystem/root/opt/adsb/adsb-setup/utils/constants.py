@@ -555,6 +555,12 @@ class Constants:
             is_mandatory=False,
             tags=["low_disk", "norestore"],
         ),
+        Env(
+            "_ADSBIM_STATE_STAGE2",
+            is_mandatory=False,
+            default=False,
+            tags=["stage2", "is_enabled", "norestore"],
+        ),
     }
 
     @property

@@ -839,7 +839,7 @@ class AdsbIm:
         airspy = any([sdr._type == "airspy" for sdr in self._sdrdevices.sdrs])
         self._constants.env_by_tags(["airspy", "is_enabled"]).value = airspy
 
-        # finally - if we have exactly one SDR and it hasn't been assigned to anything, use it for 1090
+        # next - if we have exactly one SDR and it hasn't been assigned to anything, use it for 1090
         if (
             len(self._sdrdevices.sdrs) == 1
             and not airspy
@@ -860,6 +860,10 @@ class AdsbIm:
         )
         print_err(
             f"dump978 container {self._constants.env_by_tags(['uat978', 'is_enabled']).value}"
+        )
+        # finally, set a flag to indicate whether this is a stage 2 configuration or whether it has actual SDRs attached
+        self._constants.env_by_tags(["stage2", "is_enabled"]).value = (
+            not env1090.value and not env978.value
         )
 
         # let's make sure we write out the updated ultrafeeder config
