@@ -2,6 +2,8 @@
 #
 # this script can do some housekeeping tasks before the adsb-setup
 # is (re)started
+# print the name of this path, the date, and the process ID
+echo "running $0 at $(date) with PID $$" >> /opt/adsb/adsb-setup.log
 
 ACTION="update to"
 if [[ -f "/opt/adsb/finish-update.done" ]]; then

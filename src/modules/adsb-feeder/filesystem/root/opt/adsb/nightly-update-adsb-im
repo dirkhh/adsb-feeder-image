@@ -1,4 +1,6 @@
 #!/bin/bash
+# print the name of this path, the date, and the process ID
+echo "running $0 at $(date) with PID $$" >> /opt/adsb/adsb-setup.log
 
 # this needs to run as root
 if [ $(id -u) != "0" ] ; then

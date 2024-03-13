@@ -1,4 +1,6 @@
 #!/bin/bash
+# print the name of this path, the date, and the process ID
+echo "running $0 at $(date) with PID $$" >> /opt/adsb/adsb-setup.log
 
 # since Flask makes it rather painful to run background tasks while keeping the web UI responsive,
 # it seems easier to simply do this externally with a shell script.
