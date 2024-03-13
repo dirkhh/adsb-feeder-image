@@ -75,6 +75,8 @@ class UltrafeederConfig:
             ret.add(ultrafeeder_extra_args)
         remote_sdr = self._constants.env_by_tags("remote_sdr").value
         if remote_sdr:
+            if remote_sdr.find(",") == -1:
+                remote_sdr += ",30005"
             ret.add(f"adsb,{remote_sdr.replace(' ', '')},beast_in")
 
         print_err(f"ended up with Ultrafeeder args {ret}")
