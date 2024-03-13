@@ -4,7 +4,7 @@
 {% block content %}
 <h1 class="mt-3 text-center text-danger">{% block title %} Expert setup {% endblock %}</h1>
 <div class="row small">
-  <div class="col-12 col-lg-6">
+  <div class="col-12 col-lg-6 {% if is_enabled('stage2') %}d-none{% endif %}">
     <h5 class="mt-3">Set explicit ADS-B SDR gain</h5>
     <form method="POST">
       <div class="row">
@@ -21,8 +21,7 @@
       </div>
     </form>
   </div>
-  <div {% if is_enabled('uat978') %} style="display: block;" {% else %} style="display: none;" {% endif %}
-       class="col-12 col-lg-6">
+  <div class="col-12 col-lg-6 {% if is_enabled('stage2') or not is_enabled('uat978') %}d-none{% endif %}">
     <h5 class="mt-3">Set explicit UAT SDR gain</h5>
     <form method="POST">
       <div class="row">
@@ -45,10 +44,8 @@
       <div class="row">
         <label for="ultrafeeder_extra_args" class="col-12">
           There are very few circumstances where this is something you want to manually add. One might be a
-          situation
-          where you want to feed an aggregator that uses the 'standard' format of all the semi-anonymous
-          aggregators,
-          but that isn't supported out of the box.
+          situation where you want to feed an aggregator that uses the 'standard' format of all the semi-anonymous
+          aggregators, but that isn't supported out of the box.
           Add the data that you need here - it will be appended to the Ultrafeeder config; do not add a
           leading
           semicolon.
