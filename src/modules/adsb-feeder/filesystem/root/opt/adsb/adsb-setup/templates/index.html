@@ -26,7 +26,7 @@
     <h5>You are running in micro feeder mode</h5>
     <p>Connect to a stage 2 system that feeds aggregators.</p>
     <p>Assuming the stage 2 is on the same network as your browser, it should be able to connect to this system as
-      <code>{{ local_address }},30005</code>.
+      <code>{{ local_address }}</code>.
     </p>
     <div {% if env_value_by_tag('tailscale_name') == '' %}class="d-none" {% endif %}>
       You appear to be running Tailscale - if this is how you connect to the stage 2 feeder, make sure you use your
