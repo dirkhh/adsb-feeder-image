@@ -33,7 +33,7 @@ do
         break
     else
         # someone else is here, let's wait and try again
-        sleep "1.$RANDOM"
+        sleep "0.$RANDOM"
     fi
 done
 
@@ -49,4 +49,4 @@ fi
     git fetch --tags -f
     git pull
 ) > /dev/null 2>&1
-bash src/get_version.sh
+bash src/get_version.sh | sed 's/)-.*/)/'
