@@ -1,4 +1,8 @@
 Changes since v1.2.2 include
+- hide UI elements that aren't relevant on a stage 2 setup
+- simplify the connection between micro feeder and stage 2 feeder
+- add shell script to disable secure feeder mode
+- debug logging improvements
 - add micro feeder profile to the basic setup - this makes it easier to create a two stage system
 - move routeset API over to use the adsb.im API endpoint
 - aggregator status handling - correctly implement backoff / cache time - thank you @wiedehopf
