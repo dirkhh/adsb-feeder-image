@@ -62,7 +62,6 @@ services:
       - TAR1090_PAGETITLE=${MLAT_SITE_NAME}
       - TAR1090_SITENAME=${MLAT_SITE_NAME}
       - TAR1090_PLANECOUNTINTITLE=true
-      - TAR1090_ENABLE_AC_DB=true
       - TAR1090_FLIGHTAWARELINKS=true
       - HEYWHATSTHAT_PANORAMA_ID=${FEEDER_HEYWHATSTHAT_ID}
       - HEYWHATSTHAT_ALTS=${FEEDER_HEYWHATSTHAT_ALTS:-1000ft,5000ft,10000ft,20000ft,30000ft,40000ft}
@@ -77,7 +76,7 @@ services:
       - TAR1090_IMAGE_CONFIG_LINK="http://HOSTNAME:${_ADSBIM_STATE_WEBPORT}/"
       - TAR1090_IMAGE_CONFIG_TEXT="ADS-B Feeder Image Configuration"
       # options for the µImage:
-      - TAR1090_ENABLE_AC_DB=${FEEDER_ENABLE_AC_DB}
+      - TAR1090_ENABLE_AC_DB=${FEEDER_ENABLE_AC_DB:-true}
       - MLATHUB_DISABLE=${FEEDER_MLATHUB_DISABLE}
       # --------------------------------------------------
       # GRAPHS1090 (Decoder and System Status Web Page) parameters:
