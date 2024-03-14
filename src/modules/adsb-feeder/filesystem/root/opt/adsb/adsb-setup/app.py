@@ -144,6 +144,7 @@ class AdsbIm:
         self.app.add_url_rule("/setup", "setup", self.setup, methods=["GET", "POST"])
         self.app.add_url_rule("/update", "update", self.update, methods=["POST"])
         self.app.add_url_rule("/api/sdr_info", "sdr_info", self.sdr_info)
+        self.app.add_url_rule("/api/base_info", "base_info", self.base_info)
         self.app.add_url_rule(f"/api/status/<agg>", "beast", self.agg_status)
         # fmt: on
         self.update_boardname()
@@ -492,6 +493,18 @@ class AdsbIm:
                 "sdrdevices": [sdr._json for sdr in self._sdrdevices.sdrs],
                 "frequencies": serials,
                 "duplicates": ", ".join(self._sdrdevices.duplicates),
+            }
+        )
+
+    def base_info(self):
+        return json.dumps(
+            {
+                "name": self._constants.env_by_tags("mlat_name").value,
+                "lat": self._constants.env_by_tags("lat").value,
+                "lng": self._constants.env_by_tags("lng").value,
+                "alt": self._constants.env_by_tags("alt").value,
+                "tz": self._constants.env_by_tags("form_timezone").value,
+                "version": self._constants.env_by_tags("base_version").value,
             }
         )
 
