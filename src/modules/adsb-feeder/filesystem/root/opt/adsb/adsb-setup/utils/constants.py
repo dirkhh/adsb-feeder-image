@@ -565,7 +565,13 @@ class Constants:
             "AF_IS_STAGE2",
             is_mandatory=False,
             default=False,
-            tags=["stage2", "is_enabled", "norestore"],
+            tags=["stage2", "is_enabled"],
+        ),
+        Env(
+            "_ADSBIM_STATE_STAGE2_NAME",
+            is_mandatory=False,
+            default="",
+            tags=["stage2_name"],
         ),
         Env(
             "AF_NUM_MICRO_SITES",
@@ -584,6 +590,7 @@ class Constants:
         Env("FEEDER_LONG_0", is_mandatory=False, tags=["feeder_lng_0"]),
         Env("FEEDER_ALT_M_0", is_mandatory=False, tags=["feeder_alt_0"]),
         Env("FEEDER_TZ_0", is_mandatory=False, tags=["form_timezone_0"]),
+        Env("FEEDER_VERSION_0", is_mandatory=False, tags=["feeder_version_0"]),
         Env("MLAT_SITE_NAME_0", is_mandatory=False, tags=["mlat_name_0"]),
         Env("FEEDER_HEYWHATSTHAT_ID_0", is_mandatory=False, tags=["heywhatsthat_id_0"]),
         Env(
@@ -604,6 +611,7 @@ class Constants:
         Env("FEEDER_LONG_1", is_mandatory=False, tags=["feeder_lng_1"]),
         Env("FEEDER_ALT_M_1", is_mandatory=False, tags=["feeder_alt_1"]),
         Env("FEEDER_TZ_1", is_mandatory=False, tags=["form_timezone_1"]),
+        Env("FEEDER_VERSION_1", is_mandatory=False, tags=["feeder_version_1"]),
         Env("MLAT_SITE_NAME_1", is_mandatory=False, tags=["mlat_name_1"]),
         Env("FEEDER_HEYWHATSTHAT_ID_1", is_mandatory=False, tags=["heywhatsthat_id_1"]),
         Env(
@@ -624,6 +632,7 @@ class Constants:
         Env("FEEDER_LONG_2", is_mandatory=False, tags=["feeder_lng_2"]),
         Env("FEEDER_ALT_M_2", is_mandatory=False, tags=["feeder_alt_2"]),
         Env("FEEDER_TZ_2", is_mandatory=False, tags=["form_timezone_2"]),
+        Env("FEEDER_VERSION_2", is_mandatory=False, tags=["feeder_version_2"]),
         Env("MLAT_SITE_NAME_2", is_mandatory=False, tags=["mlat_name_2"]),
         Env("FEEDER_HEYWHATSTHAT_ID_2", is_mandatory=False, tags=["heywhatsthat_id_2"]),
         Env(
@@ -644,6 +653,7 @@ class Constants:
         Env("FEEDER_LONG_3", is_mandatory=False, tags=["feeder_lng_3"]),
         Env("FEEDER_ALT_M_3", is_mandatory=False, tags=["feeder_alt_3"]),
         Env("FEEDER_TZ_3", is_mandatory=False, tags=["form_timezone_3"]),
+        Env("FEEDER_VERSION_3", is_mandatory=False, tags=["feeder_version_3"]),
         Env("MLAT_SITE_NAME_3", is_mandatory=False, tags=["mlat_name_3"]),
         Env("FEEDER_HEYWHATSTHAT_ID_3", is_mandatory=False, tags=["heywhatsthat_id_3"]),
         Env(
@@ -664,6 +674,7 @@ class Constants:
         Env("FEEDER_LONG_4", is_mandatory=False, tags=["feeder_lng_4"]),
         Env("FEEDER_ALT_M_4", is_mandatory=False, tags=["feeder_alt_4"]),
         Env("FEEDER_TZ_4", is_mandatory=False, tags=["form_timezone_4"]),
+        Env("FEEDER_VERSION_4", is_mandatory=False, tags=["feeder_version_4"]),
         Env("MLAT_SITE_NAME_4", is_mandatory=False, tags=["mlat_name_4"]),
         Env("FEEDER_HEYWHATSTHAT_ID_4", is_mandatory=False, tags=["heywhatsthat_id_4"]),
         Env(

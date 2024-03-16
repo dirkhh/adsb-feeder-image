@@ -638,6 +638,9 @@ class AdsbIm:
             self._constants.env_by_tags(f"feeder_lng_{n}").value = base_info["lng"]
             self._constants.env_by_tags(f"feeder_alt_{n}").value = base_info["alt"]
             self._constants.env_by_tags(f"form_timezone_{n}").value = base_info["tz"]
+            self._constants.env_by_tags(f"feeder_version_{n}").value = base_info[
+                "version"
+            ]
             micro_sites = self._constants.env_by_tags("micro_sites").value
             micro_sites.append(base_info["name"])
             self._constants.env_by_tags("micro_sites").value = micro_sites
@@ -682,13 +685,20 @@ class AdsbIm:
             if value == "go":
                 seen_go = True
             if value == "go" or value == "wait":
-                if key == "stage2":
-                    # user has clicked Submit on Stage 2 page
+                if key == "add_micro":
+                    # user has clicked Add micro feeder on Stage 2 page
                     # grab the IP that we know the user has provided
                     next_site = self._constants.env_by_tags("num_micro_sites").value
                     ip = form.get(f"micro_ip_{next_site}")
                     print_err(f"handling micro site nr {next_site} at {ip}")
                     self.setup_new_micro_site(ip)
+                    return redirect(url_for("stage2"))
+                if key == "set_stage2_name":
+                    # just grab the new name and go back
+                    name = form.get(f"stage2_name")
+                    print_err(f"setting new stage2 name to {name}")
+                    self._constants.env_by_tags("stage2_name").value = name
+                    return redirect(url_for("stage2"))
                 if key == "aggregators":
                     # user has clicked Submit on Aggregator page
                     self._constants.env_by_tags("aggregators_chosen").value = True
