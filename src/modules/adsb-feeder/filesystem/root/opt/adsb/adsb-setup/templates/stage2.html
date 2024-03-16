@@ -9,11 +9,14 @@
 </div>
 <div class="row">
   <form method="post">
-    <div class="form-group">
-      <label class="col-12 col-sm-6" for="stage2_name">
-        Stage2 Station Name (not visible anywhere but here)</label>
-      <input type="text" name="stage2_name" required placeholder="Stage2" class="form-control col-12 col-sm-6"
-             value="{{ env_value_by_tag('stage2_name') }}" />
+    <div class="form-group row">
+      <span class="col-12 col-sm-5 col-md-4 col-lg-3">
+        <label for="stage2_name">Stage2 Station Name</label>
+      </span>
+      <span class="col-12 col-sm-7 col-md-8 col-lg-9">
+        <input type="text" name="stage2_name" required placeholder="Stage2" class="form-control col-md"
+               value="{{ env_value_by_tag('stage2_name') }}" />
+      </span>
     </div>
     <div class="form-group">
       <button type="submit" name="set_stage2_name" value="go" class="btn btn-primary">Update</button>
@@ -21,93 +24,121 @@
   </form>
 </div>
 <div class="col-12">
-  {% for site in env_value_by_tag('micro_sites') %}
-  <h5>{{ site }}</h5>
-  <div class="col-4 col-md-3">{{ env_value_by_tag('micro_ip_' ~ loop.index0) }}</div>
-  <div class="col-6 col-md-9">{{ env_value_by_tag('feeder_lat_' ~ loop.index0) }},
-    {{ env_value_by_tag('feeder_lng_' ~ loop.index0) }} @
-    {{ env_value_by_tag('feeder_alt_' ~ loop.index0) }}m
-  </div>
-  <div class="col-4 col-md-3">running adsb.im feeder image version
-    {{ env_value_by_tag('feeder_version_' ~ loop.index0) }}
-  </div>
-  {% endfor %}
-</div>
-<div class="col-12">
-  <form method="post" action="{{ url_for('update') }}">
-    <div class="form-group row align-items-center mb-1">
-      <span class="col-md">
-        <label for="micro_ip_{{ env_value_by_tag('num_micro_sites') }}">micro feeder IP address</label>
-      </span>
-      <span class="col-md">
-        {% set next_site_tag = 'micro_ip_' ~ env_value_by_tag('num_micro_sites') %}
-        <input type="text" name="{{ next_site_tag }}" required placeholder="10.1.2.3" class="form-control"
-               pattern="((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])"
-               title="valid IPv4 address" value="{{ env_value_by_tag(next_site_tag) }}" />
-      </span>
+  <h4 class="mb-2 mt-4">Feeder sites</h4>
+  {% if env_value_by_tag('num_micro_sites') == 0 %}
+  <div class="my-4">No micro feeder sites configured</div>
+  {% else %}
+  <div class="row small">
+    <div class="col-12">
+      <table class="table table-bordered table-sm lh-1 table-striped">
+        <thead>
+          <td>Site</td>
+          <td>IP</td>
+          <td>Lat/Long@Alt</td>
+          <td>Feeder Version</td>
+          <td>Status</td>
+        </thead>
+        <tbody>
+          {% for site in env_value_by_tag('micro_sites') %}
+          <tr>
+            <td>
+              <a href="">{{ site }}</a>
+            </td>
+            <td class="text-center">{{ env_value_by_tag('micro_ip_' ~ loop.index0) }}</td>
+            <td class="text-center">{{ env_value_by_tag('feeder_lat_' ~ loop.index0) }} /
+              {{ env_value_by_tag('feeder_lng_' ~ loop.index0) }} @
+              {{ env_value_by_tag('feeder_alt_' ~ loop.index0) }}m
+            </td>
+            <td class="text-center"> {{ env_value_by_tag('feeder_version_' ~ loop.index0) }}
+            </td>
+            <td class="text-center">
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-    <div class="form-group">
-      <button type="submit" name="add_micro" value="go" class="btn btn-primary">Add micro feeder</button>
-    </div>
+  </div>
+  {% endif %}
 
-    <div class="form-group mt-3">
-      <label>
-        Which
-        <a href="#"
-           title="aggregators that don't require you to create an account or provide an email address">semi-anonymous
-        </a>
-        aggregators do you want to feed?
-      </label>
-      <br />
-      <div>
-        <input type="radio" name="aggregators" id="all" value="all" required {% if env_value_by_tag("aggregators")=="all"
+  <div class="col-12">
+    <h5 class="mb-2">Add micro feeder</h5>
+    <form method="post" action="{{ url_for('update') }}">
+      <div class="form-group row align-items-center mb-1">
+        <span class="col-12 col-sm-5 col-md-4 col-lg-3">
+          <label for="micro_ip_{{ env_value_by_tag('num_micro_sites') }}">micro feeder IP address</label>
+        </span>
+        <span class="col-12 col-sm-7 col-md-8 col-lg-9">
+          {% set next_site_tag = 'micro_ip_' ~ env_value_by_tag('num_micro_sites') %}
+          <input type="text" name="{{ next_site_tag }}" required placeholder="10.1.2.3" class="form-control"
+                 pattern="((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])"
+                 title="valid IPv4 address" value="{{ env_value_by_tag(next_site_tag) }}" />
+        </span>
+      </div>
+      <div class="form-group">
+        <button type="submit" name="add_micro" value="go" class="btn btn-primary">Add micro feeder</button>
+      </div>
+    </form>
+    <form method="post" action="{{ url_for('update') }}">
+      <div class="form-group mt-3">
+        <label>
+          Which
+          <a href="#"
+             title="aggregators that don't require you to create an account or provide an email address">semi-anonymous
+          </a>
+          aggregators do you want to feed?
+        </label>
+        <br />
+        <div>
+          <input type="radio" name="aggregators" id="all" value="all" required {% if env_value_by_tag("aggregators")=="all"
       %} checked {% endif %}>
-        <label class="form-check-label mr-3" for="all">All</label>
-        <input type="radio" name="aggregators" id="privacy" value="privacy" {% if
+          <label class="form-check-label mr-3" for="all">All</label>
+          <input type="radio" name="aggregators" id="privacy" value="privacy" {% if
       env_value_by_tag("aggregators")=="privacy" %} checked {% endif %}>
-        <label class="form-check-label mr-3" for="privacy">Aggregators with privacy policy</label>
-        <input type="radio" name="aggregators" id="individual" value="individual" {% if
+          <label class="form-check-label mr-3" for="privacy">Aggregators with privacy policy</label>
+          <input type="radio" name="aggregators" id="individual" value="individual" {% if
       env_value_by_tag("aggregators")=="individual" %} checked {% endif %}>
-        <label class="form-check-label" for="individual">Pick individually</label>
-      </div>
-      <div id="explain-all" style="display: {% if env_value_by_tag('aggregators')=='all' %} block {% else %} none {%
+          <label class="form-check-label" for="individual">Pick individually</label>
+        </div>
+        <div id="explain-all" style="display: {% if env_value_by_tag('aggregators')=='all' %} block {% else %} none {%
             endif %}; font-size: smaller;">
-        With this option you will feed data to
-        <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
-        <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/">Fly Italy ADSB</a>,
-        <a href="https://www.avdelphi.com/privacy.html">AVDelphi</a>,
-        <a href="https://www.planespotters.net/legal/privacypolicy/">planespotters.net</a>,
-        <a href="https://adsb.one/privacy-policy/">adsb.one</a>,
-        <a href="https://theairtraffic.com/privacy-license/">TheAirTraffic.com</a>,
-        <a href="https://adsb.fi/">adsb.fi</a>, <a href="https://radarplane.com/privacy-policy">RadarPlane</a>,
-        <!-- <a href="https://www.flyovr.io/">FLYOVR.IO</a>,-->
-        <a href="https://skydata.hpradar.com/">hpradar</a>,
-        <a href="https://globe.airplanes.live/privacy">airplanes.live</a>,
-        <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
-      </div>
-      <div id="explain-privacy" style="display: {% if env_value_by_tag('aggregators')=='priv' %} block {% else %}
+          With this option you will feed data to
+          <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
+          <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/">Fly Italy ADSB</a>,
+          <a href="https://www.avdelphi.com/privacy.html">AVDelphi</a>,
+          <a href="https://www.planespotters.net/legal/privacypolicy/">planespotters.net</a>,
+          <a href="https://adsb.one/privacy-policy/">adsb.one</a>,
+          <a href="https://theairtraffic.com/privacy-license/">TheAirTraffic.com</a>,
+          <a href="https://adsb.fi/">adsb.fi</a>, <a href="https://radarplane.com/privacy-policy">RadarPlane</a>,
+          <!-- <a href="https://www.flyovr.io/">FLYOVR.IO</a>,-->
+          <a href="https://skydata.hpradar.com/">hpradar</a>,
+          <a href="https://globe.airplanes.live/privacy">airplanes.live</a>,
+          <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
+        </div>
+        <div id="explain-privacy" style="display: {% if env_value_by_tag('aggregators')=='priv' %} block {% else %}
             none {% endif %}; font-size: smaller;">
-        With this option you will feed data to
-        <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
-        <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/">Fly Italy ADSB</a>,
-        <a href="https://www.avdelphi.com/privacy.html">AVDelphi</a>,
-        <a href="https://www.planespotters.net/legal/privacypolicy/">planespotters.net</a>,
-        <a href="https://adsb.one/privacy-policy/">adsb.one</a>,
-        <a href="https://adsb.fi/">adsb.fi</a>
-        <a href="https://radarplane.com/privacy-policy">RadarPlane</a>,
-        <a href="https://globe.airplanes.live/privacy">airplanes.live</a>,
-        <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
-      </div>
-      <div id="explain-individual" style="display: {% if env_value_by_tag('aggregators')=='ind' %} block {% else %}
+          With this option you will feed data to
+          <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
+          <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/">Fly Italy ADSB</a>,
+          <a href="https://www.avdelphi.com/privacy.html">AVDelphi</a>,
+          <a href="https://www.planespotters.net/legal/privacypolicy/">planespotters.net</a>,
+          <a href="https://adsb.one/privacy-policy/">adsb.one</a>,
+          <a href="https://adsb.fi/">adsb.fi</a>
+          <a href="https://radarplane.com/privacy-policy">RadarPlane</a>,
+          <a href="https://globe.airplanes.live/privacy">airplanes.live</a>,
+          <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
+        </div>
+        <div id="explain-individual" style="display: {% if env_value_by_tag('aggregators')=='ind' %} block {% else %}
                 none {% endif %}; font-size: smaller;">
-        With this option you can make detailed selections on the Aggregator page.
+          With this option you can make detailed selections on the Aggregator page.
+        </div>
       </div>
-    </div>
-    <div class="form-group">
-      <button type="submit" name="stage2" value="go" class="btn btn-primary">I'm done here</button>
-    </div>
-    <p>{{ message }}</p>
-  </form>
+      <div class="form-group">
+        <button type="submit" name="stage2" value="go" class="btn btn-primary">I'm done here</button>
+      </div>
+      <p>{{ message }}</p>
+    </form>
+  </div>
 </div>
 <script>
   const explainAll = document.getElementById("explain-all");
