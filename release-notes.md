@@ -1,4 +1,5 @@
 Changes since v1.2.2 include
+- update to latest SDR-E containers (this can cause an update to take a long time)
 - add API endpoint to provide the base info of a feeder (site name, location, etc)
 - hide UI elements that aren't relevant on a stage 2 setup
 - simplify the connection between micro feeder and stage 2 feeder
