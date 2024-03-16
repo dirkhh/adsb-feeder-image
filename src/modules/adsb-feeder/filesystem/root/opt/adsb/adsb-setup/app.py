@@ -657,18 +657,6 @@ class AdsbIm:
             self._constants.env_by_tags("micro_sites").value = micro_sites
 
             print_err(f"added new micro site {base_info['name']} at {ip}")
-
-            # next we create the new yml file
-            with open(
-                self._constants.config_path / "stage2.yml", "r"
-            ) as stage2_yml_template:
-                with open(
-                    self._constants.config_path / f"stage2_micro_site_{n}.yml",
-                    "w",
-                ) as stage2_yml:
-                    stage2_yml.write(
-                        stage2_yml_template.read().replace("STAGE2NUM", f"{n}")
-                    )
         else:
             print_err(f"failed to get base_info from {ip}")
 
@@ -1195,6 +1183,17 @@ if __name__ == "__main__":
         config_file = pathlib.Path(adsb_dir / file_name)
         if config_file.exists():
             new_file = pathlib.Path(config_dir / file_name)
+            if file_name == "stage2.yml" and not filecmp.cmp(config_file, new_file):
+                # let's update the per microsite yaml files
+                print_err("found new stage2 template... updating yaml files")
+                for n in range(0, 5):
+                    with open(config_file, "r") as stage2_yml_template:
+                        with open(
+                            pathlib.Path(config_dir / f"stage2_micro_site_{n}.yml"), "w"
+                        ) as stage2_yml:
+                            stage2_yml.write(
+                                stage2_yml_template.read().replace("STAGE2NUM", f"{n}")
+                            )
             config_file.rename(new_file)
             print_err(f"moved {config_file} to {new_file}")
 
