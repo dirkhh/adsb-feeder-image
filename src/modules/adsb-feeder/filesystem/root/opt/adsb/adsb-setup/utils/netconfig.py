@@ -55,10 +55,18 @@ class UltrafeederConfig:
         }
 
     def generate(self):
-        if self._micro and not self._constants.is_enabled("stage2"):
+        is_stage2 = self._constants.is_enabled("stage2")
+        micro = int(self._micro[1:]) if self._micro else -1
+        num_micro = self._constants.env_by_tags("num_micro_sites").value
+        # when not in stage2 mode, no point in setting up the others
+        if micro >= 0 and not is_stage2:
+            return ""
+        # in stage2 mode, don't feed from the internal aggregator, don't set up more
+        # proxy ultrafeeders than are configured
+        if is_stage2 and (micro == -1 or micro >= num_micro):
             return ""
         print_err(
-            f"generating netconfigs for {self._micro if self._micro else 'Ultrafeeder'}"
+            f"generating netconfigs for {f'micro site {micro}' if micro >= 0 else 'Ultrafeeder'}"
         )
         mlat_privacy = self._constants.is_enabled("mlat_privacy")
         ret = set()
@@ -80,6 +88,9 @@ class UltrafeederConfig:
         if ultrafeeder_extra_args:
             ret.add(ultrafeeder_extra_args)
         remote_sdr = self._constants.env_by_tags("remote_sdr").value
+        if self._micro:
+            # this is one of the proxies - so it also should feed the aggregate map
+            ret.add("adsb,ultrafeeder,30004,beast_out")
         if remote_sdr:
             if remote_sdr.find(",") == -1:
                 remote_sdr += ",30005"

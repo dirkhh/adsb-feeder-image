@@ -1,7 +1,7 @@
 # assemble the docker compose files we want to use
 # this needs to be extended for each new aggregator
 
-COMPOSE_FILES=()
+COMPOSE_FILES=("-f" "/opt/adsb/config/docker-compose.yml")
 
 if [ -f /opt/adsb/config/.env ] ; then
 	# for each of the yml snippets check if this aggregator is enabled
@@ -49,7 +49,5 @@ if [ -f /opt/adsb/config/.env ] ; then
 		for ((i = 0; i < NUM; i++)); do
 			COMPOSE_FILES+=( "-f" "/opt/adsb/config/stage2_micro_site_${i}.yml" )
 		done
-	else
-		COMPOSE_FILES=("-f" "/opt/adsb/config/docker-compose.yml" "${COMPOSE_FILES[@]}")
 	fi
 fi
