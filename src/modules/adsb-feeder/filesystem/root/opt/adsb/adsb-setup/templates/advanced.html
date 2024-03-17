@@ -113,11 +113,13 @@
       required before the web UI can see the SDRs.
     </div>
     <label class="form-label" for="remote_sdr">
-      If you are intending to use this computer with a remote device that has the SDR connected to it, please ensure
-      that it outputs <code>beast_out</code> and enter the IPv4 address and port here:</label>
+      If you are intending to use this feeder with a remote device that has the SDR connected to it and offers
+      <code>beast_out</code> (like the micro
+      feeder setup that this image supports), please enter the IPv4 address here (and the port used if it's not
+      30005):</label>
     <input type="text" id="remote_sdr" name="remote_sdr" class="form-control mb-2"
-           pattern="^\s*(?:\d{1,3}\.){3}\d{1,3},\s*\d+\s*$" title="IPv4 address and port, separated by a comma"
-           placeholder="IP-address,port" value="{{ env_value_by_tag("remote_sdr") }}" />
+           pattern="^\s*(?:\d{1,3}\.){3}\d{1,3}(?:,\s*\d+)?\s*$" title="IPv4 address and port, separated by a comma"
+           placeholder="IP-address[,port]" value="{{ env_value_by_tag("remote_sdr") }}" />
   </div>
   <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="advanced" value="go">I'm
     done here - take me to the website</button>

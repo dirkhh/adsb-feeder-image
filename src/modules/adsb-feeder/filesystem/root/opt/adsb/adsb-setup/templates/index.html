@@ -22,7 +22,22 @@
   upgrading to a larger storage device.
 </div>
 <div class="row">
-  <div class="col-12">
+  <div class="col-12 mb-3 {% if env_value_by_tag('aggregators') != 'micro'%} d-none {% endif %}">
+    <h5>You are running in micro feeder mode</h5>
+    <p>Connect to a stage 2 system that feeds aggregators.</p>
+    <p>Assuming the stage 2 is on the same network as your browser, it should be able to connect to this system as
+      <code>{{ local_address }}</code>.
+    </p>
+    <div {% if env_value_by_tag('tailscale_name') == '' %}class="d-none" {% endif %}>
+      You appear to be running Tailscale - if this is how you connect to the stage 2 feeder, make sure you use your
+      Tailnet address.
+    </div>
+    <div {% if env_value_by_tag('zerotierid') == '' %}class="d-none" {% endif %}>
+      You appear to be running ZeroTier - if this is how you connect to the stage 2 feeder, make sure you use your
+      ZeroTier address.
+    </div>
+  </div>
+  <div class="col-12 {% if env_value_by_tag('aggregators') == 'micro'%} d-none {% endif %}">
     <h4>You are feeding</h4>
     <div class="row small">
       {% for tc in [0,1] %}

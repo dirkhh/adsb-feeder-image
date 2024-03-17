@@ -45,8 +45,10 @@ class Restart:
         if self.lock.locked():
             return False
         with self.lock:
-            subprocess.call(
-                "/usr/bin/bash /opt/adsb/adsb-system-restart.sh", shell=True
+            print_err("Calling /opt/adsb/adsb-system-restart.sh")
+            # discard output, script is logging directly to /opt/adsb/adsb-setup.log
+            subprocess.run(
+                "/usr/bin/bash /opt/adsb/adsb-system-restart.sh", shell=True, capture_output=True,
             )
             return True
 

@@ -79,6 +79,8 @@ class AdsbIm:
         self._sdrdevices = SDRDevices()
         self._ultrafeeder = UltrafeederConfig(constants=self._constants)
 
+        self._agg_status_instances = dict()
+
         # Ensure secure_image is set the new way if before the update it was set only as env variable
         if self._constants.is_enabled("secure_image"):
             self.set_secure_image()
@@ -142,6 +144,7 @@ class AdsbIm:
         self.app.add_url_rule("/setup", "setup", self.setup, methods=["GET", "POST"])
         self.app.add_url_rule("/update", "update", self.update, methods=["POST"])
         self.app.add_url_rule("/api/sdr_info", "sdr_info", self.sdr_info)
+        self.app.add_url_rule("/api/base_info", "base_info", self.base_info)
         self.app.add_url_rule(f"/api/status/<agg>", "beast", self.agg_status)
         # fmt: on
         self.update_boardname()
@@ -493,6 +496,18 @@ class AdsbIm:
             }
         )
 
+    def base_info(self):
+        return json.dumps(
+            {
+                "name": self._constants.env_by_tags("mlat_name").value,
+                "lat": self._constants.env_by_tags("lat").value,
+                "lng": self._constants.env_by_tags("lng").value,
+                "alt": self._constants.env_by_tags("alt").value,
+                "tz": self._constants.env_by_tags("form_timezone").value,
+                "version": self._constants.env_by_tags("base_version").value,
+            }
+        )
+
     def agg_status(self, agg):
         if agg == "im":
             im_json, status = ImStatus(self._constants).check()
@@ -505,7 +520,13 @@ class AdsbIm:
                     "latest_commit": "",
                     "advice": "there was an error obtaining the latest version information",
                 }
-        status = AggStatus(agg, self._constants, request.host_url.rstrip("/ "))
+
+        status = self._agg_status_instances.get(agg)
+        if status is None:
+            status = self._agg_status_instances[agg] = AggStatus(
+                agg, self._constants, request.host_url.rstrip("/ ")
+            )
+
         if agg == "adsbx":
             return json.dumps(
                 {
@@ -773,6 +794,14 @@ class AdsbIm:
                     self._constants.env_by_tags(["gain_airspy"]).value = (
                         "auto" if value == "autogain" else value
                     )
+                # deal with the micro feeder setup
+                if key == "aggregators" and value == "micro":
+                    self._constants.env_by_tags(["tar1090_ac_db"]).value = False
+                    self._constants.env_by_tags(["mlathub_disable"]).value = True
+                    self._constants.env_by_tags("aggregators_chosen").value = True
+                else:
+                    self._constants.env_by_tags(["tar1090_ac_db"]).value = True
+                    self._constants.env_by_tags(["mlathub_disable"]).value = False
                 # finally, painfully ensure that we remove explicitly asigned SDRs from other asignments
                 # this relies on the web page to ensure that each SDR is only asigned on purpose
                 if key in purposes:
@@ -823,7 +852,7 @@ class AdsbIm:
         airspy = any([sdr._type == "airspy" for sdr in self._sdrdevices.sdrs])
         self._constants.env_by_tags(["airspy", "is_enabled"]).value = airspy
 
-        # finally - if we have exactly one SDR and it hasn't been assigned to anything, use it for 1090
+        # next - if we have exactly one SDR and it hasn't been assigned to anything, use it for 1090
         if (
             len(self._sdrdevices.sdrs) == 1
             and not airspy
@@ -844,6 +873,10 @@ class AdsbIm:
         )
         print_err(
             f"dump978 container {self._constants.env_by_tags(['uat978', 'is_enabled']).value}"
+        )
+        # finally, set a flag to indicate whether this is a stage 2 configuration or whether it has actual SDRs attached
+        self._constants.env_by_tags(["stage2", "is_enabled"]).value = (
+            not env1090.value and not env978.value
         )
 
         # let's make sure we write out the updated ultrafeeder config
@@ -958,6 +991,7 @@ class AdsbIm:
         ip, status = self._system.check_ip()
         if status == 200:
             self._constants.env_by_tags(["feeder_ip"]).value = ip
+        local_address = request.host.split(":")[0]
 
         # next check if there were under-voltage events (this is likely only relevant on an RPi)
         self._constants.env_by_tags("under_voltage").value = False
@@ -1015,7 +1049,9 @@ class AdsbIm:
                     aggregators[idx][3] = aggregators[idx][3].replace(
                         match.group(0), self._constants.env(match.group(1)).value
                     )
-        return render_template("index.html", aggregators=aggregators)
+        return render_template(
+            "index.html", aggregators=aggregators, local_address=local_address
+        )
 
     @check_restart_lock
     def setup(self):

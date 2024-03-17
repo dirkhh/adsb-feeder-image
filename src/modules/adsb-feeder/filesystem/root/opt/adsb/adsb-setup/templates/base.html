@@ -38,7 +38,7 @@
       {% set config_complete = is_enabled('base_config') %}
       <div class="collapse navbar-collapse " id="navbarNav">
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-          {% for href, id, caption in navigation_bar %}
+          {% for href, id, caption in navigation_bar if env_value_by_tag('aggregators') != 'micro' or id != 'aggregators' %}
           <li class="nav-item" {% if id == active_page %}aria-current="true" {% endif %}
               {% if not config_complete and id != "setup" and id != "restore" and id != "logs" %} style="display: none;"
               {% endif %}>
@@ -46,7 +46,6 @@
             {% endfor %}
         </ul>
       </div>
-    </div>
     </div>
   </nav>
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
