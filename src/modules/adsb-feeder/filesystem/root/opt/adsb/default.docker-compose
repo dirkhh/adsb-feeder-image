@@ -1,7 +1,7 @@
 # assemble the docker compose files we want to use
 # this needs to be extended for each new aggregator
 
-COMPOSE_FILES=( "-f" "/opt/adsb/config/docker-compose.yml" "-f" "/opt/adsb/config/dozzle.yml" )
+COMPOSE_FILES=( "-f" "/opt/adsb/config/dozzle.yml" )
 
 if [ -f /opt/adsb/config/.env ] ; then
 	# for each of the yml snippets check if this aggregator is enabled
@@ -38,5 +38,15 @@ if [ -f /opt/adsb/config/.env ] ; then
 	fi
 	if grep "AF_IS_AIRSPY_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "/opt/adsb/config/airspy.yml" )
+	fi
+	# finally, check if this is a stage 2 setup and enable all of the ultrafeeders
+	if grep "AF_IS_STAGE2=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
+		# stage 2 feeder, look through the various containers
+		NUM=$(grep AF_NUM_MICRO_SITES= /opt/adsb/config/.env | sed -n 's/.*=\([0-9]\+\).*/\1/p')
+		for ((i = 0; i < NUM; i++)); do
+			COMPOSE_FILES+=( "-f" "/opt/adsb/config/stage2_micro_site_${i}.yml" )
+		done
+	else
+		COMPOSE_FILES=("-f" "/opt/adsb/config/docker-compose.yml" "${COMPOSE_FILES[@]}")
 	fi
 fi

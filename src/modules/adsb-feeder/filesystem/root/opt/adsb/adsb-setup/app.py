@@ -57,6 +57,7 @@ from utils import (
     UltrafeederConfig,
     cleanup_str,
     print_err,
+    generic_get_json,
 )
 
 # nofmt: off
@@ -88,17 +89,26 @@ class AdsbIm:
         self._system = System(constants=self._constants)
         self._sdrdevices = SDRDevices()
         self._ultrafeeder = UltrafeederConfig(constants=self._constants)
+        self._ultrafeeder_micro = []
+        for i in range(0, 5):
+            self._ultrafeeder_micro.append(
+                UltrafeederConfig(constants=self._constants, micro=f"_{i}")
+            )
+
+        # update Env ultrafeeder to have value self._ultrafeed.generate()
+        self._constants.env_by_tags("ultrafeeder_config")._value_call = (
+            self._ultrafeeder.generate
+        )
+        for i in range(0, 5):
+            self._constants.env_by_tags(f"ultrafeeder_config_{i}")._value_call = (
+                self._ultrafeeder_micro[i].generate
+            )
 
         self._agg_status_instances = dict()
 
         # Ensure secure_image is set the new way if before the update it was set only as env variable
         if self._constants.is_enabled("secure_image"):
             self.set_secure_image()
-
-        # update Env ultrafeeder to have value self._ultrafeed.generate()
-        self._constants.env_by_tags("ultrafeeder_config")._value_call = (
-            self._ultrafeeder.generate
-        )
         self._constants.env_by_tags("pack")._value_call = self.pack_im
         self._other_aggregators = {
             "adsbhub--submit": ADSBHub(self._system),
@@ -152,6 +162,7 @@ class AdsbIm:
         self.app.add_url_rule("/", "director", self.director, methods=["GET", "POST"])
         self.app.add_url_rule("/index", "index", self.index)
         self.app.add_url_rule("/setup", "setup", self.setup, methods=["GET", "POST"])
+        self.app.add_url_rule("/stage2", "stage2", self.stage2, methods=["GET", "POST"])
         self.app.add_url_rule("/update", "update", self.update, methods=["POST"])
         self.app.add_url_rule("/api/sdr_info", "sdr_info", self.sdr_info)
         self.app.add_url_rule("/api/base_info", "base_info", self.base_info)
@@ -624,6 +635,40 @@ class AdsbIm:
             except:
                 print_err("failed to allow root ssh login")
 
+    def setup_new_micro_site(self, ip):
+        print_err(f"setting up new micro site at {ip}")
+        n = self._constants.env_by_tags("num_micro_sites").value
+        self._constants.env_by_tags("num_micro_sites").value = n + 1
+        self._constants.env_by_tags(f"micro_ip_{n}").value = ip
+        # now let's see if we can get the data from the micro feeder
+        base_info, status = generic_get_json(f"http://{ip}/api/base_info", None)
+        if status == 200 and base_info != None:
+            print_err(f"got {base_info} for {ip}")
+            self._constants.env_by_tags(f"mlat_name_{n}").value = base_info["name"]
+            self._constants.env_by_tags(f"feeder_lat_{n}").value = base_info["lat"]
+            self._constants.env_by_tags(f"feeder_lng_{n}").value = base_info["lng"]
+            self._constants.env_by_tags(f"feeder_alt_{n}").value = base_info["alt"]
+            self._constants.env_by_tags(f"form_timezone_{n}").value = base_info["tz"]
+            micro_sites = self._constants.env_by_tags("micro_sites").value
+            micro_sites.append(base_info["name"])
+            self._constants.env_by_tags("micro_sites").value = micro_sites
+
+            print_err(f"added new micro site {base_info['name']} at {ip}")
+
+            # next we create the new yml file
+            with open(
+                self._constants.config_path / "stage2.yml", "r"
+            ) as stage2_yml_template:
+                with open(
+                    self._constants.config_path / f"stage2_micro_site_{n}.yml",
+                    "w",
+                ) as stage2_yml:
+                    stage2_yml.write(
+                        stage2_yml_template.read().replace("STAGE2NUM", f"{n}")
+                    )
+        else:
+            print_err(f"failed to get base_info from {ip}")
+
     def update(self):
         description = """
             This is the one endpoint that handles all the updates coming in from the UI.
@@ -648,6 +693,13 @@ class AdsbIm:
             if value == "go":
                 seen_go = True
             if value == "go" or value == "wait":
+                if key == "stage2":
+                    # user has clicked Submit on Stage 2 page
+                    # grab the IP that we know the user has provided
+                    next_site = self._constants.env_by_tags("num_micro_sites").value
+                    ip = form.get(f"micro_ip_{next_site}")
+                    print_err(f"handling micro site nr {next_site} at {ip}")
+                    self.setup_new_micro_site(ip)
                 if key == "aggregators":
                     # user has clicked Submit on Aggregator page
                     self._constants.env_by_tags("aggregators_chosen").value = True
@@ -1076,10 +1128,18 @@ class AdsbIm:
     def setup(self):
         if request.method == "POST" and request.form.get("submit") == "go":
             return self.update()
-
+        # is this a stage2 feeder?
+        if self._constants.is_enabled("stage2"):
+            return render_template("stage2.html")
         # make sure DNS works
         self.update_dns_state()
         return render_template("setup.html")
+
+    @check_restart_lock
+    def stage2(self):
+        if request.method == "POST":
+            return self.update()
+        return render_template("stage2.html")
 
 
 if __name__ == "__main__":
@@ -1104,17 +1164,22 @@ if __name__ == "__main__":
         "pw.yml",
         "rb.yml",
         "rv.yml",
+        "stage2.yml",
         "uat978.yml",
     }
     adsb_dir = pathlib.Path("/opt/adsb")
     config_dir = pathlib.Path("/opt/adsb/config")
     if not config_dir.exists():
+        print_err("config folder does not exist, creating and moving config files")
         config_dir.mkdir()
         env_file = adsb_dir / ".env"
         if env_file.exists():
             env_file.rename(config_dir / ".env")
         else:
             # I don't understand how that could happen
+            print_err(
+                "no .env file found in /opt/adsb, creating empty one in /opt/adsb/config"
+            )
             open(config_dir / ".env", "w").close()
     for file_name in config_files:
         config_file = pathlib.Path(adsb_dir / file_name)

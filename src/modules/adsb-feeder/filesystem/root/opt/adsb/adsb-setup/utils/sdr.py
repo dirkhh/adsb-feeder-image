@@ -54,7 +54,7 @@ class SDR:
 class SDRDevices:
     def __init__(self):
         self.sdrs: List[SDR] = []
-        self.duplicates: Set(str) = set()
+        self.duplicates: Set[str] = set()
 
     def __len__(self):
         return len(self.sdrs)

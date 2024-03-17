@@ -14,7 +14,7 @@ from .other_aggregators import (
     Uk1090,
 )
 from .sdr import SDR, SDRDevices
-from .agg_status import AggStatus, ImStatus
+from .agg_status import AggStatus, ImStatus, generic_get_json
 from .system import System
 from .util import cleanup_str, print_err
 from .background import Background
