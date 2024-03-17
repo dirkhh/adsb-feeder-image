@@ -6,6 +6,7 @@ from typing import List, Union
 from utils.util import print_err
 
 ENV_FILE_PATH = "/opt/adsb/config/.env"
+USER_ENV_FILE_PATH = "/opt/adsb/config/.env.user"
 ENV_FLAG_FILE_PATH = "/opt/adsb/config/.env.flag"
 JSON_FILE_PATH = "/opt/adsb/config/config.json"
 
@@ -95,6 +96,15 @@ class Env:
                 f.write(
                     f"{key.strip()}={value.strip() if type(value) == str else value}\n"
                 )
+        # write the user env in the form that can be easily inserted into the yml file
+        # using the name here so it comes from the values passed in
+        val = values.get("_ADSBIM_STATE_EXTRA_ENV", "\r\n")
+        if val:
+            with open(USER_ENV_FILE_PATH, "w") as f:
+                lines = val.split("\r\n")
+                for line in lines:
+                    if line.strip():
+                        f.write(f"      - {line.strip()}\n")
 
     def _write_value_to_file(self, new_value):
         values = self._get_values_from_file()

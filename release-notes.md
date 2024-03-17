@@ -1,13 +1,6 @@
-Changes since v1.2.2 include
-- update to latest SDR-E containers (this can cause an update to take a long time)
-- add API endpoint to provide the base info of a feeder (site name, location, etc)
-- hide UI elements that aren't relevant on a stage 2 setup
-- simplify the connection between micro feeder and stage 2 feeder
-- add shell script to disable secure feeder mode
-- debug logging improvements
-- add micro feeder profile to the basic setup - this makes it easier to create a two stage system
-- move routeset API over to use the adsb.im API endpoint
-- aggregator status handling - correctly implement backoff / cache time - thank you @wiedehopf
+Changes since v1.2.3 include
+- store asdb-setup settings in json instead of trying to use the .env file for Python, bash, and Docker -- note that this means that extra variables a user stored in their .env files will be lost after the upgrade
+- add ability to add custom environment variables to the Ultrafeeder from the Expert page
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)

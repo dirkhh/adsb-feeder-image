@@ -445,6 +445,11 @@ class Constants:
             is_mandatory=False,
             tags=["tailscale_extras"],
         ),
+        Env(
+            "_ADSBIM_STATE_EXTRA_ENV",
+            is_mandatory=False,
+            tags=["ultrafeeder_extra_env"],
+        ),
         # Container images
         # -- these names are magic and are used in yaml files and the structure
         #    of these names is used in scripting around that
