@@ -1,9 +1,11 @@
-import sys
+import json
+import re
+from typing import List, Union
 
-from os import path
-from .util import print_err
+from utils.util import print_err
 
 ENV_FILE_PATH = "/opt/adsb/config/.env"
+JSON_FILE_PATH = "/opt/adsb/config/config.json"
 
 
 # extend the truthy concept to exclude all non-empty string except a few specific ones ([Tt]rue, [Oo]n, 1)
@@ -33,9 +35,6 @@ class Env:
         self._is_mandatory = is_mandatory
         self._value_call = value_call
         self._tags = tags
-        self._file = (
-            ENV_FILE_PATH  # FIXME: storing this in every Env seems... suboptimal
-        )
 
         if default_call:
             self._default = default_call()
@@ -44,10 +43,6 @@ class Env:
         self._reconcile(value=None, pull=True)
 
     def _reconcile(self, value, pull: bool = False):
-        if not path.isfile(self._file):
-            # Let's create it
-            open(self._file, "w").close()
-
         value_in_file = self._get_value_from_file()
         if pull and value_in_file != None:
             self._value = value_in_file
@@ -60,9 +55,13 @@ class Env:
             self._write_value_to_file(value)
 
     def _get_values_from_file(self):
+        ret = json.load(open(JSON_FILE_PATH, "r"))
+        return ret
+
+    def _get_values_from_file_old(self):
         ret = {}
         try:
-            with open(self._file, "r") as f:
+            with open(ENV_FILE_PATH, "r") as f:
                 for line in f.readlines():
                     if line.strip().startswith("#"):
                         continue
@@ -75,6 +74,15 @@ class Env:
 
     def _get_value_from_file(self):
         return self._get_values_from_file().get(self._name, None)
+
+    def _write_file(self, values):
+        json.dump(values, open(JSON_FILE_PATH, "w"))
+        with open(ENV_FILE_PATH, "w") as f:
+            for key, value in sorted(values.items()):
+                # _ADSBIM_STATE variables aren't needed in the .env file
+                if key.startswith("_ADSBIM_STATE"):
+                    continue
+                f.write(f"{key.strip()}={value.strip()}\n")
 
     def _write_value_to_file(self, new_value):
         values = self._get_values_from_file()

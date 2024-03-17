@@ -615,27 +615,18 @@ class Constants:
 
     # helper function to get everything that needs to be written out written out
     def update_env(self):
-        print_err("writing back .env file to persist settings")
-        env_vars = {}
-        with open(ENV_FILE_PATH, "r") as env_file:
-            for line in env_file.readlines():
-                if line.strip().startswith("#"):
-                    continue
-                key, var = line.partition("=")[::2]
-                env_vars[key.strip()] = var.strip()
-                # print_err(f"found {key.strip()} -> {var.strip()} in .env file")
-            for e in self._env:
-                if any(t == "false_is_zero" for t in e.tags):
-                    env_vars[e.name] = "1" if is_true(e.value) else "0"
-                elif any(t == "false_is_empty" for t in e.tags):
-                    env_vars[e.name] = "True" if is_true(e.value) else ""
-                else:
-                    env_vars[e.name] = e.value
-
-        with open(ENV_FILE_PATH, "w") as env_file:
-            for key, value in env_vars.items():
-                if key:
-                    env_file.write(f"{key}={value}\n")
+        # we need to grap a (basically random) Env object to be able to use the
+        # object methods:
+        env = next(iter(self._env))
+        env_vars = env._get_values_from_file()
+        for e in self._env:
+            if any(t == "false_is_zero" for t in e.tags):
+                env_vars[e.name] = "1" if is_true(e.value) else "0"
+            elif any(t == "false_is_empty" for t in e.tags):
+                env_vars[e.name] = "True" if is_true(e.value) else ""
+            else:
+                env_vars[e.name] = e.value
+        env._write_file(env_vars)
 
     # make sure our internal data is in sync with the .env file on disk
     def re_read_env(self):
