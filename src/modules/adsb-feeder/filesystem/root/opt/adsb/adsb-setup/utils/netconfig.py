@@ -25,7 +25,8 @@ class NetConfig:
 
 
 class UltrafeederConfig:
-    def __init__(self, constants):
+    def __init__(self, constants, micro: str = ""):
+        self._micro = micro
         self._constants = constants
 
     @property
@@ -54,12 +55,17 @@ class UltrafeederConfig:
         }
 
     def generate(self):
+        if self._micro and not self._constants.is_enabled("stage2"):
+            return ""
+        print_err(
+            f"generating netconfigs for {self._micro if self._micro else 'Ultrafeeder'}"
+        )
         mlat_privacy = self._constants.is_enabled("mlat_privacy")
         ret = set()
         for name, netconfig in self.enabled_aggregators.items():
-            uuid = self._constants.env_by_tags("ultrafeeder_uuid").value
+            uuid = self._constants.env_by_tags(f"ultrafeeder_uuid{self._micro}").value
             if name == "adsblol":
-                uuid = self._constants.env_by_tags("adsblol_uuid").value
+                uuid = self._constants.env_by_tags(f"adsblol_uuid{self._micro}").value
             ret.add(netconfig.generate(mlat_privacy=mlat_privacy, uuid=uuid))
         ret.discard("")
         # now we need to add the two internal inbound links (if needed)

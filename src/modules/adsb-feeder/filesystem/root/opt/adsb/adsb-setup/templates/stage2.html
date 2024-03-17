@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% set active_page = "stage2" %}
+
+{% block content %}
+<h1 class="mt-3 text-center text-danger">{% block title %} Setup stage 2 feeder {% endblock %}</h1>
+<div class="alert alert-danger" role="alert" {% if env_value_by_tag('dns_state') %} style="display: none;" {% endif %}>
+  The feeder cannot resolve DNS queries. This will most likely prevent it from working at all.
+</div>
+<div class="row">
+  <div class="col-12">
+    {% for site in env_value_by_tag('micro_sites') %}
+    <h5>{{ site }}</h5>
+    <div class="col-4 col-md-3">{{ env_value_by_tag('micro_ip_' ~ loop.index0) }}</div>
+    <div class="col-6 col-md-9">{{ env_value_by_tag('micro_lat_' ~ loop.index0) }},
+      {{ env_value_by_tag('micro_lng_' ~ loop.index0) }} @
+      {{ env_value_by_tag('micro_alt_' ~ loop.index0) }}m
+    </div>
+    <div class="col-4 col-md-3">running adsb.im feeder image version
+      {{ env_value_by_tag('micro_version_' ~ loop.index0) }}
+    </div>
+    {% endfor %}
+  </div>
+  <div class="col-12">
+    <form method="post" action="{{ url_for('update') }}">
+      <div class="form-group row align-items-center mb-1">
+        <span class="col-md">
+          <label for="micro_ip_{{ env_value_by_tag('num_micro_sites') }}">micro feeder IP address</label>
+        </span>
+        <span class="col-md">
+          {% set next_site_tag = 'micro_ip_' ~ env_value_by_tag('num_micro_sites') %}
+          <input type="text" name="{{ next_site_tag }}" required placeholder="10.1.2.3" class="form-control"
+                 pattern="((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])"
+                 title="valid IPv4 address" value="{{ env_value_by_tag(next_site_tag) }}" />
+        </span>
+      </div>
+      <div class="form-group mt-3">
+        <label>
+          Which
+          <a href="#"
+             title="aggregators that don't require you to create an account or provide an email address">semi-anonymous
+          </a>
+          aggregators do you want to feed?
+        </label>
+        <br />
+        <div>
+          <input type="radio" name="aggregators" id="all" value="all" required {% if env_value_by_tag("aggregators")=="all"
+      %} checked {% endif %}>
+          <label class="form-check-label mr-3" for="all">All</label>
+          <input type="radio" name="aggregators" id="privacy" value="privacy" {% if
+      env_value_by_tag("aggregators")=="privacy" %} checked {% endif %}>
+          <label class="form-check-label mr-3" for="privacy">Aggregators with privacy policy</label>
+          <input type="radio" name="aggregators" id="individual" value="individual" {% if
+      env_value_by_tag("aggregators")=="individual" %} checked {% endif %}>
+          <label class="form-check-label" for="individual">Pick individually</label>
+        </div>
+        <div id="explain-all" style="display: {% if env_value_by_tag('aggregators')=='all' %} block {% else %} none {%
+            endif %}; font-size: smaller;">
+          With this option you will feed data to
+          <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
+          <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/">Fly Italy ADSB</a>,
+          <a href="https://www.avdelphi.com/privacy.html">AVDelphi</a>,
+          <a href="https://www.planespotters.net/legal/privacypolicy/">planespotters.net</a>,
+          <a href="https://adsb.one/privacy-policy/">adsb.one</a>,
+          <a href="https://theairtraffic.com/privacy-license/">TheAirTraffic.com</a>,
+          <a href="https://adsb.fi/">adsb.fi</a>, <a href="https://radarplane.com/privacy-policy">RadarPlane</a>,
+          <!-- <a href="https://www.flyovr.io/">FLYOVR.IO</a>,-->
+          <a href="https://skydata.hpradar.com/">hpradar</a>,
+          <a href="https://globe.airplanes.live/privacy">airplanes.live</a>,
+          <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
+        </div>
+        <div id="explain-privacy" style="display: {% if env_value_by_tag('aggregators')=='priv' %} block {% else %}
+            none {% endif %}; font-size: smaller;">
+          With this option you will feed data to
+          <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
+          <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/">Fly Italy ADSB</a>,
+          <a href="https://www.avdelphi.com/privacy.html">AVDelphi</a>,
+          <a href="https://www.planespotters.net/legal/privacypolicy/">planespotters.net</a>,
+          <a href="https://adsb.one/privacy-policy/">adsb.one</a>,
+          <a href="https://adsb.fi/">adsb.fi</a>
+          <a href="https://radarplane.com/privacy-policy">RadarPlane</a>,
+          <a href="https://globe.airplanes.live/privacy">airplanes.live</a>,
+          <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
+        </div>
+        <div id="explain-individual" style="display: {% if env_value_by_tag('aggregators')=='ind' %} block {% else %}
+                none {% endif %}; font-size: smaller;">
+          With this option you can make detailed selections on the Aggregator page.
+        </div>
+      </div>
+      <div class="form-group">
+        <button type="submit" name="stage2" value="go" class="btn btn-primary">Submit</button>
+      </div>
+      <p>{{ message }}</p>
+    </form>
+  </div>
+</div>
+<script>
+  const explainAll = document.getElementById("explain-all");
+  const explainPriv = document.getElementById("explain-privacy");
+  const explainInd = document.getElementById("explain-individual");
+  function aggregatorClick() {
+    if (document.getElementById("all").checked) {
+      explainAll.style.display = "block";
+      explainPriv.style.display = "none";
+      explainInd.style.display = "none";
+      explainMicro.style.display = "none";
+    } else if (document.getElementById("privacy").checked) {
+      explainAll.style.display = "none";
+      explainPriv.style.display = "block";
+      explainInd.style.display = "none";
+      explainMicro.style.display = "none";
+    } else if (document.getElementById("individual").checked) {
+      explainAll.style.display = "none";
+      explainPriv.style.display = "none";
+      explainInd.style.display = "block";
+      explainMicro.style.display = "none";
+    }
+  }
+  const aggregatorBtns = document.querySelectorAll('input[name="aggregators"]');
+  aggregatorBtns.forEach((radio) => {
+    radio.addEventListener("click", aggregatorClick);
+  });
+</script>
+{% endblock %}

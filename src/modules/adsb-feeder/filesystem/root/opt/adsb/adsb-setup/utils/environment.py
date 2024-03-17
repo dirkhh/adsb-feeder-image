@@ -21,7 +21,7 @@ class Env:
     def __init__(
         self,
         name: str,
-        value: str = None,
+        value: Union[str, List[str]] = None,
         is_mandatory: bool = True,
         default: any = None,
         default_call: callable = None,
@@ -72,6 +72,7 @@ class Env:
                         key = conversion[key]
                     ret[key.strip()] = var.strip()
         except:
+            print_err("Failed to read .env file")
             pass
 
         return ret
@@ -103,6 +104,7 @@ class Env:
         if any(t == "false_is_empty" for t in self.tags):
             new_value = "1" if is_true(new_value) else ""
         values[self._name] = new_value
+        self._write_file(values)
         self._write_file(values)
 
     def __str__(self):

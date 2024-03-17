@@ -562,10 +562,122 @@ class Constants:
             tags=["low_disk", "norestore"],
         ),
         Env(
-            "_ADSBIM_STATE_STAGE2",
+            "AF_IS_STAGE2",
             is_mandatory=False,
             default=False,
             tags=["stage2", "is_enabled", "norestore"],
+        ),
+        Env(
+            "AF_NUM_MICRO_SITES",
+            is_mandatory=False,
+            default=0,
+            tags=["num_micro_sites"],
+        ),
+        Env(
+            "_ADSBIM_STATE_MICRO_SITES",
+            is_mandatory=False,
+            default=[],
+            tags=["micro_sites"],
+        ),
+        Env("AF_MICRO_IP_0", is_mandatory=False, tags=["micro_ip_0"]),
+        Env("FEEDER_LAT_0", is_mandatory=False, tags=["feeder_lat_0"]),
+        Env("FEEDER_LONG_0", is_mandatory=False, tags=["feeder_lng_0"]),
+        Env("FEEDER_ALT_M_0", is_mandatory=False, tags=["feeder_alt_0"]),
+        Env("FEEDER_TZ_0", is_mandatory=False, tags=["form_timezone_0"]),
+        Env("MLAT_SITE_NAME_0", is_mandatory=False, tags=["mlat_name_0"]),
+        Env("FEEDER_HEYWHATSTHAT_ID_0", is_mandatory=False, tags=["heywhatsthat_id_0"]),
+        Env(
+            "FEEDER_ULTRAFEEDER_CONFIG_0",
+            is_mandatory=False,
+            tags=["ultrafeeder_config_0"],
+        ),
+        Env(
+            "ULTRAFEEDER_UUID_0",
+            is_mandatory=False,
+            tags=["ultrafeeder_uuid_0"],
+        ),
+        Env(
+            "ADSBLOL_UUID_0", default_call=lambda: str(uuid4()), tags=["adsblol_uuid_0"]
+        ),
+        Env("AF_MICRO_IP_1", is_mandatory=False, tags=["micro_ip_1"]),
+        Env("FEEDER_LAT_1", is_mandatory=False, tags=["feeder_lat_1"]),
+        Env("FEEDER_LONG_1", is_mandatory=False, tags=["feeder_lng_1"]),
+        Env("FEEDER_ALT_M_1", is_mandatory=False, tags=["feeder_alt_1"]),
+        Env("FEEDER_TZ_1", is_mandatory=False, tags=["form_timezone_1"]),
+        Env("MLAT_SITE_NAME_1", is_mandatory=False, tags=["mlat_name_1"]),
+        Env("FEEDER_HEYWHATSTHAT_ID_1", is_mandatory=False, tags=["heywhatsthat_id_1"]),
+        Env(
+            "FEEDER_ULTRAFEEDER_CONFIG_1",
+            is_mandatory=False,
+            tags=["ultrafeeder_config_1"],
+        ),
+        Env(
+            "ULTRAFEEDER_UUID_1",
+            is_mandatory=False,
+            tags=["ultrafeeder_uuid_1"],
+        ),
+        Env(
+            "ADSBLOL_UUID_1", default_call=lambda: str(uuid4()), tags=["adsblol_uuid_1"]
+        ),
+        Env("AF_MICRO_IP_2", is_mandatory=False, tags=["micro_ip_2"]),
+        Env("FEEDER_LAT_2", is_mandatory=False, tags=["feeder_lat_2"]),
+        Env("FEEDER_LONG_2", is_mandatory=False, tags=["feeder_lng_2"]),
+        Env("FEEDER_ALT_M_2", is_mandatory=False, tags=["feeder_alt_2"]),
+        Env("FEEDER_TZ_2", is_mandatory=False, tags=["form_timezone_2"]),
+        Env("MLAT_SITE_NAME_2", is_mandatory=False, tags=["mlat_name_2"]),
+        Env("FEEDER_HEYWHATSTHAT_ID_2", is_mandatory=False, tags=["heywhatsthat_id_2"]),
+        Env(
+            "FEEDER_ULTRAFEEDER_CONFIG_2",
+            is_mandatory=False,
+            tags=["ultrafeeder_config_2"],
+        ),
+        Env(
+            "ULTRAFEEDER_UUID_2",
+            is_mandatory=False,
+            tags=["ultrafeeder_uuid_2"],
+        ),
+        Env(
+            "ADSBLOL_UUID_2", default_call=lambda: str(uuid4()), tags=["adsblol_uuid_2"]
+        ),
+        Env("AF_MICRO_IP_3", is_mandatory=False, tags=["micro_ip_3"]),
+        Env("FEEDER_LAT_3", is_mandatory=False, tags=["feeder_lat_3"]),
+        Env("FEEDER_LONG_3", is_mandatory=False, tags=["feeder_lng_3"]),
+        Env("FEEDER_ALT_M_3", is_mandatory=False, tags=["feeder_alt_3"]),
+        Env("FEEDER_TZ_3", is_mandatory=False, tags=["form_timezone_3"]),
+        Env("MLAT_SITE_NAME_3", is_mandatory=False, tags=["mlat_name_3"]),
+        Env("FEEDER_HEYWHATSTHAT_ID_3", is_mandatory=False, tags=["heywhatsthat_id_3"]),
+        Env(
+            "FEEDER_ULTRAFEEDER_CONFIG_3",
+            is_mandatory=False,
+            tags=["ultrafeeder_config_3"],
+        ),
+        Env(
+            "ULTRAFEEDER_UUID_3",
+            is_mandatory=False,
+            tags=["ultrafeeder_uuid_3"],
+        ),
+        Env(
+            "ADSBLOL_UUID_3", default_call=lambda: str(uuid4()), tags=["adsblol_uuid_3"]
+        ),
+        Env("AF_MICRO_IP_4", is_mandatory=False, tags=["micro_ip_4"]),
+        Env("FEEDER_LAT_4", is_mandatory=False, tags=["feeder_lat_4"]),
+        Env("FEEDER_LONG_4", is_mandatory=False, tags=["feeder_lng_4"]),
+        Env("FEEDER_ALT_M_4", is_mandatory=False, tags=["feeder_alt_4"]),
+        Env("FEEDER_TZ_4", is_mandatory=False, tags=["form_timezone_4"]),
+        Env("MLAT_SITE_NAME_4", is_mandatory=False, tags=["mlat_name_4"]),
+        Env("FEEDER_HEYWHATSTHAT_ID_4", is_mandatory=False, tags=["heywhatsthat_id_4"]),
+        Env(
+            "FEEDER_ULTRAFEEDER_CONFIG_4",
+            is_mandatory=False,
+            tags=["ultrafeeder_config_4"],
+        ),
+        Env(
+            "ULTRAFEEDER_UUID_4",
+            is_mandatory=False,
+            tags=["ultrafeeder_uuid_4"],
+        ),
+        Env(
+            "ADSBLOL_UUID_4", default_call=lambda: str(uuid4()), tags=["adsblol_uuid_4"]
         ),
     }
 
