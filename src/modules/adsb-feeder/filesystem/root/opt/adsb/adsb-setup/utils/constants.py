@@ -11,6 +11,11 @@ from .util import print_err
 
 @dataclass
 class Constants:
+    def __new__(cc):
+        if not hasattr(cc, "instance"):
+            cc.instance = super(Constants, cc).__new__(cc)
+        return cc.instance
+
     data_path = Path("/opt/adsb")
     config_path = data_path / "config"
     env_file_path = config_path / ".env"
