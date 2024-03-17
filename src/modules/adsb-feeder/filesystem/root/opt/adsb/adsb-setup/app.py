@@ -1,5 +1,4 @@
 import filecmp
-import io
 import json
 import os.path
 import pathlib
@@ -12,11 +11,9 @@ import string
 import subprocess
 import zipfile
 import tempfile
-import time
 from base64 import b64encode
 from datetime import datetime
-from operator import is_
-from os import path, urandom
+from os import urandom
 from time import sleep
 from typing import Dict, List
 from zlib import compress
@@ -73,14 +70,14 @@ class AdsbIm:
 
         @self.app.context_processor
         def env_functions():
+            def get_value(tags):
+                e = self._constants.env_by_tags(tags)
+                return e.value if e else ""
+
             return {
                 "is_enabled": lambda tag: self._constants.is_enabled(tag),
-                "env_value_by_tag": lambda tag: self._constants.env_by_tags(
-                    [tag]
-                ).value,  # this one takes a single tag
-                "env_value_by_tags": lambda tags: self._constants.env_by_tags(
-                    tags
-                ).value,  # this one takes a list of tags
+                "env_value_by_tag": lambda tag: get_value([tag]),  # single tag
+                "env_value_by_tags": lambda tags: get_value(tags),  # list of tags
                 "env_values": self._constants.envs,
             }
 
