@@ -7,8 +7,8 @@ services:
     container_name: piaware
     restart: always
     ports:
-      - ${_ADSBIM_STATE_PIAWAREMAP_PORT:-8081}:8080
-      - ${_ADSBIM_STATE_PIAWARESTAT_PORT:-8082}:80
+      - ${AF_PIAWAREMAP_PORT:-8081}:8080
+      - ${AF_PIAWARESTAT_PORT:-8082}:80
     environment:
       - BEASTHOST=ultrafeeder
       - UAT_RECEIVER_TYPE=${FEEDER_PIAWARE_UAT978}

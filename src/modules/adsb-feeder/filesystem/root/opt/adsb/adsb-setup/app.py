@@ -25,10 +25,21 @@ from zlib import compress
 # isort: off
 from flask import Flask, flash, redirect, render_template, request, send_file, url_for
 
+# this initial setup is not a great look... but I don't want to move this into a separate
+# applications... if we have no JSON config file, we need create it from a .env file and
+# then write the data back (which creates the JSON file)
+if not os.path.exists("/opt/adsb/config/config.json"):
+    open("/opt/adsb/config/.env.flag", "w").close()
+
+from utils import Constants
+
+if os.path.exists("/opt/adsb/config/.env.flag"):
+    Constants().writeback_env()
+    os.remove("/opt/adsb/config/.env.flag")
+
 from utils import (
     ADSBHub,
     Background,
-    Constants,
     Env,
     FlightAware,
     FlightRadar24,
@@ -187,7 +198,7 @@ class AdsbIm:
             "bv": self._constants.env_by_tags("base_version").value,
             "cv": self._constants.env_by_tags("container_version").value,
         }
-        return b64encode(compress(pickle.dumps(image)))
+        return b64encode(compress(pickle.dumps(image))).decode("utf-8")
 
     def check_secure_image(self):
         return self._constants.secure_image_path.exists()
@@ -209,7 +220,7 @@ class AdsbIm:
         self._routemanager.add_proxy_routes(self.proxy_routes)
         debug = os.environ.get("ADSBIM_DEBUG") is not None
         self._debug_cleanup()
-        self._constants.update_env()
+        self._constants.writeback_env()
         self.update_dns_state()
         self._dns_watch = Background(3600, self.update_dns_state)
         # prepare for app use (vs ADS-B Feeder Image use)
@@ -880,7 +891,7 @@ class AdsbIm:
         )
 
         # let's make sure we write out the updated ultrafeeder config
-        self._constants.update_env()
+        self._constants.writeback_env()
 
         # if the button simply updated some field, stay on the same page
         if not seen_go:

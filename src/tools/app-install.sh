@@ -171,12 +171,12 @@ cd /opt/adsb/config || exit_message "can't find /opt/adsb/config"
     cat /opt/adsb/docker.image.versions
     echo "_ADSBIM_BASE_VERSION=$(cat /opt/adsb/adsb.im.version)"
     echo "_ADSBIM_CONTAINER_VERSION=$(cat /opt/adsb/adsb.im.version)"
-    echo "_ADSBIM_STATE_WEBPORT=1099"
-    echo "_ADSBIM_STATE_TAR1090_PORT=1090"
-    echo "_ADSBIM_STATE_UAT978_PORT=1091"
-    echo "_ADSBIM_STATE_PIAWAREMAP_PORT=1092"
-    echo "_ADSBIM_STATE_PIAWARESTAT_PORT=1093"
-    echo "_ADSBIM_STATE_DAZZLE_PORT=1094"
+    echo "AF_WEBPORT=1099"
+    echo "AF_TAR1090_PORT=1090"
+    echo "AF_UAT978_PORT=1091"
+    echo "AF_PIAWAREMAP_PORT=1092"
+    echo "AF_PIAWARESTAT_PORT=1093"
+    echo "AF_DAZZLE_PORT=1094"
  } >> .env
 
 # run the final steps of the setup and then enable the services

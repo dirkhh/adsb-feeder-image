@@ -14,12 +14,12 @@ mv adsb-setup.log adsb-setup.log."$TIMESTAMP"
 tail -n500 adsb-setup.log."$TIMESTAMP" > adsb-setup.log
 find . -name adsb-setup.log.\* -ctime +7 | xargs rm
 docker restart adsb-setup-proxy
-if grep -q "^_ADSBIM_STATE_IS_RADARBOX_ENABLED=True" config/.env ; then
+if grep -q "^AF_IS_RADARBOX_ENABLED=True" config/.env ; then
 	docker restart rbfeeder
 fi
 
 # check in the .env file what we should do
-if grep -q "^_ADSBIM_STATE_IS_NIGHTLY_BASE_UPDATE_ENABLED=True" config/.env ; then
+if grep -q "^AF_IS_NIGHTLY_BASE_UPDATE_ENABLED=True" config/.env ; then
 	# do an OS update - either using the DietPi update tool or by just using apt
 	if [ -x /boot/dietpi/dietpi-update ] ; then
 		G_INTERACTIVE=0 CONFIG_CHECK_APT_UPDATES=2 dietpi-update 1 >> /opt/adsb/adsb-setup.log 2>&1
@@ -28,9 +28,9 @@ if grep -q "^_ADSBIM_STATE_IS_NIGHTLY_BASE_UPDATE_ENABLED=True" config/.env ; th
 		apt upgrade -y >> /opt/adsb/adsb-setup.log 2>&1
 	fi
 fi
-if grep "^_ADSBIM_STATE_IS_NIGHTLY_FEEDER_UPDATE_ENABLED=True" config/.env ; then
+if grep "^AF_IS_NIGHTLY_FEEDER_UPDATE_ENABLED=True" config/.env ; then
 	bash /opt/adsb/feeder-update
-elif grep "^_ADSBIM_STATE_IS_NIGHTLY_CONTAINER_UPDATE_ENABLED=True" config/.env ; then
+elif grep "^AF_IS_NIGHTLY_CONTAINER_UPDATE_ENABLED=True" config/.env ; then
 	# the feeder update above includes the container update, so let's not do it twice in a row
 	bash /opt/adsb/docker-update-adsb-im
 fi

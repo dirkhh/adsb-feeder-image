@@ -9,7 +9,7 @@ fi
 
 systemctl stop adsb-setup
 
-sed -i 's/_ADSBIM_STATE_IS_SECURE_IMAGE=.*/_ADSBIM_STATE_IS_SECURE_IMAGE=False/' /opt/adsb/config/.env
+sed -i 's/AF_IS_SECURE_IMAGE=.*/AF_IS_SECURE_IMAGE=False/' /opt/adsb/config/.env
 rm -f /opt/adsb/adsb.im.secure_image
 
 systemctl restart adsb-setup

@@ -23,12 +23,12 @@ cd /opt/adsb/config
 cat /opt/adsb/docker.image.versions >> .env
 echo "_ADSBIM_BASE_VERSION=$(cat /opt/adsb/adsb.im.version)" >> .env
 echo "_ADSBIM_CONTAINER_VERSION=$(cat /opt/adsb/adsb.im.version)" >> .env
-echo "_ADSBIM_STATE_WEBPORT=1099" >> .env
-echo "_ADSBIM_STATE_TAR1090_PORT=1090" >> .env
-echo "_ADSBIM_STATE_UAT978_PORT=1091" >> .env
-echo "_ADSBIM_STATE_PIAWAREMAP_PORT=1092" >> .env
-echo "_ADSBIM_STATE_PIAWARESTAT_PORT=1093" >> .env
-echo "_ADSBIM_STATE_DAZZLE_PORT=1094" >> .env
+echo "AF_WEBPORT=1099" >> .env
+echo "AF_TAR1090_PORT=1090" >> .env
+echo "AF_UAT978_PORT=1091" >> .env
+echo "AF_PIAWAREMAP_PORT=1092" >> .env
+echo "AF_PIAWARESTAT_PORT=1093" >> .env
+echo "AF_DAZZLE_PORT=1094" >> .env
 
 if [ ! -f /opt/adsb/feeder-image.name ] ; then
 	echo "ADS-B Feeder app" > /opt/adsb/feeder-image-name

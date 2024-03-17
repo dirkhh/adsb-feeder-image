@@ -25,7 +25,7 @@ waiting_placeholder() {
     if [ -f /opt/adsb-feeder-update/waiting-pid ] ; then kill "$(</opt/adsb-feeder-update/waiting-pid)" || true ; fi
     rm -f /opt/adsb-feeder-update/waiting-pid
 
-    PORT=$(grep _ADSBIM_STATE_WEBPORT /opt/adsb/config/.env | cut -d= -f2)
+    PORT=$(grep AF_WEBPORT /opt/adsb/config/.env | cut -d= -f2)
     # figure out if something is listening to that port and give it some time to stop running
     # this magic uses bash's /dev/tcp capability
     for delay in 1 5 10 ; do

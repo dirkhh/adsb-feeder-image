@@ -1,10 +1,10 @@
 # dataclass
 from dataclasses import dataclass
-from os import getenv
+from os import getenv, path
 from pathlib import Path
 from uuid import uuid4
 
-from .environment import Env, ENV_FILE_PATH, is_true
+from .environment import ENV_FILE_PATH, ENV_FLAG_FILE_PATH, Env, is_true
 from .netconfig import NetConfig
 from .util import print_err
 
@@ -56,7 +56,7 @@ class Constants:
     def proxy_routes(self):
         ret = []
         for [endpoint, _env, path] in self._proxy_routes:
-            env = "_ADSBIM_STATE_" + _env.upper() + "_PORT"
+            env = "AF_" + _env.upper() + "_PORT"
             ret.append([endpoint, self.env(env).value, path])
         return ret
 
@@ -301,14 +301,15 @@ class Constants:
             is_mandatory=False,
             tags=["board_name", "norestore"],
         ),
-        Env("_ADSBIM_STATE_WEBPORT", default=80, tags=["webport"]),
-        Env("_ADSBIM_STATE_DAZZLE_PORT", default=9999, tags=["dazzleport"]),
-        Env("_ADSBIM_STATE_TAR1090_PORT", default=8080, tags=["tar1090port"]),
-        Env("_ADSBIM_STATE_UAT978_PORT", default=9780, tags=["uatport"]),
-        Env("_ADSBIM_STATE_PIAWAREMAP_PORT", default=8081, tags=["piamapport"]),
-        Env("_ADSBIM_STATE_PIAWARESTAT_PORT", default=8082, tags=["piastatport"]),
-        Env("_ADSBIM_STATE_FLIGHTRADAR_PORT", default=8754, tags=["frport"]),
-        Env("_ADSBIM_STATE_PLANEFINDER_PORT", default=30053, tags=["pfport"]),
+        # ports used by our proxy system
+        Env("AF_WEBPORT", default=80, tags=["webport"]),
+        Env("AF_DAZZLE_PORT", default=9999, tags=["dazzleport"]),
+        Env("AF_TAR1090_PORT", default=8080, tags=["tar1090port"]),
+        Env("AF_UAT978_PORT", default=9780, tags=["uatport"]),
+        Env("AF_PIAWAREMAP_PORT", default=8081, tags=["piamapport"]),
+        Env("AF_PIAWARESTAT_PORT", default=8082, tags=["piastatport"]),
+        Env("AF_FLIGHTRADAR_PORT", default=8754, tags=["frport"]),
+        Env("AF_PLANEFINDER_PORT", default=30053, tags=["pfport"]),
         Env("_ADSBIM_STATE_PACKAGE", tags=["pack", "norestore"]),
         Env(
             "_ADSBIM_STATE_IMAGE_NAME",
@@ -324,63 +325,63 @@ class Constants:
         # keep it around to handle updates from before the changeover
         # and easy checks in webinterface
         Env(
-            "_ADSBIM_STATE_IS_SECURE_IMAGE",
+            "AF_IS_SECURE_IMAGE",
             is_mandatory=False,
             default="False",
             tags=["secure_image", "is_enabled"],
         ),
         Env(
-            "_ADSBIM_STATE_IS_FLIGHTRADAR24_ENABLED",
+            "AF_IS_FLIGHTRADAR24_ENABLED",
             is_mandatory=False,
             tags=["other_aggregator", "is_enabled", "flightradar"],
         ),
         Env(
-            "_ADSBIM_STATE_IS_PLANEWATCH_ENABLED",
+            "AF_IS_PLANEWATCH_ENABLED",
             is_mandatory=False,
             tags=["other_aggregator", "is_enabled", "planewatch"],
         ),
         Env(
-            "_ADSBIM_STATE_IS_FLIGHTAWARE_ENABLED",
+            "AF_IS_FLIGHTAWARE_ENABLED",
             is_mandatory=False,
             tags=["other_aggregator", "is_enabled", "flightaware"],
         ),
         Env(
-            "_ADSBIM_STATE_IS_RADARBOX_ENABLED",
+            "AF_IS_RADARBOX_ENABLED",
             is_mandatory=False,
             tags=["other_aggregator", "is_enabled", "radarbox"],
         ),
         Env(
-            "_ADSBIM_STATE_IS_PLANEFINDER_ENABLED",
+            "AF_IS_PLANEFINDER_ENABLED",
             is_mandatory=False,
             tags=["other_aggregator", "is_enabled", "planefinder"],
         ),
         Env(
-            "_ADSBIM_STATE_IS_ADSBHUB_ENABLED",
+            "AF_IS_ADSBHUB_ENABLED",
             is_mandatory=False,
             tags=["other_aggregator", "is_enabled", "adsbhub"],
         ),
         Env(
-            "_ADSBIM_STATE_IS_OPENSKY_ENABLED",
+            "AF_IS_OPENSKY_ENABLED",
             is_mandatory=False,
             tags=["other_aggregator", "is_enabled", "opensky"],
         ),
         Env(
-            "_ADSBIM_STATE_IS_RADARVIRTUEL_ENABLED",
+            "AF_IS_RADARVIRTUEL_ENABLED",
             is_mandatory=False,
             tags=["other_aggregator", "is_enabled", "radarvirtuel"],
         ),
         Env(
-            "_ADSBIM_STATE_IS_1090UK_ENABLED",
+            "AF_IS_1090UK_ENABLED",
             is_mandatory=False,
             tags=["other_aggregator", "is_enabled", "1090uk"],
         ),
         Env(
-            "_ADSBIM_STATE_IS_AIRSPY_ENABLED",
+            "AF_IS_AIRSPY_ENABLED",
             is_mandatory=False,
             tags=["airspy", "is_enabled"],
         ),
         Env(
-            "_ADSBIM_STATE_IS_DOZZLE_ENABLED",
+            "AF_IS_DOZZLE_ENABLED",
             is_mandatory=False,
             default=True,
             tags=["dozzle", "is_enabled"],
@@ -396,7 +397,7 @@ class Constants:
             tags=["ssh_pub", "key", "norestore"],
         ),
         Env(
-            "_ADSBIM_STATE_IS_BASE_CONFIG_FINISHED",
+            "AF_IS_BASE_CONFIG_FINISHED",
             default="0",
             is_mandatory=False,
             tags=["base_config", "is_enabled"],
@@ -408,17 +409,17 @@ class Constants:
             tags=["aggregators_chosen"],
         ),
         Env(
-            "_ADSBIM_STATE_IS_NIGHTLY_BASE_UPDATE_ENABLED",
+            "AF_IS_NIGHTLY_BASE_UPDATE_ENABLED",
             is_mandatory=False,
             tags=["nightly_base_update", "is_enabled"],
         ),
         Env(
-            "_ADSBIM_STATE_IS_NIGHTLY_FEEDER_UPDATE_ENABLED",
+            "AF_IS_NIGHTLY_FEEDER_UPDATE_ENABLED",
             is_mandatory=False,
             tags=["nightly_feeder_update", "is_enabled"],
         ),
         Env(
-            "_ADSBIM_STATE_IS_NIGHTLY_CONTAINER_UPDATE_ENABLED",
+            "AF_IS_NIGHTLY_CONTAINER_UPDATE_ENABLED",
             is_mandatory=False,
             tags=["nightly_container_update", "is_enabled"],
         ),
@@ -614,11 +615,15 @@ class Constants:
         return e and e.value
 
     # helper function to get everything that needs to be written out written out
-    def update_env(self):
+    def writeback_env(self):
         # we need to grap a (basically random) Env object to be able to use the
         # object methods:
         env = next(iter(self._env))
-        env_vars = env._get_values_from_file()
+        env_vars = (
+            env._get_values_from_env_file()
+            if path.exists(ENV_FLAG_FILE_PATH)
+            else env._get_values_from_file()
+        )
         for e in self._env:
             if any(t == "false_is_zero" for t in e.tags):
                 env_vars[e.name] = "1" if is_true(e.value) else "0"

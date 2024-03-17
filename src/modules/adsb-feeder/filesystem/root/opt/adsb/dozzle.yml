@@ -9,7 +9,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
-      - ${_ADSBIM_STATE_DAZZLE_PORT:-9999}:8080
+      - ${AF_DAZZLE_PORT:-9999}:8080
 
   adsb-setup-proxy:
     container_name: adsb-setup-proxy

@@ -8,7 +8,7 @@ services:
     device_cgroup_rules:
       - 'c 189:* rwm'
     ports:
-      - ${_ADSBIM_STATE_TAR1090_PORT:-8080}:80 # to expose the web interface
+      - ${AF_TAR1090_PORT:-8080}:80 # to expose the web interface
       - 30001:30001 # Raw input
       - 30002:30002 # Raw output
       - 30003:30003 # SBS output
@@ -73,7 +73,7 @@ services:
       - TAR1090_RANGERINGSCOLORS='#1A237E','#0D47A1','#42A5F5','#64B5F6'
       - TAR1090_USEROUTEAPI=${FEEDER_TAR1090_USEROUTEAPI}
       - TAR1090_ROUTEAPIURL="https://adsb.im/api/0/routeset"
-      - TAR1090_IMAGE_CONFIG_LINK="http://HOSTNAME:${_ADSBIM_STATE_WEBPORT}/"
+      - TAR1090_IMAGE_CONFIG_LINK="http://HOSTNAME:${AF_WEBPORT}/"
       - TAR1090_IMAGE_CONFIG_TEXT="ADS-B Feeder Image Configuration"
       # options for the µImage:
       - TAR1090_ENABLE_AC_DB=${FEEDER_ENABLE_AC_DB:-true}

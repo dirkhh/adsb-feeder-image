@@ -9,37 +9,37 @@ if [ -f /opt/adsb/config/.env ] ; then
 	if grep "FEEDER_ENABLE_UAT978=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "/opt/adsb/config/uat978.yml" )
 	fi
-	if grep "_ADSBIM_STATE_IS_FLIGHTRADAR24_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
+	if grep "AF_IS_FLIGHTRADAR24_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "/opt/adsb/config/fr24.yml" )
 	fi
-	if grep "_ADSBIM_STATE_IS_PLANEWATCH_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
+	if grep "AF_IS_PLANEWATCH_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "/opt/adsb/config/pw.yml" )
 	fi
-	if grep "_ADSBIM_STATE_IS_FLIGHTAWARE_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
+	if grep "AF_IS_FLIGHTAWARE_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "/opt/adsb/config/fa.yml" )
 	fi
-	if grep "_ADSBIM_STATE_IS_RADARBOX_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
+	if grep "AF_IS_RADARBOX_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "/opt/adsb/config/rb.yml" )
 	fi
-	if grep "_ADSBIM_STATE_IS_PLANEFINDER_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
+	if grep "AF_IS_PLANEFINDER_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "/opt/adsb/config/pf.yml" )
 	fi
-	if grep "_ADSBIM_STATE_IS_ADSBHUB_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
+	if grep "AF_IS_ADSBHUB_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "/opt/adsb/config/ah.yml" )
 	fi
-	if grep "_ADSBIM_STATE_IS_OPENSKY_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
+	if grep "AF_IS_OPENSKY_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "/opt/adsb/config/os.yml" )
 	fi
-	if grep "_ADSBIM_STATE_IS_RADARVIRTUEL_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
+	if grep "AF_IS_RADARVIRTUEL_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "/opt/adsb/config/rv.yml" )
 	fi
-	if grep "_ADSBIM_STATE_IS_1090UK_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
+	if grep "AF_IS_1090UK_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "/opt/adsb/config/1090uk.yml" )
 	fi
-	if grep "_ADSBIM_STATE_IS_DOZZLE_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
+	if grep "AF_IS_DOZZLE_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "/opt/adsb/config/dozzle.yml" )
 	fi
-	if grep "_ADSBIM_STATE_IS_AIRSPY_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
+	if grep "AF_IS_AIRSPY_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "/opt/adsb/config/airspy.yml" )
 	fi
 fi

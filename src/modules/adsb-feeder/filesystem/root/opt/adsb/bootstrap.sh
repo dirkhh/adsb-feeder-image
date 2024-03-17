@@ -29,7 +29,7 @@ bash /opt/adsb/docker-pull.sh &
 
 # the code below enables the redirection from the my.adsb.im service to the
 # local feeder. this only needs to run if things aren't configured, yet
-grep "_ADSBIM_STATE_IS_BASE_CONFIG_FINISHED=True" /opt/adsb/config/.env &> /dev/null && exit 0
+grep "AF_IS_BASE_CONFIG_FINISHED=True" /opt/adsb/config/.env &> /dev/null && exit 0
 
 # get the local IP address
 IP=$(ip route get 8.8.8.8 | sed -n '/src/{s/.*src *\([^ ]*\).*/\1/p;q}')
