@@ -21,6 +21,8 @@ services:
       - AIRSPY_ADSB_RF_GAIN=${FEEDER_AIRSPY_GAIN:-auto}
       - AIRSPY_ADSB_STATS=true
       - AIRSPY_ADSB_BIAS_TEE=${FEEDER_ENABLE_BIASTEE}
+      # USER_PROVIDED_ENV_START
+      # USER_PROVIDED_ENV_END
     volumes:
       - /run/adsb-feeder-airspy:/run
       - /run/adsb-feeder-shared:/run/airspy_adsb

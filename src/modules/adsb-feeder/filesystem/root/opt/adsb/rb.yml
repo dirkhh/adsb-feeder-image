@@ -22,6 +22,8 @@ services:
       - ALT=${FEEDER_ALT_M}
       - TZ=${FEEDER_TZ}
       - SHARING_KEY=${FEEDER_RADARBOX_SHARING_KEY}
+      # USER_PROVIDED_ENV_START
+      # USER_PROVIDED_ENV_END
     tmpfs:
       - /run:exec,size=64M
       - /var/log

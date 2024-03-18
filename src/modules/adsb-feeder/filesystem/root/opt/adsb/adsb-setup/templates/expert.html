@@ -59,15 +59,16 @@
   </div>
 
   <div class="col-12 col-lg-6">
-    <h5 class="mt-3">Add environment variables to Ultrafeeder</h5>
+    <h5 class="mt-3">Add environment variables to containers</h5>
     <form method="POST">
       <div class="row">
         <label for="ultrafeeder_extra_env" class="col-12">
-          The Ultrafeeder Docker container supports a lot more environment variables than are exposed here in the UI. If
-          there are settings that you need to add, this is the best place to do it. Please only use this if you
-          understand what you are doing. It's reasonably simple to break your setup by inserting things here that cause
-          the container not to start.<br />
-          Please enter them one per line, with an equals sign separating the variable name from its value.
+          The the various Docker containers support a lot more environment variables than are exposed here in
+          the UI. If there are settings that you need to add, this is the best place to do it. Please only use this if
+          you understand what you are doing. It's reasonably simple to break your setup by inserting things here that
+          cause the container not to start.<br />
+          Please enter them one per line, with an equals sign separating the variable name from its value. The name
+          spaces for the different containers are distinct, so for simplicity they are all just added here together.
         </label>
         <textarea class="col-8 ms-3" id="ultrafeeder_extra_env" name="ultrafeeder_extra_env"
                   placeholder="READSB_RTLSDR_PPM=22&#13;&#10;READSB_RANGE_OUTLINE_HOURS=72"

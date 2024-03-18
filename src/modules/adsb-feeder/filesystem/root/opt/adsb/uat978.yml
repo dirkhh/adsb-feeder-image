@@ -19,6 +19,8 @@ services:
       - DUMP978_DEVICE_TYPE=rtlsdr
       - DUMP978_ENABLE_BIASTEE=${FEEDER_ENABLE_UATBIASTEE}
       - AUTOGAIN_INITIAL_PERIOD=7200
+      # USER_PROVIDED_ENV_START
+      # USER_PROVIDED_ENV_END
     volumes:
       - /dev:/dev:ro
       - /opt/adsb/config/dump978/globe_history:/var/globe_history

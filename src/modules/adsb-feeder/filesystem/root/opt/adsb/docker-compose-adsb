@@ -58,7 +58,9 @@ if grep "_IS_BASE_CONFIG_FINISHED=True" /opt/adsb/config/.env > /dev/null 2>&1 ;
 	cd /opt/adsb/config || echo "config folder is missing?" >&2
 	if [ -f .env.user ] ; then
 		# now inject the user env values
-		python3 /opt/adsb/scripts/inject-env.py docker-compose.yml .env.user
+		for yaml in *.yml ; do
+			python3 /opt/adsb/scripts/inject-env.py "$yaml" .env.user
+		done
 	fi
 	$docker_compose "${COMPOSE_FILES[@]}" "$@"
 	if [ "$1" = "up" ] ; then

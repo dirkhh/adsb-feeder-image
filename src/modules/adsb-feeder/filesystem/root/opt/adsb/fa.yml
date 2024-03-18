@@ -17,6 +17,8 @@ services:
       - LONG=${FEEDER_LONG}
       - TZ=${FEEDER_TZ}
       - FEEDER_ID=${FEEDER_PIAWARE_FEEDER_ID}
+      # USER_PROVIDED_ENV_START
+      # USER_PROVIDED_ENV_END
     tmpfs:
       - /run:exec,size=64M
       - /var/log

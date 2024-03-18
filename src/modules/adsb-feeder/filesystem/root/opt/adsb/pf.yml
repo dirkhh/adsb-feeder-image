@@ -14,6 +14,8 @@ services:
       - LAT=${FEEDER_LAT}
       - LONG=${FEEDER_LONG}
       - SHARECODE=${FEEDER_PLANEFINDER_SHARECODE}
+      # USER_PROVIDED_ENV_START
+      # USER_PROVIDED_ENV_END
     tmpfs:
       - /run:exec,size=64M
       - /var/log/pfclient

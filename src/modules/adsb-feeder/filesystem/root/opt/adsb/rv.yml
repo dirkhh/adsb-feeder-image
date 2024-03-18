@@ -17,6 +17,8 @@ services:
       - LAT=${FEEDER_LAT}
       - LON=${FEEDER_LONG}
       - ALT=${FEEDER_ALT_M}
+      # USER_PROVIDED_ENV_START
+      # USER_PROVIDED_ENV_END
     tmpfs:
       - /tmp:rw,nosuid,nodev,noexec,relatime,size=128M
     volumes:

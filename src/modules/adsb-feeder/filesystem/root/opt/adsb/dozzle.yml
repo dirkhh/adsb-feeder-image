@@ -6,6 +6,8 @@ services:
     restart: always
     environment:
       - DOZZLE_NO_ANALYTICS=1
+      # USER_PROVIDED_ENV_START
+      # USER_PROVIDED_ENV_END
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:

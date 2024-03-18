@@ -13,6 +13,8 @@ services:
       - ALT=${FEEDER_ALT_M}m
       - TZ=${FEEDER_TZ}
       - API_KEY=${FEEDER_PLANEWATCH_API_KEY}
+      # USER_PROVIDED_ENV_START
+      # USER_PROVIDED_ENV_END
     tmpfs:
       - /run:exec,size=64M
       - /var/log
