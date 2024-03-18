@@ -49,12 +49,17 @@ if grep AF_IS_RADARBOX_ENABLED=True /opt/adsb/config/.env ; then
 	bash /opt/adsb/rb-hack-setup.sh
 fi
 
-if grep "AF_IS_BASE_CONFIG_FINISHED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
+# when we restart the containers after an upgrade from v1.2.3 or earlier to a later version,
+# the very first time we still need to check for the old name of the environment variable
+# To make this less ugly, check for the partial name
+if grep "_IS_BASE_CONFIG_FINISHED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
 	echo "calling docker compose for the enabled containers"
 	source /opt/adsb/default.docker-compose
 	cd /opt/adsb/config || echo "config folder is missing?" >&2
-	# now inject the user env values
-	python3 /opt/adsb/scripts/inject-env.py docker-compose.yml .env.user
+	if [ -f .env.user ] ; then
+		# now inject the user env values
+		python3 /opt/adsb/scripts/inject-env.py docker-compose.yml .env.user
+	fi
 	$docker_compose "${COMPOSE_FILES[@]}" "$@"
 	if [ "$1" = "up" ] ; then
 		# try to figure out if this was successful
