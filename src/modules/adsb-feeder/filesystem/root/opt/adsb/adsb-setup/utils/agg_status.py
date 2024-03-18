@@ -23,6 +23,7 @@ def generic_get_json(url: str, data):
                 "User-Agent": "ADS-B Image",
             },
         )
+        return response.json(), response.status_code
     except (
         requests.HTTPError,
         requests.ConnectionError,
@@ -34,8 +35,6 @@ def generic_get_json(url: str, data):
     except:
         # for some reason this didn't work
         print_err("checking {url} failed: reason unknown")
-    else:
-        return response.json(), response.status_code
     return None, status
 
 
