@@ -23,7 +23,8 @@
   upgrading to a larger storage device.
 </div>
 <div class="row">
-  <div class="col-12 mb-3 {% if env_value_by_tag('aggregators') != 'micro'%} d-none {% endif %}">
+  <div
+       class="col-12 mb-3 {% if env_value_by_tag('aggregators') != 'micro' or is_enabled('stage2') %} d-none {% endif %}">
     <h5>You are running in micro feeder mode</h5>
     <p>Connect to a stage 2 system that feeds aggregators.</p>
     <p>Assuming the stage 2 is on the same network as your browser, it should be able to connect to this system as
@@ -38,6 +39,18 @@
       ZeroTier address.
     </div>
   </div>
+  <div class="col-12 mb-3 {% if not is_enabled('stage2') %} d-none {% endif %}">
+    <h5>You are running as stage 2 feeder</h5>
+    <div class="col-12 mb-3">{% if env_value_by_tag('num_micro_sites') == 0 %}No micro feeder sites configured, yet.
+      Please do so on the <a href={{ url_for('stage2') }}>Stage 2 Setup page</a>{% else %}You are collecting data from
+      {% for site in env_value_by_tag('micro_sites') %} {% if loop.last %}and
+      {% endif %}<strong>{{site}}</strong>{% if not loop.last and not loop.length == 2 %},{% endif %}{% endfor %} - more
+      configuration options for this are available on the <a href={{ url_for('stage2') }}>Stage 2 Setup
+        page</a>{% endif %}
+    </div>
+  </div>
+
+
   <div class="col-12 {% if env_value_by_tag('aggregators') == 'micro'%} d-none {% endif %}">
     <h4>You are feeding</h4>
     <div class="row small">
@@ -108,10 +121,9 @@
         <label for="update_feeder_aps">
           Update to the current ADS-B feeder applications (i.e. the web UI, setup apps, and
           containers). Either the latest beta or stable version.<br />
-          <span class="small">If this update brings in new container images, even with a fast internet
-            connection this can easily take more than ten minutes to complete. The web UI will pause while the update is
-            running, but the feeder apps will only be briefly interrupted once all new components have been
-            downloaded.</span>
+          <span class="small">If this update brings in new container images, even with a fast internet connection this
+            can easily take more than ten minutes to complete. The web UI will pause while the update is running, but
+            the feeder apps will only be briefly interrupted once all new components have been downloaded.</span>
         </label>
         <div>
           <button type="submit" class="btn btn-primary mb-3 ml-3 col-2" name="update_feeder_aps_beta"
