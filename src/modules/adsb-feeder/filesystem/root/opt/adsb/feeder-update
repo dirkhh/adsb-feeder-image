@@ -198,6 +198,7 @@ done
 # make sure the version information is correct
 echo "$VERSION" > /opt/adsb/adsb.im.version
 sed -i "s/BASE_VERSION=.*/BASE_VERSION=$VERSION/" /opt/adsb/config/.env
+sed -i "s/\"_ADSBIM_BASE_VERSION\": \"[^\"]*\"/\"_ADSBIM_BASE_VERSION\": \"$VERSION\"/" /opt/adsb/config/config.json
 
 echo "finally, trigger a container upgrade so that they match the new image"
 /opt/adsb/docker-update-adsb-im -no-fetch
