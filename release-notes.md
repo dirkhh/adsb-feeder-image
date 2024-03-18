@@ -1,4 +1,5 @@
 Changes since v1.2.3 include
+- enable adding environment variables for all Docker containers
 - store asdb-setup settings in json instead of trying to use the .env file for Python, bash, and Docker -- note that this means that extra variables a user stored in their .env files will be lost after the upgrade
 - add ability to add custom environment variables to the Ultrafeeder from the Expert page
 
