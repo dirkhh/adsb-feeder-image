@@ -527,6 +527,7 @@ class AdsbIm:
         )
 
     def base_info(self):
+        print_err(f"access to base_info from {request.remote_addr}")
         return json.dumps(
             {
                 "name": self._constants.env_by_tags("mlat_name").value,
@@ -635,12 +636,8 @@ class AdsbIm:
             except:
                 print_err("failed to allow root ssh login")
 
-    def setup_new_micro_site(self, ip):
-        print_err(f"setting up new micro site at {ip}")
-        n = self._constants.env_by_tags("num_micro_sites").value
-        self._constants.env_by_tags("num_micro_sites").value = n + 1
-        self._constants.env_by_tags(f"micro_ip_{n}").value = ip
-        # now let's see if we can get the data from the micro feeder
+    def get_base_info(self, n):
+        ip = self._constants.env_by_tags(f"micro_ip_{n}").value
         base_info, status = generic_get_json(f"http://{ip}/api/base_info", None)
         if status == 200 and base_info != None:
             print_err(f"got {base_info} for {ip}")
@@ -652,13 +649,24 @@ class AdsbIm:
             self._constants.env_by_tags(f"feeder_version_{n}").value = base_info[
                 "version"
             ]
-            micro_sites = self._constants.env_by_tags("micro_sites").value
-            micro_sites.append(base_info["name"])
-            self._constants.env_by_tags("micro_sites").value = micro_sites
-
-            print_err(f"added new micro site {base_info['name']} at {ip}")
+            return True
         else:
             print_err(f"failed to get base_info from {ip}")
+            return False
+
+
+    def setup_new_micro_site(self, ip):
+        print_err(f"setting up new micro site at {ip}")
+        n = self._constants.env_by_tags("num_micro_sites").value
+        self._constants.env_by_tags("num_micro_sites").value = n + 1
+        self._constants.env_by_tags(f"micro_ip_{n}").value = ip
+        # now let's see if we can get the data from the micro feeder
+        if self.get_base_info(n):
+            print_err(f"added new micro site {self._constants.env_by_tags(f"mlat_name_{n}").value} at {ip}")
+            micro_sites = self._constants.env_by_tags("micro_sites").value
+            micro_sites.append(self._constants.env_by_tags(f"mlat_name_{n}").value)
+            self._constants.env_by_tags("micro_sites").value = micro_sites
+
 
     def update(self):
         description = """
@@ -1137,6 +1145,9 @@ class AdsbIm:
     def stage2(self):
         if request.method == "POST":
             return self.update()
+        # update the info from the micro feeders
+        for i in range(self._constants.env_by_tags("num_micro_sites").value):
+            self.get_base_info(i)
         return render_template("stage2.html")
 
 
