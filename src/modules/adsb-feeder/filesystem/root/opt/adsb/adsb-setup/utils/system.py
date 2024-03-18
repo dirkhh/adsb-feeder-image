@@ -48,7 +48,9 @@ class Restart:
             print_err("Calling /opt/adsb/adsb-system-restart.sh")
             # discard output, script is logging directly to /opt/adsb/adsb-setup.log
             subprocess.run(
-                "/usr/bin/bash /opt/adsb/adsb-system-restart.sh", shell=True, capture_output=True,
+                "/usr/bin/bash /opt/adsb/adsb-system-restart.sh",
+                shell=True,
+                capture_output=True,
             )
             return True
 
@@ -116,6 +118,7 @@ class System:
                     "User-Agent": "Python3/requests/adsb.im",
                     "Accept": "text/plain",
                 },
+                timeout=5.0,
             )
         except (
             requests.HTTPError,
