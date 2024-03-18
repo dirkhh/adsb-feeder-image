@@ -1073,8 +1073,53 @@ class AdsbIm:
         ip, status = self._system.check_ip()
         if status == 200:
             self._constants.env_by_tags(["feeder_ip"]).value = ip
-        local_address = request.host.split(":")[0]
+        try:
+            result = subprocess.run(
+                "ip route get 1 | head -1  | cut -d' ' -f7",
+                shell=True,
+                capture_output=True,
+                timeout=2.0,
+            ).stdout
+        except:
+            result = ""
+        else:
+            result = result.decode().strip()
+        if result:
+            local_address = result
+        else:
+            local_address = request.host.split(":")[0]
 
+        if self._constants.env_by_tags("tailscale_name").value:
+            try:
+                result = subprocess.run(
+                    "tailscale ip -4 2>/dev/null",
+                    shell=True,
+                    capture_output=True,
+                    timeout=2.0,
+                ).stdout
+            except:
+                result = ""
+            else:
+                result = result.decode().strip()
+            tailscale_address = result
+        else:
+            tailscale_address = ""
+        zt_network = self._constants.env_by_tags("zerotierid").value
+        if zt_network:
+            try:
+                result = subprocess.run(
+                    f"zerotier-cli get {zt_network} ip4 2>/dev/null",
+                    shell=True,
+                    capture_output=True,
+                    timeout=2.0,
+                ).stdout
+            except:
+                result = ""
+            else:
+                result = result.decode().strip()
+            zerotier_address = result
+        else:
+            zerotier_address = ""
         # next check if there were under-voltage events (this is likely only relevant on an RPi)
         self._constants.env_by_tags("under_voltage").value = False
         board = self._constants.env_by_tags("board_name").value
@@ -1132,7 +1177,11 @@ class AdsbIm:
                         match.group(0), self._constants.env(match.group(1)).value
                     )
         return render_template(
-            "index.html", aggregators=aggregators, local_address=local_address
+            "index.html",
+            aggregators=aggregators,
+            local_address=local_address,
+            tailscale_address=tailscale_address,
+            zerotier_address=zerotier_address,
         )
 
     @check_restart_lock

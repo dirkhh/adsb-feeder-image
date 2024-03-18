@@ -31,19 +31,13 @@
       {% for s in env_value_by_tag('stage2_listeners')%} {{s}}{% if not loop.last %},{%endif%}{%endfor%}
     </p>
     {% else %}
-    <p>Connect to a stage 2 system that feeds aggregators.</p>
-    <p>Assuming the stage 2 is on the same network as your browser, it should be able to connect to this system as
-      <code>{{ local_address }}</code>.
+    <p>Connect a stage 2 system that feeds aggregators to this system.</p>
+    <p>Most likely {% if tailscale_address != "" or zerotier_address != "" %}one of
+      {%endif%}{{ local_address }}{% if tailscale_address != "" %},
+      {{ tailscale_address}}{% endif %}{% if zerotier_address != "" %}, {{ zerotier_address}}{% endif %}
+      will work.
     </p>
-    {%endif%}
-    <div {% if env_value_by_tag('tailscale_name') == '' %}class="d-none" {% endif %}>
-      You appear to be running Tailscale - if this is how you connect to the stage 2 feeder, make sure you use your
-      Tailnet address.
-    </div>
-    <div {% if env_value_by_tag('zerotierid') == '' %}class="d-none" {% endif %}>
-      You appear to be running ZeroTier - if this is how you connect to the stage 2 feeder, make sure you use your
-      ZeroTier address.
-    </div>
+    {% endif %}
   </div>
   <div class="col-12 mb-3 {% if not is_enabled('stage2') %} d-none {% endif %}">
     <h5>You are running as stage 2 feeder</h5>
