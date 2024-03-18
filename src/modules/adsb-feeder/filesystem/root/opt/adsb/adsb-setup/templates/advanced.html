@@ -7,7 +7,7 @@
 <form class="row gy-2 gx-3 align-items-center" method="post">
   <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="advanced" value="go">I'm
     done here - take me to the website</button>
-  <div class="col-12 form-check">
+  <div class="col-12 form-check {% if env_value_by_tag('aggregators') == 'micro' %}d-none{% endif %}">
     <input class="form-check-input me-1" type="checkbox" name="mlat_privacy--is_enabled" id="mlat_privacy--is_enabled"
            {% if is_enabled("mlat_privacy") %}checked{% endif %} />
     <label for="mlat_privacy--is_enabled">
@@ -19,11 +19,11 @@
     <input class="form-check-input me-1" type="checkbox" name="route_api--is_enabled" id="route_api--is_enabled"
            {% if is_enabled("route_api") %}checked{% endif %} />
     <label for="route_api--is_enabled" class="mb-3">
-      Use adsb.lol Route API to show flight routes when
+      Use Route API to show flight routes when
       known.
     </label>
   </div>
-  <div class="col-12 form-check">
+  <div class="col-12 form-chec {% if env_value_by_tag('aggregators') == 'micro' %}d-none{% endif %}k">
     <input class="form-check-input me-1" type="checkbox" name="heywhatsthat--is_enabled" id="heywhatsthat--is_enabled"
            {% if is_enabled("heywhatsthat") %}checked{% endif %} />
     <div>
