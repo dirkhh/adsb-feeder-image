@@ -590,6 +590,12 @@ class Constants:
             default=[],
             tags=["micro_sites"],
         ),
+        Env(
+            "_ADSBIM_STATE_STAGE2_LISTENERS",
+            is_mandatory=False,
+            default=[],
+            tags=["stage2_listeners"],
+        ),
         Env("AF_MICRO_IP_0", is_mandatory=False, tags=["micro_ip_0"]),
         Env("FEEDER_LAT_0", is_mandatory=False, tags=["feeder_lat_0"]),
         Env("FEEDER_LONG_0", is_mandatory=False, tags=["feeder_lng_0"]),

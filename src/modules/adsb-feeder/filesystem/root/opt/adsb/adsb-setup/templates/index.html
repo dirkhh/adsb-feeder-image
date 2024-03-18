@@ -26,10 +26,16 @@
   <div
        class="col-12 mb-3 {% if env_value_by_tag('aggregators') != 'micro' or is_enabled('stage2') %} d-none {% endif %}">
     <h5>You are running in micro feeder mode</h5>
+    {% if env_value_by_tag('stage2_listeners') != [] %}
+    <p class="mt-3">The following stage2 systems have accessed this feeder:
+      {% for s in env_value_by_tag('stage2_listeners')%} {{s}}{% if not loop.last %},{%endif%}{%endfor%}
+    </p>
+    {% else %}
     <p>Connect to a stage 2 system that feeds aggregators.</p>
     <p>Assuming the stage 2 is on the same network as your browser, it should be able to connect to this system as
       <code>{{ local_address }}</code>.
     </p>
+    {%endif%}
     <div {% if env_value_by_tag('tailscale_name') == '' %}class="d-none" {% endif %}>
       You appear to be running Tailscale - if this is how you connect to the stage 2 feeder, make sure you use your
       Tailnet address.

@@ -527,7 +527,12 @@ class AdsbIm:
         )
 
     def base_info(self):
-        print_err(f"access to base_info from {request.remote_addr}")
+        listener = request.remote_addr
+        stage2_listeners = self._constants.env_by_tags("stage2_listeners").value
+        print_err(f"access to base_info from {listener}")
+        if not listener in stage2_listeners:
+            stage2_listeners.append(listener)
+            self._constants.env_by_tags("stage2_listeners").value = stage2_listeners
         return json.dumps(
             {
                 "name": self._constants.env_by_tags("mlat_name").value,
@@ -654,7 +659,6 @@ class AdsbIm:
             print_err(f"failed to get base_info from {ip}")
             return False
 
-
     def setup_new_micro_site(self, ip):
         print_err(f"setting up new micro site at {ip}")
         n = self._constants.env_by_tags("num_micro_sites").value
@@ -662,11 +666,12 @@ class AdsbIm:
         self._constants.env_by_tags(f"micro_ip_{n}").value = ip
         # now let's see if we can get the data from the micro feeder
         if self.get_base_info(n):
-            print_err(f"added new micro site {self._constants.env_by_tags(f"mlat_name_{n}").value} at {ip}")
+            print_err(
+                f"added new micro site {self._constants.env_by_tags(f'mlat_name_{n}').value} at {ip}"
+            )
             micro_sites = self._constants.env_by_tags("micro_sites").value
             micro_sites.append(self._constants.env_by_tags(f"mlat_name_{n}").value)
             self._constants.env_by_tags("micro_sites").value = micro_sites
-
 
     def update(self):
         description = """
