@@ -39,7 +39,8 @@
       {% set config_complete = is_enabled('base_config') %}
       <div class="collapse navbar-collapse " id="navbarNav">
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-          {% for href, id, caption in navigation_bar if env_value_by_tag('aggregators') != 'micro' or id != 'aggregators' %}
+          {% for href, id, caption in navigation_bar if (env_value_by_tag('aggregators') != 'micro' or id != 'aggregators') and (id != 'advanced' or not is_enabled('stage2')) %}
+          {% if is_enabled('stage2') and id == 'setup' -%}{% set caption='Stage 2 Setup' -%}{% set href='stage2' -%}{% endif -%}
           <li class="nav-item" {% if id == active_page %}aria-current="true" {% endif %}
               {% if not config_complete and id != "setup" and id != "restore" and id != "logs" %} style="display: none;"
               {% endif %}>

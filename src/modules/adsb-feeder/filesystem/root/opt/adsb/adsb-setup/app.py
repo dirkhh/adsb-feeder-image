@@ -578,7 +578,8 @@ class AdsbIm:
     def advanced(self):
         if request.method == "POST":
             return self.update()
-
+        if self._constants.is_enabled("stage2"):
+            return self.visualization()
         # just in case things have changed (the user plugged in a new device for example)
         self._sdrdevices._ensure_populated()
         # embed lsusb output in the page
