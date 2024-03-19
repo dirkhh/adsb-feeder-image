@@ -94,6 +94,11 @@ class Env:
                 # _ADSBIM_STATE variables aren't needed in the .env file
                 if key.startswith("_ADSBIM_STATE"):
                     continue
+                # if we have no MAP_NAME, use the MLAT_SITE_NAME - it's annoying that
+                # we need to fix this up here, but in order to be able to seamlessly
+                # migrate from older versions, this seemed like the easiest way to do it
+                if key == "MAP_NAME" and not value:
+                    value = values.get("MLAT_SITE_NAME", "")
                 f.write(
                     f"{key.strip()}={value.strip() if type(value) == str else value}\n"
                 )

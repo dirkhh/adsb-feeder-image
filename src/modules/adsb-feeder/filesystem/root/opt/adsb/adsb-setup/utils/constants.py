@@ -128,6 +128,7 @@ class Constants:
         Env("FEEDER_ALT_M", tags=["alt"]),
         Env("FEEDER_TZ", tags=["form_timezone"]),
         Env("MLAT_SITE_NAME", tags=["mlat_name"]),
+        Env("MAP_NAME", tags=["map_name"]),
         # SDR
         Env("FEEDER_RTL_SDR", default="rtlsdr", tags=["rtlsdr"]),
         Env(

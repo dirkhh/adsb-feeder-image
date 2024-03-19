@@ -718,6 +718,9 @@ class AdsbIm:
                     name = form.get(f"stage2_name")
                     print_err(f"setting new stage2 name to {name}")
                     self._constants.env_by_tags("stage2_name").value = name
+                    # since this is a stage2 system, let's also set the name for
+                    # the combined tar1090 map
+                    self._constants.env_by_tags("map_name").value = name
                     return redirect(url_for("stage2"))
                 if key == "aggregators":
                     # user has clicked Submit on Aggregator page
@@ -900,6 +903,10 @@ class AdsbIm:
                             self._constants.env_by_tags(clear_key).value = ""
 
                 e.value = value
+                if key == "mlat_name":
+                    # in a single system setup, we used to treat mlat and map name as the same, but for a
+                    # stage2 system having these as different variables makes things more obvious
+                    self._constants.env_by_tags("map_name").value = value
         # done handling the input data
         # what implied settings do we have (and could we simplify them?)
         # first grab the SDRs plugged in and check if we have one identified for UAT
