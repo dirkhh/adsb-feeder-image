@@ -157,6 +157,7 @@ class AdsbIm:
         self.app.add_url_rule("/restore", "restore", self.restore, methods=["GET", "POST"])
         self.app.add_url_rule("/executerestore", "executerestore", self.executerestore, methods=["GET", "POST"])
         self.app.add_url_rule("/advanced", "advanced", self.advanced, methods=["GET", "POST"])
+        self.app.add_url_rule("/visualization", "visualization", self.visualization, methods=["GET", "POST"])
         self.app.add_url_rule("/expert", "expert", self.expert, methods=["GET", "POST"])
         self.app.add_url_rule("/aggregators", "aggregators", self.aggregators, methods=["GET", "POST"])
         self.app.add_url_rule("/", "director", self.director, methods=["GET", "POST"])
@@ -589,6 +590,12 @@ class AdsbIm:
             lsusb = "lsusb failed"
 
         return render_template("advanced.html", lsusb=lsusb)
+
+    def visualization(self):
+        if request.method == "POST":
+            return self.update()
+
+        return render_template("visualization.html")
 
     def set_channel(self, channel: str):
         with open(self._constants.data_path / "update-channel", "w") as update_channel:

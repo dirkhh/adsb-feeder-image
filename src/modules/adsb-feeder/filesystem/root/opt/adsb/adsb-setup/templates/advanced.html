@@ -2,49 +2,44 @@
 {% set active_page = "advanced" %}
 {% block content %}
 <h1 class="mt-3 text-center text-danger">
-  {% block title %}Setup optional parameters{% endblock %}
+  {% block title %}Setup optional hardware parameters{% endblock %}
 </h1>
 <form class="row gy-2 gx-3 align-items-center" method="post">
   <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="advanced" value="go">I'm
     done here - take me to the website</button>
-  <div class="col-12 form-check {% if env_value_by_tag('aggregators') == 'micro' %}d-none{% endif %}">
-    <input class="form-check-input me-1" type="checkbox" name="mlat_privacy--is_enabled" id="mlat_privacy--is_enabled"
-           {% if is_enabled("mlat_privacy") %}checked{% endif %} />
-    <label for="mlat_privacy--is_enabled">
-      Enable privacy flag (ON = does not show on <a href="https://mlat.adsb.lol/syncmap/">public aggregator
-        maps</a>)
-    </label>
+  <div class="col-12{% if is_enabled('stage2') %}d-none{% endif %}">
+    <h5 class="mt-3">Set explicit ADS-B SDR gain</h5>
+    <form method="POST">
+      <div class="row">
+        <label for="gain" class="col-12">
+          Normally the feeder will settle on a good gain value over time (and an Airspy will do so almost
+          immediately). If you want to override that "autogain" behavior, you can set an explicit gain value
+          here.
+        </label>
+        <input class="col-auto ms-3" id="gain" name="gain" type="text" pattern="(?:autogain|\d+(?:.\d+)?)"
+               title="A number between 0 and 50 or the word 'autogain'" value="{{ env_value_by_tag('gain') }}" required>
+        <button type="submit" class="btn btn-primary mb-1 mx-3 col-3" name="gain--submit" value="go">Submit</button>
+        <button {% if env_value_by_tag('gain') != 'autogain' %}style="display:none;" {% endif %} type="submit"
+                class="btn btn-secondary mb-1 me-3 col-3" name="resetgain" value="go">Reset Autogain</button>
+      </div>
+    </form>
   </div>
-  <div class="col-12 form-check">
-    <input class="form-check-input me-1" type="checkbox" name="route_api--is_enabled" id="route_api--is_enabled"
-           {% if is_enabled("route_api") %}checked{% endif %} />
-    <label for="route_api--is_enabled" class="mb-3">
-      Use Route API to show flight routes when
-      known.
-    </label>
-  </div>
-  <div class="col-12 form-chec {% if env_value_by_tag('aggregators') == 'micro' %}d-none{% endif %}k">
-    <input class="form-check-input me-1" type="checkbox" name="heywhatsthat--is_enabled" id="heywhatsthat--is_enabled"
-           {% if is_enabled("heywhatsthat") %}checked{% endif %} />
-    <div>
-      <label class="form-check-label" for="heywhatsthat--is_enabled">
-        <a href="https://www.heywhatsthat.com/">HeyWhat'sThat</a> is an incredibly cool web service that allows
-        you to discover what you should be able to see from the location of your antenna - including estimates for
-        how far away you should be able to detect planes (depending on their altitude - and assuming there are no
-        other obstructions).
-        <span id="hwt-text"
-              {% if not is_enabled('heywhatsthat') or env_value_by_tag('heywhatsthat_id') != '' %}style="display: none;"
-              {% endif %}>
-          Click on the link, select "New Panorama" at the top, enter your address (or find the location
-          on the map), enter a title on the lower left and click "Submit request". After a couple of minutes
-          you'll be offered to look at your panorama. At the top left you'll see the title you just entered, the
-          latitude and longitude and elevation - and below that a link that ends with <code>/?view=CODE</code>.
-          Enter this code here to see the theoretical range information on your receiver map.
-        </span>
-        <input type="text" id="heywhatsthat_id" name="heywhatsthat_id" class="form-control col-6 ml-1 mb-2"
-               placeholder="HeyWhat'sThat Panorama ID" value="{{ env_value_by_tag("heywhatsthat_id") }}">
-      </label>
-    </div>
+  <div class="col-12{% if is_enabled('stage2') or not is_enabled('uat978') %}d-none{% endif %}">
+    <h5 class="mt-3">Set explicit UAT SDR gain</h5>
+    <form method="POST">
+      <div class="row">
+        <label for="uatgain" class="col-12">
+          Normally the feeder will settle on a good gain value over time. If you want to override that
+          "autogain" behavior, you can set an explicit gain value here.
+        </label>
+        <input class="col-auto ms-3" id="uatgain" name="uatgain" type="text" pattern="(?:autogain|\d+(?:.\d+)?)"
+               title="A number between 0 and 50 or the word 'autogain'" value="{{ env_value_by_tag('uatgain') }}"
+               required>
+        <button type="submit" class="btn btn-primary mb-1 mx-3 col-3" name="uatgain--submit" value="go">Submit</button>
+        <button {% if env_value_by_tag('uatgain') != 'autogain' %}style="display:none;" {% endif %} type="submit"
+                class="btn btn-secondary mb-1 me-3 col-3" name="resetuatgain" value="go">Reset Autogain</button>
+      </div>
+    </form>
   </div>
   <div class="col-12 form-check" id="1090biast"
        {% if not env_value_by_tag('1090serial') and not is_enabled('airspy') %}style="display: none;" {% endif %}>
