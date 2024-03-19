@@ -173,6 +173,30 @@ class Env:
             self._value = value
             self._reconcile(value)
 
+    def list_set(self, idx, value):
+        if type(self._value) != list:
+            print_err(f"{self._name} is not a list, converting")
+            self._value = [self._value]
+            self.list_add(idx, value)
+            return
+        while len(self._value) < idx:
+            self._value.append(None)
+        if idx == len(self._value):
+            self._value.append(value)
+        else:
+            self._value[idx] = value
+        self._reconcile(self._value)
+
+    def list_remove(self, idx=-1):
+        if type(self._value) != list:
+            print_err(f"{self._name} is not a list, giving up")
+            return
+        if idx == -1:
+            idx = len(self._value) - 1
+        while idx < len(self._value):
+            self._value.pop()
+        self._reconcile(self._value)
+
     @property
     def tags(self):
         if not self._tags:
