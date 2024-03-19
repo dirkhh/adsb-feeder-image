@@ -99,9 +99,17 @@ class Env:
                 # migrate from older versions, this seemed like the easiest way to do it
                 if key == "MAP_NAME" and not value:
                     value = values.get("MLAT_SITE_NAME", "")
-                f.write(
-                    f"{key.strip()}={value.strip() if type(value) == str else value}\n"
-                )
+                if type(value) == list:
+                    # so now we need to write this out as multiple environment variables
+                    for idx in range(len(value)):
+                        v = value[idx]
+                        f.write(
+                            f"{key.strip()}_{idx}={v.strip() if type(v) == str else v}\n"
+                        )
+                else:
+                    f.write(
+                        f"{key.strip()}={value.strip() if type(value) == str else value}\n"
+                    )
         # write the user env in the form that can be easily inserted into the yml file
         # using the name here so it comes from the values passed in
         val = values.get("_ADSBIM_STATE_EXTRA_ENV", "\r\n")
