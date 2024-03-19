@@ -89,20 +89,21 @@ class AdsbIm:
         self._system = System(constants=self._constants)
         self._sdrdevices = SDRDevices()
         self._ultrafeeder = UltrafeederConfig(constants=self._constants)
-        self._ultrafeeder_micro = []
-        for i in range(0, 5):
-            self._ultrafeeder_micro.append(
-                UltrafeederConfig(constants=self._constants, micro=f"_{i}")
-            )
+        self._ultrafeeder_micro = [
+            UltrafeederConfig(constants=self._constants, micro=i)
+            for i in range(0, self._constants.env_by_tags("num_micro_sites").value)
+        ]
 
         # update Env ultrafeeder to have value self._ultrafeed.generate()
         self._constants.env_by_tags("ultrafeeder_config")._value_call = (
             self._ultrafeeder.generate
         )
-        for i in range(0, 5):
-            self._constants.env_by_tags(f"ultrafeeder_config_{i}")._value_call = (
-                self._ultrafeeder_micro[i].generate
-            )
+
+        # the value call for the list of micro feeders is broken and needs to be implemented differently
+        # for i in range(0, self._constants.env_by_tags("num_micro_sites").value):
+        #    self._constants.env_by_tags(f"ultrafeeder_config_{i}")._value_call = (
+        #        self._ultrafeeder_micro[i].generate
+        #    )
 
         self._agg_status_instances = dict()
 
@@ -650,37 +651,44 @@ class AdsbIm:
                 print_err("failed to allow root ssh login")
 
     def get_base_info(self, n):
-        ip = self._constants.env_by_tags(f"micro_ip_{n}").value
-        base_info, status = generic_get_json(f"http://{ip}/api/base_info", None)
-        if status == 200 and base_info != None:
-            print_err(f"got {base_info} for {ip}")
-            self._constants.env_by_tags(f"mlat_name_{n}").value = base_info["name"]
-            self._constants.env_by_tags(f"feeder_lat_{n}").value = base_info["lat"]
-            self._constants.env_by_tags(f"feeder_lng_{n}").value = base_info["lng"]
-            self._constants.env_by_tags(f"feeder_alt_{n}").value = base_info["alt"]
-            self._constants.env_by_tags(f"form_timezone_{n}").value = base_info["tz"]
-            self._constants.env_by_tags(f"feeder_version_{n}").value = base_info[
-                "version"
-            ]
-            return True
-        else:
-            print_err(f"failed to get base_info from {ip}")
-            return False
+        # make the code more readable
+        c = self._constants
+        try:
+            ip = c.env_by_tags(f"mf_ip").value[n]
+            base_info, status = generic_get_json(f"http://{ip}/api/base_info", None)
+            if status == 200 and base_info != None:
+                print_err(f"got {base_info} for {ip}")
+                c.env_by_tags(f"micro_sites").list_set(n, base_info["name"])
+                c.env_by_tags(f"mf_lat").list_set(n, base_info["lat"])
+                c.env_by_tags(f"mf_lng").list_set(n, base_info["lng"])
+                c.env_by_tags(f"mf_alt").list_set(n, base_info["alt"])
+                c.env_by_tags(f"mf_timezone").list_set(n, base_info["tz"])
+                c.env_by_tags(f"mf_version").list_set(n, base_info["version"])
+                return True
+        except:
+            pass
+        print_err(f"failed to get base_info from micro feeder {n}")
+        return False
 
     def setup_new_micro_site(self, ip):
-        print_err(f"setting up new micro site at {ip}")
+        if ip in self._constants.env_by_tags("mf_ip").value:
+            print_err(f"IP address {ip} already listed as a micro site")
+            return
+        print_err(f"setting up a new micro site at {ip}")
         n = self._constants.env_by_tags("num_micro_sites").value
+        # store the IP address so that get_base_info works
+        self._constants.env_by_tags("mf_ip").list_set(n, ip)
         # now let's see if we can get the data from the micro feeder
         if self.get_base_info(n):
             print_err(
-                f"added new micro site {self._constants.env_by_tags(f'mlat_name_{n}').value} at {ip}"
+                f"added new micro site {self._constants.env_by_tags('micro_sites').value[n]} at {ip}"
             )
-            micro_sites = self._constants.env_by_tags("micro_sites").value
-            micro_sites.append(self._constants.env_by_tags(f"mlat_name_{n}").value)
             self._constants.env_by_tags("num_micro_sites").value = n + 1
-            self._constants.env_by_tags(f"micro_ip_{n}").value = ip
-            self._constants.env_by_tags("micro_sites").value = micro_sites
+        else:
+            # oh well, remove the IP address
+            self._constants.env_by_tags("mf_ip").list_remove()
 
+    @check_restart_lock
     def update(self):
         description = """
             This is the one endpoint that handles all the updates coming in from the UI.
@@ -709,7 +717,7 @@ class AdsbIm:
                     # user has clicked Add micro feeder on Stage 2 page
                     # grab the IP that we know the user has provided
                     next_site = self._constants.env_by_tags("num_micro_sites").value
-                    ip = form.get(f"micro_ip_{next_site}")
+                    ip = form.get(f"add_micro_feeder_ip")
                     print_err(f"handling micro site nr {next_site} at {ip}")
                     self.setup_new_micro_site(ip)
                     return redirect(url_for("stage2"))
@@ -985,7 +993,7 @@ class AdsbIm:
 
         # finally, check if this has given us enough configuration info to
         # start the containers
-        if self.base_is_configured():
+        if self.base_is_configured() or self._constants.is_enabled("stage2"):
             self._constants.env_by_tags(["base_config"]).value = True
             agg_chosen_env = self._constants.env_by_tags("aggregators_chosen")
             if self.at_least_one_aggregator() or agg_chosen_env.value == True:
@@ -1220,6 +1228,22 @@ class AdsbIm:
         return render_template("stage2.html")
 
 
+def create_stage2_yml_from_template(
+    stage2_yml_name, template_file="/opt/adsb/config/stage2.yml"
+):
+    # grab the number after the last '_' in the stage2_yml_name
+    m = re.search(r"_(\d+).yml$", stage2_yml_name)
+    if m:
+        n = m.group(1)
+        with open(template_file, "r") as stage2_yml_template:
+            with open(stage2_yml_name, "w") as stage2_yml:
+                stage2_yml.write(
+                    stage2_yml_template.read().replace("STAGE2NUM", f"{n}")
+                )
+    else:
+        print_err(f"could not find micro feedernumber in {stage2_yml_name}")
+
+
 if __name__ == "__main__":
     # setup the config folder if that hasn't happened yet
     # this is designed for two scenarios:
@@ -1266,14 +1290,8 @@ if __name__ == "__main__":
             if file_name == "stage2.yml" and not filecmp.cmp(config_file, new_file):
                 # let's update the per microsite yaml files
                 print_err("found new stage2 template... updating yaml files")
-                for n in range(0, 5):
-                    with open(config_file, "r") as stage2_yml_template:
-                        with open(
-                            pathlib.Path(config_dir / f"stage2_micro_site_{n}.yml"), "w"
-                        ) as stage2_yml:
-                            stage2_yml.write(
-                                stage2_yml_template.read().replace("STAGE2NUM", f"{n}")
-                            )
+                for stage2_yml_name in config_dir.glob("stage2_micro_site_*.yml"):
+                    create_stage2_yml_from_template(stage2_yml_name, config_file)
             config_file.rename(new_file)
             print_err(f"moved {config_file} to {new_file}")
 

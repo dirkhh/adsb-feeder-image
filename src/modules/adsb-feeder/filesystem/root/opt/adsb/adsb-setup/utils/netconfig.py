@@ -1,3 +1,4 @@
+from uuid import uuid4
 from utils.util import print_err
 
 
@@ -25,7 +26,8 @@ class NetConfig:
 
 
 class UltrafeederConfig:
-    def __init__(self, constants, micro: str = ""):
+    def __init__(self, constants, micro=-1):
+        # -1 means this is either standalone or the aggregator Ultrafeeder
         self._micro = micro
         self._constants = constants
 
@@ -55,39 +57,47 @@ class UltrafeederConfig:
         }
 
     def generate(self):
-        is_stage2 = self._constants.is_enabled("stage2")
-        micro = int(self._micro[1:]) if self._micro else -1
-        num_micro = self._constants.env_by_tags("num_micro_sites").value
+        c = self._constants
+        is_stage2 = c.is_enabled("stage2")
+        num_micro = c.env_by_tags("num_micro_sites").value
         # when not in stage2 mode, no point in setting up the others
-        if micro >= 0 and not is_stage2:
+        if self._micro >= 0 and not is_stage2:
             return ""
         # in stage2 mode, don't feed from the internal aggregator, don't set up more
         # proxy ultrafeeders than are configured
-        if is_stage2 and (micro == -1 or micro >= num_micro):
+        if is_stage2 and (self._micro == -1 or self._micro >= num_micro):
             return ""
         print_err(
-            f"generating netconfigs for {f'micro site {micro}' if micro >= 0 else 'Ultrafeeder'}"
+            f"generating netconfigs for {f'micro site {self._micro}' if self._micro >= 0 else 'Ultrafeeder'}"
         )
-        mlat_privacy = self._constants.is_enabled("mlat_privacy")
+        mlat_privacy = c.is_enabled("mlat_privacy")
         ret = set()
+        # let's grab the values, depending on the mode
+
         for name, netconfig in self.enabled_aggregators.items():
-            uuid = self._constants.env_by_tags(f"ultrafeeder_uuid{self._micro}").value
-            if name == "adsblol":
-                uuid = self._constants.env_by_tags(f"adsblol_uuid{self._micro}").value
+            uuid_tag = "mf_adsblol_uuid" if name == "adsblol" else "mf_ultrafeeder_uuid"
+            if self._micro >= 0:
+                uuid = c.env_by_tags(uuid_tag).value[self._micro]
+                if not uuid:
+                    uuid = str(uuid4())
+                    c.env_by_tags(uuid_tag).list_set(self._micro, uuid)
+            else:
+                uuid = c.env_by_tags(uuid_tag).value
+                if not uuid:
+                    uuid = str(uuid4())
+                    c.env_by_tags(uuid_tag).value = uuid
             ret.add(netconfig.generate(mlat_privacy=mlat_privacy, uuid=uuid))
         ret.discard("")
         # now we need to add the two internal inbound links (if needed)
-        if self._constants.is_enabled("uat978"):
+        if c.is_enabled("uat978"):
             ret.add("adsb,dump978,30978,uat_in")
-        if self._constants.is_enabled("airspy"):
+        if c.is_enabled("airspy"):
             ret.add("adsb,airspy_adsb,30005,beast_in")
         # finally, add user provided things
-        ultrafeeder_extra_args = self._constants.env_by_tags(
-            "ultrafeeder_extra_args"
-        ).value
+        ultrafeeder_extra_args = c.env_by_tags("ultrafeeder_extra_args").value
         if ultrafeeder_extra_args:
             ret.add(ultrafeeder_extra_args)
-        remote_sdr = self._constants.env_by_tags("remote_sdr").value
+        remote_sdr = c.env_by_tags("remote_sdr").value
         if self._micro:
             # this is one of the proxies - so it also should feed the aggregate map
             ret.add("adsb,ultrafeeder,30004,beast_out")

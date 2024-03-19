@@ -44,12 +44,11 @@
             <td>
               <a href="">{{ site }}</a>
             </td>
-            <td class="text-center">{{ env_value_by_tag('micro_ip_' ~ loop.index0) }}</td>
-            <td class="text-center">{{ env_value_by_tag('feeder_lat_' ~ loop.index0) }} /
-              {{ env_value_by_tag('feeder_lng_' ~ loop.index0) }} @
-              {{ env_value_by_tag('feeder_alt_' ~ loop.index0) }}m
+            <td class="text-center">{{ env_value_by_tag('mf_ip')[loop.index0] }}</td>
+            <td class="text-center">{{ env_value_by_tag('mf_lat')[loop.index0] }} /
+              {{ env_value_by_tag('mf_lng')[loop.index0] }} / {{ env_value_by_tag('mf_alt')[loop.index0] }}m
             </td>
-            <td class="text-center"> {{ env_value_by_tag('feeder_version_' ~ loop.index0) }}
+            <td class="text-center"> {{ env_value_by_tag('mf_version')[loop.index0]}}
             </td>
             <td class="text-center">
             </td>
@@ -66,13 +65,12 @@
     <form method="post" action="{{ url_for('update') }}">
       <div class="form-group row align-items-center mb-1">
         <span class="col-12 col-sm-5 col-md-4 col-lg-3">
-          <label for="micro_ip_{{ env_value_by_tag('num_micro_sites') }}">micro feeder IP address</label>
+          <label for="add_micro_feeder_ip">micro feeder IP address</label>
         </span>
         <span class="col-12 col-sm-7 col-md-8 col-lg-9">
-          {% set next_site_tag = 'micro_ip_' ~ env_value_by_tag('num_micro_sites') %}
-          <input type="text" name="{{ next_site_tag }}" required placeholder="10.1.2.3" class="form-control"
+          <input type="text" name="add_micro_feeder_ip" required placeholder="1.2.3.4" class="form-control"
                  pattern="((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])"
-                 title="valid IPv4 address" value="{{ env_value_by_tag(next_site_tag) }}" />
+                 title="valid IPv4 address" />
         </span>
       </div>
       <div class="form-group">
