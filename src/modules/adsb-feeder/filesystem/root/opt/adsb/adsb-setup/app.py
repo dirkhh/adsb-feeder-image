@@ -10,6 +10,7 @@ import signal
 import shutil
 import string
 import subprocess
+from uuid import uuid4
 import sys
 import zipfile
 import tempfile
@@ -171,6 +172,20 @@ class AdsbIm:
         self.app.add_url_rule(f"/api/status/<agg>", "beast", self.agg_status)
         # fmt: on
         self.update_boardname()
+
+        # finally, try to make sure that we have all the pieces that we need and recreate what's missing
+        stage2_yml_template = self._constants.config_path / "stage2.yml"
+        for i in range(0, self._constants.env_by_tags("num_micro_sites").value):
+            if not self._constants.env_by_tags("mf_adsblol_uuid").value[i]:
+                self._constants.env_by_tags("mf_adsblol_uuid").list_set(i, str(uuid4()))
+            if not self._constants.env_by_tags("mf_ultrafeeder_uuid").value[i]:
+                self._constants.env_by_tags("mf_ultrafeeder_uuid").list_set(
+                    i, str(uuid4())
+                )
+            create_stage2_yml_from_template(
+                self._constants.config_path / f"stage2_micro_site_{i}.yml",
+                stage2_yml_template,
+            )
 
     def update_boardname(self):
         board = ""
@@ -1232,7 +1247,7 @@ def create_stage2_yml_from_template(
     stage2_yml_name, template_file="/opt/adsb/config/stage2.yml"
 ):
     # grab the number after the last '_' in the stage2_yml_name
-    m = re.search(r"_(\d+).yml$", stage2_yml_name)
+    m = re.search(r"_(\d+).yml$", str(stage2_yml_name))
     if m:
         n = m.group(1)
         with open(template_file, "r") as stage2_yml_template:
@@ -1287,11 +1302,6 @@ if __name__ == "__main__":
         config_file = pathlib.Path(adsb_dir / file_name)
         if config_file.exists():
             new_file = pathlib.Path(config_dir / file_name)
-            if file_name == "stage2.yml" and not filecmp.cmp(config_file, new_file):
-                # let's update the per microsite yaml files
-                print_err("found new stage2 template... updating yaml files")
-                for stage2_yml_name in config_dir.glob("stage2_micro_site_*.yml"):
-                    create_stage2_yml_from_template(stage2_yml_name, config_file)
             config_file.rename(new_file)
             print_err(f"moved {config_file} to {new_file}")
 
