@@ -694,7 +694,7 @@ class Constants:
                 print_err(f"writing the MF Ultrafeeder config ")
                 for i in range(self.env("AF_NUM_MICRO_SITES").value):
                     if i >= len(self.ultrafeeder_micro):
-                        self._constants.ultrafeeder_micro.append(
+                        self.ultrafeeder_micro.append(
                             UltrafeederConfig(constants=self, micro=i)
                         )
                     e.list_set(i, self.ultrafeeder_micro[i].generate())
