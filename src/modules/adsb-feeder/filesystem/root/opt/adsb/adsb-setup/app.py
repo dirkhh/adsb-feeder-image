@@ -1009,7 +1009,8 @@ class AdsbIm:
             if self.at_least_one_aggregator() or agg_chosen_env.value == True:
                 agg_chosen_env.value = True
                 return redirect(url_for("restarting"))
-            return redirect(url_for("aggregators"))
+            if self._constants.env_by_tags("aggregators").value != "micro":
+                return redirect(url_for("aggregators"))
         return redirect(url_for("director"))
 
     @check_restart_lock
