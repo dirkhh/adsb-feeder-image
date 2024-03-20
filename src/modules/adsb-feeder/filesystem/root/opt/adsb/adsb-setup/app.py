@@ -849,9 +849,6 @@ class AdsbIm:
                 # here at the end - instead insert them before tailscale
                 continue
             if value == "stay":
-                if key == "clear_range":
-                    self.clear_range_outline()
-                    continue
                 if allow_insecure and key == "rpw":
                     print_err("updating the root password")
                     self.set_rpw()
@@ -876,6 +873,8 @@ class AdsbIm:
 
                 continue
             # now handle other form input
+            if key == "clear_range":
+                self.clear_range_outline()
             e = self._constants.env_by_tags(key.split("--"))
             if e:
                 if allow_insecure and key == "ssh_pub":
