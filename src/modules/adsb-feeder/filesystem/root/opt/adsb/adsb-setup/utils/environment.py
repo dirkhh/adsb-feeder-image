@@ -187,6 +187,14 @@ class Env:
             self._value[idx] = value
         self._reconcile(self._value)
 
+    def list_get(self, idx):
+        if type(self._value) != list:
+            print_err(f"{self._name} is not a list, giving up")
+            return None
+        if idx < len(self._value):
+            return self._value[idx]
+        return None
+
     def list_remove(self, idx=-1):
         if type(self._value) != list:
             print_err(f"{self._name} is not a list, giving up")

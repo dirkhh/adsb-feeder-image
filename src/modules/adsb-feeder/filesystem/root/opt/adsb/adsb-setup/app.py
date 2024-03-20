@@ -176,9 +176,9 @@ class AdsbIm:
         # finally, try to make sure that we have all the pieces that we need and recreate what's missing
         stage2_yml_template = self._constants.config_path / "stage2.yml"
         for i in range(0, self._constants.env_by_tags("num_micro_sites").value):
-            if not self._constants.env_by_tags("mf_adsblol_uuid").value[i]:
+            if not self._constants.env_by_tags("mf_adsblol_uuid").list_get(i):
                 self._constants.env_by_tags("mf_adsblol_uuid").list_set(i, str(uuid4()))
-            if not self._constants.env_by_tags("mf_ultrafeeder_uuid").value[i]:
+            if not self._constants.env_by_tags("mf_ultrafeeder_uuid").list_get(i):
                 self._constants.env_by_tags("mf_ultrafeeder_uuid").list_set(
                     i, str(uuid4())
                 )
