@@ -89,22 +89,17 @@ class AdsbIm:
         self._constants = Constants()
         self._system = System(constants=self._constants)
         self._sdrdevices = SDRDevices()
-        self._ultrafeeder = UltrafeederConfig(constants=self._constants)
-        self._ultrafeeder_micro = [
-            UltrafeederConfig(constants=self._constants, micro=i)
-            for i in range(0, self._constants.env_by_tags("num_micro_sites").value)
-        ]
-
-        # update Env ultrafeeder to have value self._ultrafeed.generate()
+        self._constants.ultrafeeder = UltrafeederConfig(constants=self._constants)
+        for i in range(0, self._constants.env_by_tags("num_micro_sites").value):
+            self._constants.ultrafeeder_micro.append(
+                UltrafeederConfig(constants=self._constants, micro=i)
+            )
+        # for the main Ultrafeeder we can use the _value_call to ensure we get the
+        # most updated config - for the Ultrafeeders handling micro feeders, we do
+        # this when writing out the .env file
         self._constants.env_by_tags("ultrafeeder_config")._value_call = (
-            self._ultrafeeder.generate
+            self._constants.ultrafeeder.generate
         )
-
-        # the value call for the list of micro feeders is broken and needs to be implemented differently
-        # for i in range(0, self._constants.env_by_tags("num_micro_sites").value):
-        #    self._constants.env_by_tags(f"ultrafeeder_config_{i}")._value_call = (
-        #        self._ultrafeeder_micro[i].generate
-        #    )
 
         self._agg_status_instances = dict()
 
@@ -511,7 +506,7 @@ class AdsbIm:
         return True
 
     def at_least_one_aggregator(self) -> bool:
-        if self._ultrafeeder.enabled_aggregators:
+        if self._constants.ultrafeeder.enabled_aggregators:
             return True
 
         # of course, maybe they picked just one or more proprietary aggregators and that's all they want...

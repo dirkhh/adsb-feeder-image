@@ -5,7 +5,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from .environment import ENV_FILE_PATH, ENV_FLAG_FILE_PATH, Env, is_true
-from .netconfig import NetConfig
+from .netconfig import NetConfig, UltrafeederConfig
 from .util import print_err
 
 
@@ -22,6 +22,8 @@ class Constants:
     version_file = data_path / "adsb.im.version"
     secure_image_path = data_path / "adsb.im.secure_image"
     is_feeder_image = True
+    ultrafeeder = None
+    ultrafeeder_micro = []
 
     _proxy_routes = [
         # endpoint, port, url_path
@@ -671,6 +673,7 @@ class Constants:
 
     # helper function to get everything that needs to be written out written out
     def writeback_env(self):
+        print_err("writing out the .env file")
         # we need to grap a (basically random) Env object to be able to use the
         # object methods:
         env = next(iter(self._env))
@@ -686,6 +689,17 @@ class Constants:
                 env_vars[e.name] = "True" if is_true(e.value) else ""
             else:
                 env_vars[e.name] = e.value
+            # make sure we create the ultrafeeder configurations
+            if e.name == "MF_FEEDER_ULTRAFEEDER_CONFIG":
+                print_err(f"writing the MF Ultrafeeder config ")
+                for i in range(self.env("AF_NUM_MICRO_SITES").value):
+                    if i >= len(self.ultrafeeder_micro):
+                        self._constants.ultrafeeder_micro.append(
+                            UltrafeederConfig(constants=self, micro=i)
+                        )
+                    e.list_set(i, self.ultrafeeder_micro[i].generate())
+
+        print_err(f"read in from file and applied any in memory changes: {env_vars}")
         env._write_file(env_vars)
 
     # make sure our internal data is in sync with the .env file on disk

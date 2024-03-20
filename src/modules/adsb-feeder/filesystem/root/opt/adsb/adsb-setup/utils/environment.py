@@ -128,7 +128,6 @@ class Env:
             new_value = "1" if is_true(new_value) else ""
         values[self._name] = new_value
         self._write_file(values)
-        self._write_file(values)
 
     def __str__(self):
         return f"Env({self._name}, {self._value})"
