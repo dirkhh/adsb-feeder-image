@@ -38,6 +38,13 @@
           <td>Feeder Version</td>
           <td>Status</td>
         </thead>
+        <!-- for status, add things to the api that are based one
+          jq '.last1min.messages_valid' < /run/adsb-feeder-ultrafeeder/readsb/stats.json
+          > 300k / min (5k/sec) is an indication of a cycle, so turn that one off
+          0 is a sign of nothing being sent (duh) -- maybe that one should take 5 or even 15 minutes
+          that allows us to show "no data / seems fine / cycle" as status
+          There's also the aircraft with pos count - but since we don't want to constantly refresh, maybe less interesting
+        -->
         <tbody>
           {% for site in env_value_by_tag('micro_sites') %}
           <tr>

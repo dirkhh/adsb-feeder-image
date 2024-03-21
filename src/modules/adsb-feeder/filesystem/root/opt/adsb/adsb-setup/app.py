@@ -25,6 +25,7 @@ from zlib import compress
 # nofmt: on
 # isort: off
 from flask import Flask, flash, redirect, render_template, request, send_file, url_for
+from utils.environment import is_true
 
 # this initial setup is not a great look... but I don't want to move this into a separate
 # applications... if we have no JSON config file, we need create it from a .env file and
@@ -718,12 +719,30 @@ class AdsbIm:
         form: Dict = request.form
         seen_go = False
         allow_insecure = not self.check_secure_image()
+        # special handling of per-micro-site aggregators
+        sitenum = -1
+        aggregator_submission = form.get("aggregators")
+        if aggregator_submission and aggregator_submission.startswith("go-"):
+            # this is the indicator that in stage2 mode the user is setting up aggregators
+            # for a specific micro site
+            try:
+                sitenum = int(aggregator_submission[3:])
+                site = self._constants.env_by_tags("micro_sites").list_get(sitenum)
+                if site:
+                    print_err(f"setting up aggregators for micro feeder {site}")
+                else:
+                    sitenum = -1
+            except:
+                print_err(
+                    f"failed to parse aggregator submission {aggregator_submission}"
+                )
+                sitenum = -1
         for key, value in form.items():
             print_err(f"handling {key} -> {value} (allow insecure is {allow_insecure})")
             # this seems like cheating... let's capture all of the submit buttons
             if value == "go":
                 seen_go = True
-            if value == "go" or value == "wait":
+            if value == "go" or value.startswith("go-") or value == "wait":
                 if key == "add_micro":
                     # user has clicked Add micro feeder on Stage 2 page
                     # grab the IP that we know the user has provided
@@ -919,8 +938,23 @@ class AdsbIm:
                     for clear_key in purposes:
                         if value == self._constants.env_by_tags(clear_key).value:
                             self._constants.env_by_tags(clear_key).value = ""
-
-                e.value = value
+                # when dealing with micro feeder aggregators, we need to keep the site number
+                # in mind
+                tags = key.split("--")
+                if sitenum >= 0 and "is_enabled" in tags:
+                    print_err(f"setting up stage2 site number {sitenum}: {key}")
+                    self._constants.env_by_tags("aggregators_chosen").value = True
+                    micro_tags = [
+                        f"{t}_micro" if t == "ultrafeeder" else t for t in tags
+                    ]
+                    print_err(
+                        f"landed on {micro_tags}, setting up element {sitenum} with {value}"
+                    )
+                    self._constants.env_by_tags(micro_tags).list_set(
+                        sitenum, True if is_true(value) else False
+                    )
+                else:
+                    e.value = value
                 if key == "mlat_name":
                     # in a single system setup, we used to treat mlat and map name as the same, but for a
                     # stage2 system having these as different variables makes things more obvious
@@ -1059,11 +1093,14 @@ class AdsbIm:
             )
 
         # is this a stage2 site and you are looking at an individual micro feeder,
-        # or is this a regular feeder?
-        if self._constants.is_enabled("stage2") and request.args.get("m"):
-            site = self._constants.env_by_tags("micro_sites").list_get(
-                int(request.args.get("m"))
-            )
+        # or is this a regular feeder? If we have a query argument m that is a non-negative
+        # number, then yes it is
+        try:
+            m = int(request.args.get("m"))
+        except:
+            m = -1
+        if self._constants.is_enabled("stage2") and m >= 0:
+            site = self._constants.env_by_tags("micro_sites").list_get(m)
         else:
             site = ""
         return render_template(
@@ -1071,6 +1108,7 @@ class AdsbIm:
             uf_enabled=uf_enabled,
             others_enabled=others_enabled,
             site=site,
+            m=str(m),
         )
 
     @check_restart_lock

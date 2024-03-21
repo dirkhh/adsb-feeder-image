@@ -1,6 +1,7 @@
 import json
 from os import path
 import re
+from types import NoneType
 from typing import List, Union
 
 from utils.util import print_err
@@ -31,10 +32,10 @@ class Env:
     ):
         self._name = name
         self._value = self._default = default
-        if (
-            value != None
-        ):  # only overwrite the default value if an actual Value was passed in
+        if value != None:
+            # only overwrite the default value if an actual Value was passed in
             self._value = value
+        print_err(f"created Env: {name} of type {type(self._value)}")
         self._is_mandatory = is_mandatory
         self._value_call = value_call
         self._tags = tags
@@ -48,7 +49,18 @@ class Env:
     def _reconcile(self, value, pull: bool = False):
         value_in_file = self._get_value_from_file()
         if pull and value_in_file != None:
-            self._value = value_in_file
+            if type(self._default) != NoneType and type(value_in_file) != type(
+                self._default
+            ):
+                if type(self._default) == bool:
+                    self._value = is_true(value_in_file)
+                    return
+                print_err(
+                    f"got value of type {type(value_in_file)} from file - discarding as type of {self._name} should be {type(self._default)}"
+                )
+            else:
+                self._value = value_in_file
+
             return
         if value == value_in_file:
             return  # do not write to file if value is the same
@@ -177,7 +189,7 @@ class Env:
         if type(self._value) != list:
             print_err(f"{self._name} is not a list, converting")
             self._value = [self._value]
-            self.list_add(idx, value)
+            self.list_set(idx, value)
             return
         while len(self._value) < idx:
             self._value.append(None)

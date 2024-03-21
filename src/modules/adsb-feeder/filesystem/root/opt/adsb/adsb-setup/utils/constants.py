@@ -135,12 +135,12 @@ class Constants:
         Env("FEEDER_RTL_SDR", default="rtlsdr", tags=["rtlsdr"]),
         Env(
             "FEEDER_ENABLE_BIASTEE",
-            default="False",
+            default=False,
             tags=["biast", "is_enabled", "false_is_empty"],
         ),
         Env(
             "FEEDER_ENABLE_UATBIASTEE",
-            default="False",
+            default=False,
             tags=["uatbiast", "is_enabled", "false_is_empty"],
         ),
         Env("FEEDER_READSB_GAIN", default="autogain", tags=["gain"]),
@@ -166,7 +166,7 @@ class Constants:
             default_call=lambda: str(uuid4()),
             tags=["ultrafeeder_uuid"],
         ),
-        Env("MLAT_PRIVACY", default="True", tags=["mlat_privacy", "is_enabled"]),
+        Env("MLAT_PRIVACY", default=True, tags=["mlat_privacy", "is_enabled"]),
         Env(
             "FEEDER_TAR1090_USEROUTEAPI",
             default="1",
@@ -179,7 +179,7 @@ class Constants:
         ),
         # 978
         Env(
-            "FEEDER_ENABLE_UAT978", default="False", tags=["uat978", "is_enabled"]
+            "FEEDER_ENABLE_UAT978", default=False, tags=["uat978", "is_enabled"]
         ),  # start the container
         Env(
             "FEEDER_URL_978", default="", tags=["978url"]
@@ -330,7 +330,7 @@ class Constants:
         Env(
             "AF_IS_SECURE_IMAGE",
             is_mandatory=False,
-            default="False",
+            default=False,
             tags=["secure_image", "is_enabled"],
         ),
         Env(
@@ -473,9 +473,21 @@ class Constants:
             tags=["adsblol", "ultrafeeder", "is_enabled"],
         ),
         Env(
+            "_ADSBIM_STATE_IS_ULTRAFEEDER_MICRO_ADSBLOL_ENABLED",
+            is_mandatory=False,
+            default=[],
+            tags=["adsblol", "ultrafeeder_micro", "is_enabled"],
+        ),
+        Env(
             "_ADSBIM_STATE_IS_ULTRAFEEDER_FLYITALYADSB_ENABLED",
             is_mandatory=False,
             tags=["flyitaly", "ultrafeeder", "is_enabled"],
+        ),
+        Env(
+            "_ADSBIM_STATE_IS_ULTRAFEEDER_MICRO_FLYITALYADSB_ENABLED",
+            is_mandatory=False,
+            default=[],
+            tags=["flyitaly", "ultrafeeder_micro", "is_enabled"],
         ),
         Env(
             "_ADSBIM_STATE_IS_ULTRAFEEDER_ADSBX_ENABLED",
@@ -483,9 +495,21 @@ class Constants:
             tags=["adsbx", "ultrafeeder", "is_enabled"],
         ),
         Env(
+            "_ADSBIM_STATE_IS_ULTRAFEEDER_MICRO_ADSBX_ENABLED",
+            is_mandatory=False,
+            default=[],
+            tags=["adsbx", "ultrafeeder_micro", "is_enabled"],
+        ),
+        Env(
             "_ADSBIM_STATE_ADSBX_FEEDER_ID",
             is_mandatory=False,
             tags="adsbxfeederid",
+        ),
+        Env(
+            "_ADSBIM_STATE_ADSBX_MICRO_FEEDER_ID",
+            is_mandatory=False,
+            default=[],
+            tags="adsbxfeederid_micro",
         ),
         Env(
             "_ADSBIM_STATE_IS_ULTRAFEEDER_TAT_ENABLED",
@@ -493,9 +517,21 @@ class Constants:
             tags=["tat", "ultrafeeder", "is_enabled"],
         ),
         Env(
+            "_ADSBIM_STATE_IS_ULTRAFEEDER_MICRO_TAT_ENABLED",
+            is_mandatory=False,
+            default=[],
+            tags=["tat", "ultrafeeder_micro", "is_enabled"],
+        ),
+        Env(
             "_ADSBIM_STATE_IS_ULTRAFEEDER_PLANESPOTTERS_ENABLED",
             is_mandatory=False,
             tags=["planespotters", "ultrafeeder", "is_enabled"],
+        ),
+        Env(
+            "_ADSBIM_STATE_IS_ULTRAFEEDER_MICRO_PLANESPOTTERS_ENABLED",
+            is_mandatory=False,
+            default=[],
+            tags=["planespotters", "ultrafeeder_micro", "is_enabled"],
         ),
         Env(
             "_ADSBIM_STATE_IS_ULTRAFEEDER_ADSBFI_ENABLED",
@@ -503,9 +539,21 @@ class Constants:
             tags=["adsbfi", "ultrafeeder", "is_enabled"],
         ),
         Env(
+            "_ADSBIM_STATE_IS_ULTRAFEEDER_MICRO_ADSBFI_ENABLED",
+            is_mandatory=False,
+            default=[],
+            tags=["adsbfi", "ultrafeeder_micro", "is_enabled"],
+        ),
+        Env(
             "_ADSBIM_STATE_IS_ULTRAFEEDER_AVDELPHI_ENABLED",
             is_mandatory=False,
             tags=["avdelphi", "ultrafeeder", "is_enabled"],
+        ),
+        Env(
+            "_ADSBIM_STATE_IS_ULTRAFEEDER_MICRO_AVDELPHI_ENABLED",
+            is_mandatory=False,
+            default=[],
+            tags=["avdelphi", "ultrafeeder_micro", "is_enabled"],
         ),
         # Env(
         #    "_ADSBIM_STATE_IS_ULTRAFEEDER_FLYOVR_ENABLED",
@@ -518,14 +566,32 @@ class Constants:
             tags=["radarplane", "ultrafeeder", "is_enabled"],
         ),
         Env(
+            "_ADSBIM_STATE_IS_ULTRAFEEDER_MICRO_RADARPLANE_ENABLED",
+            is_mandatory=False,
+            default=[],
+            tags=["radarplane", "ultrafeeder_micro", "is_enabled"],
+        ),
+        Env(
             "_ADSBIM_STATE_IS_ULTRAFEEDER_HPRADAR_ENABLED",
             is_mandatory=False,
             tags=["hpradar", "ultrafeeder", "is_enabled"],
         ),
         Env(
+            "_ADSBIM_STATE_IS_ULTRAFEEDER_MICRO_HPRADAR_ENABLED",
+            is_mandatory=False,
+            default=[],
+            tags=["hpradar", "ultrafeeder_micro", "is_enabled"],
+        ),
+        Env(
             "_ADSBIM_STATE_IS_ULTRAFEEDER_ALIVE_ENABLED",
             is_mandatory=False,
             tags=["alive", "ultrafeeder", "is_enabled"],
+        ),
+        Env(
+            "_ADSBIM_STATE_IS_ULTRAFEEDER_MICRO_ALIVE_ENABLED",
+            is_mandatory=False,
+            default=[],
+            tags=["alive", "ultrafeeder_micro", "is_enabled"],
         ),
         Env(
             "_ADSBIM_STATE_ULTRAFEEDER_EXTRA_ARGS",
@@ -660,7 +726,7 @@ class Constants:
         if len(matches) == 0:
             return None
         if len(matches) > 1:
-            raise Exception("More than one match for tags")
+            raise Exception(f"More than one match for tags {tags}")
         return matches[0]
 
     # helper function to see if something is enabled

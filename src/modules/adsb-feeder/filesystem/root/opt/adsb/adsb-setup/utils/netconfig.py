@@ -31,29 +31,47 @@ class UltrafeederConfig:
         self._micro = micro
         self._constants = constants
 
+    def apply_to_value_or_list(self, e, micro, value):
+        if micro == -1:
+            e.value = value
+        else:
+            e.list_set(micro, value)
+
     @property
     def enabled_aggregators(self):
+        # neither a micro feeder nor the aggregating Ultrafeeder on stage2
+        # should feed any aggregators themselves
         aggregator_selection = self._constants.env_by_tags("aggregators").value
         if aggregator_selection == "micro":
+            return {}
+        if self._constants.is_enabled("stage2") and self._micro == -1:
             return {}
         # be careful to set the correct values for the individual aggregators;
         # these values are used in the main landing page for the feeder to provide
         # additional links for the enabled aggregators
+
+        # single stage vs stage2 micro-proxy
+        if self._micro == -1:
+            uf_tag = "ultrafeeder"
+        else:
+            uf_tag = "ultrafeeder_micro"
         for name in self._constants.netconfigs.keys():
-            aggregator_env = self._constants.env_by_tags(
-                [name, "ultrafeeder", "is_enabled"]
-            )
+            aggregator_env = self._constants.env_by_tags([name, uf_tag, "is_enabled"])
             if not aggregator_env:
                 print_err(f"netconfigs references tag {name} with no associated env")
                 continue
             if aggregator_selection == "all":
-                aggregator_env.value = True
+                self.apply_to_value_or_list(aggregator_env, self._micro, True)
             elif aggregator_selection == "privacy":
-                aggregator_env.value = self._constants.netconfigs[name].has_policy
+                self.apply_to_value_or_list(
+                    aggregator_env,
+                    self._micro,
+                    self._constants.netconfigs[name].has_policy,
+                )
         return {
             name: value
             for name, value in self._constants.netconfigs.items()
-            if (self._constants.is_enabled("ultrafeeder", name))
+            if (self._constants.is_enabled(uf_tag, name))
         }
 
     def generate(self):

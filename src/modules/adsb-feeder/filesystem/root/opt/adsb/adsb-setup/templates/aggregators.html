@@ -1,45 +1,46 @@
 {% extends 'base.html' %}
 {% set active_page = "aggregators" %}
 {% block content %}
+{% if m == "-1" %}{% set go = "go" %}{% else %}{% set go = "go-" ~ m %}{% endif %}
 <h1 class="mt-3 text-center text-danger">
   {% block title %}Setup Aggregators{% if site != "" %} for feeder {{ site }}{% endif %}{% endblock %}
 </h1>
 <form class="row gy-2 gx-3 mx-1 mx-lg-3 mx-xl-5 align-items-center" method="post"
       onsubmit="show_spinner(); return true;">
-  <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="aggregators" value="go">I'm
-    done here - take me to the website</button>
+  <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="aggregators"
+          value={{go}}>I'm done here - take me to the website</button>
   <div class="col-12">Select the semi-anonymous ADS-B aggregators you want to feed:</div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1" name="is_enabled--adsblol" id="is_enabled--adsblol"
-           {{ uf_enabled("adsblol") }} />
+    <input type="checkbox" class="form-check-input me-1" name="is_enabled--ultrafeeder--adsblol"
+           id="is_enabled--adsblol" {{ uf_enabled("adsblol") }} />
     <label for="is_enabled--adsblol">
       <a href="https://adsb.lol/privacy-license/">adsb.lol</a>
     </label>
   </div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1" name="is_enabled--flyitaly" id="is_enabled--flyitaly"
-           {{ uf_enabled("flyitaly") }} />
+    <input type="checkbox" class="form-check-input me-1" name="is_enabled--ultrafeeder--flyitaly"
+           id="is_enabled--flyitaly" {{ uf_enabled("flyitaly") }} />
     <label for="is_enabled--flyitaly">
       <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/">Fly Italy ADSB</a>
     </label>
   </div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1" name="is_enabled--avdelphi" id="is_enabled--avdelphi"
-           {{ uf_enabled("avdelphi") }} />
+    <input type="checkbox" class="form-check-input me-1" name="is_enabled--ultrafeeder--avdelphi"
+           id="is_enabled--avdelphi" {{ uf_enabled("avdelphi") }} />
     <label for="is_enabled--avdelphi">
       <a href="https://www.avdelphi.com/privacy.html">AVDelphi</a>
     </label>
   </div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1" name="is_enabled--planespotters" id="is_enabled--planespotters"
-           {{ uf_enabled("planespotters") }} />
+    <input type="checkbox" class="form-check-input me-1" name="is_enabled--ultrafeeder--planespotters"
+           id="is_enabled--planespotters" {{ uf_enabled("planespotters") }} />
     <label for="is_enabled--planespotters">
       <a href="https://www.planespotters.net/legal/privacypolicy/">planespotters.net</a>
     </label>
   </div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
     <input type="checkbox" class="form-check-input me-1" data-mdb-toggle="tooltip"
-           title="please note that this site is missing a clear data/privacy policy" name="is_enabled--tat"
+           title="please note that this site is missing a clear data/privacy policy" name="is_enabled--ultrafeeder--tat"
            id="is_enabled--tat" {{ uf_enabled("tat") }} />
     <label for="is_enabled--tat">
       <a href="https://theairtraffic.com/privacy-license/" data-mdb-toggle="tooltip"
@@ -58,14 +59,14 @@
   </div>
   -->
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1" name="is_enabled--radarplane" id="is_enabled--radarplane"
-           {{ uf_enabled("radarplane") }} />
+    <input type="checkbox" class="form-check-input me-1" name="is_enabled--ultrafeeder--radarplane"
+           id="is_enabled--radarplane" {{ uf_enabled("radarplane") }} />
     <label for="is_enabled--radarplane">
       <a href="https://radarplane.com/privacy-policy">RadarPlane</a>
     </label>
   </div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1" name="is_enabled--adsbfi" id="is_enabled--adsbfi"
+    <input type="checkbox" class="form-check-input me-1" name="is_enabled--ultrafeeder--adsbfi" id="is_enabled--adsbfi"
            {{ uf_enabled("adsbfi") }} />
     <label for="is_enabled--adsbfi">
       <a href="https://adsb.fi/">adsb.fi</a>
@@ -73,22 +74,22 @@
   </div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
     <input type="checkbox" class="form-check-input me-1" data-mdb-toggle="tooltip"
-           title="please note that this site is missing a clear data/privacy policy" name="is_enabled--hpradar"
-           id="is_enabled--hpradar" {{ uf_enabled("hpradar") }} />
+           title="please note that this site is missing a clear data/privacy policy"
+           name="is_enabled--ultrafeeder--hpradar" id="is_enabled--hpradar" {{ uf_enabled("hpradar") }} />
     <label for="is_enabled--hpradar">
       <a href="https://skylink.hpradar.com/" data-mdb-toggle="tooltip"
          title="please note that this site is missing a clear data/privacy policy">HPRadar</a>
     </label>
   </div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1" name="is_enabled--alive" id="is_enabled--alive"
+    <input type="checkbox" class="form-check-input me-1" name="is_enabled--ultrafeeder--alive" id="is_enabled--alive"
            {{ uf_enabled("alive") }} />
     <label for="is_enabled--alive">
       <a href="https://airplanes.live/privacy">airplanes.live</a>
     </label>
   </div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1" name="is_enabled--adsbx" id="is_enabled--adsbx"
+    <input type="checkbox" class="form-check-input me-1" name="is_enabled--ultrafeeder--adsbx" id="is_enabled--adsbx"
            {{ uf_enabled("adsbx") }} />
     <label for="is_enabled--adsbx">
       <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
@@ -284,8 +285,8 @@
       </div>
     </label>
   </div>
-  <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="aggregators" value="go">I'm
-    done here - take me to the website</button>
+  <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="aggregators"
+          value={{go}}>I'm done here - take me to the website</button>
 </form>
 <script>
   function show_or_hide(b, f) {
