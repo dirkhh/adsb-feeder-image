@@ -9,87 +9,90 @@
     done here - take me to the website</button>
   <div class="col-12 {% if is_enabled('stage2') or env_value_by_tag('1090serial') == '' %}d-none{% endif %}">
     <h5 class="mt-3">Set explicit ADS-B SDR gain</h5>
-    <form class="col-12" method="post">
-      <div class="row">
-        <label for="gain" class="col-12">
-          Normally the feeder will settle on a good gain value over time (and an Airspy will do so almost
-          immediately). If you want to override that "autogain" behavior, you can set an explicit gain value
-          here.
-        </label>
-        <input class="col-auto ms-3" id="gain" name="gain" type="text" pattern="(?:autogain|\d+(?:.\d+)?)"
-               title="A number between 0 and 50 or the word 'autogain'" value="{{ env_value_by_tag('gain') }}" required>
-        <button type="submit" class="btn btn-primary mb-1 mx-3 col-3" name="gain--submit" value="go">Submit</button>
-        <button {% if env_value_by_tag('gain') != 'autogain' %}style="display:none;" {% endif %} type="submit"
-                class="btn btn-secondary mb-1 me-3 col-3" name="resetgain" value="go">Reset Autogain</button>
+    <div class="row">
+      <label for="gain" class="col-12 col-sm-6">
+        Normally the feeder will settle on a good gain value over time (and an Airspy will do so almost
+        immediately). If you want to override that "autogain" behavior, you can set an explicit gain value
+        here.
+      </label>
+      <input class="col-6 col-sm-3 ms-3" id="gain" name="gain" type="text" style="height: 2rem;"
+             pattern="(?:autogain|\d+(?:.\d+)?)" title="A number between 0 and 50 or the word 'autogain'"
+             value="{{ env_value_by_tag('gain') }}" />
+      <div class="col-12 form-check mt-3 ms-3{% if env_value_by_tag('gain') != 'autogain' %} d-none{% endif %}">
+        <input class=" form-check-input me-1" type="checkbox" name="resetgain" id="resetgain" />
+        <label for="resetgain" class="form-check-label">Check to reset autogain</label>
       </div>
-    </form>
+    </div>
   </div>
   <div class="col-12 {% if is_enabled('stage2') or not is_enabled('uat978') %}d-none{% endif %}">
     <h5 class="mt-3">Set explicit UAT SDR gain</h5>
-    <form method="POST">
-      <div class="row">
-        <label for="uatgain" class="col-12">
-          Normally the feeder will settle on a good gain value over time. If you want to override that
-          "autogain" behavior, you can set an explicit gain value here.
-        </label>
-        <input class="col-auto ms-3" id="uatgain" name="uatgain" type="text" pattern="(?:autogain|\d+(?:.\d+)?)"
-               title="A number between 0 and 50 or the word 'autogain'" value="{{ env_value_by_tag('uatgain') }}"
-               required>
-        <button type="submit" class="btn btn-primary mb-1 mx-3 col-3" name="uatgain--submit" value="go">Submit</button>
-        <button {% if env_value_by_tag('uatgain') != 'autogain' %}style="display:none;" {% endif %} type="submit"
-                class="btn btn-secondary mb-1 me-3 col-3" name="resetuatgain" value="go">Reset Autogain</button>
+    <div class="row">
+      <label for="uatgain" class="col-12 col-sm-6">
+        Normally the feeder will settle on a good gain value over time. If you want to override that
+        "autogain" behavior, you can set an explicit gain value here.
+      </label>
+      <input class="col-6 col-sm-3 ms-3" id="uatgain" name="uatgain" type="text" style="height: 2rem;"
+             pattern="(?:autogain|\d+(?:.\d+)?)" title="A number between 0 and 50 or the word 'autogain'"
+             value="{{ env_value_by_tag('uatgain') }}" />
+      <div class="col-12 form-check mt-3 ms-3{% if env_value_by_tag('gain') != 'autogain' %} d-none{% endif %}">
+        <input class=" form-check-input me-1" type="checkbox" name="resetuatgain" id="resetuatgain" />
+        <label for="resetuatgain" class="form-check-label">Check to reset UAT autogain</label>
       </div>
-    </form>
-  </div>
-  <div class="col-12 form-check mt-3" id="1090biast"
-       {% if not env_value_by_tag('1090serial') and not is_enabled('airspy') %}style="display: none;" {% endif %}>
-    <input class="form-check-input me-1" type="checkbox" name="biast--is_enabled" id="biast--is_enabled"
-           {% if is_enabled("biast") %}checked{% endif %} />
-    <label for="biast--is_enabled" class="form-check-label">Enable bias-T for ADS-B/1090/airspy SDR.</label>
-  </div>
-  <div class="col-12 form-check mt-3" {% if not is_enabled('uat978') %}style="display: none;" {% endif %}>
-    <input class="form-check-input me-1" type="checkbox" name="uatbiast--is_enabled" id="uatbiast--is_enabled"
-           {% if is_enabled("uatbiast") %}checked{% endif %} />
-    <label for="uatbiast--is_enabled">Enable bias-T for UAT978 SDR.</label>
-  </div>
-  <div class="row" id="multipleSdrs">
-    <div class="col-sm-12 mt-5 mb-3 text-danger" style="display: none;" id="duptext">
-      There are multiple SDRs with serial number <span id="duplicates"></span>. This will not work correctly. Please
-      ensure that all SDRs have distinct serial numbers.
     </div>
-    <div class="col-sm-12 mt-5 mb-3" style="display: block;" id="noduptext">
-      In most cases the assignment below is correct. If it isn't, please update.
-    </div>
-    <div class="col-sm-3 no-gutters">
-      <button class="btn btn-secondary btn-rounded" type="button" name="update_sdr_info" onclick="sdr_info()">Check
-        SDRs</button>
-    </div>
-    <div class="col-sm-9 no-gutters">
-      <div class="row">
-        <p class="col-sm-2 bg-info mr-2">SDR #</p>
-        <p class="col-sm-3 bg-info mr-2">Serial</p>
-        <p class="col-sm-6 bg-info mr-2">Used for</p>
+  </div>
+  <div class="col-12">
+    <div class="row">
+      <div class="col-12 form-check mt-3 ms-3" id="1090biast"
+           {% if not env_value_by_tag('1090serial') and not is_enabled('airspy') %}style="display: none;" {% endif %}>
+        <input class="form-check-input me-1" type="checkbox" name="biast--is_enabled" id="biast--is_enabled"
+               {% if is_enabled("biast") %}checked{% endif %} />
+        <label for="biast--is_enabled" class="form-check-label">Enable bias-T for ADS-B/1090/airspy SDR.</label>
       </div>
-      {% for sdr in [ "0", "1", "2", "3"] %}
-      <div class="row" id="sdr{{ sdr }}" style="display: none">
-        <p class="col-sm-2" id="sdr{{ sdr }}-tag">SDR {{ sdr }}</p>
-        <p class="col-sm-3" id="sdr{{ sdr }}-serial"></p>
-        <p class="col-sm-6 small" id="sdr{{ sdr }}-puprpose">
-          <label class="checkbox-inline mr-2">
-            <input type="radio" id="1090-{{ sdr }}" name="1090serial" value="0">
-            1090
-          </label>
-          <label class="checkbox-inline mr-2">
-            <input type="radio" id="978-{{ sdr }}" name="978serial" value="0">
-            978
-          </label>
-          <label class="checkbox-inline mr-2">
-            <input type="radio" id="other-{{ sdr }}" name="other-{{ sdr }}" value="0" checked>
-            Other
-          </label>
-        </p>
+      <div class="col-12 form-check mt-3 ms-3" {% if not is_enabled('uat978') %}style="display: none;" {% endif %}>
+        <input class="form-check-input me-1" type="checkbox" name="uatbiast--is_enabled" id="uatbiast--is_enabled"
+               {% if is_enabled("uatbiast") %}checked{% endif %} />
+        <label for="uatbiast--is_enabled">Enable bias-T for UAT978 SDR.</label>
       </div>
-      {% endfor %}
+    </div>
+    <div class="row" id="multipleSdrs">
+      <div class="col-sm-12 mt-5 mb-3 text-danger" style="display: none;" id="duptext">
+        There are multiple SDRs with serial number <span id="duplicates"></span>. This will not work correctly. Please
+        ensure that all SDRs have distinct serial numbers.
+      </div>
+      <div class="col-sm-12 mt-5 mb-3" style="display: block;" id="noduptext">
+        In most cases the assignment below is correct. If it isn't, please update.
+      </div>
+      <div class="col-sm-3 no-gutters">
+        <button class="btn btn-secondary btn-rounded" type="button" name="update_sdr_info" onclick="sdr_info()">Check
+          SDRs</button>
+      </div>
+      <div class="col-sm-9 no-gutters">
+        <div class="row">
+          <p class="col-sm-2 bg-info mr-2">SDR #</p>
+          <p class="col-sm-3 bg-info mr-2">Serial</p>
+          <p class="col-sm-6 bg-info mr-2">Used for</p>
+        </div>
+        {% for sdr in [ "0", "1", "2", "3"] %}
+        <div class="row" id="sdr{{ sdr }}" style="display: none">
+          <p class="col-sm-2" id="sdr{{ sdr }}-tag">SDR {{ sdr }}</p>
+          <p class="col-sm-3" id="sdr{{ sdr }}-serial"></p>
+          <p class="col-sm-6 small" id="sdr{{ sdr }}-puprpose">
+            <label class="checkbox-inline mr-2">
+              <input type="radio" id="1090-{{ sdr }}" name="1090serial" value="0">
+              1090
+            </label>
+            <label class="checkbox-inline mr-2">
+              <input type="radio" id="978-{{ sdr }}" name="978serial" value="0">
+              978
+            </label>
+            <label class="checkbox-inline mr-2">
+              <input type="radio" id="other-{{ sdr }}" name="other-{{ sdr }}" value="0" checked>
+              Other
+            </label>
+          </p>
+        </div>
+        {% endfor %}
+      </div>
     </div>
   </div>
   <div class="col-12 mb-3">
@@ -100,13 +103,12 @@
       </div>
     </div>
     <button class="btn btn-secondary btn-rounded" type="button" data-mdb-toggle="collapse" data-mdb-target="#showlsusb"
-            aria-expanded="false" aria-controls="showlsusb">toggle lsusb output</button>
+            aria-expanded="false" aria-controls="showlsusb">toggle lsusb
+      output</button>
   </div>
-  <div class="row gy-2 gx-3 align-items-center form-group" id="noSdrs" style="display: none;">
-    <div class="col-12">
-      No SDRs found. If you have SDRs attached to the computer this software is running on, then a reboot may be
-      required before the web UI can see the SDRs.
-    </div>
+  <div class="col-12 gy-2 gx-3 align-items-center form-group" id="noSdrs" style="display: none;">
+    No SDRs found. If you have SDRs attached to the computer this software is running on, then a reboot may be
+    required before the web UI can see the SDRs.
     <label class="form-label" for="remote_sdr">
       If you are intending to use this feeder with a remote device that has the SDR connected to it and offers
       <code>beast_out</code> (like the micro
