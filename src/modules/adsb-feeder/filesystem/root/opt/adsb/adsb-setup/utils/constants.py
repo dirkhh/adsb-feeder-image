@@ -401,7 +401,7 @@ class Constants:
         ),
         Env(
             "AF_IS_BASE_CONFIG_FINISHED",
-            default="0",
+            default=False,
             is_mandatory=False,
             tags=["base_config", "is_enabled"],
         ),

@@ -740,7 +740,7 @@ class AdsbIm:
         for key, value in form.items():
             print_err(f"handling {key} -> {value} (allow insecure is {allow_insecure})")
             # this seems like cheating... let's capture all of the submit buttons
-            if value == "go":
+            if value == "go" or value.startswith("go-"):
                 seen_go = True
             if value == "go" or value.startswith("go-") or value == "wait":
                 if key == "add_micro":

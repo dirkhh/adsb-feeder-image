@@ -37,8 +37,15 @@ class UltrafeederConfig:
         else:
             e.list_set(micro, value)
 
+    def get_value_or_list(self, e, micro):
+        if micro == -1:
+            return e.value
+        else:
+            return e.list_get(micro)
+
     @property
     def enabled_aggregators(self):
+        ret = {}
         # neither a micro feeder nor the aggregating Ultrafeeder on stage2
         # should feed any aggregators themselves
         aggregator_selection = self._constants.env_by_tags("aggregators").value
@@ -55,7 +62,7 @@ class UltrafeederConfig:
             uf_tag = "ultrafeeder"
         else:
             uf_tag = "ultrafeeder_micro"
-        for name in self._constants.netconfigs.keys():
+        for name, value in self._constants.netconfigs.items():
             aggregator_env = self._constants.env_by_tags([name, uf_tag, "is_enabled"])
             if not aggregator_env:
                 print_err(f"netconfigs references tag {name} with no associated env")
@@ -68,11 +75,9 @@ class UltrafeederConfig:
                     self._micro,
                     self._constants.netconfigs[name].has_policy,
                 )
-        return {
-            name: value
-            for name, value in self._constants.netconfigs.items()
-            if (self._constants.is_enabled(uf_tag, name))
-        }
+            if self.get_value_or_list(aggregator_env, self._micro):
+                ret[name] = value
+        return ret
 
     def generate(self):
         c = self._constants
@@ -95,7 +100,7 @@ class UltrafeederConfig:
         for name, netconfig in self.enabled_aggregators.items():
             uuid_tag = "mf_adsblol_uuid" if name == "adsblol" else "mf_ultrafeeder_uuid"
             if self._micro >= 0:
-                uuid = c.env_by_tags(uuid_tag).value[self._micro]
+                uuid = c.env_by_tags(uuid_tag).list_get(self._micro)
                 if not uuid:
                     uuid = str(uuid4())
                     c.env_by_tags(uuid_tag).list_set(self._micro, uuid)
