@@ -2,7 +2,7 @@
 {% set active_page = "aggregators" %}
 {% block content %}
 <h1 class="mt-3 text-center text-danger">
-  {% block title %}Setup additional aggregators{% endblock %}
+  {% block title %}Setup Aggregators{% if site != "" %} for feeder {{ site }}{% endif %}{% endblock %}
 </h1>
 <form class="row gy-2 gx-3 mx-1 mx-lg-3 mx-xl-5 align-items-center" method="post"
       onsubmit="show_spinner(); return true;">

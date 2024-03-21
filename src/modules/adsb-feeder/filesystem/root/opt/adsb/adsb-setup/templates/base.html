@@ -42,11 +42,24 @@
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
           {% for href, id, caption in navigation_bar if (env_value_by_tag('aggregators') != 'micro' or id != 'aggregators') and (id != 'advanced' or not is_enabled('stage2')) %}
           {% if is_enabled('stage2') and id == 'setup' -%}{% set caption='Stage 2 Setup' -%}{% set href='stage2' -%}{% endif -%}
+          {% if id == "aggregators" and is_enabled('stage2') %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
+               data-mdb-toggle="dropdown" aria-expanded="false">{{ caption|e }}
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+              {% for site in env_value_by_tag('micro_sites') %}
+              <li><a class="dropdown-item" href="{{ href|e}}?m={{loop.index0}}">{{site}}</a></li>
+              {% endfor %}
+            </ul>
+          </li>
+          {% else %}
           <li class="nav-item" {% if id == active_page %}aria-current="true" {% endif %}
               {% if not config_complete and id != "setup" and id != "restore" and id != "logs" %} style="display: none;"
               {% endif %}>
             <a class="nav-link" href="{{ href|e }}">{{ caption|e }}</a>
           </li>
+          {% endif %}
           {% endfor %}
         </ul>
       </div>

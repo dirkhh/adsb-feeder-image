@@ -1,3 +1,4 @@
+from faulthandler import is_enabled
 import filecmp
 import json
 import os.path
@@ -1057,10 +1058,19 @@ class AdsbIm:
                 else ""
             )
 
+        # is this a stage2 site and you are looking at an individual micro feeder,
+        # or is this a regular feeder?
+        if self._constants.is_enabled("stage2") and request.args.get("m"):
+            site = self._constants.env_by_tags("micro_sites").list_get(
+                int(request.args.get("m"))
+            )
+        else:
+            site = ""
         return render_template(
             "aggregators.html",
             uf_enabled=uf_enabled,
             others_enabled=others_enabled,
+            site=site,
         )
 
     @check_restart_lock
