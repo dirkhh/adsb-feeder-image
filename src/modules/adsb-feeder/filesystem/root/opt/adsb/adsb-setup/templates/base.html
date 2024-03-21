@@ -15,7 +15,8 @@
   <!-- Spinner -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
   <title>
-    {% block title %}{% endblock %}
+    {% if is_enabled("stage2") %}{{ env_value_by_tag("stage2_name") }}{% else %}{{ env_value_by_tag("mlat_name") }}
+    {% endif %}: {% block title %}{% endblock %}
   </title>
   <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
