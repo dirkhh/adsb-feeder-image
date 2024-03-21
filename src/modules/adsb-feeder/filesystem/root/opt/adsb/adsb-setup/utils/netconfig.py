@@ -98,7 +98,7 @@ class UltrafeederConfig:
         if ultrafeeder_extra_args:
             ret.add(ultrafeeder_extra_args)
         remote_sdr = c.env_by_tags("remote_sdr").value
-        if self._micro:
+        if self._micro >= 0:
             # this is one of the proxies - so it also should feed the aggregate map
             ret.add("adsb,ultrafeeder,30004,beast_out")
         if remote_sdr:
