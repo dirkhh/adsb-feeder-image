@@ -1,5 +1,6 @@
-Changes since v1.3.0 include
-- fix order of execution issue when upgrading from v1.2.3 or older to v1.3.0 or newer that lead to only some of the containers restarting
+Changes since v1.3.1 include
+- upgrade Airspy container
+- improve the shutdown behavior of the containers to shorten the restart time after config changes
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)
