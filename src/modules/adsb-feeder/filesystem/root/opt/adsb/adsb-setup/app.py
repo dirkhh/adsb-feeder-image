@@ -221,7 +221,10 @@ class AdsbIm:
         self._debug_cleanup()
         self._constants.writeback_env()
         self.update_dns_state()
-        self._dns_watch = Background(3600, self.update_dns_state)
+        # in no_server mode we want to exit right after the housekeeping, so no
+        # point in running this in the background
+        if not no_server:
+            self._dns_watch = Background(3600, self.update_dns_state)
         # prepare for app use (vs ADS-B Feeder Image use)
         # newer images will include a flag file that indicates that this is indeed
         # a full image - but in case of upgrades from older version, this heuristic
