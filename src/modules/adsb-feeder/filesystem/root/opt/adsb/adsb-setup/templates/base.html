@@ -47,7 +47,7 @@
                data-mdb-toggle="dropdown" aria-expanded="false">{{ caption|e }}
             </a>
             <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-              {% for site in env_value_by_tag('sites_name') %}
+              {% for site in env_value_by_tag('site_name') if not site == list_value_by_tag('site_name', 0) %}
               <li><a class="dropdown-item" href="{{ href|e}}?m={{loop.index}}">{{site}}</a></li>
               {% endfor %}
             </ul>

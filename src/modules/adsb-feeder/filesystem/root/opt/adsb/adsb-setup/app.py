@@ -983,13 +983,7 @@ class AdsbIm:
                 if sitenum >= 0 and "is_enabled" in tags:
                     print_err(f"setting up stage2 site number {sitenum}: {key}")
                     self._d.env_by_tags("aggregators_chosen").value = True
-                    micro_tags = [
-                        f"{t}_micro" if t == "ultrafeeder" else t for t in tags
-                    ]
-                    print_err(
-                        f"landed on {micro_tags}, setting up element {sitenum} with {value}"
-                    )
-                    self._d.env_by_tags(micro_tags).list_set(
+                    self._d.env_by_tags(tags).list_set(
                         sitenum, True if is_true(value) else False
                     )
                 else:
@@ -1195,6 +1189,7 @@ class AdsbIm:
         ip, status = self._system.check_ip()
         if status == 200:
             self._d.env_by_tags(["feeder_ip"]).value = ip
+            self._d.env_by_tags(["mf_ip"]).list_set(0, ip)
         try:
             result = subprocess.run(
                 "ip route get 1 | head -1  | cut -d' ' -f7",
@@ -1292,11 +1287,10 @@ class AdsbIm:
                     )
                 match = re.search("<([^>]*)>", aggregators[idx][3])
                 if match:
-                    # print_err(
-                    #    f"found {match.group(0)} - replace with {self._d.env(match.group(1)).value}"
-                    # )
+                    # this seems problematic. We need to replace the placeholder text with the correct KEY...
+                    # here we just take key0 and that's pretty much guaranteed to be wrong for the stage2 case
                     aggregators[idx][3] = aggregators[idx][3].replace(
-                        match.group(0), self._d.env(match.group(1)).value
+                        match.group(0), ""  # self._d.env(match.group(1)).list_get(0)
                     )
         return render_template(
             "index.html",

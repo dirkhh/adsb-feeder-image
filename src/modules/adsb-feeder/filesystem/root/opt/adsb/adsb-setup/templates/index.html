@@ -3,7 +3,7 @@
 {% block content %}
 <h1 class="mt-3 text-center text-danger">
   {% block title %}ADS-B Feeder Homepage for
-  {{ env_value_by_tag('stage2_name') if is_enabled("stage2") else env_value_by_tag("mlat_name") }}{% endblock %}
+  {{ env_value_by_tag('stage2_name') if is_enabled("stage2") else list_value_by_tag("site_name", 0) }}{% endblock %}
 </h1>
 <div class="alert alert-danger" role="alert" {% if env_value_by_tag('dns_state') %} style="display: none;" {% endif %}>
   The feeder cannot resolve DNS queries. This will most likely prevent it from working at all.
@@ -43,14 +43,25 @@
     <h5>You are running as stage 2 feeder</h5>
     <div class="col-12 mb-3">{% if env_value_by_tag('num_micro_sites') == 0 %}No micro feeder sites configured, yet.
       Please do so on the <a href={{ url_for('stage2') }}>Stage 2 Setup page</a>{% else %}You are collecting data from
-      {% for site in env_value_by_tag('site_name') %} {% if loop.last %}and
+      {% for site in env_value_by_tag('site_name') if not site == list_value_by_tag('site_name', 0) %}
+      {% if loop.last and loop.length > 1 %}and
       {% endif %}<strong>{{site}}</strong>{% if not loop.last and not loop.length == 2 %},{% endif %}{% endfor %} - more
       configuration options for this are available on the <a href={{ url_for('stage2') }}>Stage 2 Setup
         page</a>{% endif %}
     </div>
   </div>
-
-
+  {# painfully figure out which sites we are handling here - just the base, or a list of proxies? #}
+  {% set ns = namespace() %}
+  {% set ns.site_indices = [] %}
+  {% if is_enabled('stage2') %}
+  {% for site in env_value_by_tag('site_name') %}
+  {% if loop.index0 > 0 %}
+  {% set ns.site_indices = ns.site_indices + [loop.index0] %}
+  {% endif %}
+  {% endfor %}
+  {% else %}
+  {% set ns.site_indices = [0] %}
+  {% endif %}
   <div class="col-12 {% if env_value_by_tag('aggregators') == 'micro'%} d-none {% endif %}">
     <h4>You are feeding</h4>
     <div class="row small">
@@ -284,16 +295,22 @@
         }
       });
     {% for agg, name, m, s in aggregators %}
-    {% if is_enabled(agg) %}
-    get_status("{{ agg }}");
+    // agg {{ agg }}
+    {% for idx in ns.site_indices %}
+    // idx {{ idx }}
+    {% if list_is_enabled(agg, idx) %}
+    get_status("{{ agg }}", "{{ list_value_by_tag('mf_ip', idx)}}", idx);
     {% endif %}
+    {% endfor %}
     {% endfor %}
   });
 
-  function get_status(agg) {
-    fetch(`${SCRIPT_ROOT}/api/status/${agg}`)
+  function get_status(agg, ip, idx) {
+    fetch(`${ip}/api/status/${agg}`)
       .then(response => response.json())
       .then(data => {
+        // now use the idx to do something clever about what is shown there...
+        // right now this is broken and just overwrites things
         $("#" + agg + "beast").text(data["beast"]);
         $("#" + agg + "mlat").text(data["mlat"]);
         if (data["beast"] == "+" && data["mlat"] != "-") {
