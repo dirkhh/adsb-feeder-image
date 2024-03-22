@@ -13,6 +13,7 @@ services:
       - ALT=${FEEDER_ALT_M}m
       - TZ=${FEEDER_TZ}
       - API_KEY=${FEEDER_PLANEWATCH_API_KEY}
+      - S6_KILL_GRACETIME=1000
       # USER_PROVIDED_ENV_START
       # USER_PROVIDED_ENV_END
     tmpfs:

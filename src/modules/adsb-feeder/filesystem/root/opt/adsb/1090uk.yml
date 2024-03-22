@@ -11,6 +11,7 @@ services:
       - RADAR1090_KEY=${FEEDER_1090UK_API_KEY}
       - VERBOSE=false
       - BEASTHOST=ultrafeeder
+      - S6_KILL_GRACETIME=1000
       # USER_PROVIDED_ENV_START
       # USER_PROVIDED_ENV_END
     tmpfs:
