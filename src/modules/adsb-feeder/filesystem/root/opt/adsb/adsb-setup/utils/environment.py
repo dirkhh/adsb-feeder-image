@@ -198,8 +198,9 @@ class Env:
             self._value = [self._value]
             self.list_set(idx, value)
             return
+        default_value = self._default[0] if len(self._default) == 1 else None
         while len(self._value) < idx:
-            self._value.append(None)
+            self._value.append(default_value)
         if idx == len(self._value):
             self._value.append(value)
         else:
@@ -214,7 +215,10 @@ class Env:
         if idx < len(self._value):
             return self._value[idx]
         if type(self._default) == list and len(self._default) == 1:
-            return self._default[0]
+            while len(self._value) <= idx:
+                self._value.append(self._default[0])
+            return self._value[idx]
+        print_err(f"{self._name} only has {len(self._value)} values and no default")
         return None
 
     def list_remove(self, idx=-1):
