@@ -9,6 +9,7 @@ import secrets
 import shutil
 import string
 import subprocess
+import sys
 import zipfile
 import tempfile
 from base64 import b64encode
@@ -213,7 +214,7 @@ class AdsbIm:
         if not dns_state:
             print_err("we appear to have lost DNS")
 
-    def run(self):
+    def run(self, no_server=False):
         self._routemanager.add_proxy_routes(self.proxy_routes)
         debug = os.environ.get("ADSBIM_DEBUG") is not None
         self._debug_cleanup()
@@ -251,6 +252,11 @@ class AdsbIm:
                     )
                 )
                 expert_file.truncate()
+
+        # if all the user wanted is to make sure the housekeeping tasks are completed,
+        # don't start the flask app and exit instead
+        if no_server:
+            return
 
         self.app.run(
             host="0.0.0.0",
@@ -1081,6 +1087,7 @@ if __name__ == "__main__":
     #     files are moved to that place instead
     config_files = {
         ".env",
+        "1090uk.yml",
         "ah.yml",
         "airspy.yml",
         "docker-compose.yml",
@@ -1111,4 +1118,6 @@ if __name__ == "__main__":
             config_file.rename(new_file)
             print_err(f"moved {config_file} to {new_file}")
 
-    AdsbIm().run()
+    no_server = len(sys.argv) > 1 and sys.argv[1] == "--update-config"
+
+    AdsbIm().run(no_server=no_server)

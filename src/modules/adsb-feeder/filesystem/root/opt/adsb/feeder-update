@@ -200,6 +200,13 @@ echo "$VERSION" > /opt/adsb/adsb.im.version
 sed -i "s/BASE_VERSION=.*/BASE_VERSION=$VERSION/" /opt/adsb/config/.env
 sed -i "s/\"_ADSBIM_BASE_VERSION\": \"[^\"]*\"/\"_ADSBIM_BASE_VERSION\": \"$VERSION\"/" /opt/adsb/config/config.json
 
+# if there is any special handling in the adsb-setup app for changes to the config files,
+# env var names, etc (like in the v1.2.3->v1.3.0 upgrade), we need to run that
+# BEFORE we update the Docker containers so that things align properly
+# for this we don't want to restart the service, but manually run the script with the
+# correct arguments to do that
+python3 /opt/adsb/adsb-setup/app.py --update-config
+
 echo "finally, trigger a container upgrade so that they match the new image"
 /opt/adsb/docker-update-adsb-im -no-fetch
 
