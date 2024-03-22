@@ -586,21 +586,23 @@ class Data:
                 print_err(f"  {e}")
         return matches[0]
 
-    def _get_enabled_env_by_tags(self, *tags):
+    def _get_enabled_env_by_tags(self, tags):
+        print_err(f"_get_enabled_env_by_tags {tags}")
         # we append is_enabled to tags
-        taglist = list(tags)
-        taglist.append("is_enabled")
-        return self.env_by_tags(taglist)
+        tags.append("is_enabled")
+        print_err(f"taglist {tags} gets us env {self.env_by_tags(tags)}")
+        return self.env_by_tags(tags)
 
     # helper function to see if something is enabled
     def is_enabled(self, *tags):
-        e = self._get_enabled_env_by_tags(tags)
+        print_err(f"is_enabled {tags}")
+        e = self._get_enabled_env_by_tags(list(tags))
         return e and e.value
 
     # helper function to see if list element is enabled
     def list_is_enabled(self, *tags, idx):
-        e = self._get_enabled_env_by_tags(tags)
-        print_err(f"list_is_enabled {tag} {idx} {e}")
+        e = self._get_enabled_env_by_tags(list(tags))
+        print_err(f"list_is_enabled {tags} {idx} {e}")
         return e.list_get(idx) if e else ""
 
     # helper function to get everything that needs to be written out written out

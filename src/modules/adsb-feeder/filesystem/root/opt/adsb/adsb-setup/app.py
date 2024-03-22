@@ -87,7 +87,9 @@ class AdsbIm:
 
             return {
                 "is_enabled": lambda tag: self._d.is_enabled(tag),
-                "list_is_enabled": lambda tag, idx: self._d.list_is_enabled(tag, idx),
+                "list_is_enabled": lambda tag, idx: self._d.list_is_enabled(
+                    tag, idx=idx
+                ),
                 "env_value_by_tag": lambda tag: get_value([tag]),  # single tag
                 "env_value_by_tags": lambda tags: get_value(tags),  # list of tags
                 "list_value_by_tag": lambda tag, idx: list_value_by_tags([tag], idx),
@@ -1075,7 +1077,7 @@ class AdsbIm:
         # finally, check if this has given us enough configuration info to
         # start the containers
         if self.base_is_configured() or self._d.is_enabled("stage2"):
-            self._d.env_by_tags(["base_config"]).value = True
+            self._d.env_by_tags(["base_config", "is_enabled"]).value = True
             agg_chosen_env = self._d.env_by_tags("aggregators_chosen")
             if self.at_least_one_aggregator() or agg_chosen_env.value == True:
                 agg_chosen_env.value = True
@@ -1120,12 +1122,16 @@ class AdsbIm:
             return self.update()
 
         def uf_enabled(*tags, m=0):
-            return "checked" if self._d.list_is_enabled("ultrafeeder", *tags, m) else ""
+            return (
+                "checked"
+                if self._d.list_is_enabled("ultrafeeder", list(tags), idx=m)
+                else ""
+            )
 
         def others_enabled(*tags, m=0):
             return (
                 "checked"
-                if self._d.list_is_enabled("other_aggregator", *tags, m)
+                if self._d.list_is_enabled("other_aggregator", list(tags), idx=m)
                 else ""
             )
 
