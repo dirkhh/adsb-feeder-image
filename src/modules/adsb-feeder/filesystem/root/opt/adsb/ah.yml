@@ -10,6 +10,7 @@ services:
       - TZ=${FEEDER_TZ}
       - SBSHOST=ultrafeeder
       - CLIENTKEY=${FEEDER_ADSBHUB_STATION_KEY}
+      - S6_KILL_GRACETIME=1000
       # USER_PROVIDED_ENV_START
       # USER_PROVIDED_ENV_END
     tmpfs:

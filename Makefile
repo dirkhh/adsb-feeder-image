@@ -5,6 +5,24 @@ ssh-control:
 # we make a SSH control port to use with rsync.
 	ssh -M -S /tmp/adsb-setup-ssh-control -fnNT root@$(HOST)
 
+sync-and-update:
+# sync relevant files and update
+	ssh -O check -S /tmp/adsb-setup-ssh-control root@$(HOST) || make ssh-control
+
+	# stop webinterface
+	ssh -S /tmp/adsb-setup-ssh-control root@$(HOST) systemctl stop adsb-setup
+	# sync over changes from local repo
+	make sync-py-control
+
+	# update config
+	ssh -S /tmp/adsb-setup-ssh-control root@$(HOST) python3 /opt/adsb/adsb-setup/app.py --update-config || true
+
+	# docker pull / docker compose on the yml files
+	ssh -S /tmp/adsb-setup-ssh-control root@$(HOST) /opt/adsb/docker-update-adsb-im -no-fetch
+
+	# start webinterface back up
+	ssh -S /tmp/adsb-setup-ssh-control root@$(HOST) systemctl restart adsb-setup
+
 sync-py-control:
 # check if the SSH control port is open, if not, open it.
 	ssh -O check -S /tmp/adsb-setup-ssh-control root@$(HOST) || make ssh-control
