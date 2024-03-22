@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 from os import getenv, path
 from pathlib import Path
+import re
 from uuid import uuid4
 
 from .environment import ENV_FILE_PATH, ENV_FLAG_FILE_PATH, Env, is_true
@@ -121,17 +122,24 @@ class Constants:
             has_policy=True,
         ),
     }
-    # Other aggregator tags
+    # we have four different types of "feeders":
+    # 1. integrated feeders (single SBC where one Ultrafeeder collects from SDR and send to aggregator)
+    # 2. micro feeders (SBC with SDR(s) attached, talking to a stage2 micro proxy)
+    # 3. stage2 micro proxies (run on the stage2 system, each talking to a micro feeder and to aggregators)
+    # 4. stage2 aggregator (showing a combined map of the micro feeders)
+    # most feeder related values are lists with element 0 being used either for an
+    # integrated feeder, a micro feeder, or the aggregator in a stage2 setup, and
+    # elements 1 .. num_micro_sites are used for the micro-proxy instances
     _env = {
-        # Mandatory!
-        # Position
-        Env("FEEDER_LAT", tags=["lat"]),
-        Env("FEEDER_LONG", tags=["lng"]),
-        Env("FEEDER_ALT_M", tags=["alt"]),
-        Env("FEEDER_TZ", tags=["form_timezone"]),
-        Env("MLAT_SITE_NAME", tags=["mlat_name"]),
-        Env("MAP_NAME", tags=["map_name"]),
-        # SDR
+        # Mandatory site data
+        Env("FEEDER_LAT", default=[], mandatory=True, tags=["lat"]),
+        Env("FEEDER_LONG", default=[], mandatory=True, tags=["lng"]),
+        Env("FEEDER_ALT_M", default=[], mandatory=True, tags=["alt"]),
+        Env("FEEDER_TZ", default=[], mandatory=True, tags=["form_timezone"]),
+        Env("SITE_NAME", default=[], mandatory=True, tags=["site_name"]),
+        Env("MAP_NAME", default=[], mandatory=True, tags=["map_name"]),
+        #
+        # SDR settings are only valid on an integrated feeder or a micro feeder, not on stage2
         Env("FEEDER_RTL_SDR", default="rtlsdr", tags=["rtlsdr"]),
         Env(
             "FEEDER_ENABLE_BIASTEE",
@@ -146,26 +154,19 @@ class Constants:
         Env("FEEDER_READSB_GAIN", default="autogain", tags=["gain"]),
         Env("FEEDER_AIRSPY_GAIN", default="auto", tags=["gain_airspy"]),
         Env("UAT_SDR_GAIN", default="autogain", tags=["uatgain"]),
-        Env(
-            "FEEDER_SERIAL_1090", is_mandatory=False, tags=["1090serial"]
-        ),  # this is the SDR serial
-        Env(
-            "FEEDER_SERIAL_978", is_mandatory=False, tags=["978serial"]
-        ),  # this is the SDR serial
-        Env("FEEDER_UNUSED_SERIAL_0", is_mandatory=False, tags=["other-0"]),
-        Env("FEEDER_UNUSED_SERIAL_1", is_mandatory=False, tags=["other-1"]),
-        Env("FEEDER_UNUSED_SERIAL_2", is_mandatory=False, tags=["other-2"]),
-        Env("FEEDER_UNUSED_SERIAL_3", is_mandatory=False, tags=["other-3"]),
-        # Feeder
-        Env(
-            "FEEDER_ULTRAFEEDER_CONFIG", is_mandatory=True, tags=["ultrafeeder_config"]
-        ),
-        Env("ADSBLOL_UUID", default_call=lambda: str(uuid4()), tags=["adsblol_uuid"]),
-        Env(
-            "ULTRAFEEDER_UUID",
-            default_call=lambda: str(uuid4()),
-            tags=["ultrafeeder_uuid"],
-        ),
+        Env("FEEDER_SERIAL_1090", tags=["1090serial"]),
+        Env("FEEDER_SERIAL_978", tags=["978serial"]),
+        Env("FEEDER_UNUSED_SERIAL_0", tags=["other-0"]),
+        Env("FEEDER_UNUSED_SERIAL_1", tags=["other-1"]),
+        Env("FEEDER_UNUSED_SERIAL_2", tags=["other-2"]),
+        Env("FEEDER_UNUSED_SERIAL_3", tags=["other-3"]),
+        #
+        # Ultrafeeder config, used for all 4 types of Ultrafeeder instances
+        Env("FEEDER_ULTRAFEEDER_CONFIG", default=[], tags=["ultrafeeder_config"]),
+        Env("ADSBLOL_UUID", default=[], tags=["adsblol_uuid"]),
+        Env("ULTRAFEEDER_UUID", default=[], tags=["ultrafeeder_uuid"]),
+        #
+        # Global settings, not differentiated per micro feeder
         Env("MLAT_PRIVACY", default=True, tags=["mlat_privacy", "is_enabled"]),
         Env(
             "FEEDER_TAR1090_USEROUTEAPI",
@@ -177,134 +178,228 @@ class Constants:
             default="[2,3]",
             tags=["range_outline_dash"],
         ),
-        # 978
+        # 978, airspy, others for integrated feeders and micro feeders
+        Env(  # start the 978 container
+            "FEEDER_ENABLE_UAT978", default=[False], tags=["uat978", "is_enabled"]
+        ),
+        Env(  # add the URL to the dump978 map
+            "FEEDER_URL_978", default=[""], tags=["978url"]
+        ),
+        Env(  # hostname ultrafeeder uses to get 978 data
+            "FEEDER_UAT978_HOST", default=[""], tags=["978host"]
+        ),
+        Env(  # magic setting for piaware to get 978 data
+            "FEEDER_PIAWARE_UAT978", default=[""], tags=["978piaware"]
+        ),
         Env(
-            "FEEDER_ENABLE_UAT978", default=False, tags=["uat978", "is_enabled"]
-        ),  # start the container
-        Env(
-            "FEEDER_URL_978", default="", tags=["978url"]
-        ),  # add the URL to the dump978 map
-        Env(
-            "FEEDER_UAT978_HOST", default="", tags=["978host"]
-        ),  # hostname ultrafeeder uses to get 978 data
-        Env(
-            "FEEDER_PIAWARE_UAT978", default="", tags=["978piaware"]
-        ),  # magic setting for piaware to get 978 data
+            "AF_IS_AIRSPY_ENABLED",
+            tags=["airspy", "is_enabled"],
+        ),
         # Misc
         Env(
             "_ADSBIM_HEYWHATSTHAT_ENABLED",
-            is_mandatory=False,
+            default=[False],
             tags=["heywhatsthat", "is_enabled"],
         ),
         Env(
             "FEEDER_HEYWHATSTHAT_ID",
-            is_mandatory=False,
-            default="",
+            default=[""],
             tags=["heywhatsthat_id", "key"],
+        ),
+        # Ultrafeeder config
+        Env(
+            "_ADSBIM_STATE_IS_ULTRAFEEDER_ADSBLOL_ENABLED",
+            default=[False],
+            tags=["adsblol", "ultrafeeder", "is_enabled"],
+        ),
+        Env(
+            "_ADSBIM_STATE_IS_ULTRAFEEDER_FLYITALYADSB_ENABLED",
+            default=[False],
+            tags=["flyitaly", "ultrafeeder", "is_enabled"],
+        ),
+        Env(
+            "_ADSBIM_STATE_IS_ULTRAFEEDER_ADSBX_ENABLED",
+            default=[False],
+            tags=["adsbx", "ultrafeeder", "is_enabled"],
+        ),
+        Env(
+            "_ADSBIM_STATE_ADSBX_FEEDER_ID",
+            default=[False],
+            tags="adsbxfeederid",
+        ),
+        Env(
+            "_ADSBIM_STATE_IS_ULTRAFEEDER_TAT_ENABLED",
+            default=[False],
+            tags=["tat", "ultrafeeder", "is_enabled"],
+        ),
+        Env(
+            "_ADSBIM_STATE_IS_ULTRAFEEDER_PLANESPOTTERS_ENABLED",
+            default=[False],
+            tags=["planespotters", "ultrafeeder", "is_enabled"],
+        ),
+        Env(
+            "_ADSBIM_STATE_IS_ULTRAFEEDER_ADSBFI_ENABLED",
+            default=[False],
+            tags=["adsbfi", "ultrafeeder", "is_enabled"],
+        ),
+        Env(
+            "_ADSBIM_STATE_IS_ULTRAFEEDER_AVDELPHI_ENABLED",
+            default=[False],
+            tags=["avdelphi", "ultrafeeder", "is_enabled"],
+        ),
+        # Env(
+        #    "_ADSBIM_STATE_IS_ULTRAFEEDER_FLYOVR_ENABLED",
+        #    default=[False],
+        #    tags=["flyovr", "ultrafeeder", "is_enabled"],
+        # ),
+        Env(
+            "_ADSBIM_STATE_IS_ULTRAFEEDER_RADARPLANE_ENABLED",
+            default=[False],
+            tags=["radarplane", "ultrafeeder", "is_enabled"],
+        ),
+        Env(
+            "_ADSBIM_STATE_IS_ULTRAFEEDER_HPRADAR_ENABLED",
+            default=[False],
+            tags=["hpradar", "ultrafeeder", "is_enabled"],
+        ),
+        Env(
+            "_ADSBIM_STATE_IS_ULTRAFEEDER_ALIVE_ENABLED",
+            default=[False],
+            tags=["alive", "ultrafeeder", "is_enabled"],
+        ),
+        # other aggregators
+        Env(
+            "AF_IS_FLIGHTRADAR24_ENABLED",
+            default=[False],
+            tags=["other_aggregator", "is_enabled", "flightradar"],
+        ),
+        Env(
+            "AF_IS_PLANEWATCH_ENABLED",
+            default=[False],
+            tags=["other_aggregator", "is_enabled", "planewatch"],
+        ),
+        Env(
+            "AF_IS_FLIGHTAWARE_ENABLED",
+            default=[False],
+            tags=["other_aggregator", "is_enabled", "flightaware"],
+        ),
+        Env(
+            "AF_IS_RADARBOX_ENABLED",
+            default=[False],
+            tags=["other_aggregator", "is_enabled", "radarbox"],
+        ),
+        Env(
+            "AF_IS_PLANEFINDER_ENABLED",
+            default=[False],
+            tags=["other_aggregator", "is_enabled", "planefinder"],
+        ),
+        Env(
+            "AF_IS_ADSBHUB_ENABLED",
+            default=[False],
+            tags=["other_aggregator", "is_enabled", "adsbhub"],
+        ),
+        Env(
+            "AF_IS_OPENSKY_ENABLED",
+            default=[False],
+            tags=["other_aggregator", "is_enabled", "opensky"],
+        ),
+        Env(
+            "AF_IS_RADARVIRTUEL_ENABLED",
+            default=[False],
+            tags=["other_aggregator", "is_enabled", "radarvirtuel"],
+        ),
+        Env(
+            "AF_IS_1090UK_ENABLED",
+            default=[False],
+            tags=["other_aggregator", "is_enabled", "1090uk"],
         ),
         # Other aggregators keys
         Env(
             "FEEDER_FR24_SHARING_KEY",
-            is_mandatory=False,
-            default="",
+            default=[""],
             tags=["flightradar", "key"],
         ),
         Env(
             "FEEDER_FR24_UAT_SHARING_KEY",
-            is_mandatory=False,
-            default="",
+            default=[""],
             tags=["flightradar_uat", "key"],
         ),
         Env(
             "FEEDER_PIAWARE_FEEDER_ID",
-            is_mandatory=False,
-            default="",
+            default=[""],
             tags=["flightaware", "key"],
         ),
         Env(
             "FEEDER_RADARBOX_SHARING_KEY",
-            is_mandatory=False,
-            default="",
+            default=[""],
             tags=["radarbox", "key"],
         ),
         Env(
             "FEEDER_RADARBOX_SN",
-            is_mandatory=False,
-            default="",
+            default=[""],
             tags=["radarbox", "sn"],
         ),
-        Env(
+        Env(  # only on integrated or micro feeders
             "FEEDER_RB_CPUINFO_HACK",
-            is_mandatory=False,
             default="",
             tags=["rbcpuhack"],
         ),
-        Env(
+        Env(  # only on integrated or micro feeders
             "FEEDER_RB_THERMAL_HACK",
-            is_mandatory=False,
-            default="",
+            default=[""],
             tags=["rbthermalhack"],
         ),
         Env(
             "FEEDER_PLANEFINDER_SHARECODE",
-            is_mandatory=False,
-            default="",
+            default=[""],
             tags=["planefinder", "key"],
         ),
         Env(
             "FEEDER_ADSBHUB_STATION_KEY",
-            is_mandatory=False,
-            default="",
+            default=[""],
             tags=["adsbhub", "key"],
         ),
         Env(
             "FEEDER_OPENSKY_USERNAME",
-            is_mandatory=False,
-            default="",
+            default=[""],
             tags=["opensky", "user"],
         ),
         Env(
             "FEEDER_OPENSKY_SERIAL",
-            is_mandatory=False,
-            default="",
+            default=[""],
             tags=["opensky", "key"],
         ),
         Env(
             "FEEDER_RV_FEEDER_KEY",
-            is_mandatory=False,
-            default="",
+            default=[""],
             tags=["radarvirtuel", "key"],
         ),
         Env(
             "FEEDER_PLANEWATCH_API_KEY",
-            is_mandatory=False,
-            default="",
+            default=[""],
             tags=["planewatch", "key"],
         ),
         Env(
             "FEEDER_1090UK_API_KEY",
-            is_mandatory=False,
-            default="",
+            default=[""],
             tags=["1090uk", "key"],
         ),
         # ADSB.im specific
-        Env("_ADSBIM_AGGREGATORS_SELECTION", tags=["aggregators"]),
-        Env(
+        Env(  # all, privacy, individual, micro (the latter indicates this is a micro feeder)
+            # for sanity reason this is used for all stage2 proxies - same value
+            "_ADSBIM_AGGREGATORS_SELECTION",
+            tags=["aggregators"],
+        ),
+        Env(  # always of the software stack that is running, regardless of feeder type
             "_ADSBIM_BASE_VERSION",
-            is_mandatory=False,
             tags=["base_version", "norestore"],
         ),
-        Env(
-            "_ADSBIM_CONTAINER_VERSION",
-            is_mandatory=False,
-            tags=["container_version", "norestore"],
-        ),
-        Env(
+        Env(  # always the board where the software stack is running
             "_ADSBIM_STATE_BOARD_NAME",
-            is_mandatory=False,
             tags=["board_name", "norestore"],
         ),
         # ports used by our proxy system
+        # only really important when running as app, which means integrated feeder or stage2
         Env("AF_WEBPORT", default=80, tags=["webport"]),
         Env("AF_DAZZLE_PORT", default=9999, tags=["dazzleport"]),
         Env("AF_TAR1090_PORT", default=8080, tags=["tar1090port"]),
@@ -329,128 +424,60 @@ class Constants:
         # and easy checks in webinterface
         Env(
             "AF_IS_SECURE_IMAGE",
-            is_mandatory=False,
             default=False,
             tags=["secure_image", "is_enabled"],
         ),
-        Env(
-            "AF_IS_FLIGHTRADAR24_ENABLED",
-            is_mandatory=False,
-            tags=["other_aggregator", "is_enabled", "flightradar"],
-        ),
-        Env(
-            "AF_IS_PLANEWATCH_ENABLED",
-            is_mandatory=False,
-            tags=["other_aggregator", "is_enabled", "planewatch"],
-        ),
-        Env(
-            "AF_IS_FLIGHTAWARE_ENABLED",
-            is_mandatory=False,
-            tags=["other_aggregator", "is_enabled", "flightaware"],
-        ),
-        Env(
-            "AF_IS_RADARBOX_ENABLED",
-            is_mandatory=False,
-            tags=["other_aggregator", "is_enabled", "radarbox"],
-        ),
-        Env(
-            "AF_IS_PLANEFINDER_ENABLED",
-            is_mandatory=False,
-            tags=["other_aggregator", "is_enabled", "planefinder"],
-        ),
-        Env(
-            "AF_IS_ADSBHUB_ENABLED",
-            is_mandatory=False,
-            tags=["other_aggregator", "is_enabled", "adsbhub"],
-        ),
-        Env(
-            "AF_IS_OPENSKY_ENABLED",
-            is_mandatory=False,
-            tags=["other_aggregator", "is_enabled", "opensky"],
-        ),
-        Env(
-            "AF_IS_RADARVIRTUEL_ENABLED",
-            is_mandatory=False,
-            tags=["other_aggregator", "is_enabled", "radarvirtuel"],
-        ),
-        Env(
-            "AF_IS_1090UK_ENABLED",
-            is_mandatory=False,
-            tags=["other_aggregator", "is_enabled", "1090uk"],
-        ),
-        Env(
-            "AF_IS_AIRSPY_ENABLED",
-            is_mandatory=False,
-            tags=["airspy", "is_enabled"],
-        ),
-        Env(
-            "AF_IS_DOZZLE_ENABLED",
-            is_mandatory=False,
-            default=True,
-            tags=["dozzle", "is_enabled"],
-        ),
+        # specific to the board this is running on, not per feeder
         Env(
             "_ADSBIM_STATE_IS_SSH_CONFIGURED",
-            is_mandatory=False,
             tags=["ssh_configured", "is_enabled", "norestore"],
         ),
         Env(
             "_ADSB_STATE_SSH_KEY",
-            is_mandatory=False,
             tags=["ssh_pub", "key", "norestore"],
         ),
         Env(
             "AF_IS_BASE_CONFIG_FINISHED",
             default=False,
-            is_mandatory=False,
             tags=["base_config", "is_enabled"],
         ),
         Env(
             "_ADSBIM_STATE_AGGREGATORS_CHOSEN",
             default=False,
-            is_mandatory=False,
             tags=["aggregators_chosen"],
         ),
         Env(
             "AF_IS_NIGHTLY_BASE_UPDATE_ENABLED",
-            is_mandatory=False,
             tags=["nightly_base_update", "is_enabled"],
         ),
         Env(
             "AF_IS_NIGHTLY_FEEDER_UPDATE_ENABLED",
-            is_mandatory=False,
             tags=["nightly_feeder_update", "is_enabled"],
         ),
         Env(
             "AF_IS_NIGHTLY_CONTAINER_UPDATE_ENABLED",
-            is_mandatory=False,
             tags=["nightly_container_update", "is_enabled"],
         ),
         Env(
             "_ADSBIM_STATE_ZEROTIER_KEY",
-            is_mandatory=False,
             tags=["zerotierid", "key"],
         ),
         Env(
             "_ADSBIM_STATE_TAILSCALE_LOGIN_LINK",
-            is_mandatory=False,
             tags=["tailscale_ll"],
             default="",
         ),
         Env(
             "_ADSBIM_STATE_TAILSCALE_NAME",
-            is_mandatory=False,
             tags=["tailscale_name"],
             default="",
         ),
         Env(
             "_ADSBIM_STATE_TAILSCALE_EXTRA_ARGS",
-            is_mandatory=False,
             tags=["tailscale_extras"],
         ),
         Env(
             "_ADSBIM_STATE_EXTRA_ENV",
-            is_mandatory=False,
             tags=["ultrafeeder_extra_env"],
         ),
         # Container images
@@ -466,230 +493,62 @@ class Constants:
         Env("RV_CONTAINER", tags=["radarvirtuel", "container"]),
         Env("PW_CONTAINER", tags=["planewatch", "container"]),
         Env("TNUK_CONTAINER", tags=["1090uk", "container"]),
-        # Ultrafeeder config
-        Env(
-            "_ADSBIM_STATE_IS_ULTRAFEEDER_ADSBLOL_ENABLED",
-            is_mandatory=False,
-            tags=["adsblol", "ultrafeeder", "is_enabled"],
-        ),
-        Env(
-            "_ADSBIM_STATE_IS_ULTRAFEEDER_MICRO_ADSBLOL_ENABLED",
-            is_mandatory=False,
-            default=[],
-            tags=["adsblol", "ultrafeeder_micro", "is_enabled"],
-        ),
-        Env(
-            "_ADSBIM_STATE_IS_ULTRAFEEDER_FLYITALYADSB_ENABLED",
-            is_mandatory=False,
-            tags=["flyitaly", "ultrafeeder", "is_enabled"],
-        ),
-        Env(
-            "_ADSBIM_STATE_IS_ULTRAFEEDER_MICRO_FLYITALYADSB_ENABLED",
-            is_mandatory=False,
-            default=[],
-            tags=["flyitaly", "ultrafeeder_micro", "is_enabled"],
-        ),
-        Env(
-            "_ADSBIM_STATE_IS_ULTRAFEEDER_ADSBX_ENABLED",
-            is_mandatory=False,
-            tags=["adsbx", "ultrafeeder", "is_enabled"],
-        ),
-        Env(
-            "_ADSBIM_STATE_IS_ULTRAFEEDER_MICRO_ADSBX_ENABLED",
-            is_mandatory=False,
-            default=[],
-            tags=["adsbx", "ultrafeeder_micro", "is_enabled"],
-        ),
-        Env(
-            "_ADSBIM_STATE_ADSBX_FEEDER_ID",
-            is_mandatory=False,
-            tags="adsbxfeederid",
-        ),
-        Env(
-            "_ADSBIM_STATE_ADSBX_MICRO_FEEDER_ID",
-            is_mandatory=False,
-            default=[],
-            tags="adsbxfeederid_micro",
-        ),
-        Env(
-            "_ADSBIM_STATE_IS_ULTRAFEEDER_TAT_ENABLED",
-            is_mandatory=False,
-            tags=["tat", "ultrafeeder", "is_enabled"],
-        ),
-        Env(
-            "_ADSBIM_STATE_IS_ULTRAFEEDER_MICRO_TAT_ENABLED",
-            is_mandatory=False,
-            default=[],
-            tags=["tat", "ultrafeeder_micro", "is_enabled"],
-        ),
-        Env(
-            "_ADSBIM_STATE_IS_ULTRAFEEDER_PLANESPOTTERS_ENABLED",
-            is_mandatory=False,
-            tags=["planespotters", "ultrafeeder", "is_enabled"],
-        ),
-        Env(
-            "_ADSBIM_STATE_IS_ULTRAFEEDER_MICRO_PLANESPOTTERS_ENABLED",
-            is_mandatory=False,
-            default=[],
-            tags=["planespotters", "ultrafeeder_micro", "is_enabled"],
-        ),
-        Env(
-            "_ADSBIM_STATE_IS_ULTRAFEEDER_ADSBFI_ENABLED",
-            is_mandatory=False,
-            tags=["adsbfi", "ultrafeeder", "is_enabled"],
-        ),
-        Env(
-            "_ADSBIM_STATE_IS_ULTRAFEEDER_MICRO_ADSBFI_ENABLED",
-            is_mandatory=False,
-            default=[],
-            tags=["adsbfi", "ultrafeeder_micro", "is_enabled"],
-        ),
-        Env(
-            "_ADSBIM_STATE_IS_ULTRAFEEDER_AVDELPHI_ENABLED",
-            is_mandatory=False,
-            tags=["avdelphi", "ultrafeeder", "is_enabled"],
-        ),
-        Env(
-            "_ADSBIM_STATE_IS_ULTRAFEEDER_MICRO_AVDELPHI_ENABLED",
-            is_mandatory=False,
-            default=[],
-            tags=["avdelphi", "ultrafeeder_micro", "is_enabled"],
-        ),
-        # Env(
-        #    "_ADSBIM_STATE_IS_ULTRAFEEDER_FLYOVR_ENABLED",
-        #    is_mandatory=False,
-        #    tags=["flyovr", "ultrafeeder", "is_enabled"],
-        # ),
-        Env(
-            "_ADSBIM_STATE_IS_ULTRAFEEDER_RADARPLANE_ENABLED",
-            is_mandatory=False,
-            tags=["radarplane", "ultrafeeder", "is_enabled"],
-        ),
-        Env(
-            "_ADSBIM_STATE_IS_ULTRAFEEDER_MICRO_RADARPLANE_ENABLED",
-            is_mandatory=False,
-            default=[],
-            tags=["radarplane", "ultrafeeder_micro", "is_enabled"],
-        ),
-        Env(
-            "_ADSBIM_STATE_IS_ULTRAFEEDER_HPRADAR_ENABLED",
-            is_mandatory=False,
-            tags=["hpradar", "ultrafeeder", "is_enabled"],
-        ),
-        Env(
-            "_ADSBIM_STATE_IS_ULTRAFEEDER_MICRO_HPRADAR_ENABLED",
-            is_mandatory=False,
-            default=[],
-            tags=["hpradar", "ultrafeeder_micro", "is_enabled"],
-        ),
-        Env(
-            "_ADSBIM_STATE_IS_ULTRAFEEDER_ALIVE_ENABLED",
-            is_mandatory=False,
-            tags=["alive", "ultrafeeder", "is_enabled"],
-        ),
-        Env(
-            "_ADSBIM_STATE_IS_ULTRAFEEDER_MICRO_ALIVE_ENABLED",
-            is_mandatory=False,
-            default=[],
-            tags=["alive", "ultrafeeder_micro", "is_enabled"],
-        ),
+        # per system config
         Env(
             "_ADSBIM_STATE_ULTRAFEEDER_EXTRA_ARGS",
-            is_mandatory=False,
             tags=["ultrafeeder_extra_args"],
         ),
         Env(
             "FEEDER_TAR1090_ENABLE_AC_DB",
-            is_mandatory=False,
             default=True,
             tags=["tar1090_ac_db", "is_enabled"],
         ),
         Env(
             "FEEDER_MLATHUB_DISABLE",
-            is_mandatory=False,
             default=False,
             tags=["mlathub_disable", "is_enabled"],
         ),
         Env(
             "_ADSBIM_STATE_REMOTE_SDR",
-            is_mandatory=False,
             tags=["remote_sdr"],
         ),
         Env(
             "_ADSBIM_STATE_LAST_DNS_CHECK",
-            is_mandatory=False,
             tags=["dns_state", "norestore"],
         ),
         Env(
             "_ADSBIM_STATE_FEEDER_IP",
-            is_mandatory=False,
             tags=["feeder_ip", "norestore"],
         ),
         Env(
             "_ADSBIM_STATE_UNDER_VOLTAGE",
-            is_mandatory=False,
             tags=["under_voltage", "norestore"],
         ),
         Env(
             "_ADSBIM_STATE_LOW_DISK",
-            is_mandatory=False,
             tags=["low_disk", "norestore"],
         ),
         Env(
             "AF_IS_STAGE2",
-            is_mandatory=False,
             default=False,
             tags=["stage2", "is_enabled"],
         ),
         Env(
-            "_ADSBIM_STATE_STAGE2_NAME",
-            is_mandatory=False,
-            default="",
-            tags=["stage2_name"],
-        ),
-        Env(
             "AF_NUM_MICRO_SITES",
-            is_mandatory=False,
             default=0,
             tags=["num_micro_sites"],
         ),
         Env(
             "_ADSBIM_STATE_STAGE2_LISTENERS",
-            is_mandatory=False,
             default=[],
             tags=["stage2_listeners"],
         ),
-        Env("MF_MLAT_SITE_NAME", is_mandatory=False, default=[], tags=["micro_sites"]),
-        Env("AF_MICRO_IP", is_mandatory=False, default=[], tags=["mf_ip"]),
-        Env("MF_FEEDER_LAT", is_mandatory=False, default=[], tags=["mf_lat"]),
-        Env("MF_FEEDER_LONG", is_mandatory=False, default=[], tags=["mf_lng"]),
-        Env("MF_FEEDER_ALT_M", is_mandatory=False, default=[], tags=["mf_alt"]),
-        Env("MF_FEEDER_TZ", is_mandatory=False, default=[], tags=["mf_timezone"]),
-        Env("MF_FEEDER_VERSION", is_mandatory=False, default=[], tags=["mf_version"]),
-        Env(
-            "MF_FEEDER_HEYWHATSTHAT_ID",
-            is_mandatory=False,
-            default=[],
-            tags=["mf_heywhatsthat_id"],
-        ),
-        Env(
-            "MF_FEEDER_ULTRAFEEDER_CONFIG",
-            is_mandatory=False,
-            default=[],
-            tags=["mf_ultrafeeder_config"],
-        ),
-        Env(
-            "MF_ULTRAFEEDER_UUID",
-            is_mandatory=False,
-            default=[],
-            tags=["mf_ultrafeeder_uuid"],
-        ),
-        Env(
-            "MF_ADSBLOL_UUID",
-            is_mandatory=False,
-            default=[],
-            tags=["mf_adsblol_uuid"],
-        ),
+        Env("AF_MICRO_IP", default=[], tags=["mf_ip"]),
+        Env("MF_FEEDER_LAT", default=[], tags=["mf_lat"]),
+        Env("MF_FEEDER_LONG", default=[], tags=["mf_lng"]),
+        Env("MF_FEEDER_ALT_M", default=[], tags=["mf_alt"]),
+        Env("MF_FEEDER_TZ", default=[], tags=["mf_timezone"]),
+        Env("MF_FEEDER_VERSION", default=[], tags=["mf_version"]),
     }
 
     @property
@@ -726,16 +585,27 @@ class Constants:
         if len(matches) == 0:
             return None
         if len(matches) > 1:
-            raise Exception(f"More than one match for tags {tags}")
+            print_err(f"More than one match for tags {tags}")
+            for e in matches:
+                print_err(f"  {e}")
         return matches[0]
 
-    # helper function to see if something is enabled
-    def is_enabled(self, *tags):
+    def _get_enabled_env_by_tags(self, *tags):
         # we append is_enabled to tags
         taglist = list(tags)
         taglist.append("is_enabled")
-        e = self.env_by_tags(taglist)
+        return self.env_by_tags(taglist)
+
+    # helper function to see if something is enabled
+    def is_enabled(self, *tags):
+        e = self._get_enabled_env_by_tags(tags)
         return e and e.value
+
+    # helper function to see if list element is enabled
+    def list_is_enabled(self, *tags, idx):
+        e = self._get_enabled_env_by_tags(tags)
+        print_err(f"list_is_enabled {tag} {idx} {e}")
+        return e.list_get(idx) if e else ""
 
     # helper function to get everything that needs to be written out written out
     def writeback_env(self):
@@ -749,6 +619,7 @@ class Constants:
             else env._get_values_from_file()
         )
         for e in self._env:
+            print_err(f"WRITEBACK {e} with type {type(e._value)}")
             if any(t == "false_is_zero" for t in e.tags):
                 env_vars[e.name] = "1" if is_true(e.value) else "0"
             elif any(t == "false_is_empty" for t in e.tags):
@@ -763,8 +634,9 @@ class Constants:
                         self.ultrafeeder_micro.append(
                             UltrafeederConfig(constants=self, micro=i)
                         )
-                    e.list_set(i, self.ultrafeeder_micro[i].generate())
-
+                    uc = self.ultrafeeder_micro[i].generate()
+                    e.list_set(i, uc)
+                    env_vars[f"MF_FEEDER_ULTRAFEEDER_CONFIG_{i}"] = uc
         print_err(f"read in from file and applied any in memory changes: {env_vars}")
         env._write_file(env_vars)
 

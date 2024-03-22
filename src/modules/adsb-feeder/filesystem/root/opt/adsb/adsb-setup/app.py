@@ -82,6 +82,9 @@ class AdsbIm:
 
             return {
                 "is_enabled": lambda tag: self._constants.is_enabled(tag),
+                "list_is_enabled": lambda tag, idx: self._constants.list_is_enabled(
+                    tag, idx
+                ),
                 "env_value_by_tag": lambda tag: get_value([tag]),  # single tag
                 "env_value_by_tags": lambda tags: get_value(tags),  # list of tags
                 "env_values": self._constants.envs,

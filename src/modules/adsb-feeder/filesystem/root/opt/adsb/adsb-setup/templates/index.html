@@ -74,7 +74,14 @@
               </td>
               <td class="text-center">
                 <span id="{{ agg + 'span' }}">
-                  {% if is_enabled(agg) %}&#10003;{% endif %}
+                  {% if is_enabled("stage2")%}
+                  {% for site in env_value_by_tag("micro_sites") %}
+                  {% if list_is_enabled(agg, loop.index)%}<span width="1rem">&#10003;</span>
+                  {% else %}<span width="1rem"> </span> {% endif %}
+                  {% endfor %}
+                  {% else %}
+                  {% if list_is_enabled(agg, 0) %}&#10003;{% endif %}
+                  {% endif %}
                 </span>
               </td>
               <td class="text-center">

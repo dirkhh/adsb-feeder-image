@@ -24,7 +24,7 @@ class Env:
         self,
         name: str,
         value: Union[str, List[str]] = None,
-        is_mandatory: bool = True,
+        is_mandatory: bool = False,
         default: any = None,
         default_call: callable = None,
         value_call: callable = None,
@@ -180,6 +180,13 @@ class Env:
         # stupid Python with it's complex data types... modifying a list in the app
         # already modifies the existing object in memory - so we need to force a comparison
         # to the value in the file
+        if type(self._value) == list:
+            print_err(
+                f"WAIT == using standard setter to assign a list {self} -- {value} -- {type(value)}"
+            )
+            self._value = value
+            self._reconcile(value)
+            return
         if type(self._value) == list or value != self._value:
             self._value = value
             self._reconcile(value)
@@ -245,7 +252,6 @@ conversion = {
     "_ADSBIM_STATE_IS_OPENSKY_ENABLED": "AF_IS_OPENSKY_ENABLED",
     "_ADSBIM_STATE_IS_RADARVIRTUEL_ENABLED": "AF_IS_RADARVIRTUEL_ENABLED",
     "_ADSBIM_STATE_IS_1090UK_ENABLED": "AF_IS_1090UK_ENABLED",
-    "_ADSBIM_STATE_IS_DOZZLE_ENABLED": "AF_IS_DOZZLE_ENABLED",
     "_ADSBIM_STATE_IS_AIRSPY_ENABLED": "AF_IS_AIRSPY_ENABLED",
     "_ADSBIM_STATE_IS_SECURE_IMAGE": "AF_IS_SECURE_IMAGE",
     "_ADSBIM_STATE_IS_NIGHTLY_BASE_UPDATE_ENABLED": "AF_IS_NIGHTLY_BASE_UPDATE_ENABLED",

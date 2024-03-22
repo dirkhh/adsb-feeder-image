@@ -49,7 +49,7 @@
             </a>
             <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
               {% for site in env_value_by_tag('micro_sites') %}
-              <li><a class="dropdown-item" href="{{ href|e}}?m={{loop.index0}}">{{site}}</a></li>
+              <li><a class="dropdown-item" href="{{ href|e}}?m={{loop.index}}">{{site}}</a></li>
               {% endfor %}
             </ul>
           </li>
