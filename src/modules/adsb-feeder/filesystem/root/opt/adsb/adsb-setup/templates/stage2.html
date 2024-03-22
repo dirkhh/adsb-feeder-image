@@ -2,7 +2,7 @@
 {% set active_page = "stage2" %}
 
 {% block content %}
-<h1 class="mt-3 text-center text-danger">{% block title %} Setup stage 2 feeder {{ env_value_by_tag('stage2_name') }}
+<h1 class="mt-3 text-center text-danger">{% block title %} Setup stage 2 feeder {{ list_value_by_tag('site_name', 0) }}
   {% endblock %}</h1>
 <div class="alert alert-danger" role="alert" {% if env_value_by_tag('dns_state') %} style="display: none;" {% endif %}>
   The feeder cannot resolve DNS queries. This will most likely prevent it from working at all.
@@ -15,7 +15,7 @@
       </span>
       <span class="col-12 col-sm-7 col-md-8 col-lg-9">
         <input type="text" name="stage2_name" required placeholder="Stage2" class="form-control col-md"
-               value="{{ env_value_by_tag('stage2_name') }}" />
+               value="{{ list_value_by_tag('site_name', 0) }}" />
       </span>
     </div>
     <div class="form-group">
@@ -46,16 +46,16 @@
           There's also the aircraft with pos count - but since we don't want to constantly refresh, maybe less interesting
         -->
         <tbody>
-          {% for site in env_value_by_tag('micro_sites') %}
+          {% for site in env_value_by_tag('site_name') %}
           <tr>
             <td>
               <a href="">{{ site }}</a>
             </td>
-            <td class="text-center">{{ env_value_by_tag('mf_ip')[loop.index] }}</td>
-            <td class="text-center">{{ env_value_by_tag('mf_lat')[loop.index] }} /
-              {{ env_value_by_tag('mf_lng')[loop.index] }} / {{ env_value_by_tag('mf_alt')[loop.index] }}m
+            <td class="text-center">{{ list_value_by_tag('mf_ip', loop.index) }}</td>
+            <td class="text-center">{{ list_value_by_tag('mf_lat', loop.index) }} /
+              {{ list_value_by_tag('mf_lng', loop.index) }} / {{ list_value_by_tag('mf_alt', loop.index) }}m
             </td>
-            <td class="text-center"> {{ env_value_by_tag('mf_version')[loop.index]}}
+            <td class="text-center"> {{ list_value_by_tag('mf_version', loop.index)}}
             </td>
             <td class="text-center">
             </td>

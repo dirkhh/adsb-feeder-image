@@ -22,10 +22,6 @@ from time import sleep
 from typing import Dict, List
 from zlib import compress
 
-# nofmt: on
-# isort: off
-from flask import Flask, flash, redirect, render_template, request, send_file, url_for
-from utils.environment import is_true
 
 # this initial setup is not a great look... but I don't want to move this into a separate
 # applications... if we have no JSON config file, we need create it from a .env file and
@@ -38,6 +34,10 @@ from utils import Data
 if os.path.exists("/opt/adsb/config/.env.flag"):
     Data().writeback_env()
     os.remove("/opt/adsb/config/.env.flag")
+
+# nofmt: on
+# isort: off
+from flask import Flask, flash, redirect, render_template, request, send_file, url_for
 
 from utils import (
     ADSBHub,
@@ -61,6 +61,7 @@ from utils import (
     cleanup_str,
     print_err,
     generic_get_json,
+    is_true,
 )
 
 # nofmt: off
@@ -80,11 +81,17 @@ class AdsbIm:
                 e = self._d.env_by_tags(tags)
                 return e.value if e else ""
 
+            def list_value_by_tags(tags, idx):
+                e = self._d.env_by_tags(tags)
+                return e.list_get(idx) if e else ""
+
             return {
                 "is_enabled": lambda tag: self._d.is_enabled(tag),
                 "list_is_enabled": lambda tag, idx: self._d.list_is_enabled(tag, idx),
                 "env_value_by_tag": lambda tag: get_value([tag]),  # single tag
                 "env_value_by_tags": lambda tags: get_value(tags),  # list of tags
+                "list_value_by_tag": lambda tag, idx: list_value_by_tags([tag], idx),
+                "list_value_by_tags": lambda tag, idx: list_value_by_tags(tag, idx),
                 "env_values": self._d.envs,
             }
 
@@ -172,10 +179,10 @@ class AdsbIm:
         # finally, try to make sure that we have all the pieces that we need and recreate what's missing
         stage2_yml_template = self._d.config_path / "stage2.yml"
         for i in range(0, self._d.env_by_tags("num_micro_sites").value):
-            if not self._d.env_by_tags("mf_adsblol_uuid").list_get(i):
-                self._d.env_by_tags("mf_adsblol_uuid").list_set(i, str(uuid4()))
-            if not self._d.env_by_tags("mf_ultrafeeder_uuid").list_get(i):
-                self._d.env_by_tags("mf_ultrafeeder_uuid").list_set(i, str(uuid4()))
+            if not self._d.env_by_tags("adsblol_uuid").list_get(i):
+                self._d.env_by_tags("adsblol_uuid").list_set(i, str(uuid4()))
+            if not self._d.env_by_tags("ultrafeeder_uuid").list_get(i):
+                self._d.env_by_tags("ultrafeeder_uuid").list_set(i, str(uuid4()))
             create_stage2_yml_from_template(
                 self._d.config_path / f"stage2_micro_site_{i}.yml",
                 stage2_yml_template,
@@ -217,7 +224,7 @@ class AdsbIm:
             "in": self._d.env_by_tags("image_name").value,
             "bn": self._d.env_by_tags("board_name").value,
             "bv": self._d.env_by_tags("base_version").value,
-            "cv": self._d.env_by_tags("container_version").value,
+            "cv": self._d.env_by_tags("base_version").value,
         }
         return b64encode(compress(pickle.dumps(image))).decode("utf-8")
 
@@ -658,22 +665,20 @@ class AdsbIm:
                 print_err("failed to allow root ssh login")
 
     def get_base_info(self, n):
-        # make the code more readable
-        c = self._d
-        try:
-            ip = c.env_by_tags(f"mf_ip").value[n]
-            base_info, status = generic_get_json(f"http://{ip}/api/base_info", None)
-            if status == 200 and base_info != None:
-                print_err(f"got {base_info} for {ip}")
-                c.env_by_tags(f"micro_sites").list_set(n, base_info["name"])
-                c.env_by_tags(f"mf_lat").list_set(n, base_info["lat"])
-                c.env_by_tags(f"mf_lng").list_set(n, base_info["lng"])
-                c.env_by_tags(f"mf_alt").list_set(n, base_info["alt"])
-                c.env_by_tags(f"mf_timezone").list_set(n, base_info["tz"])
-                c.env_by_tags(f"mf_version").list_set(n, base_info["version"])
-                return True
-        except:
-            pass
+        #    try:
+        ip = self._d.env_by_tags("mf_ip").list_get(n)
+        base_info, status = generic_get_json(f"http://{ip}/api/base_info", None)
+        if status == 200 and base_info != None:
+            print_err(f"got {base_info} for {ip}")
+            self._d.env_by_tags("site_name").list_set(n, base_info["name"])
+            self._d.env_by_tags("mf_lat").list_set(n, base_info["lat"])
+            self._d.env_by_tags("mf_lng").list_set(n, base_info["lng"])
+            self._d.env_by_tags("mf_alt").list_set(n, base_info["alt"])
+            self._d.env_by_tags("mf_timezone").list_set(n, base_info["tz"])
+            self._d.env_by_tags("mf_version").list_set(n, base_info["version"])
+            return True
+        #    except:
+        #        pass
         print_err(f"failed to get base_info from micro feeder {n}")
         return False
 
@@ -686,9 +691,9 @@ class AdsbIm:
         # store the IP address so that get_base_info works
         self._d.env_by_tags("mf_ip").list_set(n, ip)
         # now let's see if we can get the data from the micro feeder
-        if self.get_base_info(n):
+        if self.get_base_info(n + 1):
             print_err(
-                f"added new micro site {self._d.env_by_tags('micro_sites').value[n]} at {ip}"
+                f"added new micro site {self._d.env_by_tags('site_name').value[n]} at {ip}"
             )
             self._d.env_by_tags("num_micro_sites").value = n + 1
         else:
@@ -722,7 +727,7 @@ class AdsbIm:
             # for a specific micro site
             try:
                 sitenum = int(aggregator_submission[3:])
-                site = self._d.env_by_tags("micro_sites").list_get(sitenum)
+                site = self._d.env_by_tags("site_name").list_get(sitenum)
                 if site:
                     print_err(f"setting up aggregators for micro feeder {site}")
                 else:
@@ -741,19 +746,17 @@ class AdsbIm:
                 if key == "add_micro":
                     # user has clicked Add micro feeder on Stage 2 page
                     # grab the IP that we know the user has provided
-                    next_site = self._d.env_by_tags("num_micro_sites").value
                     ip = form.get(f"add_micro_feeder_ip")
-                    print_err(f"handling micro site nr {next_site} at {ip}")
                     self.setup_new_micro_site(ip)
                     return redirect(url_for("stage2"))
                 if key == "set_stage2_name":
                     # just grab the new name and go back
                     name = form.get(f"stage2_name")
                     print_err(f"setting new stage2 name to {name}")
-                    self._d.env_by_tags("stage2_name").value = name
+                    self._d.env_by_tags("site_name").list_set(0, name)
                     # since this is a stage2 system, let's also set the name for
                     # the combined tar1090 map
-                    self._d.env_by_tags("map_name").value = name
+                    self._d.env_by_tags("map_name").list_set(0, name)
                     return redirect(url_for("stage2"))
                 if key == "aggregators":
                     # user has clicked Submit on Aggregator page
@@ -1077,11 +1080,15 @@ class AdsbIm:
         if request.method == "POST":
             return self.update()
 
-        def uf_enabled(*tags):
-            return "checked" if self._d.is_enabled("ultrafeeder", *tags) else ""
+        def uf_enabled(*tags, m=0):
+            return "checked" if self._d.list_is_enabled("ultrafeeder", *tags, m) else ""
 
-        def others_enabled(*tags):
-            return "checked" if self._d.is_enabled("other_aggregator", *tags) else ""
+        def others_enabled(*tags, m=0):
+            return (
+                "checked"
+                if self._d.list_is_enabled("other_aggregator", *tags, m)
+                else ""
+            )
 
         # is this a stage2 site and you are looking at an individual micro feeder,
         # or is this a regular feeder? If we have a query argument m that is a non-negative
@@ -1089,9 +1096,9 @@ class AdsbIm:
         try:
             m = int(request.args.get("m"))
         except:
-            m = -1
-        if self._d.is_enabled("stage2") and m >= 0:
-            site = self._d.env_by_tags("micro_sites").list_get(m)
+            m = 0
+        if self._d.is_enabled("stage2") and m > 0:
+            site = self._d.env_by_tags("site_name").list_get(m)
         else:
             site = ""
         return render_template(
@@ -1271,7 +1278,7 @@ class AdsbIm:
             return self.update()
         # update the info from the micro feeders
         for i in range(self._d.env_by_tags("num_micro_sites").value):
-            self.get_base_info(i)
+            self.get_base_info(i + 1)  # micro proxies start at 1
         return render_template("stage2.html")
 
 

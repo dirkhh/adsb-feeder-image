@@ -213,6 +213,8 @@ class Env:
             return None
         if idx < len(self._value):
             return self._value[idx]
+        if type(self._default) == list and len(self._default) == 1:
+            return self._default[0]
         return None
 
     def list_remove(self, idx=-1):

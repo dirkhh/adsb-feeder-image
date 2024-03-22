@@ -1,5 +1,5 @@
 from .data import Data
-from .environment import Env
+from .environment import Env, is_true
 from .flask import RouteManager, check_restart_lock
 from .netconfig import NetConfig, UltrafeederConfig
 from .other_aggregators import (

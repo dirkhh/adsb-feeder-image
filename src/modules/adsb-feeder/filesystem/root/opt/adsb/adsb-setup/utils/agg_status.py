@@ -22,6 +22,7 @@ def generic_get_json(url: str, data):
                 "Content-Type": "application/json",
                 "User-Agent": "ADS-B Image",
             },
+            timeout=5.0,
         )
         return response.json(), response.status_code
     except (

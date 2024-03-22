@@ -31,7 +31,8 @@
     </span>
     <span class="col-md">
       <input type="text" name="mlat_name" required placeholder="my-awesome-antenna" class="form-control"
-             pattern="[\-_.a-zA-Z0-9]+" title="Letters, numbers, -, _, ." value="{{ env_value_by_tag('mlat_name') }}" />
+             pattern="[\-_.a-zA-Z0-9]+" title="Letters, numbers, -, _, ."
+             value="{{ list_value_by_tag('site_name', 0) }}" />
     </span>
   </div>
   <div class="form-group row align-items-center mb-1">
@@ -41,7 +42,7 @@
     <span class="col-md">
       <input type="text" id="lat" name="lat" required placeholder="Antenna latitude" class="form-control"
              pattern="(?:\+|-|)(?:(?:[0-8]?\d)(?:\.\d+)?|90(?:\.0+)?)(,(?:\+|-|)(:?(:?\d?\d|1[0-7]\d)(?:\.\d+)?|180(?:\.0+)?))?"
-             title="Number between -90 and 90" value="{{ env_value_by_tag('lat') }}" />
+             title="Number between -90 and 90" value="{{ list_value_by_tag('lat', 0) }}" />
     </span>
   </div>
   <div class="form-group row align-items-center mb-1">
@@ -51,7 +52,7 @@
     <span class="col-md">
       <input type="text" id="lng" name="lng" required placeholder="Antenna longitude" class="form-control"
              pattern="(?:\+|-|)(:?(:?\d?\d|1[0-7]\d)(?:\.\d+)?|180(?:\.0+)?)" title="Number between -180 and 180"
-             value="{{ env_value_by_tag('lng') }}" />
+             value="{{ list_value_by_tag('lng', 0) }}" />
     </span>
   </div>
   <div class="form-group row align-items-center mb-1">
@@ -60,7 +61,7 @@
     </span>
     <span class="col-md">
       <input type="text" id="alt" name="alt" required placeholder="Antenna MSL altitude (in m)" class="form-control"
-             pattern="(?:\+|-|)\d+" value="{{ env_value_by_tag('alt') }}" />
+             pattern="(?:\+|-|)\d+" value="{{ list_value_by_tag('alt', 0) }}" />
     </span>
   </div>
   <div class="form-group row align-items-center mb-1">
@@ -71,7 +72,7 @@
     <span class="col-md">
       <input type="text" name="form_timezone" id="form_timezone" required
              placeholder="populate from the browser timezone by clicking the 'update timezone' button"
-             class="form-control mt-2" value="{{ env_value_by_tag('form_timezone') }}" />
+             class="form-control mt-2" value="{{ list_value_by_tag('form_timezone', 0) }}" />
     </span>
   </div>
   <div class="form-group mt-3">

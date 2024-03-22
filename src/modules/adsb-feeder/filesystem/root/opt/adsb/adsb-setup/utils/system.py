@@ -71,7 +71,7 @@ class System:
             os.remove("/opt/adsb/docker.lock")
         self._restart_lock = Lock()
         self._restart = Restart(self._restart_lock)
-        self.data = data
+        self._d = data
 
     @property
     def restart(self):

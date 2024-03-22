@@ -43,7 +43,7 @@
     <h5>You are running as stage 2 feeder</h5>
     <div class="col-12 mb-3">{% if env_value_by_tag('num_micro_sites') == 0 %}No micro feeder sites configured, yet.
       Please do so on the <a href={{ url_for('stage2') }}>Stage 2 Setup page</a>{% else %}You are collecting data from
-      {% for site in env_value_by_tag('micro_sites') %} {% if loop.last %}and
+      {% for site in env_value_by_tag('site_name') %} {% if loop.last %}and
       {% endif %}<strong>{{site}}</strong>{% if not loop.last and not loop.length == 2 %},{% endif %}{% endfor %} - more
       configuration options for this are available on the <a href={{ url_for('stage2') }}>Stage 2 Setup
         page</a>{% endif %}
@@ -75,7 +75,7 @@
               <td class="text-center">
                 <span id="{{ agg + 'span' }}">
                   {% if is_enabled("stage2")%}
-                  {% for site in env_value_by_tag("micro_sites") %}
+                  {% for site in env_value_by_tag("site_name") %}
                   {% if list_is_enabled(agg, loop.index)%}<span width="1rem">&#10003;</span>
                   {% else %}<span width="1rem"> </span> {% endif %}
                   {% endfor %}

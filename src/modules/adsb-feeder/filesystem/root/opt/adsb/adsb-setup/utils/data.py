@@ -132,12 +132,12 @@ class Data:
     # elements 1 .. num_micro_sites are used for the micro-proxy instances
     _env = {
         # Mandatory site data
-        Env("FEEDER_LAT", default=[], mandatory=True, tags=["lat"]),
-        Env("FEEDER_LONG", default=[], mandatory=True, tags=["lng"]),
-        Env("FEEDER_ALT_M", default=[], mandatory=True, tags=["alt"]),
-        Env("FEEDER_TZ", default=[], mandatory=True, tags=["form_timezone"]),
-        Env("SITE_NAME", default=[], mandatory=True, tags=["site_name"]),
-        Env("MAP_NAME", default=[], mandatory=True, tags=["map_name"]),
+        Env("FEEDER_LAT", default=[""], is_mandatory=True, tags=["lat"]),
+        Env("FEEDER_LONG", default=[""], is_mandatory=True, tags=["lng"]),
+        Env("FEEDER_ALT_M", default=[""], is_mandatory=True, tags=["alt"]),
+        Env("FEEDER_TZ", default=[""], is_mandatory=True, tags=["form_timezone"]),
+        Env("SITE_NAME", default=[""], is_mandatory=True, tags=["site_name"]),
+        Env("MAP_NAME", default=[""], is_mandatory=True, tags=["map_name"]),
         #
         # SDR settings are only valid on an integrated feeder or a micro feeder, not on stage2
         Env("FEEDER_RTL_SDR", default="rtlsdr", tags=["rtlsdr"]),
@@ -162,9 +162,9 @@ class Data:
         Env("FEEDER_UNUSED_SERIAL_3", tags=["other-3"]),
         #
         # Ultrafeeder config, used for all 4 types of Ultrafeeder instances
-        Env("FEEDER_ULTRAFEEDER_CONFIG", default=[], tags=["ultrafeeder_config"]),
-        Env("ADSBLOL_UUID", default=[], tags=["adsblol_uuid"]),
-        Env("ULTRAFEEDER_UUID", default=[], tags=["ultrafeeder_uuid"]),
+        Env("FEEDER_ULTRAFEEDER_CONFIG", default=[""], tags=["ultrafeeder_config"]),
+        Env("ADSBLOL_UUID", default=[""], tags=["adsblol_uuid"]),
+        Env("ULTRAFEEDER_UUID", default=[""], tags=["ultrafeeder_uuid"]),
         #
         # Global settings, not differentiated per micro feeder
         Env("MLAT_PRIVACY", default=True, tags=["mlat_privacy", "is_enabled"]),
@@ -225,7 +225,7 @@ class Data:
         Env(
             "_ADSBIM_STATE_ADSBX_FEEDER_ID",
             default=[False],
-            tags="adsbxfeederid",
+            tags=["adsbxfeederid"],
         ),
         Env(
             "_ADSBIM_STATE_IS_ULTRAFEEDER_TAT_ENABLED",
@@ -540,15 +540,11 @@ class Data:
         ),
         Env(
             "_ADSBIM_STATE_STAGE2_LISTENERS",
-            default=[],
+            default=[""],
             tags=["stage2_listeners"],
         ),
-        Env("AF_MICRO_IP", default=[], tags=["mf_ip"]),
-        Env("MF_FEEDER_LAT", default=[], tags=["mf_lat"]),
-        Env("MF_FEEDER_LONG", default=[], tags=["mf_lng"]),
-        Env("MF_FEEDER_ALT_M", default=[], tags=["mf_alt"]),
-        Env("MF_FEEDER_TZ", default=[], tags=["mf_timezone"]),
-        Env("MF_FEEDER_VERSION", default=[], tags=["mf_version"]),
+        Env("AF_MICRO_IP", default=[""], tags=["mf_ip"]),
+        Env("AF_FEEDER_VERSION", default=[""], tags=["mf_version"]),
     }
 
     @property
@@ -627,7 +623,7 @@ class Data:
             else:
                 env_vars[e.name] = e.value
             # make sure we create the ultrafeeder configurations
-            if e.name == "MF_FEEDER_ULTRAFEEDER_CONFIG":
+            if e.name == "FEEDER_ULTRAFEEDER_CONFIG":
                 print_err(f"writing the MF Ultrafeeder config ")
                 for i in range(self.env("AF_NUM_MICRO_SITES").value):
                     if i >= len(self.ultrafeeder_micro):
@@ -636,7 +632,7 @@ class Data:
                         )
                     uc = self.ultrafeeder_micro[i].generate()
                     e.list_set(i, uc)
-                    env_vars[f"MF_FEEDER_ULTRAFEEDER_CONFIG_{i}"] = uc
+                    env_vars[f"FEEDER_ULTRAFEEDER_CONFIG_{i}"] = uc
         print_err(f"read in from file and applied any in memory changes: {env_vars}")
         env._write_file(env_vars)
 
