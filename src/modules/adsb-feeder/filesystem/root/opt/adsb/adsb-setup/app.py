@@ -6,6 +6,7 @@ import pickle
 import platform
 import re
 import secrets
+import signal
 import shutil
 import string
 import subprocess
@@ -256,6 +257,7 @@ class AdsbIm:
         # if all the user wanted is to make sure the housekeeping tasks are completed,
         # don't start the flask app and exit instead
         if no_server:
+            signal.raise_signal(signal.SIGTERM)
             return
 
         self.app.run(
