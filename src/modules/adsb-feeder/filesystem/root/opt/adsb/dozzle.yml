@@ -16,6 +16,7 @@ services:
   adsb-setup-proxy:
     container_name: adsb-setup-proxy
     image: alpine
+    stop_signal: SIGKILL
     command: tail -n500 -f /opt/adsb-setup.log
     volumes:
       - /opt/adsb/adsb-setup.log:/opt/adsb-setup.log
