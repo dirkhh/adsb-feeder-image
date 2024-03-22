@@ -66,13 +66,13 @@
   </div>
   <div class="form-group row align-items-center mb-1">
     <span class="col-md">
-      <label for="form_timezone">Timezone</label>
+      <label for="tz">Timezone</label>
       <button class="pb-1 btn btn-secondary" onclick="sendTimeToServer()">update timezone</button>
     </span>
     <span class="col-md">
-      <input type="text" name="form_timezone" id="form_timezone" required
+      <input type="text" name="tz" id="tz" required
              placeholder="populate from the browser timezone by clicking the 'update timezone' button"
-             class="form-control mt-2" value="{{ list_value_by_tag('form_timezone', 0) }}" />
+             class="form-control mt-2" value="{{ list_value_by_tag('tz', 0) }}" />
     </span>
   </div>
   <div class="form-group mt-3">
@@ -163,7 +163,7 @@
     const dateTimeFormat = new Intl.DateTimeFormat("en-US", {});
     const i = document.createElement("img");
     i.src = "/propagateTZ?tz=" + dateTimeFormat.resolvedOptions()["timeZone"];
-    document.getElementById("form_timezone").value = dateTimeFormat.resolvedOptions()["timeZone"];
+    document.getElementById("tz").value = dateTimeFormat.resolvedOptions()["timeZone"];
   }
   const explainAll = document.getElementById("explain-all");
   const explainPriv = document.getElementById("explain-privacy");

@@ -28,43 +28,52 @@
   {% if env_value_by_tag('num_micro_sites') == 0 %}
   <div class="my-4">No micro feeder sites configured</div>
   {% else %}
-  <div class="row small">
-    <div class="col-12">
-      <table class="table table-bordered table-sm lh-1 table-striped">
-        <thead>
-          <td>Site</td>
-          <td>IP</td>
-          <td>Lat/Long@Alt</td>
-          <td>Feeder Version</td>
-          <td>Status</td>
-        </thead>
-        <!-- for status, add things to the api that are based one
+  <form method="post">
+    <div class="row small">
+      <div class="col-12">
+        <table class="table table-bordered table-sm lh-1 table-striped">
+          <thead>
+            <td>Site</td>
+            <td>IP</td>
+            <td>Lat/Long@Alt</td>
+            <td>Feeder Version</td>
+            <td>Status</td>
+            <td>Remove</td>
+          </thead>
+          <!-- for status, add things to the api that are based one
           jq '.last1min.messages_valid' < /run/adsb-feeder-ultrafeeder/readsb/stats.json
           > 300k / min (5k/sec) is an indication of a cycle, so turn that one off
           0 is a sign of nothing being sent (duh) -- maybe that one should take 5 or even 15 minutes
           that allows us to show "no data / seems fine / cycle" as status
           There's also the aircraft with pos count - but since we don't want to constantly refresh, maybe less interesting
         -->
-        <tbody>
-          {% for site in env_value_by_tag('site_name') %}
-          <tr>
-            <td>
-              <a href="">{{ site }}</a>
-            </td>
-            <td class="text-center">{{ list_value_by_tag('mf_ip', loop.index) }}</td>
-            <td class="text-center">{{ list_value_by_tag('mf_lat', loop.index) }} /
-              {{ list_value_by_tag('mf_lng', loop.index) }} / {{ list_value_by_tag('mf_alt', loop.index) }}m
-            </td>
-            <td class="text-center"> {{ list_value_by_tag('mf_version', loop.index)}}
-            </td>
-            <td class="text-center">
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+          <tbody>
+            {% for site in env_value_by_tag('site_name') %}
+            {% if loop.index0 != 0 %}<!-- skip the entry for the host -->
+            <tr class="align-middle">
+              <td>
+                <a href="http://{{ list_value_by_tag('mf_ip', loop.index0) }}">{{ site }}</a>
+              </td>
+              <td class="text-center">{{ list_value_by_tag('mf_ip', loop.index0) }}</td>
+              <td class="text-center">{{ list_value_by_tag('lat', loop.index0) }} /
+                {{ list_value_by_tag('lng', loop.index0) }} / {{ list_value_by_tag('alt', loop.index0) }}m
+              </td>
+              <td class="text-center"> {{ list_value_by_tag('mf_version', loop.index0)}}
+              </td>
+              <td class="text-center">
+              </td>
+              <td class="text-center">
+                <button type="submit" name="remove_micro_{{ loop.index0 }}" value="go"
+                        class="btn btn-danger btn-floating btn-sm"><i class="fa fa-trash"></i></button>
+              </td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
+  </form>
   {% endif %}
 
   <div class="col-12">

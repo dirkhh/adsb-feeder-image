@@ -555,7 +555,7 @@ class AdsbIm:
                 "lat": self._d.env_by_tags("lat").value,
                 "lng": self._d.env_by_tags("lng").value,
                 "alt": self._d.env_by_tags("alt").value,
-                "tz": self._d.env_by_tags("form_timezone").value,
+                "tz": self._d.env_by_tags("tz").value,
                 "version": self._d.env_by_tags("base_version").value,
             }
         )
@@ -671,10 +671,10 @@ class AdsbIm:
         if status == 200 and base_info != None:
             print_err(f"got {base_info} for {ip}")
             self._d.env_by_tags("site_name").list_set(n, base_info["name"])
-            self._d.env_by_tags("mf_lat").list_set(n, base_info["lat"])
-            self._d.env_by_tags("mf_lng").list_set(n, base_info["lng"])
-            self._d.env_by_tags("mf_alt").list_set(n, base_info["alt"])
-            self._d.env_by_tags("mf_timezone").list_set(n, base_info["tz"])
+            self._d.env_by_tags("lat").list_set(n, base_info["lat"])
+            self._d.env_by_tags("lng").list_set(n, base_info["lng"])
+            self._d.env_by_tags("alt").list_set(n, base_info["alt"])
+            self._d.env_by_tags("tz").list_set(n, base_info["tz"])
             self._d.env_by_tags("mf_version").list_set(n, base_info["version"])
             return True
         #    except:
@@ -689,16 +689,49 @@ class AdsbIm:
         print_err(f"setting up a new micro site at {ip}")
         n = self._d.env_by_tags("num_micro_sites").value
         # store the IP address so that get_base_info works
-        self._d.env_by_tags("mf_ip").list_set(n, ip)
+        self._d.env_by_tags("mf_ip").list_set(n + 1, ip)
         # now let's see if we can get the data from the micro feeder
         if self.get_base_info(n + 1):
             print_err(
-                f"added new micro site {self._d.env_by_tags('site_name').value[n]} at {ip}"
+                f"added new micro site {self._d.env_by_tags('site_name').value[n + 1]} at {ip}"
             )
             self._d.env_by_tags("num_micro_sites").value = n + 1
         else:
             # oh well, remove the IP address
             self._d.env_by_tags("mf_ip").list_remove()
+
+    def remove_micro_site(self, num):
+        # carefully shift everything down
+        for i in range(num, self._d.env_by_tags("num_micro_sites").value):
+            self._d.env_by_tags("mf_ip").list_set(
+                i, self._d.env_by_tags("mf_ip").list_get(i + 1)
+            )
+            self._d.env_by_tags("site_name").list_set(
+                i, self._d.env_by_tags("site_name").list_get(i + 1)
+            )
+            self._d.env_by_tags("lat").list_set(
+                i, self._d.env_by_tags("lat").list_get(i + 1)
+            )
+            self._d.env_by_tags("lng").list_set(
+                i, self._d.env_by_tags("lng").list_get(i + 1)
+            )
+            self._d.env_by_tags("alt").list_set(
+                i, self._d.env_by_tags("alt").list_get(i + 1)
+            )
+            self._d.env_by_tags("tz").list_set(
+                i, self._d.env_by_tags("tz").list_get(i + 1)
+            )
+            self._d.env_by_tags("mf_version").list_set(
+                i, self._d.env_by_tags("mf_version").list_get(i + 1)
+            )
+        self._d.env_by_tags("mf_ip").list_remove()
+        self._d.env_by_tags("site_name").list_remove()
+        self._d.env_by_tags("lat").list_remove()
+        self._d.env_by_tags("lng").list_remove()
+        self._d.env_by_tags("alt").list_remove()
+        self._d.env_by_tags("tz").list_remove()
+        self._d.env_by_tags("mf_version").list_remove()
+        self._d.env_by_tags("num_micro_sites").value -= 1
 
     @check_restart_lock
     def update(self):
@@ -748,6 +781,12 @@ class AdsbIm:
                     # grab the IP that we know the user has provided
                     ip = form.get(f"add_micro_feeder_ip")
                     self.setup_new_micro_site(ip)
+                    return redirect(url_for("stage2"))
+                if key.startswith("remove_micro_"):
+                    # user has clicked Remove micro feeder on Stage 2 page
+                    # grab the micro feeder number that we know the user has provided
+                    num = int(key[len("remove_micro_") :])
+                    self.remove_micro_site(num)
                     return redirect(url_for("stage2"))
                 if key == "set_stage2_name":
                     # just grab the new name and go back

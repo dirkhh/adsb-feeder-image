@@ -135,7 +135,7 @@ class Data:
         Env("FEEDER_LAT", default=[""], is_mandatory=True, tags=["lat"]),
         Env("FEEDER_LONG", default=[""], is_mandatory=True, tags=["lng"]),
         Env("FEEDER_ALT_M", default=[""], is_mandatory=True, tags=["alt"]),
-        Env("FEEDER_TZ", default=[""], is_mandatory=True, tags=["form_timezone"]),
+        Env("FEEDER_TZ", default=[""], is_mandatory=True, tags=["tz"]),
         Env("SITE_NAME", default=[""], is_mandatory=True, tags=["site_name"]),
         Env("MAP_NAME", default=[""], is_mandatory=True, tags=["map_name"]),
         #
