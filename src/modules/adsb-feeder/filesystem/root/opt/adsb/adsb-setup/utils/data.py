@@ -645,7 +645,9 @@ class Data:
                         )
                     uc = self.ultrafeeder_micro[i].generate()
                     e.list_set(i, uc)
-                    env_vars[f"FEEDER_ULTRAFEEDER_CONFIG_{i}"] = uc
+                    # this is annoying - but the environment variables are currently 0 based in the .env
+                    # file -- I think I should just change this to be 1 based
+                    env_vars[f"FEEDER_ULTRAFEEDER_CONFIG_{i-1}"] = uc
                 continue
             if type(e._value) == list and stage2:
                 # whenever we have a list, we write all elements with _idx notation
