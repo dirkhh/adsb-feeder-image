@@ -16,7 +16,7 @@ class Aggregator:
         self._name = name
         self._tags = tags
         self._system = system
-        self._constants = system._constants
+        self._d = system._d
 
     @property
     def name(self):
@@ -36,15 +36,15 @@ class Aggregator:
 
     @property
     def lat(self):
-        return self._constants.envs["FEEDER_LAT"]
+        return self._d.envs["FEEDER_LAT"]
 
     @property
     def lng(self):
-        return self._constants.envs["FEEDER_LONG"]
+        return self._d.envs["FEEDER_LONG"]
 
     @property
     def alt(self):
-        return self._constants.envs["FEEDER_ALT_M"]
+        return self._d.envs["FEEDER_ALT_M"]
 
     @property
     def alt_ft(self):
@@ -52,11 +52,11 @@ class Aggregator:
 
     @property
     def container(self):
-        return self._constants.env_by_tags(self.tags + ["container"]).value
+        return self._d.env_by_tags(self.tags + ["container"]).value
 
     @property
     def is_enabled(self):
-        return self._constants.env_by_tags(self._enabled_tags).value
+        return self._d.env_by_tags(self._enabled_tags).value
 
     def _activate(self, user_input: str):
         raise NotImplementedError
@@ -111,8 +111,8 @@ class Aggregator:
     def _simple_activate(self, user_input: str):
         if not user_input:
             return False
-        self._constants.env_by_tags(self._key_tags).value = user_input
-        self._constants.env_by_tags(self._enabled_tags).value = True
+        self._d.env_by_tags(self._key_tags).value = user_input
+        self._d.env_by_tags(self._enabled_tags).value = True
         return True
 
 
@@ -236,11 +236,9 @@ class FlightRadar24(Aggregator):
             uat_sharing_key = None
         if adsb_sharing_key or uat_sharing_key:
             # we have a sharing key, let's just enable the container
-            self._constants.env_by_tags(["flightradar", "key"]).value = adsb_sharing_key
-            self._constants.env_by_tags(["flightradar_uat", "key"]).value = (
-                uat_sharing_key
-            )
-            self._constants.env_by_tags(self._enabled_tags).value = True
+            self._d.env_by_tags(["flightradar", "key"]).value = adsb_sharing_key
+            self._d.env_by_tags(["flightradar_uat", "key"]).value = uat_sharing_key
+            self._d.env_by_tags(self._enabled_tags).value = True
 
         return True
 
@@ -288,8 +286,8 @@ class FlightAware(Aggregator):
         if not feeder_id:
             return False
 
-        self._constants.env_by_tags(self._key_tags).value = feeder_id
-        self._constants.env_by_tags(self._enabled_tags).value = True
+        self._d.env_by_tags(self._key_tags).value = feeder_id
+        self._d.env_by_tags(self._enabled_tags).value = True
         return True
 
 
@@ -302,7 +300,7 @@ class RadarBox(Aggregator):
         )
 
     def _request_rb_sharing_key(self):
-        docker_image = self._constants.env_by_tags(["radarbox", "container"]).value
+        docker_image = self._d.env_by_tags(["radarbox", "container"]).value
 
         if not self._download_docker_container(docker_image):
             print_err("failed to download the RadarBox docker image")
@@ -315,9 +313,9 @@ class RadarBox(Aggregator):
         except:
             print_err("rb-hack-setup.sh failed")
         # the script may have updated the .env file, so pull those two values
-        rbcpuhack = self._constants.env_by_tags("rbcpuhack")
+        rbcpuhack = self._d.env_by_tags("rbcpuhack")
         rbcpuhack._reconcile("", pull=True)
-        rbthermalhack = self._constants.env_by_tags("rbthermalhack")
+        rbthermalhack = self._d.env_by_tags("rbthermalhack")
         rbthermalhack._reconcile("", pull=True)
         extra_env = f"-v /opt/adsb/rb/cpuinfo:/proc/cpuinfo " if rbcpuhack.value else ""
         extra_env += (
@@ -345,8 +343,8 @@ class RadarBox(Aggregator):
         if not sharing_key:
             return False
 
-        self._constants.env_by_tags(self._key_tags).value = sharing_key
-        self._constants.env_by_tags(self._enabled_tags).value = True
+        self._d.env_by_tags(self._key_tags).value = sharing_key
+        self._d.env_by_tags(self._enabled_tags).value = True
         return True
 
 
@@ -359,7 +357,7 @@ class OpenSky(Aggregator):
         )
 
     def _request_fr_serial(self, user):
-        docker_image = self._constants.env_by_tags(["opensky", "container"]).value
+        docker_image = self._d.env_by_tags(["opensky", "container"]).value
 
         if not self._download_docker_container(docker_image):
             print_err("failed to download the OpenSky docker image")
@@ -391,9 +389,9 @@ class OpenSky(Aggregator):
             if not serial:
                 print_err("failed to get OpenSky serial")
                 return False
-        self._constants.env_by_tags(self.tags + ["user"]).value = user
-        self._constants.env_by_tags(self.tags + ["key"]).value = serial
-        self._constants.env_by_tags(self.tags + ["is_enabled"]).value = True
+        self._d.env_by_tags(self.tags + ["user"]).value = user
+        self._d.env_by_tags(self.tags + ["key"]).value = serial
+        self._d.env_by_tags(self.tags + ["is_enabled"]).value = True
         return True
 
 

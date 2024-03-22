@@ -1,4 +1,4 @@
-from .constants import Constants
+from .data import Data
 from .environment import Env
 from .flask import RouteManager, check_restart_lock
 from .netconfig import NetConfig, UltrafeederConfig

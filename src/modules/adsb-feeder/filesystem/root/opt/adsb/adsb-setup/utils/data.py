@@ -11,10 +11,10 @@ from .util import print_err
 
 
 @dataclass
-class Constants:
+class Data:
     def __new__(cc):
         if not hasattr(cc, "instance"):
-            cc.instance = super(Constants, cc).__new__(cc)
+            cc.instance = super(Data, cc).__new__(cc)
         return cc.instance
 
     data_path = Path("/opt/adsb")
@@ -632,7 +632,7 @@ class Constants:
                 for i in range(self.env("AF_NUM_MICRO_SITES").value):
                     if i >= len(self.ultrafeeder_micro):
                         self.ultrafeeder_micro.append(
-                            UltrafeederConfig(constants=self, micro=i)
+                            UltrafeederConfig(data=self, micro=i)
                         )
                     uc = self.ultrafeeder_micro[i].generate()
                     e.list_set(i, uc)

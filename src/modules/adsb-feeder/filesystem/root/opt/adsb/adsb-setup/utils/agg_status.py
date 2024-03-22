@@ -5,7 +5,7 @@ import requests
 from datetime import datetime, timedelta
 from enum import Enum
 from .util import print_err
-from .constants import Constants
+from .data import Data
 
 T = Enum("T", ["Yes", "No", "Unknown"])
 
@@ -39,12 +39,12 @@ def generic_get_json(url: str, data):
 
 
 class AggStatus:
-    def __init__(self, agg: str, constants: Constants, url: str):
+    def __init__(self, agg: str, data: Data, url: str):
         self._agg = agg
         self._last_check = datetime.fromtimestamp(0.0)
         self._beast = T.Unknown
         self._mlat = T.Unknown
-        self._constants = constants
+        self._d = data
         self._url = url
         self.check()
 
@@ -188,7 +188,7 @@ class AggStatus:
             else:
                 print_err(f"flightradar returned {status}")
         elif self._agg == "radarplane":
-            uuid = self._constants.env_by_tags("ultrafeeder_uuid").value
+            uuid = self._d.env_by_tags("ultrafeeder_uuid").value
             json_url = f"https://radarplane.com/api/v1/feed/check/{uuid}"
             rp_dict, status = self.get_json(json_url)
             if rp_dict and rp_dict.get("data") and status == 200:
@@ -198,7 +198,7 @@ class AggStatus:
             else:
                 print_err(f"radarplane returned {status}")
         elif self._agg == "radarbox":
-            station_serial = self._constants.env_by_tags(["radarbox", "sn"]).value
+            station_serial = self._d.env_by_tags(["radarbox", "sn"]).value
             if not station_serial:
                 # dang, I hate this part
                 try:
@@ -217,9 +217,7 @@ class AggStatus:
                 )
                 if match:
                     station_serial = match.group(1)
-                    self._constants.env_by_tags(["radarbox", "sn"]).value = (
-                        station_serial
-                    )
+                    self._d.env_by_tags(["radarbox", "sn"]).value = station_serial
             if station_serial:
                 html_url = f"https://www.radarbox.com/stations/{station_serial}"
                 rb_page, status = self.get_plain(html_url)
@@ -235,7 +233,7 @@ class AggStatus:
                         self._mlat = T.Yes if mlat_online else T.No
                         self._last_check = datetime.now()
         elif self._agg == "1090uk":
-            key = self._constants.env_by_tags(["1090uk", "key"]).value
+            key = self._d.env_by_tags(["1090uk", "key"]).value
             json_url = f"https://www.1090mhz.uk/mystatus.php?key={key}"
             tn_dict, status = self.get_json(json_url)
             if tn_dict and status == 200:
@@ -246,7 +244,7 @@ class AggStatus:
             json_url = "https://api.airplanes.live/feed-status"
             a_dict, status = self.get_json(json_url)
             if a_dict and status == 200:
-                uuid = self._constants.env_by_tags("ultrafeeder_uuid").value
+                uuid = self._d.env_by_tags("ultrafeeder_uuid").value
                 beast_clients = a_dict.get("beast_clients")
                 if beast_clients:
                     self._beast = (
@@ -290,7 +288,7 @@ class AggStatus:
                     r'placeholder="([^"]+)" aria-label="Feed UID"', adsbx_text
                 )
                 if match:
-                    self._constants.env_by_tags("adsbxfeederid").value = match.group(1)
+                    self._d.env_by_tags("adsbxfeederid").value = match.group(1)
             else:
                 print_err(f"adsbx returned {status}")
         elif self._agg == "tat":
@@ -316,7 +314,7 @@ class AggStatus:
             else:
                 print_err(f"tat returned {status}")
         elif self._agg == "planespotters":
-            uf_uuid = self._constants.env_by_tags("ultrafeeder_uuid").value
+            uf_uuid = self._d.env_by_tags("ultrafeeder_uuid").value
             html_url = f"https://www.planespotters.net/feed/status/{uf_uuid}"
             ps_text, status = self.get_plain(html_url)
             if ps_text and status == 200:
@@ -327,7 +325,7 @@ class AggStatus:
             else:
                 print_err(f"planespotters returned {status}")
         elif self._agg == "planewatch":
-            pw_uuid = self._constants.env_by_tags(
+            pw_uuid = self._d.env_by_tags(
                 ["planewatch", "key"]
             ).value  # they sometimes call it key, sometimes uuid
             if not pw_uuid:
@@ -355,9 +353,9 @@ class AggStatus:
 
 
 class ImStatus:
-    def __init__(self, constants: Constants):
-        self._constants = constants
+    def __init__(self, data: Data):
+        self._d = data
 
     def check(self):
         json_url = f"https://adsb.im/api/status"
-        return generic_get_json(json_url, self._constants.env_by_tags("pack").value)
+        return generic_get_json(json_url, self._d.env_by_tags("pack").value)

@@ -8,7 +8,7 @@ import threading
 import time
 import zipfile
 
-from .constants import Constants
+from .data import Data
 from .util import print_err
 
 
@@ -66,12 +66,12 @@ class Restart:
 
 
 class System:
-    def __init__(self, constants: Constants):
+    def __init__(self, data: Data):
         if os.path.exists("/opt/adsb/docker.lock"):
             os.remove("/opt/adsb/docker.lock")
         self._restart_lock = Lock()
         self._restart = Restart(self._restart_lock)
-        self._constants = constants
+        self.data = data
 
     @property
     def restart(self):
@@ -136,17 +136,15 @@ class System:
     def _get_backup_data(self):
         data = io.BytesIO()
         with zipfile.ZipFile(data, mode="w") as backup_zip:
-            backup_zip.write(self._constants.env_file_path, arcname=".env")
-            for f in self._constants.data_path.glob("*.yml"):
+            backup_zip.write(self._d.env_file_path, arcname=".env")
+            for f in self._d.data_path.glob("*.yml"):
                 backup_zip.write(f, arcname=os.path.basename(f))
-            for f in self._constants.data_path.glob("*.yaml"):  # FIXME merge with above
+            for f in self._d.data_path.glob("*.yaml"):  # FIXME merge with above
                 backup_zip.write(f, arcname=os.path.basename(f))
-            uf_path = pathlib.Path(self._constants.data_path / "ultrafeeder")
+            uf_path = pathlib.Path(self._d.data_path / "ultrafeeder")
             if uf_path.is_dir():
                 for f in uf_path.rglob("*"):
-                    backup_zip.write(
-                        f, arcname=f.relative_to(self._constants.data_path)
-                    )
+                    backup_zip.write(f, arcname=f.relative_to(self._d.data_path))
         data.seek(0)
         return data
 
@@ -155,15 +153,15 @@ class Version:
     def __init__(self):
         self._version = None
 
-        self.file_path = Constants().version_file
-        # We have to initialise Constants() here to avoid a circular import
+        self.version_file_path = Data().version_file
+        # We have to initialise Data() here to avoid a circular import
         # Usually that sucks. But in this case, we're only using the version file path.
         # So it's not too bad.
 
     def _get_base_version(self):
         basev = "unknown"
-        if os.path.isfile(self.constants.version_file):
-            with open(self.constants.version_file, "r") as v:
+        if os.path.isfile(self.version_file_path):
+            with open(self.version_file_path, "r") as v:
                 basev = v.read().strip()
         if basev == "":
             # something went wrong setting up the version info when

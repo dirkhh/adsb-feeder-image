@@ -26,10 +26,10 @@ class NetConfig:
 
 
 class UltrafeederConfig:
-    def __init__(self, constants, micro=-1):
+    def __init__(self, data, micro=-1):
         # -1 means this is either standalone or the aggregator Ultrafeeder
         self._micro = micro
-        self._constants = constants
+        self._d = data
 
     def apply_to_value_or_list(self, e, micro, value):
         if micro == -1:
@@ -48,10 +48,10 @@ class UltrafeederConfig:
         ret = {}
         # neither a micro feeder nor the aggregating Ultrafeeder on stage2
         # should feed any aggregators themselves
-        aggregator_selection = self._constants.env_by_tags("aggregators").value
+        aggregator_selection = self._d.env_by_tags("aggregators").value
         if aggregator_selection == "micro":
             return {}
-        if self._constants.is_enabled("stage2") and self._micro == -1:
+        if self._d.is_enabled("stage2") and self._micro == -1:
             return {}
         # be careful to set the correct values for the individual aggregators;
         # these values are used in the main landing page for the feeder to provide
@@ -62,8 +62,8 @@ class UltrafeederConfig:
             uf_tag = "ultrafeeder"
         else:
             uf_tag = "ultrafeeder_micro"
-        for name, value in self._constants.netconfigs.items():
-            aggregator_env = self._constants.env_by_tags([name, uf_tag, "is_enabled"])
+        for name, value in self._d.netconfigs.items():
+            aggregator_env = self._d.env_by_tags([name, uf_tag, "is_enabled"])
             if not aggregator_env:
                 print_err(f"netconfigs references tag {name} with no associated env")
                 continue
@@ -73,14 +73,14 @@ class UltrafeederConfig:
                 self.apply_to_value_or_list(
                     aggregator_env,
                     self._micro,
-                    self._constants.netconfigs[name].has_policy,
+                    self._d.netconfigs[name].has_policy,
                 )
             if self.get_value_or_list(aggregator_env, self._micro):
                 ret[name] = value
         return ret
 
     def generate(self):
-        c = self._constants
+        c = self._d
         is_stage2 = c.is_enabled("stage2")
         num_micro = c.env_by_tags("num_micro_sites").value
         # when not in stage2 mode, no point in setting up the others
