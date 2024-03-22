@@ -755,7 +755,7 @@ class AdsbIm:
         seen_go = False
         allow_insecure = not self.check_secure_image()
         # special handling of per-micro-site aggregators
-        sitenum = -1
+        sitenum = 0
         aggregator_submission = form.get("aggregators")
         if aggregator_submission and aggregator_submission.startswith("go-"):
             # this is the indicator that in stage2 mode the user is setting up aggregators
@@ -766,12 +766,12 @@ class AdsbIm:
                 if site:
                     print_err(f"setting up aggregators for micro feeder {site}")
                 else:
-                    sitenum = -1
+                    sitenum = 0
             except:
                 print_err(
                     f"failed to parse aggregator submission {aggregator_submission}"
                 )
-                sitenum = -1
+                sitenum = 0
         for key, value in form.items():
             print_err(f"handling {key} -> {value} (allow insecure is {allow_insecure})")
             # this seems like cheating... let's capture all of the submit buttons
@@ -924,7 +924,9 @@ class AdsbIm:
                         aggregator_argument += f"::{user}"
                     aggregator_object = self._other_aggregators[key]
                     try:
-                        is_successful = aggregator_object._activate(aggregator_argument)
+                        is_successful = aggregator_object._activate(
+                            aggregator_argument, sitenum
+                        )
                     except Exception as e:
                         print_err(f"error activating {key}: {e}")
                     if not is_successful:

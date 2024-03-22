@@ -605,6 +605,16 @@ class Data:
         print_err(f"list_is_enabled {tags} {idx} {e}")
         return e.list_get(idx) if e else ""
 
+    # helper function to write the correct type of data to the .env file
+    # value is an explicit argument so the caller can figure out if this is a list
+    def expand_value(self, e, value):
+        if any(t == "false_is_zero" for t in e.tags):
+            return "1" if is_true(value) else "0"
+        elif any(t == "false_is_empty" for t in e.tags):
+            return "True" if is_true(value) else ""
+        else:
+            return value
+
     # helper function to get everything that needs to be written out written out
     def writeback_env(self):
         print_err("writing out the .env file")
@@ -616,25 +626,38 @@ class Data:
             if path.exists(ENV_FLAG_FILE_PATH)
             else env._get_values_from_file()
         )
+        # if this is a stage2 server, get the number of micro proxies
+        if self.env_by_tags("stage2"):
+            stage2 = True
+            numsites = self.env("AF_NUM_MICRO_SITES").value
+        else:
+            stage2 = False
+            numsites = 0
         for e in self._env:
             print_err(f"WRITEBACK {e} with type {type(e._value)}")
-            if any(t == "false_is_zero" for t in e.tags):
-                env_vars[e.name] = "1" if is_true(e.value) else "0"
-            elif any(t == "false_is_empty" for t in e.tags):
-                env_vars[e.name] = "True" if is_true(e.value) else ""
-            else:
-                env_vars[e.name] = e.value
             # make sure we create the ultrafeeder configurations
-            if e.name == "FEEDER_ULTRAFEEDER_CONFIG":
-                print_err(f"writing the MF Ultrafeeder config ")
-                for i in range(self.env("AF_NUM_MICRO_SITES").value):
+            if e.name == "FEEDER_ULTRAFEEDER_CONFIG" and stage2:
+                print_err(f"writing the stage2 Ultrafeeder config ")
+                for i in range(numsites):
                     if i >= len(self.ultrafeeder_micro):
                         self.ultrafeeder_micro.append(
-                            UltrafeederConfig(data=self, micro=i)
+                            UltrafeederConfig(data=self, micro=i + 1)
                         )
                     uc = self.ultrafeeder_micro[i].generate()
                     e.list_set(i, uc)
                     env_vars[f"FEEDER_ULTRAFEEDER_CONFIG_{i}"] = uc
+                continue
+            if type(e._value) == list and stage2:
+                # whenever we have a list, we write all elements with _idx notation
+                for i in range(numsites):
+                    env_vars[f"{e.name}_{i+1}"] = self.expand_value(
+                        e, e.list_get(i + 1)
+                    )
+            elif type(e._value) == list:
+                env_vars[e.name] = self.expand_value(e, e.list_get(0))
+            else:
+                env_vars[e.name] = self.expand_value(e, e.value)
+
         print_err(f"read in from file and applied any in memory changes: {env_vars}")
         env._write_file(env_vars)
 
