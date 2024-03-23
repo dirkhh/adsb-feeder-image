@@ -618,10 +618,16 @@ class Data:
     def env_name_by_idx(self, name, idx):
         return name if idx == 0 else f"{name}_{idx}"
 
+    def write_config(self):
+        # we need to grab a (basically random) Env object to be able to use the
+        # object methods:
+        env = next(iter(self._env))
+        env._write_json(self._env)
+
     # helper function to get everything that needs to be written out written out
     def writeback_env(self):
-        print_err("writing out the .env file")
-        # we need to grap a (basically random) Env object to be able to use the
+        stack_info("writing out the .env file")
+        # we need to grab a (basically random) Env object to be able to use the
         # object methods:
         env = next(iter(self._env))
         env_vars = (

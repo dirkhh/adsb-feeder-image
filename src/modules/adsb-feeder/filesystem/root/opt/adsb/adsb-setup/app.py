@@ -26,12 +26,20 @@ from zlib import compress
 # applications... if we have no JSON config file, we need create it from a .env file and
 # then write the data back (which creates the JSON file)
 if not os.path.exists("/opt/adsb/config/config.json"):
+    print(
+        "no JSON config file found, creating the .env.flag file to initialize from that",
+        file=sys.stderr,
+    )
     open("/opt/adsb/config/.env.flag", "w").close()
 
 from utils import Data
 
 if os.path.exists("/opt/adsb/config/.env.flag"):
-    Data().writeback_env()
+    print(
+        "app data initialized from .env, writing out JSON and deleting the flag file",
+        file=sys.stderr,
+    )
+    Data().write_config()
     os.remove("/opt/adsb/config/.env.flag")
 
 # nofmt: on

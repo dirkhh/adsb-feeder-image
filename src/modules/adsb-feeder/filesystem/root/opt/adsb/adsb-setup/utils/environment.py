@@ -96,11 +96,19 @@ class Env:
         # Env from the .env file, it will create the json file
         # so we rely on the calling code to have provided us with a flag file
         if path.exists(ENV_FLAG_FILE_PATH):
+            print_err(f"getting value for {self._name} from .env file")
             return self._get_values_from_env_file().get(self._name, None)
         return self._get_values_from_file().get(self._name, None)
 
+    def _write_json(self, values):
+        stack_info("writing .json file")
+        data = {}
+        for e in values:
+            data[e._name] = e._value
+        json.dump(data, open(JSON_FILE_PATH, "w"))
+
     def _write_file(self, values):
-        json.dump(values, open(JSON_FILE_PATH, "w"))
+        stack_info("writing .env file")
         with open(ENV_FILE_PATH, "w") as f:
             for key, value in sorted(values.items()):
                 # _ADSBIM_STATE variables aren't needed in the .env file
@@ -133,6 +141,7 @@ class Env:
                         f.write(f"      - {line.strip()}\n")
 
     def _write_value_to_file(self, new_value):
+        print_err(f"adding {self._name} = {new_value} to config")
         values = self._get_values_from_file()
         if any(t == "false_is_zero" for t in self.tags):
             new_value = "1" if is_true(new_value) else "0"
