@@ -13,6 +13,7 @@ import subprocess
 import sys
 import zipfile
 import tempfile
+import threading
 from base64 import b64encode
 from datetime import datetime
 from os import urandom
@@ -263,6 +264,9 @@ class AdsbIm:
             signal.raise_signal(signal.SIGTERM)
             return
 
+        # check and possibly finish a restore procedure
+        self.check_finish_restore()
+
         self.app.run(
             host="0.0.0.0",
             port=int(self._constants.env_by_tags("webport").value),
@@ -327,9 +331,7 @@ class AdsbIm:
         adsb_path = pathlib.Path("/opt/adsb/config")
         data = tempfile.TemporaryFile()
         with zipfile.ZipFile(data, mode="w") as backup_zip:
-            backup_zip.write(adsb_path / ".env", arcname=".env")
-            for f in adsb_path.glob("*.yml"):
-                backup_zip.write(f, arcname=os.path.basename(f))
+            backup_zip.write(adsb_path / "config.json", arcname="config.json")
             if include_graphs:
                 graphs_path = pathlib.Path(
                     adsb_path / "ultrafeeder/graphs1090/rrd/localhost.tar.gz"
@@ -368,6 +370,10 @@ class AdsbIm:
             if file.filename.endswith(".zip"):
                 filename = secure_filename(file.filename)
                 restore_path = pathlib.Path("/opt/adsb/config/restore")
+                # clean up the restore path when saving a fresh zipfile
+                subprocess.call(
+                    f"rm -rf {str(restore_path)}", timeout=10.0, shell=True
+                )
                 restore_path.mkdir(mode=0o644, exist_ok=True)
                 file.save(restore_path / filename)
                 print_err(f"saved restore file to {restore_path / filename}")
@@ -390,11 +396,15 @@ class AdsbIm:
             with zipfile.ZipFile(restore_path / filename, "r") as restore_zip:
                 for name in restore_zip.namelist():
                     print_err(f"found file {name} in archive")
-                    # only accept the .env file and simple .yml filenames
+                    # remove files with a name that results in a path that doesn't start with our decompress path
+                    if not str(os.path.normpath(os.path.join(restore_path, name))).startswith(str(restore_path)):
+                        print_err(f"restore skipped for path breakout name: {name}")
+                        continue
+                    # only accept the .env file and config.json and files for ultrafeeder
                     if (
                         name != ".env"
+                        and name != "config.json"
                         and not name.startswith("ultrafeeder/")
-                        and (not name.endswith(".yml") or name != secure_filename(name))
                     ):
                         continue
                     restore_zip.extract(name, restore_path)
@@ -436,41 +446,77 @@ class AdsbIm:
                 )
             except subprocess.TimeoutExpired:
                 print_err("timeout expired stopping docker... trying to continue...")
+            backup_has_env=False
+            backup_has_json=False
             for name, value in request.form.items():
+
+                if name == ".env": backup_has_env=True
+                if name == "config.json": backup_has_json=True
+
                 if value == "1":
                     print_err(f"restoring {name}")
                     if pathlib.Path(adsb_path / name).exists():
                         shutil.move(adsb_path / name, restore_path / (name + ".dist"))
+
                     shutil.move(restore_path / name, adsb_path / name)
-                    if name == ".env":
-                        # this is pretty hacky, but we should at least try to not completely get this wrong
-                        for e in self._constants._env:
-                            if "norestore" in e.tags:
-                                # this overwrites the value in the file we just restored with the current value of the running image,
-                                # iow it doesn't restore that value from the backup
-                                e._reconcile(e.value)
-            self._constants.re_read_env()
-            self.update_boardname()
-            # make sure we are connected to the right Zerotier network
-            zt_network = self._constants.env_by_tags("zerotierid").value
-            if (
-                zt_network and len(zt_network) == 16
-            ):  # that's the length of a valid network id
-                try:
-                    subprocess.call(
-                        f"zerotier_cli join {zt_network}", timeout=30.0, shell=True
-                    )
-                except subprocess.TimeoutExpired:
-                    print_err(
-                        "timeout expired joining Zerotier network... trying to continue..."
-                    )
+
+                else:
+                    print_err(f"not restoring {name}")
+
+
+            # norestore fixup: run unconditionally. should also work for json config
+            # this is pretty hacky, but we should at least try to not completely get this wrong
+            for e in self._constants._env:
+                if "norestore" in e.tags:
+                    # this overwrites the value in the file we just restored with the current value of the running image,
+                    # iow it doesn't restore that value from the backup
+                    e._reconcile(e.value)
+
+            # if the backup doesn't have a json config, delete the json config so we can restore from the env file on startup
+            if backup_has_env and not backup_has_json:
+                JSON_FILE_PATH.unlink(missing_ok=True)
+
+            # touch flag file and terminate, continue restore after program start reads in config and does its thing
+            self._constants.finish_restore_path.touch(exist_ok=True)
+            print_err("RESTORE: Restarting app")
+
+            def wait_and_terminate():
+                sleep(0.5)
+                signal.raise_signal(signal.SIGKILL)
+
+            thread = threading.Thread(target=wait_and_terminate)
+            thread.start()
+
+            return render_template("/waitandredirect.html")
+
+    def check_finish_restore(self):
+        if not self._constants.finish_restore_path.exists():
+            return
+
+        print_err("RESTORE: Finishing after restart")
+        self.update_boardname()
+        # make sure we are connected to the right Zerotier network
+        zt_network = self._constants.env_by_tags("zerotierid").value
+        if (
+            zt_network and len(zt_network) == 16
+        ):  # that's the length of a valid network id
             try:
                 subprocess.call(
-                    "/opt/adsb/docker-compose-start", timeout=180.0, shell=True
+                    f"zerotier_cli join {zt_network}", timeout=30.0, shell=True
                 )
             except subprocess.TimeoutExpired:
-                print_err("timeout expired re-starting docker... trying to continue...")
-            return redirect(url_for("director"))
+                print_err(
+                    "timeout expired joining Zerotier network... trying to continue..."
+                )
+        try:
+            subprocess.call(
+                "/opt/adsb/docker-compose-start", timeout=180.0, shell=True
+            )
+        except subprocess.TimeoutExpired:
+            print_err("timeout expired re-starting docker... trying to continue...")
+
+
+        self._constants.finish_restore_path.unlink(missing_ok=True)
 
     def base_is_configured(self):
         base_config: set[Env] = {

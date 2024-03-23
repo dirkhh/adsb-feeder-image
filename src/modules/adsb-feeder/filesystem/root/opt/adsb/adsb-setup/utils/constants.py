@@ -21,6 +21,7 @@ class Constants:
     env_file_path = config_path / ".env"
     version_file = data_path / "adsb.im.version"
     secure_image_path = data_path / "adsb.im.secure_image"
+    finish_restore_path = data_path / "adsb.im.finish_restore"
     is_feeder_image = True
 
     _proxy_routes = [
