@@ -87,8 +87,8 @@
                 <span id="{{ agg + 'span' }}">
                   {% if is_enabled("stage2")%}
                   {% for site in env_value_by_tag("site_name") %}
-                  {% if list_is_enabled(agg, loop.index)%}<span width="1rem">&#10003;</span>
-                  {% else %}<span width="1rem"> </span> {% endif %}
+                  {% if list_is_enabled(agg, loop.index)%}<span width="1rem">&#10003;|</span>
+                  {% else %}<span width="1rem">&nbsp;|</span> {% endif %}
                   {% endfor %}
                   {% else %}
                   {% if list_is_enabled(agg, 0) %}&#10003;{% endif %}
