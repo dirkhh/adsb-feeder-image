@@ -4,7 +4,7 @@ import re
 from types import NoneType
 from typing import List, Union
 
-from utils.util import print_err
+from utils.util import print_err, stack_info
 
 ENV_FILE_PATH = "/opt/adsb/config/.env"
 USER_ENV_FILE_PATH = "/opt/adsb/config/.env.user"
@@ -220,7 +220,9 @@ class Env:
             while len(self._value) <= idx:
                 self._value.append(self._default[0])
             return self._value[idx]
-        print_err(f"{self._name} only has {len(self._value)} values and no default")
+        stack_info(
+            f"{self._name} only has {len(self._value)} values and no default, asking for {idx}"
+        )
         return None
 
     def list_remove(self, idx=-1):
