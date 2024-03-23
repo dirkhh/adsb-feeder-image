@@ -802,6 +802,11 @@ class AdsbIm:
                 if key == "aggregators":
                     # user has clicked Submit on Aggregator page
                     self._d.env_by_tags("aggregators_chosen").value = True
+                    if value == "stage2":
+                        set._d.env_by_tags("stage2").value = True
+                        set._d.env_by_tags("site_name").list_set(
+                            0, form.get("mlat_name")
+                        )
                 if allow_insecure and key == "shutdown":
                     # do shutdown
                     self._system.halt()
@@ -982,18 +987,22 @@ class AdsbIm:
                 # when dealing with micro feeder aggregators, we need to keep the site number
                 # in mind
                 tags = key.split("--")
-                if sitenum >= 0 and "is_enabled" in tags:
-                    print_err(f"setting up stage2 site number {sitenum}: {key}")
+                if sitenum > 0 and "is_enabled" in tags:
+                    print_err(f"setting up stage2 micro site number {sitenum}: {key}")
                     self._d.env_by_tags("aggregators_chosen").value = True
                     self._d.env_by_tags(tags).list_set(
                         sitenum, True if is_true(value) else False
                     )
                 else:
-                    e.value = value
+                    if type(e.value) == list:
+                        e.list_set(sitenum, value)
+                    else:
+                        e.value = value
                 if key == "mlat_name":
                     # in a single system setup, we used to treat mlat and map name as the same, but for a
                     # stage2 system having these as different variables makes things more obvious
                     self._d.env_by_tags("map_name").value = value
+                    self._d.env_by_tags("site_name").list_set(sitenum, value)
         # done handling the input data
         # what implied settings do we have (and could we simplify them?)
         # first grab the SDRs plugged in and check if we have one identified for UAT
@@ -1078,6 +1087,8 @@ class AdsbIm:
             if self.at_least_one_aggregator() or agg_chosen_env.value == True:
                 agg_chosen_env.value = True
                 return redirect(url_for("restarting"))
+            if self._d.env_by_tags("aggregators").value == "stage2":
+                return redirect(url_for("stage2"))
             if self._d.env_by_tags("aggregators").value != "micro":
                 return redirect(url_for("aggregators"))
         return redirect(url_for("director"))
