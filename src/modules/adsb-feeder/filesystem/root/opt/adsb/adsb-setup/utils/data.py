@@ -7,7 +7,7 @@ from uuid import uuid4
 
 from .environment import ENV_FILE_PATH, ENV_FLAG_FILE_PATH, Env, is_true
 from .netconfig import NetConfig, UltrafeederConfig
-from .util import print_err
+from .util import print_err, stack_info
 
 
 @dataclass
@@ -23,8 +23,7 @@ class Data:
     version_file = data_path / "adsb.im.version"
     secure_image_path = data_path / "adsb.im.secure_image"
     is_feeder_image = True
-    ultrafeeder = None
-    ultrafeeder_micro = []
+    ultrafeeder = []
 
     _proxy_routes = [
         # endpoint, port, url_path
@@ -587,22 +586,23 @@ class Data:
         return matches[0]
 
     def _get_enabled_env_by_tags(self, tags):
-        print_err(f"_get_enabled_env_by_tags {tags}")
         # we append is_enabled to tags
         tags.append("is_enabled")
-        print_err(f"taglist {tags} gets us env {self.env_by_tags(tags)}")
+        # stack_info(f"taglist {tags} gets us env {self.env_by_tags(tags)}")
         return self.env_by_tags(tags)
 
     # helper function to see if something is enabled
-    def is_enabled(self, *tags):
-        print_err(f"is_enabled {tags}")
-        e = self._get_enabled_env_by_tags(list(tags))
+    def is_enabled(self, tags):
+        if type(tags) != list:
+            tags = [tags]
+        e = self._get_enabled_env_by_tags(tags)
         return e and e.value
 
     # helper function to see if list element is enabled
-    def list_is_enabled(self, *tags, idx):
-        e = self._get_enabled_env_by_tags(list(tags))
-        print_err(f"list_is_enabled {tags} {idx} {e}")
+    def list_is_enabled(self, tags, idx):
+        if type(tags) != list:
+            tags = [tags]
+        e = self._get_enabled_env_by_tags(tags)
         return e.list_get(idx) if e else ""
 
     # helper function to write the correct type of data to the .env file
@@ -614,6 +614,9 @@ class Data:
             return "True" if is_true(value) else ""
         else:
             return value
+
+    def env_name_by_idx(self, name, idx):
+        return name if idx == 0 else f"{name}_{idx}"
 
     # helper function to get everything that needs to be written out written out
     def writeback_env(self):
@@ -627,7 +630,8 @@ class Data:
             else env._get_values_from_file()
         )
         # if this is a stage2 server, get the number of micro proxies
-        if self.env_by_tags("stage2"):
+        print_err("is this a stage2 server?")
+        if self.is_enabled("stage2"):
             stage2 = True
             numsites = self.env("AF_NUM_MICRO_SITES").value
         else:
@@ -638,22 +642,22 @@ class Data:
             # make sure we create the ultrafeeder configurations
             if e.name == "FEEDER_ULTRAFEEDER_CONFIG" and stage2:
                 print_err(f"writing the stage2 Ultrafeeder config ")
-                for i in range(numsites):
-                    if i >= len(self.ultrafeeder_micro):
-                        self.ultrafeeder_micro.append(
-                            UltrafeederConfig(data=self, micro=i + 1)
-                        )
-                    uc = self.ultrafeeder_micro[i].generate()
+                for i in range(numsites + 1):
+                    if i >= len(self.ultrafeeder):
+                        self.ultrafeeder.append(UltrafeederConfig(data=self, micro=i))
+                    if type(self.ultrafeeder[i]) != UltrafeederConfig:
+                        self.ultrafeeder[i] = UltrafeederConfig(data=self, micro=i)
+                    uc = self.ultrafeeder[i].generate()
                     e.list_set(i, uc)
-                    # this is annoying - but the environment variables are currently 0 based in the .env
-                    # file -- I think I should just change this to be 1 based
-                    env_vars[f"FEEDER_ULTRAFEEDER_CONFIG_{i-1}"] = uc
+                    # 0 is the integrated feeder / micro feeder / home location of a stage 2 server
+                    # 1...n are the micro feeder proxies
+                    env_vars[self.env_name_by_idx("FEEDER_ULTRAFEEDER_CONFIG", i)] = uc
                 continue
             if type(e._value) == list and stage2:
                 # whenever we have a list, we write all elements with _idx notation
-                for i in range(numsites):
-                    env_vars[f"{e.name}_{i+1}"] = self.expand_value(
-                        e, e.list_get(i + 1)
+                for i in range(numsites + 1):
+                    env_vars[self.env_name_by_idx(e.name, i)] = self.expand_value(
+                        e, e.list_get(i)
                     )
             elif type(e._value) == list:
                 env_vars[e.name] = self.expand_value(e, e.list_get(0))

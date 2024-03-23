@@ -192,6 +192,7 @@ class Env:
             self._reconcile(value)
 
     def list_set(self, idx, value):
+        idx = int(idx)
         print_err(f"set {self._name}[{idx}] = {value}")
         if type(self._value) != list:
             print_err(f"{self._name} is not a list, converting")
@@ -209,6 +210,7 @@ class Env:
         print_err(f"after reconcile {self._name} = {self._value}")
 
     def list_get(self, idx):
+        idx = int(idx)
         if type(self._value) != list:
             print_err(f"{self._name} is not a list, giving up")
             return None
@@ -222,6 +224,7 @@ class Env:
         return None
 
     def list_remove(self, idx=-1):
+        idx = int(idx)
         if type(self._value) != list:
             print_err(f"{self._name} is not a list, giving up")
             return

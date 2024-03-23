@@ -22,7 +22,6 @@ from time import sleep
 from typing import Dict, List
 from zlib import compress
 
-
 # this initial setup is not a great look... but I don't want to move this into a separate
 # applications... if we have no JSON config file, we need create it from a .env file and
 # then write the data back (which creates the JSON file)
@@ -60,12 +59,14 @@ from utils import (
     UltrafeederConfig,
     cleanup_str,
     print_err,
+    stack_info,
     generic_get_json,
     is_true,
 )
 
 # nofmt: off
 # isort: on
+
 
 from werkzeug.utils import secure_filename
 
@@ -101,15 +102,8 @@ class AdsbIm:
         self._d = Data()
         self._system = System(data=self._d)
         self._sdrdevices = SDRDevices()
-        self._d.ultrafeeder = UltrafeederConfig(data=self._d)
-        for i in range(0, self._d.env_by_tags("num_micro_sites").value):
-            self._d.ultrafeeder_micro.append(UltrafeederConfig(data=self._d, micro=i))
-        # for the main Ultrafeeder we can use the _value_call to ensure we get the
-        # most updated config - for the Ultrafeeders handling micro feeders, we do
-        # this when writing out the .env file
-        self._d.env_by_tags("ultrafeeder_config")._value_call = (
-            self._d.ultrafeeder.generate
-        )
+        for i in range(0, self._d.env_by_tags("num_micro_sites").value + 1):
+            self._d.ultrafeeder.append(UltrafeederConfig(data=self._d, micro=i))
 
         self._agg_status_instances = dict()
 
@@ -180,7 +174,7 @@ class AdsbIm:
 
         # finally, try to make sure that we have all the pieces that we need and recreate what's missing
         stage2_yml_template = self._d.config_path / "stage2.yml"
-        for i in range(0, self._d.env_by_tags("num_micro_sites").value):
+        for i in range(1, self._d.env_by_tags("num_micro_sites").value + 1):
             if not self._d.env_by_tags("adsblol_uuid").list_get(i):
                 self._d.env_by_tags("adsblol_uuid").list_set(i, str(uuid4()))
             if not self._d.env_by_tags("ultrafeeder_uuid").list_get(i):
@@ -512,13 +506,14 @@ class AdsbIm:
         return True
 
     def at_least_one_aggregator(self) -> bool:
-        if self._d.ultrafeeder.enabled_aggregators:
+        # this only checks for a micro feeder or integrated feeder, not for stage2
+        if self._d.ultrafeeder[0].enabled_aggregators:
             return True
 
         # of course, maybe they picked just one or more proprietary aggregators and that's all they want...
         for submit_key in self._other_aggregators.keys():
             key = submit_key.replace("--submit", "")
-            if self._d.is_enabled(key):
+            if self._d.list_is_enabled(key, idx=0):
                 print_err(f"no semi-anonymous aggregator, but enabled {key}")
                 return True
 
@@ -802,11 +797,6 @@ class AdsbIm:
                 if key == "aggregators":
                     # user has clicked Submit on Aggregator page
                     self._d.env_by_tags("aggregators_chosen").value = True
-                    if value == "stage2":
-                        set._d.env_by_tags("stage2").value = True
-                        set._d.env_by_tags("site_name").list_set(
-                            0, form.get("mlat_name")
-                        )
                 if allow_insecure and key == "shutdown":
                     # do shutdown
                     self._system.halt()
@@ -970,7 +960,7 @@ class AdsbIm:
                     self._d.env_by_tags(["gain_airspy"]).value = (
                         "auto" if value == "autogain" else value
                     )
-                # deal with the micro feeder setup
+                # deal with the micro feeder and stage2 initial setup
                 if key == "aggregators" and value == "micro":
                     self._d.env_by_tags(["tar1090_ac_db"]).value = False
                     self._d.env_by_tags(["mlathub_disable"]).value = True
@@ -978,6 +968,9 @@ class AdsbIm:
                 else:
                     self._d.env_by_tags(["tar1090_ac_db"]).value = True
                     self._d.env_by_tags(["mlathub_disable"]).value = False
+                if key == "aggregators" and value == "stage2":
+                    self._d.env_by_tags("stage2").value = True
+                    self._d.env_by_tags("site_name").list_set(0, form.get("mlat_name"))
                 # finally, painfully ensure that we remove explicitly asigned SDRs from other asignments
                 # this relies on the web page to ensure that each SDR is only asigned on purpose
                 if key in purposes:
@@ -1084,7 +1077,7 @@ class AdsbIm:
         if self.base_is_configured() or self._d.is_enabled("stage2"):
             self._d.env_by_tags(["base_config", "is_enabled"]).value = True
             agg_chosen_env = self._d.env_by_tags("aggregators_chosen")
-            if self.at_least_one_aggregator() or agg_chosen_env.value == True:
+            if agg_chosen_env.value == True or self.at_least_one_aggregator():
                 agg_chosen_env.value = True
                 return redirect(url_for("restarting"))
             if self._d.env_by_tags("aggregators").value == "stage2":
@@ -1128,31 +1121,49 @@ class AdsbIm:
         if request.method == "POST":
             return self.update()
 
-        def uf_enabled(*tags, m=0):
+        def uf_enabled(tag, m=0):
+            # stack_info(f"tags are {type(tag)} {tag}")
+            if type(tag) == str:
+                tag = [tag]
+            if type(tag) != list:
+                print_err(f"PROBLEM::: tag is {type(tag)}")
             return (
                 "checked"
-                if self._d.list_is_enabled("ultrafeeder", list(tags), idx=m)
+                if self._d.list_is_enabled(["ultrafeeder"] + tag, idx=m)
                 else ""
             )
 
-        def others_enabled(*tags, m=0):
+        def others_enabled(tag, m=0):
+            # stack_info(f"tags are {type(tag)} {tag}")
+            if type(tag) == str:
+                tag = [str]
+            if type(tag) != list:
+                print_err(f"PROBLEM::: tag is {type(tag)}")
             return (
                 "checked"
-                if self._d.list_is_enabled("other_aggregator", list(tags), idx=m)
+                if self._d.list_is_enabled(["other_aggregator"] + tag, idx=m)
                 else ""
             )
 
         # is this a stage2 site and you are looking at an individual micro feeder,
         # or is this a regular feeder? If we have a query argument m that is a non-negative
         # number, then yes it is
-        try:
-            m = int(request.args.get("m"))
-        except:
-            m = 0
-        if self._d.is_enabled("stage2") and m > 0:
+        if self._d.is_enabled("stage2"):
+            print_err("setting up aggregators on a stage 2 system")
+            try:
+                m = int(request.args.get("m"))
+            except:
+                m = 1
+            if m == 0:  # do not set up aggregators for the aggregated feed
+                if self._d.env_by_tags("num_micro_sites").value == "0":
+                    # things aren't set up yet, bail out to the stage 2 setup
+                    return redirect(url_for("stage2"))
+                m = 1
             site = self._d.env_by_tags("site_name").list_get(m)
+            print_err(f"setting up aggregators for site {site} (m={m})")
         else:
             site = ""
+            m = 0
         return render_template(
             "aggregators.html",
             uf_enabled=uf_enabled,
