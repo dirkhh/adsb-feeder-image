@@ -638,17 +638,3 @@ class Constants:
             else:
                 env_vars[e.name] = e.value
         env._write_file(env_vars)
-
-    # make sure our internal data is in sync with the .env file on disk
-    def re_read_env(self):
-        env_vars = {}
-        with open(ENV_FILE_PATH, "r") as env_file:
-            for line in env_file.readlines():
-                if line.strip().startswith("#"):
-                    continue
-                key, var = line.partition("=")[::2]
-                env_vars[key.strip()] = var.strip()
-        # now that we have completed reading them, update each of the Env objects
-        for e in self._env:
-            if e.name in env_vars:
-                e.value = env_vars[e.name]
