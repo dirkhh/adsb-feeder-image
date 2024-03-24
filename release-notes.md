@@ -1,4 +1,5 @@
 Changes since v1.3.1 include
+- enable backup/restore with the config.json setup - this has received some testing, could benefit from more scrutiny 
 - upgrade Airspy container
 - improve the shutdown behavior of the containers to shorten the restart time after config changes
 
