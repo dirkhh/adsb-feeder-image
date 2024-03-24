@@ -49,6 +49,7 @@ from flask import Flask, flash, redirect, render_template, request, send_file, u
 from utils import (
     ADSBHub,
     Background,
+    Config,
     Env,
     FlightAware,
     FlightRadar24,
@@ -252,7 +253,7 @@ class AdsbIm:
         self._routemanager.add_proxy_routes(self.proxy_routes)
         debug = os.environ.get("ADSBIM_DEBUG") is not None
         self._debug_cleanup()
-        self._d.writeback_env()
+        Config().writeback_env()
         self.update_dns_state()
         # in no_server mode we want to exit right after the housekeeping, so no
         # point in running this in the background
@@ -1074,7 +1075,7 @@ class AdsbIm:
         )
 
         # let's make sure we write out the updated ultrafeeder config
-        self._d.writeback_env()
+        Config().writeback_env()
 
         # if the button simply updated some field, stay on the same page
         if not seen_go:

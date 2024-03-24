@@ -1,3 +1,6 @@
+from .agg_status import AggStatus, ImStatus, generic_get_json
+from .background import Background
+from .config import Config
 from .data import Data
 from .environment import Env, is_true
 from .flask import RouteManager, check_restart_lock
@@ -14,7 +17,5 @@ from .other_aggregators import (
     Uk1090,
 )
 from .sdr import SDR, SDRDevices
-from .agg_status import AggStatus, ImStatus, generic_get_json
 from .system import System
-from .util import cleanup_str, print_err, stack_info
-from .background import Background
+from .util import cleanup_str, is_email, is_true, print_err, stack_info

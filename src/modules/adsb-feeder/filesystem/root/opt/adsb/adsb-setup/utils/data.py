@@ -1,13 +1,10 @@
 # dataclass
 from dataclasses import dataclass
-from os import getenv, path
 from pathlib import Path
-import re
-from uuid import uuid4
 
-from .environment import ENV_FILE_PATH, ENV_FLAG_FILE_PATH, Env, is_true
-from .netconfig import NetConfig, UltrafeederConfig
-from .util import print_err, stack_info
+from .environment import Env
+from .netconfig import NetConfig
+from .util import print_err
 
 
 @dataclass
@@ -605,73 +602,8 @@ class Data:
         e = self._get_enabled_env_by_tags(tags)
         return e.list_get(idx) if e else ""
 
-    # helper function to write the correct type of data to the .env file
-    # value is an explicit argument so the caller can figure out if this is a list
-    def expand_value(self, e, value):
-        if any(t == "false_is_zero" for t in e.tags):
-            return "1" if is_true(value) else "0"
-        elif any(t == "false_is_empty" for t in e.tags):
-            return "True" if is_true(value) else ""
-        else:
-            return value
-
     def env_name_by_idx(self, name, idx):
         return name if idx == 0 else f"{name}_{idx}"
-
-    def write_config(self):
-        # we need to grab a (basically random) Env object to be able to use the
-        # object methods:
-        env = next(iter(self._env))
-        env._write_json(self._env)
-
-    # helper function to get everything that needs to be written out written out
-    def writeback_env(self):
-        stack_info("writing out the .env file")
-        # we need to grab a (basically random) Env object to be able to use the
-        # object methods:
-        env = next(iter(self._env))
-        env_vars = (
-            env._get_values_from_env_file()
-            if path.exists(ENV_FLAG_FILE_PATH)
-            else env._get_values_from_file()
-        )
-        # if this is a stage2 server, get the number of micro proxies
-        print_err("is this a stage2 server?")
-        if self.is_enabled("stage2"):
-            stage2 = True
-            numsites = self.env("AF_NUM_MICRO_SITES").value
-        else:
-            stage2 = False
-            numsites = 0
-        for e in self._env:
-            print_err(f"WRITEBACK {e} with type {type(e._value)}")
-            # make sure we create the ultrafeeder configurations
-            if e.name == "FEEDER_ULTRAFEEDER_CONFIG" and stage2:
-                print_err(f"writing the stage2 Ultrafeeder config ")
-                for i in range(numsites + 1):
-                    if i >= len(self.ultrafeeder):
-                        self.ultrafeeder.append(UltrafeederConfig(data=self, micro=i))
-                    if type(self.ultrafeeder[i]) != UltrafeederConfig:
-                        self.ultrafeeder[i] = UltrafeederConfig(data=self, micro=i)
-                    uc = self.ultrafeeder[i].generate()
-                    e.list_set(i, uc)
-                    # 0 is the integrated feeder / micro feeder / home location of a stage 2 server
-                    # 1...n are the micro feeder proxies
-                    env_vars[self.env_name_by_idx("FEEDER_ULTRAFEEDER_CONFIG", i)] = uc
-                continue
-            if type(e._value) == list and stage2:
-                # whenever we have a list, we write all elements with _idx notation
-                for i in range(numsites + 1):
-                    env_vars[self.env_name_by_idx(e.name, i)] = self.expand_value(
-                        e, e.list_get(i)
-                    )
-            elif type(e._value) == list:
-                env_vars[e.name] = self.expand_value(e, e.list_get(0))
-            else:
-                env_vars[e.name] = self.expand_value(e, e.value)
-
-        print_err(f"read in from file and applied any in memory changes: {env_vars}")
-        env._write_file(env_vars)
 
     # make sure our internal data is in sync with the .env file on disk
     def re_read_env(self):

@@ -43,3 +43,10 @@ def print_err(*args, **kwargs):
 # this is based on https://www.regular-expressions.info/email.html
 def is_email(text: str):
     return re.match(r"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}", text, flags=re.IGNORECASE)
+
+
+# extend the truthy concept to exclude all non-empty string except a few specific ones ([Tt]rue, [Oo]n, 1)
+def is_true(value):
+    if type(value) == str:
+        return any({value.lower() == "true", value.lower == "on", value == "1"})
+    return bool(value)
