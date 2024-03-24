@@ -62,6 +62,7 @@
   {% else %}
   {% set ns.site_indices = [0] %}
   {% endif %}
+  {% set num_micro_sites = (ns.site_indices | length) %}
   <div class="col-12 {% if env_value_by_tag('aggregators') == 'micro'%} d-none {% endif %}">
     <h4>You are feeding</h4>
     <div class="row small">
@@ -70,10 +71,10 @@
         <table class="table table-bordered table-sm lh-1 table-striped">
           <thead>
             <td>Aggregator</td>
-            <td>Enabled</td>
-            <td>Data</td>
-            <td>MLAT</td>
-            <td>Status</td>
+            <td colspan="{{num_micro_sites}}">Enabled</td>
+            <td colspan="{{num_micro_sites}}">Data</td>
+            <td colspan="{{num_micro_sites}}">MLAT</td>
+            <td colspan="{{num_micro_sites}}">Status</td>
           </thead>
           <tbody>
             {% for agg, name, map, status in aggregators %}
@@ -81,29 +82,28 @@
             {% if (tc==0 and is_first) or (tc==1 and not is_first) %}
             <tr>
               <td>
-                <a href="{{ map }}">{{ name }}</a>
+                <a href=" {{ map }}">{{ name }}</a>
               </td>
+              {% for idx in ns.site_indices %}
               <td class="text-center">
-                <span id="{{ agg + 'span' }}">
-                  {% if is_enabled("stage2")%}
-                  {% for site in env_value_by_tag("site_name") %}
-                  {% if list_is_enabled(agg, loop.index)%}<span width="1rem">&#10003;|</span>
-                  {% else %}<span width="1rem">&nbsp;|</span> {% endif %}
-                  {% endfor %}
-                  {% else %}
-                  {% if list_is_enabled(agg, 0) %}&#10003;{% endif %}
-                  {% endif %}
-                </span>
+                <span id="{{ agg ~ 'span' ~ idx }}">{% if list_is_enabled(agg, idx)%}&#10003; {% endif %}</span>
               </td>
+              {% endfor %}
+              {% for idx in ns.site_indices %}
               <td class="text-center">
-                <span id="{{ agg + 'beast' }}"></span>
+                <span id="{{ agg ~ 'beast' ~ idx }}"></span>
               </td>
+              {% endfor %}
+              {% for idx in ns.site_indices %}
               <td class="text-center">
-                <span id="{{ agg + 'mlat' }}"></span>
+                <span id="{{ agg ~ 'mlat' ~ idx }}"></span>
               </td>
+              {% endfor %}
+              {% for idx in ns.site_indices %}
               <td class="text-center">
-                {% if status != "" and is_enabled(agg) %}<a href="{{ status }}">&#x1f517;</a>{% endif %}
+                {% if status != "" and is_enabled(agg) %}<a href="{{ status ~ idx }}">&#x1f517;</a>{% endif %}
               </td>
+              {% endfor %}
             </tr>
             {% endif %}
             {% endfor %}
