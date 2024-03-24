@@ -3,6 +3,12 @@
 # set up ADS-B Feeder as image (and not just as app)
 # this only ever gets used on bookwork (or later)
 apt install -y --no-install-recommends python3-flask python3-requests
+
+# install chrony for better time synchronization compared to systemd-timesyncd
+# when chrony is installed it's imperative that CONFIG_NTP_MODE=0
+# (custom/disabled) is set in dietpi.txt to avoid breakage of dietpi-update
+apt install -y --no-install-recommends chrony
+
 git clone 'https://github.com/dirkhh/adsb-feeder-image.git' /tmp/adsb-feeder
 cd /tmp/adsb-feeder
 git checkout GIT_COMMIT_SHA  # <- gets replaced before use

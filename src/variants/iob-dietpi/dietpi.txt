@@ -207,7 +207,7 @@ CONFIG_CHECK_DIETPI_UPDATES=1
 CONFIG_CHECK_APT_UPDATES=1
 
 # Network time sync: 0=disabled | 1=boot only | 2=boot + daily | 3=boot + hourly | 4=Daemon + Drift
-CONFIG_NTP_MODE=4
+CONFIG_NTP_MODE=0
 
 # Serial Console: Set to 0 if you do not require serial console.
 CONFIG_SERIAL_CONSOLE_ENABLE=0
