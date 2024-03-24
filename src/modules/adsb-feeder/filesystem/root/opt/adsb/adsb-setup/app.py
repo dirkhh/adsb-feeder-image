@@ -39,7 +39,12 @@ if os.path.exists("/opt/adsb/config/.env.flag"):
         "app data initialized from .env, writing out JSON and deleting the flag file",
         file=sys.stderr,
     )
-    Data().write_config()
+    # create a data object that will initialize itself from the .env file and then force it
+    # to write out the JSON file - then explicitly delete the object (having it go out of scope
+    # at the end of this if-clause should be enough, so call me paranoid)
+    d = Data()
+    d.write_config()
+    del d
     os.remove("/opt/adsb/config/.env.flag")
 
 # nofmt: on

@@ -5,7 +5,6 @@ from .util import is_true, print_err, stack_info
 from .netconfig import UltrafeederConfig
 
 
-@dataclass
 class Config:
     # this is a singleton
     def __new__(cc):
@@ -57,8 +56,8 @@ class Config:
         # so we rely on the calling code to have provided us with a flag file
         if os.path.exists(self.ENV_FLAG_FILE_PATH):
             print_err(f"getting value for {name} from .env file")
-            return self._get_values_from_env_file().get(name, None)
-        return self._get_values_from_file().get(name, None)
+            return self.get_values_from_env_file().get(name, None)
+        return self.get_values_from_config().get(name, None)
 
     def write_values_to_env_file(self, values):
         # writes the values in the Dict passed in to the .env file

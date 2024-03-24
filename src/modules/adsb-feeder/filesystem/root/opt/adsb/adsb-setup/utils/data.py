@@ -2,6 +2,8 @@
 from dataclasses import dataclass
 from pathlib import Path
 
+from utils.config import Config
+
 from .environment import Env
 from .netconfig import NetConfig
 from .util import print_err
@@ -9,10 +11,7 @@ from .util import print_err
 
 @dataclass
 class Data:
-    def __new__(cc):
-        if not hasattr(cc, "instance"):
-            cc.instance = super(Data, cc).__new__(cc)
-        return cc.instance
+    config: Config
 
     data_path = Path("/opt/adsb")
     config_path = data_path / "config"
