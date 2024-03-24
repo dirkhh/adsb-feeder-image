@@ -48,7 +48,9 @@ class Restart:
             print_err("Calling /opt/adsb/adsb-system-restart.sh")
             # discard output, script is logging directly to /opt/adsb/adsb-setup.log
             subprocess.run(
-                "/usr/bin/bash /opt/adsb/adsb-system-restart.sh", shell=True, capture_output=True,
+                "/usr/bin/bash /opt/adsb/adsb-system-restart.sh",
+                shell=True,
+                capture_output=True,
             )
             return True
 
@@ -129,23 +131,6 @@ class System:
         else:
             return response.text, response.status_code
         return None, status
-
-    def _get_backup_data(self):
-        data = io.BytesIO()
-        with zipfile.ZipFile(data, mode="w") as backup_zip:
-            backup_zip.write(self._constants.env_file_path, arcname=".env")
-            for f in self._constants.data_path.glob("*.yml"):
-                backup_zip.write(f, arcname=os.path.basename(f))
-            for f in self._constants.data_path.glob("*.yaml"):  # FIXME merge with above
-                backup_zip.write(f, arcname=os.path.basename(f))
-            uf_path = pathlib.Path(self._constants.data_path / "ultrafeeder")
-            if uf_path.is_dir():
-                for f in uf_path.rglob("*"):
-                    backup_zip.write(
-                        f, arcname=f.relative_to(self._constants.data_path)
-                    )
-        data.seek(0)
-        return data
 
 
 class Version:

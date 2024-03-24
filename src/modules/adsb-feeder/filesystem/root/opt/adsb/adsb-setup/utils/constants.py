@@ -4,7 +4,7 @@ from os import getenv, path
 from pathlib import Path
 from uuid import uuid4
 
-from .environment import ENV_FILE_PATH, ENV_FLAG_FILE_PATH, Env, is_true
+from .environment import Env, is_true
 from .netconfig import NetConfig
 from .util import print_err
 
@@ -618,36 +618,3 @@ class Constants:
         taglist.append("is_enabled")
         e = self.env_by_tags(taglist)
         return e and e.value
-
-    # helper function to get everything that needs to be written out written out
-    def writeback_env(self):
-        # we need to grap a (basically random) Env object to be able to use the
-        # object methods:
-        env = next(iter(self._env))
-        env_vars = (
-            env._get_values_from_env_file()
-            if path.exists(ENV_FLAG_FILE_PATH)
-            else env._get_values_from_file()
-        )
-        for e in self._env:
-            if any(t == "false_is_zero" for t in e.tags):
-                env_vars[e.name] = "1" if is_true(e.value) else "0"
-            elif any(t == "false_is_empty" for t in e.tags):
-                env_vars[e.name] = "True" if is_true(e.value) else ""
-            else:
-                env_vars[e.name] = e.value
-        env._write_file(env_vars)
-
-    # make sure our internal data is in sync with the .env file on disk
-    def re_read_env(self):
-        env_vars = {}
-        with open(ENV_FILE_PATH, "r") as env_file:
-            for line in env_file.readlines():
-                if line.strip().startswith("#"):
-                    continue
-                key, var = line.partition("=")[::2]
-                env_vars[key.strip()] = var.strip()
-        # now that we have completed reading them, update each of the Env objects
-        for e in self._env:
-            if e.name in env_vars:
-                e.value = env_vars[e.name]
