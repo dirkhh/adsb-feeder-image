@@ -20,25 +20,27 @@ from time import sleep
 from typing import Dict, List
 from zlib import compress
 
+from utils.config import (
+    read_values_from_env_file,
+    write_values_to_config_json,
+    write_values_to_env_file,
+)
+
+if not os.path.exists("/opt/adsb/config/config.json"):
+    # this must be either a first run after an install,
+    # or the first run after an upgrade from a version that didn't use the config.json
+    values = read_values_from_env_file()
+    write_values_to_config_json(values)
+
 # nofmt: on
 # isort: off
 from flask import Flask, flash, redirect, render_template, request, send_file, url_for
 
-# this initial setup is not a great look... but I don't want to move this into a separate
-# applications... if we have no JSON config file, we need create it from a .env file and
-# then write the data back (which creates the JSON file)
-if not os.path.exists("/opt/adsb/config/config.json"):
-    open("/opt/adsb/config/.env.flag", "w").close()
-
-from utils import Constants
-
-if os.path.exists("/opt/adsb/config/.env.flag"):
-    Constants().writeback_env()
-    os.remove("/opt/adsb/config/.env.flag")
 
 from utils import (
     ADSBHub,
     Background,
+    Constants,
     Env,
     FlightAware,
     FlightRadar24,
@@ -219,7 +221,7 @@ class AdsbIm:
         self._routemanager.add_proxy_routes(self.proxy_routes)
         debug = os.environ.get("ADSBIM_DEBUG") is not None
         self._debug_cleanup()
-        self._constants.writeback_env()
+        write_values_to_env_file(self._constants.envs)
         self.update_dns_state()
         # in no_server mode we want to exit right after the housekeeping, so no
         # point in running this in the background
@@ -327,9 +329,7 @@ class AdsbIm:
         adsb_path = pathlib.Path("/opt/adsb/config")
         data = tempfile.TemporaryFile()
         with zipfile.ZipFile(data, mode="w") as backup_zip:
-            backup_zip.write(adsb_path / ".env", arcname=".env")
-            for f in adsb_path.glob("*.yml"):
-                backup_zip.write(f, arcname=os.path.basename(f))
+            backup_zip.write(adsb_path / "json.conf", arcname="json.conf")
             if include_graphs:
                 graphs_path = pathlib.Path(
                     adsb_path / "ultrafeeder/graphs1090/rrd/localhost.tar.gz"
@@ -368,6 +368,8 @@ class AdsbIm:
             if file.filename.endswith(".zip"):
                 filename = secure_filename(file.filename)
                 restore_path = pathlib.Path("/opt/adsb/config/restore")
+                # clean up the restore path when saving a fresh zipfile
+                shutil.rmtree(restore_path, ignore_errors=True)
                 restore_path.mkdir(mode=0o644, exist_ok=True)
                 file.save(restore_path / filename)
                 print_err(f"saved restore file to {restore_path / filename}")
@@ -390,11 +392,17 @@ class AdsbIm:
             with zipfile.ZipFile(restore_path / filename, "r") as restore_zip:
                 for name in restore_zip.namelist():
                     print_err(f"found file {name} in archive")
-                    # only accept the .env file and simple .yml filenames
+                    # remove files with a name that results in a path that doesn't start with our decompress path
+                    if not str(
+                        os.path.normpath(os.path.join(restore_path, name))
+                    ).startswith(str(restore_path)):
+                        print_err(f"restore skipped for path breakout name: {name}")
+                        continue
+                    # only accept the .env file and config.json and files for ultrafeeder
                     if (
                         name != ".env"
+                        and name != "config.json"
                         and not name.startswith("ultrafeeder/")
-                        and (not name.endswith(".yml") or name != secure_filename(name))
                     ):
                         continue
                     restore_zip.extract(name, restore_path)
@@ -443,13 +451,24 @@ class AdsbIm:
                         shutil.move(adsb_path / name, restore_path / (name + ".dist"))
                     shutil.move(restore_path / name, adsb_path / name)
                     if name == ".env":
-                        # this is pretty hacky, but we should at least try to not completely get this wrong
+                        if "config.json" in request.form.keys():
+                            # if we are restoring the config.json file, we don't need to restore the .env
+                            # this should never happen, but better safe than sorry
+                            continue
+                        # so this is a backup from an older system, let's try to make this work
+                        # read them in, replace the ones that match a norestore tag with the current value
+                        # and then write this all back out as config.json
+                        values = read_values_from_env_file()
                         for e in self._constants._env:
                             if "norestore" in e.tags:
                                 # this overwrites the value in the file we just restored with the current value of the running image,
                                 # iow it doesn't restore that value from the backup
-                                e._reconcile(e.value)
-            self._constants.re_read_env()
+                                values[e.name] = e.value
+                        write_values_to_config_json(values)
+            # now that everything has been moved into place we need to read all the values from config.json
+            # of course we do not want to pull values marked as norestore
+            for e in self._constants._env:
+                e._reconcile(e._value, pull=("norestore" not in e.tags))
             self.update_boardname()
             # make sure we are connected to the right Zerotier network
             zt_network = self._constants.env_by_tags("zerotierid").value
@@ -899,7 +918,7 @@ class AdsbIm:
         )
 
         # let's make sure we write out the updated ultrafeeder config
-        self._constants.writeback_env()
+        write_values_to_env_file(self._constants.envs)
 
         # if the button simply updated some field, stay on the same page
         if not seen_go:
