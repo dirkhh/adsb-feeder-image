@@ -425,11 +425,10 @@ class AdsbIm:
             saw_globe_history = False
             saw_graphs = False
             for name in restored_files:
-                if name.startswith("ultrafeeder/"):
-                    if name.startswith("ultrafeeder/globe_history/"):
-                        saw_globe_history = True
-                    if name.startswith("ultrafeeder/graphs1090/"):
-                        saw_graphs = True
+                if name.startswith("ultrafeeder/globe_history/"):
+                    saw_globe_history = True
+                elif name.startswith("ultrafeeder/graphs1090/"):
+                    saw_graphs = True
                 elif os.path.isfile(adsb_path / name):
                     if filecmp.cmp(adsb_path / name, restore_path / name):
                         print_err(f"{name} is unchanged")
@@ -459,9 +458,14 @@ class AdsbIm:
             for name, value in request.form.items():
                 if value == "1":
                     print_err(f"restoring {name}")
-                    if pathlib.Path(adsb_path / name).exists():
-                        shutil.move(adsb_path / name, restore_path / (name + ".dist"))
-                    shutil.move(restore_path / name, adsb_path / name)
+                    dest = adsb_path / name
+                    if os.path.isfile(dest):
+                        shutil.move(dest, adsb_path / (name + ".dist"))
+                    elif os.path.isdir(dest):
+                        shutil.rmtree(dest, ignore_errors=True)
+
+                    shutil.move(restore_path / name, dest)
+
                     if name == ".env":
                         if "config.json" in request.form.keys():
                             # if we are restoring the config.json file, we don't need to restore the .env
@@ -477,6 +481,11 @@ class AdsbIm:
                                 # iow it doesn't restore that value from the backup
                                 values[e.name] = e.value
                         write_values_to_config_json(values)
+
+            # clean up the restore path
+            restore_path = pathlib.Path("/opt/adsb/config/restore")
+            shutil.rmtree(restore_path, ignore_errors=True)
+
             # now that everything has been moved into place we need to read all the values from config.json
             # of course we do not want to pull values marked as norestore
             for e in self._constants._env:
