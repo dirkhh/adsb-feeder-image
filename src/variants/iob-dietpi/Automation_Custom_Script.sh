@@ -9,6 +9,59 @@ apt install -y --no-install-recommends python3-flask python3-requests
 # (custom/disabled) is set in dietpi.txt to avoid breakage of dietpi-update
 apt install -y --no-install-recommends chrony
 
+# copy the blocklisting code from Ramon Kolb's install-docker.sh script
+# DOCKER-INSTALL.SH -- Installation script for the Docker infrastructure on a Raspbian or Ubuntu system
+# Usage: source <(curl -s https://raw.githubusercontent.com/sdr-enthusiasts/docker-install/main/docker-install.sh)
+#
+# Copyright 2021-2023 Ramon F. Kolb (kx1t)- licensed under the terms and conditions
+# of the MIT license. The terms and conditions of this license are included with the Github
+# distribution of this package.
+#
+tmpdir=$(mktemp -d)
+pushd "$tmpdir" >/dev/null || exit
+    echo -n "Getting the latest RTL-SDR packages... "
+    apt-get install -qq -y git rtl-sdr >/dev/null
+    echo -n "Getting the latest UDEV rules... "
+    mkdir -p -m 0755 /etc/udev/rules.d /etc/udev/hwdb.d
+    # First install the UDEV rules for RTL-SDR dongles
+    curl -sL -o /etc/udev/rules.d/rtl-sdr.rules https://raw.githubusercontent.com/wiedehopf/adsb-scripts/master/osmocom-rtl-sdr.rules
+    curl -sL -o /etc/udev/rules.d/dump978-fa.rules https://raw.githubusercontent.com/flightaware/dump978/master/debian/dump978-fa.udev
+    # Now install the UDEV rules for SDRPlay devices
+    curl -sL -o /etc/udev/rules.d/66-mirics.rules https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/66-mirics.rules
+    curl -sL -o /etc/udev/hwdb.d/20-sdrplay.hwdb https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/20-sdrplay.hwdb
+    # make sure the permissions are set correctly
+    chmod 0755 /etc/udev/rules.d /etc/udev/hwdb.d
+    chmod go=r /etc/udev/rules.d/* /etc/udev/hwdb.d/*
+    # Next, exclude the drivers so the dongles stay accessible
+    echo -n "Excluding and unloading any competing RTL-SDR drivers... "
+    UNLOAD_SUCCESS=true
+    for module in "${BLOCKED_MODULES[@]}"
+    do
+        if ! grep -q "$module" /etc/modprobe.d/exclusions-rtl2832.conf
+        then
+          echo blacklist "$module" >>/etc/modprobe.d/exclusions-rtl2832.conf
+          echo install "$module" /bin/false >>/etc/modprobe.d/exclusions-rtl2832.conf
+          modprobe -r "$module" 2>/dev/null || UNLOAD_SUCCESS=false
+        fi
+    done
+    # Rebuild module dependency database factoring in blacklists
+    which depmod >/dev/null 2>&1 && depmod -a  >/dev/null 2>&1 || UNLOAD_SUCCESS=false
+    # On systems with initramfs, this needs to be updated to make sure the exclusions take effect:
+    which update-initramfs >/dev/null 2>&1 && update-initramfs -u  >/dev/null 2>&1 || true
+
+    if [[ "${UNLOAD_SUCCESS}" == false ]]; then
+      echo "INFO: Although we've successfully excluded any competing RTL-SDR drivers, we weren't able to unload them. This will remedy itself when you reboot your system after the script finishes."
+    fi
+popd >/dev/null
+# Check tmpdir is set and not null before attempting to remove it
+if [[ -z "$tmpdir" ]]; then
+  rm -rf "$tmpdir" >/dev/null 2>&1
+fi
+
+
+#
+# End of Ramon Kolb's docker-install.sh
+#
 git clone 'https://github.com/dirkhh/adsb-feeder-image.git' /tmp/adsb-feeder
 cd /tmp/adsb-feeder
 git checkout GIT_COMMIT_SHA  # <- gets replaced before use

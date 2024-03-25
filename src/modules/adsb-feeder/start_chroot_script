@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# overall distro module for ADSB.lol image
-# <Description what this module does>
+# overall distro module for ADSB.im feeder image
 # Written by Dirk Hohndel <dirk@hohndel.org>
 # GPL V3
 ########

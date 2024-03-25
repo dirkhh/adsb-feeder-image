@@ -1,4 +1,5 @@
 Changes since v1.3.1 include
+- update to the latest version of the udev rules and module blocklist from Ramon Kolb's docker-install.sh; add the same code to the DietPi builds (where it was missing before)
 - switch to chrony for time synchronization on all images
 - enable backup/restore with the config.json setup - this has received some testing, could benefit from more scrutiny 
 - upgrade Airspy container
