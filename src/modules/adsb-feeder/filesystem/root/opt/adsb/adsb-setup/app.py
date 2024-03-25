@@ -329,7 +329,7 @@ class AdsbIm:
         adsb_path = pathlib.Path("/opt/adsb/config")
         data = tempfile.TemporaryFile()
         with zipfile.ZipFile(data, mode="w") as backup_zip:
-            backup_zip.write(adsb_path / "json.conf", arcname="json.conf")
+            backup_zip.write(adsb_path / "config.json", arcname="config.json")
             if include_graphs:
                 graphs_path = pathlib.Path(
                     adsb_path / "ultrafeeder/graphs1090/rrd/localhost.tar.gz"
