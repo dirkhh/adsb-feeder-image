@@ -329,7 +329,7 @@ class AdsbIm:
         adsb_path = pathlib.Path("/opt/adsb/config")
         data = tempfile.TemporaryFile()
         with zipfile.ZipFile(data, mode="w") as backup_zip:
-            backup_zip.write(adsb_path / "json.conf", arcname="json.conf")
+            backup_zip.write(adsb_path / "config.json", arcname="config.json")
             if include_graphs:
                 graphs_path = pathlib.Path(
                     adsb_path / "ultrafeeder/graphs1090/rrd/localhost.tar.gz"
@@ -483,6 +483,10 @@ class AdsbIm:
                     print_err(
                         "timeout expired joining Zerotier network... trying to continue..."
                     )
+
+            # let's make sure we write out the updated ultrafeeder config
+            write_values_to_env_file(self._constants.envs)
+
             try:
                 subprocess.call(
                     "/opt/adsb/docker-compose-start", timeout=180.0, shell=True
@@ -943,7 +947,7 @@ class AdsbIm:
             # is tailscale set up?
             try:
                 result = subprocess.run(
-                    "tailscale status --json 2>/dev/null",
+                    "pgrep tailscaled >/dev/null 2>/dev/null && tailscale status --json 2>/dev/null",
                     shell=True,
                     check=True,
                     capture_output=True,
