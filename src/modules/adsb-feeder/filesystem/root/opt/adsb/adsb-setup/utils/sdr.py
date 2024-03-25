@@ -24,10 +24,14 @@ class SDR:
             return ""
         output = result.stdout.decode()
         print_err(f"lsusb -s {self._address}: {output}")
-        serial_match = re.search(r"iSerial\s+\d+\s+(.*)$", output, flags=re.M)
-        if serial_match:
-            self._serial_probed = serial_match.group(1).strip()
-            return self._serial_probed
+        # is there a serial number?
+        for line in output.splitlines():
+            serial_match = re.search(r"iSerial\s+\d+\s+(.*)$", line)
+            if serial_match:
+                self._serial_probed = serial_match.group(1).strip()
+        if not self._serial_probed and self._type == "sdrplay":
+            return "SDRplay w/o serial"
+        return self._serial_probed
 
         return ""
 
