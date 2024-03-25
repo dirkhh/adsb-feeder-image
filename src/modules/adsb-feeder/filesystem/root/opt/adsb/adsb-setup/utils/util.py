@@ -1,4 +1,26 @@
-import re, itertools, sys, time, math
+import inspect
+import itertools
+import math
+import re
+import sys
+import time
+
+
+def stack_info(msg=""):
+    framenr = 0
+    for frame, filename, line_num, func, source_code, source_index in inspect.stack():
+        if framenr == 0:
+            framenr += 1
+            continue
+        print_err(f" .. [{framenr}] {filename}:{line_num}: in {func}()")
+        if framenr == 1:
+            fname = func
+        framenr += 1
+        if func.startswith("dispatch_request"):
+            break
+    if msg:
+        print_err(f" == {fname}: {msg}")
+
 
 # let's do this just once, not at every call
 _clean_control_chars = "".join(
@@ -12,10 +34,19 @@ def cleanup_str(s):
 
 
 def print_err(*args, **kwargs):
-    timestamp = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()) + ".{0:03.0f}Z".format(math.modf(time.time())[0] * 1000)
-    print(*((timestamp, ) + args), file=sys.stderr, **kwargs)
+    timestamp = time.strftime(
+        "%Y-%m-%dT%H:%M:%S", time.gmtime()
+    ) + ".{0:03.0f}Z".format(math.modf(time.time())[0] * 1000)
+    print(*((timestamp,) + args), file=sys.stderr, **kwargs)
 
 
 # this is based on https://www.regular-expressions.info/email.html
 def is_email(text: str):
     return re.match(r"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}", text, flags=re.IGNORECASE)
+
+
+# extend the truthy concept to exclude all non-empty string except a few specific ones ([Tt]rue, [Oo]n, 1)
+def is_true(value):
+    if type(value) == str:
+        return any({value.lower() == "true", value.lower == "on", value == "1"})
+    return bool(value)
