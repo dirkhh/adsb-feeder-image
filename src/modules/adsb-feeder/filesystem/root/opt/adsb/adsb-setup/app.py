@@ -351,9 +351,16 @@ class AdsbIm:
                             for f in uf_path.rglob("*"):
                                 backup_zip.write(f, arcname=f.relative_to(adsb_path))
             except BrokenPipeError:
-                print_err(f'warning: backup download aborted mid-stream')
+                print_err(f"warning: backup download aborted mid-stream")
 
-        thread = threading.Thread(target=zip2fobj, kwargs={'fobj': pipeIn, 'include_graphs': include_graphs, 'include_heatmap': include_heatmap})
+        thread = threading.Thread(
+            target=zip2fobj,
+            kwargs={
+                "fobj": pipeIn,
+                "include_graphs": include_graphs,
+                "include_heatmap": include_heatmap,
+            },
+        )
         thread.start()
 
         site_name = self._constants.env_by_tags("mlat_name").value
