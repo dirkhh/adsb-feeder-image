@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="mt-3 text-center text-danger">{% block title %} SDRplay required software license {% endblock %}</h1>
+<p>The drivers for the SDRplay SDR that you are using are licensed under a proprietary license. You will only be able to
+  use this SDR with this feeder image if you accept <a href="" target="_blank">this license</a>.</p>
+<form method="post">
+  <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="sdrplay_license_accept"
+          value="go">I
+    have reviewed and ACCEPT the license</button>
+  <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="sdrplay_license_reject"
+          value="go">I
+    do NOT ACCEPT the license</button>
+</form>
+{% endblock %}
