@@ -947,7 +947,7 @@ class AdsbIm:
             # is tailscale set up?
             try:
                 result = subprocess.run(
-                    "tailscale status --json 2>/dev/null",
+                    "pgrep tailscaled >/dev/null 2>/dev/null && tailscale status --json 2>/dev/null",
                     shell=True,
                     check=True,
                     capture_output=True,
