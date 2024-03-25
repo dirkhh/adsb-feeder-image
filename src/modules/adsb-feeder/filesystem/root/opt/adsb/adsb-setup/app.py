@@ -894,6 +894,10 @@ class AdsbIm:
         airspy = any([sdr._type == "airspy" for sdr in self._sdrdevices.sdrs])
         self._constants.env_by_tags(["airspy", "is_enabled"]).value = airspy
 
+        # SDRplay devices
+        sdrplay = any([sdr._type == "sdrplay" for sdr in self._sdrdevices.sdrs])
+        self._constants.env_by_tags(["sdrplay", "is_enabled"]).value = sdrplay
+
         # next - if we have exactly one SDR and it hasn't been assigned to anything, use it for 1090
         if (
             len(self._sdrdevices.sdrs) == 1
@@ -901,10 +905,13 @@ class AdsbIm:
             and not any(self._constants.env_by_tags(p).value for p in purposes)
         ):
             env1090.value = self._sdrdevices.sdrs[0]._serial
-        if airspy:
-            env1090.value = ""
 
-        rtlsdr = not airspy and env1090.value != ""
+        rtlsdr = any(
+            sdr._type == "rtlsdr" and sdr._serial == env1090.value
+            for sdr in self._sdrdevices.sdrs
+        )
+        if not rtlsdr:
+            env1090.value = ""
         self._constants.env_by_tags("rtlsdr").value = "rtlsdr" if rtlsdr else ""
 
         print_err(f"in the end we have")

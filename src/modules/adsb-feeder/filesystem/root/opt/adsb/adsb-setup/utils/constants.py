@@ -381,6 +381,11 @@ class Constants:
             tags=["airspy", "is_enabled"],
         ),
         Env(
+            "AF_IS_SDRPLAY_ENABLED",
+            is_mandatory=False,
+            tags=["sdrplay", "is_enabled"],
+        ),
+        Env(
             "AF_IS_DOZZLE_ENABLED",
             is_mandatory=False,
             default=True,
