@@ -1,4 +1,5 @@
 Changes since v1.3.1 include
+- intial experimental support of SDRplay devices
 - backup: generate zipfile on the fly; this gets us immediate UI response to clicking the backup button and less wear and tear on the SD card
 - more backup/restore fixes
 - update to the latest version of the udev rules and module blocklist from Ramon Kolb's docker-install.sh; add the same code to the DietPi builds (where it was missing before)

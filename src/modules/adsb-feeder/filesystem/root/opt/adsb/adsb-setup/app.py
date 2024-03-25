@@ -155,6 +155,7 @@ class AdsbIm:
         self.app.add_url_rule("/index", "index", self.index)
         self.app.add_url_rule("/setup", "setup", self.setup, methods=["GET", "POST"])
         self.app.add_url_rule("/update", "update", self.update, methods=["POST"])
+        self.app.add_url_rule("/sdplay_license", "sdrplay_license", self.sdrplay_license, methods=["GET", "POST"])
         self.app.add_url_rule("/api/sdr_info", "sdr_info", self.sdr_info)
         self.app.add_url_rule("/api/base_info", "base_info", self.base_info)
         self.app.add_url_rule(f"/api/status/<agg>", "beast", self.agg_status)
@@ -671,6 +672,12 @@ class AdsbIm:
             if value == "go":
                 seen_go = True
             if value == "go" or value == "wait":
+                if key == "sdrplay_license_accept":
+                    self._constants.env_by_tags("sdrplay_license_accepted").value = True
+                if key == "sdrplay_license_reject":
+                    self._constants.env_by_tags("sdrplay_license_accepted").value = (
+                        False
+                    )
                 if key == "aggregators":
                     # user has clicked Submit on Aggregator page
                     self._constants.env_by_tags("aggregators_chosen").value = True
@@ -942,6 +949,10 @@ class AdsbIm:
             agg_chosen_env = self._constants.env_by_tags("aggregators_chosen")
             if self.at_least_one_aggregator() or agg_chosen_env.value == True:
                 agg_chosen_env.value = True
+                if self._constants.is_enabled(
+                    "sdrplay"
+                ) and not self._constants.is_enabled("sdrplay_license_accepted"):
+                    return redirect(url_for("sdrplay_license"))
                 return redirect(url_for("restarting"))
             return redirect(url_for("aggregators"))
         return redirect(url_for("director"))
@@ -975,6 +986,12 @@ class AdsbIm:
         alphabet = string.ascii_letters + string.digits
         self.rpw = "".join(secrets.choice(alphabet) for i in range(12))
         return render_template("expert.html", rpw=self.rpw)
+
+    @check_restart_lock
+    def sdrplay_license(self):
+        if request.method == "POST":
+            return self.update()
+        return render_template("sdrplay_license.html")
 
     @check_restart_lock
     def aggregators(self):

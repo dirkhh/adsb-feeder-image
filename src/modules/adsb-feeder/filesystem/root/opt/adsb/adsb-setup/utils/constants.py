@@ -386,6 +386,11 @@ class Constants:
             tags=["sdrplay", "is_enabled"],
         ),
         Env(
+            "AF_IS_SDRPLAY_LICENSE_ACCEPTED",
+            is_mandatory=False,
+            tags=["sdrplay_license_accepted", "is_enabled"],
+        ),
+        Env(
             "AF_IS_DOZZLE_ENABLED",
             is_mandatory=False,
             default=True,
