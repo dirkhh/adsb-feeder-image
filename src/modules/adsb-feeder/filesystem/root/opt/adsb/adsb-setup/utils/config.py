@@ -8,7 +8,7 @@ JSON_FILE_PATH = "/opt/adsb/config/config.json"
 
 
 def read_values_from_config_json():
-    print_err("reading .json file")
+    # print_err("reading .json file")
     ret = {}
     try:
         ret = json.load(open(JSON_FILE_PATH, "r"))
@@ -18,12 +18,12 @@ def read_values_from_config_json():
 
 
 def write_values_to_config_json(data: dict):
-    print_err("writing .json file")
+    # print_err("writing .json file")
     json.dump(data, open(JSON_FILE_PATH, "w"))
 
 
 def read_values_from_env_file():
-    print_err("reading .env file")
+    # print_err("reading .env file")
     ret = {}
     try:
         with open(ENV_FILE_PATH, "r") as f:
@@ -40,7 +40,7 @@ def read_values_from_env_file():
 
 
 def write_values_to_env_file(values):
-    print_err("writing .env file")
+    # print_err("writing .env file")
     with open(ENV_FILE_PATH, "w") as f:
         for key, value in sorted(values.items()):
             # _ADSBIM_STATE variables aren't needed in the .env file
