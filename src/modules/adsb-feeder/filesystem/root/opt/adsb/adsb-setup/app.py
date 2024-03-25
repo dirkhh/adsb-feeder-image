@@ -459,9 +459,9 @@ class AdsbIm:
                 if value == "1":
                     print_err(f"restoring {name}")
                     dest = adsb_path / name
-                    if os.path.isfile(dest):
+                    if dest.is_file():
                         shutil.move(dest, adsb_path / (name + ".dist"))
-                    elif os.path.isdir(dest):
+                    elif dest.is_dir():
                         shutil.rmtree(dest, ignore_errors=True)
 
                     shutil.move(restore_path / name, dest)
