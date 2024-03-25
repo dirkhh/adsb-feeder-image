@@ -24,10 +24,14 @@ class SDR:
             return ""
         output = result.stdout.decode()
         print_err(f"lsusb -s {self._address}: {output}")
-        serial_match = re.search(r"iSerial\s+\d+\s+(.*)$", output, flags=re.M)
-        if serial_match:
-            self._serial_probed = serial_match.group(1).strip()
-            return self._serial_probed
+        # is there a serial number?
+        for line in output.splitlines():
+            serial_match = re.search(r"iSerial\s+\d+\s+(.*)$", line)
+            if serial_match:
+                self._serial_probed = serial_match.group(1).strip()
+        if not self._serial_probed and self._type == "sdrplay":
+            return "SDRplay w/o serial"
+        return self._serial_probed
 
         return ""
 
@@ -73,11 +77,20 @@ class SDRDevices:
         output = io.StringIO(lsusb_text)
         self.sdrs = []
         for line in output:
-            for pidvid in ("1d50:60a1", "0bda:2838", "0bda:2832"):
+            for pidvid in (
+                "1d50:60a1",
+                "0bda:2838",
+                "0bda:2832",
+                "1df7:2500",
+                "1df7:3000",
+                "1df7:3050",
+            ):
                 address = self._get_address_for_pid_vid(pidvid, line)
                 if address:
                     print(f"get_sdr_info() found SDR {pidvid} at {address}")
-                    if pidvid == "1d50:60a1":
+                    if pidvid.startswith("1df7"):
+                        candidate = SDR("sdrplay", address)
+                    elif pidvid == "1d50:60a1":
                         candidate = SDR("airspy", address)
                     else:
                         candidate = SDR("rtlsdr", address)

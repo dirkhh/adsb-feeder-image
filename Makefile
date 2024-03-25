@@ -5,6 +5,16 @@ ssh-control:
 # we make a SSH control port to use with rsync.
 	ssh -M -S /tmp/adsb-setup-ssh-control -fnNT root@$(HOST)
 
+sync-and-update-nocontainer:
+# sync relevant files and update
+	ssh -O check -S /tmp/adsb-setup-ssh-control root@$(HOST) || make ssh-control
+
+	# sync over changes from local repo
+	make sync-py-control
+
+	# restart webinterface
+	ssh -S /tmp/adsb-setup-ssh-control root@$(HOST) systemctl restart adsb-setup
+
 sync-and-update:
 # sync relevant files and update
 	ssh -O check -S /tmp/adsb-setup-ssh-control root@$(HOST) || make ssh-control
