@@ -483,6 +483,10 @@ class AdsbIm:
                     print_err(
                         "timeout expired joining Zerotier network... trying to continue..."
                     )
+
+            # let's make sure we write out the updated ultrafeeder config
+            write_values_to_env_file(self._constants.envs)
+
             try:
                 subprocess.call(
                     "/opt/adsb/docker-compose-start", timeout=180.0, shell=True
