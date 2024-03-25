@@ -1,5 +1,6 @@
 import filecmp
 import json
+import os
 import os.path
 import pathlib
 import pickle
@@ -10,6 +11,7 @@ import signal
 import shutil
 import string
 import subprocess
+import threading
 import sys
 import zipfile
 import tempfile
@@ -328,27 +330,44 @@ class AdsbIm:
 
     def create_backup_zip(self, include_graphs=False, include_heatmap=False):
         adsb_path = pathlib.Path("/opt/adsb/config")
-        data = tempfile.TemporaryFile()
-        with zipfile.ZipFile(data, mode="w") as backup_zip:
-            backup_zip.write(adsb_path / "config.json", arcname="config.json")
-            if include_graphs:
-                graphs_path = pathlib.Path(
-                    adsb_path / "ultrafeeder/graphs1090/rrd/localhost.tar.gz"
-                )
-                backup_zip.write(
-                    graphs_path, arcname=graphs_path.relative_to(adsb_path)
-                )
-            if include_heatmap:
-                uf_path = pathlib.Path(adsb_path / "ultrafeeder/globe_history")
-                if uf_path.is_dir():
-                    for f in uf_path.rglob("*"):
-                        backup_zip.write(f, arcname=f.relative_to(adsb_path))
-        data.seek(0)
+        fdOut, fdIn = os.pipe()
+        pipeOut = os.fdopen(fdOut, "rb")
+        pipeIn = os.fdopen(fdIn, "wb")
+
+        def zip2fobj(fobj, include_graphs, include_heatmap):
+            try:
+                with fobj as file, zipfile.ZipFile(file, mode="w") as backup_zip:
+                    backup_zip.write(adsb_path / "config.json", arcname="config.json")
+                    if include_graphs:
+                        graphs_path = pathlib.Path(
+                            adsb_path / "ultrafeeder/graphs1090/rrd/localhost.tar.gz"
+                        )
+                        backup_zip.write(
+                            graphs_path, arcname=graphs_path.relative_to(adsb_path)
+                        )
+                    if include_heatmap:
+                        uf_path = pathlib.Path(adsb_path / "ultrafeeder/globe_history")
+                        if uf_path.is_dir():
+                            for f in uf_path.rglob("*"):
+                                backup_zip.write(f, arcname=f.relative_to(adsb_path))
+            except BrokenPipeError:
+                print_err(f"warning: backup download aborted mid-stream")
+
+        thread = threading.Thread(
+            target=zip2fobj,
+            kwargs={
+                "fobj": pipeIn,
+                "include_graphs": include_graphs,
+                "include_heatmap": include_heatmap,
+            },
+        )
+        thread.start()
+
         site_name = self._constants.env_by_tags("mlat_name").value
         now = datetime.now().replace(microsecond=0).isoformat().replace(":", "-")
         download_name = f"adsb-feeder-config-{site_name}-{now}.zip"
         return send_file(
-            data,
+            pipeOut,
             mimetype="application/zip",
             as_attachment=True,
             download_name=download_name,
@@ -414,11 +433,10 @@ class AdsbIm:
             saw_globe_history = False
             saw_graphs = False
             for name in restored_files:
-                if name.startswith("ultrafeeder/"):
-                    if name.startswith("ultrafeeder/globe_history/"):
-                        saw_globe_history = True
-                    if name.startswith("ultrafeeder/graphs1090/"):
-                        saw_graphs = True
+                if name.startswith("ultrafeeder/globe_history/"):
+                    saw_globe_history = True
+                elif name.startswith("ultrafeeder/graphs1090/"):
+                    saw_graphs = True
                 elif os.path.isfile(adsb_path / name):
                     if filecmp.cmp(adsb_path / name, restore_path / name):
                         print_err(f"{name} is unchanged")
@@ -448,9 +466,14 @@ class AdsbIm:
             for name, value in request.form.items():
                 if value == "1":
                     print_err(f"restoring {name}")
-                    if pathlib.Path(adsb_path / name).exists():
-                        shutil.move(adsb_path / name, restore_path / (name + ".dist"))
-                    shutil.move(restore_path / name, adsb_path / name)
+                    dest = adsb_path / name
+                    if dest.is_file():
+                        shutil.move(dest, adsb_path / (name + ".dist"))
+                    elif dest.is_dir():
+                        shutil.rmtree(dest, ignore_errors=True)
+
+                    shutil.move(restore_path / name, dest)
+
                     if name == ".env":
                         if "config.json" in request.form.keys():
                             # if we are restoring the config.json file, we don't need to restore the .env
@@ -466,6 +489,11 @@ class AdsbIm:
                                 # iow it doesn't restore that value from the backup
                                 values[e.name] = e.value
                         write_values_to_config_json(values)
+
+            # clean up the restore path
+            restore_path = pathlib.Path("/opt/adsb/config/restore")
+            shutil.rmtree(restore_path, ignore_errors=True)
+
             # now that everything has been moved into place we need to read all the values from config.json
             # of course we do not want to pull values marked as norestore
             for e in self._constants._env:
