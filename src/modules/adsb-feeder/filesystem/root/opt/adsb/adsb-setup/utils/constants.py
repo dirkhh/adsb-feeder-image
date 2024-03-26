@@ -328,7 +328,7 @@ class Constants:
             "AF_IS_SECURE_IMAGE",
             is_mandatory=False,
             default="False",
-            tags=["secure_image", "is_enabled"],
+            tags=["secure_image", "is_enabled", "norestore"],
         ),
         Env(
             "AF_IS_FLIGHTRADAR24_ENABLED",
