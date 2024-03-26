@@ -328,7 +328,7 @@ class Constants:
             "AF_IS_SECURE_IMAGE",
             is_mandatory=False,
             default="False",
-            tags=["secure_image", "is_enabled", "norestore"],
+            tags=["secure_image", "is_enabled"],
         ),
         Env(
             "AF_IS_FLIGHTRADAR24_ENABLED",
@@ -463,9 +463,6 @@ class Constants:
         # Container images
         # -- these names are magic and are used in yaml files and the structure
         #    of these names is used in scripting around that
-        # the version of the adsb-setup app and the containers are linked and
-        # there are subtle dependencies between them - so let's not include these
-        # in backup/restore
         Env("ULTRAFEEDER_CONTAINER", tags=["ultrafeeder", "container", "norestore"]),
         Env("FR24_CONTAINER", tags=["flightradar", "container", "norestore"]),
         Env("FA_CONTAINER", tags=["flightaware", "container", "norestore"]),
