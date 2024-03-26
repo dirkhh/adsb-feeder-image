@@ -1,4 +1,7 @@
 Changes since v1.3.1 include
+- fix install issue that prevented SDRplay devices from working out of the box
+- prevent users from inadvertantly locking themselves out of a freshly installed system by restoring from a system with secure-image enabled
+- fix issue with recent iob builds potentially not successfully completing that first install due to CONFIG_NTP_MODE being set to 0
 - attempt to deal better with SDRs without serial number
 - intial experimental support of SDRplay devices
 - backup: generate zipfile on the fly; this gets us immediate UI response to clicking the backup button and less wear and tear on the SD card

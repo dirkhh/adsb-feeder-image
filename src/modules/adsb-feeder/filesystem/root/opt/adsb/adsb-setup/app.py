@@ -1179,6 +1179,7 @@ if __name__ == "__main__":
         "pw.yml",
         "rb.yml",
         "rv.yml",
+        "sdrplay.yml",
         "uat978.yml",
     }
     adsb_dir = pathlib.Path("/opt/adsb")
