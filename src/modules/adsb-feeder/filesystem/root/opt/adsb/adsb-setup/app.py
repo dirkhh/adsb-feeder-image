@@ -427,6 +427,7 @@ class AdsbIm:
         if request.method == "GET":
             # the user has uploaded a zip file and we need to take a look.
             # be very careful with the content of this zip file...
+            print_err("zip file uploaded, looking at the content")
             filename = request.args["zipfile"]
             adsb_path = pathlib.Path("/opt/adsb/config")
             restore_path = adsb_path / "restore"
@@ -471,11 +472,13 @@ class AdsbIm:
                 changed.append("ultrafeeder/globe_history/")
             if saw_graphs:
                 changed.append("ultrafeeder/graphs1090/")
+            print_err(f"offering the usr to restore the changed files: {changed}")
             return render_template(
                 "/restoreexecute.html", changed=changed, unchanged=unchanged
             )
         else:
             # they have selected the files to restore
+            print_err("restoring the files the user selected")
             adsb_path = pathlib.Path("/opt/adsb/config")
             (adsb_path / "ultrafeeder").mkdir(mode=0o755, exist_ok=True)
             restore_path = adsb_path / "restore"
@@ -519,8 +522,12 @@ class AdsbIm:
 
             # now that everything has been moved into place we need to read all the values from config.json
             # of course we do not want to pull values marked as norestore
+            print_err("finished restoring files, syncing the configuration")
             for e in self._constants._env:
                 e._reconcile(e._value, pull=("norestore" not in e.tags))
+                print_err(
+                    f"{'wrote out' if 'norestore' in e.tags else 'read in'} {e.name}: {e.value}"
+                )
 
             # finally make sure that a couple of the key settings are up to date
             self.update_boardname()
