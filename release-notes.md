@@ -1,4 +1,5 @@
 Changes since v1.3.1 include
+- ensure that the system survives the scenario where the user deletes their settings and then wants to restore them from a backup; recover version info for both adsb-setup and the containers
 - don't restore the container versions from the backup
 - fix install issue that prevented SDRplay devices from working out of the box
 - prevent users from inadvertantly locking themselves out of a freshly installed system by restoring from a system with secure-image enabled

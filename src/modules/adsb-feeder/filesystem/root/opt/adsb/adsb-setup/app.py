@@ -523,6 +523,7 @@ class AdsbIm:
             # now that everything has been moved into place we need to read all the values from config.json
             # of course we do not want to pull values marked as norestore
             print_err("finished restoring files, syncing the configuration")
+
             for e in self._constants._env:
                 e._reconcile(e._value, pull=("norestore" not in e.tags))
                 print_err(
@@ -1223,15 +1224,15 @@ if __name__ == "__main__":
         env_file = adsb_dir / ".env"
         if env_file.exists():
             env_file.rename(config_dir / ".env")
-        else:
-            # I don't understand how that could happen
-            open(config_dir / ".env", "w").close()
     for file_name in config_files:
         config_file = pathlib.Path(adsb_dir / file_name)
         if config_file.exists():
             new_file = pathlib.Path(config_dir / file_name)
             config_file.rename(new_file)
             print_err(f"moved {config_file} to {new_file}")
+    if not pathlib.Path(config_dir / ".env").exists():
+        # I don't understand how that could happen
+        shutil.copyfile(adsb_dir / "docker.image.versions", config_dir / ".env")
 
     no_server = len(sys.argv) > 1 and sys.argv[1] == "--update-config"
 
