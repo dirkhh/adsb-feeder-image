@@ -163,6 +163,7 @@ class AdsbIm:
         self.app.add_url_rule(f"/api/status/<agg>", "beast", self.agg_status)
         # fmt: on
         self.update_boardname()
+        self.update_version()
 
     def update_boardname(self):
         board = ""
@@ -194,6 +195,28 @@ class AdsbIm:
         elif board == "Libre Computer AML-S905X-CC":
             board = "Libre Computer Le Potato (AML-S905X-CC)"
         self._constants.env_by_tags("board_name").value = board
+
+    def update_version(self):
+        conf_version = self._constants.env_by_tags("base_version").value
+        if pathlib.Path(self._constants.version_file).exists():
+            with open(self._constants.version_file, "r") as f:
+                file_version = f.read().strip()
+        else:
+            file_version = ""
+        if file_version:
+            if file_version != conf_version:
+                print_err(
+                    f"found version '{conf_version}' in memory, but '{file_version}' on disk, updating to {file_version}"
+                )
+                self._constants.env_by_tags("base_version").value = file_version
+        else:
+            if conf_version:
+                print_err(f"no version found on disk, using {conf_version}")
+                with open(self._constants.version_file, "w") as f:
+                    f.write(conf_version)
+            else:
+                print_err("no version found on disk or in memory, using v0.0.0")
+                self._constants.env_by_tags("base_version").value = "v0.0.0"
 
     def pack_im(self) -> str:
         image = {
@@ -498,7 +521,11 @@ class AdsbIm:
             # of course we do not want to pull values marked as norestore
             for e in self._constants._env:
                 e._reconcile(e._value, pull=("norestore" not in e.tags))
+
+            # finally make sure that a couple of the key settings are up to date
             self.update_boardname()
+            self.update_version()
+
             # make sure we are connected to the right Zerotier network
             zt_network = self._constants.env_by_tags("zerotierid").value
             if (
