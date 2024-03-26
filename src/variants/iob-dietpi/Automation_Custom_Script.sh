@@ -7,8 +7,8 @@ apt install -y --no-install-recommends python3-flask python3-requests
 # install chrony for better time synchronization compared to systemd-timesyncd
 # when chrony is installed it's imperative that CONFIG_NTP_MODE=0
 # (custom/disabled) is set in dietpi.txt to avoid breakage of dietpi-update
+/boot/dietpi/func/dietpi-set_software ntpd-mode 0
 apt install -y --no-install-recommends chrony
-sed -i -e 's/^CONFIG_NTP_MODE=.*/CONFIG_NTP_MODE=0/' /boot/dietpi.txt
 
 # copy the blocklisting code from Ramon Kolb's install-docker.sh script
 # DOCKER-INSTALL.SH -- Installation script for the Docker infrastructure on a Raspbian or Ubuntu system
