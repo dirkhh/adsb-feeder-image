@@ -62,11 +62,11 @@ class Env:
         # make sure we follow the weird rules for some of the variables
         # (these are mainly driven by how they are used once they get exported to .env)
         if any(t == "false_is_zero" for t in self.tags):
-            value = "1" if is_true(value) else "0"
+            new_value = "1" if is_true(new_value) else "0"
         if any(t == "false_is_empty" for t in self.tags):
-            value = "1" if is_true(value) else ""
+            new_value = "1" if is_true(new_value) else ""
         values = read_values_from_config_json()
-        values[self._name] = value
+        values[self._name] = new_value
         write_values_to_config_json(values)
 
     def __str__(self):
