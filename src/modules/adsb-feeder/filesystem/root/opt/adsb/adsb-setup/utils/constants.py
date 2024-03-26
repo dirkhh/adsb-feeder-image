@@ -463,16 +463,19 @@ class Constants:
         # Container images
         # -- these names are magic and are used in yaml files and the structure
         #    of these names is used in scripting around that
-        Env("ULTRAFEEDER_CONTAINER", tags=["ultrafeeder", "container"]),
-        Env("FR24_CONTAINER", tags=["flightradar", "container"]),
-        Env("FA_CONTAINER", tags=["flightaware", "container"]),
-        Env("RB_CONTAINER", tags=["radarbox", "container"]),
-        Env("PF_CONTAINER", tags=["planefinder", "container"]),
-        Env("AH_CONTAINER", tags=["adsbhub", "container"]),
-        Env("OS_CONTAINER", tags=["opensky", "container"]),
-        Env("RV_CONTAINER", tags=["radarvirtuel", "container"]),
-        Env("PW_CONTAINER", tags=["planewatch", "container"]),
-        Env("TNUK_CONTAINER", tags=["1090uk", "container"]),
+        # the version of the adsb-setup app and the containers are linked and
+        # there are subtle dependencies between them - so let's not include these
+        # in backup/restore
+        Env("ULTRAFEEDER_CONTAINER", tags=["ultrafeeder", "container", "norestore"]),
+        Env("FR24_CONTAINER", tags=["flightradar", "container", "norestore"]),
+        Env("FA_CONTAINER", tags=["flightaware", "container", "norestore"]),
+        Env("RB_CONTAINER", tags=["radarbox", "container", "norestore"]),
+        Env("PF_CONTAINER", tags=["planefinder", "container", "norestore"]),
+        Env("AH_CONTAINER", tags=["adsbhub", "container", "norestore"]),
+        Env("OS_CONTAINER", tags=["opensky", "container", "norestore"]),
+        Env("RV_CONTAINER", tags=["radarvirtuel", "container", "norestore"]),
+        Env("PW_CONTAINER", tags=["planewatch", "container", "norestore"]),
+        Env("TNUK_CONTAINER", tags=["1090uk", "container", "norestore"]),
         # Ultrafeeder config
         Env(
             "_ADSBIM_STATE_IS_ULTRAFEEDER_ADSBLOL_ENABLED",
