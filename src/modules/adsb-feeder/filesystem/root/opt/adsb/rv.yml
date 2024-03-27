@@ -1,5 +1,3 @@
-version: '2.0'
-
 services:
   radarvirtuel:
     image: ${RV_CONTAINER}

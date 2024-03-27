@@ -1,12 +1,9 @@
-import io
 import os
-import pathlib
 import requests
 import socket
 import subprocess
 import threading
 import time
-import zipfile
 
 from .data import Data
 from .util import print_err
@@ -66,12 +63,12 @@ class Restart:
 
 
 class System:
-    def __init__(self, d: Data):
+    def __init__(self, data: Data):
         if os.path.exists("/opt/adsb/docker.lock"):
             os.remove("/opt/adsb/docker.lock")
         self._restart_lock = Lock()
         self._restart = Restart(self._restart_lock)
-        self._d = d
+        self._d = data
 
     @property
     def restart(self):

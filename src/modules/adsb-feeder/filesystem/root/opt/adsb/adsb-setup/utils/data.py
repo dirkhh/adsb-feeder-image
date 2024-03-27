@@ -4,16 +4,9 @@ from os import getenv, path
 from pathlib import Path
 from uuid import uuid4
 
-from .environment import Env, is_true
+from .environment import Env
 from .netconfig import NetConfig
 from .util import print_err, stack_info
-
-
-# extend the truthy concept to exclude all non-empty string except a few specific ones ([Tt]rue, [Oo]n, 1)
-def is_true(value):
-    if type(value) == str:
-        return any({value.lower() == "true", value.lower == "on", value == "1"})
-    return bool(value)
 
 
 @dataclass
@@ -30,6 +23,7 @@ class Data:
     version_file = data_path / "adsb.im.version"
     secure_image_path = data_path / "adsb.im.secure_image"
     is_feeder_image = True
+    ultrafeeder = []
 
     _proxy_routes = [
         # endpoint, port, url_path
@@ -459,7 +453,7 @@ class Data:
         ),
         Env(
             "_ADSBIM_STATE_ADSBX_FEEDER_ID",
-            default=[False],
+            default=[""],
             tags="adsbxfeederid",
         ),
         Env(
@@ -605,6 +599,8 @@ class Data:
         if type(tags) != list:
             tags = [tags]
         e = self._get_enabled_env_by_tags(tags)
+        if type(e._value) == list:
+            return e and e.list_get(0)
         return e and e.value
 
     # helper function to see if list element is enabled
@@ -612,4 +608,4 @@ class Data:
         if type(tags) != list:
             tags = [tags]
         e = self._get_enabled_env_by_tags(tags)
-        return e.list_get(idx) if e else ""
+        return e.list_get(idx) if e else False
