@@ -4,44 +4,16 @@ import subprocess
 import requests
 from datetime import datetime, timedelta
 from enum import Enum
-from .util import print_err
+from .util import generic_get_json, print_err
 from .data import Data
 
 T = Enum("T", ["Yes", "No", "Unknown"])
 
 
-def generic_get_json(url: str, data):
-    requests.packages.urllib3.util.connection.HAS_IPV6 = False
-    status = -1
-    try:
-        response = requests.request(
-            method="GET" if data == None else "POST",
-            url=url,
-            data=data,
-            headers={
-                "Content-Type": "application/json",
-                "User-Agent": "ADS-B Image",
-            },
-        )
-    except (
-        requests.HTTPError,
-        requests.ConnectionError,
-        requests.Timeout,
-        requests.RequestException,
-    ) as err:
-        print_err(f"checking {url} failed: {err}")
-        status = err.errno
-    except:
-        # for some reason this didn't work
-        print_err("checking {url} failed: reason unknown")
-    else:
-        return response.json(), response.status_code
-    return None, status
-
-
 class AggStatus:
-    def __init__(self, agg: str, d: Data, url: str):
+    def __init__(self, agg: str, idx: str, d: Data, url: str):
         self._agg = agg
+        self._idx = idx
         self._last_check = datetime.fromtimestamp(0.0)
         self._beast = T.Unknown
         self._mlat = T.Unknown

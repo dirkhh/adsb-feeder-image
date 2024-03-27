@@ -1,9 +1,10 @@
 import json
 from os import path
 import re
+from types import NoneType
 from typing import List, Union
 from utils.config import read_values_from_config_json, write_values_to_config_json
-from utils.util import is_true, print_err
+from utils.util import is_true, print_err, stack_info
 
 
 class Env:
@@ -63,11 +64,11 @@ class Env:
         # make sure we follow the weird rules for some of the variables
         # (these are mainly driven by how they are used once they get exported to .env)
         if any(t == "false_is_zero" for t in self.tags):
-            value = "1" if is_true(value) else "0"
+            new_value = "1" if is_true(new_value) else "0"
         if any(t == "false_is_empty" for t in self.tags):
-            value = "1" if is_true(value) else ""
+            new_value = "1" if is_true(new_value) else ""
         values = read_values_from_config_json()
-        values[self._name] = value
+        values[self._name] = new_value
         write_values_to_config_json(values)
 
     def __str__(self):
@@ -110,10 +111,10 @@ class Env:
         # already modifies the existing object in memory - so we need to force a comparison
         # to the value in the file
         if type(self._value) == list:
-            print_err(
+            stack_info(
                 f"WAIT == using standard setter to assign a list {self} -- {value} -- {type(value)}"
             )
-            self._value = value
+            self.list_set(0, value)
             self._reconcile(value)
             return
         if type(self._value) == list or value != self._value:
@@ -124,11 +125,14 @@ class Env:
         idx = int(idx)
         print_err(f"set {self._name}[{idx}] = {value}")
         if type(self._value) != list:
-            print_err(f"{self._name} is not a list, converting")
+            stack_info(f"{self._name} is not a list, converting")
             self._value = [self._value]
             self.list_set(idx, value)
             return
-        default_value = self._default[0] if len(self._default) == 1 else None
+        if type(self._default) == list and len(self._default) == 1:
+            default_value = self._default[0]
+        else:
+            default_value = None
         while len(self._value) < idx:
             self._value.append(default_value)
         if idx == len(self._value):
@@ -141,8 +145,8 @@ class Env:
     def list_get(self, idx):
         idx = int(idx)
         if type(self._value) != list:
-            print_err(f"{self._name} is not a list, giving up")
-            return None
+            stack_info(f"{self._name} is not a list, converting")
+            self._value = [self._value]
         if idx < len(self._value):
             return self._value[idx]
         if type(self._default) == list and len(self._default) == 1:

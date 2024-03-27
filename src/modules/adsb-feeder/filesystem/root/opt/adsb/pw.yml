@@ -1,5 +1,3 @@
-version: '2.0'
-
 services:
   planewatch:
     image: ${PW_CONTAINER}

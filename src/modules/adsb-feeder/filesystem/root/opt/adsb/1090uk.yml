@@ -1,5 +1,3 @@
-version: '2.0'
-
 services:
   1090uk:
     image: ${TNUK_CONTAINER}

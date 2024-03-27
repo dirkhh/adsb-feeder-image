@@ -15,7 +15,7 @@
   <!-- Spinner -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
   <title>
-    {% block title %}{% endblock %}
+    {{ list_value_by_tag("site_name", 0) }}: {% block title %}{% endblock %}
   </title>
   <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
@@ -27,7 +27,8 @@
       {% set navigation_bar = [
                   (url_for('/map/'), 'map', 'Map'),
                   (url_for('setup'), 'setup', 'Basic Setup'),
-                  (url_for('advanced'), 'advanced', 'Advanced'),
+                  (url_for('advanced'), 'advanced', 'Adv. HW Setup'),
+                  (url_for('visualization'), 'visualization', 'Visualization Setup'),
                   (url_for('aggregators'), 'aggregators', 'Aggregators'),
                   (url_for('backup'), 'backup', 'Backup'),
                   (url_for('restore'), 'restore', 'Restore'),
@@ -38,12 +39,38 @@
       {% set config_complete = is_enabled('base_config') %}
       <div class="collapse navbar-collapse " id="navbarNav">
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-          {% for href, id, caption in navigation_bar if env_value_by_tag('aggregators') != 'micro' or id != 'aggregators' %}
+          {% for href, id, caption in navigation_bar if (env_value_by_tag('aggregators') != 'micro' or id != 'aggregators') and (id != 'advanced' or not is_enabled('stage2')) %}
+          {% if is_enabled('stage2') and id == 'setup' -%}{% set caption='Stage 2 Setup' -%}{% set href='stage2' -%}{% endif -%}
+          {% if id == "aggregators" and is_enabled('stage2') %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
+               data-mdb-toggle="dropdown" aria-expanded="false">{{ caption|e }}
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+              {% for site in env_value_by_tag('site_name') if not site == list_value_by_tag('site_name', 0) %}
+              <li><a class="dropdown-item" href="{{ href|e}}?m={{loop.index}}">{{site}}</a></li>
+              {% endfor %}
+            </ul>
+          </li>
+          {% elif id == "visualization" and is_enabled('stage2') %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLinkV" role="button"
+               data-mdb-toggle="dropdown" aria-expanded="false">{{ caption|e }}
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLinkV">
+              {% for site in env_value_by_tag('site_name') %}
+              <li><a class="dropdown-item" href="{{ href|e}}?m={{loop.index0}}">{{site}}</a></li>
+              {% endfor %}
+            </ul>
+          </li>
+          {% else %}
           <li class="nav-item" {% if id == active_page %}aria-current="true" {% endif %}
               {% if not config_complete and id != "setup" and id != "restore" and id != "logs" %} style="display: none;"
               {% endif %}>
             <a class="nav-link" href="{{ href|e }}">{{ caption|e }}</a>
-            {% endfor %}
+          </li>
+          {% endif %}
+          {% endfor %}
         </ul>
       </div>
     </div>
@@ -85,9 +112,9 @@
             <a href="https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image">adsb-feeder-image Zulip
               channel</a>
           </span>| <span class="ms-3">
-            <a href='https://ko-fi.com/H2H2H3JS5' target='_blank'><img height='1.5em' style='border:0.1em;height:1.3em;'
-                   src='https://storage.ko-fi.com/cdn/brandasset/kofi_button_stroke.png' border='0'
-                   alt='Help sustain this project at ko-fi.com' /></a>
+            <a href="https://ko-fi.com/H2H2H3JS5" target="_blank"><img height="1.5em" style="border:0.1em;height:1.3em;"
+                   src="https://storage.ko-fi.com/cdn/brandasset/kofi_button_stroke.png" border="0"
+                   alt="Help sustain this project at ko-fi.com" /></a>
           </span>
         </div>
       </section>
