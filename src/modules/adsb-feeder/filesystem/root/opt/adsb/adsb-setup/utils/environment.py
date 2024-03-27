@@ -3,22 +3,15 @@ from os import path
 import re
 from typing import List, Union
 from utils.config import read_values_from_config_json, write_values_to_config_json
-from utils.util import print_err
-
-
-# extend the truthy concept to exclude all non-empty string except a few specific ones ([Tt]rue, [Oo]n, 1)
-def is_true(value):
-    if type(value) == str:
-        return any({value.lower() == "true", value.lower == "on", value == "1"})
-    return bool(value)
+from utils.util import is_true, print_err
 
 
 class Env:
     def __init__(
         self,
         name: str,
-        value: str = None,
-        is_mandatory: bool = True,
+        value: Union[str, List[str]] = None,
+        is_mandatory: bool = False,
         default: any = None,
         default_call: callable = None,
         value_call: callable = None,
@@ -26,9 +19,8 @@ class Env:
     ):
         self._name = name
         self._value = self._default = default
-        if (
-            value != None
-        ):  # only overwrite the default value if an actual Value was passed in
+        if value != None:
+            # only overwrite the default value if an actual Value was passed in
             self._value = value
         self._is_mandatory = is_mandatory
         self._value_call = value_call
@@ -43,7 +35,18 @@ class Env:
     def _reconcile(self, value, pull: bool = False):
         value_in_file = self._get_value_from_file()
         if pull and value_in_file != None:
-            self._value = value_in_file
+            if type(self._default) != NoneType and type(value_in_file) != type(
+                self._default
+            ):
+                if type(self._default) == bool:
+                    self._value = is_true(value_in_file)
+                    return
+                print_err(
+                    f"got value of type {type(value_in_file)} from file - discarding as type of {self._name} should be {type(self._default)}"
+                )
+            else:
+                self._value = value_in_file
+
             return
         if value == value_in_file:
             return  # do not write to file if value is the same
@@ -56,12 +59,15 @@ class Env:
         return read_values_from_config_json().get(self._name, None)
 
     def _write_value_to_file(self, new_value):
-        values = read_values_from_config_json()
+        print_err(f"adding {self._name} = {new_value} to config")
+        # make sure we follow the weird rules for some of the variables
+        # (these are mainly driven by how they are used once they get exported to .env)
         if any(t == "false_is_zero" for t in self.tags):
-            new_value = "1" if is_true(new_value) else "0"
+            value = "1" if is_true(value) else "0"
         if any(t == "false_is_empty" for t in self.tags):
-            new_value = "1" if is_true(new_value) else ""
-        values[self._name] = new_value
+            value = "1" if is_true(value) else ""
+        values = read_values_from_config_json()
+        values[self._name] = value
         write_values_to_config_json(values)
 
     def __str__(self):
@@ -100,9 +106,64 @@ class Env:
         # we get "1" from .env files and "on" from checkboxes in HTML
         if self.is_bool:
             value = is_true(value)
-        if value != self._value:
+        # stupid Python with it's complex data types... modifying a list in the app
+        # already modifies the existing object in memory - so we need to force a comparison
+        # to the value in the file
+        if type(self._value) == list:
+            print_err(
+                f"WAIT == using standard setter to assign a list {self} -- {value} -- {type(value)}"
+            )
             self._value = value
             self._reconcile(value)
+            return
+        if type(self._value) == list or value != self._value:
+            self._value = value
+            self._reconcile(value)
+
+    def list_set(self, idx, value):
+        idx = int(idx)
+        print_err(f"set {self._name}[{idx}] = {value}")
+        if type(self._value) != list:
+            print_err(f"{self._name} is not a list, converting")
+            self._value = [self._value]
+            self.list_set(idx, value)
+            return
+        default_value = self._default[0] if len(self._default) == 1 else None
+        while len(self._value) < idx:
+            self._value.append(default_value)
+        if idx == len(self._value):
+            self._value.append(value)
+        else:
+            self._value[idx] = value
+        self._reconcile(self._value)
+        print_err(f"after reconcile {self._name} = {self._value}")
+
+    def list_get(self, idx):
+        idx = int(idx)
+        if type(self._value) != list:
+            print_err(f"{self._name} is not a list, giving up")
+            return None
+        if idx < len(self._value):
+            return self._value[idx]
+        if type(self._default) == list and len(self._default) == 1:
+            while len(self._value) <= idx:
+                self._value.append(self._default[0])
+            return self._value[idx]
+        stack_info(
+            f"{self._name} only has {len(self._value)} values and no default, asking for {idx}"
+        )
+        return None
+
+    def list_remove(self, idx=-1):
+        idx = int(idx)
+        if type(self._value) != list:
+            print_err(f"{self._name} is not a list, giving up")
+            return
+        if idx == -1:
+            idx = len(self._value) - 1
+        while idx < len(self._value):
+            self._value.pop()
+        self._reconcile(self._value)
 
     @property
     def tags(self):
