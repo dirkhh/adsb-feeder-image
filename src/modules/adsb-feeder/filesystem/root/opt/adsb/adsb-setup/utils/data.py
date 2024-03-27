@@ -6,14 +6,15 @@ from uuid import uuid4
 
 from .environment import Env, is_true
 from .netconfig import NetConfig
-from .util import print_err
+from .util import print_err, stack_info
 
 
 @dataclass
-class Constants:
+class Data:
     def __new__(cc):
-        if not hasattr(cc, "instance"):
-            cc.instance = super(Constants, cc).__new__(cc)
+        if hasattr(cc, "instance"):
+            stack_info(f"ALERT: creating new instance of Data")
+        cc.instance = super(Data, cc).__new__(cc)
         return cc.instance
 
     data_path = Path("/opt/adsb")

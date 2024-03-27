@@ -25,57 +25,53 @@ class NetConfig:
 
 
 class UltrafeederConfig:
-    def __init__(self, constants):
-        self._constants = constants
+    def __init__(self, d):
+        self._d = d
 
     @property
     def enabled_aggregators(self):
-        aggregator_selection = self._constants.env_by_tags("aggregators").value
+        aggregator_selection = self._d.env_by_tags("aggregators").value
         if aggregator_selection == "micro":
             return {}
         # be careful to set the correct values for the individual aggregators;
         # these values are used in the main landing page for the feeder to provide
         # additional links for the enabled aggregators
-        for name in self._constants.netconfigs.keys():
-            aggregator_env = self._constants.env_by_tags(
-                [name, "ultrafeeder", "is_enabled"]
-            )
+        for name in self._d.netconfigs.keys():
+            aggregator_env = self._d.env_by_tags([name, "ultrafeeder", "is_enabled"])
             if not aggregator_env:
                 print_err(f"netconfigs references tag {name} with no associated env")
                 continue
             if aggregator_selection == "all":
                 aggregator_env.value = True
             elif aggregator_selection == "privacy":
-                aggregator_env.value = self._constants.netconfigs[name].has_policy
+                aggregator_env.value = self._d.netconfigs[name].has_policy
         return {
             name: value
-            for name, value in self._constants.netconfigs.items()
-            if (self._constants.is_enabled("ultrafeeder", name))
+            for name, value in self._d.netconfigs.items()
+            if (self._d.is_enabled("ultrafeeder", name))
         }
 
     def generate(self):
-        mlat_privacy = self._constants.is_enabled("mlat_privacy")
+        mlat_privacy = self._d.is_enabled("mlat_privacy")
         ret = set()
         for name, netconfig in self.enabled_aggregators.items():
-            uuid = self._constants.env_by_tags("ultrafeeder_uuid").value
+            uuid = self._d.env_by_tags("ultrafeeder_uuid").value
             if name == "adsblol":
-                uuid = self._constants.env_by_tags("adsblol_uuid").value
+                uuid = self._d.env_by_tags("adsblol_uuid").value
             ret.add(netconfig.generate(mlat_privacy=mlat_privacy, uuid=uuid))
         ret.discard("")
         # now we need to add the two internal inbound links (if needed)
-        if self._constants.is_enabled("uat978"):
+        if self._d.is_enabled("uat978"):
             ret.add("adsb,dump978,30978,uat_in")
-        if self._constants.is_enabled("airspy"):
+        if self._d.is_enabled("airspy"):
             ret.add("adsb,airspy_adsb,30005,beast_in")
-        if self._constants.is_enabled("sdrplay"):
+        if self._d.is_enabled("sdrplay"):
             ret.add("adsb,sdrplay-beast1090,30005,beast_in")
         # finally, add user provided things
-        ultrafeeder_extra_args = self._constants.env_by_tags(
-            "ultrafeeder_extra_args"
-        ).value
+        ultrafeeder_extra_args = self._d.env_by_tags("ultrafeeder_extra_args").value
         if ultrafeeder_extra_args:
             ret.add(ultrafeeder_extra_args)
-        remote_sdr = self._constants.env_by_tags("remote_sdr").value
+        remote_sdr = self._d.env_by_tags("remote_sdr").value
         if remote_sdr:
             if remote_sdr.find(",") == -1:
                 remote_sdr += ",30005"
