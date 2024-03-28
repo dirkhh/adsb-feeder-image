@@ -1,4 +1,5 @@
 Changes since v1.3.1 include
+- second (and hopefully correct) attempt to fix the blocklist issue on DietPi (and fix a couple related bugs)
 - make it easier to clear out the extra enviroment variable setting
 - ensure that the system survives the scenario where the user deletes their settings and then wants to restore them from a backup; recover version info for both adsb-setup and the containers
 - don't restore the container versions from the backup
