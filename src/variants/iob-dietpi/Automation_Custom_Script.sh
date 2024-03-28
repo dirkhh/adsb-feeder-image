@@ -17,22 +17,27 @@ apt install -y --no-install-recommends chrony
 # Copyright 2021-2023 Ramon F. Kolb (kx1t)- licensed under the terms and conditions
 # of the MIT license. The terms and conditions of this license are included with the Github
 # distribution of this package.
-#
-tmpdir=$(mktemp -d)
-pushd "$tmpdir" >/dev/null || exit
+
+
+    BLOCKED_MODULES=("rtl2832_sdr")
+    BLOCKED_MODULES+=("dvb_usb_rtl2832u")
+    BLOCKED_MODULES+=("dvb_usb_rtl28xxu")
+    BLOCKED_MODULES+=("dvb_usb_v2")
+    BLOCKED_MODULES+=("r820t")
+    BLOCKED_MODULES+=("rtl2830")
+    BLOCKED_MODULES+=("rtl2832")
+    BLOCKED_MODULES+=("rtl2838")
+    BLOCKED_MODULES+=("dvb_core")
     echo -n "Getting the latest RTL-SDR packages... "
-    apt-get install -qq -y git rtl-sdr >/dev/null
+    apt-get install -q -y git rtl-sdr
     echo -n "Getting the latest UDEV rules... "
-    mkdir -p -m 0755 /etc/udev/rules.d /etc/udev/hwdb.d
+    mkdir -p /etc/udev/rules.d /etc/udev/hwdb.d
     # First install the UDEV rules for RTL-SDR dongles
     curl -sL -o /etc/udev/rules.d/rtl-sdr.rules https://raw.githubusercontent.com/wiedehopf/adsb-scripts/master/osmocom-rtl-sdr.rules
     curl -sL -o /etc/udev/rules.d/dump978-fa.rules https://raw.githubusercontent.com/flightaware/dump978/master/debian/dump978-fa.udev
     # Now install the UDEV rules for SDRPlay devices
     curl -sL -o /etc/udev/rules.d/66-mirics.rules https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/66-mirics.rules
     curl -sL -o /etc/udev/hwdb.d/20-sdrplay.hwdb https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/20-sdrplay.hwdb
-    # make sure the permissions are set correctly
-    chmod 0755 /etc/udev/rules.d /etc/udev/hwdb.d
-    chmod go=r /etc/udev/rules.d/* /etc/udev/hwdb.d/*
     # Next, exclude the drivers so the dongles stay accessible
     echo -n "Excluding and unloading any competing RTL-SDR drivers... "
     UNLOAD_SUCCESS=true
@@ -53,11 +58,10 @@ pushd "$tmpdir" >/dev/null || exit
     if [[ "${UNLOAD_SUCCESS}" == false ]]; then
       echo "INFO: Although we've successfully excluded any competing RTL-SDR drivers, we weren't able to unload them. This will remedy itself when you reboot your system after the script finishes."
     fi
-popd >/dev/null
-# Check tmpdir is set and not null before attempting to remove it
-if [[ -z "$tmpdir" ]]; then
-  rm -rf "$tmpdir" >/dev/null 2>&1
-fi
+
+    echo "Deactivating biastees possibly turned on by kernel driver, device not found errors are expected:"
+    for i in 0 1 2 3; do rtl_biast -d "$i" -b 0; done
+    echo "Deactivation of biastees completed."
 
 
 #
