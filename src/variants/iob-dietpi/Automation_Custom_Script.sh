@@ -59,6 +59,10 @@ apt install -y --no-install-recommends chrony
       echo "INFO: Although we've successfully excluded any competing RTL-SDR drivers, we weren't able to unload them. This will remedy itself when you reboot your system after the script finishes."
     fi
 
+    echo "Deactivating biastees possibly turned on by kernel driver, device not found errors are expected:"
+    for i in 0 1 2 3; do rtl_biast -d "$i" -b 0; done
+    echo "Deactivation of biastees completed."
+
 
 #
 # End of Ramon Kolb's docker-install.sh
