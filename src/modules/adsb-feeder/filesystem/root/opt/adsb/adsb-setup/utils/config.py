@@ -19,7 +19,7 @@ def read_values_from_config_json():
 
 def write_values_to_config_json(data: dict):
     # print_err("writing .json file")
-    json.dump(data, open(JSON_FILE_PATH, "w"))
+    json.dump(data, open(JSON_FILE_PATH, "w"), indent=2)
 
 
 def read_values_from_env_file():
