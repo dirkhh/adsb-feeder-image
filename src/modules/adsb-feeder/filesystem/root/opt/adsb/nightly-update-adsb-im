@@ -30,7 +30,4 @@ if grep -q "^AF_IS_NIGHTLY_BASE_UPDATE_ENABLED=True" config/.env ; then
 fi
 if grep "^AF_IS_NIGHTLY_FEEDER_UPDATE_ENABLED=True" config/.env ; then
 	bash /opt/adsb/feeder-update
-elif grep "^AF_IS_NIGHTLY_CONTAINER_UPDATE_ENABLED=True" config/.env ; then
-	# the feeder update above includes the container update, so let's not do it twice in a row
-	bash /opt/adsb/docker-update-adsb-im
 fi

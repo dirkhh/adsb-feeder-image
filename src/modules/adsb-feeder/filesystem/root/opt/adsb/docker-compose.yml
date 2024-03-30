@@ -101,3 +101,5 @@ services:
     tmpfs:
       - /tmp:size=128M
       - /var/log:size=32M
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
