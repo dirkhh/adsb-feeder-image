@@ -1,4 +1,5 @@
 Changes since v1.3.2 include
+- fix FR24 sometimes being displayed in aggregator links when not enabled
 - show SDRplay SDR as 1090 receiver on the advanced page
 - fix bug in handling container version upgrades
 - clean up several inconsistencies in the handling of config files and docker containers

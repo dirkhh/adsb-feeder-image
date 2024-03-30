@@ -195,7 +195,7 @@
           </li>
         </ul>
       </div>
-      <div class="col-12">
+      <div {% if not is_enabled('flightradar') %}style="display: none;" {% endif %} class="col-12">
         <div class="lead">FlightRadar 24</div>
         <ul>
           <li>
