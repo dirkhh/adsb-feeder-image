@@ -329,6 +329,7 @@ class AdsbIm:
 
     def restart(self):
         if request.method == "POST":
+            write_values_to_env_file(self._constants.envs)
             resp = self._system._restart.restart_systemd()
             return "restarting" if resp else "already restarting"
         if request.method == "GET":
@@ -753,6 +754,7 @@ class AdsbIm:
                     self._system.reboot()
                     return render_template("/waitandredirect.html")
                 if key == "restart_containers":
+                    write_values_to_env_file(self._constants.envs)
                     # almost certainly overkill, but...
                     self._system.restart_containers()
                     return render_template("/waitandredirect.html")
