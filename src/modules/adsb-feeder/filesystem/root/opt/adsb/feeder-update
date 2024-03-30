@@ -200,10 +200,11 @@ sed -i "s/\"_ADSBIM_BASE_VERSION\": \"[^\"]*\"/\"_ADSBIM_BASE_VERSION\": \"$VERS
 # for this we don't want to restart the service, but manually run the script with the
 # correct arguments to do that
 # this also moves potentially updated yml files into the config folder
+# also updates .env/config.json with new container versions from docker.image.versions
 python3 /opt/adsb/adsb-setup/app.py --update-config
 
 echo "finally, trigger a container upgrade so that they match the new image"
-/opt/adsb/docker-update-adsb-im -no-fetch
+/opt/adsb/docker-update-adsb-im
 
 echo "restart the service"
 trap - EXIT

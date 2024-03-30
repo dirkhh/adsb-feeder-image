@@ -9,37 +9,8 @@ fi
 cd /opt/adsb
 TIME=$(date -Iseconds)
 
-if [ "$1" != "-no-fetch" ] ; then
-    # just in case - make some backups
-    cp docker.image.versions docker.image.versions.${TIME}
-    cp config/.env config/env.${TIME}
-
-    UPSTREAM_PATH=https://raw.githubusercontent.com/dirkhh/adsb-feeder-image/latest/src/modules/adsb-feeder/filesystem/root/opt/adsb/docker.image.versions
-    if curl -s $UPSTREAM_PATH > docker.image.versions.new ; then
-        mv docker.image.versions.new docker.image.versions
-        echo "${TIME}: successfully retrieved new image versions from server" >> /opt/adsb/adsb-setup.log
-    else
-        echo "${TIME}: failed to retrieved new image versions from server" >> /opt/adsb/adsb-setup.log
-        exit 1
-    fi
-
-    # let's check if this really brings in anything new:
-    # if any of them are label based (instead of SHA), we have to do the docker pull, anyway
-    LABELS=$(grep -v "^#" docker.image.versions.${TIME} | grep -v @sha | wc -l)
-    if [ "$LABELS" = "0" ] ; then
-        sort < docker.image.versions.${TIME} > /tmp/old.div
-        sort < docker.image.versions > /tmp/new.div
-
-        if diff /tmp/old.div /tmp/new.div > /dev/null 2>&1 ; then
-            echo "${TIME}: no new container images" >> /opt/adsb/adsb-setup.log
-            exit 0
-        fi
-    fi
-fi
-
-grep -v "_CONTAINER=" config/.env > config/env.new
-cat docker.image.versions >> config/env.new
-mv config/env.new config/.env
+# this shell script no longer changes or downloads docker.image.versions, this only happens during feeder-update
+# it now merely pulls the container versions as set in config.json / .env
 
 echo "$(date -Iseconds): pulling new container images and restarting docker" >> /opt/adsb/adsb-setup.log
 bash ./docker-pull.sh

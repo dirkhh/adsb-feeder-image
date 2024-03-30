@@ -28,7 +28,7 @@ sync-and-update:
 	ssh -S /tmp/adsb-setup-ssh-control root@$(HOST) python3 /opt/adsb/adsb-setup/app.py --update-config || true
 
 	# docker pull / docker compose on the yml files
-	ssh -S /tmp/adsb-setup-ssh-control root@$(HOST) /opt/adsb/docker-update-adsb-im -no-fetch
+	ssh -S /tmp/adsb-setup-ssh-control root@$(HOST) /opt/adsb/docker-update-adsb-im
 
 	# start webinterface back up
 	ssh -S /tmp/adsb-setup-ssh-control root@$(HOST) systemctl restart adsb-setup

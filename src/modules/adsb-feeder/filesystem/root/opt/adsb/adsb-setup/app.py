@@ -758,10 +758,6 @@ class AdsbIm:
                     return render_template("/waitandredirect.html")
                 if key == "secure_image":
                     self.set_secure_image()
-                if key == "update":
-                    # this needs a lot more checking and safety, but for now, just go
-                    cmdline = "/opt/adsb/docker-update-adsb-im"
-                    subprocess.run(cmdline, timeout=600.0, shell=True)
                 if key == "update_feeder_aps_beta" or key == "update_feeder_aps_stable":
                     channel = "stable" if key == "update_feeder_aps_stable" else "beta"
                     self.set_channel(channel)
