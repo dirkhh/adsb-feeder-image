@@ -1200,36 +1200,22 @@ if __name__ == "__main__":
     # (b) prior to starting this app, /opt/adsb/config is created as a symlink to the
     #     OS designated config dir (e.g., /mnt/dietpi_userdata/adsb-feeder) and the config
     #     files are moved to that place instead
-    config_files = {
-        ".env",
-        "1090uk.yml",
-        "ah.yml",
-        "airspy.yml",
-        "docker-compose.yml",
-        "dozzle.yml",
-        "fa.yml",
-        "fr24.yml",
-        "os.yml",
-        "pf.yml",
-        "pw.yml",
-        "rb.yml",
-        "rv.yml",
-        "sdrplay.yml",
-        "uat978.yml",
-    }
+
     adsb_dir = pathlib.Path("/opt/adsb")
     config_dir = pathlib.Path("/opt/adsb/config")
+
     if not config_dir.exists():
         config_dir.mkdir()
         env_file = adsb_dir / ".env"
         if env_file.exists():
             env_file.rename(config_dir / ".env")
-    for file_name in config_files:
-        config_file = pathlib.Path(adsb_dir / file_name)
+
+    for config_file in adsb_dir.glob("*.yml"):
         if config_file.exists():
-            new_file = pathlib.Path(config_dir / file_name)
+            new_file = config_dir / config_file.name
             config_file.rename(new_file)
             print_err(f"moved {config_file} to {new_file}")
+
     if not pathlib.Path(config_dir / ".env").exists():
         # I don't understand how that could happen
         shutil.copyfile(adsb_dir / "docker.image.versions", config_dir / ".env")

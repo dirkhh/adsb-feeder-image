@@ -185,15 +185,9 @@ else
     # copy the complete tree into the / filesystem
     cp -r . /
 fi
-# since the next run won't be a clean first start, we need to manually
-# mv the potentially updated .yml files into place and keep backups of
-# any that might have been changed
+
 # shellcheck disable=SC2164
 cd /opt/adsb
-for ymlfile in *.yml; do
-    cmp "$ymlfile" "config/$ymlfile" &> /dev/null || mv -f "config/$ymlfile" "config/${ymlfile}.bak"
-    mv -f "$ymlfile" "config/$ymlfile"
-done
 
 # make sure the version information is correct
 echo "$VERSION" > /opt/adsb/adsb.im.version
@@ -205,6 +199,7 @@ sed -i "s/\"_ADSBIM_BASE_VERSION\": \"[^\"]*\"/\"_ADSBIM_BASE_VERSION\": \"$VERS
 # BEFORE we update the Docker containers so that things align properly
 # for this we don't want to restart the service, but manually run the script with the
 # correct arguments to do that
+# this also moves potentially updated yml files into the config folder
 python3 /opt/adsb/adsb-setup/app.py --update-config
 
 echo "finally, trigger a container upgrade so that they match the new image"
