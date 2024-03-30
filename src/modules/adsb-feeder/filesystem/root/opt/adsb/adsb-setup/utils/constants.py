@@ -460,22 +460,6 @@ class Constants:
             is_mandatory=False,
             tags=["ultrafeeder_extra_env"],
         ),
-        # Container images
-        # -- these names are magic and are used in yaml files and the structure
-        #    of these names is used in scripting around that
-        # the version of the adsb-setup app and the containers are linked and
-        # there are subtle dependencies between them - so let's not include these
-        # in backup/restore
-        Env("ULTRAFEEDER_CONTAINER", tags=["ultrafeeder", "container", "norestore"]),
-        Env("FR24_CONTAINER", tags=["flightradar", "container", "norestore"]),
-        Env("FA_CONTAINER", tags=["flightaware", "container", "norestore"]),
-        Env("RB_CONTAINER", tags=["radarbox", "container", "norestore"]),
-        Env("PF_CONTAINER", tags=["planefinder", "container", "norestore"]),
-        Env("AH_CONTAINER", tags=["adsbhub", "container", "norestore"]),
-        Env("OS_CONTAINER", tags=["opensky", "container", "norestore"]),
-        Env("RV_CONTAINER", tags=["radarvirtuel", "container", "norestore"]),
-        Env("PW_CONTAINER", tags=["planewatch", "container", "norestore"]),
-        Env("TNUK_CONTAINER", tags=["1090uk", "container", "norestore"]),
         # Ultrafeeder config
         Env(
             "_ADSBIM_STATE_IS_ULTRAFEEDER_ADSBLOL_ENABLED",
@@ -586,6 +570,27 @@ class Constants:
             tags=["stage2", "is_enabled", "norestore"],
         ),
     }
+
+    # Container images
+    # -- these names are magic and are used in yaml files and the structure
+    #    of these names is used in scripting around that
+    # the version of the adsb-setup app and the containers are linked and
+    # there are subtle dependencies between them - so let's not include these
+    # in backup/restore
+
+    with open(data_path / 'docker.image.versions', 'r') as file:
+        for line in file:
+            if line.startswith('#'): continue
+            items = line.replace('\n', '').split('=')
+            if len(items) != 2:
+                print_err(f'docker.image.versions check line: {line}')
+                continue
+            key = items[0]
+            value = items[1]
+            entry = Env(key, tags=[key, "container", "norestore"])
+            entry.value = value # always use value from docker.image.versions as definitive source
+            _env.add(entry) # add to _env set
+
 
     @property
     def envs(self):
