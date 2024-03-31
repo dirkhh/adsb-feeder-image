@@ -81,15 +81,15 @@
         <p class="col-sm-3" id="sdr{{ sdr }}-serial"></p>
         <p class="col-sm-6 small" id="sdr{{ sdr }}-puprpose">
           <label class="checkbox-inline mr-2">
-            <input type="radio" id="1090-{{ sdr }}" name="1090serial" value="0">
+            <input type="radio" id="1090-{{ sdr }}" name="1090serial" value="">
             1090
           </label>
           <label class="checkbox-inline mr-2">
-            <input type="radio" id="978-{{ sdr }}" name="978serial" value="0">
+            <input type="radio" id="978-{{ sdr }}" name="978serial" value="">
             978
           </label>
           <label class="checkbox-inline mr-2">
-            <input type="radio" id="other-{{ sdr }}" name="other-{{ sdr }}" value="0" checked>
+            <input type="radio" id="other-{{ sdr }}" name="other-{{ sdr }}" value="" checked>
             Other
           </label>
         </p>
@@ -157,9 +157,15 @@
           let serial = sdrs[i]['serial'];
           document.getElementById(id).style.display = 'flex';
           document.getElementById(id + "-serial").innerHTML = serial;
+          let used = false;
           for (const c of consumers) {
             document.getElementById(c + '-' + i).value = serial;
             document.getElementById(c + '-' + i).checked = (use[c] == serial);
+            used |= (use[c] == serial)
+          }
+          // if not explicitely used, check box for other
+          if (!used) {
+            document.getElementById('other' + '-' + i).checked = true;
           }
         }
         for (let i = num; i < 4; i++) {

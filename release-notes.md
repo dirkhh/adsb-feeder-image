@@ -1,4 +1,5 @@
 Changes since v1.3.2 include
+- make 'other' checkbox for SDRs stick when selected
 - fix routeAPI not working
 - fix FR24 sometimes being displayed in aggregator links when not enabled
 - show SDRplay SDR as 1090 receiver on the advanced page

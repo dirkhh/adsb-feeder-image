@@ -593,10 +593,14 @@ class AdsbIm:
         serials: Dict[str, str] = {
             f: self._constants.env_by_tags(f"{f}serial").value for f in [978, 1090]
         }
+        used_serials = {
+            self._constants.env_by_tags(f).value for f in self._sdrdevices.purposes()
+        }
         for f in [978, 1090]:
-            if not serials[f] and serial_guess[f] not in serials.values():
+            if not serials[f] and serial_guess[f] not in used_serials:
                 serials[f] = serial_guess[f]
 
+        print_err(f'sdr_info->frequencies: {str(serials)}')
         return json.dumps(
             {
                 "sdrdevices": [sdr._json for sdr in self._sdrdevices.sdrs],
@@ -721,14 +725,7 @@ class AdsbIm:
         """
         # in the HTML, every input field needs to have a name that is concatenated by "--"
         # and that matches the tags of one Env
-        purposes = (
-            "978serial",
-            "1090serial",
-            "other-0",
-            "other-1",
-            "other-2",
-            "other-3",
-        )
+        purposes = self._sdrdevices.purposes()
         form: Dict = request.form
         seen_go = False
         allow_insecure = not self.check_secure_image()
@@ -916,12 +913,16 @@ class AdsbIm:
                     self._constants.env_by_tags(["mlathub_disable"]).value = False
                 # finally, painfully ensure that we remove explicitly asigned SDRs from other asignments
                 # this relies on the web page to ensure that each SDR is only asigned on purpose
-                if key in purposes:
+                # the key in quesiton will be explicitely set and does not need clearing
+                # empty string means no SDRs assigned to that purpose
+                if key in purposes and value != "":
                     for clear_key in purposes:
-                        if value == self._constants.env_by_tags(clear_key).value:
+                        if clear_key != key and value == self._constants.env_by_tags(clear_key).value:
+                            print_err(f'clearing: {str(clear_key)} old value: {value}')
                             self._constants.env_by_tags(clear_key).value = ""
 
                 e.value = value
+
         # done handling the input data
         # what implied settings do we have (and could we simplify them?)
         # first grab the SDRs plugged in and check if we have one identified for UAT

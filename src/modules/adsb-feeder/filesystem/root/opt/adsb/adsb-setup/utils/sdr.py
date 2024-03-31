@@ -20,7 +20,7 @@ class SDR:
         try:
             result = subprocess.run(cmdline, shell=True, capture_output=True)
         except subprocess.SubprocessError:
-            print(f"'lsusb -s {self._address} -v' failed", file=sys.stderr)
+            print_err(f"'lsusb -s {self._address} -v' failed")
             return ""
         output = result.stdout.decode()
         print_err(f"lsusb -s {self._address}: {output}")
@@ -65,6 +65,16 @@ class SDRDevices:
 
     def __repr__(self):
         return f"SDRDevices({','.join([s for s in self.sdrs])})"
+
+    def purposes(self):
+        return (
+            "978serial",
+            "1090serial",
+            "other-0",
+            "other-1",
+            "other-2",
+            "other-3",
+        )
 
     def get_sdr_info(self):
         try:
