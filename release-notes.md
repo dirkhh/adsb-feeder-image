@@ -1,4 +1,4 @@
-Changes since v1.3.2 include
+Changes since v1.3.3 include
 - fix: never use more than one SDR data input source for ultrafeeder
 - allow user provided env vars for sdrplay container
 - update lsusb output box when 'check SDRs' is clicked
@@ -7,9 +7,6 @@ Changes since v1.3.2 include
 - fix routeAPI not working
 - fix FR24 sometimes being displayed in aggregator links when not enabled
 - show SDRplay SDR as 1090 receiver on the advanced page
-- fix bug in handling container version upgrades
-- clean up several inconsistencies in the handling of config files and docker containers
-- add host.docker.internal to ultrafeeder
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)
