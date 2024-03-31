@@ -1,4 +1,5 @@
 Changes since v1.3.2 include
+- show SDRplay SDR as 1090 receiver on the advanced page
 - fix bug in handling container version upgrades
 - clean up several inconsistencies in the handling of config files and docker containers
 - add host.docker.internal to ultrafeeder

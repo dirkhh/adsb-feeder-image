@@ -128,6 +128,8 @@ class SDRDevices:
         for sdr in self.sdrs:
             if sdr._type == "airspy":
                 ret[1090] = sdr._serial
+            elif sdr._type == "sdrplay":
+                ret[1090] = sdr._serial
             elif sdr._type == "rtlsdr":
                 if sdr._serial in {"1090", "00001090"}:
                     ret[1090] = sdr._serial
