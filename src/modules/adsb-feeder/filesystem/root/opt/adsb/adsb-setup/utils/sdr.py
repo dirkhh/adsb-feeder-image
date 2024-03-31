@@ -11,6 +11,9 @@ class SDR:
         self._type = type_
         self._address = address
         self._serial_probed = None
+        self.lsusb_output = ""
+        # probe serial to popuplate lsusb_output right now
+        self._serial
 
     @property
     def _serial(self) -> str:
@@ -23,7 +26,7 @@ class SDR:
             print_err(f"'lsusb -s {self._address} -v' failed")
             return ""
         output = result.stdout.decode()
-        print_err(f"lsusb -s {self._address}: {output}")
+        self.lsusb_output = f"lsusb -s {self._address}: {output}"
         # is there a serial number?
         for line in output.splitlines():
             serial_match = re.search(r"iSerial\s+\d+\s+(.*)$", line)
@@ -59,6 +62,7 @@ class SDRDevices:
     def __init__(self):
         self.sdrs: List[SDR] = []
         self.duplicates: Set[str] = set()
+        self.lsusb_output = ""
 
     def __len__(self):
         return len(self.sdrs)
@@ -83,7 +87,7 @@ class SDRDevices:
             print("lsusb failed", file=sys.stderr)
             return
         lsusb_text = result.stdout.decode()
-        print_err(f"lsusb: {lsusb_text}")
+        self.lsusb_output = f"lsusb: {lsusb_text}"
         output = io.StringIO(lsusb_text)
         self.sdrs = []
         for line in output:
@@ -104,11 +108,14 @@ class SDRDevices:
                         candidate = SDR("airspy", address)
                     else:
                         candidate = SDR("rtlsdr", address)
-                    if candidate not in self.sdrs:
-                        self.sdrs.append(candidate)
+
+                    self.sdrs.append(candidate)
+
         found_serials = set()
         self.duplicates = set()
         for sdr in self.sdrs:
+            self.lsusb_output += f'\nSDR detected with serial: {sdr._serial}\n'
+            self.lsusb_output += sdr.lsusb_output
             if sdr._serial in found_serials:
                 self.duplicates.add(sdr._serial)
             else:

@@ -657,15 +657,9 @@ class AdsbIm:
 
         # just in case things have changed (the user plugged in a new device for example)
         self._sdrdevices._ensure_populated()
-        # embed lsusb output in the page
-        try:
-            lsusb = subprocess.run(
-                "lsusb", shell=True, check=True, capture_output=True
-            ).stdout.decode()
-        except:
-            lsusb = "lsusb failed"
+        # embed lsusb output from above _sdrdevices scan in the page
 
-        return render_template("advanced.html", lsusb=lsusb)
+        return render_template("advanced.html", lsusb=self._sdrdevices.lsusb_output)
 
     def set_channel(self, channel: str):
         with open(self._constants.data_path / "update-channel", "w") as update_channel:
