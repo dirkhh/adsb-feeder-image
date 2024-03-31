@@ -1,4 +1,5 @@
 Changes since v1.3.3 include
+- add FA mlat results to ultrafeeder
 - fix: never use more than one SDR data input source for ultrafeeder
 - allow user provided env vars for sdrplay container
 - update lsusb output box when 'check SDRs' is clicked
