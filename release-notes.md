@@ -1,4 +1,5 @@
 Changes since v1.3.2 include
+- fix: never use more than one SDR data input source for ultrafeeder
 - allow user provided env vars for sdrplay container
 - update lsusb output box when 'check SDRs' is clicked
 - lsusb output box has more verbose info for easier debugging

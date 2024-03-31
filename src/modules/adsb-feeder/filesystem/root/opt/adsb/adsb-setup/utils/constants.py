@@ -129,7 +129,8 @@ class Constants:
         Env("FEEDER_TZ", tags=["form_timezone"]),
         Env("MLAT_SITE_NAME", tags=["mlat_name"]),
         # SDR
-        Env("FEEDER_RTL_SDR", default="rtlsdr", tags=["rtlsdr"]),
+        # misnomer, FEEDER_RTL_SDR is used as follows: READSB_DEVICE_TYPE=${FEEDER_RTL_SDR}
+        Env("FEEDER_RTL_SDR", default="rtlsdr", tags=["readsb_device_type"]),
         Env(
             "FEEDER_ENABLE_BIASTEE",
             default="False",

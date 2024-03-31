@@ -976,7 +976,7 @@ class AdsbIm:
         )
         if not rtlsdr:
             env1090.value = ""
-        self._constants.env_by_tags("rtlsdr").value = "rtlsdr" if rtlsdr else ""
+        self._constants.env_by_tags("readsb_device_type").value = "rtlsdr" if rtlsdr else ""
 
         print_err(f"in the end we have")
         print_err(f"1090serial {env1090.value}")

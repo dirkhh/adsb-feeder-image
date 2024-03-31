@@ -65,21 +65,26 @@ class UltrafeederConfig:
         # now we need to add the two internal inbound links (if needed)
         if self._constants.is_enabled("uat978"):
             ret.add("adsb,dump978,30978,uat_in")
-        if self._constants.is_enabled("airspy"):
+
+        remote_sdr = self._constants.env_by_tags("remote_sdr").value
+        # make sure we only ever use 1 SDR / network input for ultrafeeder
+        if self._constants.env_by_tags("readsb_device_type").value != "":
+            pass
+        elif self._constants.is_enabled("airspy"):
             ret.add("adsb,airspy_adsb,30005,beast_in")
-        if self._constants.is_enabled("sdrplay"):
+        elif self._constants.is_enabled("sdrplay"):
             ret.add("adsb,sdrplay-beast1090,30005,beast_in")
+        elif remote_sdr:
+            if remote_sdr.find(",") == -1:
+                remote_sdr += ",30005"
+            ret.add(f"adsb,{remote_sdr.replace(' ', '')},beast_in")
+
         # finally, add user provided things
         ultrafeeder_extra_args = self._constants.env_by_tags(
             "ultrafeeder_extra_args"
         ).value
         if ultrafeeder_extra_args:
             ret.add(ultrafeeder_extra_args)
-        remote_sdr = self._constants.env_by_tags("remote_sdr").value
-        if remote_sdr:
-            if remote_sdr.find(",") == -1:
-                remote_sdr += ",30005"
-            ret.add(f"adsb,{remote_sdr.replace(' ', '')},beast_in")
 
         print_err(f"ended up with Ultrafeeder args {ret}")
 
