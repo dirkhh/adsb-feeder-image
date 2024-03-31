@@ -243,11 +243,14 @@ class AdsbIm:
         if not dns_state:
             print_err("we appear to have lost DNS")
 
+    def write_envfile(self):
+        write_values_to_env_file(self._constants.envs_for_envfile)
+
     def run(self, no_server=False):
         self._routemanager.add_proxy_routes(self.proxy_routes)
         debug = os.environ.get("ADSBIM_DEBUG") is not None
         self._debug_cleanup()
-        write_values_to_env_file(self._constants.envs)
+        self.write_envfile()
         self.update_dns_state()
         # in no_server mode we want to exit right after the housekeeping, so no
         # point in running this in the background
@@ -329,7 +332,7 @@ class AdsbIm:
 
     def restart(self):
         if request.method == "POST":
-            write_values_to_env_file(self._constants.envs)
+            self.write_envfile()
             resp = self._system._restart.restart_systemd()
             return "restarting" if resp else "already restarting"
         if request.method == "GET":
@@ -549,8 +552,7 @@ class AdsbIm:
                         "timeout expired joining Zerotier network... trying to continue..."
                     )
 
-            # let's make sure we write out the updated ultrafeeder config
-            write_values_to_env_file(self._constants.envs)
+            self.write_envfile()
 
             try:
                 subprocess.call(
@@ -754,7 +756,7 @@ class AdsbIm:
                     self._system.reboot()
                     return render_template("/waitandredirect.html")
                 if key == "restart_containers":
-                    write_values_to_env_file(self._constants.envs)
+                    self.write_envfile()
                     # almost certainly overkill, but...
                     self._system.restart_containers()
                     return render_template("/waitandredirect.html")
@@ -996,8 +998,7 @@ class AdsbIm:
             not env1090.value and not env978.value
         )
 
-        # let's make sure we write out the updated ultrafeeder config
-        write_values_to_env_file(self._constants.envs)
+        self.write_envfile()
 
         # if the button simply updated some field, stay on the same page
         if not seen_go:

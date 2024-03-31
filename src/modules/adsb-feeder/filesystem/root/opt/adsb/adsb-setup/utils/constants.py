@@ -591,6 +591,16 @@ class Constants:
             entry.value = value # always use value from docker.image.versions as definitive source
             _env.add(entry) # add to _env set
 
+    @property
+    def envs_for_envfile(self):
+        def value_for_envfile(e):
+            if "false_is_zero" in e.tags:
+                return "1" if is_true(e.value) else "0"
+            if "false_is_empty" in e.tags:
+                return "1" if is_true(e.value) else ""
+            return e.value
+
+        return {e.name: value_for_envfile(e) for e in self._env}
 
     @property
     def envs(self):

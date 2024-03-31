@@ -57,10 +57,6 @@ class Env:
 
     def _write_value_to_file(self, new_value):
         values = read_values_from_config_json()
-        if any(t == "false_is_zero" for t in self.tags):
-            new_value = "1" if is_true(new_value) else "0"
-        if any(t == "false_is_empty" for t in self.tags):
-            new_value = "1" if is_true(new_value) else ""
         values[self._name] = new_value
         write_values_to_config_json(values)
 
