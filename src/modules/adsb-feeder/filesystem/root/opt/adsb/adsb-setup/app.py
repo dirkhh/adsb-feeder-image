@@ -36,7 +36,7 @@ if not os.path.exists("/opt/adsb/config/config.json"):
 
 # nofmt: on
 # isort: off
-from flask import Flask, flash, redirect, render_template, request, send_file, url_for
+from flask import Flask, flash, redirect, render_template, request, Response, send_file, url_for
 
 
 from utils import (
@@ -601,13 +601,16 @@ class AdsbIm:
                 serials[f] = serial_guess[f]
 
         print_err(f'sdr_info->frequencies: {str(serials)}')
-        return json.dumps(
+        jsonString = json.dumps(
             {
                 "sdrdevices": [sdr._json for sdr in self._sdrdevices.sdrs],
                 "frequencies": serials,
                 "duplicates": ", ".join(self._sdrdevices.duplicates),
-            }
+                "lsusb_output": self._sdrdevices.lsusb_output
+            },
+            indent=2
         )
+        return Response(jsonString, mimetype='application/json')
 
     def base_info(self):
         return json.dumps(
@@ -655,11 +658,7 @@ class AdsbIm:
         if request.method == "POST":
             return self.update()
 
-        # just in case things have changed (the user plugged in a new device for example)
-        self._sdrdevices._ensure_populated()
-        # embed lsusb output from above _sdrdevices scan in the page
-
-        return render_template("advanced.html", lsusb=self._sdrdevices.lsusb_output)
+        return render_template("advanced.html")
 
     def set_channel(self, channel: str):
         with open(self._constants.data_path / "update-channel", "w") as update_channel:

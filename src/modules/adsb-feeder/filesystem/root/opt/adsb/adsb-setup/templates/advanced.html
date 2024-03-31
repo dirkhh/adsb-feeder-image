@@ -103,7 +103,7 @@
     <div class="fw-light collapse" id="showlsusb">
       <h5 class="mt-3">lsusb output</h5>
       <div class="row">
-        <pre class="col-12 small">{{ lsusb }}</pre>
+        <pre class="col-12 smal" id="lsusb_text"></pre>
       </div>
     </div>
   </div>
@@ -149,6 +149,7 @@
           document.getElementById('noSdrs').style.display = 'block';
           document.getElementById('1090biast').style.display = 'none';
         }
+        document.getElementById("lsusb_text").innerHTML = data.lsusb_output;
         let sdrs = data['sdrdevices'];
         let use = data['frequencies'];
         let consumers = ["1090", "978", "other"]

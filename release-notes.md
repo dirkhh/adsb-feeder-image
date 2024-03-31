@@ -1,4 +1,5 @@
 Changes since v1.3.2 include
+- update lsusb output box when 'check SDRs' is clicked
 - lsusb output box has more verbose info for easier debugging
 - make 'other' checkbox for SDRs stick when selected
 - fix routeAPI not working
