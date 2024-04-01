@@ -106,10 +106,10 @@ else
     # everything else is interpreted as a branch or a hash
     if [[ "$TARGET" == "beta" ]] ; then
         # for the beta channel, grab the last beta tag
-        TARGET=$(git tag --sort=version:refname|grep beta|tail -1)
+        TARGET=$(git tag --merged origin/beta --sort=version:refname|grep '^v[0-9]'|grep beta|tail -1)
     elif [[ "$TARGET" == "stable" ]] ; then
         # for the stable channel, grab the last non-beta tag
-        TARGET=$(git tag --sort=version:refname|grep -v beta|tail -1)
+        TARGET=$(git tag --merged origin/stable --sort=version:refname|grep '^v[0-9]'|grep -v beta|tail -1)
     fi
     # move to a temporary branch in order to be able to delete the branch we want to update to
     # this avoids "non-ff" issues after force pushes
