@@ -10,10 +10,10 @@ from .util import print_err
 
 
 @dataclass
-class Constants:
+class Data:
     def __new__(cc):
         if not hasattr(cc, "instance"):
-            cc.instance = super(Constants, cc).__new__(cc)
+            cc.instance = super(Data, cc).__new__(cc)
         return cc.instance
 
     data_path = Path("/opt/adsb")
@@ -579,18 +579,19 @@ class Constants:
     # there are subtle dependencies between them - so let's not include these
     # in backup/restore
 
-    with open(data_path / 'docker.image.versions', 'r') as file:
+    with open(data_path / "docker.image.versions", "r") as file:
         for line in file:
-            if line.startswith('#'): continue
-            items = line.replace('\n', '').split('=')
+            if line.startswith("#"):
+                continue
+            items = line.replace("\n", "").split("=")
             if len(items) != 2:
-                print_err(f'docker.image.versions check line: {line}')
+                print_err(f"docker.image.versions check line: {line}")
                 continue
             key = items[0]
             value = items[1]
             entry = Env(key, tags=[key, "container", "norestore"])
-            entry.value = value # always use value from docker.image.versions as definitive source
-            _env.add(entry) # add to _env set
+            entry.value = value  # always use value from docker.image.versions as definitive source
+            _env.add(entry)  # add to _env set
 
     @property
     def envs_for_envfile(self):
