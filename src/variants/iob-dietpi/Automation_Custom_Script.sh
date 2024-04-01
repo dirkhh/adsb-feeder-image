@@ -80,6 +80,13 @@ touch /opt/adsb/os.adsb.feeder.image
 touch /opt/adsb/adsb.im.passwd.and.keys
 cp ~root/.ssh/authorized_keys ~root/.ssh/adsb.im.installkey
 
+# setup initial .env with container versions
+mkdir -p /opt/adsb/config
+ENV_FILE=/opt/adsb/config/.env
+cp /opt/adsb/docker.image.versions "$ENV_FILE"
+echo "_ADSBIM_BASE_VERSION=$(cat /opt/adsb/adsb.im.version)" >> "$ENV_FILE"
+echo "_ADSBIM_CONTAINER_VERSION=$(cat /opt/adsb/adsb.im.version)" >> "$ENV_FILE"
+
 # make sure all the ADS-B Feeder services are enabled and started
 systemctl enable --now adsb-bootstrap.service
 systemctl enable --now adsb-setup.service
