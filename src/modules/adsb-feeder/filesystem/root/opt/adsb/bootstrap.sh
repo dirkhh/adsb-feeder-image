@@ -18,13 +18,6 @@ else
 	exit
 fi
 
-mkdir -p /opt/adsb/config
-cd /opt/adsb/config
-if [ ! -f .env ] ; then
-	cp /opt/adsb/docker.image.versions .env
-	echo "_ADSBIM_BASE_VERSION=$(cat /opt/adsb/adsb.im.version)" >> .env
-	echo "_ADSBIM_CONTAINER_VERSION=$(cat /opt/adsb/adsb.im.version)" >> .env
-fi
 bash /opt/adsb/docker-pull.sh &
 
 # the code below enables the redirection from the my.adsb.im service to the

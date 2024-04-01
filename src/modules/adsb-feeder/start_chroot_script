@@ -53,6 +53,13 @@ else
 fi
 echo "Using feeder image name $(cat /opt/adsb/feeder-image.name)"
 
+# setup initial .env with container versions
+mkdir -p /opt/adsb/config
+ENV_FILE=/opt/adsb/config/.env
+cp /opt/adsb/docker.image.versions "$ENV_FILE"
+echo "_ADSBIM_BASE_VERSION=$(cat /opt/adsb/adsb.im.version)" >> "$ENV_FILE"
+echo "_ADSBIM_CONTAINER_VERSION=$(cat /opt/adsb/adsb.im.version)" >> "$ENV_FILE"
+
 if grep -q "^diet" /etc/dist_variant ; then
 	# oh, lots of things things are different here...
 	sed -i "s/AUTO_SETUP_LOCALE=.*/AUTO_SETUP_LOCALE=en_US.UTF-8/" /boot/dietpi.txt
