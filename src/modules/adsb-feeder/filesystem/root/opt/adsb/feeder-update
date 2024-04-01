@@ -106,18 +106,12 @@ else
     # everything else is interpreted as a branch or a hash
     if [[ "$TARGET" == "beta" ]] ; then
         # for the beta channel, grab the last beta tag
-        TARGET=$(git tag --sort=version:refname|grep beta|tail -1)
+        TARGET=$(git tag --merged origin/beta --sort=version:refname|grep '^v[0-9]'|grep beta|tail -1)
     elif [[ "$TARGET" == "stable" ]] ; then
         # for the stable channel, grab the last non-beta tag
-        TARGET=$(git tag --sort=version:refname|grep -v beta|tail -1)
+        TARGET=$(git tag --merged origin/stable --sort=version:refname|grep '^v[0-9]'|grep -v beta|tail -1)
     fi
-    # move to a temporary branch in order to be able to delete the branch we want to update to
-    # this avoids "non-ff" issues after force pushes
-    FAKE_BRANCH="${RANDOM}-${RANDOM}"
-    git checkout -b "$FAKE_BRANCH" &> /dev/null
-    git branch -D "$TARGET" &> /dev/null || true
-    git checkout "$TARGET" &> /dev/null
-    git branch -D "$FAKE_BRANCH" &> /dev/null
+    git reset --hard "$TARGET"
     echo "restarting with feeder-update from $TARGET"
     if [ ! -f src/modules/adsb-feeder/filesystem/root/opt/adsb/feeder-update ] ; then
         echo "can't find the feeder-update app in the git tree, using existing one"
