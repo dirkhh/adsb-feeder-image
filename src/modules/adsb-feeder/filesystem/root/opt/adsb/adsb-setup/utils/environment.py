@@ -116,8 +116,7 @@ class Env:
 
     def list_set(self, idx, value):
         idx = int(idx)
-        value = self._normalize_value(is_true(value) if self.is_bool else value)
-        print_err(f"set {self._name}[{idx}] = {value}")
+        print_err(f"list_set {self._name}[{idx}] = {value}")
         if type(self._value) != list:
             stack_info(f"{self._name} is not a list, converting")
             self._value = [self._value]

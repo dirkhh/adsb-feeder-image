@@ -40,6 +40,7 @@ class Restart:
 
     def restart_systemd(self):
         if self.lock.locked():
+            print_err("restart locked")
             return False
         with self.lock:
             print_err("Calling /opt/adsb/adsb-system-restart.sh")
@@ -128,42 +129,3 @@ class System:
         else:
             return response.text, response.status_code
         return None, status
-
-
-class Version:
-    def __init__(self):
-        self._version = None
-
-        self.file_path = Data().version_file
-        # We have to initialise Data() here to avoid a circular import
-        # Usually that sucks. But in this case, we're only using the version file path.
-        # So it's not too bad.
-
-    def _get_base_version(self):
-        basev = "unknown"
-        if os.path.isfile(self.data.version_file):
-            with open(self.data.version_file, "r") as v:
-                basev = v.read().strip()
-        if basev == "":
-            # something went wrong setting up the version info when
-            # the image was crated - try to get an approximation
-            output: str = ""
-            try:
-                result = subprocess.run(
-                    'ls -o -g --time-style="+%y%m%d" /opt/adsb/adsb.im.version | cut -d\  -f 4',
-                    shell=True,
-                    capture_output=True,
-                    timeout=5.0,
-                )
-            except subprocess.TimeoutExpired as exc:
-                output = exc.stdout.decode().strip()
-            else:
-                output = result.stdout.decode().strip()
-            if len(output) == 6:
-                basev = f"{output}-0"
-            return basev
-
-    def __str__(self):
-        if self._version is None:
-            self._version = self._get_base_version()
-        return self._version

@@ -37,15 +37,15 @@ class Aggregator:
 
     @property
     def lat(self):
-        return self._d.env_by_tags("FEEDER_LAT").list_get(self._idx)
+        return self._d.env_by_tags("lat").list_get(self._idx)
 
     @property
     def lng(self):
-        return self._d.env_by_tags("FEEDER_LONG").list_get(self._idx)
+        return self._d.env_by_tags("lng").list_get(self._idx)
 
     @property
     def alt(self):
-        return self._d.env_by_tags("FEEDER_ALT_M").list_get(self._idx)
+        return self._d.env_by_tags("alt").list_get(self._idx)
 
     @property
     def alt_ft(self):
@@ -211,6 +211,7 @@ class FlightRadar24(Aggregator):
         return uat_key
 
     def _activate(self, user_input: str, idx=0):
+        print_err(f"FR_activate adsb |{user_input}| idx |{idx}|")
         if not user_input:
             return False
         input_values = user_input.count("::")
@@ -224,9 +225,12 @@ class FlightRadar24(Aggregator):
         if not adsb_sharing_key and not uat_sharing_key:
             return False
         self._idx = idx  # this way the properties work correctly
+        print_err(
+            f"FR_activate adsb |{adsb_sharing_key}| uat |{uat_sharing_key}| idx |{idx}|"
+        )
         if is_email(adsb_sharing_key):
             # that's an email address, so we are looking to get a sharing key
-            adsb_sharing_key = self._request_fr24_sharing_key(adsb_sharing_key, idx)
+            adsb_sharing_key = self._request_fr24_sharing_key(adsb_sharing_key)
             print_err(f"got back sharing_key |{adsb_sharing_key}|")
         if not re.match("[0-9a-zA-Z]+", adsb_sharing_key):
             adsb_sharing_key = None
@@ -237,10 +241,12 @@ class FlightRadar24(Aggregator):
         if not re.match("[0-9a-zA-Z]+", uat_sharing_key):
             uat_sharing_key = None
         if adsb_sharing_key or uat_sharing_key:
-            # we have a sharing key, let's just enable the container
-            self._d.env_by_tags(["flightradar", "key"]).value = adsb_sharing_key
-            self._d.env_by_tags(["flightradar_uat", "key"]).value = uat_sharing_key
-            self._d.env_by_tags(self._enabled_tags).value = True
+            # we have at least one sharing key, let's just enable the container
+            self._d.env_by_tags(["flightradar", "key"]).list_set(idx, adsb_sharing_key)
+            self._d.env_by_tags(["flightradar_uat", "key"]).list_set(
+                idx, uat_sharing_key
+            )
+            self._d.env_by_tags(self._enabled_tags).list_set(idx, True)
 
         return True
 

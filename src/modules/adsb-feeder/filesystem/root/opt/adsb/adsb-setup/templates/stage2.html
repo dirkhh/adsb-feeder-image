@@ -9,17 +9,38 @@
 </div>
 <div class="row">
   <form method="post">
-    <div class="form-group row">
-      <span class="col-12 col-sm-5 col-md-4 col-lg-3">
-        <label for="stage2_name">Stage2 Station Name</label>
+    <div class="form-group row align-items-center mb-1">
+      <span class="col-md">
+        <label for="mlat_name">Station Name (shows up on public maps if enabled later)</label>
       </span>
-      <span class="col-12 col-sm-7 col-md-8 col-lg-9">
-        <input type="text" name="stage2_name" required placeholder="Stage2" class="form-control col-md"
+      <span class="col-md">
+        <input type="text" id="mlat_name" name="site_name" required placeholder="my-awesome-antenna"
+               class="form-control" pattern="[\-_.a-zA-Z0-9 ]+" title="Letters, numbers, -, _, ."
                value="{{ list_value_by_tag('site_name', 0) }}" />
       </span>
     </div>
+    <div class="form-group row align-items-center mb-1">
+      <span class="col-md">
+        <label for="lat">Latitude (-90 .. +90 -- please use 5 decimals, e.g. 45.12345)</label>
+      </span>
+      <span class="col-md">
+        <input type="text" id="lat" name="lat" required placeholder="Antenna latitude" class="form-control"
+               pattern="(?:\+|-|)(?:(?:[0-8]?\d)(?:\.\d+)?|90(?:\.0+)?)(,(?:\+|-|)(:?(:?\d?\d|1[0-7]\d)(?:\.\d+)?|180(?:\.0+)?))?"
+               title="Number between -90 and 90" value="{{ list_value_by_tag('lat', 0) }}" />
+      </span>
+    </div>
+    <div class="form-group row align-items-center mb-1">
+      <span class="col-md">
+        <label for="lng">Longitude (-180 .. +180 -- please use 5 decimals , e.g. -122.12345)</label>
+      </span>
+      <span class="col-md">
+        <input type="text" id="lng" name="lng" required placeholder="Antenna longitude" class="form-control"
+               pattern="(?:\+|-|)(:?(:?\d?\d|1[0-7]\d)(?:\.\d+)?|180(?:\.0+)?)" title="Number between -180 and 180"
+               value="{{ list_value_by_tag('lng', 0) }}" />
+      </span>
+    </div>
     <div class="form-group">
-      <button type="submit" name="set_stage2_name" value="go" class="btn btn-primary">Update</button>
+      <button type="submit" name="set_stage2_data" value="go" class="btn btn-primary">Update</button>
     </div>
   </form>
 </div>

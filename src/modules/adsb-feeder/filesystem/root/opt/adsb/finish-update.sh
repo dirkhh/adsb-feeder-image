@@ -3,6 +3,11 @@
 # this script can do some housekeeping tasks before the adsb-setup
 # is (re)started
 
+if [ -f /opt/adsb/verbose ] ; then
+	mkdir -p /opt/adsb/config
+	mv /opt/adsb/verbose /opt/adsb/config/verbose
+fi
+
 ACTION="update to"
 if [[ -f "/opt/adsb/finish-update.done" ]]; then
 	# so we have completed one of the 'post 0.15' updates already.

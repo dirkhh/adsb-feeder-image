@@ -1,8 +1,6 @@
 # dataclass
 from dataclasses import dataclass
-from os import getenv, path
 from pathlib import Path
-from uuid import uuid4
 
 from .environment import Env
 from .netconfig import NetConfig
@@ -135,7 +133,6 @@ class Data:
         Env("FEEDER_ALT_M", default=[""], is_mandatory=True, tags=["alt"]),
         Env("FEEDER_TZ", default=[""], is_mandatory=True, tags=["tz"]),
         Env("SITE_NAME", default=[""], is_mandatory=True, tags=["site_name"]),
-        Env("MAP_NAME", default=[""], is_mandatory=True, tags=["map_name"]),
         #
         # SDR settings are only valid on an integrated feeder or a micro feeder, not on stage2
         # misnomer, FEEDER_RTL_SDR is used as follows: READSB_DEVICE_TYPE=${FEEDER_RTL_SDR}
@@ -161,9 +158,7 @@ class Data:
         Env("FEEDER_UNUSED_SERIAL_3", tags=["other-3"]),
         #
         # Ultrafeeder config, used for all 4 types of Ultrafeeder instances
-        Env(
-            "FEEDER_ULTRAFEEDER_CONFIG", is_mandatory=True, tags=["ultrafeeder_config"]
-        ),
+        Env("FEEDER_ULTRAFEEDER_CONFIG", tags=["ultrafeeder_config"]),
         Env("ADSBLOL_UUID", default=[""], tags=["adsblol_uuid"]),
         Env("ULTRAFEEDER_UUID", default=[""], tags=["ultrafeeder_uuid"]),
         Env("MLAT_PRIVACY", default=True, tags=["mlat_privacy", "is_enabled"]),
@@ -516,7 +511,7 @@ class Data:
             tags=["low_disk", "norestore"],
         ),
         Env(
-            "_ADSBIM_STATE_STAGE2",
+            "AF_IS_STAGE2",
             default=False,
             tags=["stage2", "is_enabled", "norestore"],
         ),
@@ -571,14 +566,36 @@ class Data:
 
     @property
     def envs_for_envfile(self):
-        def value_for_envfile(e):
+        def adjust_bool_impl(e, value):
             if "false_is_zero" in e.tags:
-                return "1" if is_true(e.value) else "0"
+                return "1" if is_true(value) else "0"
             if "false_is_empty" in e.tags:
-                return "1" if is_true(e.value) else ""
-            return e.value
+                return "1" if is_true(value) else ""
+            return is_true(value)
 
-        return {e.name: value_for_envfile(e) for e in self._env}
+        def adjust_bool(e, value):
+            v = adjust_bool_impl(e, value)
+            print_err(f"adjust_bool({e}, {e.tags}) = {v}")
+            return v
+
+        ret = {}
+        for e in self._env:
+            if type(e._value) == list:
+                for i in range(len(e._value)):
+                    suffix = "" if i == 0 else f"_{i}"
+                    value = e._value[i]
+                    ret[e._name + suffix] = (
+                        adjust_bool(e, value)
+                        if type(value) == bool or "is_enabled" in e.tags
+                        else value
+                    )
+                    print_err(f"WRITING: {e._name}{suffix} = {ret[e._name + suffix]}")
+            else:
+                ret[e.name] = (
+                    adjust_bool(e, e._value) if type(e._value) == bool else e._value
+                )
+                print_err(f"WRITING: {e._name} = {ret[e._name]}")
+        return ret
 
     @property
     def envs(self):
@@ -631,12 +648,16 @@ class Data:
             tags = [tags]
         e = self._get_enabled_env_by_tags(tags)
         if type(e._value) == list:
-            return e and e.list_get(0)
-        return e and e.value
+            ret = e and is_true(e.list_get(0))
+            print_err(f"is_enabled called on list: {e}[0] = {ret}")
+            return ret
+        return e and is_true(e._value)
 
     # helper function to see if list element is enabled
     def list_is_enabled(self, tags, idx):
         if type(tags) != list:
             tags = [tags]
         e = self._get_enabled_env_by_tags(tags)
-        return e.list_get(idx) if e else False
+        ret = is_true(e.list_get(idx)) if e else False
+        print_err(f"list_is_enabled: {e}[{idx}] = {ret}")
+        return ret

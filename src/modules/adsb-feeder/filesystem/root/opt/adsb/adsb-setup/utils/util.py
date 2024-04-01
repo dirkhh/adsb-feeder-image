@@ -1,10 +1,17 @@
 import inspect
 import itertools
 import math
+import os
 import re
 import requests
 import sys
 import time
+
+verbose = (
+    0
+    if not os.path.exists("/opt/adsb/config/verbose")
+    else int(open("/opt/adsb/config/verbose", "r").read().strip())
+)
 
 
 def stack_info(msg=""):
@@ -35,6 +42,9 @@ def cleanup_str(s):
 
 
 def print_err(*args, **kwargs):
+    level = int(kwargs.pop("level", 0))
+    if level > 0 and int(verbose) & int(level) == 0:
+        return
     timestamp = time.strftime(
         "%Y-%m-%dT%H:%M:%S", time.gmtime()
     ) + ".{0:03.0f}Z".format(math.modf(time.time())[0] * 1000)
@@ -66,6 +76,7 @@ def generic_get_json(url: str, data):
                 "User-Agent": "ADS-B Image",
             },
         )
+        json_response = response.json()
     except (
         requests.HTTPError,
         requests.ConnectionError,
@@ -78,5 +89,5 @@ def generic_get_json(url: str, data):
         # for some reason this didn't work
         print_err("checking {url} failed: reason unknown")
     else:
-        return response.json(), response.status_code
+        return json_response, response.status_code
     return None, status

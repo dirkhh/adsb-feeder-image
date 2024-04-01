@@ -55,17 +55,17 @@ def write_values_to_env_file(values):
             # _ADSBIM_STATE variables aren't needed in the .env file
             if key.startswith("_ADSBIM_STATE"):
                 continue
-            print_err(f"write_values_to_env_file {key} {value}")
             if type(value) == list:
+                print_err(f"WARNING: ==== key {key} has list value {value}")
                 for i in range(len(value)):
                     suffix = "" if i == 0 else f"_{i}"
                     env_line = f"{key}{suffix}={value[i]}\n"
                     f.write(env_line)
-                    print_err(f"wrote {env_line} to .env")
+                    print_err(f"wrote {env_line.strip()} to .env")
             else:
                 env_line = f"{key}={value.strip() if type(value) == str else value}\n"
                 f.write(env_line)
-                print_err(f"wrote {env_line} to .env")
+                print_err(f"wrote {env_line.strip()} to .env")
     # write the user env in the form that can be easily inserted into the yml file
     # using the name here so it comes from the values passed in
     val = values.get("_ADSBIM_STATE_EXTRA_ENV", None)

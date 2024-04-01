@@ -1,5 +1,5 @@
 from uuid import uuid4
-from utils.util import print_err
+from utils.util import is_true, print_err
 
 
 class NetConfig:
@@ -57,7 +57,7 @@ class UltrafeederConfig:
                     self._micro,
                     self._d.netconfigs[name].has_policy,
                 )
-            if aggregator_env.list_get(self._micro):
+            if is_true(aggregator_env.list_get(self._micro)):
                 ret[name] = value
         return ret
 

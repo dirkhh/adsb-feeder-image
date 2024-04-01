@@ -43,4 +43,12 @@ if [ -f /opt/adsb/config/.env ] ; then
 	    grep "AF_IS_SDRPLAY_LICENSE_ACCEPTED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
 		COMPOSE_FILES+=( "-f" "/opt/adsb/config/sdrplay.yml" )
 	fi
+	# finally, check if this is a stage 2 setup and enable all of the ultrafeeders
+	if grep "AF_IS_STAGE2=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
+	    # stage 2 feeder, look through the various containers
+	    NUM=$(grep AF_NUM_MICRO_SITES= /opt/adsb/config/.env | sed -n 's/.*=\([0-9]\+\).*/\1/p')
+	    for ((i = 1; i <= NUM; i++)); do
+		COMPOSE_FILES+=( "-f" "/opt/adsb/config/stage2_micro_site_${i}.yml" )
+	    done
+	fi
 fi

@@ -80,6 +80,8 @@ class AggStatus:
     def check(self):
         # figure out the feeder state at this aggregator (if possible)
         if self._agg == "adsblol":
+            uuid = self._d.env_by_tags("adsblol_uuid").list_get(self._idx)
+            name = self._d.env_by_tags("site_name").list_get(self._idx)
             json_url = "https://api.adsb.lol/0/me"
             response_dict, status = self.get_json(json_url)
             if response_dict and status == 200:
@@ -88,10 +90,19 @@ class AggStatus:
                     lolbeast = lolclients.get("beast")
                     lolmlat = lolclients.get("mlat")
                     self._beast = (
-                        T.Yes if isinstance(lolbeast, list) and len(lolbeast) else T.No
+                        T.Yes
+                        if isinstance(lolbeast, list)
+                        and any(
+                            b.get("uuid", "xxxxxxxx-xxxx-")[:14] == uuid[:14]
+                            for b in lolbeast
+                        )
+                        else T.No
                     )
                     self._mlat = (
-                        T.Yes if isinstance(lolmlat, list) and len(lolmlat) else T.No
+                        T.Yes
+                        if isinstance(lolbeast, list)
+                        and any(b.get("user", "") == name for b in lolmlat)
+                        else T.No
                     )
                     self._last_check = datetime.now()
                 else:
@@ -161,7 +172,7 @@ class AggStatus:
             else:
                 print_err(f"flightradar returned {status}")
         elif self._agg == "radarplane":
-            uuid = self._d.env_by_tags("ultrafeeder_uuid").value
+            uuid = self._d.env_by_tags("ultrafeeder_uuid").list_get(self._idx)
             json_url = f"https://radarplane.com/api/v1/feed/check/{uuid}"
             rp_dict, status = self.get_json(json_url)
             if rp_dict and rp_dict.get("data") and status == 200:
@@ -287,7 +298,7 @@ class AggStatus:
             else:
                 print_err(f"tat returned {status}")
         elif self._agg == "planespotters":
-            uf_uuid = self._d.env_by_tags("ultrafeeder_uuid").value
+            uf_uuid = self._d.env_by_tags("ultrafeeder_uuid").list_get(self._idx)
             html_url = f"https://www.planespotters.net/feed/status/{uf_uuid}"
             ps_text, status = self.get_plain(html_url)
             if ps_text and status == 200:

@@ -67,6 +67,8 @@ services:
       #- ENABLE_978=${FEEDER_ENABLE_UAT978_STAGE2NUM}
       #- URL_978=${FEEDER_URL_978_STAGE2NUM}
       #
+      # USER_PROVIDED_ENV_START
+      # USER_PROVIDED_ENV_END
     volumes:
       - /opt/adsb/config/ultrafeeder/globe_history_STAGE2NUM:/var/globe_history
       - /opt/adsb/config/ultrafeeder/graphs1090_STAGE2NUM:/var/lib/collectd

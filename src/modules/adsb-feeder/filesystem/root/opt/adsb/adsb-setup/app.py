@@ -15,7 +15,6 @@ import threading
 from uuid import uuid4
 import sys
 import zipfile
-import tempfile
 from base64 import b64encode
 from datetime import datetime
 from os import urandom
@@ -29,6 +28,13 @@ from utils.config import (
     write_values_to_config_json,
     write_values_to_env_file,
 )
+
+if not os.path.exists("/opt/adsb/config/config.json"):
+    print_err(
+        "No config.json found, this should have been created before starting adsb-setup"
+    )
+    values = read_values_from_env_file()
+    write_values_to_config_json(values)
 
 # nofmt: on
 # isort: off
@@ -69,6 +75,7 @@ from utils import (
     stack_info,
     generic_get_json,
     is_true,
+    verbose,
 )
 
 # nofmt: off
@@ -79,6 +86,7 @@ from werkzeug.utils import secure_filename
 
 class AdsbIm:
     def __init__(self):
+        print_err("starting AdsbIm.__init__", level=4)
         self.app = Flask(__name__)
         self.app.secret_key = urandom(16).hex()
 
@@ -183,15 +191,16 @@ class AdsbIm:
 
         # finally, try to make sure that we have all the pieces that we need and recreate what's missing
         stage2_yml_template = self._d.config_path / "stage2.yml"
-        for i in range(1, self._d.env_by_tags("num_micro_sites").value + 1):
+        for i in range(self._d.env_by_tags("num_micro_sites").value + 1):
             if not self._d.env_by_tags("adsblol_uuid").list_get(i):
                 self._d.env_by_tags("adsblol_uuid").list_set(i, str(uuid4()))
             if not self._d.env_by_tags("ultrafeeder_uuid").list_get(i):
                 self._d.env_by_tags("ultrafeeder_uuid").list_set(i, str(uuid4()))
-            create_stage2_yml_from_template(
-                self._d.config_path / f"stage2_micro_site_{i}.yml",
-                stage2_yml_template,
-            )
+            if i > 0:
+                create_stage2_yml_from_template(
+                    self._d.config_path / f"stage2_micro_site_{i}.yml",
+                    stage2_yml_template,
+                )
 
     def update_boardname(self):
         board = ""
@@ -608,7 +617,7 @@ class AdsbIm:
     def base_is_configured(self):
         base_config: set[Env] = {env for env in self._d._env if env.is_mandatory}
         for env in base_config:
-            if env.value == None:
+            if env._value == None or (type(env._value) == list and not env.list_get(0)):
                 print_err(f"base_is_configured: {env} isn't set up yet")
                 return False
         return True
@@ -863,6 +872,7 @@ class AdsbIm:
         purposes = self._sdrdevices.purposes()
         form: Dict = request.form
         seen_go = False
+        next_url = None
         allow_insecure = not self.check_secure_image()
         # special handling of per-micro-site aggregators
         sitenum = 0
@@ -907,15 +917,9 @@ class AdsbIm:
                     num = int(key[len("remove_micro_") :])
                     self.remove_micro_site(num)
                     return redirect(url_for("stage2"))
-                if key == "set_stage2_name":
-                    # just grab the new name and go back
-                    name = form.get(f"stage2_name")
-                    print_err(f"setting new stage2 name to {name}")
-                    self._d.env_by_tags("site_name").list_set(0, name)
-                    # since this is a stage2 system, let's also set the name for
-                    # the combined tar1090 map
-                    self._d.env_by_tags("map_name").list_set(0, name)
-                    return redirect(url_for("stage2"))
+                if key == "set_stage2_data":
+                    # just grab the new data and go back
+                    next_url = url_for("stage2")
                 if key == "aggregators":
                     # user has clicked Submit on Aggregator page
                     self._d.env_by_tags("aggregators_chosen").value = True
@@ -1027,6 +1031,7 @@ class AdsbIm:
                     self.set_rpw()
                     continue
                 if key in self._other_aggregators:
+                    print_err(f"found other aggregator {key}")
                     is_successful = False
                     base = key.replace("--submit", "")
                     aggregator_argument = form.get(f"{base}--key", None)
@@ -1037,6 +1042,9 @@ class AdsbIm:
                         user = form.get(f"{base}--user", None)
                         aggregator_argument += f"::{user}"
                     aggregator_object = self._other_aggregators[key]
+                    print_err(
+                        f"got aggregator object {aggregator_object} -- activating"
+                    )
                     try:
                         is_successful = aggregator_object._activate(
                             aggregator_argument, sitenum
@@ -1106,18 +1114,13 @@ class AdsbIm:
                 if sitenum > 0 and "is_enabled" in tags:
                     print_err(f"setting up stage2 micro site number {sitenum}: {key}")
                     self._d.env_by_tags("aggregators_chosen").value = True
-                    self._d.env_by_tags(tags).list_set(
-                        sitenum, True if is_true(value) else False
-                    )
+                    self._d.env_by_tags(tags).list_set(sitenum, is_true(value))
                 else:
                     if type(e._value) == list:
                         e.list_set(sitenum, value)
                     else:
                         e.value = value
                 if key == "mlat_name":
-                    # in a single system setup, we used to treat mlat and map name as the same, but for a
-                    # stage2 system having these as different variables makes things more obvious
-                    self._d.env_by_tags("map_name").value = value
                     self._d.env_by_tags("site_name").list_set(sitenum, value)
         # done handling the input data
         # what implied settings do we have (and could we simplify them?)
@@ -1183,32 +1186,51 @@ class AdsbIm:
             env1090.value = ""
         self._d.env_by_tags("readsb_device_type").value = "rtlsdr" if rtlsdr else ""
 
-        print_err(f"in the end we have")
-        print_err(f"1090serial {env1090.value}")
-        print_err(f"978serial {env978.value}")
-        print_err(f"airspy container is {self._d.is_enabled(['airspy', 'is_enabled'])}")
-        print_err(
-            f"SDRplay container is {self._d.is_enabled(['sdrplay', 'is_enabled'])}"
-        )
-        print_err(f"dump978 container {self._d.is_enabled(['uat978', 'is_enabled'])}")
-        # finally, set a flag to indicate whether this is a stage 2 configuration or whether it has actual SDRs attached
-        self._d.env_by_tags(["stage2", "is_enabled"]).value = (
-            not env1090.value and not env978.value
-        )
+        if verbose & 1:
+            print_err(f"in the end we have")
+            print_err(f"1090serial {env1090.value}")
+            print_err(f"978serial {env978.value}")
+            print_err(
+                f"airspy container is {self._d.is_enabled(['airspy', 'is_enabled'])}"
+            )
+            print_err(
+                f"SDRplay container is {self._d.is_enabled(['sdrplay', 'is_enabled'])}"
+            )
+            print_err(
+                f"dump978 container {self._d.is_enabled(['uat978', 'is_enabled'])}"
+            )
 
+        # set all of the ultrafeeder config data up
+        for i in range(1 + self._d.env_by_tags("num_micro_sites").value):
+            print_err(f"ultrafeeder_config {i}", level=2)
+            if i >= len(self._d.ultrafeeder):
+                self._d.ultrafeeder.append(UltrafeederConfig(data=self._d, micro=i))
+            self._d.env_by_tags("ultrafeeder_config").list_set(
+                i, self._d.ultrafeeder[i].generate()
+            )
+        # finally, check if this has given us enough configuration info to
+        # start the containers
+        agg_chosen_env = self._d.env_by_tags("aggregators_chosen")
+        if self.base_is_configured() or self._d.is_enabled("stage2"):
+            self._d.env_by_tags(["base_config", "is_enabled"]).value = True
+            if self.at_least_one_aggregator():
+                agg_chosen_env.value = True
+
+        # write all this out to the .env file so that a docker-compose run will find it
         self.write_envfile()
 
         # if the button simply updated some field, stay on the same page
         if not seen_go:
+            print_err("no go button, so stay on the same page", level=2)
             return redirect(request.url)
 
-        # finally, check if this has given us enough configuration info to
-        # start the containers
-        if self.base_is_configured() or self._d.is_enabled("stage2"):
-            self._d.env_by_tags(["base_config", "is_enabled"]).value = True
-            agg_chosen_env = self._d.env_by_tags("aggregators_chosen")
-            if agg_chosen_env.value == True or self.at_least_one_aggregator():
-                agg_chosen_env.value = True
+        # where do we go from here?
+        if next_url:  # we figured it out above
+            return redirect(next_url)
+        if self._d.is_enabled("base_config"):
+            print_err("base config is completed", level=2)
+            if agg_chosen_env.value == True:
+                print_err("base config is completed", level=2)
                 if self._d.is_enabled("sdrplay") and not self._d.is_enabled(
                     "sdrplay_license_accepted"
                 ):
@@ -1218,6 +1240,7 @@ class AdsbIm:
                 return redirect(url_for("stage2"))
             if self._d.env_by_tags("aggregators").value != "micro":
                 return redirect(url_for("aggregators"))
+        print_err("base config not completed", level=2)
         return redirect(url_for("director"))
 
     @check_restart_lock
