@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import io
 import re
 import subprocess
@@ -114,7 +115,7 @@ class SDRDevices:
         found_serials = set()
         self.duplicates = set()
         for sdr in self.sdrs:
-            self.lsusb_output += f'\nSDR detected with serial: {sdr._serial}\n'
+            self.lsusb_output += f"\nSDR detected with serial: {sdr._serial}\n"
             self.lsusb_output += sdr.lsusb_output
             if sdr._serial in found_serials:
                 self.duplicates.add(sdr._serial)

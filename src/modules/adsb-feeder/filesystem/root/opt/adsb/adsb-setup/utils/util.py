@@ -1,4 +1,27 @@
-import re, itertools, sys, time, math
+import inspect
+import itertools
+import math
+import re
+import requests
+import sys
+import time
+
+
+def stack_info(msg=""):
+    framenr = 0
+    for frame, filename, line_num, func, source_code, source_index in inspect.stack():
+        if framenr == 0:
+            framenr += 1
+            continue
+        print_err(f" .. [{framenr}] {filename}:{line_num}: in {func}()")
+        if framenr == 1:
+            fname = func
+        framenr += 1
+        if func.startswith("dispatch_request"):
+            break
+    if msg:
+        print_err(f" == {fname}: {msg}")
+
 
 # let's do this just once, not at every call
 _clean_control_chars = "".join(
@@ -30,4 +53,30 @@ def is_true(value):
     return bool(value)
 
 
-ß
+def generic_get_json(url: str, data):
+    requests.packages.urllib3.util.connection.HAS_IPV6 = False
+    status = -1
+    try:
+        response = requests.request(
+            method="GET" if data == None else "POST",
+            url=url,
+            data=data,
+            headers={
+                "Content-Type": "application/json",
+                "User-Agent": "ADS-B Image",
+            },
+        )
+    except (
+        requests.HTTPError,
+        requests.ConnectionError,
+        requests.Timeout,
+        requests.RequestException,
+    ) as err:
+        print_err(f"checking {url} failed: {err}")
+        status = err.errno
+    except:
+        # for some reason this didn't work
+        print_err("checking {url} failed: reason unknown")
+    else:
+        return response.json(), response.status_code
+    return None, status

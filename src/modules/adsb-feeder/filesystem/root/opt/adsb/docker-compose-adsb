@@ -44,7 +44,7 @@ fi
 docker_compose="docker compose"
 $docker_compose version &> /dev/null || docker_compose="docker-compose"
 
-if grep AF_IS_RADARBOX_ENABLED=True /opt/adsb/config/.env ; then
+if grep -q AF_IS_RADARBOX_ENABLED=True /opt/adsb/config/.env ; then
 	# make sure the fake cpuinfo and thermal zone files are setup if needed for RadarBox
 	bash /opt/adsb/rb-hack-setup.sh
 fi
@@ -52,7 +52,7 @@ fi
 # when we restart the containers after an upgrade from v1.2.3 or earlier to a later version,
 # the very first time we still need to check for the old name of the environment variable
 # To make this less ugly, check for the partial name
-if grep "_IS_BASE_CONFIG_FINISHED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
+if grep -q "_IS_BASE_CONFIG_FINISHED=True" /opt/adsb/config/.env 2> /dev/null ; then
 	echo "calling docker compose for the enabled containers"
 	source /opt/adsb/default.docker-compose
 	cd /opt/adsb/config || echo "config folder is missing?" >&2

@@ -1,12 +1,9 @@
-import io
 import os
-import pathlib
 import requests
 import socket
 import subprocess
 import threading
 import time
-import zipfile
 
 from .data import Data
 from .util import print_err

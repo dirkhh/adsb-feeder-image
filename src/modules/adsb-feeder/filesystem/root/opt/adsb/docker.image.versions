@@ -10,3 +10,4 @@ AH_CONTAINER=ghcr.io/sdr-enthusiasts/docker-adsbhub:latest-build-333
 PW_CONTAINER=ghcr.io/plane-watch/docker-plane-watch@sha256:43106ec19bb838c914281bd007a40c9deb869dfa4419edbc9454eeea29336a1d
 AIRSPY_CONTAINER=ghcr.io/sdr-enthusiasts/airspy_adsb:latest-build-118
 TNUK_CONTAINER=ghcr.io/sdr-enthusiasts/docker-radar1090:latest-build-103
+SDRPLAY_CONTAINER=ghcr.io/sdr-enthusiasts/docker-sdrplay-beast1090:latest-build-3

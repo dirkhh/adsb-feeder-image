@@ -54,7 +54,7 @@ AUTO_SETUP_SWAPFILE_SIZE=1
 AUTO_SETUP_SWAPFILE_LOCATION=/var/swap
 
 # Set to "1" to disable HDMI/video output and framebuffers on Raspberry Pi, to reduce power consumption and memory usage: Works on RPi only!
-AUTO_SETUP_HEADLESS=1
+AUTO_SETUP_HEADLESS=0
 
 # Unmask (enable) systemd-logind service (including dbus), which is masked by default on DietPi
 AUTO_UNMASK_LOGIND=0

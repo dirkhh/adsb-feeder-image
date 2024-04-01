@@ -1,6 +1,6 @@
 services:
   sdrplay-beast1090:
-    image: ghcr.io/sdr-enthusiasts/docker-sdrplay-beast1090:latest-build-3
+    image: ${SDRPLAY_CONTAINER}
     tty: true
     container_name: sdrplay-beast1090
     hostname: sdrplay-beast1090

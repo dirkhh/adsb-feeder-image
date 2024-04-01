@@ -1,47 +1,28 @@
 services:
-  ultrafeeder:
+  ultrafeeder_stage2_STAGE2NUM:
     image: ${ULTRAFEEDER_CONTAINER}
     tty: true
-    container_name: ultrafeeder
-    hostname: ultrafeeder
+    container_name: ultrafeeder_stage2_STAGE2NUM
+    hostname: ultrafeeder_stage2_STAGE2NUM
     restart: always
-    device_cgroup_rules:
-      - 'c 189:* rwm'
     ports:
-      - ${AF_TAR1090_PORT:-8080}:80 # to expose the web interface
-      - 30001:30001 # Raw input
-      - 30002:30002 # Raw output
-      - 30003:30003 # SBS output
-      - 32006:32006 # SBS input
-      - 30004:30004 # Beast input
-      - 30104:30104 # Beast input
-      - 30005:30005 # Beast output
-      - 30006:30006 # Beast reduce output
-      - 30047:30047 # JSON position output
-      - 30152:30152 # to expose re-api
-      - 31003:31003 # MLATHUB SBS output
-      - 31004:31004 # MLATHUB Beast input
-      - 31005:31005 # MLATHUB Beast output
-      - 31006:31006 # MLATHUB Beast reduce output
+      - ${AF_TAR1090_PORT_STAGE2NUM:-809STAGE2NUM}:80 # to expose the web interface
+      - 311STAGE2NUM3:31003 # MLATHUB SBS output
+      - 311STAGE2NUM4:31004 # MLATHUB Beast input
+      - 311STAGE2NUM5:31005 # MLATHUB Beast output
+      - 311STAGE2NUM6:31006 # MLATHUB Beast reduce output
     environment:
       # --------------------------------------------------
       # general parameters:
       - LOGLEVEL=error
-      - TZ=${FEEDER_TZ}
-      # --------------------------------------------------
-      # SDR related parameters:
-      - READSB_DEVICE_TYPE=${FEEDER_RTL_SDR}
-      - READSB_RTLSDR_DEVICE=${FEEDER_SERIAL_1090}
-      - READSB_RTLSDR_PPM=${ADSB_SDR_PPM}
-      - READSB_ENABLE_BIASTEE=${FEEDER_ENABLE_BIASTEE}
-      - READSB_AUTOGAIN_INITIAL_GAIN=29.6
+      - TZ=${FEEDER_TZ_STAGE2NUM}
       #
       # --------------------------------------------------
       # readsb/decoder parameters:
-      - READSB_LAT=${FEEDER_LAT}
-      - READSB_LON=${FEEDER_LONG}
-      - READSB_ALT=${FEEDER_ALT_M}
-      - READSB_GAIN=${FEEDER_READSB_GAIN}
+      - BEASTHOST=${AF_MICRO_IP_STAGE2NUM}
+      - READSB_LAT=${FEEDER_LAT_STAGE2NUM}
+      - READSB_LON=${FEEDER_LONG_STAGE2NUM}
+      - READSB_ALT=${FEEDER_ALT_M_STAGE2NUM}
       - READSB_MODEAC=false
       - READSB_RX_LOCATION_ACCURACY=2
       - READSB_STATS_RANGE=true
@@ -51,19 +32,19 @@ services:
       - READSB_EXTRA_ARGS=--write-state-only-on-exit
       # Sources and Aggregator connections:
       # (Note - remove the ones you are not using / feeding)
-      - ULTRAFEEDER_CONFIG=${FEEDER_ULTRAFEEDER_CONFIG}
-      - MLAT_USER=${SITE_NAME}
-      - UUID=${ULTRAFEEDER_UUID}
+      - ULTRAFEEDER_CONFIG=${FEEDER_ULTRAFEEDER_CONFIG_STAGE2NUM}
+      - MLAT_USER=${SITE_NAME_STAGE2NUM}
+      - UUID=${ULTRAFEEDER_UUID_STAGE2NUM}
       #
       # --------------------------------------------------
       # TAR1090 (Map Web Page) parameters:
       - UPDATE_TAR1090=true
       - TAR1090_MESSAGERATEINTITLE=true
-      - TAR1090_PAGETITLE=${SITE_NAME}
-      - TAR1090_SITENAME=${SITE_NAME}
+      - TAR1090_PAGETITLE=${SITE_NAME_STAGE2NUM}
+      - TAR1090_SITENAME=${SITE_NAME_STAGE2NUM}
       - TAR1090_PLANECOUNTINTITLE=true
       - TAR1090_FLIGHTAWARELINKS=true
-      - HEYWHATSTHAT_PANORAMA_ID=${FEEDER_HEYWHATSTHAT_ID}
+      - HEYWHATSTHAT_PANORAMA_ID=${FEEDER_HEYWHATSTHAT_ID_STAGE2NUM}
       - HEYWHATSTHAT_ALTS=${FEEDER_HEYWHATSTHAT_ALTS:-1000ft,5000ft,10000ft,20000ft,30000ft,40000ft}
       - TAR1090_SITESHOW=true
       - TAR1090_RANGE_OUTLINE_COLORED_BY_ALTITUDE=true
@@ -75,9 +56,7 @@ services:
       - TAR1090_ROUTEAPIURL="https://adsb.im/api/0/routeset"
       - TAR1090_IMAGE_CONFIG_LINK="http://HOSTNAME:${AF_WEBPORT}/"
       - TAR1090_IMAGE_CONFIG_TEXT="ADS-B Feeder Image Configuration"
-      # options for the µImage:
-      - TAR1090_ENABLE_AC_DB=${FEEDER_ENABLE_AC_DB:-true}
-      - MLATHUB_DISABLE=${FEEDER_MLATHUB_DISABLE}
+      - TAR1090_ENABLE_AC_DB=true
       # --------------------------------------------------
       # GRAPHS1090 (Decoder and System Status Web Page) parameters:
       # The two 978 related parameters should only be included if you are running dump978 for UAT reception (USA only)
@@ -85,21 +64,15 @@ services:
       # How often the statistics data the graphs are generated from are written to disk (in seconds)
       - GRAPHS1090_REDUCE_IO_FLUSH_IVAL=21600
       - GRAPHS1090_DARKMODE=true
-      - ENABLE_978=${FEEDER_ENABLE_UAT978}
-      - URL_978=${FEEDER_URL_978}
-      - S6_KILL_GRACETIME=1000
+      #- ENABLE_978=${FEEDER_ENABLE_UAT978_STAGE2NUM}
+      #- URL_978=${FEEDER_URL_978_STAGE2NUM}
       #
-      # USER_PROVIDED_ENV_START
-      # USER_PROVIDED_ENV_END
     volumes:
-      - /opt/adsb/config/ultrafeeder/globe_history:/var/globe_history
-      - /opt/adsb/config/ultrafeeder/graphs1090:/var/lib/collectd
+      - /opt/adsb/config/ultrafeeder/globe_history_STAGE2NUM:/var/globe_history
+      - /opt/adsb/config/ultrafeeder/graphs1090_STAGE2NUM:/var/lib/collectd
       - /proc/diskstats:/proc/diskstats:ro
       - /dev:/dev:ro
-      - /run/adsb-feeder-ultrafeeder:/run
-      - /run/adsb-feeder-shared:/run/airspy_adsb
+      - /run/adsb-feeder-ultrafeeder_STAGE2NUM:/run
     tmpfs:
       - /tmp:size=128M
       - /var/log:size=32M
-    extra_hosts:
-      - "host.docker.internal:host-gateway"

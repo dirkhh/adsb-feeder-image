@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% set active_page = "visualization" %}
+{% block content %}
+{% if m == "0" %}{% set go = "go" %}{% else %}{% set go = "go-" ~ m %}{% endif %}
+<h1 class="mt-3 text-center text-danger">
+  {% block title %}Setup visualization parameters{% if is_enabled('stage2') %} ({{ site }}){% endif %}{% endblock %}
+</h1>
+<form class="row gy-2 gx-3 align-items-center" method="post">
+  <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="advanced" value="go">I'm
+    done here - take me to the website</button>
+
+  <div class="col-12 form-check {% if env_value_by_tag('aggregators') == 'micro' %}d-none{% endif %}">
+    <input class="form-check-input me-1" type="checkbox" name="mlat_privacy--is_enabled" id="mlat_privacy--is_enabled"
+           {% if list_is_enabled("mlat_privacy", m) %}checked{% endif %} />
+    <label for="mlat_privacy--is_enabled">
+      Enable privacy flag (ON = does not show on <a href="https://mlat.adsb.lol/syncmap/">public aggregator
+        maps</a>)
+    </label>
+  </div>
+  <div class="col-12 form-check">
+    <input class="form-check-input me-1" type="checkbox" name="route_api--is_enabled" id="route_api--is_enabled"
+           {% if list_is_enabled("route_api", m) %}checked{% endif %} />
+    <label for="route_api--is_enabled" class="mb-3">
+      Use Route API to show flight routes when
+      known.
+    </label>
+  </div>
+  <div class="col-12 form-check {% if env_value_by_tag('aggregators') == 'micro' %}d-none{% endif %}">
+    <input class="form-check-input me-1" type="checkbox" name="heywhatsthat--is_enabled" id="heywhatsthat--is_enabled"
+           {% if list_is_enabled("heywhatsthat", m) %}checked{% endif %} />
+    <div>
+      <label class="form-check-label" for="heywhatsthat--is_enabled">
+        <a href="https://www.heywhatsthat.com/">HeyWhat'sThat</a> is an incredibly cool web service that allows
+        you to discover what you should be able to see from the location of your antenna - including estimates for
+        how far away you should be able to detect planes (depending on their altitude - and assuming there are no
+        other obstructions).
+        <span id="hwt-text"
+              {% if not list_is_enabled('heywhatsthat',m) or list_value_by_tag('heywhatsthat_id', m) != '' %}style="display: none;"
+              {% endif %}>
+          Click on the link, select "New Panorama" at the top, enter your address (or find the location
+          on the map), enter a title on the lower left and click "Submit request". After a couple of minutes
+          you'll be offered to look at your panorama. At the top left you'll see the title you just entered, the
+          latitude and longitude and elevation - and below that a link that ends with <code>/?view=CODE</code>.
+          Enter this code here to see the theoretical range information on your receiver map.
+        </span>
+        <input type="text" id="heywhatsthat_id" name="heywhatsthat_id" class="form-control col-6 ml-1 mb-2"
+               placeholder="HeyWhat'sThat Panorama ID" value="{{ list_value_by_tag("heywhatsthat_id", m) }}">
+      </label>
+    </div>
+  </div>
+  <div class="col-12 form-check">
+    <input class="form-check-input me-1" type="checkbox" name="clear_range" id="clear_range" />
+    <label for="clear_range" class="mb-3">
+      The tar1090 map maintains an outline for the area around your feeder where planes have been observed; sometimes it
+      may be desirable to reset that (for example after you changed location). Select the checkbox and submit below to
+      clear that range outline.
+    </label>
+  </div>
+
+  <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="advanced" value="go">I'm
+    done here - take me to the website</button>
+</form>
+<script>
+
+  function show_or_hide(b, f) {
+    if (b.checked) f.style.display = "block";
+    else f.style.display = "none";
+  }
+  const hwt = document.getElementById('heywhatsthat--is_enabled');
+  const hwttext = document.getElementById('hwt-text');
+  hwt.addEventListener("change", function () {
+    show_or_hide(hwt, hwttext);
+  });
+</script>
+{% endblock %}

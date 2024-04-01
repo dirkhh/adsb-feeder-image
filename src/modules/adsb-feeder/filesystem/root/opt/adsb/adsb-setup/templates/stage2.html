@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% set active_page = "stage2" %}
+
+{% block content %}
+<h1 class="mt-3 text-center text-danger">{% block title %} Setup stage 2 feeder {{ list_value_by_tag('site_name', 0) }}
+  {% endblock %}</h1>
+<div class="alert alert-danger" role="alert" {% if env_value_by_tag('dns_state') %} style="display: none;" {% endif %}>
+  The feeder cannot resolve DNS queries. This will most likely prevent it from working at all.
+</div>
+<div class="row">
+  <form method="post">
+    <div class="form-group row">
+      <span class="col-12 col-sm-5 col-md-4 col-lg-3">
+        <label for="stage2_name">Stage2 Station Name</label>
+      </span>
+      <span class="col-12 col-sm-7 col-md-8 col-lg-9">
+        <input type="text" name="stage2_name" required placeholder="Stage2" class="form-control col-md"
+               value="{{ list_value_by_tag('site_name', 0) }}" />
+      </span>
+    </div>
+    <div class="form-group">
+      <button type="submit" name="set_stage2_name" value="go" class="btn btn-primary">Update</button>
+    </div>
+  </form>
+</div>
+<div class="col-12">
+  <h4 class="mb-2 mt-4">Feeder sites</h4>
+  {% if env_value_by_tag('num_micro_sites') == 0 %}
+  <div class="my-4">No micro feeder sites configured</div>
+  {% else %}
+  <form method="post">
+    <div class="row small">
+      <div class="col-12">
+        <table class="table table-bordered table-sm lh-1 table-striped">
+          <thead>
+            <td>Site</td>
+            <td>IP</td>
+            <td>Lat/Long@Alt</td>
+            <td>Feeder Version</td>
+            <td>Status</td>
+            <td>Remove</td>
+          </thead>
+          <!-- for status, add things to the api that are based one
+          jq '.last1min.messages_valid' < /run/adsb-feeder-ultrafeeder/readsb/stats.json
+          > 300k / min (5k/sec) is an indication of a cycle, so turn that one off
+          0 is a sign of nothing being sent (duh) -- maybe that one should take 5 or even 15 minutes
+          that allows us to show "no data / seems fine / cycle" as status
+          There's also the aircraft with pos count - but since we don't want to constantly refresh, maybe less interesting
+        -->
+          <tbody>
+            {% for site in env_value_by_tag('site_name') %}
+            {% if loop.index0 != 0 %}<!-- skip the entry for the host -->
+            <tr class="align-middle">
+              <td>
+                <a href="http://{{ list_value_by_tag('mf_ip', loop.index0) }}">{{ site }}</a>
+              </td>
+              <td class="text-center">{{ list_value_by_tag('mf_ip', loop.index0) }}</td>
+              <td class="text-center">{{ list_value_by_tag('lat', loop.index0) }} /
+                {{ list_value_by_tag('lng', loop.index0) }} / {{ list_value_by_tag('alt', loop.index0) }}m
+              </td>
+              <td class="text-center"> {{ list_value_by_tag('mf_version', loop.index0)}}
+              </td>
+              <td class="text-center">
+              </td>
+              <td class="text-center">
+                <button type="submit" name="remove_micro_{{ loop.index0 }}" value="go"
+                        class="btn btn-danger btn-floating btn-sm"><i class="fa fa-trash"></i></button>
+              </td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </form>
+  {% endif %}
+
+  <div class="col-12">
+    <h5 class="mb-2">Add micro feeder</h5>
+    <form method="post" action="{{ url_for('update') }}">
+      <div class="form-group row align-items-center mb-1">
+        <span class="col-12 col-sm-5 col-md-4 col-lg-3">
+          <label for="add_micro_feeder_ip">micro feeder IP address</label>
+        </span>
+        <span class="col-12 col-sm-7 col-md-8 col-lg-9">
+          <input type="text" name="add_micro_feeder_ip" required placeholder="1.2.3.4" class="form-control"
+                 pattern="((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])"
+                 title="valid IPv4 address" />
+        </span>
+      </div>
+      <div class="form-group">
+        <button type="submit" name="add_micro" value="go" class="btn btn-primary">Add micro feeder</button>
+      </div>
+    </form>
+    <form method="post" action="{{ url_for('update') }}">
+      <div class="form-group mt-3">
+        <label>
+          Which
+          <a href="#"
+             title="aggregators that don't require you to create an account or provide an email address">semi-anonymous
+          </a>
+          aggregators do you want to feed?
+        </label>
+        <br />
+        <div>
+          <input type="radio" name="aggregators" id="all" value="all" required {% if env_value_by_tag("aggregators")=="all"
+      %} checked {% endif %}>
+          <label class="form-check-label mr-3" for="all">All</label>
+          <input type="radio" name="aggregators" id="privacy" value="privacy" {% if
+      env_value_by_tag("aggregators")=="privacy" %} checked {% endif %}>
+          <label class="form-check-label mr-3" for="privacy">Aggregators with privacy policy</label>
+          <input type="radio" name="aggregators" id="individual" value="individual" {% if
+      env_value_by_tag("aggregators")=="individual" %} checked {% endif %}>
+          <label class="form-check-label" for="individual">Pick individually</label>
+        </div>
+        <div id="explain-all" style="display: {% if env_value_by_tag('aggregators')=='all' %} block {% else %} none {%
+            endif %}; font-size: smaller;">
+          With this option you will feed data to
+          <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
+          <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/">Fly Italy ADSB</a>,
+          <a href="https://www.avdelphi.com/privacy.html">AVDelphi</a>,
+          <a href="https://www.planespotters.net/legal/privacypolicy/">planespotters.net</a>,
+          <a href="https://adsb.one/privacy-policy/">adsb.one</a>,
+          <a href="https://theairtraffic.com/privacy-license/">TheAirTraffic.com</a>,
+          <a href="https://adsb.fi/">adsb.fi</a>, <a href="https://radarplane.com/privacy-policy">RadarPlane</a>,
+          <!-- <a href="https://www.flyovr.io/">FLYOVR.IO</a>,-->
+          <a href="https://skydata.hpradar.com/">hpradar</a>,
+          <a href="https://globe.airplanes.live/privacy">airplanes.live</a>,
+          <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
+        </div>
+        <div id="explain-privacy" style="display: {% if env_value_by_tag('aggregators')=='priv' %} block {% else %}
+            none {% endif %}; font-size: smaller;">
+          With this option you will feed data to
+          <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
+          <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/">Fly Italy ADSB</a>,
+          <a href="https://www.avdelphi.com/privacy.html">AVDelphi</a>,
+          <a href="https://www.planespotters.net/legal/privacypolicy/">planespotters.net</a>,
+          <a href="https://adsb.one/privacy-policy/">adsb.one</a>,
+          <a href="https://adsb.fi/">adsb.fi</a>
+          <a href="https://radarplane.com/privacy-policy">RadarPlane</a>,
+          <a href="https://globe.airplanes.live/privacy">airplanes.live</a>,
+          <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
+        </div>
+        <div id="explain-individual" style="display: {% if env_value_by_tag('aggregators')=='ind' %} block {% else %}
+                none {% endif %}; font-size: smaller;">
+          With this option you can make detailed selections on the Aggregator page.
+        </div>
+      </div>
+      <div class="form-group">
+        <button type="submit" name="stage2" value="go" class="btn btn-primary">I'm done here</button>
+      </div>
+      <p>{{ message }}</p>
+    </form>
+  </div>
+</div>
+<script>
+  const explainAll = document.getElementById("explain-all");
+  const explainPriv = document.getElementById("explain-privacy");
+  const explainInd = document.getElementById("explain-individual");
+  function aggregatorClick() {
+    if (document.getElementById("all").checked) {
+      explainAll.style.display = "block";
+      explainPriv.style.display = "none";
+      explainInd.style.display = "none";
+      explainMicro.style.display = "none";
+    } else if (document.getElementById("privacy").checked) {
+      explainAll.style.display = "none";
+      explainPriv.style.display = "block";
+      explainInd.style.display = "none";
+      explainMicro.style.display = "none";
+    } else if (document.getElementById("individual").checked) {
+      explainAll.style.display = "none";
+      explainPriv.style.display = "none";
+      explainInd.style.display = "block";
+      explainMicro.style.display = "none";
+    }
+  }
+  const aggregatorBtns = document.querySelectorAll('input[name="aggregators"]');
+  aggregatorBtns.forEach((radio) => {
+    radio.addEventListener("click", aggregatorClick);
+  });
+</script>
+{% endblock %}

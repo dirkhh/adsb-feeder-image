@@ -36,9 +36,15 @@ done
 # once we have those two things in place, the setup app will successfully
 # start and finish the rest of the work
 [[ -d /opt/adsb/config ]] || mkdir -p /opt/adsb/config
-[[ -f /opt/adsb/config/.env ]] || cp /opt/adsb/.env /opt/adsb/config
-# last resort
-touch /opt/adsb/config/.env
+cd /opt/adsb/config
+if [ ! -f .env ] ; then
+	cp /opt/adsb/docker.image.versions .env
+	echo "_ADSBIM_BASE_VERSION=$(cat /opt/adsb/adsb.im.version)" >> .env
+	echo "_ADSBIM_CONTAINER_VERSION=$(cat /opt/adsb/adsb.im.version)" >> .env
+fi
+if [ ! -f config.json ] ; then
+	bash /opt/adsb/create-json-from-env.sh
+fi
 
 # remember that we handled the housekeeping for this version
 cp /opt/adsb/adsb.im.version /opt/adsb/finish-update.done

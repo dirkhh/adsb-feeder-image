@@ -1,9 +1,10 @@
 import json
 from os import path
 import re
+from types import NoneType
 from typing import List, Union
 from utils.config import read_values_from_config_json, write_values_to_config_json
-from utils.util import is_true, print_err
+from utils.util import is_true, print_err, stack_info
 
 
 class Env:
@@ -103,10 +104,10 @@ class Env:
         # already modifies the existing object in memory - so we need to force a comparison
         # to the value in the file
         if type(self._value) == list:
-            print_err(
+            stack_info(
                 f"WAIT == using standard setter to assign a list {self} -- {value} -- {type(value)}"
             )
-            self._value = value
+            self.list_set(0, value)
             self._reconcile(value)
             return
         if type(self._value) == list or value != self._value:
@@ -115,13 +116,17 @@ class Env:
 
     def list_set(self, idx, value):
         idx = int(idx)
+        value = self._normalize_value(is_true(value) if self.is_bool else value)
         print_err(f"set {self._name}[{idx}] = {value}")
         if type(self._value) != list:
-            print_err(f"{self._name} is not a list, converting")
+            stack_info(f"{self._name} is not a list, converting")
             self._value = [self._value]
             self.list_set(idx, value)
             return
-        default_value = self._default[0] if len(self._default) == 1 else None
+        if type(self._default) == list and len(self._default) == 1:
+            default_value = self._default[0]
+        else:
+            default_value = None
         while len(self._value) < idx:
             self._value.append(default_value)
         if idx == len(self._value):
@@ -134,8 +139,8 @@ class Env:
     def list_get(self, idx):
         idx = int(idx)
         if type(self._value) != list:
-            print_err(f"{self._name} is not a list, giving up")
-            return None
+            stack_info(f"{self._name} is not a list, converting")
+            self._value = [self._value]
         if idx < len(self._value):
             return self._value[idx]
         if type(self._default) == list and len(self._default) == 1:

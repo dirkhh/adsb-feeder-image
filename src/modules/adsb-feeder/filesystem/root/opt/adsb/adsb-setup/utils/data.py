@@ -22,6 +22,7 @@ class Data:
     version_file = data_path / "adsb.im.version"
     secure_image_path = data_path / "adsb.im.secure_image"
     is_feeder_image = True
+    ultrafeeder = []
 
     _proxy_routes = [
         # endpoint, port, url_path
@@ -178,7 +179,7 @@ class Data:
         ),
         # 978
         Env(
-            "FEEDER_ENABLE_UAT978", default=[False], tags=["uat978", "is_enabled"]
+            "FEEDER_ENABLE_UAT978", default=False, tags=["uat978", "is_enabled"]
         ),  # start the container
         Env(
             "FEEDER_URL_978", default=[""], tags=["978url"]
@@ -312,6 +313,7 @@ class Data:
         ),
         Env(
             "AF_IS_FLIGHTRADAR24_ENABLED",
+            default=[False],
             tags=["other_aggregator", "is_enabled", "flightradar"],
         ),
         Env(
@@ -436,7 +438,7 @@ class Data:
         ),
         Env(
             "_ADSBIM_STATE_ADSBX_FEEDER_ID",
-            default=[False],
+            default=[""],
             tags="adsbxfeederid",
         ),
         Env(
@@ -580,7 +582,7 @@ class Data:
 
     @property
     def envs(self):
-        return {e.name: e.value for e in self._env}
+        return {e.name: e._value for e in self._env}
 
     # helper function to find env by name
     def env(self, name: str):
@@ -628,6 +630,8 @@ class Data:
         if type(tags) != list:
             tags = [tags]
         e = self._get_enabled_env_by_tags(tags)
+        if type(e._value) == list:
+            return e and e.list_get(0)
         return e and e.value
 
     # helper function to see if list element is enabled
@@ -635,4 +639,4 @@ class Data:
         if type(tags) != list:
             tags = [tags]
         e = self._get_enabled_env_by_tags(tags)
-        return e.list_get(idx) if e else ""
+        return e.list_get(idx) if e else False

@@ -1,5 +1,3 @@
-version: '2.0'
-
 volumes:
   radarbox_segfault_fix:
     driver: local

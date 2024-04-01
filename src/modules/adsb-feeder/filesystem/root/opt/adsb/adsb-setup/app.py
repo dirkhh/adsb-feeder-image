@@ -12,6 +12,7 @@ import shutil
 import string
 import subprocess
 import threading
+from uuid import uuid4
 import sys
 import zipfile
 import tempfile
@@ -65,6 +66,9 @@ from utils import (
     UltrafeederConfig,
     cleanup_str,
     print_err,
+    stack_info,
+    generic_get_json,
+    is_true,
 )
 
 # nofmt: off
@@ -84,10 +88,19 @@ class AdsbIm:
                 e = self._d.env_by_tags(tags)
                 return e.value if e else ""
 
+            def list_value_by_tags(tags, idx):
+                e = self._d.env_by_tags(tags)
+                return e.list_get(idx) if e else ""
+
             return {
                 "is_enabled": lambda tag: self._d.is_enabled(tag),
+                "list_is_enabled": lambda tag, idx: self._d.list_is_enabled(
+                    tag, idx=idx
+                ),
                 "env_value_by_tag": lambda tag: get_value([tag]),  # single tag
                 "env_value_by_tags": lambda tags: get_value(tags),  # list of tags
+                "list_value_by_tag": lambda tag, idx: list_value_by_tags([tag], idx),
+                "list_value_by_tags": lambda tag, idx: list_value_by_tags(tag, idx),
                 "env_values": self._d.envs,
             }
 
@@ -95,18 +108,14 @@ class AdsbIm:
         self._d = Data()
         self._system = System(data=self._d)
         self._sdrdevices = SDRDevices()
-        self._ultrafeeder = UltrafeederConfig(data=self._d)
+        for i in range(0, self._d.env_by_tags("num_micro_sites").value + 1):
+            self._d.ultrafeeder.append(UltrafeederConfig(data=self._d, micro=i))
 
         self._agg_status_instances = dict()
 
         # Ensure secure_image is set the new way if before the update it was set only as env variable
         if self._d.is_enabled("secure_image"):
             self.set_secure_image()
-
-        # update Env ultrafeeder to have value self._ultrafeed.generate()
-        self._d.env_by_tags("ultrafeeder_config")._value_call = (
-            self._ultrafeeder.generate
-        )
         self._d.env_by_tags("pack")._value_call = self.pack_im
         self._other_aggregators = {
             "adsbhub--submit": ADSBHub(self._system),
@@ -155,19 +164,34 @@ class AdsbIm:
         self.app.add_url_rule("/restore", "restore", self.restore, methods=["GET", "POST"])
         self.app.add_url_rule("/executerestore", "executerestore", self.executerestore, methods=["GET", "POST"])
         self.app.add_url_rule("/advanced", "advanced", self.advanced, methods=["GET", "POST"])
+        self.app.add_url_rule("/visualization", "visualization", self.visualization, methods=["GET", "POST"])
         self.app.add_url_rule("/expert", "expert", self.expert, methods=["GET", "POST"])
         self.app.add_url_rule("/aggregators", "aggregators", self.aggregators, methods=["GET", "POST"])
         self.app.add_url_rule("/", "director", self.director, methods=["GET", "POST"])
         self.app.add_url_rule("/index", "index", self.index)
         self.app.add_url_rule("/setup", "setup", self.setup, methods=["GET", "POST"])
+        self.app.add_url_rule("/stage2", "stage2", self.stage2, methods=["GET", "POST"])
         self.app.add_url_rule("/update", "update", self.update, methods=["POST"])
         self.app.add_url_rule("/sdplay_license", "sdrplay_license", self.sdrplay_license, methods=["GET", "POST"])
         self.app.add_url_rule("/api/sdr_info", "sdr_info", self.sdr_info)
         self.app.add_url_rule("/api/base_info", "base_info", self.base_info)
         self.app.add_url_rule(f"/api/status/<agg>", "beast", self.agg_status)
+        self.app.add_url_rule(f"/api/status/<agg>/<idx>", "beast", self.agg_status)
         # fmt: on
         self.update_boardname()
         self.update_version()
+
+        # finally, try to make sure that we have all the pieces that we need and recreate what's missing
+        stage2_yml_template = self._d.config_path / "stage2.yml"
+        for i in range(1, self._d.env_by_tags("num_micro_sites").value + 1):
+            if not self._d.env_by_tags("adsblol_uuid").list_get(i):
+                self._d.env_by_tags("adsblol_uuid").list_set(i, str(uuid4()))
+            if not self._d.env_by_tags("ultrafeeder_uuid").list_get(i):
+                self._d.env_by_tags("ultrafeeder_uuid").list_set(i, str(uuid4()))
+            create_stage2_yml_from_template(
+                self._d.config_path / f"stage2_micro_site_{i}.yml",
+                stage2_yml_template,
+            )
 
     def update_boardname(self):
         board = ""
@@ -227,7 +251,7 @@ class AdsbIm:
             "in": self._d.env_by_tags("image_name").value,
             "bn": self._d.env_by_tags("board_name").value,
             "bv": self._d.env_by_tags("base_version").value,
-            "cv": self._d.env_by_tags("container_version").value,
+            "cv": self._d.env_by_tags("base_version").value,
         }
         return b64encode(compress(pickle.dumps(image))).decode("utf-8")
 
@@ -590,13 +614,14 @@ class AdsbIm:
         return True
 
     def at_least_one_aggregator(self) -> bool:
-        if self._ultrafeeder.enabled_aggregators:
+        # this only checks for a micro feeder or integrated feeder, not for stage2
+        if self._d.ultrafeeder[0].enabled_aggregators:
             return True
 
         # of course, maybe they picked just one or more proprietary aggregators and that's all they want...
         for submit_key in self._other_aggregators.keys():
             key = submit_key.replace("--submit", "")
-            if self._d.is_enabled(key):
+            if self._d.list_is_enabled(key, idx=0):
                 print_err(f"no semi-anonymous aggregator, but enabled {key}")
                 return True
 
@@ -630,18 +655,24 @@ class AdsbIm:
         return Response(jsonString, mimetype="application/json")
 
     def base_info(self):
+        listener = request.remote_addr
+        stage2_listeners = self._d.env_by_tags("stage2_listeners").value
+        print_err(f"access to base_info from {listener}")
+        if not listener in stage2_listeners:
+            stage2_listeners.append(listener)
+            self._d.env_by_tags("stage2_listeners").value = stage2_listeners
         return json.dumps(
             {
                 "name": self._d.env_by_tags("mlat_name").value,
                 "lat": self._d.env_by_tags("lat").value,
                 "lng": self._d.env_by_tags("lng").value,
                 "alt": self._d.env_by_tags("alt").value,
-                "tz": self._d.env_by_tags("form_timezone").value,
+                "tz": self._d.env_by_tags("tz").value,
                 "version": self._d.env_by_tags("base_version").value,
             }
         )
 
-    def agg_status(self, agg):
+    def agg_status(self, agg, idx=0):
         if agg == "im":
             im_json, status = ImStatus(self._d).check()
             if status == 200:
@@ -654,10 +685,10 @@ class AdsbIm:
                     "advice": "there was an error obtaining the latest version information",
                 }
 
-        status = self._agg_status_instances.get(agg)
+        status = self._agg_status_instances.get(f"{agg}-{idx}")
         if status is None:
-            status = self._agg_status_instances[agg] = AggStatus(
-                agg, self._d, request.host_url.rstrip("/ ")
+            status = self._agg_status_instances[f"{agg}-{idx}"] = AggStatus(
+                agg, idx, self._d, request.host_url.rstrip("/ ")
             )
 
         if agg == "adsbx":
@@ -665,7 +696,7 @@ class AdsbIm:
                 {
                     "beast": status.beast,
                     "mlat": status.mlat,
-                    "adsbxfeederid": self._d.env_by_tags("adsbxfeederid").value,
+                    "adsbxfeederid": self._d.env_by_tags("adsbxfeederid").list_get(idx),
                 }
             )
         return json.dumps({"beast": status.beast, "mlat": status.mlat})
@@ -674,19 +705,43 @@ class AdsbIm:
     def advanced(self):
         if request.method == "POST":
             return self.update()
-
+        if self._d.is_enabled("stage2"):
+            return self.visualization()
         return render_template("advanced.html")
+
+    def visualization(self):
+        if request.method == "POST":
+            return self.update()
+
+        # is this a stage2 site and you are looking at an individual micro feeder,
+        # or is this a regular feeder?
+        # m=0 indicates we are looking at an integrated/micro feeder or at the stage 2 local aggregator
+        # m>0 indicates we are looking at a micro-proxy
+        if self._d.is_enabled("stage2"):
+            try:
+                m = int(request.args.get("m"))
+            except:
+                m = 0
+            site = self._d.env_by_tags("site_name").list_get(m)
+            print_err(
+                "setting up visualization on a stage 2 system for site {site} (m={m})"
+            )
+        else:
+            site = ""
+            m = 0
+        return render_template("visualization.html", site=site, m=m)
 
     def set_channel(self, channel: str):
         with open(self._d.data_path / "update-channel", "w") as update_channel:
             print(channel, file=update_channel)
 
-    def clear_range_outline(self):
+    def clear_range_outline(self, idx=0):
         # is the file where we expect it?
+        globe_history = "globe_history" if idx == 0 else f"globe_history_{idx}"
         rangedirs = (
             self._d.config_path
             / "ultrafeeder"
-            / "globe_history"
+            / globe_history
             / "internal_state"
             / "rangeDirs.gz"
         )
@@ -728,6 +783,76 @@ class AdsbIm:
             except:
                 print_err("failed to allow root ssh login")
 
+    def get_base_info(self, n):
+        #    try:
+        ip = self._d.env_by_tags("mf_ip").list_get(n)
+        base_info, status = generic_get_json(f"http://{ip}/api/base_info", None)
+        if status == 200 and base_info != None:
+            print_err(f"got {base_info} for {ip}")
+            self._d.env_by_tags("site_name").list_set(n, base_info["name"])
+            self._d.env_by_tags("lat").list_set(n, base_info["lat"])
+            self._d.env_by_tags("lng").list_set(n, base_info["lng"])
+            self._d.env_by_tags("alt").list_set(n, base_info["alt"])
+            self._d.env_by_tags("tz").list_set(n, base_info["tz"])
+            self._d.env_by_tags("mf_version").list_set(n, base_info["version"])
+            return True
+        #    except:
+        #        pass
+        print_err(f"failed to get base_info from micro feeder {n}")
+        return False
+
+    def setup_new_micro_site(self, ip):
+        if ip in self._d.env_by_tags("mf_ip").value:
+            print_err(f"IP address {ip} already listed as a micro site")
+            return
+        print_err(f"setting up a new micro site at {ip}")
+        n = self._d.env_by_tags("num_micro_sites").value
+        # store the IP address so that get_base_info works
+        self._d.env_by_tags("mf_ip").list_set(n + 1, ip)
+        # now let's see if we can get the data from the micro feeder
+        if self.get_base_info(n + 1):
+            print_err(
+                f"added new micro site {self._d.env_by_tags('site_name').value[n + 1]} at {ip}"
+            )
+            self._d.env_by_tags("num_micro_sites").value = n + 1
+        else:
+            # oh well, remove the IP address
+            self._d.env_by_tags("mf_ip").list_remove()
+
+    def remove_micro_site(self, num):
+        # carefully shift everything down
+        for i in range(num, self._d.env_by_tags("num_micro_sites").value):
+            self._d.env_by_tags("mf_ip").list_set(
+                i, self._d.env_by_tags("mf_ip").list_get(i + 1)
+            )
+            self._d.env_by_tags("site_name").list_set(
+                i, self._d.env_by_tags("site_name").list_get(i + 1)
+            )
+            self._d.env_by_tags("lat").list_set(
+                i, self._d.env_by_tags("lat").list_get(i + 1)
+            )
+            self._d.env_by_tags("lng").list_set(
+                i, self._d.env_by_tags("lng").list_get(i + 1)
+            )
+            self._d.env_by_tags("alt").list_set(
+                i, self._d.env_by_tags("alt").list_get(i + 1)
+            )
+            self._d.env_by_tags("tz").list_set(
+                i, self._d.env_by_tags("tz").list_get(i + 1)
+            )
+            self._d.env_by_tags("mf_version").list_set(
+                i, self._d.env_by_tags("mf_version").list_get(i + 1)
+            )
+        self._d.env_by_tags("mf_ip").list_remove()
+        self._d.env_by_tags("site_name").list_remove()
+        self._d.env_by_tags("lat").list_remove()
+        self._d.env_by_tags("lng").list_remove()
+        self._d.env_by_tags("alt").list_remove()
+        self._d.env_by_tags("tz").list_remove()
+        self._d.env_by_tags("mf_version").list_remove()
+        self._d.env_by_tags("num_micro_sites").value -= 1
+
+    @check_restart_lock
     def update(self):
         description = """
             This is the one endpoint that handles all the updates coming in from the UI.
@@ -739,16 +864,58 @@ class AdsbIm:
         form: Dict = request.form
         seen_go = False
         allow_insecure = not self.check_secure_image()
+        # special handling of per-micro-site aggregators
+        sitenum = 0
+        aggregator_submission = form.get("aggregators")
+        if aggregator_submission and aggregator_submission.startswith("go-"):
+            # this is the indicator that in stage2 mode the user is setting up aggregators
+            # for a specific micro site
+            try:
+                sitenum = int(aggregator_submission[3:])
+                site = self._d.env_by_tags("site_name").list_get(sitenum)
+                if site:
+                    print_err(f"setting up aggregators for micro feeder {site}")
+                else:
+                    sitenum = 0
+            except:
+                print_err(
+                    f"failed to parse aggregator submission {aggregator_submission}"
+                )
+                sitenum = 0
         for key, value in form.items():
             print_err(f"handling {key} -> {value} (allow insecure is {allow_insecure})")
             # this seems like cheating... let's capture all of the submit buttons
-            if value == "go":
+            if value == "go" or value.startswith("go-"):
                 seen_go = True
-            if value == "go" or value == "wait":
+            if value == "go" or value.startswith("go-") or value == "wait":
+                if key == "clear_range":
+                    self.clear_range_outline(sitenum)
+                    continue
                 if key == "sdrplay_license_accept":
                     self._d.env_by_tags("sdrplay_license_accepted").value = True
                 if key == "sdrplay_license_reject":
                     self._d.env_by_tags("sdrplay_license_accepted").value = False
+                if key == "add_micro":
+                    # user has clicked Add micro feeder on Stage 2 page
+                    # grab the IP that we know the user has provided
+                    ip = form.get(f"add_micro_feeder_ip")
+                    self.setup_new_micro_site(ip)
+                    return redirect(url_for("stage2"))
+                if key.startswith("remove_micro_"):
+                    # user has clicked Remove micro feeder on Stage 2 page
+                    # grab the micro feeder number that we know the user has provided
+                    num = int(key[len("remove_micro_") :])
+                    self.remove_micro_site(num)
+                    return redirect(url_for("stage2"))
+                if key == "set_stage2_name":
+                    # just grab the new name and go back
+                    name = form.get(f"stage2_name")
+                    print_err(f"setting new stage2 name to {name}")
+                    self._d.env_by_tags("site_name").list_set(0, name)
+                    # since this is a stage2 system, let's also set the name for
+                    # the combined tar1090 map
+                    self._d.env_by_tags("map_name").list_set(0, name)
+                    return redirect(url_for("stage2"))
                 if key == "aggregators":
                     # user has clicked Submit on Aggregator page
                     self._d.env_by_tags("aggregators_chosen").value = True
@@ -855,9 +1022,6 @@ class AdsbIm:
                 # here at the end - instead insert them before tailscale
                 continue
             if value == "stay":
-                if key == "clear_range":
-                    self.clear_range_outline()
-                    continue
                 if allow_insecure and key == "rpw":
                     print_err("updating the root password")
                     self.set_rpw()
@@ -874,7 +1038,9 @@ class AdsbIm:
                         aggregator_argument += f"::{user}"
                     aggregator_object = self._other_aggregators[key]
                     try:
-                        is_successful = aggregator_object._activate(aggregator_argument)
+                        is_successful = aggregator_object._activate(
+                            aggregator_argument, sitenum
+                        )
                     except Exception as e:
                         print_err(f"error activating {key}: {e}")
                     if not is_successful:
@@ -911,7 +1077,7 @@ class AdsbIm:
                     self._d.env_by_tags(["gain_airspy"]).value = (
                         "auto" if value == "autogain" else value
                     )
-                # deal with the micro feeder setup
+                # deal with the micro feeder and stage2 initial setup
                 if key == "aggregators" and value == "micro":
                     self._d.env_by_tags(["tar1090_ac_db"]).value = False
                     self._d.env_by_tags(["mlathub_disable"]).value = True
@@ -919,6 +1085,9 @@ class AdsbIm:
                 else:
                     self._d.env_by_tags(["tar1090_ac_db"]).value = True
                     self._d.env_by_tags(["mlathub_disable"]).value = False
+                if key == "aggregators" and value == "stage2":
+                    self._d.env_by_tags("stage2").value = True
+                    self._d.env_by_tags("site_name").list_set(0, form.get("mlat_name"))
                 # finally, painfully ensure that we remove explicitly asigned SDRs from other asignments
                 # this relies on the web page to ensure that each SDR is only asigned on purpose
                 # the key in quesiton will be explicitely set and does not need clearing
@@ -931,9 +1100,25 @@ class AdsbIm:
                         ):
                             print_err(f"clearing: {str(clear_key)} old value: {value}")
                             self._d.env_by_tags(clear_key).value = ""
-
-                e.value = value
-
+                # when dealing with micro feeder aggregators, we need to keep the site number
+                # in mind
+                tags = key.split("--")
+                if sitenum > 0 and "is_enabled" in tags:
+                    print_err(f"setting up stage2 micro site number {sitenum}: {key}")
+                    self._d.env_by_tags("aggregators_chosen").value = True
+                    self._d.env_by_tags(tags).list_set(
+                        sitenum, True if is_true(value) else False
+                    )
+                else:
+                    if type(e._value) == list:
+                        e.list_set(sitenum, value)
+                    else:
+                        e.value = value
+                if key == "mlat_name":
+                    # in a single system setup, we used to treat mlat and map name as the same, but for a
+                    # stage2 system having these as different variables makes things more obvious
+                    self._d.env_by_tags("map_name").value = value
+                    self._d.env_by_tags("site_name").list_set(sitenum, value)
         # done handling the input data
         # what implied settings do we have (and could we simplify them?)
         # first grab the SDRs plugged in and check if we have one identified for UAT
@@ -963,14 +1148,16 @@ class AdsbIm:
             env978.value = auto_assignment[978]
         if env978.value:
             self._d.env_by_tags(["uat978", "is_enabled"]).value = True
-            self._d.env_by_tags("978url").value = "http://dump978/skyaware978"
-            self._d.env_by_tags("978host").value = "dump978"
-            self._d.env_by_tags("978piaware").value = "relay"
+            self._d.env_by_tags("978url").list_set(
+                sitenum, "http://dump978/skyaware978"
+            )
+            self._d.env_by_tags("978host").list_set(sitenum, "dump978")
+            self._d.env_by_tags("978piaware").list_set(sitenum, "relay")
         else:
             self._d.env_by_tags(["uat978", "is_enabled"]).value = False
-            self._d.env_by_tags("978url").value = ""
-            self._d.env_by_tags("978host").value = ""
-            self._d.env_by_tags("978piaware").value = ""
+            self._d.env_by_tags("978url").list_set(sitenum, "")
+            self._d.env_by_tags("978host").list_set(sitenum, "")
+            self._d.env_by_tags("978piaware").list_set(sitenum, "")
 
         # next check for airspy devices
         airspy = any([sdr._type == "airspy" for sdr in self._sdrdevices.sdrs])
@@ -999,12 +1186,11 @@ class AdsbIm:
         print_err(f"in the end we have")
         print_err(f"1090serial {env1090.value}")
         print_err(f"978serial {env978.value}")
+        print_err(f"airspy container is {self._d.is_enabled(['airspy', 'is_enabled'])}")
         print_err(
-            f"airspy container is {self._d.env_by_tags(['airspy', 'is_enabled']).value}"
+            f"SDRplay container is {self._d.is_enabled(['sdrplay', 'is_enabled'])}"
         )
-        print_err(
-            f"dump978 container {self._d.env_by_tags(['uat978', 'is_enabled']).value}"
-        )
+        print_err(f"dump978 container {self._d.is_enabled(['uat978', 'is_enabled'])}")
         # finally, set a flag to indicate whether this is a stage 2 configuration or whether it has actual SDRs attached
         self._d.env_by_tags(["stage2", "is_enabled"]).value = (
             not env1090.value and not env978.value
@@ -1018,17 +1204,20 @@ class AdsbIm:
 
         # finally, check if this has given us enough configuration info to
         # start the containers
-        if self.base_is_configured():
-            self._d.env_by_tags(["base_config"]).value = True
+        if self.base_is_configured() or self._d.is_enabled("stage2"):
+            self._d.env_by_tags(["base_config", "is_enabled"]).value = True
             agg_chosen_env = self._d.env_by_tags("aggregators_chosen")
-            if self.at_least_one_aggregator() or agg_chosen_env.value == True:
+            if agg_chosen_env.value == True or self.at_least_one_aggregator():
                 agg_chosen_env.value = True
                 if self._d.is_enabled("sdrplay") and not self._d.is_enabled(
                     "sdrplay_license_accepted"
                 ):
                     return redirect(url_for("sdrplay_license"))
                 return redirect(url_for("restarting"))
-            return redirect(url_for("aggregators"))
+            if self._d.env_by_tags("aggregators").value == "stage2":
+                return redirect(url_for("stage2"))
+            if self._d.env_by_tags("aggregators").value != "micro":
+                return redirect(url_for("aggregators"))
         return redirect(url_for("director"))
 
     @check_restart_lock
@@ -1072,16 +1261,55 @@ class AdsbIm:
         if request.method == "POST":
             return self.update()
 
-        def uf_enabled(*tags):
-            return "checked" if self._d.is_enabled("ultrafeeder", *tags) else ""
+        def uf_enabled(tag, m=0):
+            # stack_info(f"tags are {type(tag)} {tag}")
+            if type(tag) == str:
+                tag = [tag]
+            if type(tag) != list:
+                print_err(f"PROBLEM::: tag is {type(tag)}")
+            return (
+                "checked"
+                if self._d.list_is_enabled(["ultrafeeder"] + tag, idx=m)
+                else ""
+            )
 
-        def others_enabled(*tags):
-            return "checked" if self._d.is_enabled("other_aggregator", *tags) else ""
+        def others_enabled(tag, m=0):
+            # stack_info(f"tags are {type(tag)} {tag}")
+            if type(tag) == str:
+                tag = [tag]
+            if type(tag) != list:
+                print_err(f"PROBLEM::: tag is {type(tag)}")
+            return (
+                "checked"
+                if self._d.list_is_enabled(["other_aggregator"] + tag, idx=m)
+                else ""
+            )
 
+        # is this a stage2 site and you are looking at an individual micro feeder,
+        # or is this a regular feeder? If we have a query argument m that is a non-negative
+        # number, then yes it is
+        if self._d.is_enabled("stage2"):
+            print_err("setting up aggregators on a stage 2 system")
+            try:
+                m = int(request.args.get("m"))
+            except:
+                m = 1
+            if m == 0:  # do not set up aggregators for the aggregated feed
+                if self._d.env_by_tags("num_micro_sites").value == "0":
+                    # things aren't set up yet, bail out to the stage 2 setup
+                    return redirect(url_for("stage2"))
+                m = 1
+            site = self._d.env_by_tags("site_name").list_get(m)
+            print_err(f"setting up aggregators for site {site} (m={m})")
+        else:
+            site = ""
+            m = 0
         return render_template(
             "aggregators.html",
             uf_enabled=uf_enabled,
             others_enabled=others_enabled,
+            site=site,
+            m=str(m),
         )
 
     @check_restart_lock
@@ -1125,8 +1353,54 @@ class AdsbIm:
         ip, status = self._system.check_ip()
         if status == 200:
             self._d.env_by_tags(["feeder_ip"]).value = ip
-        local_address = request.host.split(":")[0]
+            self._d.env_by_tags(["mf_ip"]).list_set(0, ip)
+        try:
+            result = subprocess.run(
+                "ip route get 1 | head -1  | cut -d' ' -f7",
+                shell=True,
+                capture_output=True,
+                timeout=2.0,
+            ).stdout
+        except:
+            result = ""
+        else:
+            result = result.decode().strip()
+        if result:
+            local_address = result
+        else:
+            local_address = request.host.split(":")[0]
 
+        if self._d.env_by_tags("tailscale_name").value:
+            try:
+                result = subprocess.run(
+                    "tailscale ip -4 2>/dev/null",
+                    shell=True,
+                    capture_output=True,
+                    timeout=2.0,
+                ).stdout
+            except:
+                result = ""
+            else:
+                result = result.decode().strip()
+            tailscale_address = result
+        else:
+            tailscale_address = ""
+        zt_network = self._d.env_by_tags("zerotierid").value
+        if zt_network:
+            try:
+                result = subprocess.run(
+                    f"zerotier-cli get {zt_network} ip4 2>/dev/null",
+                    shell=True,
+                    capture_output=True,
+                    timeout=2.0,
+                ).stdout
+            except:
+                result = ""
+            else:
+                result = result.decode().strip()
+            zerotier_address = result
+        else:
+            zerotier_address = ""
         # next check if there were under-voltage events (this is likely only relevant on an RPi)
         self._d.env_by_tags("under_voltage").value = False
         board = self._d.env_by_tags("board_name").value
@@ -1177,24 +1451,54 @@ class AdsbIm:
                     )
                 match = re.search("<([^>]*)>", aggregators[idx][3])
                 if match:
-                    # print_err(
-                    #    f"found {match.group(0)} - replace with {self._d.env(match.group(1)).value}"
-                    # )
+                    # this seems problematic. We need to replace the placeholder text with the correct KEY...
+                    # here we just take key0 and that's pretty much guaranteed to be wrong for the stage2 case
                     aggregators[idx][3] = aggregators[idx][3].replace(
-                        match.group(0), self._d.env(match.group(1)).value
+                        match.group(0), ""  # self._d.env(match.group(1)).list_get(0)
                     )
         return render_template(
-            "index.html", aggregators=aggregators, local_address=local_address
+            "index.html",
+            aggregators=aggregators,
+            local_address=local_address,
+            tailscale_address=tailscale_address,
+            zerotier_address=zerotier_address,
         )
 
     @check_restart_lock
     def setup(self):
         if request.method == "POST" and request.form.get("submit") == "go":
             return self.update()
-
+        # is this a stage2 feeder?
+        if self._d.is_enabled("stage2"):
+            return render_template("stage2.html")
         # make sure DNS works
         self.update_dns_state()
         return render_template("setup.html")
+
+    @check_restart_lock
+    def stage2(self):
+        if request.method == "POST":
+            return self.update()
+        # update the info from the micro feeders
+        for i in range(self._d.env_by_tags("num_micro_sites").value):
+            self.get_base_info(i + 1)  # micro proxies start at 1
+        return render_template("stage2.html")
+
+
+def create_stage2_yml_from_template(
+    stage2_yml_name, template_file="/opt/adsb/config/stage2.yml"
+):
+    # grab the number after the last '_' in the stage2_yml_name
+    m = re.search(r"_(\d+).yml$", str(stage2_yml_name))
+    if m:
+        n = m.group(1)
+        with open(template_file, "r") as stage2_yml_template:
+            with open(stage2_yml_name, "w") as stage2_yml:
+                stage2_yml.write(
+                    stage2_yml_template.read().replace("STAGE2NUM", f"{n}")
+                )
+    else:
+        print_err(f"could not find micro feedernumber in {stage2_yml_name}")
 
 
 if __name__ == "__main__":

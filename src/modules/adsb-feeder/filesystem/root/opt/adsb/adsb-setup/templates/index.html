@@ -2,7 +2,8 @@
 {% set active_page = "index" %}
 {% block content %}
 <h1 class="mt-3 text-center text-danger">
-  {% block title %}ADS-B Feeder Homepage for {{ env_value_by_tag("mlat_name") }}{% endblock %}
+  {% block title %}ADS-B Feeder Homepage for
+  {{ env_value_by_tag('stage2_name') if is_enabled("stage2") else list_value_by_tag("site_name", 0) }}{% endblock %}
 </h1>
 <div class="alert alert-danger" role="alert" {% if env_value_by_tag('dns_state') %} style="display: none;" {% endif %}>
   The feeder cannot resolve DNS queries. This will most likely prevent it from working at all.
@@ -22,21 +23,46 @@
   upgrading to a larger storage device.
 </div>
 <div class="row">
-  <div class="col-12 mb-3 {% if env_value_by_tag('aggregators') != 'micro'%} d-none {% endif %}">
+  <div
+       class="col-12 mb-3 {% if env_value_by_tag('aggregators') != 'micro' or is_enabled('stage2') %} d-none {% endif %}">
     <h5>You are running in micro feeder mode</h5>
-    <p>Connect to a stage 2 system that feeds aggregators.</p>
-    <p>Assuming the stage 2 is on the same network as your browser, it should be able to connect to this system as
-      <code>{{ local_address }}</code>.
+    {% if env_value_by_tag('stage2_listeners') != [] %}
+    <p class="mt-3">The following stage2 systems have accessed this feeder:
+      {% for s in env_value_by_tag('stage2_listeners')%} {{s}}{% if not loop.last %},{%endif%}{%endfor%}
     </p>
-    <div {% if env_value_by_tag('tailscale_name') == '' %}class="d-none" {% endif %}>
-      You appear to be running Tailscale - if this is how you connect to the stage 2 feeder, make sure you use your
-      Tailnet address.
-    </div>
-    <div {% if env_value_by_tag('zerotierid') == '' %}class="d-none" {% endif %}>
-      You appear to be running ZeroTier - if this is how you connect to the stage 2 feeder, make sure you use your
-      ZeroTier address.
+    {% else %}
+    <p>Connect a stage 2 system that feeds aggregators to this system.</p>
+    <p>Most likely {% if tailscale_address != "" or zerotier_address != "" %}one of
+      {%endif%}{{ local_address }}{% if tailscale_address != "" %},
+      {{ tailscale_address}}{% endif %}{% if zerotier_address != "" %}, {{ zerotier_address}}{% endif %}
+      will work.
+    </p>
+    {% endif %}
+  </div>
+  <div class="col-12 mb-3 {% if not is_enabled('stage2') %} d-none {% endif %}">
+    <h5>You are running as stage 2 feeder</h5>
+    <div class="col-12 mb-3">{% if env_value_by_tag('num_micro_sites') == 0 %}No micro feeder sites configured, yet.
+      Please do so on the <a href={{ url_for('stage2') }}>Stage 2 Setup page</a>{% else %}You are collecting data from
+      {% for site in env_value_by_tag('site_name') if not site == list_value_by_tag('site_name', 0) %}
+      {% if loop.last and loop.length > 1 %}and
+      {% endif %}<strong>{{site}}</strong>{% if not loop.last and not loop.length == 2 %},{% endif %}{% endfor %} - more
+      configuration options for this are available on the <a href={{ url_for('stage2') }}>Stage 2 Setup
+        page</a>{% endif %}
     </div>
   </div>
+  {# painfully figure out which sites we are handling here - just the base, or a list of proxies? #}
+  {% set ns = namespace() %}
+  {% set ns.site_indices = [] %}
+  {% if is_enabled('stage2') %}
+  {% for site in env_value_by_tag('site_name') %}
+  {% if loop.index0 > 0 %}
+  {% set ns.site_indices = ns.site_indices + [loop.index0] %}
+  {% endif %}
+  {% endfor %}
+  {% else %}
+  {% set ns.site_indices = [0] %}
+  {% endif %}
+  {% set num_micro_sites = (ns.site_indices | length) %}
   <div class="col-12 {% if env_value_by_tag('aggregators') == 'micro'%} d-none {% endif %}">
     <h4>You are feeding</h4>
     <div class="row small">
@@ -45,10 +71,10 @@
         <table class="table table-bordered table-sm lh-1 table-striped">
           <thead>
             <td>Aggregator</td>
-            <td>Enabled</td>
-            <td>Data</td>
-            <td>MLAT</td>
-            <td>Status</td>
+            <td class="text-center" colspan="{{num_micro_sites}}">Enabled</td>
+            <td class="text-center" colspan="{{num_micro_sites}}">Data</td>
+            <td class="text-center" colspan="{{num_micro_sites}}">MLAT</td>
+            <td class="text-center" colspan="{{num_micro_sites}}">Status</td>
           </thead>
           <tbody>
             {% for agg, name, map, status in aggregators %}
@@ -56,22 +82,29 @@
             {% if (tc==0 and is_first) or (tc==1 and not is_first) %}
             <tr>
               <td>
-                <a href="{{ map }}">{{ name }}</a>
+                <a href=" {{ map }}">{{ name }}</a>
               </td>
+              {% for idx in ns.site_indices %}
               <td class="text-center">
-                <span id="{{ agg + 'span' }}">
-                  {% if is_enabled(agg) %}&#10003;{% endif %}
-                </span>
+                <span id="{{ agg ~ 'span' ~ idx }}" width="3em">{% if list_is_enabled(agg, idx)%}&#10003;
+                  {% endif %}</span>
               </td>
+              {% endfor %}
+              {% for idx in ns.site_indices %}
               <td class="text-center">
-                <span id="{{ agg + 'beast' }}"></span>
+                <span id="{{ agg ~ 'beast' ~ idx }}" width="3em"></span>
               </td>
+              {% endfor %}
+              {% for idx in ns.site_indices %}
               <td class="text-center">
-                <span id="{{ agg + 'mlat' }}"></span>
+                <span id="{{ agg ~ 'mlat' ~ idx }}" width="3em"></span>
               </td>
+              {% endfor %}
+              {% for idx in ns.site_indices %}
               <td class="text-center">
-                {% if status != "" and is_enabled(agg) %}<a href="{{ status }}">&#x1f517;</a>{% endif %}
+                {% if status != "" and list_is_enabled(agg, idx) %}<a href="{{ status }}">&#x1f517;</a>{% endif %}
               </td>
+              {% endfor %}
             </tr>
             {% endif %}
             {% endfor %}
@@ -107,10 +140,9 @@
         <label for="update_feeder_aps">
           Update to the current ADS-B feeder applications (i.e. the web UI, setup apps, and
           containers). Either the latest beta or stable version.<br />
-          <span class="small">If this update brings in new container images, even with a fast internet
-            connection this can easily take more than ten minutes to complete. The web UI will pause while the update is
-            running, but the feeder apps will only be briefly interrupted once all new components have been
-            downloaded.</span>
+          <span class="small">If this update brings in new container images, even with a fast internet connection this
+            can easily take more than ten minutes to complete. The web UI will pause while the update is running, but
+            the feeder apps will only be briefly interrupted once all new components have been downloaded.</span>
         </label>
         <div>
           <button type="submit" class="btn btn-primary mb-3 ml-3 col-2" name="update_feeder_aps_beta"
@@ -124,7 +156,7 @@
   <div class="col-12">
     <div id="UF" class="row">
       <div class="col-12">
-        <h5>TAR1090 Mapping Interface</h5>
+        <h5>{% if env_value_by_tag('aggregators') == 'micro' %}Local {%endif%}TAR1090 Mapping Interface</h5>
       </div>
       <div class="col col-md-4 col-lg-3">
         <ul>
@@ -166,6 +198,7 @@
         </ul>
       </div>
     </div>
+    {% if not is_enabled('stage2') %}
     <div class="row mt-3" {% if not ( is_enabled('adsblol') or is_enabled('flightradar') or is_enabled('planefinder') or
         is_enabled('adsbx')) %} style="display: none;" {% endif %}>
       <div class="col-12">
@@ -188,8 +221,7 @@
             <br />
             {% if is_enabled("mlat_privacy") %}
             (since you have MLAT privacy enabled, your feeder won't be shown)
-            {% else
-                %}
+            {% else %}
             (your feeder will be at an approximate location as {{ env_value_by_tag("mlat_name") }})
             {% endif %}
           </li>
@@ -223,6 +255,7 @@
         </ul>
       </div>
     </div>
+    {% endif %}
   </div>
 </div>
 <script>
@@ -264,16 +297,22 @@
         }
       });
     {% for agg, name, m, s in aggregators %}
-    {% if is_enabled(agg) %}
-    get_status("{{ agg }}");
-    {% endif %}
-    {% endfor %}
+    // agg {{ agg }}
+    {% for idx in ns.site_indices %}
+    // idx {{ idx }}
+    {% if list_is_enabled(agg, idx) %}
+    get_status("{{ agg }}", "{{ list_value_by_tag('mf_ip', idx)}}", {{ idx }});
+  {% endif %}
+  {% endfor %}
+  {% endfor %}
   });
 
-  function get_status(agg) {
-    fetch(`${SCRIPT_ROOT}/api/status/${agg}`)
+  function get_status(agg, ip, idx) {
+    fetch(`/api/status/${agg}/${idx}`)
       .then(response => response.json())
       .then(data => {
+        // now use the idx to do something clever about what is shown there...
+        // right now this is broken and just overwrites things
         $("#" + agg + "beast").text(data["beast"]);
         $("#" + agg + "mlat").text(data["mlat"]);
         if (data["beast"] == "+" && data["mlat"] != "-") {

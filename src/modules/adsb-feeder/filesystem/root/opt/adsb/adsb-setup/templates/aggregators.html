@@ -1,104 +1,94 @@
 {% extends 'base.html' %}
 {% set active_page = "aggregators" %}
 {% block content %}
+{% if m == "0" %}{% set go = "go" %}{% else %}{% set go = "go-" ~ m %}{% endif %}
 <h1 class="mt-3 text-center text-danger">
-  {% block title %}Setup additional aggregators{% endblock %}
+  {% block title %}Setup Aggregators{% if site != "" %} for feeder {{ site }}{% endif %}{% endblock %}
 </h1>
 <form class="row gy-2 gx-3 mx-1 mx-lg-3 mx-xl-5 align-items-center" method="post"
       onsubmit="show_spinner(); return true;">
-  <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="aggregators" value="go">I'm
-    done here - take me to the website</button>
+  <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="aggregators"
+          value={{go}}>I'm done here - take me to the website</button>
   <div class="col-12">Select the semi-anonymous ADS-B aggregators you want to feed:</div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1" name="is_enabled--adsblol" id="is_enabled--adsblol"
-           {{ uf_enabled("adsblol") }} />
+    <input type="checkbox" class="form-check-input me-1" name="is_enabled--ultrafeeder--adsblol"
+           id="is_enabled--adsblol" {{ uf_enabled("adsblol", m) }} />
     <label for="is_enabled--adsblol">
       <a href="https://adsb.lol/privacy-license/">adsb.lol</a>
     </label>
   </div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1" name="is_enabled--flyitaly" id="is_enabled--flyitaly"
-           {{ uf_enabled("flyitaly") }} />
+    <input type="checkbox" class="form-check-input me-1" name="is_enabled--ultrafeeder--flyitaly"
+           id="is_enabled--flyitaly" {{ uf_enabled("flyitaly", m) }} />
     <label for="is_enabled--flyitaly">
       <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/">Fly Italy ADSB</a>
     </label>
   </div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1" name="is_enabled--avdelphi" id="is_enabled--avdelphi"
-           {{ uf_enabled("avdelphi") }} />
+    <input type="checkbox" class="form-check-input me-1" name="is_enabled--ultrafeeder--avdelphi"
+           id="is_enabled--avdelphi" {{ uf_enabled("avdelphi", m) }} />
     <label for="is_enabled--avdelphi">
       <a href="https://www.avdelphi.com/privacy.html">AVDelphi</a>
     </label>
   </div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1" name="is_enabled--planespotters" id="is_enabled--planespotters"
-           {{ uf_enabled("planespotters") }} />
+    <input type="checkbox" class="form-check-input me-1" name="is_enabled--ultrafeeder--planespotters"
+           id="is_enabled--planespotters" {{ uf_enabled("planespotters", m) }} />
     <label for="is_enabled--planespotters">
       <a href="https://www.planespotters.net/legal/privacypolicy/">planespotters.net</a>
     </label>
   </div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
     <input type="checkbox" class="form-check-input me-1" data-mdb-toggle="tooltip"
-           title="please note that this site is missing a clear data/privacy policy" name="is_enabled--tat"
-           id="is_enabled--tat" {{ uf_enabled("tat") }} />
+           title="please note that this site is missing a clear data/privacy policy" name="is_enabled--ultrafeeder--tat"
+           id="is_enabled--tat" {{ uf_enabled("tat", m) }} />
     <label for="is_enabled--tat">
       <a href="https://theairtraffic.com/privacy-license/" data-mdb-toggle="tooltip"
          title="please note that this site is missing a clear data/privacy policy">TheAirTraffic.com</a>
     </label>
   </div>
-  <!--
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1" data-mdb-toggle="tooltip"
-           title="please note that this site is missing a clear data/privacy policy" name="is_enabled--flyovr"
-           id="is_enabled--flyovr" {{ uf_enabled("flyovr") }} />
-    <label for="is_enabled--flyovr">
-      <a href="https://www.flyovr.io/" data-mdb-toggle="tooltip"
-         title="please note that this site is missing a clear data/privacy policy">FLYOVR.IO</a>
-    </label>
-  </div>
-  -->
-  <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1" name="is_enabled--radarplane" id="is_enabled--radarplane"
-           {{ uf_enabled("radarplane") }} />
+    <input type="checkbox" class="form-check-input me-1" name="is_enabled--ultrafeeder--radarplane"
+           id="is_enabled--radarplane" {{ uf_enabled("radarplane", m) }} />
     <label for="is_enabled--radarplane">
       <a href="https://radarplane.com/privacy-policy">RadarPlane</a>
     </label>
   </div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1" name="is_enabled--adsbfi" id="is_enabled--adsbfi"
-           {{ uf_enabled("adsbfi") }} />
+    <input type="checkbox" class="form-check-input me-1" name="is_enabled--ultrafeeder--adsbfi" id="is_enabled--adsbfi"
+           {{ uf_enabled("adsbfi", m) }} />
     <label for="is_enabled--adsbfi">
       <a href="https://adsb.fi/">adsb.fi</a>
     </label>
   </div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
     <input type="checkbox" class="form-check-input me-1" data-mdb-toggle="tooltip"
-           title="please note that this site is missing a clear data/privacy policy" name="is_enabled--hpradar"
-           id="is_enabled--hpradar" {{ uf_enabled("hpradar") }} />
+           title="please note that this site is missing a clear data/privacy policy"
+           name="is_enabled--ultrafeeder--hpradar" id="is_enabled--hpradar" {{ uf_enabled("hpradar", m) }} />
     <label for="is_enabled--hpradar">
       <a href="https://skylink.hpradar.com/" data-mdb-toggle="tooltip"
          title="please note that this site is missing a clear data/privacy policy">HPRadar</a>
     </label>
   </div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1" name="is_enabled--alive" id="is_enabled--alive"
-           {{ uf_enabled("alive") }} />
+    <input type="checkbox" class="form-check-input me-1" name="is_enabled--ultrafeeder--alive" id="is_enabled--alive"
+           {{ uf_enabled("alive", m) }} />
     <label for="is_enabled--alive">
       <a href="https://airplanes.live/privacy">airplanes.live</a>
     </label>
   </div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1" name="is_enabled--adsbx" id="is_enabled--adsbx"
-           {{ uf_enabled("adsbx") }} />
+    <input type="checkbox" class="form-check-input me-1" name="is_enabled--ultrafeeder--adsbx" id="is_enabled--adsbx"
+           {{ uf_enabled("adsbx", m) }} />
     <label for="is_enabled--adsbx">
       <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
     </label>
   </div>
   <div class="col-12 small fw-light text-muted text-end">
     <div class="small fw-light text-muted text-end collapse" id="showuuids">
-      {% if uf_enabled("adsblol") %}adsb.lol UUID: {{ env_value_by_tags(['adsblol_uuid']) }} {% endif %}<br>
-      {% if uf_enabled("flyitaly") or uf_enabled("avdelphi") or uf_enabled("planespotters") or uf_enabled("tat") or uf_enabled("radarplane") or uf_enabled("adsbfi") or uf_enabled("hpradar") or uf_enabled("alive") or uf_enabled("adsbx") %}
-      Ultrafeeder UUID: {{ env_value_by_tags(['ultrafeeder_uuid']) }} {% endif %}
+      {% if uf_enabled("adsblol", m) %}adsb.lol UUID: {{ list_value_by_tag('adsblol_uuid', m) }} {% endif %}<br>
+      {% if uf_enabled("flyitaly", m) or uf_enabled("avdelphi", m) or uf_enabled("planespotters", m) or uf_enabled("tat", m) or uf_enabled("radarplane", m) or uf_enabled("adsbfi", m) or uf_enabled("hpradar", m) or uf_enabled("alive", m) or uf_enabled("adsbx", m) %}
+      Ultrafeeder UUID: {{ list_value_by_tag('ultrafeeder_uuid', m) }} {% endif %}
     </div>
     <button class="btn btn-secondary small" type="button" data-mdb-toggle="collapse" data-mdb-target="#showuuids"
             aria-expanded="false" aria-controls="showuuids">
@@ -108,7 +98,7 @@
   <div class="col-12 mt-3 mb-1">Select the commercial ADS-B aggregators you want to feed:</div>
   <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="flightradar--is_enabled" id="flightradar--is_enabled"
-           {{ others_enabled("flightradar") }} />
+           {{ others_enabled("flightradar", m) }} />
     <label class="mx-1 w-auto" for="flightradar--is_enabled">
       <a href="https://www.flightradar24.com/privacy-policy">flightradar24</a>
       <div class="form-group" id="FR_FIELDS">
@@ -125,18 +115,18 @@
         </label>
         <input type="text" id="flightradar--key" name="flightradar--key" class="form-control w-50"
                placeholder="existing flightradar24 ADS-B sharing key or email address"
-               value="{{ env_value_by_tags(["flightradar", "key"]) }}" />
+               value="{{ list_value_by_tags(["flightradar", "key"], m) }}" />
         <input {% if not is_enabled('uat978') %}style="display: none;" {% endif %} type="text" id="flightradar_uat--key"
                name="flightradar_uat--key" class="form-control w-50"
                placeholder="existing flightradar24 UAT sharing key or email address"
-               value="{{ env_value_by_tags(["flightradar_uat", "key"]) }}" />
+               value="{{ list_value_by_tags(["flightradar_uat", "key"], m) }}" />
         <button type="submit" class="btn btn-primary mt-1" name="flightradar--submit" value="stay">Request key</button>
       </div>
     </label>
   </div>
   <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="planewatch--is_enabled" id="planewatch--is_enabled"
-           {{ others_enabled("planewatch") }} />
+           {{ others_enabled("planewatch", m) }} />
     <label class="mx-1 w-auto" for="planewatch--is_enabled">
       <a href="https://plane.watch">Plane.watch</a>
       <div class="form-group" id="PW_FIELDS">
@@ -146,14 +136,14 @@
           show you an API key that you can enter here.
         </label>
         <input type="text" id="planewatch--key" name="planewatch--key" class="form-control w-75"
-               {{ others_enabled("planewatch") | replace("checked", "required" ) }} placeholder=" Plane.watch API key"
-               value="{{ env_value_by_tags(["planewatch", "key"]) }}">
+               {{ others_enabled("planewatch", m) | replace("checked", "required" ) }}
+               placeholder=" Plane.watch API key" value="{{ list_value_by_tags(["planewatch", "key"], m) }}">
       </div>
     </label>
   </div>
   <div class="ol-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="flightaware--is_enabled" id="flightaware--is_enabled"
-           {{ others_enabled("flightaware") }} />
+           {{ others_enabled("flightaware", m) }} />
     <label class="mx-1 w-auto" for="FA">
       <a href="https://flightaware.com/">FlightAware</a>
       <div class="form-group" id="FA_FIELDS">
@@ -169,14 +159,14 @@
           link.setAttribute('href', window.location.protocol + "//" + window.location.hostname + ":" + {{ env_value_by_tag("piamapport") }});
         </script>
         <input type="text" id="flighaware--key" name="flightaware--key" class="form-control w-75"
-               placeholder="Piaware key" value="{{ env_value_by_tags(["flightaware", "key"]) }}" />
+               placeholder="Piaware key" value="{{ list_value_by_tags(["flightaware", "key"], m) }}" />
         <button type="submit" class="btn btn-primary mt-1" name="flightaware--submit" value="stay">Request key</button>
       </div>
     </label>
   </div>
   <div class="ol-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="radarbox--is_enabled" id="radarbox--is_enabled"
-           {{ others_enabled("radarbox") }} />
+           {{ others_enabled("radarbox", m) }} />
     <label for="radarbox--is_enabled">
       <a href="https://www.radarbox.com/">RadarBox</a>
       <div class="form-group" id="RB_FIELDS">
@@ -188,14 +178,14 @@
         </label>
         <input type="text" id="radarbox--key" name="radarbox--key" class="form-control w-75"
                {{ env_values["RB"] | replace('checked', 'required') }} placeholder=" RadarBox sharing key"
-               value="{{ env_value_by_tags(["radarbox", "key"]) }}">
+               value="{{ list_value_by_tags(["radarbox", "key"], m) }}">
         <button type="submit" class="btn btn-primary mt-1" name="radarbox--submit" value="stay">Request key</button>
       </div>
     </label>
   </div>
   <div class="ol-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="planefinder--is_enabled" id="planefinder--is_enabled"
-           {{ others_enabled("planefinder") }} />
+           {{ others_enabled("planefinder", m) }} />
     <label for="planefinder--is_enabled">
       <a href="https://planefinder.net/">PlaneFinder</a>
       <div class="form-group" id="PF_FIELDS">
@@ -204,14 +194,14 @@
           feeder is fairly complicated - we are trying to add this for a future release.
         </label>
         <input type="text" id="planefinder--key" name="planefinder--key" class="form-control w-75"
-               {{ others_enabled("planefinder") | replace("checked", "required" ) }}
-               placeholder=" PlaneFinder sharecode" value="{{ env_value_by_tags(["planefinder", "key"]) }}">
+               {{ others_enabled("planefinder", m) | replace("checked", "required" ) }}
+               placeholder=" PlaneFinder sharecode" value="{{ list_value_by_tags(["planefinder", "key"], m) }}">
       </div>
     </label>
   </div>
   <div class="ol-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="adsbhub--is_enabled" id="adsbhub--is_enabled"
-           {{ others_enabled("adsbhub") }} />
+           {{ others_enabled("adsbhub", m) }} />
     <label for="adsbhub--is_enabled">
       <a href="https://adsbhub.org">ADSBHub</a>
       <div class="form-group" id="AH_FIELDS">
@@ -222,14 +212,14 @@
           users can find their station key on the Settings page of the ADSBHub site.
         </label>
         <input type="text" id="adsbhub--key" name="adsbhub--key" class="form-control w-75"
-               {{ others_enabled("adsbhub") | replace("checked", "required" ) }} placeholder=" ADSBHub station key"
-               value="{{ env_value_by_tags(["adsbhub", "key"]) }}">
+               {{ others_enabled("adsbhub", m) | replace("checked", "required" ) }} placeholder=" ADSBHub station key"
+               value="{{ list_value_by_tags(["adsbhub", "key"], m) }}">
       </div>
     </label>
   </div>
   <div class="ol-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="opensky--is_enabled" id="opensky--is_enabled"
-           {{ others_enabled("opensky") }} />
+           {{ others_enabled("opensky", m) }} />
     <label for="opensky--is_enabled">
       <a href="https://opensky-network.org/">OpenSky Network</a>
       <!-- this one needs automation set up with a docker container again -- and it needs two fields -->
@@ -241,17 +231,17 @@
           and click Request Key; we will get a serial for you.
         </label>
         <input type="text" id="opensky--user" name="opensky--user" class="form-control w-75"
-               {{ others_enabled("opensky") | replace("checked", "required" ) }} placeholder=" OpenSky username"
-               value="{{ env_value_by_tags(["opensky", "user"]) }}">
+               {{ others_enabled("opensky", m) | replace("checked", "required" ) }} placeholder=" OpenSky username"
+               value="{{ list_value_by_tags(["opensky", "user"], m) }}">
         <input type="text" id="opensky--key" name="opensky--key" class="form-control w-75"
-               placeholder="OpenSky serial number" value="{{ env_value_by_tags(["opensky", "key"]) }}" />
+               placeholder="OpenSky serial number" value="{{ list_value_by_tags(["opensky", "key"], m) }}" />
         <button type="submit" class="btn btn-primary mt-1" name="opensky--submit" value="stay">Request key</button>
       </div>
     </label>
   </div>
   <div class="ol-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="radarvirtuel--is_enabled" id="radarvirtuel--is_enabled"
-           {{ others_enabled("radarvirtuel") }} />
+           {{ others_enabled("radarvirtuel", m) }} />
     <label for="radarvirtuel--is_enabled">
       <a href="https://www.radarvirtuel.com/">RadarVirtuel</a>
       <div class="form-group" id="RV_FIELDS">
@@ -262,14 +252,14 @@
           can enter here
         </label>
         <input type="text" id="radarvirtuel--key" name="radarvirtuel--key" class="form-control w-75"
-               {{ others_enabled("radarvirtuel") | replace("checked", "required" ) }}
-               placeholder=" RadarVirtuel feeder key" value="{{ env_value_by_tags(["radarvirtuel", "key"]) }}">
+               {{ others_enabled("radarvirtuel", m) | replace("checked", "required" ) }}
+               placeholder=" RadarVirtuel feeder key" value="{{ list_value_by_tags(["radarvirtuel", "key"], m) }}">
       </div>
     </label>
   </div>
   <div class="ol-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="1090uk--is_enabled" id="1090uk--is_enabled"
-           {{ others_enabled("1090uk") }} />
+           {{ others_enabled("1090uk", m) }} />
     <label for="1090uk--is_enabled">
       <a href="https://1090mhz.uk/">1090MHz UK</a>
       <div class="form-group" id="TNUK_FIELDS">
@@ -279,13 +269,13 @@
           those locations, please contact them at info@1090mhz.uk to get a sharing key.
         </label>
         <input type="text" id="1090uk--key" name="1090uk--key" class="form-control w-75"
-               {{ others_enabled("1090uk") | replace("checked", "required" ) }} placeholder=" 1090MHz UK sharing key"
-               value="{{ env_value_by_tags(["1090uk", "key"]) }}">
+               {{ others_enabled("1090uk", m) | replace("checked", "required" ) }} placeholder=" 1090MHz UK sharing key"
+               value="{{ list_value_by_tags(["1090uk", "key"], m) }}">
       </div>
     </label>
   </div>
-  <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="aggregators" value="go">I'm
-    done here - take me to the website</button>
+  <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="aggregators"
+          value={{go}}>I'm done here - take me to the website</button>
 </form>
 <script>
   function show_or_hide(b, f) {

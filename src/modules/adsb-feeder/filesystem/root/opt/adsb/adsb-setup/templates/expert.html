@@ -4,40 +4,7 @@
 {% block content %}
 <h1 class="mt-3 text-center text-danger">{% block title %} Expert setup {% endblock %}</h1>
 <div class="row small">
-  <div class="col-12 col-lg-6 {% if is_enabled('stage2') %}d-none{% endif %}">
-    <h5 class="mt-3">Set explicit ADS-B SDR gain</h5>
-    <form method="POST">
-      <div class="row">
-        <label for="gain" class="col-12">
-          Normally the feeder will settle on a good gain value over time (and an Airspy will do so almost
-          immediately). If you want to override that "autogain" behavior, you can set an explicit gain value
-          here.
-        </label>
-        <input class="col-auto ms-3" id="gain" name="gain" type="text" pattern="(?:autogain|\d+(?:.\d+)?)"
-               title="A number between 0 and 50 or the word 'autogain'" value="{{ env_value_by_tag('gain') }}" required>
-        <button type="submit" class="btn btn-primary mb-1 mx-3 col-3" name="gain--submit" value="go">Submit</button>
-        <button {% if env_value_by_tag('gain') != 'autogain' %}style="display:none;" {% endif %} type="submit"
-                class="btn btn-secondary mb-1 me-3 col-3" name="resetgain" value="go">Reset Autogain</button>
-      </div>
-    </form>
-  </div>
-  <div class="col-12 col-lg-6 {% if is_enabled('stage2') or not is_enabled('uat978') %}d-none{% endif %}">
-    <h5 class="mt-3">Set explicit UAT SDR gain</h5>
-    <form method="POST">
-      <div class="row">
-        <label for="uatgain" class="col-12">
-          Normally the feeder will settle on a good gain value over time. If you want to override that
-          "autogain" behavior, you can set an explicit gain value here.
-        </label>
-        <input class="col-auto ms-3" id="uatgain" name="uatgain" type="text" pattern="(?:autogain|\d+(?:.\d+)?)"
-               title="A number between 0 and 50 or the word 'autogain'" value="{{ env_value_by_tag('uatgain') }}"
-               required>
-        <button type="submit" class="btn btn-primary mb-1 mx-3 col-3" name="uatgain--submit" value="go">Submit</button>
-        <button {% if env_value_by_tag('uatgain') != 'autogain' %}style="display:none;" {% endif %} type="submit"
-                class="btn btn-secondary mb-1 me-3 col-3" name="resetuatgain" value="go">Reset Autogain</button>
-      </div>
-    </form>
-  </div>
+
   <div class="col-12 col-lg-6">
     <h5 class="mt-3">Add additional Ultrafeeder arguments</h5>
     <form method="POST">
@@ -79,18 +46,6 @@
   </div>
 
 
-  <div class="col-12 col-lg-6">
-    <h5 class="mt-3">Remove existing observed range outline</h5>
-    <form method="POST" onsubmit="show_spinner(); return true;">
-      <div class="row">
-        <label for="clear_range" class="col-8 me-3">
-          The tar1090 map maintains an outline for the area around your feeder where planes have been
-          observed; sometimes it may be desirable to reset that (for example after you changed location).
-        </label>
-        <button type="submit" class="btn btn-primary mb-1 mx-3 col-sm-3" name="clear_range" value="stay">Submit</button>
-      </div>
-    </form>
-  </div>
   <!-- FULL_IMAGE_ONLY_START -->
   <!-- SECURE_IMAGE_START -->
   <div class="col-12 col-lg-6 {% if is_enabled('secure_image') %} d-none {% endif %}">

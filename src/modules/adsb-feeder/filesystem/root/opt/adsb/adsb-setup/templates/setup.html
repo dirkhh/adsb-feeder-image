@@ -11,6 +11,10 @@
   <a href="https://www.freemaptools.com/elevation-finder.htm" target="_blank">location and elevation finder tool</a>
   to find your Latitude, Longitude, and Altitude based on your address.
 </p>
+<p>
+  If you are seting up a <strong>stage 2</strong> feeder to connect with already running micro feeder(s), indicate this
+  below and fill out the data here for the position you want to be the center of your combined map display.
+</p>
 <p class="row">
   <span class="col-md">
     If you re-installed the ADS-B Feeder Image and have made a backup of your configuration, you can also simply restore
@@ -26,8 +30,9 @@
       <label for="mlat_name">Station Name (shows up on public maps if enabled later)</label>
     </span>
     <span class="col-md">
-      <input type="text" name="mlat_name" required placeholder="my-awesome-antenna" class="form-control"
-             pattern="[\-_.a-zA-Z0-9]+" title="Letters, numbers, -, _, ." value="{{ env_value_by_tag('mlat_name') }}" />
+      <input type="text" id="mlat_name" name="site_name" required placeholder="my-awesome-antenna" class="form-control"
+             pattern="[\-_.a-zA-Z0-9]+" title="Letters, numbers, -, _, ."
+             value="{{ list_value_by_tag('site_name', 0) }}" />
     </span>
   </div>
   <div class="form-group row align-items-center mb-1">
@@ -37,7 +42,7 @@
     <span class="col-md">
       <input type="text" id="lat" name="lat" required placeholder="Antenna latitude" class="form-control"
              pattern="(?:\+|-|)(?:(?:[0-8]?\d)(?:\.\d+)?|90(?:\.0+)?)(,(?:\+|-|)(:?(:?\d?\d|1[0-7]\d)(?:\.\d+)?|180(?:\.0+)?))?"
-             title="Number between -90 and 90" value="{{ env_value_by_tag('lat') }}" />
+             title="Number between -90 and 90" value="{{ list_value_by_tag('lat', 0) }}" />
     </span>
   </div>
   <div class="form-group row align-items-center mb-1">
@@ -47,7 +52,7 @@
     <span class="col-md">
       <input type="text" id="lng" name="lng" required placeholder="Antenna longitude" class="form-control"
              pattern="(?:\+|-|)(:?(:?\d?\d|1[0-7]\d)(?:\.\d+)?|180(?:\.0+)?)" title="Number between -180 and 180"
-             value="{{ env_value_by_tag('lng') }}" />
+             value="{{ list_value_by_tag('lng', 0) }}" />
     </span>
   </div>
   <div class="form-group row align-items-center mb-1">
@@ -56,18 +61,18 @@
     </span>
     <span class="col-md">
       <input type="text" id="alt" name="alt" required placeholder="Antenna MSL altitude (in m)" class="form-control"
-             pattern="(?:\+|-|)\d+" value="{{ env_value_by_tag('alt') }}" />
+             pattern="(?:\+|-|)\d+" value="{{ list_value_by_tag('alt', 0) }}" />
     </span>
   </div>
   <div class="form-group row align-items-center mb-1">
     <span class="col-md">
-      <label for="form_timezone">Timezone</label>
+      <label for="tz">Timezone</label>
       <button class="pb-1 btn btn-secondary" onclick="sendTimeToServer()">update timezone</button>
     </span>
     <span class="col-md">
-      <input type="text" name="form_timezone" id="form_timezone" required
+      <input type="text" name="tz" id="tz" required
              placeholder="populate from the browser timezone by clicking the 'update timezone' button"
-             class="form-control mt-2" value="{{ env_value_by_tag('form_timezone') }}" />
+             class="form-control mt-2" value="{{ list_value_by_tag('tz', 0) }}" />
     </span>
   </div>
   <div class="form-group mt-3">
@@ -76,7 +81,7 @@
       <a href="#"
          title="aggregators that don't require you to create an account or provide an email address">semi-anonymous
       </a>
-      aggregators do you want to feed?
+      aggregators do you want to feed? Or is this a stage 2 setup?
     </label>
     <br />
     <div>
@@ -92,6 +97,9 @@
       <input type="radio" name="aggregators" id="micro" value="micro" {% if env_value_by_tag("aggregators")=="micro" %}
              checked {% endif %}>
       <label class="form-check-label mr-3" for="micro">None (micro feeder)</label>
+      <input type="radio" name="aggregators" id="stage2" value="stage2"
+             {% if env_value_by_tag("aggregators")=="stage2" %} checked {% endif %}>
+      <label class="form-check-label mr-3" for="stage2">Stage 2 setup (select these later)</label>
     </div>
     <div id="explain-all" style="display: {% if env_value_by_tag('aggregators')=='all' %} block {% else %} none {%
             endif %}; font-size: smaller;">
@@ -131,6 +139,12 @@
       This is designed to work with a second stage image that uses this feeder as its input and creates the map, feeds
       the aggregators, etc.
     </div>
+    <div id="explain-stage2" style="display: {% if env_value_by_tag('aggregators')=='stage2' %} block {% else %}
+                    none {% endif %}; font-size: smaller;">
+      With this option the image will be set up as a stage 2 system, designed to connect to one or more micro feeder(s).
+      You can select for each of them individually which aggregators you want to feed, and you get a combined map of all
+      the planes that the micro feeder(s) see.
+    </div>
   </div>
   <div class="form-group">
     <button type="submit" name="submit" value="go" class="btn btn-primary">Submit</button>
@@ -158,33 +172,44 @@
     const dateTimeFormat = new Intl.DateTimeFormat("en-US", {});
     const i = document.createElement("img");
     i.src = "/propagateTZ?tz=" + dateTimeFormat.resolvedOptions()["timeZone"];
-    document.getElementById("form_timezone").value = dateTimeFormat.resolvedOptions()["timeZone"];
+    document.getElementById("tz").value = dateTimeFormat.resolvedOptions()["timeZone"];
   }
   const explainAll = document.getElementById("explain-all");
   const explainPriv = document.getElementById("explain-privacy");
   const explainInd = document.getElementById("explain-individual");
   const explainMicro = document.getElementById("explain-micro");
+  const explainStage2 = document.getElementById("explain-stage2");
   function aggregatorClick() {
     if (document.getElementById("all").checked) {
       explainAll.style.display = "block";
       explainPriv.style.display = "none";
       explainInd.style.display = "none";
       explainMicro.style.display = "none";
+      explainStage2.style.display = "none";
     } else if (document.getElementById("privacy").checked) {
       explainAll.style.display = "none";
       explainPriv.style.display = "block";
       explainInd.style.display = "none";
       explainMicro.style.display = "none";
+      explainStage2.style.display = "none";
     } else if (document.getElementById("individual").checked) {
       explainAll.style.display = "none";
       explainPriv.style.display = "none";
       explainInd.style.display = "block";
       explainMicro.style.display = "none";
+      explainStage2.style.display = "none";
     } else if (document.getElementById("micro").checked) {
       explainAll.style.display = "none";
       explainPriv.style.display = "none";
       explainInd.style.display = "none";
       explainMicro.style.display = "block";
+      explainStage2.style.display = "none";
+    } else if (document.getElementById("stage2").checked) {
+      explainAll.style.display = "none";
+      explainPriv.style.display = "none";
+      explainInd.style.display = "none";
+      explainMicro.style.display = "none";
+      explainStage2.style.display = "block";
     }
   }
   const aggregatorBtns = document.querySelectorAll('input[name="aggregators"]');
