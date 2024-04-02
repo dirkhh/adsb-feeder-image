@@ -1,4 +1,6 @@
 Changes since v1.3.4 include
+- clean up the aftermath of a v1.3.4 change that could cause broken app installs with incorrect ports for the web UI
+- random fixes to improve handling of logfiles, attempt to avoid loss of graphs on update, and clean up other small issues
 - restore correct ports for app installs on DietPi or other Linux distros
 - fix for an issue specific to app installs to ensure the config data gets properly populated
 - update to newest RPi Raspbian image
