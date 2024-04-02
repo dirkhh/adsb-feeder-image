@@ -1,4 +1,7 @@
 Changes since v1.3.4 include
+- fix for an issue specific to app installs to ensure the config data gets properly populated
+- update to newest RPi Raspbian image
+- small changes to the update process and tag handling
 - internal changes to data structures and approach to creating some files. There should be no user visible changes.
 
 > [!NOTE]
