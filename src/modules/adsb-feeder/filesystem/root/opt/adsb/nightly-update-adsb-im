@@ -13,7 +13,7 @@ TIMESTAMP=$(date +%Y-%m-%d+%H:%M)
 cp adsb-setup.log adsb-setup.log."$TIMESTAMP"
 truncate -s 0 adsb-setup.log
 tail -n500 adsb-setup.log."$TIMESTAMP" >> adsb-setup.log
-find . -name adsb-setup.log.\* -ctime +7 | xargs rm
+find . -name adsb-setup.log.\* -ctime +7 | xargs rm -f
 
 if grep -q "^AF_IS_RADARBOX_ENABLED=True" config/.env ; then
 	docker restart rbfeeder
