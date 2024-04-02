@@ -217,7 +217,9 @@
             <a href="https://my.adsb.lol/">personal ADSB.lol URL with the planes you are sending</a>
           </li>
           <li>
-            <a href="https://mlat.adsb.lol/">ADSB.lol MLAT feeder map</a>
+            <a
+               href="https://mlat.adsb.lol/syncmap/#lat={{ list_value_by_tag('lat', 0) }}#lon={{ list_value_by_tag('lng', 0) }}#zoom=10">ADSB.lol
+              MLAT feeder map</a>
             <br />
             {% if is_enabled("mlat_privacy") %}
             (since you have MLAT privacy enabled, your feeder won't be shown)

@@ -13,8 +13,9 @@
     <input class="form-check-input me-1" type="checkbox" name="mlat_privacy--is_enabled" id="mlat_privacy--is_enabled"
            {% if list_is_enabled("mlat_privacy", m) %}checked{% endif %} />
     <label for="mlat_privacy--is_enabled">
-      Enable privacy flag (ON = does not show on <a href="https://mlat.adsb.lol/syncmap/">public aggregator
-        maps</a>)
+      Enable privacy flag (ON = does not show on <a
+         href="https://mlat.adsb.lol/syncmap/#lat={{ list_value_by_tag('lat', 0) }}#lon={{ list_value_by_tag('lng', 0) }}#zoom=10">public
+        aggregator maps</a>)
     </label>
   </div>
   <div class="col-12 form-check">
