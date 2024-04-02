@@ -579,6 +579,18 @@ class Data:
     # there are subtle dependencies between them - so let's not include these
     # in backup/restore
 
+    tag_for_name = {
+        "ULTRAFEEDER_CONTAINER": "ultrafeeder",
+        "FR24_CONTAINER": "flightradar",
+        "FA_CONTAINER": "flightaware",
+        "RB_CONTAINER": "radarbox",
+        "PF_CONTAINER": "planefinder",
+        "AH_CONTAINER": "adsbhub",
+        "OS_CONTAINER": "opensky",
+        "RV_CONTAINER": "radarvirtuel",
+        "PW_CONTAINER": "planewatch",
+        "TNUK_CONTAINER": "1090uk",
+    }
     with open(data_path / "docker.image.versions", "r") as file:
         for line in file:
             if line.startswith("#"):
@@ -589,7 +601,9 @@ class Data:
                 continue
             key = items[0]
             value = items[1]
-            entry = Env(key, tags=[key, "container", "norestore"])
+            entry = Env(
+                key, tags=[tag_for_name.get(key, key), "container", "norestore"]
+            )
             entry.value = value  # always use value from docker.image.versions as definitive source
             _env.add(entry)  # add to _env set
 
