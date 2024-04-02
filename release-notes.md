@@ -1,4 +1,5 @@
 Changes since v1.3.4 include
+- restore correct ports for app installs on DietPi or other Linux distros
 - fix for an issue specific to app installs to ensure the config data gets properly populated
 - update to newest RPi Raspbian image
 - small changes to the update process and tag handling

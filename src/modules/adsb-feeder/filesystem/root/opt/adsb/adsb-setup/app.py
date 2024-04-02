@@ -23,6 +23,7 @@ from typing import Dict, List
 from zlib import compress
 
 from utils.config import (
+    read_values_from_config_json,
     read_values_from_env_file,
     write_values_to_config_json,
     write_values_to_env_file,
@@ -249,6 +250,18 @@ class AdsbIm:
     def write_envfile(self):
         write_values_to_env_file(self._d.envs_for_envfile)
 
+    def setup_app_ports(self):
+        in_json = read_values_from_config_json()
+        if "AF_WEBPORT" not in in_json.keys():
+            # ok, we don't have them explicitly set, so let's set them up
+            # with the app defaults
+            self._d.env_by_tags("webport").value = 1099
+            self._d.env_by_tags("tar1090port").value = 1090
+            self._d.env_by_tags("uatport").value = 1091
+            self._d.env_by_tags("piamapport").value = 1092
+            self._d.env_by_tags("piastatport").value = 1093
+            self._d.env_by_tags("dazzleport").value = 1094
+
     def run(self, no_server=False):
         self._routemanager.add_proxy_routes(self.proxy_routes)
         debug = os.environ.get("ADSBIM_DEBUG") is not None
@@ -290,6 +303,9 @@ class AdsbIm:
                     )
                 )
                 expert_file.truncate()
+            # v1.3.4 ended up not installing the correct port definitions - if that's
+            # the case, then insert them into the settings
+            self.setup_app_ports()
 
         # if all the user wanted is to make sure the housekeeping tasks are completed,
         # don't start the flask app and exit instead
