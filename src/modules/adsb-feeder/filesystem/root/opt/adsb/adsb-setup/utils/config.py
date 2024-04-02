@@ -1,4 +1,5 @@
 import json
+import os
 from .util import print_err
 
 
@@ -9,6 +10,13 @@ JSON_FILE_PATH = "/opt/adsb/config/config.json"
 
 def read_values_from_config_json():
     # print_err("reading .json file")
+    if not os.path.exists(JSON_FILE_PATH):
+        # this must be either a first run after an install,
+        # or the first run after an upgrade from a version that didn't use the config.json
+        print_err("WARNING: config.json doesn't exist, populating from .env")
+        values = read_values_from_env_file()
+        write_values_to_config_json(values)
+
     ret = {}
     try:
         ret = json.load(open(JSON_FILE_PATH, "r"))

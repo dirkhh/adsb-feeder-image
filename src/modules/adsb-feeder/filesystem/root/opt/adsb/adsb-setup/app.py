@@ -28,12 +28,6 @@ from utils.config import (
     write_values_to_env_file,
 )
 
-if not os.path.exists("/opt/adsb/config/config.json"):
-    # this must be either a first run after an install,
-    # or the first run after an upgrade from a version that didn't use the config.json
-    values = read_values_from_env_file()
-    write_values_to_config_json(values)
-
 # nofmt: on
 # isort: off
 from flask import (
