@@ -62,6 +62,7 @@ if grep "_IS_BASE_CONFIG_FINISHED=True" /opt/adsb/config/.env > /dev/null 2>&1 ;
 			python3 /opt/adsb/scripts/inject-env.py "$yaml" .env.user
 		done
 	fi
+	sync # graphs1090 writeback calls sync, to avoid timeouts during compose call sync now to empty the write cache
 	$docker_compose "${COMPOSE_FILES[@]}" "$@"
 	if [ "$1" = "up" ] ; then
 		# try to figure out if this was successful
