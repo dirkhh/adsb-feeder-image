@@ -8,19 +8,25 @@
   <div class="col-12 col-lg-6">
     <h5 class="mt-3">Add additional Ultrafeeder arguments</h5>
     <form method="POST">
-      <div class="row">
-        <label for="ultrafeeder_extra_args" class="col-12">
-          There are very few circumstances where this is something you want to manually add. One might be a
-          situation where you want to feed an aggregator that uses the 'standard' format of all the semi-anonymous
-          aggregators, but that isn't supported out of the box.
-          Add the data that you need here - it will be appended to the Ultrafeeder config; do not add a
-          leading
-          semicolon.
-        </label>
-        <input class="col-8 ms-3" id="ultrafeeder_extra_args" name="ultrafeeder_extra_args" type="text"
-               value="{{ env_value_by_tag('ultrafeeder_extra_args') }}" required>
-        <button type="submit" class="btn btn-primary mb-1 mx-3 col-sm-3" name="ultrafeeder_extra_args--submit"
-                value="go">Submit</button>
+      <div class="row align-items-center">
+        <div class="col-12 mb-2">
+          <label for="ultrafeeder_extra_args">
+            There are very few circumstances where this is something you want to manually add. One might be a
+            situation where you want to feed an aggregator that uses the 'standard' format of all the semi-anonymous
+            aggregators, but that isn't supported out of the box.
+            Add the data that you need here - it will be appended to the Ultrafeeder config; do not add a
+            leading
+            semicolon.
+          </label>
+        </div>
+        <div class="col-8">
+          <input class="mx-auto w-100" id="ultrafeeder_extra_args" name="ultrafeeder_extra_args" type="text"
+                 value="{{ env_value_by_tag('ultrafeeder_extra_args') }}" required>
+        </div>
+        <div class="col-4">
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="ultrafeeder_extra_args--submit"
+                  value="go">Submit</button>
+        </div>
       </div>
     </form>
   </div>
@@ -28,19 +34,25 @@
   <div class="col-12 col-lg-6">
     <h5 class="mt-3">Add environment variables to containers</h5>
     <form method="POST">
-      <div class="row">
-        <label for="ultrafeeder_extra_env" class="col-12">
-          The the various Docker containers support a lot more environment variables than are exposed here in
-          the UI. If there are settings that you need to add, this is the best place to do it. Please only use this if
-          you understand what you are doing. It's reasonably simple to break your setup by inserting things here that
-          cause the container not to start.<br />
-          Please enter them one per line, with an equals sign separating the variable name from its value. The name
-          spaces for the different containers are distinct, so for simplicity they are all just added here together.
-        </label>
-        <textarea class="col-8 ms-3" id="ultrafeeder_extra_env" name="ultrafeeder_extra_env"
-                  placeholder="READSB_RTLSDR_PPM=22&#13;&#10;READSB_RANGE_OUTLINE_HOURS=72">{{ env_value_by_tag('ultrafeeder_extra_env') }}</textarea>
-        <button type="submit" class="btn btn-primary mb-1 mx-3 col-sm-3" name="ultrafeeder_extra_env--submit"
-                value="go">Submit</button>
+      <div class="row align-items-center">
+        <div class="col-12 mb-2">
+          <label for="ultrafeeder_extra_env">
+            The the various Docker containers support a lot more environment variables than are exposed here in
+            the UI. If there are settings that you need to add, this is the best place to do it. Please only use this if
+            you understand what you are doing. It's reasonably simple to break your setup by inserting things here that
+            cause the container not to start.<br />
+            Please enter them one per line, with an equals sign separating the variable name from its value. The name
+            spaces for the different containers are distinct, so for simplicity they are all just added here together.
+          </label>
+        </div>
+        <div class="col-8">
+          <textarea class="mx-auto w-100" id="ultrafeeder_extra_env" name="ultrafeeder_extra_env"
+                    placeholder="READSB_RTLSDR_PPM=22&#13;&#10;READSB_RANGE_OUTLINE_HOURS=72">{{ env_value_by_tag('ultrafeeder_extra_env') }}</textarea>
+        </div>
+        <div class="col-4">
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="ultrafeeder_extra_env--submit"
+                  value="go">Submit</button>
+        </div>
       </div>
     </form>
   </div>
@@ -51,23 +63,32 @@
   <div class="col-12 col-lg-6 {% if is_enabled('secure_image') %} d-none {% endif %}">
     <h5 class="mt-3">Install ssh credentials</h5>
     <form method="POST">
-      <div class="row">
-        <label for="ssh_pub" class="col-12">
-          Enter or paste your public key below. This will allow you to then log in as root on the feeder SBC.
-        </label>
-        <input class="col-8 ms-3" id="ssh_pub" name="ssh_pub" type="text" placeholder=" Enter your public key" required>
-        <button type="submit" class="btn btn-primary mb-1 mx-3 col-sm-3" name="ssh" value="stay">Submit</button>
+      <div class="row align-items-center">
+        <div class="col-12 mb-2">
+          <label for="ssh_pub">
+            Enter or paste your public key below. This will allow you to then log in as root on the feeder SBC.
+          </label>
+        </div>
+        <div class="col-8">
+          <input class="mx-auto w-100" id="ssh_pub" name="ssh_pub" type="text" placeholder=" Enter your public key"
+                 required>
+        </div>
+        <div class="col-4">
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="ssh" value="stay">Submit</button>
+        </div>
       </div>
     </form>
   </div>
   <div class="col-12 col-lg-6 {% if is_enabled('secure_image') %} d-none {% endif %}">
     <h5 class="mt-3">Create new random root password</h5>
     <form method="POST">
-      <div class="row">
-        <label for="root_password" class="col-12">
-          The image will use the random root password displayed here. This will allow you to then log in as root
-          on the feeder SBC. Please make sure to copy this password before clicking "Accept".
-        </label>
+      <div class="row align-items-center">
+        <div class="col-12 mb-2">
+          <label for="root_password">
+            The image will use the random root password displayed here. This will allow you to then log in as root
+            on the feeder SBC. Please make sure to copy this password before clicking "Accept".
+          </label>
+        </div>
         <div class="row fw-light collapse align-right" id="showrpw">
           <pre class="align-middle ms-5 mt-2 col-auto"><code class="text-light bg-danger">{{ rpw }}</code></pre>
           <button type="submit" name="rpw" value="stay"
@@ -81,30 +102,41 @@
   <div class="col-12 col-lg-6 {% if is_enabled('secure_image') %} d-none {% endif %}">
     <h5 class="mt-3">Secure feeder system</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
-      <div class="row">
-        <label for="secure_image" class="col-8 me-3">Attempt to make it somewhat harder for a local user to
-          gain access to the image. Of course, anyone with physical access to the feeder hardware can
-          circumvent
-          the protection attempted here. Make sure you have an ssh key set up and tested before doing this, or
-          you will permanently log yourself out of this image.
-        </label>
-        <button type="submit" class="btn btn-primary mb-1 mx-3 col-sm-3 mb-5" name="secure_image" value="go">Update
-          Settings</button>
+      <div class="row align-items-center">
+        <div class="col-8">
+          <label for="secure_image">Attempt to make it somewhat harder for a local user to
+            gain access to the image. Of course, anyone with physical access to the feeder hardware can
+            circumvent
+            the protection attempted here. Make sure you have an ssh key set up and tested before doing this, or
+            you will permanently log yourself out of this image.
+          </label>
+        </div>
+        <div class="col-4">
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="secure_image" value="go">Update
+            Settings</button>
+        </div>
       </div>
     </form>
   </div>
   <div class="col-12 col-lg-6 {% if is_enabled('secure_image') %} d-none {% endif %}">
     <h5 class="mt-3">Shutdown/Reboot</h5>
     <form method="POST">
-      <div class="row">
-        <label for="shutdown" class="col-8 me-3">Shutdown the feeder. Most boards won't turn off power by themselves.
-        </label>
-        <button type="submit" class="btn btn-primary mb-3 mx-3 col-sm-3" name="shutdown" value="wait">Shutdown</button>
-        <label for="reboot" class="col-8 me-3">Reboot the feeder. Please note that some boards are not able to reboot
-          without
-          manually power cycling.
-        </label>
-        <button type="submit" class="btn btn-primary mb-3 mx-3 col-sm-3" name="reboot" value="wait">Reboot</button>
+      <div class="row align-items-center">
+        <div class="col-8">
+          <label for="shutdown">Shutdown the feeder. Most boards won't turn off power by themselves.
+          </label>
+        </div>
+        <div class="col-4">
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="shutdown" value="wait">Shutdown</button>
+        </div>
+        <div class="col-8">
+          <label for="reboot">Reboot the feeder. Please note that some boards are not able to reboot
+            without manually power cycling.
+          </label>
+        </div>
+        <div class="col-4">
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="reboot" value="wait">Reboot</button>
+        </div>
       </div>
     </form>
   </div>
@@ -112,9 +144,9 @@
   <div class="col-12 col-lg-6">
     <h5 class="mt-3">Nightly system update settings</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
-      <div class="row">
-        <div class="col-8 me-3">
-          <div class="row ms-1">
+      <div class="row align-items-center">
+        <div class="col-8">
+          <div class="row align-items-center ms-1">
             <input type="checkbox" class="mb-3 col-1" name="nightly_base_update--is_enabled"
                    id="nightly_base_update--is_enabled" {% if is_enabled("nightly_base_update") %} checked {%
                             endif %}>
@@ -137,18 +169,20 @@
   <div class="col-12 col-lg-6">
     <h5 class="mt-3">Update feeder applications</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
-      <div class="row">
-        <label for="update_feeder_aps" class="col-8 me-3">Update to the current ADS-B feeder applications (i.e. the
-          web UI, setup apps, and containers). Either the latest beta or stable version.
-          If this update brings in new container images, even with a fast internet connection this can easily
-          take more than ten minutes to complete. The web UI will pause while the update is running, but the
-          feeder apps will only be briefly interrupted once all new components have been downloaded.
-        </label>
-        <div class="col-3">
-          <div class="row">
-            <button type="submit" class="btn btn-primary mb-3 mx-3 col-12" name="update_feeder_aps_beta"
+      <div class="row align-items-center">
+        <div class="col-8">
+          <label for="update_feeder_aps">Update to the current ADS-B feeder applications (i.e. the
+            web UI, setup apps, and containers). Either the latest beta or stable version.
+            If this update brings in new container images, even with a fast internet connection this can easily
+            take more than ten minutes to complete. The web UI will pause while the update is running, but the
+            feeder apps will only be briefly interrupted once all new components have been downloaded.
+          </label>
+        </div>
+        <div class="col-4">
+          <div class="row mx-auto gy-2">
+            <button type="submit" class="btn btn-primary mx-auto w-100 col-12" name="update_feeder_aps_beta"
                     value="go">Update (beta)</button>
-            <button type="submit" class="btn btn-primary mb-3 mx-3 col-12" name="update_feeder_aps_stable"
+            <button type="submit" class="btn btn-primary mx-auto w-100 col-12" name="update_feeder_aps_stable"
                     value="go">Update (stable)</button>
           </div>
         </div>
@@ -158,12 +192,16 @@
   <div class="col-12 col-lg-6">
     <h5 class="mt-3">Restart all containers</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
-      <div class="row">
-        <label for="restart_containers" class="col-8 me-3">Typically this shouldn't be necessary, but occasionally it
-          seems that for whatever reason a container doesn't pick up a setting or gets otherwise stuck. While this may
-          be overkill, it at least allows you to restart all of them at once when needed.</label>
-        <button type="submit" class="btn btn-primary mb-3 mx-3 col-3" name="restart_containers" value="go">Restart
-          Containers</button>
+      <div class="row align-items-center">
+        <div class="col-8">
+          <label for="restart_containers">Typically this shouldn't be necessary, but occasionally it
+            seems that for whatever reason a container doesn't pick up a setting or gets otherwise stuck. While this may
+            be overkill, it at least allows you to restart all of them at once when needed.</label>
+        </div>
+        <div class="col-4">
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="restart_containers" value="go">Restart
+            Containers</button>
+        </div>
       </div>
     </form>
   </div>
@@ -171,49 +209,60 @@
   <div class="col-12 col-lg-6 {% if is_enabled('secure_image') %} d-none {% endif %}">
     <h5 class="mt-3">Add Zerotier</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
-      <div class="row">
-        <label for="zerotierid" class="col-12">
-          Zerotier support allows to connect your ADS-B Feeder to your own global area network. Please add
-          your
-          Zerotier Network ID below.<br />
-          Once this process has completed, you need to accept the new device into the network on the Zerotier
-          website.
-        </label>
-        <input class="col-8 ms-3" id="zerotierid" name="zerotierid" type="text"
-               value="{{ env_value_by_tag('zerotierid') }}" placeholder=" Enter your Zerotier Network ID" required>
-        <button type="submit" class="btn btn-primary mb-1 mx-3 col-sm-3" name="zerotier" value="go">Submit</button>
+      <div class="row align-items-center">
+        <div class="col-12 mb-2">
+          <label for="zerotierid">
+            Zerotier support allows to connect your ADS-B Feeder to your own global area network. Please add
+            your Zerotier Network ID below.<br />
+            Once this process has completed, you need to accept the new device into the network on the Zerotier
+            website.
+          </label>
+        </div>
+        <div class="col-8">
+          <input class="mx-auto w-100" id="zerotierid" name="zerotierid" type="text"
+                 value="{{ env_value_by_tag('zerotierid') }}" placeholder=" Enter your Zerotier Network ID" required>
+        </div>
+        <div class="col-4">
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="zerotier" value="go">Submit</button>
+        </div>
       </div>
     </form>
   </div>
   <div class="col-12 col-lg-6 {% if is_enabled('secure_image') %} d-none {% endif %}">
     <h5 class="mt-3">Add Tailscale</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
-      <div class="row">
-        <label for="tailscale" class="col-12">
-          Tailscale support allows to connect your ADS-B Feeder to your own tailnet. <br />
-          {% if env_value_by_tag("tailscale_name") == "" %}In order to do this, we will start
-          the <code>tailscale</code> client on the feeder SBC and then redirect you back here and add a link
-          to the
-          login page so you can authenticate the device on your tailnet.{% endif %}<br />
-          {% if env_value_by_tag("tailscale_ll") != "" %}
-          Click this <a href="{{ env_value_by_tag('tailscale_ll') }}" target="_blank">link to open {{
+      <div class="row align-items-center">
+        <div class="col-12 mb-2">
+          <label for="tailscale">
+            Tailscale support allows to connect your ADS-B Feeder to your own tailnet. <br />
+            {% if env_value_by_tag("tailscale_name") == "" %}In order to do this, we will start
+            the <code>tailscale</code> client on the feeder SBC and then redirect you back here and add a link
+            to the
+            login page so you can authenticate the device on your tailnet.{% endif %}<br />
+            {% if env_value_by_tag("tailscale_ll") != "" %}
+            Click this <a href="{{ env_value_by_tag('tailscale_ll') }}" target="_blank">link to open {{
                         env_value_by_tag("tailscale_ll") }}</a>. After you have logged in, please come back to this tab
-          and
-          reload this page.{% endif %}
-          {% if env_value_by_tag("tailscale_name") != "" %}
-          This device should now be on your tailnet as '{{ env_value_by_tag("tailscale_name") }}'.
-          {% elif env_value_by_tag("tailscale_ll") =="" %}
-          You can add options like a specific <code>--login-server</code> below. But please note that
-          <code>--authkey</code> isn't supported at this point.
-          {% endif %}
-        </label>
-        <input class="col-8 ms-3" id="tailscale_extras" name="tailscale_extras" type="text"
-               value="{{ env_value_by_tag('tailscale_extras') }}"
-               placeholder=" Enter additional tailscale options you need" {% if env_value_by_tag("tailscale_name")
+            and
+            reload this page.{% endif %}
+            {% if env_value_by_tag("tailscale_name") != "" %}
+            This device should now be on your tailnet as '{{ env_value_by_tag("tailscale_name") }}'.
+            {% elif env_value_by_tag("tailscale_ll") =="" %}
+            You can add options like a specific <code>--login-server</code> below. But please note that
+            <code>--authkey</code> isn't supported at this point.
+            {% endif %}
+          </label>
+        </div>
+        <div class="col-8">
+          <input class="mx-auto w-100" id="tailscale_extras" name="tailscale_extras" type="text"
+                 value="{{ env_value_by_tag('tailscale_extras') }}"
+                 placeholder=" Enter additional tailscale options you need" {% if env_value_by_tag("tailscale_name")
                     !="" or env_value_by_tag("tailscale_ll") !="" %}style="display: none;" {% endif %}>
-        <button type="submit" class="btn btn-primary mb-1 mx-3 col-sm-3" name="tailscale" value="go" {% if
+        </div>
+        <div class="col-4">
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="tailscale" value="go" {% if
                     env_value_by_tag("tailscale_name") !="" or env_value_by_tag("tailscale_ll") !=""
                     %}style="display: none;" {% endif %}>Submit</button>
+        </div>
       </div>
     </form>
   </div>
@@ -221,9 +270,21 @@
   <!-- FULL_IMAGE_ONLY_END -->
   <div class="col-12 col-lg-6">
     <h5 class="mt-3">Backup and Restore</h5>
-    <div class="row">
-      You can <a href="{{ url_for('backup') }}">backup</a> most settings, the statistics, as well as the history of the
-      data received, or <a href="{{ url_for('restore') }}">restore</a> a previous backup.
+    <div class="row align-items-center">
+      <div class="col-8">
+        You can <a href="{{ url_for('backup') }}">backup</a> most settings, the statistics, as well as the history of
+        the data received, or <a href="{{ url_for('restore') }}">restore</a> a previous backup.
+      </div>
+      <div class="col-4">
+        <div class="row gy-2">
+          <form action="{{ url_for('backup') }}" method="get">
+            <button type="submit" class="btn btn-primary mx-auto w-100">Backup</button>
+          </form>
+          <form action="{{ url_for('restore') }}" method="get">
+            <button type="submit" class="btn btn-primary mx-auto w-100">Restore</button>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
 </div>
