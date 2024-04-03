@@ -75,12 +75,6 @@ else
     systemctl stop adsb-setup.service
     waiting_placeholder
 
-    # now that the adsb-setup app has shut down let's do a quick backup of the config data
-    mkdir -p /opt/adsb/config/backups
-    TIMESTAMP=$(date +%Y-%m-%d+%H:%M)
-    cp /opt/adsb/config/.env /opt/adsb/config/backups/env."$TIMESTAMP" &> /dev/null
-    cp /opt/adsb/config/config.json /opt/adsb/config/backups/config.json."$TIMESTAMP" &> /dev/null
-
     # we want to get the correct (matching) update script. But to do
     # that we need to figure out which one that is.
     # (that last arg pattern has downsides... we can't just skip them, so filter out non-branch arguments here)
@@ -141,6 +135,12 @@ fi
 # now we know that we are running the right script in the right place
 DIR=$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")
 echo "running ${DIR}/feeder-update from $TARGET"
+
+# we know that the adsb-setup app has been shut down so, let's do a quick backup of the config data
+mkdir -p /opt/adsb/config/backups
+TIMESTAMP=$(date +%Y-%m-%d+%H:%M)
+cp /opt/adsb/config/.env /opt/adsb/config/backups/env."$TIMESTAMP" &> /dev/null
+cp /opt/adsb/config/config.json /opt/adsb/config/backups/config.json."$TIMESTAMP" &> /dev/null
 
 cd "${DIR}/adsb-feeder-image" || exit_with_message "can't cd to ${DIR}/adsb-feeder-image"
 
