@@ -1,13 +1,6 @@
-Changes since v1.3.4 include
-- make ultrafeeder arguments deterministic to avoid unnecessary container recreation
-- fix tag/name mixup with container data which broke automated signups since v1.3.3-beta.1
-- clean up the aftermath of a v1.3.4 change that could cause broken app installs with incorrect ports for the web UI
-- random fixes to improve handling of logfiles, attempt to avoid loss of graphs on update, and clean up other small issues
-- restore correct ports for app installs on DietPi or other Linux distros
-- fix for an issue specific to app installs to ensure the config data gets properly populated
-- update to newest RPi Raspbian image
-- small changes to the update process and tag handling
-- internal changes to data structures and approach to creating some files. There should be no user visible changes.
+Changes since v1.3.5 include
+- create additional on-device backup of the settings before every upgrade
+- reduce unnecessary restarts of the Ultrafeeder container by ensuring order of options stays stable
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)
