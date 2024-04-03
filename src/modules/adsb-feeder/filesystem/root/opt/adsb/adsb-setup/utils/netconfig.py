@@ -82,6 +82,9 @@ class UltrafeederConfig:
         if ultrafeeder_extra_args:
             ret.add(ultrafeeder_extra_args)
 
+        # generate sorted listed for deterministic env var (avoid unnecessary container recreation by docker compose)
+        ret = sorted(ret)
+
         print_err(f"ended up with Ultrafeeder args {ret}")
 
         return ";".join(ret)
