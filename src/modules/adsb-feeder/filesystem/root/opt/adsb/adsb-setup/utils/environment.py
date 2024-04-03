@@ -42,8 +42,22 @@ class Env:
                 if type(self._default) == bool:
                     self._value = is_true(value_in_file)
                     return
+                if (
+                    type(self._default) == list
+                    and len(self._default) > 0
+                    and type(self._default[0]) == type(value_in_file)
+                ):
+                    self._value = [value_in_file]
+                    print_err(f"converting {self._name} to list {self._value}")
+                    return
+                if type(self._default) == int and type(value_in_file) == str:
+                    try:
+                        self._value = int(value_in_file)
+                        return
+                    except Exception as e:
+                        print_err(f"cannot convert {value_in_file} to int - {e}")
                 print_err(
-                    f"got value of type {type(value_in_file)} from file - discarding as type of {self._name} should be {type(self._default)}"
+                    f"got value {value_in_file} of type {type(value_in_file)} from file - discarding as type of {self._name} should be {type(self._default)}"
                 )
             else:
                 self._value = value_in_file

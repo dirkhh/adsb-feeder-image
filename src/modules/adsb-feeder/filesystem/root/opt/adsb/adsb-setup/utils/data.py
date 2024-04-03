@@ -132,7 +132,7 @@ class Data:
         Env("FEEDER_LONG", default=[""], is_mandatory=True, tags=["lng"]),
         Env("FEEDER_ALT_M", default=[""], is_mandatory=True, tags=["alt"]),
         Env("FEEDER_TZ", default=[""], is_mandatory=True, tags=["tz"]),
-        Env("SITE_NAME", default=[""], is_mandatory=True, tags=["site_name"]),
+        Env("MLAT_SITE_NAME", default=[""], is_mandatory=True, tags=["site_name"]),
         #
         # SDR settings are only valid on an integrated feeder or a micro feeder, not on stage2
         # misnomer, FEEDER_RTL_SDR is used as follows: READSB_DEVICE_TYPE=${FEEDER_RTL_SDR}
@@ -164,7 +164,7 @@ class Data:
         Env("MLAT_PRIVACY", default=True, tags=["mlat_privacy", "is_enabled"]),
         Env(
             "FEEDER_TAR1090_USEROUTEAPI",
-            default="1",
+            default=True,
             tags=["route_api", "is_enabled", "false_is_zero"],
         ),
         Env(  # this has no UI component, but we want to enable the advanced user to modify it in .env

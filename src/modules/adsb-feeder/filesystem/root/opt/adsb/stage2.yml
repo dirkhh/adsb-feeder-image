@@ -33,15 +33,15 @@ services:
       # Sources and Aggregator connections:
       # (Note - remove the ones you are not using / feeding)
       - ULTRAFEEDER_CONFIG=${FEEDER_ULTRAFEEDER_CONFIG_STAGE2NUM}
-      - MLAT_USER=${SITE_NAME_STAGE2NUM}
+      - MLAT_USER=${MLAT_SITE_NAME_STAGE2NUM}
       - UUID=${ULTRAFEEDER_UUID_STAGE2NUM}
       #
       # --------------------------------------------------
       # TAR1090 (Map Web Page) parameters:
       - UPDATE_TAR1090=true
       - TAR1090_MESSAGERATEINTITLE=true
-      - TAR1090_PAGETITLE=${SITE_NAME_STAGE2NUM}
-      - TAR1090_SITENAME=${SITE_NAME_STAGE2NUM}
+      - TAR1090_PAGETITLE=${MLAT_SITE_NAME_STAGE2NUM}
+      - TAR1090_SITENAME=${MLAT_SITE_NAME_STAGE2NUM}
       - TAR1090_PLANECOUNTINTITLE=true
       - TAR1090_FLIGHTAWARELINKS=true
       - HEYWHATSTHAT_PANORAMA_ID=${FEEDER_HEYWHATSTHAT_ID_STAGE2NUM}
