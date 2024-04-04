@@ -74,7 +74,7 @@ class UltrafeederConfig:
         print_err(
             f"generating netconfigs for {f'micro site {self._micro}' if self._micro > 0 else 'Ultrafeeder'}"
         )
-        mlat_privacy = self._d.is_enabled("mlat_privacy")
+        mlat_privacy = self._d.list_is_enabled("mlat_privacy", self._micro)
         ret = set()
         # let's grab the values, depending on the mode
         for name, netconfig in self.enabled_aggregators.items():
