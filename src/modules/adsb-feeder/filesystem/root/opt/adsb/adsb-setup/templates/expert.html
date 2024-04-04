@@ -173,6 +173,9 @@
         <div class="col-8">
           <label for="update_feeder_aps">Update to the current ADS-B feeder applications (i.e. the
             web UI, setup apps, and containers). Either the latest beta or stable version.
+            {% if channel != "" %} Additionally, you can try to update to the latest state of the {{ channel }}
+            branch. This is typically far less tested and may not work at all. Please make sure to create a
+            backup before doing this. {% endif %}
             If this update brings in new container images, even with a fast internet connection this can easily
             take more than ten minutes to complete. The web UI will pause while the update is running, but the
             feeder apps will only be briefly interrupted once all new components have been downloaded.
@@ -184,6 +187,10 @@
                     value="go">Update (beta)</button>
             <button type="submit" class="btn btn-primary mx-auto w-100 col-12" name="update_feeder_aps_stable"
                     value="go">Update (stable)</button>
+            {% if channel != "" %}
+            <button type="submit" class="btn btn-primary mx-auto w-100 col-12" name="update_feeder_aps_branch"
+                    value="go">Update ({{ channel }})</button>
+            {% endif %}
           </div>
         </div>
       </div>

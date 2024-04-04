@@ -744,6 +744,16 @@ class AdsbIm:
         with open(self._d.data_path / "update-channel", "w") as update_channel:
             print(channel, file=update_channel)
 
+    def extract_channel(self) -> str:
+        channel = self._d.env_by_tags("base_version").value
+        if channel:
+            match = re.search(r"\((.*?)\)", channel)
+            if match:
+                channel = match.group(1)
+        if channel in ["stable", "beta", "main"]:
+            channel = ""
+        return channel
+
     def clear_range_outline(self, idx=0):
         # is the file where we expect it?
         globe_history = "globe_history" if idx == 0 else f"globe_history_{idx}"
@@ -938,8 +948,10 @@ class AdsbIm:
                     return render_template("/waitandredirect.html")
                 if key == "secure_image":
                     self.set_secure_image()
-                if key == "update_feeder_aps_beta" or key == "update_feeder_aps_stable":
-                    channel = "stable" if key == "update_feeder_aps_stable" else "beta"
+                if key.startswith("update_feeder_aps"):
+                    channel = key.rsplit("_", 1)[-1]
+                    if channel == "branch":
+                        channel = self.extract_channel()
                     self.set_channel(channel)
                     print_err(f"updating feeder to {channel} channel")
                     # start this in the background so it doesn't prevent showing the waiting screen
@@ -1271,7 +1283,13 @@ class AdsbIm:
         # create a potential new root password in case the user wants to change it
         alphabet = string.ascii_letters + string.digits
         self.rpw = "".join(secrets.choice(alphabet) for i in range(12))
-        return render_template("expert.html", rpw=self.rpw)
+        # if we are on a branch that's neither stable nor beta, pass the value to the template
+        # so that a third update button will be shown
+        return render_template(
+            "expert.html",
+            rpw=self.rpw,
+            channel=self.extract_channel(),
+        )
 
     @check_restart_lock
     def sdrplay_license(self):
