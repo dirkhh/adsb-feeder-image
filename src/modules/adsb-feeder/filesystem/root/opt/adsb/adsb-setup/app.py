@@ -6,6 +6,7 @@ import pathlib
 import pickle
 import platform
 import re
+import requests
 import secrets
 import signal
 import shutil
@@ -120,6 +121,7 @@ class AdsbIm:
             self._d.ultrafeeder.append(UltrafeederConfig(data=self._d, micro=i))
 
         self._agg_status_instances = dict()
+        self._next_url_from_director = ""
 
         # Ensure secure_image is set the new way if before the update it was set only as env variable
         if self._d.is_enabled("secure_image"):
@@ -908,6 +910,19 @@ class AdsbIm:
             if value == "go" or value.startswith("go-"):
                 seen_go = True
             if value == "go" or value.startswith("go-") or value == "wait":
+                if key == "showmap" and value.startswith("go-"):
+                    idx = value[3:]
+                    try:
+                        idx = int(idx)
+                    except:
+                        idx = 0
+                    port = 8090 + idx if idx > 0 else 8080
+                    self._next_url_from_director = (
+                        f"http://{request.host.split(':')[0]}:{port}/"
+                    )
+                    print_err(
+                        f"after applying changes, go to map at {self._next_url_from_director}"
+                    )
                 if key == "clear_range":
                     self.clear_range_outline(sitenum)
                     continue
@@ -1360,7 +1375,24 @@ class AdsbIm:
             return self.update()
         if not self._d.is_enabled("base_config"):
             return self.setup()
-
+        # if we already figured out where to go next, let's just do that
+        if self._next_url_from_director:
+            url = self._next_url_from_director
+            self._next_url_from_director = ""
+            if re.match(r"^http://\d+\.\d+\.\d+\.\d+:\d+$", url):
+                # this looks like it could be a forward to a tar1090 map
+                # give it a few moments until this page is ready
+                # but don't risk hanging out here forever
+                testurl = url + "/data/receiver.json"
+                for i in range(5):
+                    sleep(1.0)
+                    try:
+                        response = requests.get(testurl, timeout=2.0)
+                        if response.status_code == 200:
+                            break
+                    except:
+                        pass
+            return redirect(url)
         # If we have more than one SDR, or one of them is an airspy,
         # we need to go to advanced - unless we have at least one of the serials set up
         # for 978 or 1090 reporting

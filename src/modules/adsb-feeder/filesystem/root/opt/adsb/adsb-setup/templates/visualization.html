@@ -6,8 +6,14 @@
   {% block title %}Setup Map Options{% if is_enabled('stage2') %} ({{ site }}){% endif %}{% endblock %}
 </h1>
 <form class="row gy-2 gx-3 align-items-center" method="post">
-  <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="advanced" value="go">I'm
-    done here - take me to the website</button>
+  <div class="col-12 col-sm-6">
+    <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="advanced" value="go">I'm
+      done here - take me to the website</button>
+  </div>
+  <div class="col-12 col-sm-6">
+    <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="showmap" value={{go}}>I'm
+      done here - take me to this map</button>
+  </div>
   <div class="col-12 form-check">
     <input class="form-check-input me-1" type="checkbox" name="route_api--is_enabled" id="route_api--is_enabled"
            {% if list_is_enabled("route_api", m) %}checked{% endif %} />
