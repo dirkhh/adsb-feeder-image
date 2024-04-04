@@ -26,12 +26,14 @@
       </button>
       <div class="collapse navbar-collapse " id="navbarNav">
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-          <!-- Maps -->
-          <li class="nav-item dropdown">
+          <!-- Main Map -->
+          <li class="nav-item {% if not is_enabled('base_config') %}d-none{% endif %}"><a class="nav-link"
+               href="/map">Main Map</a></li>
+          <!-- Other Maps/Stats -->
+          <li class="nav-item dropdown {% if not is_enabled('base_config') %}d-none{% endif %}">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMaps" role="button"
-               data-mdb-toggle="dropdown" aria-expanded="false">Maps</a>
+               data-mdb-toggle="dropdown" aria-expanded="false">Other Graphs</a>
             <ul class="dropdown-menu" aria-labelledby="navbarDropdownMaps">
-              <li><a class="dropdown-item" href="/map">Map</a></li>
               <li><a class="dropdown-item" href="/map/?heatmap">Heatmap</a></li>
               <li><a class="dropdown-item" href="/map/?pTracks">Tracks</a></li>
               <li><a class="dropdown-item" href="/map/?replay">Replay</a></li>
