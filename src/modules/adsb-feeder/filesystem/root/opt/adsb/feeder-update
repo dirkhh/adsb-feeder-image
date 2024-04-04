@@ -190,9 +190,12 @@ fi
 cd /opt/adsb
 
 # make sure the version information is correct
+# deal with remote branches like origin/somebranch that contain forward slashes
+# and end up being part of the VERSION string - those need to be escaped for sed
 echo "$VERSION" > /opt/adsb/adsb.im.version
-sed -i "s/BASE_VERSION=.*/BASE_VERSION=$VERSION/" /opt/adsb/config/.env
-sed -i "s/\"_ADSBIM_BASE_VERSION\": \"[^\"]*\"/\"_ADSBIM_BASE_VERSION\": \"$VERSION\"/" /opt/adsb/config/config.json
+SEDVERSION=${VERSION//\//\\\/}
+sed -i "s/BASE_VERSION=.*/BASE_VERSION=$SEDVERSION/" /opt/adsb/config/.env
+sed -i "s/\"_ADSBIM_BASE_VERSION\": \"[^\"]*\"/\"_ADSBIM_BASE_VERSION\": \"$SEDVERSION\"/" /opt/adsb/config/config.json
 
 # if there is any special handling in the adsb-setup app for changes to the config files,
 # env var names, etc (like in the v1.2.3->v1.3.0 upgrade), we need to run that
