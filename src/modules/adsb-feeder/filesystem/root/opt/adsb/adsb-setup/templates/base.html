@@ -32,22 +32,27 @@
           <!-- Other Maps/Stats -->
           <li class="nav-item dropdown {% if not is_enabled('base_config') %}d-none{% endif %}">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMaps" role="button"
-               data-mdb-toggle="dropdown" aria-expanded="false">Other Graphs</a>
+               data-mdb-toggle="dropdown" aria-expanded="false">Graphs</a>
             <ul class="dropdown-menu" aria-labelledby="navbarDropdownMaps">
               <li><a class="dropdown-item" href="/map/?heatmap">Heatmap</a></li>
               <li><a class="dropdown-item" href="/map/?pTracks">Tracks</a></li>
               <li><a class="dropdown-item" href="/map/?replay">Replay</a></li>
-              <li><a class="dropdown-item" href="/stats">Graphs/Stats</a></li>
+              <li><a class="dropdown-item" href="/stats">Stats</a></li>
             </ul>
           </li>
-          <!-- Basic Setup / Stage 2 Setup -->
-          <li class="nav-item"><a class="nav-link" href="/setup">
-              {% if is_enabled('stage2') %}Stage 2 Setup{% else %}Basic Setup{% endif %}</a>
-          </li>
-          <!-- SDR Setup -->
-          <li class="nav-item"><a
-               class="nav-link {% if is_enabled('stage2') or not is_enabled('base_config') %}d-none{% endif %}"
-               href="/advanced">SDR Setup</a>
+          <!-- Setup -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownSetup" role="button"
+               data-mdb-toggle="dropdown" aria-expanded="false">Setup</a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdownsetup">
+              <li><a class="dropdown-item" href="/setup">{% if is_enabled('stage2') %}Stage
+                  2{% else %}Basic{% endif %}</a></li>
+              <li><a class="dropdown-item {% if not is_enabled('base_config') %}d-none{% endif %}"
+                   href="/advanced">SDR</a></li>
+              <li><a class="dropdown-item {% if not is_enabled('base_config') %}d-none{% endif %}"
+                   href="/expert">Expert</a></li>
+              <li><a class="dropdown-item" href="/logs/">Logs</a></li>
+            </ul>
           </li>
           <!-- Map Options -->
           {% if not is_enabled('stage2') %}
@@ -82,13 +87,6 @@
             </ul>
           </li>
           {% endif %}
-          <!-- Expert -->
-          <li class="nav-item"><a class="nav-link {% if not is_enabled('base_config') %}d-none{% endif %}"
-               href="/expert">Expert</a>
-          </li>
-          <!-- Logs -->
-          <li class="nav-item"><a class="nav-link" href="/logs/">Logs</a>
-          </li>
         </ul>
       </div>
     </div>
