@@ -285,6 +285,16 @@ class AdsbIm:
     def write_envfile(self):
         write_values_to_env_file(self._d.envs_for_envfile)
 
+    def setup_ultrafeeder_args(self):
+        # set all of the ultrafeeder config data up
+        for i in range(1 + self._d.env_by_tags("num_micro_sites").value):
+            print_err(f"ultrafeeder_config {i}", level=2)
+            if i >= len(self._d.ultrafeeder):
+                self._d.ultrafeeder.append(UltrafeederConfig(data=self._d, micro=i))
+            self._d.env_by_tags("ultrafeeder_config").list_set(
+                i, self._d.ultrafeeder[i].generate()
+            )
+
     def setup_app_ports(self):
         in_json = read_values_from_config_json()
         if "AF_WEBPORT" not in in_json.keys():
@@ -345,6 +355,8 @@ class AdsbIm:
         # if all the user wanted is to make sure the housekeeping tasks are completed,
         # don't start the flask app and exit instead
         if no_server:
+            self.setup_ultrafeeder_args()
+            self.write_envfile()
             signal.raise_signal(signal.SIGTERM)
             return
 
@@ -1228,13 +1240,8 @@ class AdsbIm:
             )
 
         # set all of the ultrafeeder config data up
-        for i in range(1 + self._d.env_by_tags("num_micro_sites").value):
-            print_err(f"ultrafeeder_config {i}", level=2)
-            if i >= len(self._d.ultrafeeder):
-                self._d.ultrafeeder.append(UltrafeederConfig(data=self._d, micro=i))
-            self._d.env_by_tags("ultrafeeder_config").list_set(
-                i, self._d.ultrafeeder[i].generate()
-            )
+        self.setup_ultrafeeder_args()
+
         # finally, check if this has given us enough configuration info to
         # start the containers
         agg_chosen_env = self._d.env_by_tags("aggregators_chosen")
