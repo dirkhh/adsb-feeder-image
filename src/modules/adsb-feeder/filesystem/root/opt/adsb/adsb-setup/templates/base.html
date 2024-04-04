@@ -24,51 +24,69 @@
               aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <i class="fas fa-bars"></i>
       </button>
-      {% set navigation_bar = [
-                  (url_for('/map/'), 'map', 'Map'),
-                  (url_for('setup'), 'setup', 'Basic Setup'),
-                  (url_for('advanced'), 'advanced', 'SDR Setup'),
-                  (url_for('visualization'), 'visualization', 'Visualization Setup'),
-                  (url_for('aggregators'), 'aggregators', 'Aggregators'),
-                  (url_for('expert'), 'expert', 'Expert'),
-                  (url_for('/logs/'), 'logs', 'Logs'),
-                ] -%}
-      {% set active_page = active_page|default('index') -%}
-      {% set config_complete = is_enabled('base_config') %}
       <div class="collapse navbar-collapse " id="navbarNav">
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-          {% for href, id, caption in navigation_bar if (env_value_by_tag('aggregators') != 'micro' or id != 'aggregators') and (id != 'advanced' or not is_enabled('stage2')) %}
-          {% if is_enabled('stage2') and id == 'setup' -%}{% set caption='Stage 2 Setup' -%}{% set href='stage2' -%}{% endif -%}
-          {% if id == "aggregators" and is_enabled('stage2') %}
+          <!-- Maps -->
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
-               data-mdb-toggle="dropdown" aria-expanded="false">{{ caption|e }}
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-              {% for site in env_value_by_tag('site_name') if not site == list_value_by_tag('site_name', 0) %}
-              <li><a class="dropdown-item" href="{{ href|e}}?m={{loop.index}}">{{site}}</a></li>
-              {% endfor %}
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMaps" role="button"
+               data-mdb-toggle="dropdown" aria-expanded="false">Maps</a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdownMaps">
+              <li><a class="dropdown-item" href="/map">Map</a></li>
+              <li><a class="dropdown-item" href="/map/?heatmap">Heatmap</a></li>
+              <li><a class="dropdown-item" href="/map/?pTracks">Tracks</a></li>
+              <li><a class="dropdown-item" href="/map/?replay">Replay</a></li>
+              <li><a class="dropdown-item" href="/stats">Graphs/Stats</a></li>
             </ul>
           </li>
-          {% elif id == "visualization" and is_enabled('stage2') %}
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLinkV" role="button"
-               data-mdb-toggle="dropdown" aria-expanded="false">{{ caption|e }}
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLinkV">
-              {% for site in env_value_by_tag('site_name') %}
-              <li><a class="dropdown-item" href="{{ href|e}}?m={{loop.index0}}">{{site}}</a></li>
-              {% endfor %}
-            </ul>
+          <!-- Basic Setup / Stage 2 Setup -->
+          <li class="nav-item"><a class="nav-link" href="/setup">
+              {% if is_enabled('stage2') %}Stage 2 Setup{% else %}Basic Setup{% endif %}</a>
+          </li>
+          <!-- SDR Setup -->
+          <li class="nav-item"><a
+               class="nav-link {% if is_enabled('stage2') or not is_enabled('base_config') %}d-none{% endif %}"
+               href="/advanced">SDR Setup</a>
+          </li>
+          <!-- Map Options -->
+          {% if not is_enabled('stage2') %}
+          <li class="nav-item"> <a class="nav-link {% if not is_enabled('base_config') %}d-none{% endif %}"
+               href="/visualization">Map Options</a>
           </li>
           {% else %}
-          <li class="nav-item" {% if id == active_page %}aria-current="true" {% endif %}
-              {% if not config_complete and id != "setup" and id != "restore" and id != "logs" %} style="display: none;"
-              {% endif %}>
-            <a class="nav-link" href="{{ href|e }}">{{ caption|e }}</a>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownViz" role="button" data-mdb-toggle="dropdown"
+               aria-expanded="false">Map Options</a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuViz">
+              {% for site in env_value_by_tag('site_name') %}
+              <li><a class="dropdown-item" href="/visualization?m={{loop.index0}}">{{site}}</a></li>
+              {% endfor %}
+            </ul>
           </li>
           {% endif %}
-          {% endfor %}
+          <!-- Data Sharing -->
+          {% if not is_enabled('stage2') %}
+          <li class="nav-item"><a
+               class="nav-link {% if not is_enabled('base_config') or env_value_by_tag('aggregators') == 'micro' %}d-none{% endif %}"
+               href="/aggregators">Data Sharing</a>
+          </li>
+          {% else %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAgg" role="button" data-mdb-toggle="dropdown"
+               aria-expanded="false">Data Sharing</a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdownAgg">
+              {% for site in env_value_by_tag('site_name') if not site == list_value_by_tag('site_name', 0) %}
+              <li><a class="dropdown-item" href="/aggregators?m={{loop.index}}">{{site}}</a></li>
+              {% endfor %}
+            </ul>
+          </li>
+          {% endif %}
+          <!-- Expert -->
+          <li class="nav-item"><a class="nav-link {% if not is_enabled('base_config') %}d-none{% endif %}"
+               href="/expert">Expert</a>
+          </li>
+          <!-- Logs -->
+          <li class="nav-item"><a class="nav-link" href="/logs/">Logs</a>
+          </li>
         </ul>
       </div>
     </div>
