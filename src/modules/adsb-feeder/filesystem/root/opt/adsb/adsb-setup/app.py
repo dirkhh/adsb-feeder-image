@@ -179,6 +179,7 @@ class AdsbIm:
         self.app.add_url_rule("/aggregators", "aggregators", self.aggregators, methods=["GET", "POST"])
         self.app.add_url_rule("/", "director", self.director, methods=["GET", "POST"])
         self.app.add_url_rule("/index", "index", self.index)
+        self.app.add_url_rule("/info", "info", self.info)
         self.app.add_url_rule("/setup", "setup", self.setup, methods=["GET", "POST"])
         self.app.add_url_rule("/stage2", "stage2", self.stage2, methods=["GET", "POST"])
         self.app.add_url_rule("/update", "update", self.update, methods=["POST"])
@@ -1565,6 +1566,51 @@ class AdsbIm:
         for i in range(self._d.env_by_tags("num_micro_sites").value):
             self.get_base_info(i + 1)  # micro proxies start at 1
         return render_template("stage2.html")
+
+    def info(self):
+        board = self._d.env_by_tags("board_name").value
+        base = self._d.env_by_tags("image_name").value
+        current = self._d.env_by_tags("base_version").value
+        ufargs = self._d.env_by_tags("ultrafeeder_extra_args").value
+        envvars = self._d.env_by_tags("ultrafeeder_extra_env").value
+        sdrs = (
+            [f"{sdr}" for sdr in self._sdrdevices.sdrs]
+            if len(self._sdrdevices.sdrs) > 0
+            else ["none"]
+        )
+        try:
+            cmdline = "df -h | grep -v overlay"
+            result = subprocess.run(
+                cmdline, shell=True, capture_output=True, timeout=2.0
+            )
+        except:
+            result = "failed to run 'df -h | grep -v overlay'"
+        storage = result.stdout.decode("utf-8")
+        try:
+            cmdline = "free -h"
+            result = subprocess.run(
+                cmdline, shell=True, capture_output=True, timeout=2.0
+            )
+        except:
+            result = "failed to run 'free -h'"
+        memory = result.stdout.decode("utf-8")
+        containers = [
+            self._d.env_by_tags(["container", container]).value
+            for container in self._d.tag_for_name.values()
+            if self._d.is_enabled(container) or container == "ultrafeeder"
+        ]
+        return render_template(
+            "info.html",
+            board=board,
+            memory=memory,
+            storage=storage,
+            base=base,
+            current=current,
+            containers=containers,
+            sdrs=sdrs,
+            ufargs=ufargs,
+            envvars=envvars,
+        )
 
 
 def create_stage2_yml_from_template(

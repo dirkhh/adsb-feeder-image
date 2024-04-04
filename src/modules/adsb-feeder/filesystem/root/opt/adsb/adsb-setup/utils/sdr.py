@@ -36,8 +36,6 @@ class SDR:
             return "SDRplay w/o serial"
         return self._serial_probed
 
-        return ""
-
     @property
     def _json(self):
         return {
@@ -53,9 +51,7 @@ class SDR:
         return False
 
     def __repr__(self):
-        return (
-            f"SDR(type: {self._type} address: {self._address}, serial: {self._serial})"
-        )
+        return f"SDR(type: '{self._type}' address: '{self._address}', serial: '{self._serial}')"
 
 
 class SDRDevices:
