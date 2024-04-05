@@ -11,10 +11,10 @@
   <form method="post">
     <div class="form-group row align-items-center mb-1">
       <span class="col-md">
-        <label for="mlat_name">Station Name (shows up on public maps if enabled later)</label>
+        <label for="site_name">Station Name (shows up on public maps if enabled later)</label>
       </span>
       <span class="col-md">
-        <input type="text" id="mlat_name" name="site_name" required placeholder="my-awesome-antenna"
+        <input type="text" id="site_name" name="site_name" required placeholder="my-awesome-antenna"
                class="form-control" pattern="[\-_.a-zA-Z0-9 ]+" title="Letters, numbers, -, _, ."
                value="{{ list_value_by_tag('site_name', 0) }}" />
       </span>

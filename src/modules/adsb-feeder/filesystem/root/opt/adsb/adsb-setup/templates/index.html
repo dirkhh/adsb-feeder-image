@@ -239,7 +239,7 @@
             {% if list_is_enabled("mlat_privacy", 0) %}
             (since you have MLAT privacy enabled, your feeder won't be shown)
             {% else %}
-            (your feeder will be at an approximate location as {{ env_value_by_tag("mlat_name") }})
+            (your feeder will be at an approximate location as {{ list_value_by_tag('site_name', 0) }})
             {% endif %}
             {% endif %}
           </li>

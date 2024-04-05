@@ -457,7 +457,7 @@ class AdsbIm:
         )
         thread.start()
 
-        site_name = self._d.env_by_tags("mlat_name").value
+        site_name = self._d.env_by_tags("site_name").liste_get(0)
         now = datetime.now().replace(microsecond=0).isoformat().replace(":", "-")
         download_name = f"adsb-feeder-config-{site_name}-{now}.zip"
         return send_file(
@@ -687,11 +687,11 @@ class AdsbIm:
             self._d.env_by_tags("stage2_listeners").value = stage2_listeners
         return json.dumps(
             {
-                "name": self._d.env_by_tags("mlat_name").value,
-                "lat": self._d.env_by_tags("lat").value,
-                "lng": self._d.env_by_tags("lng").value,
-                "alt": self._d.env_by_tags("alt").value,
-                "tz": self._d.env_by_tags("tz").value,
+                "name": self._d.env_by_tags("site_name").list_get(0),
+                "lat": self._d.env_by_tags("lat").list_get(0),
+                "lng": self._d.env_by_tags("lng").list_get(0),
+                "alt": self._d.env_by_tags("alt").list_get(0),
+                "tz": self._d.env_by_tags("tz").list_get(0),
                 "version": self._d.env_by_tags("base_version").value,
             }
         )
@@ -1137,7 +1137,7 @@ class AdsbIm:
                     self._d.env_by_tags(["mlathub_disable"]).value = False
                 if key == "aggregators" and value == "stage2":
                     self._d.env_by_tags("stage2").value = True
-                    self._d.env_by_tags("site_name").list_set(0, form.get("mlat_name"))
+                    self._d.env_by_tags("site_name").list_set(0, form.get("site_name"))
                 # finally, painfully ensure that we remove explicitly asigned SDRs from other asignments
                 # this relies on the web page to ensure that each SDR is only asigned on purpose
                 # the key in quesiton will be explicitely set and does not need clearing
@@ -1162,7 +1162,7 @@ class AdsbIm:
                         e.list_set(sitenum, value)
                     else:
                         e.value = value
-                if key == "mlat_name":
+                if key == "site_name":
                     self._d.env_by_tags("site_name").list_set(sitenum, value)
         # done handling the input data
         # what implied settings do we have (and could we simplify them?)
