@@ -1,7 +1,6 @@
 import json
 from os import path
 import re
-from types import NoneType
 from typing import List, Union
 from utils.config import read_values_from_config_json, write_values_to_config_json
 from utils.util import is_true, print_err, stack_info
@@ -36,9 +35,7 @@ class Env:
     def _reconcile(self, value, pull: bool = False):
         value_in_file = self._get_value_from_file()
         if pull and value_in_file != None:
-            if type(self._default) != NoneType and type(value_in_file) != type(
-                self._default
-            ):
+            if self._default != None and type(value_in_file) != type(self._default):
                 if type(self._default) == bool:
                     self._value = is_true(value_in_file)
                     return
