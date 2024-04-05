@@ -683,8 +683,8 @@ class AdsbIm:
         stage2_listeners = self._d.env_by_tags("stage2_listeners").value
         print_err(f"access to base_info from {listener}")
         if not listener in stage2_listeners:
-            stage2_listeners.append(listener)
-            self._d.env_by_tags("stage2_listeners").value = stage2_listeners
+            idx = len(stage2_listeners)
+            self._d.env_by_tags("stage2_listeners").list_set(idx, listener)
         return json.dumps(
             {
                 "name": self._d.env_by_tags("site_name").list_get(0),
