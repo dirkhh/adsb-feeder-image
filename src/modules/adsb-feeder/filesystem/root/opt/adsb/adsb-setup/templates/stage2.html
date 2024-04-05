@@ -105,10 +105,11 @@
           <label for="add_micro_feeder_ip">micro feeder IP address</label>
         </span>
         <span class="col-12 col-sm-7 col-md-8 col-lg-9">
-          <input type="text" name="add_micro_feeder_ip" required placeholder="1.2.3.4" class="form-control"
-                 pattern="((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])"
+          <input type="text" id="add_micro_feeder_ip" name="add_micro_feeder_ip" required placeholder="1.2.3.4"
+                 class="form-control" pattern="((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])"
                  title="valid IPv4 address" />
         </span>
+        <span id="add_micro_feeder_name"></span>
       </div>
       <div class="form-group">
         <button type="submit" name="add_micro" value="go" class="btn btn-primary">Add micro feeder</button>
@@ -201,5 +202,12 @@
   aggregatorBtns.forEach((radio) => {
     radio.addEventListener("click", aggregatorClick);
   });
+  $("#add_micro_feeder_ip").on("blur", function () {
+    fetch("http://" + $("#add_micro_feeder_ip").val() + "/api/base_info")
+      .then(response => response.json())
+      .then(data => {
+        $("#add_micro_feeder_name").val(data['name']);
+      })
+  })
 </script>
 {% endblock %}
