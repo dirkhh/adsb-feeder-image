@@ -273,6 +273,7 @@ class Data:
         Env("_ADSBIM_AGGREGATORS_SELECTION", tags=["aggregators"]),
         Env(
             "_ADSBIM_BASE_VERSION",
+            default="",
             tags=["base_version", "norestore"],
         ),
         Env(

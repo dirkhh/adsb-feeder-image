@@ -165,7 +165,7 @@ class AdsbIm:
             ["1090uk", "1090MHz UK", "https://1090mhz.uk", "https://www.1090mhz.uk/mystatus.php?key=<FEEDER_1090UK_API_KEY>"],
         ]
         self.microfeeder_setting_tags = (
-            "site_name", "lat", "lng", "alt", "tz", "base_version",
+            "site_name", "lat", "lng", "alt", "tz", "mf_version",
             "adsblol_uuid", "ultrafeeder_uuid", "mlat_privacy", "route_api",
             "uat978", "heywhatsthat", "heywhatsthat_id",
             "flightradar--key", "flightradar_uat--key", "flightradar--is_enabled",
@@ -761,14 +761,7 @@ class AdsbIm:
         return response
 
     def micro_settings(self):
-        microsettings = {
-            "name": self._d.env_by_tags("site_name").list_get(0),
-            "lat": self._d.env_by_tags("lat").list_get(0),
-            "lng": self._d.env_by_tags("lng").list_get(0),
-            "alt": self._d.env_by_tags("alt").list_get(0),
-            "tz": self._d.env_by_tags("tz").list_get(0),
-            "version": self._d.env_by_tags("base_version").value,
-        }
+        microsettings = {}
         for e in self._d._env:
             for t in self.microfeeder_setting_tags:
                 tags = t.split("--")
@@ -777,6 +770,8 @@ class AdsbIm:
                         microsettings[t] = e.list_get(0)
                     else:
                         microsettings[t] = e._value
+        # fix up the version
+        microsettings["mf_version"] = self._d.env_by_tags("base_version").value
         response = make_response(json.dumps(microsettings))
         response.headers.add("Access-Control-Allow-Origin", "*")
         return response
@@ -915,8 +910,6 @@ class AdsbIm:
             print_err(f"micro_settings API on {ip}: {status}, {micro_settings}")
             if status == 200 and micro_settings != None:
                 for key, value in micro_settings.items():
-                    if key == "base_version":
-                        key = "mf_version"
                     tags = key.split("--")
                     print_err(f"setting env for {tags} to {value}", level=4)
                     e = self._d.env_by_tags(tags)
@@ -987,8 +980,6 @@ class AdsbIm:
         # carefully shift everything down
         print_err(f"removing micro site {num}")
         for t in self.microfeeder_setting_tags + ("mf_ip",):
-            if t == "base_version":
-                t == "mf_version"
             tags = t.split("--")
             e = self._d.env_by_tags(tags)
             if e:
