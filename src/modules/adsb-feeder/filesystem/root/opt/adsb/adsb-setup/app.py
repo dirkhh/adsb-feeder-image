@@ -221,7 +221,6 @@ class AdsbIm:
         self.update_version()
 
         # finally, try to make sure that we have all the pieces that we need and recreate what's missing
-        stage2_yml_template = self._d.config_path / "stage2.yml"
         for i in range(self._d.env_by_tags("num_micro_sites").value + 1):
             if not self._d.env_by_tags("adsblol_uuid").list_get(i):
                 self._d.env_by_tags("adsblol_uuid").list_set(i, str(uuid4()))
@@ -230,7 +229,8 @@ class AdsbIm:
             if i > 0:
                 create_stage2_yml_from_template(
                     self._d.config_path / f"stage2_micro_site_{i}.yml",
-                    stage2_yml_template,
+                    i,
+                    self._d.env_by_tags("mf_ip").list_get(i),
                 )
 
     def update_boardname(self):
@@ -921,6 +921,9 @@ class AdsbIm:
                 f"added new micro site {self._d.env_by_tags('site_name').value[n + 1]} at {ip}"
             )
             self._d.env_by_tags("num_micro_sites").value = n + 1
+            create_stage2_yml_from_template(
+                self._d.config_path / f"stage2_micro_site_{n + 1}.yml", n + 1, ip
+            )
         else:
             # oh well, remove the IP address
             self._d.env_by_tags("mf_ip").list_remove()
@@ -940,6 +943,15 @@ class AdsbIm:
             else:
                 print_err(f"couldn't find env for {tags}")
         self._d.env_by_tags("num_micro_sites").value -= 1
+        # finally, recreate the stage2 yml files for those feeders that shifted down
+        # the index is used to pick the correct environment variables, the IP address
+        # is used to distinguish the globe history and graphs for each micro feeder
+        for i in range(num, self._d.env_by_tags("num_micro_sites").value):
+            create_stage2_yml_from_template(
+                self._d.config_path / f"stage2_micro_site_{i}.yml",
+                i,
+                self._d.env_by_tags("mf_ip").list_get(i),
+            )
 
     @check_restart_lock
     def update(self):
@@ -1667,16 +1679,15 @@ class AdsbIm:
 
 
 def create_stage2_yml_from_template(
-    stage2_yml_name, template_file="/opt/adsb/config/stage2.yml"
+    stage2_yml_name, n, ip, template_file="/opt/adsb/config/stage2.yml"
 ):
-    # grab the number after the last '_' in the stage2_yml_name
-    m = re.search(r"_(\d+).yml$", str(stage2_yml_name))
-    if m:
-        n = m.group(1)
+    if n:
         with open(template_file, "r") as stage2_yml_template:
             with open(stage2_yml_name, "w") as stage2_yml:
                 stage2_yml.write(
-                    stage2_yml_template.read().replace("STAGE2NUM", f"{n}")
+                    stage2_yml_template.read()
+                    .replace("STAGE2NUM", f"{n}")
+                    .replace("STAGE2IP", ip)
                 )
     else:
         print_err(f"could not find micro feedernumber in {stage2_yml_name}")
