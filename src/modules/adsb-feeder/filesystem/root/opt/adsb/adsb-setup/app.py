@@ -42,6 +42,7 @@ if not os.path.exists("/opt/adsb/config/config.json"):
 from flask import (
     Flask,
     flash,
+    make_response,
     redirect,
     render_template,
     request,
@@ -162,6 +163,32 @@ class AdsbIm:
             ["radarvirtuel", "RadarVirtuel", "https://www.radarvirtuel.com/", ""],
             ["1090uk", "1090MHz UK", "https://1090mhz.uk", "https://www.1090mhz.uk/mystatus.php?key=<FEEDER_1090UK_API_KEY>"],
         ]
+        self.microfeeder_setting_tags = (
+            "site_name", "lat", "lng", "alt", "tz", "base_version",
+            "adsblol_uuid", "ultrafeeder_uuid", "mlat_privacy", "route_api",
+            "uat978", "heywhatsthat", "heywhatsthat_id",
+            "flightradar--key", "flightradar_uat--key", "flightradar--is_enabled",
+            "planewatch--key", "planewatch--is_enabled",
+            "flightaware--key", "flightaware--is_enabled",
+            "radarbox--key", "radarbox--is_enabled",
+            "planefinder--key", "planefinder--is_enabled",
+            "adsbhub--key", "adsbhub--is_enabled",
+            "opensky--user", "opensky--key", "opensky--is_enabled",
+            "radarvirtuel--key", "radarvirtuel--is_enabled",
+            "planewatch--key", "planewatch--is_enabled",
+            "1090uk--key", "1090uk--is_enabled",
+            "adsblol--is_enabled",
+            "flyitaly--is_enabled",
+            "adsbx--is_enabled", "adsbxfeederid",
+            "tat--is_enabled",
+            "planespotters--is_enabled",
+            "adsbfi--is_enabled",
+            "avdelphi--is_enabled",
+            "radarplane--is_enabled",
+            "hpradar--is_enabled",
+            "alive--is_enabled",
+        )
+
         self.proxy_routes = self._d.proxy_routes
         self.app.add_url_rule("/propagateTZ", "propagateTZ", self.get_tz)
         self.app.add_url_rule("/restarting", "restarting", self.restarting)
@@ -186,6 +213,7 @@ class AdsbIm:
         self.app.add_url_rule("/sdplay_license", "sdrplay_license", self.sdrplay_license, methods=["GET", "POST"])
         self.app.add_url_rule("/api/sdr_info", "sdr_info", self.sdr_info)
         self.app.add_url_rule("/api/base_info", "base_info", self.base_info)
+        self.app.add_url_rule("/api/micro_settings", "micro_settings", self.micro_settings)
         self.app.add_url_rule(f"/api/status/<agg>", "beast", self.agg_status)
         self.app.add_url_rule(f"/api/status/<agg>/<idx>", "beast", self.agg_status)
         # fmt: on
@@ -685,16 +713,41 @@ class AdsbIm:
         if not listener in stage2_listeners:
             idx = len(stage2_listeners)
             self._d.env_by_tags("stage2_listeners").list_set(idx, listener)
-        return json.dumps(
-            {
-                "name": self._d.env_by_tags("site_name").list_get(0),
-                "lat": self._d.env_by_tags("lat").list_get(0),
-                "lng": self._d.env_by_tags("lng").list_get(0),
-                "alt": self._d.env_by_tags("alt").list_get(0),
-                "tz": self._d.env_by_tags("tz").list_get(0),
-                "version": self._d.env_by_tags("base_version").value,
-            }
+        response = make_response(
+            json.dumps(
+                {
+                    "name": self._d.env_by_tags("site_name").list_get(0),
+                    "lat": self._d.env_by_tags("lat").list_get(0),
+                    "lng": self._d.env_by_tags("lng").list_get(0),
+                    "alt": self._d.env_by_tags("alt").list_get(0),
+                    "tz": self._d.env_by_tags("tz").list_get(0),
+                    "version": self._d.env_by_tags("base_version").value,
+                }
+            )
         )
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        return response
+
+    def micro_settings(self):
+        microsettings = {
+            "name": self._d.env_by_tags("site_name").list_get(0),
+            "lat": self._d.env_by_tags("lat").list_get(0),
+            "lng": self._d.env_by_tags("lng").list_get(0),
+            "alt": self._d.env_by_tags("alt").list_get(0),
+            "tz": self._d.env_by_tags("tz").list_get(0),
+            "version": self._d.env_by_tags("base_version").value,
+        }
+        for e in self._d._env:
+            for t in self.microfeeder_setting_tags:
+                tags = t.split("--")
+                if all(t in e.tags for t in tags):
+                    if type(e._value) == list:
+                        microsettings[t] = e.list_get(0)
+                    else:
+                        microsettings[t] = e._value
+        response = make_response(json.dumps(microsettings))
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        return response
 
     def agg_status(self, agg, idx=0):
         if agg == "im":
@@ -819,34 +872,51 @@ class AdsbIm:
             except:
                 print_err("failed to allow root ssh login")
 
-    def get_base_info(self, n):
-        #    try:
+    def get_base_info(self, n, do_import=False):
         ip = self._d.env_by_tags("mf_ip").list_get(n)
-        base_info, status = generic_get_json(f"http://{ip}/api/base_info", None)
-        if status == 200 and base_info != None:
-            print_err(f"got {base_info} for {ip}")
-            self._d.env_by_tags("site_name").list_set(n, base_info["name"])
-            self._d.env_by_tags("lat").list_set(n, base_info["lat"])
-            self._d.env_by_tags("lng").list_set(n, base_info["lng"])
-            self._d.env_by_tags("alt").list_set(n, base_info["alt"])
-            self._d.env_by_tags("tz").list_set(n, base_info["tz"])
-            self._d.env_by_tags("mf_version").list_set(n, base_info["version"])
-            return True
+        print_err(f"getting info from {ip} with do_import={do_import}")
+        # try:
+        if do_import:
+            micro_settings, status = generic_get_json(
+                f"http://{ip}/api/micro_settings", None
+            )
+            print_err(f"micro_settings API on {ip}: {status}, {micro_settings}")
+            if status == 200 and micro_settings != None:
+                for key, value in micro_settings.items():
+                    if key == "base_version":
+                        key = "mf_version"
+                    tags = key.split("--")
+                    print_err(f"setting env for {tags} to {value}", level=4)
+                    e = self._d.env_by_tags(tags)
+                    if e:
+                        e.list_set(n, value)
+                return True
+        else:
+            base_info, status = generic_get_json(f"http://{ip}/api/base_info", None)
+            if status == 200 and base_info != None:
+                print_err(f"got {base_info} for {ip}")
+                self._d.env_by_tags("site_name").list_set(n, base_info["name"])
+                self._d.env_by_tags("lat").list_set(n, base_info["lat"])
+                self._d.env_by_tags("lng").list_set(n, base_info["lng"])
+                self._d.env_by_tags("alt").list_set(n, base_info["alt"])
+                self._d.env_by_tags("tz").list_set(n, base_info["tz"])
+                self._d.env_by_tags("mf_version").list_set(n, base_info["version"])
+                return True
         #    except:
         #        pass
         print_err(f"failed to get base_info from micro feeder {n}")
         return False
 
-    def setup_new_micro_site(self, ip):
+    def setup_new_micro_site(self, ip, do_import=False):
         if ip in self._d.env_by_tags("mf_ip").value:
             print_err(f"IP address {ip} already listed as a micro site")
             return
-        print_err(f"setting up a new micro site at {ip}")
+        print_err(f"setting up a new micro site at {ip} do_import={do_import}")
         n = self._d.env_by_tags("num_micro_sites").value
         # store the IP address so that get_base_info works
         self._d.env_by_tags("mf_ip").list_set(n + 1, ip)
         # now let's see if we can get the data from the micro feeder
-        if self.get_base_info(n + 1):
+        if self.get_base_info(n + 1, do_import=do_import):
             print_err(
                 f"added new micro site {self._d.env_by_tags('site_name').value[n + 1]} at {ip}"
             )
@@ -857,35 +927,18 @@ class AdsbIm:
 
     def remove_micro_site(self, num):
         # carefully shift everything down
-        for i in range(num, self._d.env_by_tags("num_micro_sites").value):
-            self._d.env_by_tags("mf_ip").list_set(
-                i, self._d.env_by_tags("mf_ip").list_get(i + 1)
-            )
-            self._d.env_by_tags("site_name").list_set(
-                i, self._d.env_by_tags("site_name").list_get(i + 1)
-            )
-            self._d.env_by_tags("lat").list_set(
-                i, self._d.env_by_tags("lat").list_get(i + 1)
-            )
-            self._d.env_by_tags("lng").list_set(
-                i, self._d.env_by_tags("lng").list_get(i + 1)
-            )
-            self._d.env_by_tags("alt").list_set(
-                i, self._d.env_by_tags("alt").list_get(i + 1)
-            )
-            self._d.env_by_tags("tz").list_set(
-                i, self._d.env_by_tags("tz").list_get(i + 1)
-            )
-            self._d.env_by_tags("mf_version").list_set(
-                i, self._d.env_by_tags("mf_version").list_get(i + 1)
-            )
-        self._d.env_by_tags("mf_ip").list_remove()
-        self._d.env_by_tags("site_name").list_remove()
-        self._d.env_by_tags("lat").list_remove()
-        self._d.env_by_tags("lng").list_remove()
-        self._d.env_by_tags("alt").list_remove()
-        self._d.env_by_tags("tz").list_remove()
-        self._d.env_by_tags("mf_version").list_remove()
+        print_err(f"removing micro site {num}")
+        for t in self.microfeeder_setting_tags + ("mf_ip",):
+            if t == "base_version":
+                t == "mf_version"
+            tags = t.split("--")
+            e = self._d.env_by_tags(tags)
+            if e:
+                for i in range(num, self._d.env_by_tags("num_micro_sites").value):
+                    e.list_set(i, e.list_get(i + 1))
+                e.list_remove()
+            else:
+                print_err(f"couldn't find env for {tags}")
         self._d.env_by_tags("num_micro_sites").value -= 1
 
     @check_restart_lock
@@ -945,11 +998,11 @@ class AdsbIm:
                     self._d.env_by_tags("sdrplay_license_accepted").value = True
                 if key == "sdrplay_license_reject":
                     self._d.env_by_tags("sdrplay_license_accepted").value = False
-                if key == "add_micro":
+                if key == "add_micro" or key == "import_micro":
                     # user has clicked Add micro feeder on Stage 2 page
                     # grab the IP that we know the user has provided
                     ip = form.get(f"add_micro_feeder_ip")
-                    self.setup_new_micro_site(ip)
+                    self.setup_new_micro_site(ip, do_import=(key == "import_micro"))
                     return redirect(url_for("stage2"))
                 if key.startswith("remove_micro_"):
                     # user has clicked Remove micro feeder on Stage 2 page

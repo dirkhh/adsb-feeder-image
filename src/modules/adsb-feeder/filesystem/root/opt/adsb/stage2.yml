@@ -70,8 +70,9 @@ services:
       # USER_PROVIDED_ENV_START
       # USER_PROVIDED_ENV_END
     volumes:
-      - /opt/adsb/config/ultrafeeder/globe_history_STAGE2NUM:/var/globe_history
-      - /opt/adsb/config/ultrafeeder/graphs1090_STAGE2NUM:/var/lib/collectd
+      # CURRENT_IP=STAGE2IP
+      - /opt/adsb/config/ultrafeeder/STAGE2IP/globe_history:/var/globe_history
+      - /opt/adsb/config/ultrafeeder/STAGE2IP/graphs1090:/var/lib/collectd
       - /proc/diskstats:/proc/diskstats:ro
       - /dev:/dev:ro
       - /run/adsb-feeder-ultrafeeder_STAGE2NUM:/run

@@ -49,7 +49,7 @@
   {% if env_value_by_tag('num_micro_sites') == 0 %}
   <div class="my-4">No micro feeder sites configured</div>
   {% else %}
-  <form method="post">
+  <form method="post" action="{{ url_for('update') }}">
     <div class="row small">
       <div class="col-12">
         <table class="table table-bordered table-sm lh-1 table-striped">
@@ -101,18 +101,23 @@
     <h5 class="mb-2">Add micro feeder</h5>
     <form method="post" action="{{ url_for('update') }}">
       <div class="form-group row align-items-center mb-1">
-        <span class="col-12 col-sm-5 col-md-4 col-lg-3">
+        <div class="col-12 col-sm-5 col-md-4 col-lg-3">
           <label for="add_micro_feeder_ip">micro feeder IP address</label>
-        </span>
-        <span class="col-12 col-sm-7 col-md-8 col-lg-9">
+        </div>
+        <div class="col-12 col-sm-7 col-md-8 col-lg-9 mb-3">
           <input type="text" id="add_micro_feeder_ip" name="add_micro_feeder_ip" required placeholder="1.2.3.4"
                  class="form-control" pattern="((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])"
                  title="valid IPv4 address" />
-        </span>
-        <span id="add_micro_feeder_name"></span>
-      </div>
-      <div class="form-group">
-        <button type="submit" name="add_micro" value="go" class="btn btn-primary">Add micro feeder</button>
+        </div>
+        <div id="mf_step1" class="col-12">
+          <button type="button" class="btn btn-primary" onclick="check_micro_feeder();">Check micro feeder</button>
+        </div>
+        <div class="col-3 font-weight-bold text-danger" id="add_micro_feeder_name"></div>
+        <div id="mf_step2" class="d-none col-9">
+          <button type="submit" name="add_micro" value="go" class="btn btn-primary">Manually add micro feeder</button>
+          <button type="submit" name="import_micro" value="go" class="btn btn-primary">Import micro feeder and
+            settings</button>
+        </div>
       </div>
     </form>
     <form method="post" action="{{ url_for('update') }}">
@@ -202,12 +207,28 @@
   aggregatorBtns.forEach((radio) => {
     radio.addEventListener("click", aggregatorClick);
   });
-  $("#add_micro_feeder_ip").on("blur", function () {
-    fetch("http://" + $("#add_micro_feeder_ip").val() + "/api/base_info")
-      .then(response => response.json())
-      .then(data => {
-        $("#add_micro_feeder_name").val(data['name']);
+  $("#add_micro_feeder_ip").keypress(key => {
+    if (key.which == 13) {
+      check_micro_feeder();
+      return false;
+    }
+  });
+  function check_micro_feeder() {
+    let ip = $("#add_micro_feeder_ip").val()
+    if (ip.length > 3) {
+      let url = "http://" + ip + "/api/base_info"
+      console.log("Accessing", url)
+      fetch(url, {
+        method: "GET", cors: "no-cors"
       })
-  })
+        .then(response => { console.log(response); return response.json() })
+        .then(data => {
+          console.log(data)
+          $("#add_micro_feeder_name").text(data['name']);
+          $("#mf_step2").removeClass("d-none");
+          $("#mf_step1").addClass("d-none");
+        })
+    }
+  }
 </script>
 {% endblock %}
