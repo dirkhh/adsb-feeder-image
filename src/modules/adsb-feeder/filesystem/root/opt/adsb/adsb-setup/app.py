@@ -485,7 +485,7 @@ class AdsbIm:
         )
         thread.start()
 
-        site_name = self._d.env_by_tags("site_name").liste_get(0)
+        site_name = self._d.env_by_tags("site_name").list_get(0)
         now = datetime.now().replace(microsecond=0).isoformat().replace(":", "-")
         download_name = f"adsb-feeder-config-{site_name}-{now}.zip"
         return send_file(
