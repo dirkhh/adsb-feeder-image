@@ -1015,13 +1015,13 @@ class AdsbIm:
                     # grab the IP that we know the user has provided
                     ip = form.get(f"add_micro_feeder_ip")
                     self.setup_new_micro_site(ip, do_import=(key == "import_micro"))
-                    return redirect(url_for("stage2"))
+                    continue
                 if key.startswith("remove_micro_"):
                     # user has clicked Remove micro feeder on Stage 2 page
                     # grab the micro feeder number that we know the user has provided
                     num = int(key[len("remove_micro_") :])
                     self.remove_micro_site(num)
-                    return redirect(url_for("stage2"))
+                    continue
                 if key == "set_stage2_data":
                     # just grab the new data and go back
                     next_url = url_for("stage2")
