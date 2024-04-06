@@ -452,7 +452,38 @@ class AdsbIm:
         return self.create_backup_zip(include_graphs=True, include_heatmap=True)
 
     def create_backup_zip(self, include_graphs=False, include_heatmap=False):
-        adsb_path = pathlib.Path("/opt/adsb/config")
+        adsb_path = self._d.config_path
+        if include_graphs:
+            rrd_file = adsb_path / "ultrafeeder/graphs1090/rrd/localhost.tar.gz"
+            # the rrd file will be updated via move after collectd is done writing it out
+            # so killing collectd and waiting for the mtime to change is enough
+            prev_time = os.stat(rrd_file).st_mtime
+            try:
+                subprocess.call(
+                    "docker exec ultrafeeder pkill collectd", timeout=5.0, shell=True
+                )
+            except:
+                print_err(
+                    "failed to kill collectd - just using the localhost.tar.gz that's already there"
+                )
+                pass
+            else:
+                count = 0
+                while True:
+                    # because of the way the file gets updated, it will briefly not exist
+                    # when the new copy is moved in place, which will make os.stat unhappy;
+                    # either way, we give up after 30 seconds
+                    try:
+                        latest_timestamp = os.stat(rrd_file).st_mtime
+                    except:
+                        sleep(0.5)
+                        continue
+                    if latest_timestamp != prev_time:
+                        break
+                    sleep(1)
+                    count += 1
+                    if count > 30:
+                        break
         fdOut, fdIn = os.pipe()
         pipeOut = os.fdopen(fdOut, "rb")
         pipeIn = os.fdopen(fdIn, "wb")
