@@ -114,9 +114,24 @@
         </div>
         <div class="col-3 font-weight-bold text-danger" id="add_micro_feeder_name"></div>
         <div id="mf_step2" class="d-none col-9">
-          <button type="submit" name="add_micro" value="go" class="btn btn-primary">Manually add micro feeder</button>
-          <button type="submit" name="import_micro" value="go" class="btn btn-primary">Import micro feeder and
-            settings</button>
+          <div class="row gy-2">
+            <div class="col-3">
+              <button type="submit" name="add_micro" value="go" class="btn btn-primary">Manual</button>
+            </div>
+            <div class="col-9">You will need to manually create settings for data sharing.</div>
+            <div class="col-3">
+              <button type="submit" name="import_micro" value="go" class="btn btn-primary">Import Settings</button>
+            </div>
+            <div class="col-9">Import settings for data sharing and some other options from the micro feeder.</div>
+            <div class="col-3">
+              <button type="submit" name="import_micro_full" value="go" class="btn btn-primary">Full Import</button>
+            </div>
+            <div class="col-9">Import settings for data sharing and some other options as well as historical data and
+              graphs from the micro feeder. Depending on connection speed and amount of historical data, this can take a
+              significant amount of time during which this web UI will be unresponsive. Also, note that this will fail
+              if you switch from 32 to 64bit architecture, i.e., you cannot use this when the microfeeder is arm32 but
+              your stage 2 is arm64 or AMD64.</div>
+          </div>
         </div>
       </div>
     </form>

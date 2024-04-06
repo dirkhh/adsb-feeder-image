@@ -1,4 +1,5 @@
 import filecmp
+import io
 import json
 import os
 import os.path
@@ -907,11 +908,31 @@ class AdsbIm:
         print_err(f"failed to get base_info from micro feeder {n}")
         return False
 
-    def setup_new_micro_site(self, ip, do_import=False):
+    def import_graphs_and_history_from_remote(self, ip):
+        print_err(f"importing graphs and history from {ip}")
+        url = f"http://{ip}/backupexecutefull"
+        with requests.get(url, stream=True) as response, zipfile.ZipFile(
+            io.BytesIO(response.content)
+        ) as zf:
+            zf.extractall(path=self._d.config_path / "ultrafeeder" / ip)
+        # deal with the duplicate "ultrafeeder in the path"
+        shutil.move(
+            self._d.config_path / "ultrafeeder" / ip / "ultrafeeder" / "globe_history",
+            self._d.config_path / "ultrafeeder" / ip / "globe_history",
+        )
+        shutil.move(
+            self._d.config_path / "ultrafeeder" / ip / "ultrafeeder" / "graphs1090",
+            self._d.config_path / "ultrafeeder" / ip / "graphs1090",
+        )
+        print_err(f"done importing graphs and history from {ip}")
+
+    def setup_new_micro_site(self, ip, do_import=False, do_restore=False):
         if ip in self._d.env_by_tags("mf_ip").value:
             print_err(f"IP address {ip} already listed as a micro site")
             return
-        print_err(f"setting up a new micro site at {ip} do_import={do_import}")
+        print_err(
+            f"setting up a new micro site at {ip} do_import={do_import} do_restore={do_restore}"
+        )
         n = self._d.env_by_tags("num_micro_sites").value
         # store the IP address so that get_base_info works
         self._d.env_by_tags("mf_ip").list_set(n + 1, ip)
@@ -924,6 +945,9 @@ class AdsbIm:
             create_stage2_yml_from_template(
                 self._d.config_path / f"stage2_micro_site_{n + 1}.yml", n + 1, ip
             )
+            if do_restore:
+                print_err(f"attempting to restore graphs and history from {ip}")
+                self.import_graphs_and_history_from_remote(ip)
         else:
             # oh well, remove the IP address
             self._d.env_by_tags("mf_ip").list_remove()
@@ -1010,11 +1034,15 @@ class AdsbIm:
                     self._d.env_by_tags("sdrplay_license_accepted").value = True
                 if key == "sdrplay_license_reject":
                     self._d.env_by_tags("sdrplay_license_accepted").value = False
-                if key == "add_micro" or key == "import_micro":
+                if key == "add_micro" or key.startswith("import_micro"):
                     # user has clicked Add micro feeder on Stage 2 page
                     # grab the IP that we know the user has provided
                     ip = form.get(f"add_micro_feeder_ip")
-                    self.setup_new_micro_site(ip, do_import=(key == "import_micro"))
+                    do_import = key.startswith("import_micro")
+                    do_restore = key == "import_micro_full"
+                    self.setup_new_micro_site(
+                        ip, do_import=do_import, do_restore=do_restore
+                    )
                     continue
                 if key.startswith("remove_micro_"):
                     # user has clicked Remove micro feeder on Stage 2 page
