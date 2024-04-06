@@ -32,7 +32,7 @@
     request.onload = function () {
       if (request.status === 200 && request.responseText === "done") {
         // restarting the ADS-B infra completed, redirect user
-        window.location = "/";
+        window.location.replace("/");
       } else if (request.status === 200 && request.responseText === "restarting") {
         // restart is still in progress, show progress and check again after a delay
         setTimeout(checkRestartStatus, 2000);
