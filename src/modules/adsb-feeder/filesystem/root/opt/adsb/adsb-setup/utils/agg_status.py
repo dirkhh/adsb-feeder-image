@@ -100,7 +100,7 @@ class AggStatus:
                     )
                     self._mlat = (
                         T.Yes
-                        if isinstance(lolbeast, list)
+                        if isinstance(lolmlat, list)
                         and any(b.get("user", "") == name for b in lolmlat)
                         else T.No
                     )
