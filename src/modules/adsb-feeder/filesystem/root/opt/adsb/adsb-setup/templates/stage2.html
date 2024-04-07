@@ -7,6 +7,14 @@
 <div class="alert alert-danger" role="alert" {% if env_value_by_tag('dns_state') %} style="display: none;" {% endif %}>
   The feeder cannot resolve DNS queries. This will most likely prevent it from working at all.
 </div>
+<div class="alert alert-danger" role="alert">
+  The stage 2 code is still in development. Do not use this with your 'production' feeder. Running this image as regular
+  feeder is reasonably well tested (there's always a chance that there are still bugs), but the two stage setup has
+  received a lot less testing by others and might still eat your data.
+</div>
+<div class="alert alert-danger" role="alert">
+  Right now it is really important that the micro feeder is running the same version of the code as the second stage.
+</div>
 <div class="row">
   <form method="post">
     <div class="form-group row align-items-center mb-1">
