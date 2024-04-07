@@ -1247,6 +1247,11 @@ class AdsbIm:
                     self._d.env_by_tags(["tar1090_ac_db"]).value = False
                     self._d.env_by_tags(["mlathub_disable"]).value = True
                     self._d.env_by_tags("aggregators_chosen").value = True
+                    # disable all the aggregators in micro mode
+                    for e in self._d._env:
+                        if "is_enabled" in e.tags:
+                            if "other_aggregator" in e.tags or "ultrafeeder" in e.tags:
+                                e.list_set(0, False)
                 else:
                     self._d.env_by_tags(["tar1090_ac_db"]).value = True
                     self._d.env_by_tags(["mlathub_disable"]).value = False
