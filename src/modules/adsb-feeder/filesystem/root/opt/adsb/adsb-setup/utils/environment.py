@@ -39,14 +39,17 @@ class Env:
                 if type(self._default) == bool:
                     self._value = is_true(value_in_file)
                     return
-                if (
-                    type(self._default) == list
-                    and len(self._default) > 0
-                    and type(self._default[0]) == type(value_in_file)
-                ):
-                    self._value = [value_in_file]
-                    print_err(f"converting {self._name} to list {self._value}")
-                    return
+                if type(self._default) == list and len(self._default) > 0:
+                    if type(self._default[0]) == type(value_in_file):
+                        self._value = [value_in_file]
+                        print_err(f"converting {self._name} to list {self._value}")
+                        return
+                    if type(self._default[0]) == bool and (
+                        value_in_file.lower() in ["true", "false", "0", "1"]
+                    ):
+                        self._value = [is_true(value_in_file)]
+                        print_err(f"converting {self._name} to list {self._value}")
+                        return
                 if type(self._default) == int and type(value_in_file) == str:
                     try:
                         self._value = int(value_in_file)
