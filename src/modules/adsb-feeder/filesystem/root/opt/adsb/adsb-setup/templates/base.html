@@ -38,6 +38,24 @@
               <li><a class="dropdown-item" href="/map/?pTracks">Tracks</a></li>
               <li><a class="dropdown-item" href="/map/?replay">Replay</a></li>
               <li><a class="dropdown-item" href="/stats">Stats</a></li>
+              {% if is_enabled('stage2') %}
+              <!-- awkward double dropdown for the micro proxies -->
+              {% for site in env_value_by_tag('site_name') %}
+              {% if loop.index0 != 0 %}
+              <li>
+                <a class="dropdown-item" href="#">{{site}} &raquo;</a>
+                <ul class="dropdown-menu dropdown-submenu">
+                  {% set url = request.host_url.rsplit(":", 1)[0] ~ ":" ~ (loop.index0 + 8090) %}
+                  <li><a class="dropdown-item" href="{{ url }}">Main Map</a></li>
+                  <li><a class="dropdown-item" href="{{ url }}/?heatmap">Heatmap</a></li>
+                  <li><a class="dropdown-item" href="{{ url }}/?pTracks">Tracks</a></li>
+                  <li><a class="dropdown-item" href="{{ url }}/?replay">Replay</a></li>
+                  <li><a class="dropdown-item" href="{{ url }}/graphs1090/">Stats</a></li>
+                </ul>
+              </li>
+              {% endif %}
+              {% endfor %}
+              {% endif %}
             </ul>
           </li>
           <!-- Setup -->
