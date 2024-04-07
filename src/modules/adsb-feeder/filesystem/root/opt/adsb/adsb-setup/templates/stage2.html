@@ -141,6 +141,12 @@
               your stage 2 is arm64 or AMD64.</div>
           </div>
         </div>
+        <div id="mf_step3" class="col-9">
+          As long as the feeder exposes port 30004 with Beast-Out at this IP address, you should be able to connect to
+          it and use this system as stage 2 - a number of more advanced features will be missing.
+          <button type="submit" name="add_other" value="go" class="btn btn-primary">Attach to other
+            feeder</button>
+        </div>
       </div>
     </form>
     <form method="post" action="{{ url_for('update') }}">
@@ -246,6 +252,12 @@
           console.log(data)
           $("#add_micro_feeder_name").text(data['name']);
           $("#mf_step2").removeClass("d-none");
+          $("#mf_step1").addClass("d-none");
+        })
+        .catch(error => {
+          console.log("received error", error);
+          $("#add_micro_feeder_name").text("Unknown (not a recent adsb.im feeder)");
+          $("#mf_step3").removeClass("d-none");
           $("#mf_step1").addClass("d-none");
         })
     }

@@ -950,7 +950,7 @@ class AdsbIm:
         )
         print_err(f"done importing graphs and history from {ip}")
 
-    def setup_new_micro_site(self, ip, do_import=False, do_restore=False):
+    def setup_new_micro_site(self, ip, is_adsbim, do_import=False, do_restore=False):
         if ip in self._d.env_by_tags("mf_ip").value:
             print_err(f"IP address {ip} already listed as a micro site")
             return
@@ -960,6 +960,20 @@ class AdsbIm:
         n = self._d.env_by_tags("num_micro_sites").value
         # store the IP address so that get_base_info works
         self._d.env_by_tags("mf_ip").list_set(n + 1, ip)
+        if not is_adsbim:
+            # well that's unfortunate
+            # we might get asked to create a UI for this at some point. Not today, though
+            print_err(f"Micro feeder at {ip} is not an adsb.im feeder")
+            n += 1
+            self._d.env_by_tags("num_micro_sites").value = n
+            self._d.env_by_tags("site_name").list_set(n, ip)
+            self._d.env_by_tags("lat").list_set(n, "")
+            self._d.env_by_tags("lng").list_set(n, "")
+            self._d.env_by_tags("alt").list_set(n, "")
+            self._d.env_by_tags("tz").list_set(n, "UTC")
+            self._d.env_by_tags("mf_version").list_set(n, "not an adsb.im feeder")
+            return
+
         # now let's see if we can get the data from the micro feeder
         if self.get_base_info(n + 1, do_import=do_import):
             print_err(
@@ -1056,14 +1070,22 @@ class AdsbIm:
                     self._d.env_by_tags("sdrplay_license_accepted").value = True
                 if key == "sdrplay_license_reject":
                     self._d.env_by_tags("sdrplay_license_accepted").value = False
-                if key == "add_micro" or key.startswith("import_micro"):
+                if (
+                    key == "add_micro"
+                    or key == "add_other"
+                    or key.startswith("import_micro")
+                ):
                     # user has clicked Add micro feeder on Stage 2 page
                     # grab the IP that we know the user has provided
                     ip = form.get(f"add_micro_feeder_ip")
+                    is_adsbim = key != "add_other"
                     do_import = key.startswith("import_micro")
                     do_restore = key == "import_micro_full"
                     self.setup_new_micro_site(
-                        ip, do_import=do_import, do_restore=do_restore
+                        ip,
+                        is_adsbim=is_adsbim,
+                        do_import=do_import,
+                        do_restore=do_restore,
                     )
                     continue
                 if key.startswith("remove_micro_"):
