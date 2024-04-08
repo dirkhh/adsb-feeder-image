@@ -174,7 +174,7 @@ class Data:
         ),
         # 978
         Env(
-            "FEEDER_ENABLE_UAT978", default=False, tags=["uat978", "is_enabled"]
+            "FEEDER_ENABLE_UAT978", default=[False], tags=["uat978", "is_enabled"]
         ),  # start the container
         Env(
             "FEEDER_URL_978", default=[""], tags=["978url"]

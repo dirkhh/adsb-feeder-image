@@ -188,6 +188,8 @@ class AdsbIm:
             "radarplane--is_enabled",
             "hpradar--is_enabled",
             "alive--is_enabled",
+            "uat978--is_enabled", "978url", "uatport", "978piaware",
+            "piamapport", "piastatport", "frport", "pfport"
         )
 
         self.proxy_routes = self._d.proxy_routes
