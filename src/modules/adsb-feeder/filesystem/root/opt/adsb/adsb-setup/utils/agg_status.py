@@ -204,7 +204,7 @@ class AggStatus:
             else:
                 print_err(f"radarplane returned {status}")
         elif self._agg == "radarbox":
-            station_serial = self._d.env_by_tags(["radarbox", "sn"]).value
+            station_serial = self._d.env_by_tags(["radarbox", "sn"]).list_get(self._idx)
             if not station_serial:
                 # dang, I hate this part
                 try:
@@ -223,7 +223,9 @@ class AggStatus:
                 )
                 if match:
                     station_serial = match.group(1)
-                    self._d.env_by_tags(["radarbox", "sn"]).value = station_serial
+                    self._d.env_by_tags(["radarbox", "sn"]).list_set(
+                        self._idx, station_serial
+                    )
             if station_serial:
                 html_url = f"https://www.radarbox.com/stations/{station_serial}"
                 rb_page, status = self.get_plain(html_url)
@@ -250,24 +252,28 @@ class AggStatus:
             json_url = "https://api.airplanes.live/feed-status"
             a_dict, status = self.get_json(json_url)
             if a_dict and status == 200:
-                uuid = self._d.env_by_tags("ultrafeeder_uuid").value
+                uuid = self._d.env_by_tags("ultrafeeder_uuid").list_get(self._idx)
                 beast_clients = a_dict.get("beast_clients")
+                print_err(f"alife returned {beast_clients}")
                 if beast_clients:
+                    for bc in beast_clients:
+                        print_err(f"alife: {uuid} -- {bc.get('uuid')}")
                     self._beast = (
                         T.Yes
-                        if any({bc.get("uuid") == uuid for bc in beast_clients})
+                        if any(bc.get("uuid") == uuid for bc in beast_clients)
                         else T.No
                     )
                 mlat_clients = a_dict.get("mlat_clients")
+                print_err(f"alife returned {mlat_clients}")
                 if mlat_clients:
+                    for mc in mlat_clients:
+                        print_err(f"alife: {uuid} -- {mc.get('uuid')}")
                     self._mlat = (
                         T.Yes
                         if any(
-                            {
-                                isinstance(mc.get("uuid"), list)
-                                and mc.get("uuid")[0] == uuid
-                                for mc in mlat_clients
-                            }
+                            isinstance(mc.get("uuid"), list)
+                            and mc.get("uuid")[0] == uuid
+                            for mc in mlat_clients
                         )
                         else T.No
                     )
@@ -294,7 +300,9 @@ class AggStatus:
                     r'placeholder="([^"]+)" aria-label="Feed UID"', adsbx_text
                 )
                 if match:
-                    self._d.env_by_tags("adsbxfeederid").value = match.group(1)
+                    self._d.env_by_tags("adsbxfeederid").list_set(
+                        self._idx, match.group(1)
+                    )
             else:
                 print_err(f"adsbx returned {status}")
         elif self._agg == "tat":
@@ -331,9 +339,8 @@ class AggStatus:
             else:
                 print_err(f"planespotters returned {status}")
         elif self._agg == "planewatch":
-            pw_uuid = self._d.env_by_tags(
-                ["planewatch", "key"]
-            ).value  # they sometimes call it key, sometimes uuid
+            # they sometimes call it key, sometimes uuid
+            pw_uuid = self._d.env_by_tags(["planewatch", "key"]).list_get(self._idx)
             if not pw_uuid:
                 return
             json_url = f"https://atc.plane.watch/api/v1/feeders/{pw_uuid}/status.json"
