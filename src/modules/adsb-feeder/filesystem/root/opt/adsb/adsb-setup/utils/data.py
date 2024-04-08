@@ -597,6 +597,8 @@ class Data:
                     adjust_bool(e, e._value) if type(e._value) == bool else e._value
                 )
                 print_err(f"WRITING: {e._name} = {ret[e._name]}")
+        # add convenience values
+        ret["AF_FALSE_ON_STAGE2"] = "false" if self.is_enabled(["stage2"]) else "true"
         return ret
 
     @property
