@@ -228,12 +228,7 @@ class AdsbIm:
                 self._d.env_by_tags("adsblol_uuid").list_set(i, str(uuid4()))
             if not self._d.env_by_tags("ultrafeeder_uuid").list_get(i):
                 self._d.env_by_tags("ultrafeeder_uuid").list_set(i, str(uuid4()))
-            if i > 0:
-                create_stage2_yml_from_template(
-                    self._d.config_path / f"stage2_micro_site_{i}.yml",
-                    i,
-                    self._d.env_by_tags("mf_ip").list_get(i),
-                )
+            create_stage2_yml_files(i, self._d.env_by_tags("mf_ip").list_get(i))
 
     def update_boardname(self):
         board = ""
@@ -968,11 +963,11 @@ class AdsbIm:
         # hundreds or thousands of lines of output
         uf = self._d.env_by_tags(["ultrafeeder", "container"]).value
         print_err(
-            f"running: 'docker run --entrypoint /usr/local/bin/readsb {uf} --net-connector {ip},30005,beast_in --net-only --show-only=123456'"
+            f"running: 'docker run --rm --entrypoint /usr/local/bin/readsb {uf} --net-connector {ip},30005,beast_in --net-only --show-only=123456'"
         )
         try:
             response = subprocess.run(
-                f"docker run --entrypoint /usr/local/bin/readsb {uf} --net-connector {ip},30005,beast_in --net-only --show-only=123456",
+                f"docker run --rm --entrypoint /usr/local/bin/readsb {uf} --net-connector {ip},30005,beast_in --net-only --show-only=123456",
                 shell=True,
                 timeout=5.0,
                 capture_output=True,
@@ -1039,9 +1034,7 @@ class AdsbIm:
                 f"added new micro site {self._d.env_by_tags('site_name').value[n + 1]} at {ip}"
             )
             self._d.env_by_tags("num_micro_sites").value = n + 1
-            create_stage2_yml_from_template(
-                self._d.config_path / f"stage2_micro_site_{n + 1}.yml", n + 1, ip
-            )
+            create_stage2_yml_files(n + 1, ip)
             if do_restore:
                 print_err(f"attempting to restore graphs and history from {ip}")
                 self.import_graphs_and_history_from_remote(ip)
@@ -1068,11 +1061,7 @@ class AdsbIm:
         # the index is used to pick the correct environment variables, the IP address
         # is used to distinguish the globe history and graphs for each micro feeder
         for i in range(num, self._d.env_by_tags("num_micro_sites").value):
-            create_stage2_yml_from_template(
-                self._d.config_path / f"stage2_micro_site_{i}.yml",
-                i,
-                self._d.env_by_tags("mf_ip").list_get(i),
-            )
+            create_stage2_yml_files(i, self._d.env_by_tags("mf_ip").list_get(i))
 
     @check_restart_lock
     def update(self):
@@ -1821,9 +1810,7 @@ class AdsbIm:
         )
 
 
-def create_stage2_yml_from_template(
-    stage2_yml_name, n, ip, template_file="/opt/adsb/config/stage2.yml"
-):
+def create_stage2_yml_from_template(stage2_yml_name, n, ip, template_file):
     if n:
         with open(template_file, "r") as stage2_yml_template:
             with open(stage2_yml_name, "w") as stage2_yml:
@@ -1834,6 +1821,26 @@ def create_stage2_yml_from_template(
                 )
     else:
         print_err(f"could not find micro feedernumber in {stage2_yml_name}")
+
+
+def create_stage2_yml_files(n, ip):
+    if not n:
+        return
+    for yml_file, template in [
+        [f"stage2_micro_site_{n}.yml", "stage2.yml"],
+        [f"1090uk_{n}.yml", "1090uk_stage2_template.yml"],
+        [f"ah_{n}.yml", "ah_stage2_template.yml"],
+        [f"fa_{n}.yml", "fa_stage2_template.yml"],
+        [f"fr24_{n}.yml", "fr24_stage2_template.yml"],
+        [f"os_{n}.yml", "os_stage2_template.yml"],
+        [f"pf_{n}.yml", "pf_stage2_template.yml"],
+        [f"pw_{n}.yml", "pw_stage2_template.yml"],
+        [f"rb_{n}.yml", "rb_stage2_template.yml"],
+        [f"rv_{n}.yml", "rv_stage2_template.yml"],
+    ]:
+        create_stage2_yml_from_template(
+            f"/opt/adsb/config/{yml_file}", n, ip, f"/opt/adsb/config/{template}"
+        )
 
 
 if __name__ == "__main__":

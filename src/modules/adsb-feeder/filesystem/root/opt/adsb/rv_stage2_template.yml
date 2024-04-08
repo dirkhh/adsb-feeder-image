@@ -1,0 +1,25 @@
+services:
+  radarvirtuel:
+    image: ${RV_CONTAINER}
+    tty: true
+    container_name: radarvirtuel_STAGE2NUM
+    hostname: radarvirtuel_STAGE2NUM
+    restart: always
+    environment:
+      - FEEDER_KEY=${FEEDER_RV_FEEDER_KEY_STAGE2NUM}
+      - SOURCE_HOST=ultrafeeder_STAGE2NUM:30002
+      - RV_SERVER=mg22.adsbnetwork.com:50050
+      - VERBOSE=OFF
+      - MLAT_SERVER=mlat.adsbnetwork.com:50000
+      - MLAT_HOST=ultrafeeder_STAGE2NUM:30005
+      - LAT=${FEEDER_LAT_STAGE2NUM}
+      - LON=${FEEDER_LONG_STAGE2NUM}
+      - ALT=${FEEDER_ALT_M_STAGE2NUM}
+      - S6_KILL_GRACETIME=1000
+      # USER_PROVIDED_ENV_START
+      # USER_PROVIDED_ENV_END
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,noexec,relatime,size=128M
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+      - "/etc/timezone:/etc/timezone:ro"
