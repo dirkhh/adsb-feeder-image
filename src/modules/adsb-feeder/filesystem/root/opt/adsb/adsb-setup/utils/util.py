@@ -59,7 +59,7 @@ def is_email(text: str):
 # extend the truthy concept to exclude all non-empty string except a few specific ones ([Tt]rue, [Oo]n, 1)
 def is_true(value):
     if type(value) == str:
-        return any({value.lower() == "true", value.lower == "on", value == "1"})
+        return value.lower() in ["true", "on", "1"]
     return bool(value)
 
 

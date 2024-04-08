@@ -37,6 +37,10 @@ class UltrafeederConfig:
         # neither a micro feeder nor the aggregating Ultrafeeder on stage2
         # should feed any aggregators themselves
         aggregator_selection = self._d.env_by_tags("aggregators").value
+        print_err(
+            f"enabled_aggregators for {self._micro} with agg_sel {aggregator_selection} and stage2 {self._d.is_enabled('stage2')}",
+            level=4,
+        )
         if aggregator_selection == "micro":
             return {}
         if self._d.is_enabled("stage2") and self._micro == 0:
