@@ -127,21 +127,23 @@
               <button type="submit" name="add_micro" value="go" class="btn btn-primary">Manual</button>
             </div>
             <div class="col-9">You will need to manually create settings for data sharing.</div>
-            <div class="col-3">
+            <div id="mf_step2_import" class="col-3 d-none">
               <button type="submit" name="import_micro" value="go" class="btn btn-primary">Import Settings</button>
             </div>
-            <div class="col-9">Import settings for data sharing and some other options from the micro feeder.</div>
-            <div class="col-3">
+            <div id="mf_step2_import_text" class="col-9 d-none">Import settings for data sharing and some other options
+              from
+              the micro feeder.</div>
+            <div id="mf_step2_full" class="col-3 d-none">
               <button type="submit" name="import_micro_full" value="go" class="btn btn-primary">Full Import</button>
             </div>
-            <div class="col-9">Import settings for data sharing and some other options as well as historical data and
-              graphs from the micro feeder. Depending on connection speed and amount of historical data, this can take a
-              significant amount of time during which this web UI will be unresponsive. Also, note that this will fail
-              if you switch from 32 to 64bit architecture, i.e., you cannot use this when the microfeeder is arm32 but
-              your stage 2 is arm64 or AMD64.</div>
+            <div id="mf_step2_full_text" class="col-9 d-none">Import settings for data sharing and some other options as
+              well as historical data and graphs from the micro feeder. Depending on connection speed and amount of
+              historical data, this can take a significant amount of time during which this web UI will be unresponsive.
+              Also, note that this will fail if you switch from 32 to 64bit architecture, i.e., you cannot use this when
+              the microfeeder is arm32 but your stage 2 is arm64 or AMD64.</div>
           </div>
         </div>
-        <div id="mf_step3" class="col-9">
+        <div id="mf_step3" class="col-9 d-none">
           As long as the feeder exposes port 30004 with Beast-Out at this IP address, you should be able to connect to
           it and use this system as stage 2 - a number of more advanced features will be missing.
           <button type="submit" name="add_other" value="go" class="btn btn-primary">Attach to other
@@ -242,7 +244,7 @@
   function check_micro_feeder() {
     let ip = $("#add_micro_feeder_ip").val()
     if (ip.length > 3) {
-      let url = "http://" + ip + "/api/base_info"
+      let url = "/api/check_remote_feeder/" + ip
       console.log("Accessing", url)
       fetch(url, {
         method: "GET", cors: "no-cors"
@@ -250,15 +252,27 @@
         .then(response => { console.log(response); return response.json() })
         .then(data => {
           console.log(data)
-          $("#add_micro_feeder_name").text(data['name']);
-          $("#mf_step2").removeClass("d-none");
-          $("#mf_step1").addClass("d-none");
+          if ('name' in data) {
+            if ('micro_settings' in data && data['micro_settings'] == true) {
+              $("#mf_step2_import").removeClass("d-none");
+              $("#mf_step2_import_text").removeClass("d-none");
+              $("#mf_step2_full").removeClass("d-none");
+              $("#mf_step2_full_text").removeClass("d-none");
+            }
+            $("#add_micro_feeder_name").text(data['name']);
+            $("#mf_step2").removeClass("d-none");
+            $("#mf_step1").addClass("d-none");
+          } else if ('status' in data && data['status'] == "ok") {
+            $("#add_micro_feeder_name").text("Unknown (not a recent adsb.im feeder)");
+            $("#mf_step3").removeClass("d-none");
+            $("#mf_step1").addClass("d-none");
+          } else {
+            $("#add_micro_feeder_name").text("Unable to detect feeder at " + ip);
+          }
         })
         .catch(error => {
           console.log("received error", error);
-          $("#add_micro_feeder_name").text("Unknown (not a recent adsb.im feeder)");
-          $("#mf_step3").removeClass("d-none");
-          $("#mf_step1").addClass("d-none");
+          $("#add_micro_feeder_name").text("Unable to detect feeder at " + ip);
         })
     }
   }

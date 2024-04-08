@@ -215,6 +215,7 @@ class AdsbIm:
         self.app.add_url_rule("/api/sdr_info", "sdr_info", self.sdr_info)
         self.app.add_url_rule("/api/base_info", "base_info", self.base_info)
         self.app.add_url_rule("/api/micro_settings", "micro_settings", self.micro_settings)
+        self.app.add_url_rule("/api/check_remote_feeder/<ip>", "check_remote_feeder", self.check_remote_feeder)
         self.app.add_url_rule(f"/api/status/<agg>", "beast", self.agg_status)
         self.app.add_url_rule(f"/api/status/<agg>/<idx>", "beast", self.agg_status)
         # fmt: on
@@ -916,21 +917,79 @@ class AdsbIm:
                     if e:
                         e.list_set(n, value)
                 return True
-        else:
-            base_info, status = generic_get_json(f"http://{ip}/api/base_info", None)
-            if status == 200 and base_info != None:
-                print_err(f"got {base_info} for {ip}")
-                self._d.env_by_tags("site_name").list_set(n, base_info["name"])
-                self._d.env_by_tags("lat").list_set(n, base_info["lat"])
-                self._d.env_by_tags("lng").list_set(n, base_info["lng"])
-                self._d.env_by_tags("alt").list_set(n, base_info["alt"])
-                self._d.env_by_tags("tz").list_set(n, base_info["tz"])
-                self._d.env_by_tags("mf_version").list_set(n, base_info["version"])
-                return True
+        # we fall through here if we can't get the micro settings
+        base_info, status = generic_get_json(f"http://{ip}/api/base_info", None)
+        if status == 200 and base_info != None:
+            print_err(f"got {base_info} for {ip}")
+            self._d.env_by_tags("site_name").list_set(n, base_info["name"])
+            self._d.env_by_tags("lat").list_set(n, base_info["lat"])
+            self._d.env_by_tags("lng").list_set(n, base_info["lng"])
+            self._d.env_by_tags("alt").list_set(n, base_info["alt"])
+            self._d.env_by_tags("tz").list_set(n, base_info["tz"])
+            self._d.env_by_tags("mf_version").list_set(n, base_info["version"])
+            return True
         #    except:
         #        pass
         print_err(f"failed to get base_info from micro feeder {n}")
         return False
+
+    def check_remote_feeder(self, ip):
+        url = f"http://{ip}/api/base_info"
+        print_err(f"checking remote feeder {url}")
+        try:
+            response = requests.get(url, timeout=5.0)
+            print_err(f"response code: {response.status_code}")
+            json_dict = response.json()
+            print_err(f"json_dict: {type(json_dict)} {json_dict}")
+        except:
+            print_err(f"failed to check base_info from remote feeder {ip}")
+        else:
+            if response.status_code == 200:
+                # yay, this is an adsb.im feeder
+                # is it new enough to have the setting transfer?
+                url = f"http://{ip}/api/micro_settings"
+                print_err(f"checking remote feeder {url}")
+                try:
+                    response = requests.get(url, timeout=5.0)
+                except:
+                    print_err(f"failed to check micro_settings from remote feeder {ip}")
+                    json_dict["micro_settings"] = False
+                else:
+                    if response.status_code == 200:
+                        # ok, we have a recent adsb.im version
+                        json_dict["micro_settings"] = True
+                    else:
+                        json_dict["micro_settings"] = False
+            # now return the json_dict which will give the caller all the relevant data
+            # including whether this is a v2 or not
+            return make_response(json.dumps(json_dict), 200)
+        # ok, it's not a recent adsb.im version, it could still be a feeder
+        # the show-only argument basically just makes sure that the readsb doesn't create
+        # hundreds or thousands of lines of output
+        uf = self._d.env_by_tags(["ultrafeeder", "container"]).value
+        print_err(
+            f"running: 'docker run --entrypoint /usr/local/bin/readsb {uf} --net-connector {ip},30005,beast_in --net-only --show-only=123456'"
+        )
+        try:
+            response = subprocess.run(
+                f"docker run --entrypoint /usr/local/bin/readsb {uf} --net-connector {ip},30005,beast_in --net-only --show-only=123456",
+                shell=True,
+                timeout=5.0,
+                capture_output=True,
+            )
+            output = response.stderr.decode("utf-8")
+        except subprocess.TimeoutExpired as e:
+            # no worries, that' very much expected behavior
+            output = e.stderr.decode("utf-8")
+        except:
+            print_err(
+                "failed to use readsb in ultrafeeder container to check on remote feeder status"
+            )
+            return make_response(json.dumps({"status": "fail"}), 200)
+        if not re.search("Beast TCP input: Connection established", output):
+            print_err(f"can't connect to beast_output on remote feeder: {output}")
+            return make_response(json.dumps({"status": "fail"}), 200)
+        return make_response(json.dumps({"status": "ok"}), 200)
 
     def import_graphs_and_history_from_remote(self, ip):
         print_err(f"importing graphs and history from {ip}")
@@ -953,7 +1012,7 @@ class AdsbIm:
     def setup_new_micro_site(self, ip, is_adsbim, do_import=False, do_restore=False):
         if ip in self._d.env_by_tags("mf_ip").value:
             print_err(f"IP address {ip} already listed as a micro site")
-            return
+            return False
         print_err(
             f"setting up a new micro site at {ip} do_import={do_import} do_restore={do_restore}"
         )
@@ -972,7 +1031,7 @@ class AdsbIm:
             self._d.env_by_tags("alt").list_set(n, "")
             self._d.env_by_tags("tz").list_set(n, "UTC")
             self._d.env_by_tags("mf_version").list_set(n, "not an adsb.im feeder")
-            return
+            return True
 
         # now let's see if we can get the data from the micro feeder
         if self.get_base_info(n + 1, do_import=do_import):
@@ -989,6 +1048,8 @@ class AdsbIm:
         else:
             # oh well, remove the IP address
             self._d.env_by_tags("mf_ip").list_remove()
+            return False
+        return True
 
     def remove_micro_site(self, num):
         # carefully shift everything down
@@ -1081,12 +1142,14 @@ class AdsbIm:
                     is_adsbim = key != "add_other"
                     do_import = key.startswith("import_micro")
                     do_restore = key == "import_micro_full"
-                    self.setup_new_micro_site(
+                    if self.setup_new_micro_site(
                         ip,
                         is_adsbim=is_adsbim,
                         do_import=do_import,
                         do_restore=do_restore,
-                    )
+                    ):
+                        continue
+                    next_url = url_for("stage2")
                     continue
                 if key.startswith("remove_micro_"):
                     # user has clicked Remove micro feeder on Stage 2 page
