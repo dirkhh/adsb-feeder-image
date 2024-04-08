@@ -50,7 +50,7 @@ if [ -f /opt/adsb/config/.env ] ; then
             NUM=$(grep AF_NUM_MICRO_SITES= /opt/adsb/config/.env | sed -n 's/.*=\([0-9]\+\).*/\1/p')
             for ((i = 1; i <= NUM; i++)); do
                 COMPOSE_FILES+=( "-f" "/opt/adsb/config/stage2_micro_site_${i}.yml" )
-                if grep "AF_IS_FLIGHTRADAR24_ENABLED_$i}=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
+                if grep "AF_IS_FLIGHTRADAR24_ENABLED_${i}=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
                     COMPOSE_FILES+=( "-f" "/opt/adsb/config/fr24_${i}.yml" )
                 fi
                 if grep "AF_IS_PLANEWATCH_ENABLED_${i}=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
