@@ -1258,13 +1258,27 @@ class AdsbIm:
                 # tailscale handling uses 'continue' to avoid deep nesting - don't add other keys
                 # here at the end - instead insert them before tailscale
                 continue
-            if value == "stay":
+            if value == "stay" or value.startswith("stay-"):
                 if allow_insecure and key == "rpw":
                     print_err("updating the root password")
                     self.set_rpw()
                     continue
                 if key in self._other_aggregators:
-                    print_err(f"found other aggregator {key}")
+                    l_sitenum = 0
+                    if value.startswith("stay-"):
+                        try:
+                            l_sitenum = int(value[5:])
+                            l_site = self._d.env_by_tags("site_name").list_get(
+                                l_sitenum
+                            )
+                            if not l_site:
+                                l_sitenum = 0
+                        except:
+                            print_err(f"failed to parse value keyword {value}")
+                            l_sitenum = 0
+                        print_err(
+                            f"found other aggregator {key} for site {l_site} sitenum {l_sitenum}"
+                        )
                     is_successful = False
                     base = key.replace("--submit", "")
                     aggregator_argument = form.get(f"{base}--key", None)
@@ -1276,11 +1290,11 @@ class AdsbIm:
                         aggregator_argument += f"::{user}"
                     aggregator_object = self._other_aggregators[key]
                     print_err(
-                        f"got aggregator object {aggregator_object} -- activating"
+                        f"got aggregator object {aggregator_object} -- activating for sitenum {l_sitenum}"
                     )
                     try:
                         is_successful = aggregator_object._activate(
-                            aggregator_argument, sitenum
+                            aggregator_argument, l_sitenum
                         )
                     except Exception as e:
                         print_err(f"error activating {key}: {e}")
