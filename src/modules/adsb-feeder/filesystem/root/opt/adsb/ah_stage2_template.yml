@@ -1,5 +1,5 @@
 services:
-  adsbhub:
+  adsbhub_STAGE2NUM:
     image: ${AH_CONTAINER}
     tty: true
     container_name: adsbhub_STAGE2NUM

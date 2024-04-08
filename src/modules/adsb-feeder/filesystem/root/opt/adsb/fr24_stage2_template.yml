@@ -1,5 +1,5 @@
 services:
-  fr24feed:
+  fr24feed_STAGE2NUM:
     image: ${FR24_CONTAINER}
     tty: true
     container_name: fr24feed_STAGE2NUM

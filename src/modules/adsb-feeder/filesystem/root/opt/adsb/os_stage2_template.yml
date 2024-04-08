@@ -1,5 +1,5 @@
 services:
-  opensky:
+  opensky_STAGE2NUM:
     image: ${OS_CONTAINER}
     tty: true
     container_name: opensky_STAGE2NUM

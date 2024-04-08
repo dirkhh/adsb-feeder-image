@@ -1,5 +1,5 @@
 services:
-  1090uk:
+  1090uk_STAGE2NUM:
     image: ${TNUK_CONTAINER}
     tty: true
     container_name: radar1090uk_STAGE2NUM

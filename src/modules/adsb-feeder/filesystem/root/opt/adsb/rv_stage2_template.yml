@@ -1,5 +1,5 @@
 services:
-  radarvirtuel:
+  radarvirtuel_STAGE2NUM:
     image: ${RV_CONTAINER}
     tty: true
     container_name: radarvirtuel_STAGE2NUM

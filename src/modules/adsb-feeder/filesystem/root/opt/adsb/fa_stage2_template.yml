@@ -1,5 +1,5 @@
 services:
-  piaware:
+  piaware_STAGE2NUM:
     image: ${FA_CONTAINER}
     tty: true
     container_name: piaware_STAGE2NUM

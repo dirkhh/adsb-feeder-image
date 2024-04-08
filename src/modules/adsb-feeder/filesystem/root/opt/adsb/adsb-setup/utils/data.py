@@ -599,6 +599,11 @@ class Data:
                 print_err(f"WRITING: {e._name} = {ret[e._name]}")
         # add convenience values
         ret["AF_FALSE_ON_STAGE2"] = "false" if self.is_enabled(["stage2"]) else "true"
+        for i in range(1, 10):
+            ret[f"AF_PIAWAREMAP_PORT_{i}"] = 8081 + i * 1000
+            ret[f"AF_PIAWARESTAT_PORT_{i}"] = 8082 + i * 1000
+            ret[f"AF_FLIGHTRADAR_PORT_{i}"] = 8754 + i * 1000
+            ret[f"AF_PLANEFINDER_PORT_{i}"] = 30053 + i * 1000
         return ret
 
     @property

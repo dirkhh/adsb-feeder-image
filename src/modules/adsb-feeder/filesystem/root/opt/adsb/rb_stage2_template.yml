@@ -7,7 +7,7 @@ volumes:
       o: bind
 
 services:
-  rbfeeder:
+  rbfeeder_STAGE2NUM:
     image: ${RB_CONTAINER}
     tty: true
     container_name: rbfeeder_STAGE2NUM

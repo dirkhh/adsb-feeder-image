@@ -1,5 +1,5 @@
 services:
-  pfclient:
+  pfclient_STAGE2NUM:
     image: ${PF_CONTAINER}
     tty: true
     container_name: pfclient_STAGE2NUM

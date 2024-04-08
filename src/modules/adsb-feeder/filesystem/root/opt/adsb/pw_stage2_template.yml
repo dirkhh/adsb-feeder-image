@@ -1,5 +1,5 @@
 services:
-  planewatch:
+  planewatch_STAGE2NUM:
     image: ${PW_CONTAINER}
     tty: true
     container_name: planewatch_STAGE2NUM
