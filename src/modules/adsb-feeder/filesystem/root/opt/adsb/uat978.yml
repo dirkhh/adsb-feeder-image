@@ -25,6 +25,7 @@ services:
       - /opt/adsb/config/dump978/globe_history:/var/globe_history
     ports:
       - ${AF_UAT978_PORT:-9780}:80
+      - 30978:30978
     tmpfs:
       - /run:exec,size=64M
       - /run/stats:size=32M
