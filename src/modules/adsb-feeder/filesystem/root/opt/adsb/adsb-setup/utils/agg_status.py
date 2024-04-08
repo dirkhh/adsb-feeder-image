@@ -239,7 +239,7 @@ class AggStatus:
                         self._mlat = T.Yes if mlat_online else T.No
                         self._last_check = datetime.now()
         elif self._agg == "1090uk":
-            key = self._d.env_by_tags(["1090uk", "key"]).value
+            key = self._d.env_by_tags(["1090uk", "key"]).list_get(self._idx)
             json_url = f"https://www.1090mhz.uk/mystatus.php?key={key}"
             tn_dict, status = self.get_json(json_url)
             if tn_dict and status == 200:
