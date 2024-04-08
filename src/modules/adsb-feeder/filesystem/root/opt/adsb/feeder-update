@@ -109,7 +109,7 @@ else
         TARGET=$(git tag --merged origin/beta --sort=version:refname|grep '^v[0-9]'|grep beta|tail -1)
     elif [[ "$TARGET" == "stable" ]] ; then
         # for the stable channel, grab the last non-beta tag
-        TARGET=$(git tag --merged origin/stable --sort=version:refname|grep '^v[0-9]'|grep -v beta|tail -1)
+        TARGET=$(git tag --merged origin/stable --sort=version:refname|grep '^v[0-9]'|grep -vE 'alpha|beta'|tail -1)
     fi
     git reset --hard "$TARGET"
     echo "restarting with feeder-update from $TARGET"
