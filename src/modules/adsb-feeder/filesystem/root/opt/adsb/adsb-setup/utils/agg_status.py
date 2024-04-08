@@ -121,14 +121,36 @@ class AggStatus:
                 print_err(f"flyitaly returned {status}")
         elif self._agg == "adsbfi":
             # get the data from json
-            json_url = "https://api.adsb.fi/v1/myip"
-            adsbfi_dict, status = self.get_json(json_url)
+            # get beast from https://api.adsb.fi/v1/feeder?id=uuid
+            # and get mlat from myip with name match
+            uuid = self._d.env_by_tags("ultrafeeder_uuid").list_get(self._idx)
+            name = self._d.env_by_tags("site_name").list_get(self._idx)
+            json_uuid_url = f"https://api.adsb.fi/v1/feeder?id={uuid}"
+            # we are having an easier time finding mlat data via the myip api
+            # as apparently mlathub doesn't always send the right uuid
+            json_ip_url = "https://api.adsb.fi/v1/myip"
+            adsbfi_dict, status = self.get_json(json_ip_url)
             if adsbfi_dict and status == 200:
-                self._beast = T.No if adsbfi_dict.get("beast") == [] else T.Yes
-                self._mlat = T.No if adsbfi_dict.get("mlat") == [] else T.Yes
+                mlat_array = adsbfi_dict.get("mlat", [])
+                self._mlat = (
+                    T.Yes
+                    if any(m.get("user", "") == name for m in mlat_array)
+                    else T.No
+                )
                 self._last_check = datetime.now()
             else:
-                print_err(f"adsbfi returned {status}")
+                print_err(f"adsbfi v1/myip returned {status}")
+            adsbfi_dict, status = self.get_json(json_uuid_url)
+            if adsbfi_dict and status == 200:
+                self._beast = (
+                    T.Yes
+                    if len(adsbfi_dict.get("beast", [])) > 0
+                    and adsbfi_dict.get("beast")[0].get("receiverId") == uuid
+                    else T.No
+                )
+                self._last_check = datetime.now()
+            else:
+                print_err(f"adsbfi v1/feeder returned {status}")
         elif self._agg == "radarplane":
             json_url = "https://radarplane.com/api/v1/feed/check"
             radarplane_dict, status = self.get_json(json_url)
