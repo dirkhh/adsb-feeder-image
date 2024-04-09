@@ -120,7 +120,19 @@
         <div id="mf_step1" class="col-12">
           <button type="button" class="btn btn-primary" onclick="check_micro_feeder();">Check micro feeder</button>
         </div>
-        <div class="col-3 font-weight-bold text-danger" id="add_micro_feeder_name"></div>
+        <div class="col-3 mt-2">
+          <div class="row">
+            <div class="col-12 font-weight-bold text-danger mb-5 ms-2" id="add_micro_feeder_name"></div>
+          </div>
+          <div class="row small align-items-center">
+            <div class="col-1">
+              <input type="checkbox" class="form-check-input" name="micro_uat" id="micro_uat" />
+            </div>
+            <div class="col-10">
+              <label for="micro_uat">check this box to also receive UAT data on port 30978</label>
+            </div>
+          </div>
+        </div>
         <div id="mf_step2" class="d-none col-9">
           <div class="row gy-2">
             <div class="col-3">
@@ -130,16 +142,20 @@
             <div id="mf_step2_import" class="col-3 d-none">
               <button type="submit" name="import_micro" value="go" class="btn btn-primary">Import Settings</button>
             </div>
-            <div id="mf_step2_import_text" class="col-9 d-none">Import settings for data sharing and some other options
+            <div id="mf_step2_import_text" class="col-9 d-none">Import settings for data sharing and some other
+              options
               from
               the micro feeder.</div>
             <div id="mf_step2_full" class="col-3 d-none">
               <button type="submit" name="import_micro_full" value="go" class="btn btn-primary">Full Import</button>
             </div>
-            <div id="mf_step2_full_text" class="col-9 d-none">Import settings for data sharing and some other options as
+            <div id="mf_step2_full_text" class="col-9 d-none">Import settings for data sharing and some other options
+              as
               well as historical data and graphs from the micro feeder. Depending on connection speed and amount of
-              historical data, this can take a significant amount of time during which this web UI will be unresponsive.
-              Also, note that this will fail if you switch from 32 to 64bit architecture, i.e., you cannot use this when
+              historical data, this can take a significant amount of time during which this web UI will be
+              unresponsive.
+              Also, note that this will fail if you switch from 32 to 64bit architecture, i.e., you cannot use this
+              when
               the microfeeder is arm32 but your stage 2 is arm64 or AMD64.</div>
           </div>
         </div>

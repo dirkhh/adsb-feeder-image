@@ -1007,7 +1007,9 @@ class AdsbIm:
         )
         print_err(f"done importing graphs and history from {ip}")
 
-    def setup_new_micro_site(self, ip, is_adsbim, do_import=False, do_restore=False):
+    def setup_new_micro_site(
+        self, ip, uat, is_adsbim, do_import=False, do_restore=False
+    ):
         if ip in self._d.env_by_tags("mf_ip").value:
             print_err(f"IP address {ip} already listed as a micro site")
             return False
@@ -1029,6 +1031,7 @@ class AdsbIm:
             self._d.env_by_tags("alt").list_set(n, "")
             self._d.env_by_tags("tz").list_set(n, "UTC")
             self._d.env_by_tags("mf_version").list_set(n, "not an adsb.im feeder")
+            self._d.env_by_tags(["uat", "is_enabled"]).list_set(n, uat)
             return True
 
         # now let's see if we can get the data from the micro feeder
@@ -1045,6 +1048,8 @@ class AdsbIm:
             # oh well, remove the IP address
             self._d.env_by_tags("mf_ip").list_remove()
             return False
+
+        self._d.env_by_tags(["uat", "is_enabled"]).list_set(n + 1, uat)
         return True
 
     def remove_micro_site(self, num):
@@ -1054,9 +1059,13 @@ class AdsbIm:
             tags = t.split("--")
             e = self._d.env_by_tags(tags)
             if e:
+                print_err(
+                    f"shifting {e.name} down and deleting last element {e._value}"
+                )
                 for i in range(num, self._d.env_by_tags("num_micro_sites").value):
                     e.list_set(i, e.list_get(i + 1))
-                e.list_remove()
+                if len(e._value) > self._d.env_by_tags("num_micro_sites").value:
+                    e.list_remove()
             else:
                 print_err(f"couldn't find env for {tags}")
         self._d.env_by_tags("num_micro_sites").value -= 1
@@ -1130,12 +1139,14 @@ class AdsbIm:
                 ):
                     # user has clicked Add micro feeder on Stage 2 page
                     # grab the IP that we know the user has provided
-                    ip = form.get(f"add_micro_feeder_ip")
+                    ip = form.get("add_micro_feeder_ip")
+                    uat = form.get("micro_uat")
                     is_adsbim = key != "add_other"
                     do_import = key.startswith("import_micro")
                     do_restore = key == "import_micro_full"
                     if self.setup_new_micro_site(
                         ip,
+                        uat=is_true(uat),
                         is_adsbim=is_adsbim,
                         do_import=do_import,
                         do_restore=do_restore,
@@ -1406,14 +1417,14 @@ class AdsbIm:
         if not env978.value and auto_assignment[978]:
             env978.value = auto_assignment[978]
         if env978.value:
-            self._d.env_by_tags(["uat978", "is_enabled"]).value = True
+            self._d.env_by_tags(["uat978", "is_enabled"]).list_set(sitenum, True)
             self._d.env_by_tags("978url").list_set(
                 sitenum, "http://dump978/skyaware978"
             )
             self._d.env_by_tags("978host").list_set(sitenum, "dump978")
             self._d.env_by_tags("978piaware").list_set(sitenum, "relay")
         else:
-            self._d.env_by_tags(["uat978", "is_enabled"]).value = False
+            self._d.env_by_tags(["uat978", "is_enabled"]).list_set(sitenum, False)
             self._d.env_by_tags("978url").list_set(sitenum, "")
             self._d.env_by_tags("978host").list_set(sitenum, "")
             self._d.env_by_tags("978piaware").list_set(sitenum, "")
@@ -1453,7 +1464,7 @@ class AdsbIm:
                 f"SDRplay container is {self._d.is_enabled(['sdrplay', 'is_enabled'])}"
             )
             print_err(
-                f"dump978 container {self._d.is_enabled(['uat978', 'is_enabled'])}"
+                f"dump978 container {self._d.list_is_enabled(['uat978', 'is_enabled'], sitenum)}"
             )
 
         # set all of the ultrafeeder config data up

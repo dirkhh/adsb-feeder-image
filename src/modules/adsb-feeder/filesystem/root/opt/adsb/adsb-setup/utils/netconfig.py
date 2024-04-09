@@ -90,7 +90,7 @@ class UltrafeederConfig:
             ret.add(netconfig.generate(mlat_privacy=mlat_privacy, uuid=uuid))
         ret.discard("")
         # now we need to add the internal inbound links (if needed)
-        if self._d.is_enabled("uat978"):
+        if self._d.list_is_enabled("uat978", self._micro):
             ret.add("adsb,dump978,30978,uat_in")
 
         remote_sdr = self._d.env_by_tags("remote_sdr").value
