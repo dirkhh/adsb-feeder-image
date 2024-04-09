@@ -587,7 +587,7 @@ class Data:
 
         def adjust_bool(e, value):
             v = adjust_bool_impl(e, value)
-            print_err(f"adjust_bool({e}, {e.tags}) = {v}")
+            print_err(f"adjust_bool({e}, {e.tags}) = {v}", level=2)
             return v
 
         ret = {}
@@ -601,12 +601,15 @@ class Data:
                         if type(value) == bool or "is_enabled" in e.tags
                         else value
                     )
-                    print_err(f"WRITING: {e._name}{suffix} = {ret[e._name + suffix]}")
+                    print_err(
+                        f"ENV_FILE LIST: {e._name}{suffix} = {ret[e._name + suffix]}",
+                        level=2,
+                    )
             else:
                 ret[e.name] = (
                     adjust_bool(e, e._value) if type(e._value) == bool else e._value
                 )
-                print_err(f"WRITING: {e._name} = {ret[e._name]}")
+                print_err(f"ENV_FILE OTHR: {e._name} = {ret[e._name]}", level=2)
         # add convenience values
         # fmt: off
         ret["AF_FALSE_ON_STAGE2"] = "false" if self.is_enabled(["stage2"]) else "true"
@@ -680,5 +683,5 @@ class Data:
             tags = [tags]
         e = self._get_enabled_env_by_tags(tags)
         ret = is_true(e.list_get(idx)) if e else False
-        print_err(f"list_is_enabled: {e}[{idx}] = {ret}")
+        print_err(f"list_is_enabled: {e}[{idx}] = {ret}", level=4)
         return ret
