@@ -43,7 +43,7 @@ waiting_placeholder() {
     if kill -0 $PID ; then
         # ok, the background process started
         mkdir -p /opt/adsb-feeder-update
-        echo $! > /opt/adsb-feeder-update/waiting-pid
+        echo $PID > /opt/adsb-feeder-update/waiting-pid
     else
         echo "Starting the waiting-app failed"
     fi
