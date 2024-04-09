@@ -163,7 +163,7 @@ class Env:
         stack_info(
             f"{self._name} only has {len(self._value)} values and no default, asking for {idx}"
         )
-        return None
+        return ""
 
     def list_remove(self, idx=-1):
         idx = int(idx)

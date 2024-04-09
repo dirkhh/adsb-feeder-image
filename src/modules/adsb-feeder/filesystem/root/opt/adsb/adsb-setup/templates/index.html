@@ -114,7 +114,8 @@
               {% endfor %}
               {% for idx in ns.site_indices %}
               <td class="text-center">
-                {% if status != "" and list_is_enabled(agg, idx) %}<a href="{{ status }}">&#x1f517;</a>{% endif %}
+                {% if status[idx] != "" and list_is_enabled(agg, idx) %}<a
+                   href="{{ status[idx] }}">&#x1f517;</a>{% endif %}
               </td>
               {% endfor %}
             </tr>

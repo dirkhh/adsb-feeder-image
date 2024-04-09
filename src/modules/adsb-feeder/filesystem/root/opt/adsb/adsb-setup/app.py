@@ -1,3 +1,4 @@
+import copy
 import filecmp
 import io
 import json
@@ -143,26 +144,26 @@ class AdsbIm:
         # fmt: off
         self.all_aggregators = [
             # tag, name, map link, status link
-            ["adsblol", "adsb.lol", "https://adsb.lol/", "https://api.adsb.lol/0/me"],
-            ["flyitaly", "Fly Italy ADSB", "https://mappa.flyitalyadsb.com/", "https://my.flyitalyadsb.com/am_i_feeding"],
-            ["avdelphi", "AVDelphi", "https://www.avdelphi.com/coverage.html", ""],
-            ["planespotters", "Planespotters", "https://radar.planespotters.net/", "https://www.planespotters.net/feed/status"],
-            ["tat", "TheAirTraffic", "https://globe.theairtraffic.com/", "https://theairtraffic.com/feed/myip/"],
+            ["adsblol", "adsb.lol", "https://adsb.lol/", ["https://api.adsb.lol/0/me"]],
+            ["flyitaly", "Fly Italy ADSB", "https://mappa.flyitalyadsb.com/", ["https://my.flyitalyadsb.com/am_i_feeding"]],
+            ["avdelphi", "AVDelphi", "https://www.avdelphi.com/coverage.html", [""]],
+            ["planespotters", "Planespotters", "https://radar.planespotters.net/", ["https://www.planespotters.net/feed/status"]],
+            ["tat", "TheAirTraffic", "https://globe.theairtraffic.com/", ["https://theairtraffic.com/feed/myip/"]],
             # on "pause" for a while... ["flyovr", "FLYOVR.io", "https://globe.flyovr.io/", ""],
-            ["radarplane", "RadarPlane", "https://radarplane.com/", "https://radarplane.com/feed"],
-            ["adsbfi", "adsb.fi", "https://globe.adsb.fi/", "https://api.adsb.fi/v1/myip"],
-            ["adsbx", "ADSBExchange", "https://globe.adsbexchange.com/", "https://www.adsbexchange.com/myip/"],
-            ["hpradar", "HPRadar", "https://skylink.hpradar.com/", ""],
-            ["alive", "airplanes.live", "https://globe.airplanes.live/", "https://airplanes.live/myfeed/"],
-            ["flightradar", "flightradar24", "https://www.flightradar24.com/", "/fr24-monitor.json"],
-            ["planewatch", "Plane.watch", "https:/plane.watch/desktop.html", ""],
-            ["flightaware", "FlightAware", "https://www.flightaware.com/live/map", "/fa-status"],
-            ["radarbox", "RadarBox", "https://www.radarbox.com/coverage-map", "https://www.radarbox.com/stations/<FEEDER_RADARBOX_SN>"],
-            ["planefinder", "PlaneFinder", "https://planefinder.net/", "/planefinder-stat"],
-            ["adsbhub", "ADSBHub", "https://www.adsbhub.org/coverage.php", ""],
-            ["opensky", "OpenSky", "https://opensky-network.org/network/explorer", "https://opensky-network.org/receiver-profile?s=<FEEDER_OPENSKY_SERIAL>"],
-            ["radarvirtuel", "RadarVirtuel", "https://www.radarvirtuel.com/", ""],
-            ["1090uk", "1090MHz UK", "https://1090mhz.uk", "https://www.1090mhz.uk/mystatus.php?key=<FEEDER_1090UK_API_KEY>"],
+            ["radarplane", "RadarPlane", "https://radarplane.com/", ["https://radarplane.com/feed"]],
+            ["adsbfi", "adsb.fi", "https://globe.adsb.fi/", ["https://api.adsb.fi/v1/myip"]],
+            ["adsbx", "ADSBExchange", "https://globe.adsbexchange.com/", ["https://www.adsbexchange.com/myip/"]],
+            ["hpradar", "HPRadar", "https://skylink.hpradar.com/", [""]],
+            ["alive", "airplanes.live", "https://globe.airplanes.live/", ["https://airplanes.live/myfeed/"]],
+            ["flightradar", "flightradar24", "https://www.flightradar24.com/", ["/fr24-monitor.jsonSTG2IDX"]],
+            ["planewatch", "Plane.watch", "https:/plane.watch/desktop.html", [""]],
+            ["flightaware", "FlightAware", "https://www.flightaware.com/live/map", ["/fa-statusSTG2IDX"]],
+            ["radarbox", "RadarBox", "https://www.radarbox.com/coverage-map", ["https://www.radarbox.com/stations/<FEEDER_RADARBOX_SN>"]],
+            ["planefinder", "PlaneFinder", "https://planefinder.net/", ["/planefinder-statSTG2IDX"]],
+            ["adsbhub", "ADSBHub", "https://www.adsbhub.org/coverage.php", [""]],
+            ["opensky", "OpenSky", "https://opensky-network.org/network/explorer", ["https://opensky-network.org/receiver-profile?s=<FEEDER_OPENSKY_SERIAL>"]],
+            ["radarvirtuel", "RadarVirtuel", "https://www.radarvirtuel.com/", [""]],
+            ["1090uk", "1090MHz UK", "https://1090mhz.uk", ["https://www.1090mhz.uk/mystatus.php?key=<FEEDER_1090UK_API_KEY>"]],
         ]
         self.microfeeder_setting_tags = (
             "site_name", "lat", "lng", "alt", "tz", "mf_version",
@@ -1738,20 +1739,28 @@ class AdsbIm:
             self.rpw = "".join(secrets.choice(alphabet) for i in range(12))
             self.set_rpw()
             os.remove("/opt/adsb/adsb.im.passwd.and.keys")
-        aggregators = self.all_aggregators
+        aggregators = copy.deepcopy(self.all_aggregators)
+        url_start = request.host_url.rstrip("/ ")
         for idx in range(len(aggregators)):
-            if aggregators[idx][3]:
-                if aggregators[idx][3][0] == "/":
-                    aggregators[idx][3] = (
-                        request.host_url.rstrip("/ ") + aggregators[idx][3]
+            status_link_list = aggregators[idx][3]
+            template_link = status_link_list[0]
+            final_link = template_link
+            for i in range(self._d.env_by_tags("num_micro_sites").value + 1):
+                if template_link.startswith("/"):
+                    final_link = url_start + template_link.replace(
+                        "STG2IDX", "" if i == 0 else f"_{i}"
                     )
-                match = re.search("<([^>]*)>", aggregators[idx][3])
-                if match:
-                    # this seems problematic. We need to replace the placeholder text with the correct KEY...
-                    # here we just take key0 and that's pretty much guaranteed to be wrong for the stage2 case
-                    aggregators[idx][3] = aggregators[idx][3].replace(
-                        match.group(0), ""  # self._d.env(match.group(1)).list_get(0)
-                    )
+                else:
+                    match = re.search("<([^>]*)>", template_link)
+                    if match:
+                        final_link = template_link.replace(
+                            match.group(0), self._d.env(match.group(1)).list_get(i)
+                        )
+                if i == 0:
+                    status_link_list[0] = final_link
+                else:
+                    status_link_list.append(final_link)
+        print_err(f"final aggregator structure: {aggregators}")
         return render_template(
             "index.html",
             aggregators=aggregators,
