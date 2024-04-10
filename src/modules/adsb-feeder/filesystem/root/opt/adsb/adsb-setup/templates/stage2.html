@@ -124,7 +124,7 @@
           <div class="row">
             <div class="col-12 font-weight-bold text-danger mb-5 ms-2" id="add_micro_feeder_name"></div>
           </div>
-          <div class="row small align-items-center">
+          <div id="uat_div" class="row small align-items-center d-none">
             <div class="col-1">
               <input type="checkbox" class="form-check-input" name="micro_uat" id="micro_uat" />
             </div>
@@ -278,10 +278,12 @@
             $("#add_micro_feeder_name").text(data['name']);
             $("#mf_step2").removeClass("d-none");
             $("#mf_step1").addClass("d-none");
+            $("#uat_div").removeClass("d-none");
           } else if ('status' in data && data['status'] == "ok") {
             $("#add_micro_feeder_name").text("Unknown (not a recent adsb.im feeder)");
             $("#mf_step3").removeClass("d-none");
             $("#mf_step1").addClass("d-none");
+            $("#uat_div").removeClass("d-none");
           } else {
             $("#add_micro_feeder_name").text("Unable to detect feeder at " + ip);
           }
