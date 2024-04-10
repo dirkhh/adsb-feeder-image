@@ -89,9 +89,16 @@ class UltrafeederConfig:
                 self._d.env_by_tags(uuid_tag).list_set(self._micro, uuid)
             ret.add(netconfig.generate(mlat_privacy=mlat_privacy, uuid=uuid))
         ret.discard("")
-        # now we need to add the internal inbound links (if needed)
+        # now we need to add the inbound links (if needed)
         if self._d.list_is_enabled("uat978", self._micro):
-            ret.add("adsb,dump978,30978,uat_in")
+            if self._micro == 0:
+                # the dump978 container if this is an integrated feeder
+                ret.add("adsb,dump978,30978,uat_in")
+            else:
+                # or the UAT port on the micro feeder
+                ret.add(
+                    f"adsb,{self._d.env_by_tags('mf_ip').list_get(self._micro)},30978,uat_in"
+                )
 
         remote_sdr = self._d.env_by_tags("remote_sdr").value
         # make sure we only ever use 1 SDR / network input for ultrafeeder

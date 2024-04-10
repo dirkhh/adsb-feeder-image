@@ -1031,7 +1031,14 @@ class AdsbIm:
             self._d.env_by_tags("alt").list_set(n, "")
             self._d.env_by_tags("tz").list_set(n, "UTC")
             self._d.env_by_tags("mf_version").list_set(n, "not an adsb.im feeder")
-            self._d.env_by_tags(["uat", "is_enabled"]).list_set(n, uat)
+            self._d.env_by_tags(["uat978", "is_enabled"]).list_set(n, uat)
+            if uat:
+                # always get UAT from the readsb uat_replay
+                self._d.env_by_tags("replay978").list_set(
+                    n, "--net-uat-replay-port 30978"
+                )
+                self._d.env_by_tags("978host").list_set(n, f"ultrafeeder_{n}")
+                self._d.env_by_tags("978piaware").list_set(n, "relay")
             return True
 
         # now let's see if we can get the data from the micro feeder
@@ -1039,8 +1046,9 @@ class AdsbIm:
             print_err(
                 f"added new micro site {self._d.env_by_tags('site_name').value[n + 1]} at {ip}"
             )
-            self._d.env_by_tags("num_micro_sites").value = n + 1
-            create_stage2_yml_files(n + 1, ip)
+            n += 1
+            self._d.env_by_tags("num_micro_sites").value = n
+            create_stage2_yml_files(n, ip)
             if do_restore:
                 print_err(f"attempting to restore graphs and history from {ip}")
                 self.import_graphs_and_history_from_remote(ip)
@@ -1049,7 +1057,12 @@ class AdsbIm:
             self._d.env_by_tags("mf_ip").list_remove()
             return False
 
-        self._d.env_by_tags(["uat", "is_enabled"]).list_set(n + 1, uat)
+        self._d.env_by_tags(["uat978", "is_enabled"]).list_set(n, uat)
+        if uat:
+            # always get UAT from the readsb uat_replay
+            self._d.env_by_tags("replay978").list_set(n, "--net-uat-replay-port 30978")
+            self._d.env_by_tags("978host").list_set(n, f"ultrafeeder_{n}")
+            self._d.env_by_tags("978piaware").list_set(n, "relay")
         return True
 
     def remove_micro_site(self, num):

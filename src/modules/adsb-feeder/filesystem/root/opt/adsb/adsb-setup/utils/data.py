@@ -183,18 +183,15 @@ class Data:
             tags=["range_outline_dash"],
         ),
         # 978
-        Env(
-            "FEEDER_ENABLE_UAT978", default=[False], tags=["uat978", "is_enabled"]
-        ),  # start the container
-        Env(
-            "FEEDER_URL_978", default=[""], tags=["978url"]
-        ),  # add the URL to the dump978 map
-        Env(
-            "FEEDER_UAT978_HOST", default=[""], tags=["978host"]
-        ),  # hostname ultrafeeder uses to get 978 data
-        Env(
-            "FEEDER_PIAWARE_UAT978", default=[""], tags=["978piaware"]
-        ),  # magic setting for piaware to get 978 data
+        # start the container (integrated / micro) or the replay
+        Env("FEEDER_ENABLE_UAT978", default=[False], tags=["uat978", "is_enabled"]),
+        Env("FEEDER_UAT_REPLAY978", default=[False], tags=["replay978", "is_enabled"]),
+        # hostname ultrafeeder uses to get 978 data
+        Env("FEEDER_UAT978_HOST", default=[""], tags=["978host"]),
+        # add the URL to the dump978 map
+        Env("FEEDER_URL_978", default=[""], tags=["978url"]),
+        # magic setting for piaware to get 978 data
+        Env("FEEDER_PIAWARE_UAT978", default=[""], tags=["978piaware"]),
         # Misc
         Env(
             "_ADSBIM_HEYWHATSTHAT_ENABLED",

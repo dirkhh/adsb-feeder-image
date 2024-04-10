@@ -128,8 +128,8 @@
         <input type="text" id="flightradar--key" name="flightradar--key" class="form-control w-75"
                placeholder="existing flightradar24 ADS-B sharing key or email address"
                value="{{ list_value_by_tags(["flightradar", "key"], m) }}" />
-        <input {% if not is_enabled('uat978') %}style="display: none;" {% endif %} type="text" id="flightradar_uat--key"
-               name="flightradar_uat--key" class="form-control w-75"
+        <input {% if not list_is_enabled('uat978',m) %}style="display: none;" {% endif %} type="text"
+               id="flightradar_uat--key" name="flightradar_uat--key" class="form-control w-75"
                placeholder="existing flightradar24 UAT sharing key or email address"
                value="{{ list_value_by_tags(["flightradar_uat", "key"], m) }}" />
         <button type="submit" class="btn btn-primary mt-1" name="flightradar--submit" value="{{stay}}">Request
