@@ -163,7 +163,8 @@ class AggStatus:
             else:
                 print_err(f"radarplane returned {status}")
         elif self._agg == "flightaware":
-            json_url = f"{self._url}/fa-status.json/"
+            suffix = "" if self._idx == 0 else f"_{self._idx}"
+            json_url = f"{self._url}/fa-status{suffix}/"
             fa_dict, status = self.get_json(json_url)
             if fa_dict and status == 200:
                 # print_err(f"fa status.json returned {fa_dict}")
@@ -183,7 +184,8 @@ class AggStatus:
             else:
                 print_err(f"flightaware returned {status}")
         elif self._agg == "flightradar":
-            json_url = f"{self._url}/fr24-monitor.json"
+            suffix = "" if self._idx == 0 else f"_{self._idx}"
+            json_url = f"{self._url}/fr24-monitor.json{suffix}"
             fr_dict, status = self.get_json(json_url)
             if fr_dict and status == 200:
                 # print_err(f"fr monitor.json returned {fr_dict}")
