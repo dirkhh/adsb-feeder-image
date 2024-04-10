@@ -281,30 +281,83 @@ class AggStatus:
             else:
                 print_err(f"airplanes.james returned {status}")
         elif self._agg == "adsbx":
-            html_url = "https://www.adsbexchange.com/myip/"
-            adsbx_text, status = self.get_plain(html_url)
-            if adsbx_text and status == 200:
-                match = re.search(r"<.*?>([a-zA-Z ]*)<.*?>ADS-B Status", adsbx_text)
-                if match:
-                    self._beast = (
-                        T.Yes if match.group(1).find("Feed Ok") != -1 else T.No
+            # another one where we need to grab an ID from the docker logs
+            if not self._d.env_by_tags("adsbxfeederid").list_get(self._idx):
+                print_err(f"don't have the adsbX Feeder ID for {self._idx}, yet")
+                container_name = (
+                    "ultrafeeder"
+                    if self._idx == "0"
+                    else f"ultrafeeder_stage2_{self._idx}"
+                )
+                try:
+                    result = subprocess.run(
+                        f"docker logs {container_name} | grep 'www.adsbexchange.com/api/feeders' | tail -1",
+                        shell=True,
+                        capture_output=True,
+                        text=True,
                     )
-                else:
-                    print_err("failed to find adsbx Status in response")
+                    output = result.stdout
+                except:
+                    print_err("got exception trying to look at the adsbx logs")
                     return
-                match = re.search(r"<.*?>([a-zA-Z ]*)<.*?>MLAT Status", adsbx_text)
-                if match:
-                    self._mlat = T.Yes if match.group(1).find("Feed Ok") != -1 else T.No
-                self._last_check = datetime.now()
                 match = re.search(
-                    r'placeholder="([^"]+)" aria-label="Feed UID"', adsbx_text
+                    r"www.adsbexchange.com/api/feeders/\?feed=([0-9a-zA-Z]*)",
+                    output,
                 )
                 if match:
-                    self._d.env_by_tags("adsbxfeederid").list_set(
-                        self._idx, match.group(1)
+                    adsbx_id = match.group(1)
+                else:
+                    print_err(
+                        f"ran: docker logs {container_name} | grep 'www.adsbexchange.com/api/feeders' | tail -1"
                     )
+                    print_err(f"failed to find adsbx ID in response {output}")
+                    return
+                self._d.env_by_tags("adsbxfeederid").list_set(self._idx, adsbx_id)
+            # let's get the feeder status from their feed status page
+            feederid = self._d.env_by_tags("adsbxfeederid").list_get(self._idx)
+            html_url = f"https://www.adsbexchange.com/api/feeders/?feed={feederid}"
+            adsbx_text, status = self.get_plain(html_url)
+            if adsbx_text and status == 200:
+                match = re.search(r'"data":([^]]+])', adsbx_text)
+                if match:
+                    self._beast = (
+                        T.No
+                        if match.group(1).endswith(",0]")
+                        or match.group(1).endswith('0",]')
+                        else T.Yes
+                    )
+                else:
+                    print_err(f"failed to find adsbx Status in response {adsbx_text}")
+                    return
             else:
                 print_err(f"adsbx returned {status}")
+                return
+            self._last_check = datetime.now()
+            # now check mlat - which we can't really get easily from their status page
+            # but can get from our docker logs again
+            container_name = (
+                "ultrafeeder" if self._idx == "0" else f"ultrafeeder_stage2_{self._idx}"
+            )
+            try:
+                result = subprocess.run(
+                    f"docker logs --since=20m {container_name} | grep '\[mlat-client]\[feed.adsbexchange.com] Results:'",
+                    shell=True,
+                    capture_output=True,
+                    text=True,
+                )
+            except:
+                print_err(
+                    f"got exception trying to look at the adsbx docker logs from {container_name}"
+                )
+                return
+            match = re.search(
+                r".mlat-client..feed.adsbexchange.com. Results:[^0-9]*([0-9.]*) positions/minute",
+                result.stdout,
+            )
+            if match:
+                self._mlat = T.Yes if match.group(1) != "0.0" else T.No
+                self._last_check = datetime.now()
+
         elif self._agg == "tat":
             # get the data from the status text site
             text_url = "https://theairtraffic.com/iapi/feeder_status"
