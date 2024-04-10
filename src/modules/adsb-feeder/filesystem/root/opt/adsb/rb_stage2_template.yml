@@ -14,7 +14,7 @@ services:
     restart: always
     environment:
       - BEASTHOST=ultrafeeder_STAGE2NUM
-      - UAT_RECEIVER_HOST=${FEEDER_UAT978_HOST_STAGE2NUM}
+      - UAT_RECEIVER_HOST=${FEEDER_UAT978_HOST_STAGE2NUM:-ultrafeeder_STAGE2NUM}
       - LAT=${FEEDER_LAT_STAGE2NUM}
       - LONG=${FEEDER_LONG_STAGE2NUM}
       - ALT=${FEEDER_ALT_M_STAGE2NUM}
