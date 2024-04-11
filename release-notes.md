@@ -1,7 +1,14 @@
 Changes since v1.3 include
 - introduction of a full stage 2 mode that allows separating data collection (the antenna / SDR) and data distribution (feeding the aggregators) between different systems, with one stage 2 instances collecting and sharing data from multiple (micro) feeders
+- the stage 2 code is definitely a lot more 'alpha' than the rest of the code that has received a lot more testing.
 - significant changes to the web UI to support integrated instances (how things used to be), micro feeders, and stage 2 instances
+- beyond that, fairly significant UI overhaul with new menu organization, new, hopefully more intuitive names for the different menu entries, and a new option to upload anonymized logs for easier analysis by the developers
+- removed dependency on most CDN / remote provided content (including Google Font, FontAwesome, and jQuery)
+- changed the default for MLAT privacy to OFF (but made this setting very obvious at the top of the 'Data Sharing' (previously 'Aggregators') page - with a better explanation what it does. 
+- improve the aggregator status detection for a number of aggregators
+- switched to latest Ultrafeeder container with a new readsb version that allows us to replay UAT traffic (this is part of the stage2 setup)
 - (under the hood) significant changes to the storage format for config settings; it should be transparent during an upgrade, but once upgraded, a downgrade is not possible
+
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)
