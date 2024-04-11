@@ -11,6 +11,13 @@ if [ "$(id -u)" != "0" ] ; then
 	exit 1
 fi
 
+start_wait_app() {
+    python3 /opt/adsb/adsb-setup/waiting-app.py "$@"
+}
+kill_wait_app() {
+    pkill -f 'python3 /opt/adsb/adsb-setup/waiting-app.py' || true
+}
+
 # little silly helper functions
 exit_with_message() { echo "$1" ; exit 1 ; }
 cleanup() {
@@ -19,16 +26,14 @@ cleanup() {
     # that way the user might at least be able to look at the logs and figure out
     # what went wrong (or at least ask for help with more information)
     # make sure this doesn't fail if the kill fails for some reason
-    if [ -f /opt/adsb-feeder-update/waiting-pid ] ; then kill "$(</opt/adsb-feeder-update/waiting-pid)" || true ; fi
-    rm -f /opt/adsb-feeder-update/waiting-pid
+    kill_wait_app
     /opt/adsb/docker-compose-start
-    systemctl start adsb-setup.service;
+    systemctl start adsb-setup.service
 }
 
 waiting_placeholder() {
     # make sure the waiting app isn't around anymore
-    if [ -f /opt/adsb-feeder-update/waiting-pid ] ; then kill "$(</opt/adsb-feeder-update/waiting-pid)" || true ; fi
-    rm -f /opt/adsb-feeder-update/waiting-pid
+    kill_wait_app
 
     PORT=$(grep AF_WEBPORT /opt/adsb/config/.env | cut -d= -f2)
     # figure out if something is listening to that port and give it some time to stop running
@@ -42,16 +47,7 @@ waiting_placeholder() {
         fi
     done
     # finally start the waiting-app
-    python3 /opt/adsb/adsb-setup/waiting-app.py "$PORT" &
-    PID="$!"
-    sleep 1
-    if kill -0 $PID ; then
-        # ok, the background process started
-        mkdir -p /opt/adsb-feeder-update
-        echo $PID > /opt/adsb-feeder-update/waiting-pid
-    else
-        echo "Starting the waiting-app failed"
-    fi
+    start_wait_app "$PORT" &
 }
 
 # if this is an update where the previous version of the image used /var/log/adsb-setup.log
@@ -219,8 +215,7 @@ echo "finally, trigger a container upgrade so that they match the new image"
 echo "restart the service"
 trap - EXIT
 systemctl daemon-reload
-if [ -f /opt/adsb-feeder-update/waiting-pid ] ; then kill "$(</opt/adsb-feeder-update/waiting-pid)" || true ; fi
-rm -f /opt/adsb-feeder-update/waiting-pid
+kill_wait_app
 
 systemctl start adsb-setup.service
 systemctl enable adsb-update.service
