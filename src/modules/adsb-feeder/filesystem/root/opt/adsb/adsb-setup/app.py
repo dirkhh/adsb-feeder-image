@@ -1094,6 +1094,25 @@ class AdsbIm:
             This is the one endpoint that handles all the updates coming in from the UI.
             It walks through the form data and figures out what to do about the information provided.
         """
+        # let's try and figure out where we came from:
+        referer = request.headers.get("referer")
+        match = re.match(r"\?m=(\d*)$", referer)
+        if match:
+            sitenum = int(match.group(1))
+            if sitenum >= 0 and sitenum < self._d.env_by_tags("num_micro_sites").value:
+                # this is a request coming from a micro site
+                site = self._d.env_by_tags("site_name").list_get(sitenum)
+            else:
+                print_err(
+                    f"invalid micro site number {sitenum} (num_micro_sites={self._d.env_by_tags('num_micro_sites').value})"
+                )
+                sitenum = 0
+                site = ""
+        else:
+            site = ""
+            sitenum = 0
+            target = "integrated feeder / stage2 main page"
+        print_err(f"handling input from {referer} and site {site}")
         # in the HTML, every input field needs to have a name that is concatenated by "--"
         # and that matches the tags of one Env
         purposes = self._sdrdevices.purposes()
@@ -1101,24 +1120,6 @@ class AdsbIm:
         seen_go = False
         next_url = None
         allow_insecure = not self.check_secure_image()
-        # special handling of per-micro-site aggregators
-        sitenum = 0
-        aggregator_submission = form.get("aggregators")
-        if aggregator_submission and aggregator_submission.startswith("go-"):
-            # this is the indicator that in stage2 mode the user is setting up aggregators
-            # for a specific micro site
-            try:
-                sitenum = int(aggregator_submission[3:])
-                site = self._d.env_by_tags("site_name").list_get(sitenum)
-                if site:
-                    print_err(f"setting up aggregators for micro feeder {site}")
-                else:
-                    sitenum = 0
-            except:
-                print_err(
-                    f"failed to parse aggregator submission {aggregator_submission}"
-                )
-                sitenum = 0
         for key, value in form.items():
             print_err(f"handling {key} -> {value} (allow insecure is {allow_insecure})")
             # this seems like cheating... let's capture all of the submit buttons
