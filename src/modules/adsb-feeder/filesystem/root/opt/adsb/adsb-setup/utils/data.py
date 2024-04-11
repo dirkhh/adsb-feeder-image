@@ -58,7 +58,11 @@ class Data:
         for [endpoint, _env, path] in self._proxy_routes:
             env = "AF_" + _env.upper() + "_PORT"
             ret.append([endpoint, self.env(env).value, path])
-            if endpoint in ["/fr24-monitor.json", "/fa-status/", "/planefinder-stat/"]:
+            if endpoint in [
+                "/fr24-monitor.json",
+                "/fa-status.json/",
+                "/planefinder-stat/",
+            ]:
                 # preparing routes for up to 30 sites
                 for i in range(1, 31):
                     port = int(self.env(env).value) + i * 1000
