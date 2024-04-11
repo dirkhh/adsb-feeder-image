@@ -211,6 +211,7 @@ class AdsbIm:
         self.app.add_url_rule("/", "director", self.director, methods=["GET", "POST"])
         self.app.add_url_rule("/index", "index", self.index)
         self.app.add_url_rule("/info", "info", self.info)
+        self.app.add_url_rule("/support", "support", self.support, methods=["GET", "POST"])
         self.app.add_url_rule("/setup", "setup", self.setup, methods=["GET", "POST"])
         self.app.add_url_rule("/stage2", "stage2", self.stage2, methods=["GET", "POST"])
         self.app.add_url_rule("/update", "update", self.update, methods=["POST"])
@@ -1821,6 +1822,25 @@ class AdsbIm:
         for i in range(self._d.env_by_tags("num_micro_sites").value):
             self.get_base_info(i + 1)  # micro proxies start at 1
         return render_template("stage2.html")
+
+    def support(self):
+        url = ""
+        print_err(f"support request, {request.form}")
+        if request.method == "POST":
+            if request.form.get("upload") == "stay":
+                print_err("trying to upload the logs")
+                try:
+                    result = subprocess.run(
+                        "bash /opt/adsb/log-sanitizer.sh | curl -F 'sprunge=<-' http://sprunge.us",
+                        shell=True,
+                        capture_output=True,
+                    )
+                except:
+                    print_err("failed to upload logs")
+                else:
+                    url = result.stdout.decode("utf-8").strip()
+                    print_err(f"uploaded logs to {url}")
+        return render_template("support.html", url=url)
 
     def info(self):
         board = self._d.env_by_tags("board_name").value

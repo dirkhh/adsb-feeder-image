@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% set active_page = "support" %}
+
+{% block content %}
+<h1 class="mt-3 text-center text-danger">{% block title %} Upload anonymized logs for support {% endblock %}</h1>
+<p>This will create an anonymized log that removes IP addresses, locations, and any aggregator keys and other secrets
+  from your logs and upload them to a website for easier sharing with the developers.</p>
+<p class="{% if url != '' %}d-none{% endif %}">After you click the button, this will display a link that you can share
+  on one of the support forums (and that you can review first to make sure no personal data is included).</p>
+<p class="{% if url == '' %}d-none{% endif %}">The link to the uploaded log is: <a href="{{ url }}">{{ url }}</a>.</p>
+<p class="{% if url == '' %}d-none{% endif %}">Please share this link with the developers who are trying to help you
+  (and who most likely asked you to provide this info in the first place).</p>
+<form method="post" enctype="multipart/form-data">
+  <button type="submit" class="btn btn-primary btn-rounded p-4 mb-3" name="upload" value="stay">Upload Logs</button>
+</form>
+<div class="d-lg-block mt-4">
+  <div class="mb-3">
+    For help and questions, please go to the
+    <a href="https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image">adsb-feeder-image Zulip
+      channel</a> or (if you prefer Discord) the <code>#adsb-feeder-image</code> channel on this <a
+       href="https://discord.gg/7buWAFA28H">Discord server</a>.
+  </div>
+  <div class="mb-3">
+    If you would like to support the development of this project, please consider
+    <a href="https://ko-fi.com/H2H2H3JS5" target="_blank"><img height="1.5em" style="border:0.1em;height:1.3em;"
+           src="https://storage.ko-fi.com/cdn/brandasset/kofi_button_stroke.png" border="0"
+           alt="Help sustain this project at ko-fi.com" /></a>
+  </div>
+</div>
+
+{% endblock %}
