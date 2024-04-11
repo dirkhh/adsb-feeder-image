@@ -224,7 +224,7 @@ class FlightRadar24(Aggregator):
             uat_sharing_key = None
         if not adsb_sharing_key and not uat_sharing_key:
             return False
-        self._idx = idx  # this way the properties work correctly
+        self._idx = make_int(idx)  # this way the properties work correctly
         print_err(
             f"FR_activate adsb |{adsb_sharing_key}| uat |{uat_sharing_key}| idx |{idx}|"
         )
@@ -285,7 +285,7 @@ class FlightAware(Aggregator):
         return None
 
     def _activate(self, user_input: str, idx=0):
-        self._idx = idx
+        self._idx = make_int(idx)
         if re.match("[0-9a-zA-Z]+", user_input):
             # that might be a valid key
             feeder_id = user_input
@@ -343,7 +343,7 @@ class RadarBox(Aggregator):
         return sharing_key_match.group(1)
 
     def _activate(self, user_input: str, idx=0):
-        self._idx = idx
+        self._idx = make_int(idx)
         if re.match("[0-9a-zA-Z]+", user_input):
             # that might be a valid key
             sharing_key = user_input
@@ -388,7 +388,7 @@ class OpenSky(Aggregator):
         return serial_match.group(1)
 
     def _activate(self, user_input: str, idx=0):
-        self._idx = idx
+        self._idx = make_int(idx)
         serial, user = user_input.split("::")
         print_err(f"passed in {user_input} seeing user |{user}| and serial |{serial}|")
         if not user:

@@ -4,16 +4,16 @@ import subprocess
 import requests
 from datetime import datetime, timedelta
 from enum import Enum
-from .util import generic_get_json, print_err
+from .util import generic_get_json, print_err, make_int
 from .data import Data
 
 T = Enum("T", ["Yes", "No", "Unknown"])
 
 
 class AggStatus:
-    def __init__(self, agg: str, idx: str, data: Data, url: str):
+    def __init__(self, agg: str, idx, data: Data, url: str):
         self._agg = agg
-        self._idx = idx
+        self._idx = make_int(idx)
         self._last_check = datetime.fromtimestamp(0.0)
         self._beast = T.Unknown
         self._mlat = T.Unknown
@@ -163,7 +163,7 @@ class AggStatus:
             else:
                 print_err(f"radarplane returned {status}")
         elif self._agg == "flightaware":
-            suffix = "" if str(self._idx) == "0" else f"_{self._idx}"
+            suffix = "" if self._idx == 0 else f"_{self._idx}"
             json_url = f"{self._url}/fa-status.json{suffix}/"
             fa_dict, status = self.get_json(json_url)
             if fa_dict and status == 200:
@@ -184,7 +184,7 @@ class AggStatus:
             else:
                 print_err(f"flightaware at {json_url} returned {status}")
         elif self._agg == "flightradar":
-            suffix = "" if str(self._idx) == "0" else f"_{self._idx}"
+            suffix = "" if self._idx == 0 else f"_{self._idx}"
             json_url = f"{self._url}/fr24-monitor.json{suffix}"
             fr_dict, status = self.get_json(json_url)
             if fr_dict and status == 200:
@@ -288,7 +288,7 @@ class AggStatus:
                 print_err(f"don't have the adsbX Feeder ID for {self._idx}, yet")
                 container_name = (
                     "ultrafeeder"
-                    if self._idx == "0"
+                    if self._idx == 0
                     else f"ultrafeeder_stage2_{self._idx}"
                 )
                 try:
@@ -338,7 +338,7 @@ class AggStatus:
             # now check mlat - which we can't really get easily from their status page
             # but can get from our docker logs again
             container_name = (
-                "ultrafeeder" if self._idx == "0" else f"ultrafeeder_stage2_{self._idx}"
+                "ultrafeeder" if self._idx == 0 else f"ultrafeeder_stage2_{self._idx}"
             )
             try:
                 result = subprocess.run(
