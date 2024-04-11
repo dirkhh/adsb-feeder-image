@@ -157,7 +157,7 @@ class AdsbIm:
             ["alive", "airplanes.live", "https://globe.airplanes.live/", ["https://airplanes.live/myfeed/"]],
             ["flightradar", "flightradar24", "https://www.flightradar24.com/", ["/fr24-monitor.jsonSTG2IDX"]],
             ["planewatch", "Plane.watch", "https:/plane.watch/desktop.html", [""]],
-            ["flightaware", "FlightAware", "https://www.flightaware.com/live/map", ["/fa-statusSTG2IDX"]],
+            ["flightaware", "FlightAware", "https://www.flightaware.com/live/map", ["/fa-status.jsonSTG2IDX"]],
             ["radarbox", "RadarBox", "https://www.radarbox.com/coverage-map", ["https://www.radarbox.com/stations/<FEEDER_RADARBOX_SN>"]],
             ["planefinder", "PlaneFinder", "https://planefinder.net/", ["/planefinder-statSTG2IDX"]],
             ["adsbhub", "ADSBHub", "https://www.adsbhub.org/coverage.php", [""]],
@@ -777,7 +777,7 @@ class AdsbIm:
         return response
 
     def agg_status(self, agg, idx=0):
-        #print_err(f'agg_status(agg={agg}, idx={idx})')
+        # print_err(f'agg_status(agg={agg}, idx={idx})')
         if agg == "im":
             im_json, status = ImStatus(self._d).check()
             if status == 200:
