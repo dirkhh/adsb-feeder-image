@@ -3,7 +3,7 @@ import sys
 import subprocess
 
 from .system import System
-from .util import is_email, print_err
+from .util import is_email, make_int, print_err
 
 
 class Aggregator:
