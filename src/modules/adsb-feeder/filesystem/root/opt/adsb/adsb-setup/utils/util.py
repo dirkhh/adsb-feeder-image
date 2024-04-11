@@ -2,7 +2,9 @@ import inspect
 import itertools
 import math
 import os
+import pathlib
 import re
+import secrets
 import requests
 import sys
 import time
@@ -62,12 +64,14 @@ def is_true(value):
         return value.lower() in ["true", "on", "1"]
     return bool(value)
 
+
 def make_int(value):
     try:
         return int(value)
     except:
         stack_info(f"ERROR: make_int({value}) - returning 0")
         return 0
+
 
 def generic_get_json(url: str, data):
     requests.packages.urllib3.util.connection.HAS_IPV6 = False
@@ -97,3 +101,21 @@ def generic_get_json(url: str, data):
     else:
         return json_response, response.status_code
     return None, status
+
+
+def create_fake_RB_info():
+    # instead of trying to figure out if we need this and creating it only in that case,
+    # let's just make sure the fake files are there and move on
+    os.makedirs("/opt/adsb/rb/thermal_zone0", exist_ok=True)
+    cpuinfo = pathlib.Path("/opt/adsb/rb/cpuinfo")
+    if not cpuinfo.exists():
+        with open("/proc/cpuinfo", "r") as ci_in, open(cpuinfo, "w") as ci_out:
+            for line in ci_in:
+                if not line.startswith("Serial"):
+                    ci_out.write(line)
+            random_hex_string = secrets.token_hex(8)
+            ci_out.write(f"Serial\t\t: {random_hex_string}\n")
+    if not pathlib.Path("/opt/adsb/rb/thermal_zone0/temp").exists():
+        with open("/opt/adsb/rb/thermal_zone0/temp", "w") as fake_temp:
+            print("12345\n", file=fake_temp)
+    return not pathlib.Path("/sys/class/thermal/thermal_zone0/temp").exists()

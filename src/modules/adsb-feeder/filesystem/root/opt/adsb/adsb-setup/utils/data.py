@@ -234,12 +234,6 @@ class Data:
             tags=["radarbox", "sn"],
         ),
         Env(
-            "FEEDER_RB_CPUINFO_HACK",
-            is_mandatory=False,
-            default="",
-            tags=["rbcpuhack"],
-        ),
-        Env(
             "FEEDER_RB_THERMAL_HACK",
             is_mandatory=False,
             default="",

@@ -28,4 +28,4 @@ services:
       - /var/log
     volumes:
       - radarbox_segfault_fix:${FEEDER_RB_THERMAL_HACK:-/tmp/rbt}:ro
-      - /opt/adsb/rb/cpuinfo:${FEEDER_RB_CPUINFO_HACK:-/tmp/rbc}:ro
+      - /opt/adsb/rb/cpuinfo:/proc/cpuinfo:ro

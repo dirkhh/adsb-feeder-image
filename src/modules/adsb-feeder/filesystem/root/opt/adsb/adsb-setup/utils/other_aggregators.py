@@ -1,5 +1,4 @@
 import re
-import sys
 import subprocess
 
 from .system import System
@@ -321,15 +320,12 @@ class RadarBox(Aggregator):
             subprocess.run(cmdline, timeout=10.0, shell=True)
         except:
             print_err("rb-hack-setup.sh failed")
-        # the script may have updated the .env file, so pull those two values
-        rbcpuhack = self._d.env_by_tags("rbcpuhack")
-        rbcpuhack._reconcile("", pull=True)
-        rbthermalhack = self._d.env_by_tags("rbthermalhack")
-        rbthermalhack._reconcile("", pull=True)
-        extra_env = f"-v /opt/adsb/rb/cpuinfo:/proc/cpuinfo " if rbcpuhack.value else ""
-        extra_env += (
-            f"-v /opt/adsb/rb:/sys/class/thermal:ro " if rbthermalhack.value else ""
-        )
+
+        # make sure we correctly enable the hacks
+        extra_env = "-v /opt/adsb/rb/cpuinfo:/proc/cpuinfo "
+        if self._d.env_by_tags("rbthermalhack").value != "":
+            extra_env += "-v /opt/adsb/rb:/sys/class/thermal:ro "
+
         cmdline = (
             f"--rm -i --network config_default -e BEASTHOST=ultrafeeder -e LAT={self.lat} "
             f"-e LONG={self.lng} -e ALT={self.alt} {extra_env} {docker_image}"
