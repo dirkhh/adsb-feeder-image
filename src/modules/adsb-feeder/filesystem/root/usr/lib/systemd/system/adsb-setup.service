@@ -8,6 +8,9 @@ WorkingDirectory=/opt/adsb/adsb-setup
 ExecStartPre=/usr/bin/bash /opt/adsb/finish-update.sh
 ExecStart=/usr/bin/python3 /opt/adsb/adsb-setup/app.py
 Restart=always
+RestartSec=5
+StartLimitInterval=1
+StartLimitBurst=100
 StandardOutput=append:/opt/adsb/adsb-setup.log
 StandardError=append:/opt/adsb/adsb-setup.log
 
