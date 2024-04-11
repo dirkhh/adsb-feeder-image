@@ -991,6 +991,14 @@ class AdsbIm:
 
     def import_graphs_and_history_from_remote(self, ip):
         print_err(f"importing graphs and history from {ip}")
+        # first make sure that there isn't any old data that needs to be moved
+        # out of the way
+        if pathlib.Path(self._d.config_path / "ultrafeeder" / ip).exists():
+            now = datetime.now().replace(microsecond=0).isoformat().replace(":", "-")
+            shutil.move(
+                self._d.config_path / "ultrafeeder" / ip,
+                self._d.config_path / "ultrafeeder" / f"{ip}-{now}",
+            )
         url = f"http://{ip}/backupexecutefull"
         with requests.get(url, stream=True) as response, zipfile.ZipFile(
             io.BytesIO(response.content)
