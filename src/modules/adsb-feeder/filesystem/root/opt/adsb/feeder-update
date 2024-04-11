@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#all errors will show a line number and the command used to produce the error
+# shellcheck disable=SC2148,SC2164
+SCRIPT_PATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd)/$(basename "$0")"
+trap 'echo -e "[ERROR] $SCRIPT_PATH in line $LINENO when executing: $BASH_COMMAND"' ERR
+
 # this needs to run as root
 if [ "$(id -u)" != "0" ] ; then
 	echo "this command requires superuser privileges - please run as sudo bash $0"
@@ -96,22 +101,24 @@ else
     fi
     [ -z "$BRANCH" ] && BRANCH="$TARGET"
     mkdir -p /opt/adsb-feeder-update
-    cd /opt/adsb-feeder-update || exit_with_message "can't cd /opt/adsb-feeder-update"
-    [ -d adsb-feeder-image ] || git clone https://github.com/dirkhh/adsb-feeder-image || exit_with_message "git clone failed, giving up"
-    cd adsb-feeder-image || exit_with_message "can't cd /opt/adsb-feeder-update/adsb-feeder-image"
-    # we're in the checked out directory - make sure it's the latest
+    # make sure the git dir is up to date
     # don't hide the output as that could be useful in the logs
-    git fetch || exit_with_message "git fetch in /opt/adsb-feeder-update/adsb-feeder-image failed"
+    if ! cd /opt/adsb-feeder-update/adsb-feeder-image || ! git fetch; then
+        cd /opt/adsb-feeder-update || exit_with_message "can't cd /opt/adsb-feeder-update"
+        rm -rf /opt/adsb-feeder-update/adsb-feeder-image
+        git clone https://github.com/dirkhh/adsb-feeder-image || exit_with_message "git clone failed, giving up"
+        cd adsb-feeder-image || exit_with_message "can't cd /opt/adsb-feeder-update/adsb-feeder-image"
+    fi
     # 'stable' and 'beta' are special, they refer to tags.
     # everything else is interpreted as a branch or a hash
     if [[ "$TARGET" == "beta" ]] ; then
         # for the beta channel, grab the last beta tag
-        TARGET=$(git tag --merged origin/beta --sort=version:refname|grep '^v[0-9]'|grep beta|tail -1)
+        TARGET=$(git tag --merged origin/beta --sort=version:refname|grep '^v[0-9]'|grep beta|tail -1) || exit_with_message "error finding tag, giving up"
     elif [[ "$TARGET" == "stable" ]] ; then
         # for the stable channel, grab the last non-beta tag
-        TARGET=$(git tag --merged origin/stable --sort=version:refname|grep '^v[0-9]'|grep -vE 'alpha|beta'|tail -1)
+        TARGET=$(git tag --merged origin/stable --sort=version:refname|grep '^v[0-9]'|grep -vE 'alpha|beta'|tail -1) || exit_with_message "error finding tag, giving up"
     fi
-    git reset --hard "$TARGET"
+    git reset --hard "$TARGET" || exit_with_message "git reset --hard $TARGET failed, giving up"
     echo "restarting with feeder-update from $TARGET"
     if [ ! -f src/modules/adsb-feeder/filesystem/root/opt/adsb/feeder-update ] ; then
         echo "can't find the feeder-update app in the git tree, using existing one"
@@ -204,7 +211,7 @@ sed -i "s/\"_ADSBIM_BASE_VERSION\": \"[^\"]*\"/\"_ADSBIM_BASE_VERSION\": \"$SEDV
 # correct arguments to do that
 # this also moves potentially updated yml files into the config folder
 # also updates .env/config.json with new container versions from docker.image.versions
-python3 /opt/adsb/adsb-setup/app.py --update-config
+python3 /opt/adsb/adsb-setup/app.py --update-config || true # this always exits 1 and that's fine
 
 echo "finally, trigger a container upgrade so that they match the new image"
 /opt/adsb/docker-update-adsb-im
