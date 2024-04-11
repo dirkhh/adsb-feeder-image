@@ -101,7 +101,10 @@ class AggStatus:
                     self._mlat = (
                         T.Yes
                         if isinstance(lolmlat, list)
-                        and any(b.get("user", "") == name for b in lolmlat)
+                        and any(
+                            b.get("uuid", "xxxxxxxx-xxxx-")[:14] == uuid[:14]
+                            for b in lolmlat
+                        )
                         else T.No
                     )
                     self._last_check = datetime.now()
