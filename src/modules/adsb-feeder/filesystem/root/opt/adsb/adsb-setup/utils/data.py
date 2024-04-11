@@ -174,7 +174,7 @@ class Data:
         Env("MLAT_PRIVACY", default=[True], tags=["mlat_privacy", "is_enabled"]),
         Env(
             "FEEDER_TAR1090_USEROUTEAPI",
-            default=True,
+            default=[True],
             tags=["route_api", "is_enabled", "false_is_zero"],
         ),
         Env(  # this has no UI component, but we want to enable the advanced user to modify it in .env
