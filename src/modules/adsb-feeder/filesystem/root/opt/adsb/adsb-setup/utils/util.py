@@ -62,6 +62,12 @@ def is_true(value):
         return value.lower() in ["true", "on", "1"]
     return bool(value)
 
+def make_int(value):
+    try:
+        return int(value)
+    except:
+        stack_info(f"ERROR: make_int({value}) - returning 0")
+        return 0
 
 def generic_get_json(url: str, data):
     requests.packages.urllib3.util.connection.HAS_IPV6 = False

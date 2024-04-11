@@ -3,7 +3,7 @@ from os import path
 import re
 from typing import List, Union
 from utils.config import read_values_from_config_json, write_values_to_config_json
-from utils.util import is_true, print_err, stack_info
+from utils.util import is_true, print_err, stack_info, make_int
 
 
 class Env:
@@ -129,7 +129,7 @@ class Env:
             self._reconcile(value)
 
     def list_set(self, idx, value):
-        idx = int(idx)
+        idx = make_int(idx)
         print_err(f"list_set {self._name}[{idx}] = {value}")
         if type(self._value) != list:
             stack_info(f"{self._name} is not a list, converting")
@@ -150,7 +150,7 @@ class Env:
         print_err(f"after reconcile {self._name} = {self._value}")
 
     def list_get(self, idx):
-        idx = int(idx)
+        idx = make_int(idx)
         if type(self._value) != list:
             stack_info(f"{self._name} is not a list, converting")
             self._value = [self._value]
@@ -166,7 +166,7 @@ class Env:
         return ""
 
     def list_remove(self, idx=-1):
-        idx = int(idx)
+        idx = make_int(idx)
         if type(self._value) != list:
             print_err(f"{self._name} is not a list, giving up")
             return
