@@ -777,6 +777,7 @@ class AdsbIm:
         return response
 
     def agg_status(self, agg, idx=0):
+        #print_err(f'agg_status(agg={agg}, idx={idx})')
         if agg == "im":
             im_json, status = ImStatus(self._d).check()
             if status == 200:

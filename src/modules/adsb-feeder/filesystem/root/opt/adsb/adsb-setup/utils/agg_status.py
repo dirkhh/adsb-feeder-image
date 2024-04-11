@@ -163,8 +163,8 @@ class AggStatus:
             else:
                 print_err(f"radarplane returned {status}")
         elif self._agg == "flightaware":
-            suffix = "" if self._idx == 0 else f"_{self._idx}"
-            json_url = f"{self._url}/fa-status{suffix}/"
+            suffix = "" if str(self._idx) == "0" else f"_{self._idx}"
+            json_url = f"{self._url}/fa-status.json{suffix}/"
             fa_dict, status = self.get_json(json_url)
             if fa_dict and status == 200:
                 # print_err(f"fa status.json returned {fa_dict}")
@@ -182,9 +182,9 @@ class AggStatus:
                 )
                 self._last_check = datetime.now()
             else:
-                print_err(f"flightaware returned {status}")
+                print_err(f"flightaware at {json_url} returned {status}")
         elif self._agg == "flightradar":
-            suffix = "" if self._idx == 0 else f"_{self._idx}"
+            suffix = "" if str(self._idx) == "0" else f"_{self._idx}"
             json_url = f"{self._url}/fr24-monitor.json{suffix}"
             fr_dict, status = self.get_json(json_url)
             if fr_dict and status == 200:
@@ -194,7 +194,7 @@ class AggStatus:
                 )
                 self._last_check = datetime.now()
             else:
-                print_err(f"flightradar returned {status}")
+                print_err(f"flightradar at {json_url} returned {status}")
         elif self._agg == "radarplane":
             uuid = self._d.env_by_tags("ultrafeeder_uuid").list_get(self._idx)
             json_url = f"https://radarplane.com/api/v1/feed/check/{uuid}"
