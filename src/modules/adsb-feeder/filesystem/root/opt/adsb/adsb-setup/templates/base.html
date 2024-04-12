@@ -22,18 +22,17 @@
       </button>
       <div class="collapse navbar-collapse " id="navbarNav">
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-          <!-- Main Map -->
+          <!-- Live Map -->
           <li class="nav-item {% if not is_enabled('base_config') %}d-none{% endif %}"><a class="nav-link"
-               href="/map">Main Map</a></li>
-          <!-- Other Maps/Stats -->
+               href="/map">Live Map</a></li>
+          <!-- Additional Maps -->
           <li class="nav-item dropdown {% if not is_enabled('base_config') %}d-none{% endif %}">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMaps" role="button"
-               data-mdb-toggle="dropdown" aria-expanded="false">Graphs</a>
+               data-mdb-toggle="dropdown" aria-expanded="false">Addtl Maps</a>
             <ul class="dropdown-menu" aria-labelledby="navbarDropdownMaps">
               <li><a class="dropdown-item" href="/map/?heatmap">Heatmap</a></li>
               <li><a class="dropdown-item" href="/map/?pTracks">Tracks</a></li>
               <li><a class="dropdown-item" href="/map/?replay">Replay</a></li>
-              <li><a class="dropdown-item" href="/stats">Stats</a></li>
               {% if is_enabled('stage2') %}
               <!-- awkward double dropdown for the micro proxies -->
               {% for site in env_value_by_tag('site_name') %}
@@ -46,7 +45,6 @@
                   <li><a class="dropdown-item" href="{{ url }}/?heatmap">Heatmap</a></li>
                   <li><a class="dropdown-item" href="{{ url }}/?pTracks">Tracks</a></li>
                   <li><a class="dropdown-item" href="{{ url }}/?replay">Replay</a></li>
-                  <li><a class="dropdown-item" href="{{ url }}/graphs1090/">Stats</a></li>
                 </ul>
               </li>
               {% endif %}
@@ -100,14 +98,21 @@
             </ul>
           </li>
           {% endif %}
-          <!-- logs -->
+          <!-- System -->
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownLogs" role="button"
-               data-mdb-toggle="dropdown" aria-expanded="false">Logs</a>
+               data-mdb-toggle="dropdown" aria-expanded="false">System</a>
             <ul class="dropdown-menu" aria-labelledby="navbarDropdownLogs">
-              <li><a class="dropdown-item" href="/logs/">Dozzle Logs</a></li>
+              <li><a class="dropdown-item" href="/logs/">Logs</a></li>
               <li><a class="dropdown-item" href="/info">Support Info</a></li>
-              <li><a class="dropdown-item" href="/support">Upload Logs</a></li>
+              <li><a class="dropdown-item" href="/support">Share Diagnostics</a></li>
+              <li><a class="dropdown-item" href="/stats">Stats</a></li>
+              {% for site in env_value_by_tag('site_name') %}
+              {% if loop.index0 != 0 %}
+              {% set url = request.host_url.rsplit(":", 1)[0] ~ ":" ~ (loop.index0 + 8090) %}
+              <li><a class="dropdown-item" href="{{ url }}/graphs1090/">{{site}} Stats</a></li>
+              {% endif %}
+              {% endfor %}
             </ul>
           </li>
         </ul>
