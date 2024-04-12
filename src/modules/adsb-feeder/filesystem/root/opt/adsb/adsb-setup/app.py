@@ -241,6 +241,11 @@ class AdsbIm:
                 self._d.env_by_tags("ultrafeeder_uuid").list_set(i, str(uuid4()))
             create_stage2_yml_files(i, self._d.env_by_tags("mf_ip").list_get(i))
 
+        # now all the envs are loaded and reconciled with the data on file - which means we should
+        # actually write out the potentially updated values (e.g. when plain values were converted
+        # to lists)
+        write_values_to_config_json(self._d.envs)
+
     def update_boardname(self):
         board = ""
         if pathlib.Path("/sys/firmware/devicetree/base/model").exists():
