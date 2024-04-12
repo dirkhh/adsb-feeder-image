@@ -1629,6 +1629,9 @@ class AdsbIm:
             others_enabled=others_enabled,
             site=site,
             m=str(m),
+            piastatport=str(
+                m * 1000 + make_int(self._d.env_by_tags("piastatport").value)
+            ),
         )
 
     @check_restart_lock

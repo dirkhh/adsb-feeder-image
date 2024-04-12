@@ -169,7 +169,7 @@
         </label>
         <script>
           var link = document.getElementById('piaware');
-          link.setAttribute('href', window.location.protocol + "//" + window.location.hostname + ":" + {{ env_value_by_tag("piamapport") }});
+          link.setAttribute('href', window.location.protocol + "//" + window.location.hostname + ":" + {{ piastatport }});
         </script>
         <input type="text" id="flighaware--key" name="flightaware--key" class="form-control w-75"
                placeholder="Piaware key" value="{{ list_value_by_tags(["flightaware", "key"], m) }}" />
