@@ -1,4 +1,6 @@
 Changes since v1.3 include
+- more menu tweaks
+- several fixes for stage 2 aggregator handling
 - introduction of a full stage 2 mode that allows separating data collection (the antenna / SDR) and data distribution (feeding the aggregators) between different systems, with one stage 2 instances collecting and sharing data from multiple (micro) feeders
 - the stage 2 code is definitely a lot more 'alpha' than the rest of the code that has received a lot more testing.
 - significant changes to the web UI to support integrated instances (how things used to be), micro feeders, and stage 2 instances
