@@ -31,7 +31,7 @@ from utils.config import (
     write_values_to_config_json,
     write_values_to_env_file,
 )
-from utils.util import create_fake_RB_info
+from utils.util import create_fake_RB_info, make_int, print_err
 
 if not os.path.exists("/opt/adsb/config/config.json"):
     print_err(
@@ -1116,25 +1116,17 @@ class AdsbIm:
             This is the one endpoint that handles all the updates coming in from the UI.
             It walks through the form data and figures out what to do about the information provided.
         """
-        # let's try and figure out where we came from:
+        # let's try and figure out where we came from - for reasons I don't understand
+        # the regexp didn't capture the site number, so let's do this the hard way
         referer = request.headers.get("referer")
-        match = re.match(r"\?m=(\d*)$", referer)
-        if match:
-            sitenum = int(match.group(1))
-            if sitenum >= 0 and sitenum < self._d.env_by_tags("num_micro_sites").value:
-                # this is a request coming from a micro site
-                site = self._d.env_by_tags("site_name").list_get(sitenum)
-            else:
-                print_err(
-                    f"invalid micro site number {sitenum} (num_micro_sites={self._d.env_by_tags('num_micro_sites').value})"
-                )
-                sitenum = 0
-                site = ""
+        arg = make_int(referer[referer.rfind("?m=") + 3 :])
+        if 0 < arg < self._d.env_by_tags("num_micro_sites").value:
+            sitenum = arg
+            site = self._d.env_by_tags("site_name").list_get(sitenum)
         else:
             site = ""
             sitenum = 0
-            target = "integrated feeder / stage2 main page"
-        print_err(f"handling input from {referer} and site {site}")
+        print_err(f"handling input from {referer} and site # {sitenum} / {site}")
         # in the HTML, every input field needs to have a name that is concatenated by "--"
         # and that matches the tags of one Env
         purposes = self._sdrdevices.purposes()
