@@ -4,6 +4,8 @@ services:
     tty: true
     container_name: adsbhub
     restart: always
+    cpu_period: 50000
+    cpu_quota: 7500
     environment:
       - TZ=${FEEDER_TZ}
       - SBSHOST=ultrafeeder

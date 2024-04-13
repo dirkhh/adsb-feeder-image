@@ -4,6 +4,8 @@ services:
     tty: true
     container_name: piaware_STAGE2NUM
     restart: always
+    cpu_period: 50000
+    cpu_quota: 7500
     ports:
       - ${AF_PIAWAREMAP_PORT_STAGE2NUM:-8081}:8080
       - ${AF_PIAWARESTAT_PORT_STAGE2NUM:-8082}:80

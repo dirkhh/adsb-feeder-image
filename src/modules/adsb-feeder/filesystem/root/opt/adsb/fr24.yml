@@ -4,6 +4,8 @@ services:
     tty: true
     container_name: fr24feed
     restart: always
+    cpu_period: 50000
+    cpu_quota: 7500
     # fr24 apparently loops over available fds so this can save CPU
     ulimits:
       nofile: 1024
