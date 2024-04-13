@@ -1803,12 +1803,18 @@ class AdsbIm:
                 else:
                     status_link_list.append(final_link)
         print_err(f"final aggregator structure: {aggregators}")
+        board = self._d.env_by_tags("board_name").value
+        # there are many other boards I should list here - but Pi 3 and Pi Zero are probably the most common
+        stage2_suggestion = board.startswith("Raspberry") and not (
+            board.startswith("Raspberry Pi 4") or board.startswith("Raspberry Pi 5")
+        )
         return render_template(
             "index.html",
             aggregators=aggregators,
             local_address=local_address,
             tailscale_address=tailscale_address,
             zerotier_address=zerotier_address,
+            stage2_suggestion=stage2_suggestion,
         )
 
     @check_restart_lock

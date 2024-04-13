@@ -1,4 +1,6 @@
 Changes since v1.3 include
+- add UI comments about ratio of containers to SBC chosen
+- limit CPU use of all 3rd party containers and FD abuse by FR24 container
 - more menu tweaks
 - several fixes for stage 2 aggregator handling
 - introduction of a full stage 2 mode that allows separating data collection (the antenna / SDR) and data distribution (feeding the aggregators) between different systems, with one stage 2 instances collecting and sharing data from multiple (micro) feeders
