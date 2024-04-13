@@ -5,6 +5,8 @@ services:
     container_name: radarvirtuel
     hostname: radarvirtuel
     restart: always
+    cpu_period: 50000
+    cpu_quota: 7500
     environment:
       - FEEDER_KEY=${FEEDER_RV_FEEDER_KEY}
       - SOURCE_HOST=ultrafeeder:30002

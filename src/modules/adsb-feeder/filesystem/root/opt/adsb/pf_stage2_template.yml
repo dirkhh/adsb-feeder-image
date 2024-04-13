@@ -4,6 +4,8 @@ services:
     tty: true
     container_name: pfclient_STAGE2NUM
     restart: always
+    cpu_period: 50000
+    cpu_quota: 7500
     ports:
       - ${AF_PLANEFINDER_PORT_STAGE2NUM:-30053}:30053
     environment:
