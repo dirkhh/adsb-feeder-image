@@ -46,6 +46,10 @@ def read_values_from_env_file():
         print_err("Failed to read .env file")
     return ret
 
+def escape_env(line):
+    # docker compose does weird stuff if there are $ in the env vars
+    # escape them using $$
+    return line.replace('$', '$$')
 
 def write_values_to_env_file(values):
     # print_err("writing .env file")
@@ -60,10 +64,12 @@ def write_values_to_env_file(values):
                 for i in range(len(value)):
                     suffix = "" if i == 0 else f"_{i}"
                     env_line = f"{key}{suffix}={value[i]}\n"
+                    env_line = escape_env(env_line)
                     f.write(env_line)
                     print_err(f"wrote {env_line.strip()} to .env")
             else:
                 env_line = f"{key}={value.strip() if type(value) == str else value}\n"
+                env_line = escape_env(env_line)
                 f.write(env_line)
                 print_err(f"wrote {env_line.strip()} to .env")
     # write the user env in the form that can be easily inserted into the yml file
