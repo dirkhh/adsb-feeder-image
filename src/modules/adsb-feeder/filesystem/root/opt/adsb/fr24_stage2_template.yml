@@ -4,6 +4,9 @@ services:
     tty: true
     container_name: fr24feed_STAGE2NUM
     restart: always
+    # fr24 apparently loops over available fds so this can save CPU
+    ulimits:
+      nofile: 1024
     ports:
       - ${AF_FLIGHTRADAR_PORT_STAGE2NUM:-8754}:8754
     environment:
