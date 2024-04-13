@@ -258,7 +258,7 @@ jobs:
 
 
     - name: Upload to GitHub as release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       if: ${{ steps.tag.outputs.is_release == 'release' }}
       with:
         token: ${{ secrets.PAT_GITHUB_TOKEN }}
@@ -268,7 +268,7 @@ jobs:
 
 
     - name: Upload to GitHub as beta release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       if: ${{ steps.tag.outputs.is_release == 'beta' }}
       with:
         token: ${{ secrets.PAT_GITHUB_TOKEN }}
@@ -279,7 +279,7 @@ jobs:
 
 
     - name: Upload non-release artifacts
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       if: ${{ steps.tag.outputs.is_release == 'test' }}
       with:
         token: ${{ secrets.PAT_GITHUB_TOKEN }}
