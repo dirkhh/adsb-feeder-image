@@ -1,4 +1,5 @@
 Changes since v1.3 include
+- add Raspbian bullseye based image as potential fix for pi3 mlat issues
 - prune tagged images, not only dangling ones
 - update to latest SDR-E containers
 - fix RBfeeder fake cpu info creation issue

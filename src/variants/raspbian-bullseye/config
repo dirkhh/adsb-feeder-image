@@ -1,0 +1,2 @@
+VARIANT_CONFIG_DIR=$(realpath -s $(dirname $(realpath -s $BASH_SOURCE))/../..)
+BASE_BOOT_MOUNT_PATH="boot"
