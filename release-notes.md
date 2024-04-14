@@ -1,4 +1,5 @@
 Changes since v1.3 include
+- prune tagged images, not only dangling ones
 - update to latest SDR-E containers
 - fix RBfeeder fake cpu info creation issue
 - escape the idiotic adsbhub key (which uses a ridiculous character set - get a grip, people)

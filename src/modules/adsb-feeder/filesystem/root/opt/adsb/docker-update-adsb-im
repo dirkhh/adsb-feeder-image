@@ -18,7 +18,12 @@ bash /opt/adsb/docker-compose-start
 
 # finally remove the images and files we no longer use - but only if this is the image we are running
 # this would be rude to do on a system where we are one of many apps potentially using docker.
-[ -f os.adsb.feeder.image ] && docker system prune -f
+if [ -f os.adsb.feeder.image ]; then
+    # -a is necessary as otherwise only dangling images are removed
+    #  https://docs.docker.com/config/pruning/ says: A dangling image is one that isn't tagged, and isn't referenced by any container.
+    #  pretty much all old images we have are tagged so they wouldn't be removed without -a
+    docker system prune -f -a
+fi
 
 sed -i "s/CONTAINER_VERSION=.*/CONTAINER_VERSION=$TIME/" /opt/adsb/config/.env
 
