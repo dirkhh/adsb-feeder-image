@@ -117,15 +117,10 @@ class UltrafeederConfig:
         ultrafeeder_extra_args = self._d.env_by_tags("ultrafeeder_extra_args").value
         if ultrafeeder_extra_args:
             ret.add(ultrafeeder_extra_args)
-        remote_sdr = self._d.env_by_tags("remote_sdr").value
         if self._micro > 0:
             # this is one of the proxies - so it also should feed the aggregate map
             ret.add("adsb,ultrafeeder,30004,beast_out")
             ret.add("mlathub,ultrafeeder,30004,beast_out")
-        if remote_sdr:
-            if remote_sdr.find(",") == -1:
-                remote_sdr += ",30005"
-            ret.add(f"adsb,{remote_sdr.replace(' ', '')},beast_in")
 
         # generate sorted listed for deterministic env var (avoid unnecessary container recreation by docker compose)
         ret = sorted(ret)
