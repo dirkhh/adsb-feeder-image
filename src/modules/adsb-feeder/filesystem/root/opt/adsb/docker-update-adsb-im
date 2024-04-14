@@ -19,10 +19,23 @@ bash /opt/adsb/docker-compose-start
 # finally remove the images and files we no longer use - but only if this is the image we are running
 # this would be rude to do on a system where we are one of many apps potentially using docker.
 if [ -f os.adsb.feeder.image ]; then
-    # -a is necessary as otherwise only dangling images are removed
-    #  https://docs.docker.com/config/pruning/ says: A dangling image is one that isn't tagged, and isn't referenced by any container.
-    #  pretty much all old images we have are tagged so they wouldn't be removed without -a
-    docker system prune -f -a
+    docker system prune -f
+    # https://docs.docker.com/config/pruning/ says: A dangling image is one that isn't tagged, and isn't referenced by any container.
+    # pretty much all old images we have are tagged so they wouldn't be removed without -a
+    # but -a also removes current images of for example deactived feed containers
+    # thus we manually create a list of images that are neither running nor in docker.image.versions
+    # alert: the following code relies on non quoted bash expansion
+    PRUNE_LIST=$( \
+        docker images -a --format "{{.Repository}}:{{.Tag}}" \
+        | grep -v \
+            $(docker ps -a --format '{{.Image}}' | while read line; do echo -n " -e $line"; done) \
+            $(cut -d= -f2 /opt/adsb/docker.image.versions | while read line; do echo -n " -e $line"; done) \
+    )
+    # then all images on this prune list are deleted
+    echo "PRUNING:"
+    echo "$PRUNE_LIST"
+    docker rmi $PRUNE_LIST # unquoted expansion required
+    echo "PRUNING DONE"
 fi
 
 sed -i "s/CONTAINER_VERSION=.*/CONTAINER_VERSION=$TIME/" /opt/adsb/config/.env
