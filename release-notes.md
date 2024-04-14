@@ -1,4 +1,7 @@
 Changes since v1.3 include
+- update to latest SDR-E containers
+- fix RBfeeder fake cpu info creation issue
+- escape the idiotic adsbhub key (which uses a ridiculous character set - get a grip, people)
 - add UI comments about ratio of containers to SBC chosen
 - limit CPU use of all 3rd party containers and FD abuse by FR24 container
 - more menu tweaks
