@@ -108,6 +108,13 @@ def create_fake_RB_info():
     # let's just make sure the fake files are there and move on
     os.makedirs("/opt/adsb/rb/thermal_zone0", exist_ok=True)
     cpuinfo = pathlib.Path("/opt/adsb/rb/cpuinfo")
+    # when docker tries to mount this file without it existing, it creates a directory
+    # in case that has happened, remove it
+    if cpuinfo.is_dir():
+        try:
+            cpuinfo.rmdir()
+        except:
+            pass
     if not cpuinfo.exists():
         with open("/proc/cpuinfo", "r") as ci_in, open(cpuinfo, "w") as ci_out:
             for line in ci_in:
