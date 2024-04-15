@@ -108,7 +108,7 @@
               <li><a class="dropdown-item" href="/logs/">Logs</a></li>
               <li><a class="dropdown-item" href="/info">Support Info</a></li>
               <li><a class="dropdown-item" href="/support">Share Diagnostics</a></li>
-              <li><a class="dropdown-item" href="/stats">Stats</a></li>
+              <li><a class="dropdown-item" href="/stats">{%if is_enabled('stage2')%}Combined {%endif%}Stats</a></li>
               {% for site in env_value_by_tag('site_name') %}
               {% if loop.index0 != 0 %}
               {% set url = request.host_url.rsplit(":", 1)[0] ~ ":" ~ (loop.index0 + 8090) %}
