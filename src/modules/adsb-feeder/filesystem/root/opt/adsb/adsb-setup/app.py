@@ -1867,22 +1867,20 @@ class AdsbIm:
             if len(self._sdrdevices.sdrs) > 0
             else ["none"]
         )
-        try:
-            cmdline = "df -h | grep -v overlay"
-            result = subprocess.run(
-                cmdline, shell=True, capture_output=True, timeout=2.0
-            )
-        except:
-            result = "failed to run 'df -h | grep -v overlay'"
-        storage = result.stdout.decode("utf-8")
-        try:
-            cmdline = "free -h"
-            result = subprocess.run(
-                cmdline, shell=True, capture_output=True, timeout=2.0
-            )
-        except:
-            result = "failed to run 'free -h'"
-        memory = result.stdout.decode("utf-8")
+
+        def simple_cmd_result(cmd):
+            try:
+                result = subprocess.run(
+                    cmd, shell=True, capture_output=True, timeout=2.0
+                )
+                return result.stdout.decode("utf-8")
+            except:
+                return f"failed to run '{cmd}'"
+
+        storage = simple_cmd_result("df -h | grep -v overlay")
+        kernel = simple_cmd_result("uname -a")
+        memory = simple_cmd_result("free -h")
+
         containers = [
             self._d.env_by_tags(["container", container]).value
             for container in self._d.tag_for_name.values()
@@ -1894,6 +1892,7 @@ class AdsbIm:
             memory=memory,
             storage=storage,
             base=base,
+            kernel=kernel,
             current=current,
             containers=containers,
             sdrs=sdrs,
