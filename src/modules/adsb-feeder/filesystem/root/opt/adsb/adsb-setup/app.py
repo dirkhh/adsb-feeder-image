@@ -835,10 +835,7 @@ class AdsbIm:
         # m=0 indicates we are looking at an integrated/micro feeder or at the stage 2 local aggregator
         # m>0 indicates we are looking at a micro-proxy
         if self._d.is_enabled("stage2"):
-            try:
-                m = int(request.args.get("m"))
-            except:
-                m = 0
+            m = make_int(request.args.get("m"))
             site = self._d.env_by_tags("site_name").list_get(m)
             print_err(
                 "setting up visualization on a stage 2 system for site {site} (m={m})"
@@ -1141,11 +1138,7 @@ class AdsbIm:
                 seen_go = True
             if value == "go" or value.startswith("go-") or value == "wait":
                 if key == "showmap" and value.startswith("go-"):
-                    idx = value[3:]
-                    try:
-                        idx = int(idx)
-                    except:
-                        idx = 0
+                    idx = make_int(value[3:])
                     port = 8090 + idx if idx > 0 else 8080
                     self._next_url_from_director = (
                         f"http://{request.host.split(':')[0]}:{port}/"
@@ -1306,19 +1299,15 @@ class AdsbIm:
                 if key in self._other_aggregators:
                     l_sitenum = 0
                     if value.startswith("stay-"):
-                        try:
-                            l_sitenum = int(value[5:])
-                            l_site = self._d.env_by_tags("site_name").list_get(
-                                l_sitenum
-                            )
-                            if not l_site:
-                                l_sitenum = 0
-                        except:
-                            print_err(f"failed to parse value keyword {value}")
+                        l_sitenum = make_int(value[5:])
+                        l_site = self._d.env_by_tags("site_name").list_get(l_sitenum)
+                        if not l_site:
+                            print_err(f"can't find a site for sitenum {l_sitenum}")
                             l_sitenum = 0
-                        print_err(
-                            f"found other aggregator {key} for site {l_site} sitenum {l_sitenum}"
-                        )
+                        else:
+                            print_err(
+                                f"found other aggregator {key} for site {l_site} sitenum {l_sitenum}"
+                            )
                     is_successful = False
                     base = key.replace("--submit", "")
                     aggregator_argument = form.get(f"{base}--key", None)
