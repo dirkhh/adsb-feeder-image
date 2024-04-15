@@ -54,19 +54,6 @@
               {% endif %}
             </ul>
           </li>
-          <!-- Setup -->
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownSetup" role="button"
-               data-mdb-toggle="dropdown" aria-expanded="false">Setup</a>
-            <ul class="dropdown-menu" aria-labelledby="navbarDropdownSetup">
-              <li><a class="dropdown-item" href="/setup">{% if is_enabled('stage2') %}Stage
-                  2{% else %}Basic{% endif %}</a></li>
-              <li><a class="dropdown-item {% if not is_enabled('base_config') %}d-none{% endif %}"
-                   href="/advanced">SDR</a></li>
-              <li><a class="dropdown-item {% if not is_enabled('base_config') %}d-none{% endif %}"
-                   href="/expert">Expert</a></li>
-            </ul>
-          </li>
           <!-- Map Options -->
           {% if not is_enabled('stage2') %}
           <li class="nav-item"> <a class="nav-link {% if not is_enabled('base_config') %}d-none{% endif %}"
@@ -100,6 +87,19 @@
             </ul>
           </li>
           {% endif %}
+          <!-- Setup -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownSetup" role="button"
+               data-mdb-toggle="dropdown" aria-expanded="false">Setup</a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdownSetup">
+              <li><a class="dropdown-item" href="/setup">{% if is_enabled('stage2') %}Stage
+                  2{% else %}Basic{% endif %}</a></li>
+              <li><a class="dropdown-item {% if not is_enabled('base_config') %}d-none{% endif %}"
+                   href="/advanced">SDR</a></li>
+              <li><a class="dropdown-item {% if not is_enabled('base_config') %}d-none{% endif %}"
+                   href="/expert">Expert</a></li>
+            </ul>
+          </li>
           <!-- System -->
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownLogs" role="button"
