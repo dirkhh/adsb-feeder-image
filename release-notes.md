@@ -1,4 +1,7 @@
 Changes since v1.3 include
+- build bullseye image based on 2023-02-21 Raspbian Lite image (pi3 mlat issues)
+- add usb ids for RSP2, RSPDuo, RSPdx
+- improve backup robustness
 - small UI changes, trying to make things more intuitive
 - add Raspbian bullseye based image as potential fix for pi3 mlat issues
 - prune tagged images, not only dangling ones
