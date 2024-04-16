@@ -517,8 +517,12 @@ class AdsbIm:
                     if include_heatmap:
                         uf_path = pathlib.Path(adsb_path / "ultrafeeder/globe_history")
                         if uf_path.is_dir():
-                            for f in uf_path.rglob("*"):
-                                backup_zip.write(f, arcname=f.relative_to(adsb_path))
+                            for subpath in uf_path.iterdir():
+                                pstring = str(subpath)
+                                if pstring.endswith('internal_state') or pstring.endswith('tar1090-update'):
+                                    continue
+                                for f in subpath.rglob("*"):
+                                    backup_zip.write(f, arcname=f.relative_to(adsb_path))
 
                     # do graphs after heatmap data as this can pause a couple seconds in graphs1090_writeback
                     # due to buffers, the download won't be recognized by the browsers until some data is added to the zipfile
