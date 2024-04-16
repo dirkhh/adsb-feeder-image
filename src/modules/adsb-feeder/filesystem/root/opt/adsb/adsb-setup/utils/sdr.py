@@ -93,6 +93,9 @@ class SDRDevices:
                 "0bda:2832",
                 "1df7:2500",
                 "1df7:3000",
+                "1df7:3010",
+                "1df7:3020",
+                "1df7:3030",
                 "1df7:3050",
             ):
                 address = self._get_address_for_pid_vid(pidvid, line)
