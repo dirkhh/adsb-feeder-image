@@ -15,6 +15,7 @@ import shutil
 import string
 import subprocess
 import threading
+import time
 from uuid import uuid4
 import sys
 import zipfile
@@ -465,11 +466,25 @@ class AdsbIm:
 
     def create_backup_zip(self, include_graphs=False, include_heatmap=False):
         adsb_path = self._d.config_path
-        if include_graphs:
-            rrd_file = adsb_path / "ultrafeeder/graphs1090/rrd/localhost.tar.gz"
+
+        def graphs1090_writeback():
             # the rrd file will be updated via move after collectd is done writing it out
             # so killing collectd and waiting for the mtime to change is enough
-            prev_time = os.stat(rrd_file).st_mtime
+
+            def timeSinceWrite():
+                rrd_file = adsb_path / "ultrafeeder/graphs1090/rrd/localhost.tar.gz"
+                # because of the way the file gets updated, it will briefly not exist
+                # when the new copy is moved in place, which will make os.stat unhappy
+                try:
+                    return time.time() - os.stat(rrd_file).st_mtime
+                except:
+                    return time.time() - 0 # fallback to long time since last write
+
+            if timeSinceWrite() < 120:
+                print_err(f"graphs1090 writeback: not needed, timeSinceWrite: {round(timeSinceWrite())}s")
+                return
+
+            print_err("graphs1090 writeback: requesting")
             try:
                 subprocess.call(
                     "docker exec ultrafeeder pkill collectd", timeout=5.0, shell=True
@@ -481,21 +496,15 @@ class AdsbIm:
                 pass
             else:
                 count = 0
-                while True:
-                    # because of the way the file gets updated, it will briefly not exist
-                    # when the new copy is moved in place, which will make os.stat unhappy;
-                    # either way, we give up after 30 seconds
-                    try:
-                        latest_timestamp = os.stat(rrd_file).st_mtime
-                    except:
-                        sleep(0.5)
-                        continue
-                    if latest_timestamp != prev_time:
+                increment = 0.1
+                # give up after 30 seconds
+                while count < 30:
+                    count += increment
+                    sleep(increment)
+                    if timeSinceWrite() < 120:
+                        print_err("graphs1090 writeback: success")
                         break
-                    sleep(1)
-                    count += 1
-                    if count > 30:
-                        break
+
         fdOut, fdIn = os.pipe()
         pipeOut = os.fdopen(fdOut, "rb")
         pipeIn = os.fdopen(fdIn, "wb")
@@ -504,18 +513,23 @@ class AdsbIm:
             try:
                 with fobj as file, zipfile.ZipFile(file, mode="w") as backup_zip:
                     backup_zip.write(adsb_path / "config.json", arcname="config.json")
+
+                    if include_heatmap:
+                        uf_path = pathlib.Path(adsb_path / "ultrafeeder/globe_history")
+                        if uf_path.is_dir():
+                            for f in uf_path.rglob("*"):
+                                backup_zip.write(f, arcname=f.relative_to(adsb_path))
+
+                    # do graphs after heatmap data as this can pause a couple seconds in graphs1090_writeback
+                    # due to buffers, the download won't be recognized by the browsers until some data is added to the zipfile
                     if include_graphs:
+                        graphs1090_writeback()
                         graphs_path = pathlib.Path(
                             adsb_path / "ultrafeeder/graphs1090/rrd/localhost.tar.gz"
                         )
                         backup_zip.write(
                             graphs_path, arcname=graphs_path.relative_to(adsb_path)
                         )
-                    if include_heatmap:
-                        uf_path = pathlib.Path(adsb_path / "ultrafeeder/globe_history")
-                        if uf_path.is_dir():
-                            for f in uf_path.rglob("*"):
-                                backup_zip.write(f, arcname=f.relative_to(adsb_path))
             except BrokenPipeError:
                 print_err(f"warning: backup download aborted mid-stream")
 
