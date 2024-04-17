@@ -1163,7 +1163,7 @@ class AdsbIm:
             arg = make_int(referer[m_arg + 3 :])
         else:
             arg = 0
-        if 0 < arg < self._d.env_by_tags("num_micro_sites").value:
+        if 0 < arg <= self._d.env_by_tags("num_micro_sites").value:
             sitenum = arg
             site = self._d.env_by_tags("site_name").list_get(sitenum)
         else:
