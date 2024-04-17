@@ -224,9 +224,15 @@
           With this option you can make detailed selections on the Aggregator page.
         </div>
       </div>
+      {% if env_value_by_tag('num_micro_sites') > 0 %}
       <div class="form-group">
         <button type="submit" name="stage2" value="go" class="btn btn-primary">I'm done here</button>
       </div>
+      {% else %}
+      <div class="form-group">
+        <button type="submit" name="turn_off_stage2" value="go" class="btn btn-primary">Turn off Stage 2 Mode</button>
+      </div>
+      {% endif %}
       <p>{{ message }}</p>
     </form>
   </div>

@@ -1225,6 +1225,11 @@ class AdsbIm:
                 if key == "set_stage2_data":
                     # just grab the new data and go back
                     next_url = url_for("stage2")
+                if key == "turn_off_stage2":
+                    # let's just switch back
+                    self._d.env_by_tags("stage2").value = False
+                    self._d.env_by_tags("aggregators_chosen").value = False
+                    self._d.env_by_tags("aggregators").value = ""
                 if key == "aggregators":
                     # user has clicked Submit on Aggregator page
                     self._d.env_by_tags("aggregators_chosen").value = True

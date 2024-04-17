@@ -1,4 +1,5 @@
 Changes since v1.3 include
+- stage2 UI improvements: better explanation of the workflow, plus the ability to turn stage2 mode off again
 - allow importing micro feeders that run and app install of adsb.im
 - only accept known and expect environment settings when importing a micro feeder
 - fix broken range and gain reset options in the UI
