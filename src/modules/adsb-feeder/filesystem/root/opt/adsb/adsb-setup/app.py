@@ -478,10 +478,12 @@ class AdsbIm:
                 try:
                     return time.time() - os.stat(rrd_file).st_mtime
                 except:
-                    return time.time() - 0 # fallback to long time since last write
+                    return time.time() - 0  # fallback to long time since last write
 
             if timeSinceWrite() < 120:
-                print_err(f"graphs1090 writeback: not needed, timeSinceWrite: {round(timeSinceWrite())}s")
+                print_err(
+                    f"graphs1090 writeback: not needed, timeSinceWrite: {round(timeSinceWrite())}s"
+                )
                 return
 
             print_err("graphs1090 writeback: requesting")
@@ -519,10 +521,14 @@ class AdsbIm:
                         if uf_path.is_dir():
                             for subpath in uf_path.iterdir():
                                 pstring = str(subpath)
-                                if pstring.endswith('internal_state') or pstring.endswith('tar1090-update'):
+                                if pstring.endswith(
+                                    "internal_state"
+                                ) or pstring.endswith("tar1090-update"):
                                     continue
                                 for f in subpath.rglob("*"):
-                                    backup_zip.write(f, arcname=f.relative_to(adsb_path))
+                                    backup_zip.write(
+                                        f, arcname=f.relative_to(adsb_path)
+                                    )
 
                     # do graphs after heatmap data as this can pause a couple seconds in graphs1090_writeback
                     # due to buffers, the download won't be recognized by the browsers until some data is added to the zipfile
