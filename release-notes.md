@@ -1,4 +1,5 @@
 Changes since v1.3 include
+- fix broken range and gain reset options in the UI
 - build bullseye image based on 2023-02-21 Raspbian Lite image (pi3 mlat issues)
 - add usb ids for RSP2, RSPDuo, RSPdx
 - improve backup robustness

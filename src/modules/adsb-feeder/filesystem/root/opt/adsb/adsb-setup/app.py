@@ -1174,9 +1174,6 @@ class AdsbIm:
                     print_err(
                         f"after applying changes, go to map at {self._next_url_from_director}"
                     )
-                if key == "clear_range":
-                    self.clear_range_outline(sitenum)
-                    continue
                 if key == "sdrplay_license_accept":
                     self._d.env_by_tags("sdrplay_license_accepted").value = True
                 if key == "sdrplay_license_reject":
@@ -1240,22 +1237,6 @@ class AdsbIm:
                     cmdline = "systemctl start adsb-feeder-update.service &"
                     subprocess.run(cmdline, timeout=5.0, shell=True)
                     return render_template("/waitandredirect.html")
-                if key == "resetgain":
-                    # tell the ultrafeeder container to restart the autogain processing
-                    cmdline = (
-                        "docker exec ultrafeeder /usr/local/bin/autogain1090 reset"
-                    )
-                    try:
-                        subprocess.run(cmdline, timeout=5.0, shell=True)
-                    except:
-                        print_err("Error running Ultrafeeder autogain reset")
-                if key == "resetuatgain":
-                    # tell the dump978 container to restart the autogain processing
-                    cmdline = "docker exec dump978 /usr/local/bin/autogain978 reset"
-                    try:
-                        subprocess.run(cmdline, timeout=5.0, shell=True)
-                    except:
-                        print_err("Error running UAT autogain reset")
                 if key == "nightly_update" or key == "zerotier":
                     # this will be handled through the separate key/value pairs
                     pass
@@ -1360,6 +1341,25 @@ class AdsbIm:
 
                 continue
             # now handle other form input
+            if key == "clear_range" and value == "1":
+                self.clear_range_outline(sitenum)
+                continue
+            if key == "resetgain" and value == "1":
+                # tell the ultrafeeder container to restart the autogain processing
+                cmdline = "docker exec ultrafeeder /usr/local/bin/autogain1090 reset"
+                try:
+                    subprocess.run(cmdline, timeout=5.0, shell=True)
+                except:
+                    print_err("Error running Ultrafeeder autogain reset")
+                continue
+            if key == "resetuatgain" and value == "1":
+                # tell the dump978 container to restart the autogain processing
+                cmdline = "docker exec dump978 /usr/local/bin/autogain978 reset"
+                try:
+                    subprocess.run(cmdline, timeout=5.0, shell=True)
+                except:
+                    print_err("Error running UAT autogain reset")
+                continue
             e = self._d.env_by_tags(key.split("--"))
             if e:
                 if allow_insecure and key == "ssh_pub":
