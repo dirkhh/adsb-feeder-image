@@ -1084,6 +1084,7 @@ class AdsbIm:
             print_err(f"Micro feeder at {ip} is not an adsb.im feeder")
             n += 1
             self._d.env_by_tags("num_micro_sites").value = n
+            create_stage2_yml_files(n, ip)
             self._d.env_by_tags("site_name").list_set(
                 n, micro_data.get("micro_site_name", "")
             )
