@@ -1,11 +1,11 @@
-Changes since v1.3 include
+Changes since v1.3.6 include
 - up ultrafeeder version for readsb debug features
 - stage2: fix microsite URLs when base URL has no port
 - stage2 setup: non-adsb.im micro feeders: slight UI changes / fix stage2 yml file not being created immediately
 - stage2 data sharing: fix micro site with highest index not configurable
 - stage2 setup: allow setting name / lat / lng / alt for non-adsb.im micro feeder (so plain port 30005 source)
 - stage2 UI improvements: better explanation of the workflow, plus the ability to turn stage2 mode off again
-- allow importing micro feeders that run and app install of adsb.im
+- allow importing micro feeders that run an app install of adsb.im
 - only accept known and expect environment settings when importing a micro feeder
 - fix broken range and gain reset options in the UI
 - build bullseye image based on 2023-02-21 Raspbian Lite image (pi3 mlat issues)
