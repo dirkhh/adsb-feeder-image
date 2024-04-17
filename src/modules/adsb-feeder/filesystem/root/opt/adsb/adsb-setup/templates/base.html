@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
+{% set no_port_url = request.scheme ~ "://" ~ request.host.rsplit(':', 1)[0] %}
 <head>
   <!-- Required meta tags -->
   <meta charset="utf-8" />
@@ -42,7 +43,7 @@
               <li>
                 <a class="dropdown-item" href="#">{{site}} &raquo;</a>
                 <ul class="dropdown-menu dropdown-submenu">
-                  {% set url = request.host_url.rsplit(":", 1)[0] ~ ":" ~ (loop.index0 + 8090) %}
+                  {% set url = no_port_url ~ ":" ~ (loop.index0 + 8090) %}
                   <li><a class="dropdown-item" href="{{ url }}">Main Map</a></li>
                   <li><a class="dropdown-item" href="{{ url }}/?heatmap">Heatmap</a></li>
                   <li><a class="dropdown-item" href="{{ url }}/?pTracks">Tracks</a></li>
@@ -112,7 +113,7 @@
               <li><a class="dropdown-item" href="/stats">{%if is_enabled('stage2')%}Combined {%endif%}Stats</a></li>
               {% for site in env_value_by_tag('site_name') %}
               {% if loop.index0 != 0 %}
-              {% set url = request.host_url.rsplit(":", 1)[0] ~ ":" ~ (loop.index0 + 8090) %}
+              {% set url = no_port_url ~ ":" ~ (loop.index0 + 8090) %}
               <li><a class="dropdown-item" href="{{ url }}/graphs1090/">{{site}} Stats</a></li>
               {% endif %}
               {% endfor %}
