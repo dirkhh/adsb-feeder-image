@@ -165,6 +165,44 @@
         <div id="mf_step3" class="col-9 d-none">
           As long as the feeder exposes port 30004 with Beast-Out at this IP address, you should be able to connect to
           it and use this system as stage 2 - a number of more advanced features will be missing.
+          <div class="form-group row align-items-center mb-1">
+            <span class="col-md">
+              <label for="micro_site_name">Micro feeder name (shows up on public maps if enabled later)</label>
+            </span>
+            <span class="col-md">
+              <input type="text" id="micro_site_name" name="micro_site_name" placeholder="my-awesome-antenna"
+                     class="form-control" pattern="[\-_.a-zA-Z0-9]+" title="Letters, numbers, -, _, ." value="" />
+            </span>
+          </div>
+          <div class="form-group row align-items-center mb-1">
+            <span class="col-md">
+              <label for="micro_lat">Latitude (-90 .. +90 -- please use 5 decimals, e.g. 45.12345)</label>
+            </span>
+            <span class="col-md">
+              <input type="text" id="micro_lat" name="micro_lat" placeholder="Antenna latitude" class="form-control"
+                     pattern="(?:\+|-|)(?:(?:[0-8]?\d)(?:\.\d+)?|90(?:\.0+)?)(,(?:\+|-|)(:?(:?\d?\d|1[0-7]\d)(?:\.\d+)?|180(?:\.0+)?))?"
+                     title="Number between -90 and 90" value="" />
+            </span>
+          </div>
+          <div class="form-group row align-items-center mb-1">
+            <span class="col-md">
+              <label for="micro_lng">Longitude (-180 .. +180 -- please use 5 decimals , e.g. -122.12345)</label>
+            </span>
+            <span class="col-md">
+              <input type="text" id="micro_lng" name="micro_lng" placeholder="Antenna longitude" class="form-control"
+                     pattern="(?:\+|-|)(:?(:?\d?\d|1[0-7]\d)(?:\.\d+)?|180(?:\.0+)?)"
+                     title="Number between -180 and 180" value="" />
+            </span>
+          </div>
+          <div class="form-group row align-items-center mb-1">
+            <span class="col-md">
+              <label for="micro_alt">Altitude above mean sealevel, rounded to whole meters</label>
+            </span>
+            <span class="col-md">
+              <input type="text" id="micro_alt" name="micro_alt" placeholder="Antenna MSL altitude (in m)"
+                     class="form-control" pattern="(?:\+|-|)\d+" value="" />
+            </span>
+          </div>
           <button type="submit" name="add_other" value="go" class="btn btn-primary">Attach to other
             feeder</button>
         </div>

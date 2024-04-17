@@ -1067,7 +1067,7 @@ class AdsbIm:
         print_err(f"done importing graphs and history from {ip}")
 
     def setup_new_micro_site(
-        self, ip, uat, is_adsbim, do_import=False, do_restore=False
+        self, ip, uat, is_adsbim, do_import=False, do_restore=False, micro_data={}
     ):
         if ip in self._d.env_by_tags("mf_ip").value:
             print_err(f"IP address {ip} already listed as a micro site")
@@ -1084,10 +1084,12 @@ class AdsbIm:
             print_err(f"Micro feeder at {ip} is not an adsb.im feeder")
             n += 1
             self._d.env_by_tags("num_micro_sites").value = n
-            self._d.env_by_tags("site_name").list_set(n, ip)
-            self._d.env_by_tags("lat").list_set(n, "")
-            self._d.env_by_tags("lng").list_set(n, "")
-            self._d.env_by_tags("alt").list_set(n, "")
+            self._d.env_by_tags("site_name").list_set(
+                n, micro_data.get("micro_site_name", "")
+            )
+            self._d.env_by_tags("lat").list_set(n, micro_data.get("micro_lat", ""))
+            self._d.env_by_tags("lng").list_set(n, micro_data.get("micro_lng", ""))
+            self._d.env_by_tags("alt").list_set(n, micro_data.get("micro_alt", ""))
             self._d.env_by_tags("tz").list_set(n, "UTC")
             self._d.env_by_tags("mf_version").list_set(n, "not an adsb.im feeder")
             self._d.env_by_tags(["uat978", "is_enabled"]).list_set(n, uat)
@@ -1130,7 +1132,7 @@ class AdsbIm:
         for t in self.microfeeder_setting_tags + ("mf_ip",):
             tags = t.split("--")
             e = self._d.env_by_tags(tags)
-            if e:
+            if e and type(e._value) == list:
                 print_err(
                     f"shifting {e.name} down and deleting last element {e._value}"
                 )
@@ -1139,7 +1141,7 @@ class AdsbIm:
                 if len(e._value) > self._d.env_by_tags("num_micro_sites").value:
                     e.list_remove()
             else:
-                print_err(f"couldn't find env for {tags}")
+                print_err(f"couldn't find env list for {tags}")
         self._d.env_by_tags("num_micro_sites").value -= 1
         # finally, recreate the stage2 yml files for those feeders that shifted down
         # the index is used to pick the correct environment variables, the IP address
@@ -1156,7 +1158,11 @@ class AdsbIm:
         # let's try and figure out where we came from - for reasons I don't understand
         # the regexp didn't capture the site number, so let's do this the hard way
         referer = request.headers.get("referer")
-        arg = make_int(referer[referer.rfind("?m=") + 3 :])
+        m_arg = referer.rfind("?m=")
+        if m_arg > 0:
+            arg = make_int(referer[m_arg + 3 :])
+        else:
+            arg = 0
         if 0 < arg < self._d.env_by_tags("num_micro_sites").value:
             sitenum = arg
             site = self._d.env_by_tags("site_name").list_get(sitenum)
@@ -1204,6 +1210,15 @@ class AdsbIm:
                     ip = form.get("add_micro_feeder_ip")
                     uat = form.get("micro_uat")
                     is_adsbim = key != "add_other"
+                    micro_data = {}
+                    if not is_adsbim:
+                        for mk in [
+                            "micro_site_name",
+                            "micro_lat",
+                            "micro_lng",
+                            "micro_alt",
+                        ]:
+                            micro_data[mk] = form.get(mk)
                     do_import = key.startswith("import_micro")
                     do_restore = key == "import_micro_full"
                     if self.setup_new_micro_site(
@@ -1212,6 +1227,7 @@ class AdsbIm:
                         is_adsbim=is_adsbim,
                         do_import=do_import,
                         do_restore=do_restore,
+                        micro_data=micro_data,
                     ):
                         continue
                     next_url = url_for("stage2")
