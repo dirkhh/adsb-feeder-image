@@ -1971,6 +1971,7 @@ def create_stage2_yml_from_template(stage2_yml_name, n, ip, template_file):
 def create_stage2_yml_files(n, ip):
     if not n:
         return
+    print_err(f"create_stage2_yml_files(n={n}, ip={ip})")
     for yml_file, template in [
         [f"stage2_micro_site_{n}.yml", "stage2.yml"],
         [f"1090uk_{n}.yml", "1090uk_stage2_template.yml"],
