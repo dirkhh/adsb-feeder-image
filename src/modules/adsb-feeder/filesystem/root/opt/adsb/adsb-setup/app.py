@@ -944,6 +944,8 @@ class AdsbIm:
             print_err(f"micro_settings API on {ip}: {status}, {micro_settings}")
             if status == 200 and micro_settings != None:
                 for key, value in micro_settings.items():
+                    if key not in self.microfeeder_setting_tags:
+                        continue
                     tags = key.split("--")
                     print_err(f"setting env for {tags} to {value}", level=4)
                     e = self._d.env_by_tags(tags)
