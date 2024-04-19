@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -x
+set -e
+
+mkdir -p /etc/systemd/system/dhcpcd.service.d
+tee /etc/systemd/system/dhcpcd.service.d/restart.conf <<"EOF"
+[Service]
+Restart=always
+RestartSec=5s
+StartLimitInterval=1
+StartLimitBurst=100
+EOF
