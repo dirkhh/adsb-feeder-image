@@ -1,4 +1,5 @@
 Changes since v1.3 include
+- up ultrafeeder version for readsb debug features
 - stage2: fix microsite URLs when base URL has no port
 - stage2 setup: non-adsb.im micro feeders: slight UI changes / fix stage2 yml file not being created immediately
 - stage2 data sharing: fix micro site with highest index not configurable
