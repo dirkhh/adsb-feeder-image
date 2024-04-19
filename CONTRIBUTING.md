@@ -13,3 +13,12 @@ For simple changes, simply submit a PR. For more complex changes, please first c
 The main branch is where releases happen and it should always move in a 'fast-forward' style. The dev branch is mostly for testing things with the GitHub Actions pipeline and will see the occasional force-push.
 
 Pull requests should usually be opened against the `beta` branch as I try to test things before they go into `main` and only move main forward as a `fast-forward` merge of `beta`.
+
+## Testing changes
+
+After having done your changes on your local codebase, you can test these against your `adsb-feeder.local` instance. The prerequisite is to have a `root` SSH access to this instance and ist must be available under the hostname `adsb-feeder.local` in your local network.
+
+The root working directory of this repository contains a `Makefile` with different commands that interacts with the instance, i.e. copies files, restarts services, respectively. This allows for immediate testing the impact of the changes made.
+
+* `$ make sync-and-update` will generally update "everything" including Docker definition changes or container versions
+* `$ make sync-and-update-nocontainer` is aimed for changes to the feeder homepage, web server etc. It skips the container part and is therefore quicker to execute.
