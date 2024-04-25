@@ -1013,23 +1013,17 @@ class AdsbIm:
             # including whether this is a v2 or not
             return make_response(json.dumps(json_dict), 200)
         # ok, it's not a recent adsb.im version, it could still be a feeder
-        # the show-only argument basically just makes sure that the readsb doesn't create
-        # hundreds or thousands of lines of output
         uf = self._d.env_by_tags(["ultrafeeder", "container"]).value
-        print_err(
-            f"running: 'docker run --rm --entrypoint /usr/local/bin/readsb {uf} --net-connector {ip},30005,beast_in --net-only --show-only=123456'"
-        )
+        cmd = f'docker run --rm --entrypoint /usr/local/bin/readsb {uf} --net --net-connector {ip},30005,beast_in --quiet --auto-exit=2'
+        print_err(f"running: {cmd}")
         try:
             response = subprocess.run(
-                f"docker run --rm --entrypoint /usr/local/bin/readsb {uf} --net-connector {ip},30005,beast_in --net-only --show-only=123456",
+                cmd,
                 shell=True,
-                timeout=5.0,
+                timeout=30.0,
                 capture_output=True,
             )
             output = response.stderr.decode("utf-8")
-        except subprocess.TimeoutExpired as e:
-            # no worries, that' very much expected behavior
-            output = e.stderr.decode("utf-8")
         except:
             print_err(
                 "failed to use readsb in ultrafeeder container to check on remote feeder status"
