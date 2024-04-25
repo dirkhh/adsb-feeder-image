@@ -938,14 +938,12 @@ class AdsbIm:
         print_err(f"getting info from {ip} with do_import={do_import}")
         # try:
         if do_import:
-            micro_settings, status = generic_get_json(
-                f"http://{ip}/api/micro_settings", None
-            )
+            micro_settings, status = generic_get_json(f"http://{ip}/api/micro_settings")
             print_err(f"micro_settings API on {ip}: {status}, {micro_settings}")
             if status != 200 or micro_settings == None:
                 # maybe we're running on 1099?
                 micro_settings, status = generic_get_json(
-                    f"http://{ip}:1099/api/micro_settings", None
+                    f"http://{ip}:1099/api/micro_settings"
                 )
                 print_err(
                     f"micro_settings API on {ip}:1099: {status}, {micro_settings}"
@@ -962,12 +960,10 @@ class AdsbIm:
                         e.list_set(n, value)
                 return True
         # we fall through here if we can't get the micro settings
-        base_info, status = generic_get_json(f"http://{ip}/api/base_info", None)
+        base_info, status = generic_get_json(f"http://{ip}/api/base_info")
         if status != 200 or base_info == None:
             # maybe we're running on 1099?
-            base_info, status = generic_get_json(
-                f"http://{ip}:1099/api/base_info", None
-            )
+            base_info, status = generic_get_json(f"http://{ip}:1099/api/base_info")
         if status == 200 and base_info != None:
             print_err(f"got {base_info} for {ip}")
             self._d.env_by_tags("site_name").list_set(n, base_info["name"])

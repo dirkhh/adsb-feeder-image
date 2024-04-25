@@ -73,7 +73,7 @@ def make_int(value):
         return 0
 
 
-def generic_get_json(url: str, data):
+def generic_get_json(url: str, data=None):
     requests.packages.urllib3.util.connection.HAS_IPV6 = False
     status = -1
     try:
