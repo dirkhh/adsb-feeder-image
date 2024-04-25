@@ -181,6 +181,11 @@ class Data:
             default=[True],
             tags=["route_api", "is_enabled", "false_is_zero"],
         ),
+        Env(
+            "FEEDER_TAR1090_CONFIGJS_APPEND",
+            default="",
+            tags=["tar1090_configjs_append"],
+        ),
         Env(  # this has no UI component, but we want to enable the advanced user to modify it in .env
             "TAR1090_RANGE_OUTLINE_DASH",
             default="[2,3]",

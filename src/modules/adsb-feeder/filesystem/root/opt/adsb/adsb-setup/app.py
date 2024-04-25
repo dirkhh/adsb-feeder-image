@@ -8,6 +8,7 @@ import pathlib
 import pickle
 import platform
 import re
+from tempfile import TemporaryDirectory
 import requests
 import secrets
 import signal
@@ -82,6 +83,7 @@ from utils import (
     generic_get_json,
     is_true,
     verbose,
+    MultiOutline,
 )
 
 # nofmt: off
@@ -119,6 +121,7 @@ class AdsbIm:
             }
 
         self._routemanager = RouteManager(self.app)
+        self._multi_outline = MultiOutline()
         self._d = Data()
         self._system = System(data=self._d)
         self._sdrdevices = SDRDevices()
@@ -403,6 +406,14 @@ class AdsbIm:
             signal.raise_signal(signal.SIGTERM)
             return
 
+        # check if we need the stage2 multiOutline job
+        if self._d.is_enabled("stage2"):
+            self._d.env_by_tags("tar1090_configjs_append").value = "multiOutline=true;"
+            self.push_multi_outline()
+            self._multi_outline_bg = Background(60, self.push_multi_outline)
+        else:
+            self._multi_outline_bg = None
+
         self.app.run(
             host="0.0.0.0",
             port=int(self._d.env_by_tags("webport").value),
@@ -435,6 +446,27 @@ class AdsbIm:
             print_err("failed to set up timezone")
 
         return render_template("setup.html")
+
+    def push_multi_outline(self) -> None:
+        if not self._d.is_enabled("stage2"):
+            return
+        mo_data = self._multi_outline.create(
+            self._d.env_by_tags("num_micro_sites").value
+        )
+        # now we need to inject this into the stage2 tar1090
+        with TemporaryDirectory(prefix="/tmp/adsb") as tmpdir:
+            try:
+                with open(f"{tmpdir}/multiOutline.json", "w") as f:
+                    json.dump(mo_data, f)
+            except:
+                print_err("failed to write multiOutline.json")
+                return
+            cmd = f"docker cp {tmpdir}/multiOutline.json ultrafeeder:/run/readsb/"
+            try:
+                subprocess.run(cmd, shell=True, check=True)
+            except subprocess.SubprocessError:
+                print_err("failed to push multiOutline.json")
+                return
 
     def restarting(self):
         return render_template("restarting.html")
@@ -1235,6 +1267,10 @@ class AdsbIm:
                 if key == "turn_off_stage2":
                     # let's just switch back
                     self._d.env_by_tags("stage2").value = False
+                    if self._multi_outline_bg:
+                        self._multi_outline_bg.cancel()
+                        self._multi_outline_bg = None
+                        self._d.env_by_tags("tar1090_configjs_append").value = ""
                     self._d.env_by_tags("aggregators_chosen").value = False
                     self._d.env_by_tags("aggregators").value = ""
                 if key == "aggregators":
@@ -1435,6 +1471,12 @@ class AdsbIm:
                     self._d.env_by_tags(["mlathub_disable"]).value = False
                 if key == "aggregators" and value == "stage2":
                     self._d.env_by_tags("stage2").value = True
+                    if not self._multi_outline_bg:
+                        self._d.env_by_tags("tar1090_configjs_append").value = (
+                            "multiOutline=true;"
+                        )
+                        self.push_multi_outline()
+                        self._multi_outline_bg = Background(60, self.push_multi_outline)
                     self._d.env_by_tags("site_name").list_set(0, form.get("site_name"))
                 # finally, painfully ensure that we remove explicitly asigned SDRs from other asignments
                 # this relies on the web page to ensure that each SDR is only asigned on purpose

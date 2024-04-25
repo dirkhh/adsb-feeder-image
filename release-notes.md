@@ -1,35 +1,5 @@
-Changes since v1.3.6 include
-- up ultrafeeder version for readsb debug features
-- stage2: fix microsite URLs when base URL has no port
-- stage2 setup: non-adsb.im micro feeders: slight UI changes / fix stage2 yml file not being created immediately
-- stage2 data sharing: fix micro site with highest index not configurable
-- stage2 setup: allow setting name / lat / lng / alt for non-adsb.im micro feeder (so plain port 30005 source)
-- stage2 UI improvements: better explanation of the workflow, plus the ability to turn stage2 mode off again
-- allow importing micro feeders that run an app install of adsb.im
-- only accept known and expect environment settings when importing a micro feeder
-- fix broken range and gain reset options in the UI
-- build bullseye image based on 2023-02-21 Raspbian Lite image (pi3 mlat issues)
-- add usb ids for RSP2, RSPDuo, RSPdx
-- improve backup robustness
-- small UI changes, trying to make things more intuitive
-- add Raspbian bullseye based image as potential fix for pi3 mlat issues
-- prune tagged images, not only dangling ones
-- update to latest SDR-E containers
-- fix RBfeeder fake cpu info creation issue
-- escape the idiotic adsbhub key (which uses a ridiculous character set - get a grip, people)
-- add UI comments about ratio of containers to SBC chosen
-- limit CPU use of all 3rd party containers and FD abuse by FR24 container
-- more menu tweaks
-- several fixes for stage 2 aggregator handling
-- introduction of a full stage 2 mode that allows separating data collection (the antenna / SDR) and data distribution (feeding the aggregators) between different systems, with one stage 2 instances collecting and sharing data from multiple (micro) feeders
-- the stage 2 code is definitely a lot more 'alpha' than the rest of the code that has received a lot more testing.
-- significant changes to the web UI to support integrated instances (how things used to be), micro feeders, and stage 2 instances
-- beyond that, fairly significant UI overhaul with new menu organization, new, hopefully more intuitive names for the different menu entries, and a new option to upload anonymized logs for easier analysis by the developers
-- removed dependency on most CDN / remote provided content (including Google Font, FontAwesome, and jQuery)
-- changed the default for MLAT privacy to OFF (but made this setting very obvious at the top of the 'Data Sharing' (previously 'Aggregators') page - with a better explanation what it does. 
-- improve the aggregator status detection for a number of aggregators
-- switched to latest Ultrafeeder container with a new readsb version that allows us to replay UAT traffic (this is part of the stage2 setup)
-- (under the hood) significant changes to the storage format for config settings; it should be transparent during an upgrade, but once upgraded, a downgrade is not possible
+Changes since v2.0.0 include:
+- add multi-outline for stage 2 maps
 
 
 > [!NOTE]
