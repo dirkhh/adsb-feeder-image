@@ -59,7 +59,7 @@ services:
       #
       # --------------------------------------------------
       # TAR1090 (Map Web Page) parameters:
-      - UPDATE_TAR1090=${UPDATE_TAR1090:-false}
+      - UPDATE_TAR1090=${UPDATE_TAR1090:-true}
       - TAR1090_MESSAGERATEINTITLE=true
       - TAR1090_PAGETITLE=${MLAT_SITE_NAME}
       - TAR1090_SITENAME=${MLAT_SITE_NAME}
