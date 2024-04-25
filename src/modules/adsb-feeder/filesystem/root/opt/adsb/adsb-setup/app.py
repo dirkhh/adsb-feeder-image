@@ -1010,7 +1010,7 @@ class AdsbIm:
             return make_response(json.dumps(json_dict), 200)
         # ok, it's not a recent adsb.im version, it could still be a feeder
         uf = self._d.env_by_tags(["ultrafeeder", "container"]).value
-        cmd = f'docker run --rm --entrypoint /usr/local/bin/readsb {uf} --net --net-connector {ip},30005,beast_in --quiet --auto-exit=2'
+        cmd = f"docker run --rm --entrypoint /usr/local/bin/readsb {uf} --net --net-connector {ip},30005,beast_in --quiet --auto-exit=2"
         print_err(f"running: {cmd}")
         try:
             response = subprocess.run(
