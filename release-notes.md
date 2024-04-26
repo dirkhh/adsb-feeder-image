@@ -2,6 +2,7 @@ Changes since v2.0.0 include:
 - work around broken PlaneFinder container on RPi5
 - re-enable tar1090 update at start
 - add multi-outline for stage 2 maps
+- various small UI adjustments
 
 
 > [!NOTE]
