@@ -398,6 +398,14 @@ class AdsbIm:
             # the case, then insert them into the settings
             self.setup_app_ports()
 
+        # hopefully very temporary hack to deal with a broken container that
+        # doesn't run on Raspberry Pi 5 boards
+        board = self._d.env_by_tags("board_name").value
+        if board.startswith("Raspberry Pi 5"):
+            self._d.env_by_tags(["container", "planefinder"]).value = (
+                "ghcr.io/sdr-enthusiasts/docker-planefinder:5.0.161_arm64"
+            )
+
         # if all the user wanted is to make sure the housekeeping tasks are completed,
         # don't start the flask app and exit instead
         if no_server:
