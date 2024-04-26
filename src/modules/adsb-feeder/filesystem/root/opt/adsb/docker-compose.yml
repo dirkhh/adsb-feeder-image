@@ -34,7 +34,7 @@ services:
       - READSB_RTLSDR_DEVICE=${FEEDER_SERIAL_1090}
       - READSB_RTLSDR_PPM=${ADSB_SDR_PPM}
       - READSB_ENABLE_BIASTEE=${FEEDER_ENABLE_BIASTEE}
-      - READSB_AUTOGAIN_INITIAL_GAIN=29.6
+      - READSB_AUTOGAIN_INITIAL_GAIN=40.2
       #
       # --------------------------------------------------
       # readsb/decoder parameters:
