@@ -83,7 +83,6 @@ from utils import (
     generic_get_json,
     is_true,
     verbose,
-    MultiOutline,
 )
 
 # nofmt: off
@@ -121,7 +120,6 @@ class AdsbIm:
             }
 
         self._routemanager = RouteManager(self.app)
-        self._multi_outline = MultiOutline()
         self._d = Data()
         self._system = System(data=self._d)
         self._sdrdevices = SDRDevices()
@@ -472,23 +470,10 @@ class AdsbIm:
     def push_multi_outline(self) -> None:
         if not self._d.is_enabled("stage2"):
             return
-        mo_data = self._multi_outline.create(
-            self._d.env_by_tags("num_micro_sites").value
+        subprocess.run(
+            f"bash /opt/adsb/push_multioutline.sh {self._d.env_by_tags('num_micro_sites').value}",
+            shell=True,
         )
-        # now we need to inject this into the stage2 tar1090
-        with TemporaryDirectory(prefix="/tmp/adsb") as tmpdir:
-            try:
-                with open(f"{tmpdir}/multiOutline.json", "w") as f:
-                    json.dump(mo_data, f)
-            except:
-                print_err("failed to write multiOutline.json")
-                return
-            cmd = f"docker cp {tmpdir}/multiOutline.json ultrafeeder:/run/readsb/"
-            try:
-                subprocess.run(cmd, shell=True, check=True)
-            except subprocess.SubprocessError:
-                print_err("failed to push multiOutline.json")
-                return
 
     def restarting(self):
         return render_template("restarting.html")

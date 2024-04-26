@@ -32,4 +32,3 @@ from .util import (
     make_int,
 )
 from .background import Background
-from .multioutline import MultiOutline
