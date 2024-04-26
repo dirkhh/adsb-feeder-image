@@ -236,6 +236,7 @@ class AdsbIm:
         # fmt: on
         self.update_boardname()
         self.update_version()
+        self.update_meminfo()
 
         # finally, try to make sure that we have all the pieces that we need and recreate what's missing
         for i in range(self._d.env_by_tags("num_micro_sites").value + 1):
@@ -302,6 +303,17 @@ class AdsbIm:
             else:
                 print_err("no version found on disk or in memory, using v0.0.0")
                 self._d.env_by_tags("base_version").value = "v0.0.0"
+
+    def update_meminfo(self):
+        self._memtotal = 0
+        try:
+            with open("/proc/meminfo", "r") as f:
+                for line in f:
+                    if line.startswith("MemTotal:"):
+                        self._memtotal = make_int(line.split()[1])
+                        break
+        except:
+            pass
 
     def pack_im(self) -> str:
         image = {
@@ -415,7 +427,9 @@ class AdsbIm:
             return
 
         # check if we need the stage2 multiOutline job
-        if self._d.is_enabled("stage2"):
+        # the extra check for > 1.8G is really for the off chance that someone set up
+        # a stage to one a < 1.8G system prior to that requirement being added
+        if self._d.is_enabled("stage2") and self._memtotal > 1800000:
             self._d.env_by_tags("tar1090_configjs_append").value = "multiOutline=true;"
             self.push_multi_outline()
             self._multi_outline_bg = Background(60, self.push_multi_outline)
@@ -1921,7 +1935,7 @@ class AdsbIm:
             return render_template("stage2.html")
         # make sure DNS works
         self.update_dns_state()
-        return render_template("setup.html")
+        return render_template("setup.html", mem=self._memtotal)
 
     @check_restart_lock
     def stage2(self):

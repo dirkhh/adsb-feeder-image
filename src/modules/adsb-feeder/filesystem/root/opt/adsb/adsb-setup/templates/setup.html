@@ -81,7 +81,8 @@
       <a href="#"
          title="aggregators that don't require you to create an account or provide an email address">semi-anonymous
       </a>
-      aggregators do you want to feed? Or is this a stage 2 setup?
+      aggregators do you want to feed? {% if mem > 1800000 %}Or is this a stage 2 setup?{% else %}(Stage 2 setup
+      unsupported with {{ mem }} GB of memory){% endif %}
     </label>
     <br />
     <div>
@@ -97,7 +98,7 @@
       <input type="radio" name="aggregators" id="micro" value="micro" {% if env_value_by_tag("aggregators")=="micro" %}
              checked {% endif %}>
       <label class="form-check-label mr-3" for="micro">None (micro feeder)</label>
-      <input type="radio" name="aggregators" id="stage2" value="stage2"
+      <input type="radio" name="aggregators" id="stage2" value="stage2" {% if mem <= 1800000 %}disabled{% endif %}
              {% if env_value_by_tag("aggregators")=="stage2" %} checked {% endif %}>
       <label class="form-check-label mr-3" for="stage2">Stage 2 setup (select these later)</label>
     </div>
