@@ -296,7 +296,7 @@
           $("#ip-mismatch").hide()
         }
       });
-    fetch(`${SCRIPT_ROOT}/api/status/im`)
+    fetch("/api/status/im")
       .then(response => response.json())
       .then(data => {
         $("#latest_tag").text(data["latest_tag"]);

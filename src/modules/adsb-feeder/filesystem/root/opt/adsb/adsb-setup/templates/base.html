@@ -168,20 +168,15 @@
       </section>
     </footer>
   </div>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/mdb.min.js') }}"></script>
   <script>
     function show_spinner() {
       document.getElementById("loader").style.display = "block";
       document.getElementById("overlay").style.display = "block";
     }
-    const SCRIPT_ROOT = {{ request.script_root | tojson }}
-  </script>
-  <script type="text/javascript" src="{{ url_for('static', filename='js/mdb.min.js') }}"></script>
-  <script>
     $(document).ready(function () {
       $('[data-toggle="tooltip"]').tooltip();
     });
-  </script>
-  <script>
     $("form").submit(function () {
       // stupid hack to get checkboxes that are unchecked into Flask
       // first hide the form (so the checkboxes don't visibly turn back on)

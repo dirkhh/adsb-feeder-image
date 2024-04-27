@@ -137,7 +137,7 @@
   })
 
   function sdr_info() {
-    fetch(`${SCRIPT_ROOT}/api/sdr_info`)
+    fetch("/api/sdr_info")
       .then(response => response.json())
       .then(data => {
         let num = data['sdrdevices'].length;

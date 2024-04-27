@@ -69,13 +69,6 @@
             <td>Status</td>
             <td>Remove</td>
           </thead>
-          <!-- for status, add things to the api that are based one
-          jq '.last1min.messages_valid' < /run/adsb-feeder-ultrafeeder/readsb/stats.json
-          > 300k / min (5k/sec) is an indication of a cycle, so turn that one off
-          0 is a sign of nothing being sent (duh) -- maybe that one should take 5 or even 15 minutes
-          that allows us to show "no data / seems fine / cycle" as status
-          There's also the aircraft with pos count - but since we don't want to constantly refresh, maybe less interesting
-        -->
           <tbody>
             {% for site in env_value_by_tag('site_name') %}
             {% if loop.index0 != 0 %}<!-- skip the entry for the host -->
@@ -301,8 +294,8 @@
   function check_micro_feeder() {
     let ip = $("#add_micro_feeder_ip").val()
     if (ip.length > 3) {
-      let url = "/api/check_remote_feeder/" + ip
-      console.log("Accessing", url)
+      let url = "/api/check_remote_feeder/" + ip;
+      console.log("Accessing", url);
       fetch(url, {
         method: "GET", cors: "no-cors"
       })
@@ -332,8 +325,8 @@
         .catch(error => {
           console.log("received error", error);
           $("#add_micro_feeder_name").text("Unable to detect feeder at " + ip);
-        })
+        });
     }
-  }
+  };
 </script>
 {% endblock %}
