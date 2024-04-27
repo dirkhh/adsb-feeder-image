@@ -103,7 +103,7 @@ def generic_get_json(url: str, data=None):
     return None, status
 
 
-def create_fake_RB_info():
+def create_fake_info():
     # instead of trying to figure out if we need this and creating it only in that case,
     # let's just make sure the fake files are there and move on
     os.makedirs("/opt/adsb/rb/thermal_zone0", exist_ok=True)

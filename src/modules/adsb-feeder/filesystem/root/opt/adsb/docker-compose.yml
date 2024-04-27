@@ -102,8 +102,18 @@ services:
       - /dev:/dev:ro
       - /run/adsb-feeder-ultrafeeder:/run
       - /run/adsb-feeder-shared:/run/airspy_adsb
+      - thermal_fix:${FEEDER_RB_THERMAL_HACK:-/tmp/rbt}:ro
     tmpfs:
       - /tmp:size=128M
       - /var/log:size=32M
     extra_hosts:
       - "host.docker.internal:host-gateway"
+
+volumes:
+  thermal_fix:
+    driver: local
+    driver_opts:
+      type: none
+      device: /opt/adsb/rb
+      o: bind
+
