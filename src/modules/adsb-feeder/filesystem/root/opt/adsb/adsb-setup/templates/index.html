@@ -54,12 +54,24 @@
   <div class="col-12 mb-3 {% if not is_enabled('stage2') %} d-none {% endif %}">
     <h5>You are running as stage 2 feeder</h5>
     <div class="col-12 mb-3">{% if env_value_by_tag('num_micro_sites') == 0 %}No micro feeder sites configured, yet.
-      Please do so on the <a href={{ url_for('stage2') }}>Stage 2 Setup page</a>{% else %}You are collecting data from
-      {% for site in env_value_by_tag('site_name') if not site == list_value_by_tag('site_name', 0) %}
-      {% if loop.last and loop.length > 1 %}and
-      {% endif %}<strong>{{site}}</strong>{% if num_micro_sites > 1 %}<span
-            class="text-muted small">({{ loop.index }})</span>{% endif %}{% if not loop.last and not loop.length == 2 %},{% endif %}{% endfor %}
-      - more configuration options for this are available on the <a href={{ url_for('stage2') }}>Stage 2 Setup
+      Please do so on the <a href={{ url_for('stage2') }}>Stage 2 Setup page</a>{% else %}
+      <table class="table table-bordered table-sm lh-1 w-auto table-striped">
+        <thead>
+          <th class="text-center" scope="col">#</th>
+          <th class="text-center" scope="col">Name</th>
+          <th class="text-center" scope="col">Status (pos/min)</th>
+        </thead>
+        <tbody>
+          {% for site in env_value_by_tag('site_name') if not site == list_value_by_tag('site_name', 0) %}
+          <tr>
+            <td class="text-center" scope="row">{{loop.index}}</td>
+            <td class="text-left">{{site}}</td>
+            <td class="text-center"><span id="mf_status_{{loop.index}}"></span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      More configuration options for this are available on the <a href={{ url_for('stage2') }}>Stage 2 Setup
         page</a>{% endif %}
     </div>
   </div>
@@ -355,5 +367,7 @@
         }
       });
   }
+  // start the micro feeder check if needed
+  check_mf_status();
 </script>
 {% endblock %}
