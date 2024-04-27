@@ -227,6 +227,7 @@ class AdsbIm:
         self.app.add_url_rule("/sdplay_license", "sdrplay_license", self.sdrplay_license, methods=["GET", "POST"])
         self.app.add_url_rule("/api/sdr_info", "sdr_info", self.sdr_info)
         self.app.add_url_rule("/api/base_info", "base_info", self.base_info)
+        self.app.add_url_rule("/api/stage2_stats", "stage2_stats", self.stage2_stats)
         self.app.add_url_rule("/api/micro_settings", "micro_settings", self.micro_settings)
         self.app.add_url_rule("/api/check_remote_feeder/<ip>", "check_remote_feeder", self.check_remote_feeder)
         self.app.add_url_rule(f"/api/status/<agg>", "beast", self.agg_status)
@@ -834,6 +835,32 @@ class AdsbIm:
         )
         response.headers.add("Access-Control-Allow-Origin", "*")
         return response
+
+    def stage2_stats(self):
+        ret = []
+        if self._d.is_enabled("stage2"):
+            for i in range(1, 1 + self._d.env_by_tags("num_micro_sites").value):
+                ip = self._d.env_by_tags("mf_ip").list_get(i)
+                try:
+                    with open(
+                        f"/run/adsb-feeder-ultrafeeder_{i}/readsb/stats.prom"
+                    ) as f:
+                        pct = 0
+                        secs = 0
+                        found = 0
+                        for line in f:
+                            if "position_count_total" in line:
+                                pct = int(line.split()[1])
+                                found |= 1
+                            if ip in line:
+                                secs = int(line.split()[1])
+                                found |= 2
+                            if found == 3:
+                                break
+                        ret.append({"pct": pct, "secs": secs})
+                except:
+                    ret.append({"pct": 0, "secs": 0})
+        return Response(json.dumps(ret), mimetype="application/json")
 
     def micro_settings(self):
         microsettings = {}

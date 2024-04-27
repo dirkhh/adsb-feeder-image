@@ -127,6 +127,33 @@
   </nav>
   <script src="/static/js/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8="
           crossorigin="anonymous"></script>
+  <script>
+    function check_mf_status() {
+      let n = parseInt("{{ env_value_by_tag('num_micro_sites') }}")
+      if (isNaN(n)) n = 0;
+      if (n == 0) return;
+      let url = "/api/stage2_stats";
+      fetch(url, {
+        method: "GET", cors: "no-cors"
+      })
+        .then(response => { return response.json() })
+        .then(data => {
+          data.forEach((d, i) => {
+            let color_class = "text-danger";
+            if (d["pct"] > 10) {
+              color_class = "text-success";
+            } else if (d["pct"] > 0 || d["secs"] > 60) {
+              color_class = "text-warning";
+            }
+            $("#mf_status_" + (i + 1)).attr('class', color_class);
+            $("#mf_status_" + (i + 1)).text(d["pct"] + " pos/min");
+          })
+        })
+        .finally(() => {
+          setTimeout(check_mf_status, 15000);
+        });
+    };
+  </script>
 </head>
 
 <body>

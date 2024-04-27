@@ -1,4 +1,5 @@
 Changes since v2.0.0 include:
+- add micro feeder status info to stage2 settings page
 - work around broken PlaneFinder container on RPi5
 - re-enable tar1090 update at start
 - add multi-outline for stage 2 maps
