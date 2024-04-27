@@ -78,6 +78,16 @@ services:
       - /proc/diskstats:/proc/diskstats:ro
       - /dev:/dev:ro
       - /run/adsb-feeder-ultrafeeder_STAGE2NUM:/run
+      - thermal_fix:${FEEDER_RB_THERMAL_HACK:-/tmp/rbt}:ro
     tmpfs:
       - /tmp:size=128M
       - /var/log:size=32M
+
+volumes:
+  thermal_fix:
+    driver: local
+    driver_opts:
+      type: none
+      device: /opt/adsb/rb
+      o: bind
+

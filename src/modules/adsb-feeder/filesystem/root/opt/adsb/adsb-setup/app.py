@@ -33,7 +33,7 @@ from utils.config import (
     write_values_to_config_json,
     write_values_to_env_file,
 )
-from utils.util import create_fake_RB_info, make_int, print_err
+from utils.util import create_fake_info, make_int, print_err
 
 if not os.path.exists("/opt/adsb/config/config.json"):
     print_err(
@@ -130,9 +130,9 @@ class AdsbIm:
         self._next_url_from_director = ""
 
         # no one should share a CPU serial with RadarBox, so always create fake cpuinfo;
-        # also identify if we would use the thermal hack for RB
+        # also identify if we would use the thermal hack for RB and Ultrafeeder
         self._d.env_by_tags("rbthermalhack").value = (
-            "/sys/class/thermal" if create_fake_RB_info() else ""
+            "/sys/class/thermal" if create_fake_info() else ""
         )
 
         # Ensure secure_image is set the new way if before the update it was set only as env variable
