@@ -9,6 +9,8 @@ volumes:
 services:
   rbfeeder:
     image: ${RB_CONTAINER}
+    healthcheck:
+      disable: true
     tty: true
     container_name: rbfeeder
     restart: always

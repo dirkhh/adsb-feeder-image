@@ -1,6 +1,8 @@
 services:
   ultrafeeder:
     image: ${ULTRAFEEDER_CONTAINER}
+    healthcheck:
+      disable: true
     tty: true
     container_name: ultrafeeder
     hostname: ultrafeeder

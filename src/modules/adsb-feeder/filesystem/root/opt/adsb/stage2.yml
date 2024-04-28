@@ -1,6 +1,8 @@
 services:
   ultrafeeder_stage2_STAGE2NUM:
     image: ${ULTRAFEEDER_CONTAINER}
+    healthcheck:
+      disable: true
     tty: true
     container_name: ultrafeeder_stage2_STAGE2NUM
     hostname: ultrafeeder_STAGE2NUM

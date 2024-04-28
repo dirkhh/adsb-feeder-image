@@ -1,6 +1,8 @@
 services:
   opensky_STAGE2NUM:
     image: ${OS_CONTAINER}
+    healthcheck:
+      disable: true
     tty: true
     container_name: opensky_STAGE2NUM
     restart: always

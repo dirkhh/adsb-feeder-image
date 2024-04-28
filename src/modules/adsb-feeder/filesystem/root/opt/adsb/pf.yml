@@ -1,6 +1,8 @@
 services:
   pfclient:
     image: ${PF_CONTAINER}
+    healthcheck:
+      disable: true
     tty: true
     container_name: pfclient
     restart: always

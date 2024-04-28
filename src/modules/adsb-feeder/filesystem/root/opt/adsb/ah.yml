@@ -1,6 +1,8 @@
 services:
   adsbhub:
     image: ${AH_CONTAINER}
+    healthcheck:
+      disable: true
     tty: true
     container_name: adsbhub
     restart: always
