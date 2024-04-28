@@ -7,7 +7,14 @@ export DIST_PATH=${DIR}
 export CUSTOM_PI_OS_PATH=$(<"${DIR}/custompios_path")
 export PATH=$PATH:$CUSTOM_PI_OS_PATH
 
-if [[ "$1" == "iob-dietpi"* ]] ; then
+# variants that start with dietpi are built on top of the custom, preinstalled
+# DietPi image - but they still act as if they are install on boot - it's just
+# that almost all of the installation is already done in the build process and
+# becomes a no-op at first boot. That increases consistency without adding
+# significant overhead
+VARIANT="$1"
+[[ "$VARIANT" == "dietpi"* ]] && VARIANT="iob-${VARIANT}"
+if [[ "$VARIANT" == "iob-dietpi"* ]] ; then
     VERSION="$DIST_VERSION"
     GIT_COMMIT_SHA=$(git rev-parse HEAD)     # this means that this image WILL FAIL if the code wasn't pushed to GitHub
 
@@ -19,7 +26,7 @@ if [[ "$1" == "iob-dietpi"* ]] ; then
     7zr e -so "$BASE_ZIP_IMG" > "$BASE_IMG"
     echo "$BASE_IMG"
     MNT_DIR=$(mktemp -d)
-    if [[ "$1" == "iob-dietpi-fat-2" ]] ; then
+    if [[ "$VARIANT" == "iob-dietpi-fat-2" ]] ; then
         # what we want to do is this:
         # mount_image "$BASE_IMG" 1 "$MNT_DIR" "media" 2
         # but that unfortunately doesn't work if the fat partition is after the root partition
@@ -53,7 +60,7 @@ if [[ "$1" == "iob-dietpi"* ]] ; then
         sudo mount -o bind /dev/pts "$mount_path/dev/pts"
         sudo mount -o bind /proc "$mount_path/proc"
         CONFIG_DIR="media"
-    elif [[ "$1" == "iob-dietpi-root-only" ]] ; then
+    elif [[ "$VARIANT" == "iob-dietpi-root-only" ]] ; then
         # I think that's only the VM image, but let's keep it generic in the descriptor
         # here we don't need to mount a second partition at all; instead we just modify the files in /boot on the root partition
         # we do, however, need to make sure that the image is big enough - the VM disks come only with about a gig of storage which

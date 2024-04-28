@@ -36,7 +36,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [lepotato, orangepi-zero3-dietpi, orangepi-5plus-dietpi,nanopi-neo3-dietpi, pine64, raspberrypi64, raspberrypi-dietpi-64, raspberrypi32-pi3-bullseye-2022-04-04, x86-64-vm]
+        name: [lepotato, orangepi-zero3-dietpi, orangepi-5plus-dietpi,nanopi-neo3-dietpi, pine64, raspberrypi64, raspberrypi-dietpi-64, raspberrypi32-pi3-bullseye-2022-04-04, x86-64-vm, x86-64-native]
         include:
         - name: lepotato
           base_arch: arm64
@@ -88,6 +88,11 @@ jobs:
           base_arch: x86_64
           url: https://dietpi.com/downloads/images/DietPi_VM-x86_64-Bookworm.img.xz
           magic_path: "repository/src/image-dietpi/DietPi_VM-x86_64-Bookworm.img.xz"
+        - name: x86-64-native
+          variant: dietpi-root-only
+          base_arch: x86_64
+          dietpi_machine: 21
+          magic_path: "repository/src/image-dietpi/DietPi_NativePC-BIOS-x86_64-Bookworm.img.xz"
 
     env:
       IMG_NAME: ${{ matrix.name }}
@@ -95,6 +100,7 @@ jobs:
       VARIANT: ${{ matrix.variant }}
       IMAGE_URL: ${{ matrix.url }}
       MAGIC_PATH: ${{ matrix.magic_path }}
+      DIETPI_MACHINE: ${{ matrix.dietpi_machine }}
 
 
     steps:
@@ -123,6 +129,14 @@ jobs:
         show-progress: false
         path: CustomPiOS
 
+    - name: Checkout DietPi
+      uses: actions/checkout@v4
+      if: ${{ startsWith(env.VARIANT, 'dietpi') }}
+      with:
+        repository: dirkhh/DietPi
+        ref: adsbim
+        show-progress: false
+        path: DietPi
 
     - name: patch CustomPiOS to support running on x86_64
       run: |
@@ -131,19 +145,25 @@ jobs:
         patch -p1 < ../repository/src/0002-reduce-space-used-when-running-in-GitHub-action.patch
         patch -p1 < ../repository/src/0003-don-t-try-to-configure-wifi-if-it-isn-t-there.patch
 
-
-    - name: Update CustomPiOS Paths
+    - name: Update CustomPiOS Paths and create image directories
       run: |
         cd repository/src
         ../../CustomPiOS/src/update-custompios-paths
-
+        mkdir -p image image-armbian image-dietpi
 
     - name: Download image
+      if: ${{ ! startsWith(env.VARIANT, 'dietpi') }}
       run: |
         MAGIC_DIR=$(dirname "${MAGIC_PATH}")
         mkdir -p "${MAGIC_DIR}"
         wget -qO "${MAGIC_PATH}" "$IMAGE_URL"
 
+    - name: Build DietPi Image
+      if: ${{ startsWith(env.VARIANT, 'dietpi') }}
+      run: |
+        cd DietPi/.build/images
+        sudo G_GITOWNER=dirkhh G_GITBRANCH=adsbim ./dietpi-build -m ${{ env.DIETPI_MACHINE }} -o dirkhh -b adsbim --preinst 141 --sizeincrement 400
+        mv DietPi*.img.xz ../../../${{ env.MAGIC_PATH }}
 
     - name: create a reasonable tag for this run - either a short sha or the tag we were called with
       id: tag
@@ -187,7 +207,7 @@ jobs:
       env:
         BASE_RELEASE_COMPRESS: no
       run: |
-        if [[ "${VARIANT}" = "iob-dietpi"* ]] ; then
+        if [[ "${VARIANT}" = *"dietpi"* ]] ; then
           echo "this doesn't do anything"
         else
           cd repository/src
@@ -207,7 +227,7 @@ jobs:
         IMAGE="${{ steps.build.outputs.feeder_image_name }}"
         if [ "${VARIANT}" = "default" ]; then
           WORKSPACE="repository/src/workspace"
-        elif [[ "${VARIANT}" = "iob-dietpi"* ]] ; then
+        elif [[ "${VARIANT}" = *"dietpi"* ]] ; then
           WORKSPACE="repository/src/image-dietpi"
         else
           WORKSPACE="repository/src/workspace-${VARIANT}"
