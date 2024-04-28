@@ -1,6 +1,8 @@
 services:
   radarvirtuel_STAGE2NUM:
     image: ${RV_CONTAINER}
+    healthcheck:
+      disable: true
     tty: true
     container_name: radarvirtuel_STAGE2NUM
     hostname: radarvirtuel_STAGE2NUM

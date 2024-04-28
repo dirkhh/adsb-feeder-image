@@ -1,6 +1,8 @@
 services:
   fr24feed_STAGE2NUM:
     image: ${FR24_CONTAINER}
+    healthcheck:
+      disable: true
     tty: true
     container_name: fr24feed_STAGE2NUM
     restart: always

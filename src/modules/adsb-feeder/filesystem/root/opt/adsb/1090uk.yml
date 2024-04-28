@@ -1,6 +1,8 @@
 services:
   1090uk:
     image: ${TNUK_CONTAINER}
+    healthcheck:
+      disable: true
     tty: true
     container_name: radar1090uk
     restart: always

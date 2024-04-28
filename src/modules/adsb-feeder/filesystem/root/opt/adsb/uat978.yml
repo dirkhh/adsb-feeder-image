@@ -1,6 +1,8 @@
 services:
   dump978:
     image: ${UAT978_CONTAINER}
+    healthcheck:
+      disable: true
     tty: true
     container_name: dump978
     hostname: dump978

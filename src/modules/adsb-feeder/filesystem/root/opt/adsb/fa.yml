@@ -1,6 +1,8 @@
 services:
   piaware:
     image: ${FA_CONTAINER}
+    healthcheck:
+      disable: true
     tty: true
     container_name: piaware
     restart: always

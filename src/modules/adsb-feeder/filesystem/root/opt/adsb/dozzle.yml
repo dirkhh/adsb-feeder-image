@@ -2,6 +2,8 @@ services:
   dozzle:
     container_name: dozzle
     image: amir20/dozzle:latest
+    healthcheck:
+      disable: true
     restart: always
     environment:
       - DOZZLE_NO_ANALYTICS=1
@@ -15,6 +17,8 @@ services:
   adsb-setup-proxy:
     container_name: adsb-setup-proxy
     image: alpine
+    healthcheck:
+      disable: true
     stop_signal: SIGKILL
     command: tail -n500 -f /opt/adsb-setup.log
     volumes:
