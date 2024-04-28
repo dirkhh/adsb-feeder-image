@@ -4,7 +4,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "${DIR}/config"
 
 export DIST_PATH=${DIR}
-export CUSTOM_PI_OS_PATH=$(<${DIR}/custompios_path)
+export CUSTOM_PI_OS_PATH=$(<"${DIR}/custompios_path")
 export PATH=$PATH:$CUSTOM_PI_OS_PATH
 
 if [[ "$1" == "iob-dietpi"* ]] ; then
@@ -14,8 +14,7 @@ if [[ "$1" == "iob-dietpi"* ]] ; then
     # these are done completely differently, we really don't use CustomPiOS for those, but for
     # consistency we still use their framework so we can benefit from their tooling
     source "${CUSTOM_PI_OS_PATH}/common.sh"
-    VARIANT_CONFIG_DIR=$(realpath -s $(dirname $(realpath -s $BASH_SOURCE))/../..)
-    BASE_ZIP_IMG=`ls -t ${DIST_PATH}/image-dietpi/*.xz | head -n 1`
+    BASE_ZIP_IMG=$(ls -t "${DIST_PATH}"/image-dietpi/*.xz | head -n 1)
     BASE_IMG="${BASE_ZIP_IMG%.xz}"
     7zr e -so "$BASE_ZIP_IMG" > "$BASE_IMG"
     echo "$BASE_IMG"
@@ -39,20 +38,20 @@ if [[ "$1" == "iob-dietpi"* ]] ; then
 
         # mount root and boot partition
 
-        detach_all_loopback $image_path
+        detach_all_loopback "$image_path"
         echo "Mounting root parition"
         sudo losetup -f
-        sudo mount -o loop,offset=$root_offset,sizelimit=$( expr $boot_offset - $root_offset ) $image_path $mount_path/
+        sudo mount -o loop,offset=$root_offset,sizelimit="$(( boot_offset - root_offset ))" "$image_path" "$mount_path/"
         if [[ "$boot_partition" != "$root_partition" ]]; then
             echo "Mounting boot partition"
             sudo losetup -f
             sudo mount -o loop,offset=$boot_offset "${image_path}" "${mount_path}"/"${boot_mount_path}"
         fi
-        sudo mkdir -p $mount_path/dev/pts
-        sudo mkdir -p $mount_path/proc
-        sudo mount -o bind /dev $mount_path/dev
-        sudo mount -o bind /dev/pts $mount_path/dev/pts
-        sudo mount -o bind /proc $mount_path/proc
+        sudo mkdir -p "$mount_path/dev/pts"
+        sudo mkdir -p "$mount_path/proc"
+        sudo mount -o bind /dev "$mount_path/dev"
+        sudo mount -o bind /dev/pts "$mount_path/dev/pts"
+        sudo mount -o bind /proc "$mount_path/proc"
         CONFIG_DIR="media"
     elif [[ "$1" == "iob-dietpi-root-only" ]] ; then
         # I think that's only the VM image, but let's keep it generic in the descriptor
@@ -74,11 +73,11 @@ if [[ "$1" == "iob-dietpi"* ]] ; then
         boot_dev=$(findmnt -o SOURCE "${MNT_DIR}/media" | tail -1)
         fatlabel "$boot_dev" ADSB-FEEDER
     fi
-    sed -i "s/GIT_COMMIT_SHA/$GIT_COMMIT_SHA/" ${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh
-    sed -i "s/FEEDER_IMAGE_NAME/$FEEDER_IMAGE_NAME/" ${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh
-    sed -i "s/FEEDER_IMAGE_VERSION/$VERSION/" ${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh
-    sed -i "s/ADSB_RANDOM_PASSWORD/$ROOT_PWD/" ${DIR}/variants/iob-dietpi/dietpi.txt
-    echo "AUTO_SETUP_SSH_PUBKEY=$SSH_PUB_KEY" >> ${DIR}/variants/iob-dietpi/dietpi.txt
+    sed -i "s/GIT_COMMIT_SHA/$GIT_COMMIT_SHA/" "${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh"
+    sed -i "s/FEEDER_IMAGE_NAME/$FEEDER_IMAGE_NAME/" "${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh"
+    sed -i "s/FEEDER_IMAGE_VERSION/$VERSION/" "${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh"
+    sed -i "s/ADSB_RANDOM_PASSWORD/$ROOT_PWD/" "${DIR}/variants/iob-dietpi/dietpi.txt"
+    echo "AUTO_SETUP_SSH_PUBKEY=$SSH_PUB_KEY" >> "${DIR}/variants/iob-dietpi/dietpi.txt"
     cp "${DIR}/variants/iob-dietpi/dietpi.txt" "$MNT_DIR"/"$CONFIG_DIR"
     cp "${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh" "$MNT_DIR"/"$CONFIG_DIR"
     cp "${DIR}/modules/adsb-feeder/filesystem/root/boot/ADSB-README.txt" "$MNT_DIR"/"$CONFIG_DIR"
@@ -86,7 +85,7 @@ if [[ "$1" == "iob-dietpi"* ]] ; then
     exit 0
 else
     VERSION=$(bash "${DIR}/get_version.sh")
-    echo $VERSION > modules/adsb-feeder/filesystem/root/opt/adsb/adsb.im.version
+    echo "$VERSION" > modules/adsb-feeder/filesystem/root/opt/adsb/adsb.im.version
 
-    ${CUSTOM_PI_OS_PATH}/build_custom_os $@
+    "${CUSTOM_PI_OS_PATH}/build_custom_os" "$@"
 fi
