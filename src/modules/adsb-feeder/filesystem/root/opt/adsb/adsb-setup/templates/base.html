@@ -2,6 +2,7 @@
 <html lang="en">
 
 {% set no_port_url = request.scheme ~ "://" ~ request.host.rsplit(':', 1)[0] %}
+
 <head>
   <!-- Required meta tags -->
   <meta charset="utf-8" />
@@ -140,12 +141,16 @@
         .then(data => {
           data.forEach((d, i) => {
             let color_class = "text-danger";
+            let tooltip = "not receiving any data"
             if (d["pct"] > 10) {
               color_class = "text-success";
+              let tooltip = "receiving data"
             } else if (d["pct"] > 0 || d["secs"] > 60) {
               color_class = "text-warning";
+              let tooltip = "receiving unusually little data"
             }
             $("#mf_status_" + (i + 1)).attr('class', color_class);
+            $("#mf_status_" + (i + 1)).attr('title', tooltip);
             $("#mf_status_" + (i + 1)).text(d["pct"] + " pos/min");
           })
         })
