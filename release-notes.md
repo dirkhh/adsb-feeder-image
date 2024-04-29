@@ -1,4 +1,5 @@
 Changes since v2.0.0 include:
+- add a second set of DietPi images that should boot much quicker as most of the dependencies are installed at build time
 - make initial autogain adjustment quicker / no more restarting the decoder to change gain
 - fix dump978 when using rtl-sdr blog v4 SDR
 - add an option to remove the config link from the map
