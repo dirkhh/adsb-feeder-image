@@ -595,7 +595,7 @@ class AdsbIm:
 
         site_name = self._d.env_by_tags("site_name").list_get(0)
         now = datetime.now().replace(microsecond=0).isoformat().replace(":", "-")
-        download_name = f"adsb-feeder-config-{site_name}-{now}.zip"
+        download_name = f"adsb-feeder-config-{site_name}-{now}.backup"
         return send_file(
             pipeOut,
             mimetype="application/zip",
@@ -615,7 +615,7 @@ class AdsbIm:
             if file.filename == "":
                 flash("No file selected")
                 return redirect(request.url)
-            if file.filename.endswith(".zip"):
+            if file.filename.endswith(".zip") or file.filename.endswith(".backup"):
                 filename = secure_filename(file.filename)
                 restore_path = pathlib.Path("/opt/adsb/config/restore")
                 # clean up the restore path when saving a fresh zipfile
