@@ -1,4 +1,6 @@
 Changes since v2.0.0 include:
+- make initial autogain adjustment quicker / no more restarting the decoder to change gain
+- fix dump978 when using rtl-sdr blog v4 SDR
 - add an option to remove the config link from the map
 - change the file name extension of backups from .zip to .backup
 - disable docker healthcheck for all containers (hopefully improve MLAT on pi3)
