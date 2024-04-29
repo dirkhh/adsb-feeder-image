@@ -358,6 +358,7 @@ class AdsbIm:
             # ok, we don't have them explicitly set, so let's set them up
             # with the app defaults
             self._d.env_by_tags("webport").value = 1099
+            self._d.env_by_tags("tar1090_image_config_link").value = "http://HOSTNAME:1099/"
             self._d.env_by_tags("tar1090port").value = 1090
             self._d.env_by_tags("uatport").value = 1091
             self._d.env_by_tags("piamapport").value = 1092
@@ -1325,6 +1326,10 @@ class AdsbIm:
                     return render_template("/waitandredirect.html")
                 if key == "secure_image":
                     self.set_secure_image()
+                if key == "no_config_link":
+                    self._d.env_by_tags("tar1090_image_config_link").value = ""
+                if key == "allow_config_link":
+                    self._d.env_by_tags("tar1090_image_config_link").value = f"http://HOSTNAME:{self._d.env_by_tags('webport').value}/"
                 if key.startswith("update_feeder_aps"):
                     channel = key.rsplit("_", 1)[-1]
                     if channel == "branch":

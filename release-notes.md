@@ -1,4 +1,5 @@
 Changes since v2.0.0 include:
+- add an option to remove the config link from the map
 - change the file name extension of backups from .zip to .backup
 - disable docker healthcheck for all containers (hopefully improve MLAT on pi3)
 - add micro feeder status info to index and stage2 settings page

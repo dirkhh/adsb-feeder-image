@@ -79,7 +79,7 @@ services:
       - TAR1090_ENABLE_ACTUALRANGE=${AF_FALSE_ON_STAGE2:-true}
       - TAR1090_USEROUTEAPI=${FEEDER_TAR1090_USEROUTEAPI}
       - TAR1090_ROUTEAPIURL="https://adsb.im/api/0/routeset"
-      - TAR1090_IMAGE_CONFIG_LINK="http://HOSTNAME:${AF_WEBPORT}/"
+      - TAR1090_IMAGE_CONFIG_LINK="${FEEDER_TAR1090_IMAGE_CONFIG_LINK}"
       - TAR1090_IMAGE_CONFIG_TEXT="ADS-B Feeder Image Configuration"
       # options for the µImage:
       - TAR1090_ENABLE_AC_DB=${FEEDER_ENABLE_AC_DB:-true}

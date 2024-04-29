@@ -118,6 +118,45 @@
       </div>
     </form>
   </div>
+  {% if env_value_by_tag('tar1090_image_config_link') != '' %}
+  <div class="col-12 col-lg-6">
+    <h5 class="mt-3">Don't show config link on map page</h5>
+    <form method="POST" onsubmit="show_spinner(); return true;">
+      <div class="row align-items-center">
+        <div class="col-8">
+          <label for="no_config_link">If you want to share ONLY the map / statistics with others, but don't want to show
+            them the link to the adsb.im feeder image home page (which allows them to change the configuration), you can
+            disable it here. Please note that the user still can simply access that page by changing the port that they
+            access your feeder on from {{ env_value_by_tag('tar1090port') }} to {{ env_value_by_tag('webport') }},
+            unless you filter this out through some firewall settings (which isn't something this image supports).
+          </label>
+        </div>
+        <div class="col-4">
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="no_config_link" value="go">Update
+            Settings</button>
+        </div>
+      </div>
+    </form>
+  </div>
+  {% else %}
+  <div class="col-12 col-lg-6">
+    <h5 class="mt-3">Show config link on map page</h5>
+    <form method="POST" onsubmit="show_spinner(); return true;">
+      <div class="row align-items-center">
+        <div class="col-8">
+          <label for="no_config_link">Reenable the link to the adsb.im feeder image home page on the map page.
+            Please make sure that both the map port {{ env_value_by_tag('tar1090port') }} and the feeder UI port
+            {{ env_value_by_tag('webport') }} are accessible to users.
+          </label>
+        </div>
+        <div class="col-4">
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="allow_config_link" value="go">Update
+            Settings</button>
+        </div>
+      </div>
+    </form>
+  </div>
+  {% endif %}
   <div class="col-12 col-lg-6 {% if is_enabled('secure_image') %} d-none {% endif %}">
     <h5 class="mt-3">Shutdown/Reboot</h5>
     <form method="POST">
