@@ -58,27 +58,27 @@ jobs:
           variant: raspbian-bullseye
           url: https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2022-04-07/2022-04-04-raspios-bullseye-armhf-lite.img.xz
           magic_path: "repository/src/image/2022-04-04-raspios-bullseye-armhf-lite.img.xz"
-        - name: raspberrypi-dietpi-64
+        - name: raspberrypi-dietpi-64-iob
           base_arch: arm64
           variant: iob-dietpi-fat-1
           url: https://dietpi.com/downloads/images/DietPi_RPi-ARMv8-Bookworm.img.xz
           magic_path: "repository/src/image-dietpi/DietPi_RPi-ARMv8-Bookworm.img.xz"
-        - name: rpi5-dietpi-64
+        - name: rpi5-dietpi-64-iob
           base_arch: arm64
           variant: iob-dietpi-fat-1
           url: https://dietpi.com/downloads/images/testing/DietPi_RPi5-ARMv8-Bookworm.img.xz
           magic_path: "repository/src/image-dietpi/DietPi_RPi5-ARMv8-Bookworm.img.xz"
-        - name: nanopi-neo3-dietpi
+        - name: nanopi-neo3-dietpi-iob
           variant: iob-dietpi-fat-2
           base_arch: arm64
           url: https://dietpi.com/downloads/images/DietPi_NanoPiNEO3-ARMv8-Bookworm.img.xz
           magic_path: "repository/src/image-dietpi/DietPi_NanoPiNEO3-ARMv8-Bookworm.img.xz"
-        - name: orangepi-5plus-dietpi
+        - name: orangepi-5plus-dietpi-iob
           variant: iob-dietpi-fat-2
           base_arch: arm64
           url: https://dietpi.com/downloads/images/DietPi_OrangePi5Plus-ARMv8-Bookworm.img.xz
           magic_path: "repository/src/image-dietpi/DietPi_OrangePi5Plus-ARMv8-Bookworm.img.xz"
-        - name: orangepi-zero3-dietpi
+        - name: orangepi-zero3-dietpi-iob
           variant: iob-dietpi-fat-2
           base_arch: arm64
           url: https://dietpi.com/downloads/images/DietPi_OrangePiZero3-ARMv8-Bookworm.img.xz
@@ -93,6 +93,33 @@ jobs:
           base_arch: x86_64
           dietpi_machine: 21
           magic_path: "repository/src/image-dietpi/DietPi_NativePC-BIOS-x86_64-Bookworm.img"
+        - name: raspberrypi-dietpi-64
+          base_arch: arm64
+          variant: dietpi-fat-1
+          dietpi_machine: 4
+          magic_path: "repository/src/image-dietpi/DietPi_RPi-ARMv8-Bookworm.img"
+        - name: rpi5-dietpi-64
+          base_arch: arm64
+          variant: dietpi-fat-1
+          dietpi_machine: 5
+          magic_path: "repository/src/image-dietpi/DietPi_RPi5-ARMv8-Bookworm.img"
+        - name: orangepi-zero3-dietpi
+          variant: dietpi-fat-2
+          base_arch: arm64
+          dietpi_machine: 83.1
+          magic_path: "repository/src/image-dietpi/DietPi_OrangePiZero3-ARMv8-Bookworm.img"
+        - name: nanopi-neo3-dietpi
+          variant: dietpi-fat-2
+          base_arch: arm64
+          dietpi_machine: 56
+          magic_path: "repository/src/image-dietpi/DietPi_NanoPiNEO3-ARMv8-Bookworm.img"
+        - name: orangepi-5plus-dietpi
+          variant: dietpi-fat-2
+          base_arch: arm64
+          dietpi_machine: 82
+          magic_path: "repository/src/image-dietpi/DietPi_OrangePi5Plus-ARMv8-Bookworm.img"
+
+
 
     env:
       IMG_NAME: ${{ matrix.name }}
