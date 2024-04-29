@@ -189,7 +189,7 @@ jobs:
       if: ${{ startsWith(env.VARIANT, 'dietpi') }}
       run: |
         cd DietPi/.build/images
-        sudo G_GITOWNER=dirkhh G_GITBRANCH=adsbim ./dietpi-build -m ${{ env.DIETPI_MACHINE }} -o dirkhh -b adsbim --preinst 141 --sizeincrement 400
+        sudo G_GITOWNER=dirkhh G_GITBRANCH=adsbim ./dietpi-build -m ${{ env.DIETPI_MACHINE }} -o dirkhh -b adsbim --preinst 141 --sizeincrement 500
         mv DietPi*.img ../../../${{ env.MAGIC_PATH }}
 
     - name: create a reasonable tag for this run - either a short sha or the tag we were called with
