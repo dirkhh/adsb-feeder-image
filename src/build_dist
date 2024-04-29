@@ -21,9 +21,13 @@ if [[ "$VARIANT" == "iob-dietpi"* ]] ; then
     # these are done completely differently, we really don't use CustomPiOS for those, but for
     # consistency we still use their framework so we can benefit from their tooling
     source "${CUSTOM_PI_OS_PATH}/common.sh"
-    BASE_ZIP_IMG=$(ls -t "${DIST_PATH}"/image-dietpi/*.xz | head -n 1)
-    BASE_IMG="${BASE_ZIP_IMG%.xz}"
-    7zr e -so "$BASE_ZIP_IMG" > "$BASE_IMG"
+    if [[ $(ls "${DIST_PATH}"/image-dietpi/DietPi*.img 2> /dev/null | wc -l) != 0 ]] ; then
+        BASE_IMG=$(ls -t "${DIST_PATH}"/image-dietpi/DietPi*.img | head -n 1)
+    else
+        BASE_ZIP_IMG=$(ls -t "${DIST_PATH}"/image-dietpi/*.xz | head -n 1)
+        BASE_IMG="${BASE_ZIP_IMG%.xz}"
+        7zr e -so "$BASE_ZIP_IMG" > "$BASE_IMG"
+    fi
     echo "$BASE_IMG"
     MNT_DIR=$(mktemp -d)
     if [[ "$VARIANT" == "iob-dietpi-fat-2" ]] ; then

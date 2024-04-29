@@ -92,7 +92,7 @@ jobs:
           variant: dietpi-root-only
           base_arch: x86_64
           dietpi_machine: 21
-          magic_path: "repository/src/image-dietpi/DietPi_NativePC-BIOS-x86_64-Bookworm.img.xz"
+          magic_path: "repository/src/image-dietpi/DietPi_NativePC-BIOS-x86_64-Bookworm.img"
 
     env:
       IMG_NAME: ${{ matrix.name }}
@@ -163,7 +163,7 @@ jobs:
       run: |
         cd DietPi/.build/images
         sudo G_GITOWNER=dirkhh G_GITBRANCH=adsbim ./dietpi-build -m ${{ env.DIETPI_MACHINE }} -o dirkhh -b adsbim --preinst 141 --sizeincrement 400
-        mv DietPi*.img.xz ../../../${{ env.MAGIC_PATH }}
+        mv DietPi*.img ../../../${{ env.MAGIC_PATH }}
 
     - name: create a reasonable tag for this run - either a short sha or the tag we were called with
       id: tag
