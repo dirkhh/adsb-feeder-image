@@ -183,6 +183,18 @@ jobs:
     - name: Build Image
       id: build
       run: |
+        if [[ ${IMG_NAME} == *x86-64-vm* ]] ; then
+          # this is where we run out of space. Bugger.
+          echo "remaining space before cleanup $(df -h .)"
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          sudo rm -rf /usr/local/lib/android
+          sudo apt-get autoremove -y >/dev/null 2>&1 || true
+          sudo apt-get autoclean -y >/dev/null 2>&1 || true
+          echo "remaining space now $(df -h .)"
+        fi
         sudo modprobe loop
         cd repository/src
         if [ "${DIETPI_NATIVE}" = "1" ] ; then
@@ -223,7 +235,7 @@ jobs:
     - name: Copy output
       id: copy
       run: |
-        find -name "*.img*" || true
+        mkdir -p uploads
         CURRENT_IMAGE_NAME="$(basename $MAGIC_PATH)"
         echo "${CURRENT_IMAGE_NAME}"
         IMAGE="${{ steps.build.outputs.feeder_image_name }}"
@@ -234,34 +246,31 @@ jobs:
         else
           WORKSPACE="repository/src/workspace-${VARIANT}"
         fi
-        sudo chmod 777 -R "$WORKSPACE"
-
-        sudo chmod 777 .
+        ls -l "$WORKSPACE"
         BUILT_IMAGE="$(find $WORKSPACE -name "*.img" | head -n 1)"
-        mv -v "${BUILT_IMAGE}" "${IMAGE}"
-        sudo chmod 777 "${IMAGE}"
-
+        sudo mv -v "${BUILT_IMAGE}" uploads/"${IMAGE}"
+        if [[ ${IMG_NAME} == *x86-64-vm* ]] ; then
+          for img in $(find $WORKSPACE -name "DietPi_*.xz") ; do
+            base_name=$(basename "$img")
+            nodiet=${base_name#DietPi_}
+            nobookworm=${nodiet/-Bookworm/}
+            echo "$img -> $nodiet -> $nobookworm"
+            final_name="adsb-im-${{ steps.tag.outputs.tag }}-${nobookworm}"
+            sudo mv -v "$img" uploads/"${final_name}"
+          done
+        fi
 
     - name: Compress img
       id: compress
       run: |
+        cd uploads
         export IMAGE="${{ steps.build.outputs.feeder_image_name }}"
         case ${IMAGE} in
         *-x86-64-vm*)
-          # this is where we run out of space. Bugger.
-          echo "remaining space before cleanup $(df -h .)"
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /opt/ghc
-          sudo rm -rf /usr/local/share/boost
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-          sudo rm -rf /usr/local/lib/android
-          sudo apt-get autoremove -y >/dev/null 2>&1 || true
-          sudo apt-get autoclean -y >/dev/null 2>&1 || true
-          echo "remaining space now $(df -h .)"
           NAME=${IMAGE%.img}
           echo "name: ${NAME}"
           if [ "${DIETPI_NATIVE}" != "1" ] ; then
-            cp repository/src/tools/pve-vmcreate.sh .
+            cp ../repository/src/tools/pve-vmcreate.sh .
             qemu-img convert -f raw ${IMAGE} -O qcow2 ${NAME}.qcow2
             XZ_OPT="-T0 --fast" tar cJf ${NAME}-proxmox.tar.xz ${NAME}.qcow2 pve-vmcreate.sh
             echo "created tar file ${NAME}-proxmox.tar.xz"
@@ -291,7 +300,7 @@ jobs:
         token: ${{ secrets.PAT_GITHUB_TOKEN }}
         generate_release_notes: true
         body_path: repository/release-notes.md
-        files: ${{ steps.compress.outputs.image }}
+        files: uploads/*
 
 
     - name: Upload to GitHub as beta release
@@ -302,8 +311,7 @@ jobs:
         generate_release_notes: true
         body_path: repository/release-notes.md
         prerelease: true
-        files: ${{ steps.compress.outputs.image }}
-
+        files: uploads/*
 
     - name: Upload non-release artifacts
       uses: softprops/action-gh-release@v2
@@ -314,4 +322,4 @@ jobs:
         prerelease: true
         tag_name: latest
         name: testbuild-${{ steps.tag.outputs.tag }}
-        files: ${{ steps.compress.outputs.image }}
+        files: uploads/*

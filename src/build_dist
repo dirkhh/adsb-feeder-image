@@ -93,6 +93,18 @@ if [[ "$VARIANT" == "iob-dietpi"* ]] ; then
     cp "${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh" "$MNT_DIR"/"$CONFIG_DIR"
     cp "${DIR}/modules/adsb-feeder/filesystem/root/boot/ADSB-README.txt" "$MNT_DIR"/"$CONFIG_DIR"
     unmount_image "$MNT_DIR"
+    if [[ "$VARIANT" == "iob-dietpi-root-only" && "$BASE_IMG" == *"VM"* ]] ; then
+        # now let's create all of the different VM images that DietPi knows about
+        if [[ ! -d "${DIR}/../../DietPi" ]] ; then
+            echo "DietPi not found in \${DIR}/../../"
+            ls -l "${DIR}/../../"
+            exit 0
+        fi
+        cd image-dietpi || exit 0
+        G_GITOWNER=dirkhh G_GITBRANCH=adsbim ../../../DietPi/.build/images/dietpi-build -v all   -m 20 -o dirkhh -b adsbim --createvms
+        pwd
+        ls -l
+    fi
     exit 0
 else
     VERSION=$(bash "${DIR}/get_version.sh")
