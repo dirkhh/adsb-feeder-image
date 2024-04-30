@@ -58,36 +58,11 @@ jobs:
           variant: raspbian-bullseye
           url: https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2022-04-07/2022-04-04-raspios-bullseye-armhf-lite.img.xz
           magic_path: "repository/src/image/2022-04-04-raspios-bullseye-armhf-lite.img.xz"
-        - name: raspberrypi-dietpi-64-iob
-          base_arch: arm64
-          variant: iob-dietpi-fat-1
-          url: https://dietpi.com/downloads/images/DietPi_RPi-ARMv8-Bookworm.img.xz
-          magic_path: "repository/src/image-dietpi/DietPi_RPi-ARMv8-Bookworm.img.xz"
-        - name: rpi5-dietpi-64-iob
-          base_arch: arm64
-          variant: iob-dietpi-fat-1
-          url: https://dietpi.com/downloads/images/testing/DietPi_RPi5-ARMv8-Bookworm.img.xz
-          magic_path: "repository/src/image-dietpi/DietPi_RPi5-ARMv8-Bookworm.img.xz"
-        - name: nanopi-neo3-dietpi-iob
-          variant: iob-dietpi-fat-2
-          base_arch: arm64
-          url: https://dietpi.com/downloads/images/DietPi_NanoPiNEO3-ARMv8-Bookworm.img.xz
-          magic_path: "repository/src/image-dietpi/DietPi_NanoPiNEO3-ARMv8-Bookworm.img.xz"
-        - name: orangepi-5plus-dietpi-iob
-          variant: iob-dietpi-fat-2
-          base_arch: arm64
-          url: https://dietpi.com/downloads/images/DietPi_OrangePi5Plus-ARMv8-Bookworm.img.xz
-          magic_path: "repository/src/image-dietpi/DietPi_OrangePi5Plus-ARMv8-Bookworm.img.xz"
-        - name: orangepi-zero3-dietpi-iob
-          variant: iob-dietpi-fat-2
-          base_arch: arm64
-          url: https://dietpi.com/downloads/images/DietPi_OrangePiZero3-ARMv8-Bookworm.img.xz
-          magic_path: "repository/src/image-dietpi/DietPi_OrangePiZero3-ARMv8-Bookworm.img.xz"
         - name: x86-64-vm
-          variant: iob-dietpi-root-only
+          variant: dietpi-root-only
           base_arch: x86_64
-          url: https://dietpi.com/downloads/images/DietPi_VM-x86_64-Bookworm.img.xz
-          magic_path: "repository/src/image-dietpi/DietPi_VM-x86_64-Bookworm.img.xz"
+          dietpi_machine: 20
+          magic_path: "repository/src/image-dietpi/DietPi_VM-x86_64-Bookworm.img"
         - name: x86-64-native
           variant: dietpi-root-only
           base_arch: x86_64

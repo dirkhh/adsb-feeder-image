@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# set up ADS-B Feeder as image (and not just as app)
-# this only ever gets used on bookwork (or later)
-apt install -y --no-install-recommends python3-flask python3-requests
-
 # install chrony for better time synchronization compared to systemd-timesyncd
 # when chrony is installed it's imperative that CONFIG_NTP_MODE=0
 # (custom/disabled) is set in dietpi.txt to avoid breakage of dietpi-update
@@ -28,8 +24,6 @@ apt install -y --no-install-recommends chrony
     BLOCKED_MODULES+=("rtl2832")
     BLOCKED_MODULES+=("rtl2838")
     BLOCKED_MODULES+=("dvb_core")
-    echo -n "Getting the latest RTL-SDR packages... "
-    apt-get install -q -y git rtl-sdr
     echo -n "Getting the latest UDEV rules... "
     mkdir -p /etc/udev/rules.d /etc/udev/hwdb.d
     # First install the UDEV rules for RTL-SDR dongles
