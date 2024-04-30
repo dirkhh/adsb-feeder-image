@@ -1,4 +1,5 @@
 Changes since v2.0.0 include:
+- fix out of space build error preventing some images from getting built
 - further improvements of boot time for DietPi images
 - add missing Env variable that broke the option to remove the config link from the map
 - add a second set of DietPi images that should boot much quicker as most of the dependencies are installed at build time
