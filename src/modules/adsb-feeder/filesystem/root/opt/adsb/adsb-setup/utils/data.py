@@ -186,6 +186,11 @@ class Data:
             default="",
             tags=["tar1090_configjs_append"],
         ),
+        Env(
+            "FEEDER_TAR1090_IMAGE_CONFIG_LINK",
+            default="http://HOSTNAME:80/",
+            tags=["tar1090_image_config_link"],
+        ),
         Env(  # this has no UI component, but we want to enable the advanced user to modify it in .env
             "TAR1090_RANGE_OUTLINE_DASH",
             default="[2,3]",
