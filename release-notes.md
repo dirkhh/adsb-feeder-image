@@ -1,4 +1,5 @@
 Changes since v2.0.0 include:
+- fix autogain reset for UAT SDRs
 - fix out of space build error preventing some images from getting built
 - further improvements of boot time for DietPi images
 - add missing Env variable that broke the option to remove the config link from the map

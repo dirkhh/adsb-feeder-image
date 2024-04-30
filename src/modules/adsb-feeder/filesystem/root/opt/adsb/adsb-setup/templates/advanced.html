@@ -35,7 +35,7 @@
       <input class="col-6 col-sm-3 ms-3" id="uatgain" name="uatgain" type="text" style="height: 2rem;"
              pattern="(?:autogain|\d+(?:.\d+)?)" title="A number between 0 and 50 or the word 'autogain'"
              value="{{ env_value_by_tag('uatgain') }}" />
-      <div class="col-12 form-check mt-3 ms-3{% if env_value_by_tag('gain') != 'autogain' %} d-none{% endif %}">
+      <div class="col-12 form-check mt-3 ms-3{% if env_value_by_tag('uatgain') != 'autogain' %} d-none{% endif %}">
         <input class=" form-check-input me-1" type="checkbox" name="resetuatgain" id="resetuatgain" />
         <label for="resetuatgain" class="form-check-label">Check to reset UAT autogain</label>
       </div>
