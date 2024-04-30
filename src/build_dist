@@ -92,6 +92,8 @@ if [[ "$VARIANT" == "iob-dietpi"* ]] ; then
     cp "${DIR}/variants/iob-dietpi/dietpi.txt" "$MNT_DIR"/"$CONFIG_DIR"
     cp "${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh" "$MNT_DIR"/"$CONFIG_DIR"
     cp "${DIR}/modules/adsb-feeder/filesystem/root/boot/ADSB-README.txt" "$MNT_DIR"/"$CONFIG_DIR"
+    # don't waste time on a distro update on first boot
+    touch "$MNT_DIR"/"$CONFIG_DIR"/dietpi/.skip_distro_upgrade
     unmount_image "$MNT_DIR"
     exit 0
 else
