@@ -1,11 +1,12 @@
 import json
 import os
+import tempfile
 from .util import print_err
 
-
-ENV_FILE_PATH = "/opt/adsb/config/.env"
-USER_ENV_FILE_PATH = "/opt/adsb/config/.env.user"
-JSON_FILE_PATH = "/opt/adsb/config/config.json"
+CONF_DIR="/opt/adsb/config"
+ENV_FILE_PATH = CONF_DIR + "/.env"
+USER_ENV_FILE_PATH = CONF_DIR + "/.env.user"
+JSON_FILE_PATH = CONF_DIR + "/config.json"
 
 
 def read_values_from_config_json():
@@ -27,7 +28,14 @@ def read_values_from_config_json():
 
 def write_values_to_config_json(data: dict):
     # print_err("writing .json file")
-    json.dump(data, open(JSON_FILE_PATH, "w"), indent=2)
+    try:
+        fd, tmp = tempfile.mkstemp(dir=CONF_DIR)
+        f = os.fdopen(fd, "w")
+        json.dump(data, f, indent=2)
+        f.close()
+        os.rename(tmp, JSON_FILE_PATH)
+    except:
+        print_err(f"Error writing config.json to {JSON_FILE_PATH}")
 
 
 def read_values_from_env_file():
