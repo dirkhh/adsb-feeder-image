@@ -30,9 +30,8 @@ def write_values_to_config_json(data: dict):
     # print_err("writing .json file")
     try:
         fd, tmp = tempfile.mkstemp(dir=CONF_DIR)
-        f = os.fdopen(fd, "w")
-        json.dump(data, f, indent=2)
-        f.close()
+        with os.fdopen(fd, "w") as f:
+            json.dump(data, f, indent=2)
         os.rename(tmp, JSON_FILE_PATH)
     except:
         print_err(f"Error writing config.json to {JSON_FILE_PATH}")
