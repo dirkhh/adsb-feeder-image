@@ -16,7 +16,7 @@ def read_values_from_config_json():
         # or the first run after an upgrade from a version that didn't use the config.json
         print_err("WARNING: config.json doesn't exist, populating from .env")
         values = read_values_from_env_file()
-        write_values_to_config_json(values)
+        write_values_to_config_json(values, reason="config.json didn't exist")
 
     ret = {}
     try:
@@ -26,9 +26,9 @@ def read_values_from_config_json():
     return ret
 
 
-def write_values_to_config_json(data: dict):
-    # print_err("writing .json file")
+def write_values_to_config_json(data: dict, reason="no reason provided"):
     try:
+        print_err(f"config.json write: {reason}")
         fd, tmp = tempfile.mkstemp(dir=CONF_DIR)
         with os.fdopen(fd, "w") as f:
             json.dump(data, f, indent=2)
