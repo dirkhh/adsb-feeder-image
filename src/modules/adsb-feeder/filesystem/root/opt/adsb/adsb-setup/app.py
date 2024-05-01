@@ -35,13 +35,6 @@ from utils.config import (
 )
 from utils.util import create_fake_info, make_int, print_err
 
-if not os.path.exists("/opt/adsb/config/config.json"):
-    print_err(
-        "No config.json found, this should have been created before starting adsb-setup"
-    )
-    values = read_values_from_env_file()
-    write_values_to_config_json(values)
-
 # nofmt: on
 # isort: off
 from flask import (
