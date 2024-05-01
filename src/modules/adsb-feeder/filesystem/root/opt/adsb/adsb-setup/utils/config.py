@@ -75,12 +75,12 @@ def write_values_to_env_file(values):
                     env_line = f"{key}{suffix}={value[i]}\n"
                     env_line = escape_env(env_line)
                     f.write(env_line)
-                    print_err(f"wrote {env_line.strip()} to .env")
+                    print_err(f"wrote {env_line.strip()} to .env", level=8)
             else:
                 env_line = f"{key}={value.strip() if type(value) == str else value}\n"
                 env_line = escape_env(env_line)
                 f.write(env_line)
-                print_err(f"wrote {env_line.strip()} to .env")
+                print_err(f"wrote {env_line.strip()} to .env", level=8)
     # write the user env in the form that can be easily inserted into the yml file
     # using the name here so it comes from the values passed in
     val = values.get("_ADSBIM_STATE_EXTRA_ENV", None)
