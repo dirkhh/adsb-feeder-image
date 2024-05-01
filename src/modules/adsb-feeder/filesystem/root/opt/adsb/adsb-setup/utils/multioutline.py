@@ -33,10 +33,7 @@ class MultiOutline:
             for i in look_at:
                 combined = False
                 for j in to_consider:
-                    if polygons[j].disjoint(polygons[i]):
-                        print(f"polygon {i} disjoint {j}")
-                    else:
-                        print(f"combine polygons {i} and {j}")
+                    if not polygons[j].disjoint(polygons[i]):
                         p = unary_union([polygons[j], polygons[i]])
                         polygons[j] = p
                         made_change = True
