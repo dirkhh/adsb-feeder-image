@@ -581,7 +581,7 @@ class Data:
 
         def adjust_bool(e, value):
             v = adjust_bool_impl(e, value)
-            print_err(f"adjust_bool({e}, {e.tags}) = {v}", level=2)
+            print_err(f"adjust_bool({e}, {e.tags}) = {v}", level=8)
             return v
 
         ret = {}
@@ -677,5 +677,5 @@ class Data:
             tags = [tags]
         e = self._get_enabled_env_by_tags(tags)
         ret = is_true(e.list_get(idx)) if e else False
-        print_err(f"list_is_enabled: {e}[{idx}] = {ret}", level=4)
+        print_err(f"list_is_enabled: {e}[{idx}] = {ret}", level=8)
         return ret
