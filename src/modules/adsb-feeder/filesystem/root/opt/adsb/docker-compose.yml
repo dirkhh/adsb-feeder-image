@@ -38,13 +38,13 @@ services:
       - READSB_ENABLE_BIASTEE=${FEEDER_ENABLE_BIASTEE}
       - READSB_AUTOGAIN_INITIAL_GAIN=40.2
       - READSB_AUTOGAIN_INITIAL_INTERVAL=60
+      - READSB_GAIN=autogain
       #
       # --------------------------------------------------
       # readsb/decoder parameters:
       - READSB_LAT=${FEEDER_LAT}
       - READSB_LON=${FEEDER_LONG}
       - READSB_ALT=${FEEDER_ALT_M}
-      - READSB_GAIN=${FEEDER_READSB_GAIN}
       - READSB_MODEAC=false
       - READSB_RX_LOCATION_ACCURACY=2
       - READSB_STATS_RANGE=true
