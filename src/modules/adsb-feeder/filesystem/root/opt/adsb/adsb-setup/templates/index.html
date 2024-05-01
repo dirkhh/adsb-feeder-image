@@ -334,10 +334,11 @@
         }
       });
     {% for agg, name, m, s in aggregators %}
+    {% set bit = 2 ** loop.index0 %}
     // agg {{ agg }}
-    {% for idx in ns.site_indices %}
+    {% for idx in ns.site_indices if matrix[idx] > 0 %}
     // idx {{ idx }}
-    {% if list_is_enabled(agg, idx) %}
+    {% if matrix[idx] | bitwise_and(bit) %}
     get_status("{{ agg }}", "{{ list_value_by_tag('mf_ip', idx)}}", {{ idx }});
   {% endif %}
   {% endfor %}

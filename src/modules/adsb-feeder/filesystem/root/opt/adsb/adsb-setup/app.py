@@ -151,7 +151,6 @@ class AdsbIm:
             ["avdelphi", "AVDelphi", "https://www.avdelphi.com/coverage.html", [""]],
             ["planespotters", "Planespotters", "https://radar.planespotters.net/", ["https://www.planespotters.net/feed/status"]],
             ["tat", "TheAirTraffic", "https://globe.theairtraffic.com/", ["https://theairtraffic.com/feed/myip/"]],
-            # on "pause" for a while... ["flyovr", "FLYOVR.io", "https://globe.flyovr.io/", ""],
             ["radarplane", "RadarPlane", "https://radarplane.com/", ["https://radarplane.com/feed"]],
             ["adsbfi", "adsb.fi", "https://globe.adsb.fi/", ["https://api.adsb.fi/v1/myip"]],
             ["adsbx", "ADSBExchange", "https://globe.adsbexchange.com/", ["https://www.adsbexchange.com/myip/"]],
@@ -231,7 +230,8 @@ class AdsbIm:
         self.update_meminfo()
 
         # finally, try to make sure that we have all the pieces that we need and recreate what's missing
-        for i in range(self._d.env_by_tags("num_micro_sites").value + 1):
+        n = self._d.env_by_tags("num_micro_sites").value + 1
+        for i in range(n):
             if not self._d.env_by_tags("adsblol_uuid").list_get(i):
                 self._d.env_by_tags("adsblol_uuid").list_set(i, str(uuid4()))
             if not self._d.env_by_tags("ultrafeeder_uuid").list_get(i):
@@ -312,7 +312,7 @@ class AdsbIm:
             "in": self._d.env_by_tags("image_name").value,
             "bn": self._d.env_by_tags("board_name").value,
             "bv": self._d.env_by_tags("base_version").value,
-            "cv": self._d.env_by_tags("base_version").value,
+            "cv": self._d.settings,
         }
         return b64encode(compress(pickle.dumps(image))).decode("utf-8")
 
@@ -351,7 +351,9 @@ class AdsbIm:
             # ok, we don't have them explicitly set, so let's set them up
             # with the app defaults
             self._d.env_by_tags("webport").value = 1099
-            self._d.env_by_tags("tar1090_image_config_link").value = "http://HOSTNAME:1099/"
+            self._d.env_by_tags("tar1090_image_config_link").value = (
+                "http://HOSTNAME:1099/"
+            )
             self._d.env_by_tags("tar1090port").value = 1090
             self._d.env_by_tags("uatport").value = 1091
             self._d.env_by_tags("piamapport").value = 1092
@@ -1322,7 +1324,9 @@ class AdsbIm:
                 if key == "no_config_link":
                     self._d.env_by_tags("tar1090_image_config_link").value = ""
                 if key == "allow_config_link":
-                    self._d.env_by_tags("tar1090_image_config_link").value = f"http://HOSTNAME:{self._d.env_by_tags('webport').value}/"
+                    self._d.env_by_tags("tar1090_image_config_link").value = (
+                        f"http://HOSTNAME:{self._d.env_by_tags('webport').value}/"
+                    )
                 if key.startswith("update_feeder_aps"):
                     channel = key.rsplit("_", 1)[-1]
                     if channel == "branch":
@@ -1902,11 +1906,15 @@ class AdsbIm:
             os.remove("/opt/adsb/adsb.im.passwd.and.keys")
         aggregators = copy.deepcopy(self.all_aggregators)
         url_start = request.host_url.rstrip("/ ")
+        n = self._d.env_by_tags("num_micro_sites").value + 1
+        matrix = [0] * n
         for idx in range(len(aggregators)):
+            agg = aggregators[idx][0]
             status_link_list = aggregators[idx][3]
             template_link = status_link_list[0]
             final_link = template_link
-            for i in range(self._d.env_by_tags("num_micro_sites").value + 1):
+            for i in range(n):
+                matrix[i] |= 1 << idx if self._d.list_is_enabled(agg, i) else 0
                 if template_link.startswith("/"):
                     final_link = url_start + template_link.replace(
                         "STG2IDX", "" if i == 0 else f"_{i}"
@@ -1923,6 +1931,7 @@ class AdsbIm:
                     status_link_list.append(final_link)
         print_err(f"final aggregator structure: {aggregators}")
         board = self._d.env_by_tags("board_name").value
+        self._d.settings = matrix
         # there are many other boards I should list here - but Pi 3 and Pi Zero are probably the most common
         stage2_suggestion = board.startswith("Raspberry") and not (
             board.startswith("Raspberry Pi 4") or board.startswith("Raspberry Pi 5")
@@ -1934,6 +1943,7 @@ class AdsbIm:
             tailscale_address=tailscale_address,
             zerotier_address=zerotier_address,
             stage2_suggestion=stage2_suggestion,
+            matrix=matrix,
         )
 
     @check_restart_lock

@@ -20,6 +20,7 @@ class Data:
     version_file = data_path / "adsb.im.version"
     secure_image_path = data_path / "adsb.im.secure_image"
     is_feeder_image = True
+    settings = None
     ultrafeeder = []
 
     _proxy_routes = [
@@ -53,7 +54,6 @@ class Data:
 
     @property
     def proxy_routes(self):
-
         ret = []
         for [endpoint, _env, path] in self._proxy_routes:
             env = "AF_" + _env.upper() + "_PORT"
@@ -74,7 +74,6 @@ class Data:
         return ret
 
     # these are the default values for the env file
-
     netconfigs = {
         "adsblol": NetConfig(
             "adsb,feed.adsb.lol,30004,beast_reduce_plus_out",
@@ -111,11 +110,6 @@ class Data:
             "",
             has_policy=True,
         ),
-        # "flyovr": NetConfig(
-        #    "adsb,feed.flyovr.io,30004,beast_reduce_plus_out",
-        #    "",
-        #    has_policy=False,
-        # ),
         "radarplane": NetConfig(
             "adsb,feed.radarplane.com,30001,beast_reduce_plus_out",
             "mlat,feed.radarplane.com,31090,39010",
@@ -473,11 +467,6 @@ class Data:
             default=[False],
             tags=["avdelphi", "ultrafeeder", "is_enabled"],
         ),
-        # Env(
-        #    "_ADSBIM_STATE_IS_ULTRAFEEDER_FLYOVR_ENABLED",
-        #    default=[False],
-        #    tags=["flyovr", "ultrafeeder", "is_enabled"],
-        # ),
         Env(
             "_ADSBIM_STATE_IS_ULTRAFEEDER_RADARPLANE_ENABLED",
             default=[False],
