@@ -76,7 +76,7 @@ class Env:
     def _write_value_to_file(self, new_value):
         values = read_values_from_config_json()
         values[self._name] = new_value
-        write_values_to_config_json(values)
+        write_values_to_config_json(values, reason=f"{self._name} = {new_value}")
 
     def __str__(self):
         return f"Env({self._name}, {self._value})"

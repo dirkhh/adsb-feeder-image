@@ -241,7 +241,7 @@ class AdsbIm:
         # now all the envs are loaded and reconciled with the data on file - which means we should
         # actually write out the potentially updated values (e.g. when plain values were converted
         # to lists)
-        write_values_to_config_json(self._d.envs)
+        write_values_to_config_json(self._d.envs, reason="Startup")
 
     def update_boardname(self):
         board = ""
@@ -715,7 +715,7 @@ class AdsbIm:
                                 # this overwrites the value in the file we just restored with the current value of the running image,
                                 # iow it doesn't restore that value from the backup
                                 values[e.name] = e.value
-                        write_values_to_config_json(values)
+                        write_values_to_config_json(values, reason="execute_restore from .env")
 
             # clean up the restore path
             restore_path = pathlib.Path("/opt/adsb/config/restore")
