@@ -1,4 +1,5 @@
 Changes since v2.0.0 include:
+- make logs less verbose and improve the diagnostic uploader
 - add ready to go VM images, drop the iob builds, drop the 32bit Pi3 build
 - fix autogain reset for UAT SDRs
 - fix out of space build error preventing some images from getting built
