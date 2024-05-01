@@ -3,7 +3,7 @@ import os
 import tempfile
 from .util import print_err
 
-CONF_DIR="/opt/adsb/config"
+CONF_DIR = "/opt/adsb/config"
 ENV_FILE_PATH = CONF_DIR + "/.env"
 USER_ENV_FILE_PATH = CONF_DIR + "/.env.user"
 JSON_FILE_PATH = CONF_DIR + "/config.json"
@@ -53,10 +53,12 @@ def read_values_from_env_file():
         print_err("Failed to read .env file")
     return ret
 
+
 def escape_env(line):
     # docker compose does weird stuff if there are $ in the env vars
     # escape them using $$
-    return line.replace('$', '$$')
+    return line.replace("$", "$$")
+
 
 def write_values_to_env_file(values):
     # print_err("writing .env file")

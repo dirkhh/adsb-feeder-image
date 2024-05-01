@@ -259,20 +259,16 @@ class AggStatus:
             if a_dict and status == 200:
                 uuid = self._d.env_by_tags("ultrafeeder_uuid").list_get(self._idx)
                 beast_clients = a_dict.get("beast_clients")
-                print_err(f"alife returned {beast_clients}")
+                # print_err(f"alife returned {beast_clients}", level=8)
                 if beast_clients:
-                    for bc in beast_clients:
-                        print_err(f"alife: {uuid} -- {bc.get('uuid')}")
                     self._beast = (
                         T.Yes
                         if any(bc.get("uuid") == uuid for bc in beast_clients)
                         else T.No
                     )
                 mlat_clients = a_dict.get("mlat_clients")
-                print_err(f"alife returned {mlat_clients}")
+                # print_err(f"alife returned {mlat_clients}")
                 if mlat_clients:
-                    for mc in mlat_clients:
-                        print_err(f"alife: {uuid} -- {mc.get('uuid')}")
                     self._mlat = (
                         T.Yes
                         if any(
