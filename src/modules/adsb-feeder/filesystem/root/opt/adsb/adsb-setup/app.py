@@ -208,6 +208,7 @@ class AdsbIm:
         self.app.add_url_rule("/advanced", "advanced", self.advanced, methods=["GET", "POST"])
         self.app.add_url_rule("/visualization", "visualization", self.visualization, methods=["GET", "POST"])
         self.app.add_url_rule("/expert", "expert", self.expert, methods=["GET", "POST"])
+        self.app.add_url_rule("/systemmgmt", "systemmgmt", self.systemmgmt, methods=["GET", "POST"])
         self.app.add_url_rule("/aggregators", "aggregators", self.aggregators, methods=["GET", "POST"])
         self.app.add_url_rule("/", "director", self.director, methods=["GET", "POST"])
         self.app.add_url_rule("/index", "index", self.index)
@@ -388,19 +389,19 @@ class AdsbIm:
             # we are running as an app under DietPi or some other OS
             self._d.is_feeder_image = False
             with open(
-                self._d.data_path / "adsb-setup/templates/expert.html", "r+"
-            ) as expert_file:
-                expert_html = expert_file.read()
-                expert_file.seek(0)
-                expert_file.write(
+                self._d.data_path / "adsb-setup/templates/systemmgmt.html", "r+"
+            ) as systemmgmt_file:
+                systemmgmt_html = systemmgmt_file.read()
+                systemmgmt_file.seek(0)
+                systemmgmt_file.write(
                     re.sub(
                         "FULL_IMAGE_ONLY_START.*? FULL_IMAGE_ONLY_END",
                         "",
-                        expert_html,
+                        systemmgmt_html,
                         flags=re.DOTALL,
                     )
                 )
-                expert_file.truncate()
+                systemmgmt_file.truncate()
             # v1.3.4 ended up not installing the correct port definitions - if that's
             # the case, then insert them into the settings
             self.setup_app_ports()
@@ -717,7 +718,9 @@ class AdsbIm:
                                 # this overwrites the value in the file we just restored with the current value of the running image,
                                 # iow it doesn't restore that value from the backup
                                 values[e.name] = e.value
-                        write_values_to_config_json(values, reason="execute_restore from .env")
+                        write_values_to_config_json(
+                            values, reason="execute_restore from .env"
+                        )
 
             # clean up the restore path
             restore_path = pathlib.Path("/opt/adsb/config/restore")
@@ -1229,8 +1232,6 @@ class AdsbIm:
             # this adjusts the gain while readsb is running
             tryWriteFile("/run/adsb-feeder-ultrafeeder/readsb/setGain", f"{gain}\n")
 
-
-
     @check_restart_lock
     def update(self):
         description = """
@@ -1425,7 +1426,7 @@ class AdsbIm:
                     login_link = match.group(1)
                     print_err(f"found login link {login_link}")
                     self._d.env_by_tags("tailscale_ll").value = login_link
-                    return redirect(url_for("expert"))
+                    return redirect(url_for("systemmgmt"))
                 # tailscale handling uses 'continue' to avoid deep nesting - don't add other keys
                 # here at the end - instead insert them before tailscale
                 continue
@@ -1693,6 +1694,12 @@ class AdsbIm:
     def expert(self):
         if request.method == "POST":
             return self.update()
+        return render_template("expert.html")
+
+    @check_restart_lock
+    def systemmgmt(self):
+        if request.method == "POST":
+            return self.update()
         if self._d.is_feeder_image:
             # is tailscale set up?
             try:
@@ -1720,7 +1727,7 @@ class AdsbIm:
         # if we are on a branch that's neither stable nor beta, pass the value to the template
         # so that a third update button will be shown
         return render_template(
-            "expert.html",
+            "systemmgmt.html",
             rpw=self.rpw,
             channel=self.extract_channel(),
         )

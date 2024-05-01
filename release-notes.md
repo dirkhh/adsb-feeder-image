@@ -1,4 +1,6 @@
 Changes since v2.0.0 include:
+- more UI reshuffling: create system mgmt page and move things that should be under system to that page from the Expert page
+- more UI reshuffling: move backup/restore into the menu under System
 - make heatmap shown consistent regardless from where you get to it
 - ultrafeeder/rtlsdr: on the fly gain changes without restarting the decoder or container
 - make logs less verbose and improve the diagnostic uploader
