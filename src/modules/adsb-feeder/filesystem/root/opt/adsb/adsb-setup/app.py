@@ -1202,6 +1202,35 @@ class AdsbIm:
         for i in range(num, self._d.env_by_tags("num_micro_sites").value):
             create_stage2_yml_files(i, self._d.env_by_tags("mf_ip").list_get(i))
 
+    def setRtlGain(self):
+        def tryWriteFile(path, string):
+            try:
+                with open(path, "w") as file:
+                    file.write(string)
+            except:
+                print_err(f'error writing "{string}" to {path}')
+
+        gaindir = pathlib.Path("/opt/adsb/config/ultrafeeder/globe_history/autogain")
+        gaindir.mkdir(exist_ok=True, parents=True)
+        gain = self._d.env_by_tags(["gain"]).value
+
+        # autogain is configured via the container env vars to be always enabled
+        # so we can change gain on the fly without changing env vars
+        # for manual gain the autogain script in the container can be asked to do nothing
+        # by touching the suspend file
+        if gain == "autogain":
+            (gaindir / "suspend").unlink(missing_ok=True)
+        else:
+            (gaindir / "suspend").touch(exist_ok=True)
+
+            # this file sets the gain on readsb start
+            tryWriteFile(gaindir / "gain", f"{gain}\n")
+
+            # this adjusts the gain while readsb is running
+            tryWriteFile("/run/adsb-feeder-ultrafeeder/readsb/setGain", f"{gain}\n")
+
+
+
     @check_restart_lock
     def update(self):
         description = """
@@ -1620,6 +1649,10 @@ class AdsbIm:
 
         # set all of the ultrafeeder config data up
         self.setup_ultrafeeder_args()
+
+        # set rtl-sdr 1090 gain, bit hacky but means we don't have to restart the bulky ultrafeeder for gain changes
+        if rtlsdr:
+            self.setRtlGain()
 
         # finally, check if this has given us enough configuration info to
         # start the containers
