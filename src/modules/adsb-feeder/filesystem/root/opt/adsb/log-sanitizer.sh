@@ -5,13 +5,14 @@
 SANITISED_LOG=$(</opt/adsb/adsb-setup.log)
 
 # We set vars to empty
-SANITISE_VARS="""FEEDER_LAT FEEDER_LONG ADSBLOL_UUID AF_MICRO_IP ULTRAFEEDER_UUID FEEDER_1090UK_API_KEY
+SANITISE_VARS="FEEDER_LAT FEEDER_LONG ADSBLOL_UUID AF_MICRO_IP ULTRAFEEDER_UUID FEEDER_1090UK_API_KEY
 FEEDER_ADSBHUB_STATION_KEY FEEDER_FR24_SHARING_KEY FEEDER_FR24_UAT_SHARING_KEY
 FEEDER_PLANEWATCH_API_KEY FEEDER_RADARBOX_SHARING_KEY FEEDER_RV_FEEDER_KEY
-_ADSB_STATE_SSH_KEY FEEDER_PIAWARE_FEEDER_ID FEEDER_RADARBOX_SHARING_KEY FEEDER_RADARBOX_SN"""
+_ADSB_STATE_SSH_KEY FEEDER_PIAWARE_FEEDER_ID FEEDER_RADARBOX_SHARING_KEY FEEDER_RADARBOX_SN
+FEEDER_PLANEFINDER_SHARECODE FEEDER_OPENSKY_USERNAME FEEDER_OPENSKY_SERIAL FEEDER_HEYWHATSTHAT_ID"
 
 # We set vars that cannot be empty, have to be stripped
-IMPORTANT_VARS="FEEDER_LAT FEEDER_LONG ADSBLOL_UUID AF_MICRO_IP ULTRAFEEDER_UUID"
+IMPORTANT_VARS="FEEDER_LAT FEEDER_LONG AF_MICRO_IP"
 
 # For each
 for VAR in $SANITISE_VARS; do
@@ -21,11 +22,10 @@ for VAR in $SANITISE_VARS; do
   if [ -z "$MY_VAR" ] ; then
     if [[ "$IMPORTANT_VARS" == *"$VAR"* ]]; then
       # If we are here, it means that the variable is empty, and it is one of the important ones
-      echo "ERROR: $VAR is empty, this is a critical variable, exiting"
-      exit 1
+      echo "WARNING: $VAR is empty, this is a critical variable, exiting"
     fi
   else
-    echo "handling ${MY_VARa} for ${VAR}"
+    echo "handling ${MY_VAR} for ${VAR}"
     SANITISED_LOG=$(echo "$SANITISED_LOG" | sed "s/${MY_VAR}/MY_REAL_${VAR}/g")
     # Otherwise we just strip it out, and put it back into SANITISED_LOG
   fi
