@@ -147,10 +147,10 @@
             let tooltip = "not receiving any data"
             if (d["pct"] > 10) {
               color_class = "text-success";
-              let tooltip = "receiving data"
+              tooltip = "receiving data"
             } else if (d["pct"] > 0 || d["secs"] > 60) {
               color_class = "text-warning";
-              let tooltip = "receiving unusually little data"
+              tooltip = "receiving unusually little data"
             }
             $("#mf_status_" + (i + 1)).attr('class', color_class);
             $("#mf_status_" + (i + 1)).attr('title', tooltip);
