@@ -1216,7 +1216,10 @@ class AdsbIm:
                 print_err(f'error writing "{string}" to {path}')
 
         gaindir = pathlib.Path("/opt/adsb/config/ultrafeeder/globe_history/autogain")
-        gaindir.mkdir(exist_ok=True, parents=True)
+        try:
+            gaindir.mkdir(exist_ok=True, parents=True)
+        except:
+            pass
         gain = self._d.env_by_tags(["gain"]).value
 
         # autogain is configured via the container env vars to be always enabled
