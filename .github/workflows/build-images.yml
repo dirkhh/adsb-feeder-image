@@ -36,7 +36,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [lepotato, nanopi-neo3-dietpi, orangepi-5plus-dietpi, orangepi-zero3-dietpi, pine64, raspberrypi64, raspberrypi64-dietpi-pi-2-3-4, raspberrypi64-dietpi-pi-5, x86-64-native, x86-64-vm]
+        name: [lepotato, nanopi-neo3-dietpi, orangepi-5plus-dietpi, orangepi-zero3-dietpi, pine64, raspberrypi64-pi-2-3-4-5, raspberrypi64-dietpi-pi-2-3-4, raspberrypi64-dietpi-pi-5, x86-64-native, x86-64-vm]
         include:
         - name: lepotato
           base_arch: arm64
@@ -63,7 +63,7 @@ jobs:
           base_arch: arm64
           url: https://redirect.armbian.com/region/EU/pine64/Bookworm_current_minimal
           magic_path: "repository/src/image-armbian/pine64.img.xz"
-        - name: raspberrypi64
+        - name: raspberrypi64-pi-2-3-4-5
           base_arch: arm64
           variant: default
           url: https://downloads.raspberrypi.com/raspios_lite_arm64/images/raspios_lite_arm64-2024-03-15/2024-03-15-raspios-bookworm-arm64-lite.img.xz
