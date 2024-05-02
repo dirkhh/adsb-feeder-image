@@ -36,7 +36,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [lepotato, nanopi-neo3-dietpi, orangepi-5plus-dietpi, orangepi-zero3-dietpi, pine64, raspberrypi64-pi-2-3-4-5, raspberrypi64-dietpi-pi-2-3-4, raspberrypi64-dietpi-pi-5, x86-64-native, x86-64-vm]
+        name: [lepotato, nanopi-neo3-dietpi, orangepi-5plus-dietpi, orangepi-zero3-dietpi, raspberrypi64-pi-2-3-4-5, raspberrypi64-dietpi-pi-2-3-4, raspberrypi64-dietpi-pi-5, x86-64-native, x86-64-vm]
         include:
         - name: lepotato
           base_arch: arm64
@@ -58,11 +58,6 @@ jobs:
           base_arch: arm64
           dietpi_machine: 83.1
           magic_path: "repository/src/image-dietpi/DietPi_OrangePiZero3-ARMv8-Bookworm.img"
-        - name: pine64
-          variant: armbian
-          base_arch: arm64
-          url: https://redirect.armbian.com/region/EU/pine64/Bookworm_current_minimal
-          magic_path: "repository/src/image-armbian/pine64.img.xz"
         - name: raspberrypi64-pi-2-3-4-5
           base_arch: arm64
           variant: default
