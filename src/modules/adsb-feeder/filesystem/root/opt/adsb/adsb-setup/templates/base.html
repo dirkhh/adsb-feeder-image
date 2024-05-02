@@ -30,7 +30,7 @@
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
           <!-- Live Map -->
           <li class="nav-item {% if not is_enabled('base_config') %}d-none{% endif %}"><a class="nav-link"
-               href="/map">Live Map</a></li>
+               href="/map{{ env_value_by_tag('tar1090_query_params') }}">Live Map</a></li>
           <!-- Additional Maps -->
           <li class="nav-item dropdown {% if not is_enabled('base_config') %}d-none{% endif %}">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMaps" role="button"
@@ -47,7 +47,8 @@
                 <a class="dropdown-item" href="#">{{site}} &raquo;</a>
                 <ul class="dropdown-menu dropdown-submenu">
                   {% set url = no_port_url ~ ":" ~ (loop.index0 + 8090) %}
-                  <li><a class="dropdown-item" href="{{ url }}">Main Map</a></li>
+                  <li><a class="dropdown-item" href="{{ url }}/{{env_value_by_tag('tar1090_query_params') }}">Main
+                      Map</a></li>
                   <li><a class="dropdown-item" href="{{ url }}/?heatmap">Heatmap</a></li>
                   <li><a class="dropdown-item" href="{{ url }}/?pTracks">Tracks</a></li>
                   <li><a class="dropdown-item" href="{{ url }}/?replay">Replay</a></li>
