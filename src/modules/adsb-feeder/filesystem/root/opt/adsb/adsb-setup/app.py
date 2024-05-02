@@ -740,6 +740,8 @@ class AdsbIm:
             self.update_boardname()
             self.update_version()
 
+            self.setRtlGain()
+
             # make sure we are connected to the right Zerotier network
             zt_network = self._d.env_by_tags("zerotierid").value
             if (
