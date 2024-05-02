@@ -7,7 +7,11 @@ from utils.util import make_int, print_err
 
 
 n = make_int(sys.argv[1] if len(sys.argv) > 1 else 1)
-mo_data = MultiOutline().create(n)
+try:
+    mo_data = MultiOutline().create(n)
+except:
+    print_err("failed to MultiOutline class - maybe just a timing issue?")
+    exit(1)
 
 # now we need to inject this into the stage2 tar1090
 with TemporaryDirectory(prefix="/tmp/adsb") as tmpdir:

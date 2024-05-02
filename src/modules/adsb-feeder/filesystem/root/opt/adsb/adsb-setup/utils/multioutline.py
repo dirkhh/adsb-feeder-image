@@ -19,14 +19,23 @@ class MultiOutline:
 
     def create(self, num):
         data = self._get_outlines(num)
+        num = len(data)
         result = {"multiRange": []}
         polygons = []
         for i in range(len(data)):
-            polygons.append(
-                Polygon(shell=LinearRing(data[i]["actualRange"]["last24h"]["points"]))
-            )
+            try:
+                polygons.append(
+                    Polygon(
+                        shell=LinearRing(data[i]["actualRange"]["last24h"]["points"])
+                    )
+                )
+            except:
+                num -= 1
+                print(
+                    f"can't create linear ring from outline #{i} - maybe there is no data, yet?"
+                )
         made_change = True
-        look_at = range(1, len(data))
+        look_at = range(1, num)
         while made_change:
             made_change = False
             to_consider = [0]
