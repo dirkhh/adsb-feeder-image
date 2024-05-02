@@ -15,10 +15,6 @@ truncate -s 0 adsb-setup.log
 tail -n500 adsb-setup.log."$TIMESTAMP" >> adsb-setup.log
 find . -name adsb-setup.log.\* -ctime +7 | xargs rm -f
 
-if grep -q "^AF_IS_RADARBOX_ENABLED=True" config/.env ; then
-	docker restart rbfeeder
-fi
-
 # check in the .env file what we should do
 if grep -q "^AF_IS_NIGHTLY_BASE_UPDATE_ENABLED=True" config/.env ; then
 	# do an OS update - either using the DietPi update tool or by just using apt

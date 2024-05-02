@@ -740,6 +740,8 @@ class AdsbIm:
             self.update_boardname()
             self.update_version()
 
+            self.setRtlGain()
+
             # make sure we are connected to the right Zerotier network
             zt_network = self._d.env_by_tags("zerotierid").value
             if (
@@ -1214,7 +1216,10 @@ class AdsbIm:
                 print_err(f'error writing "{string}" to {path}')
 
         gaindir = pathlib.Path("/opt/adsb/config/ultrafeeder/globe_history/autogain")
-        gaindir.mkdir(exist_ok=True, parents=True)
+        try:
+            gaindir.mkdir(exist_ok=True, parents=True)
+        except:
+            pass
         gain = self._d.env_by_tags(["gain"]).value
 
         # autogain is configured via the container env vars to be always enabled

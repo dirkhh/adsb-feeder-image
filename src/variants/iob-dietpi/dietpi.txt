@@ -202,7 +202,7 @@ CONFIG_CHECK_DIETPI_UPDATES=1
 
 # Daily check for APT package updates: 0=disable | 1=check only | 2=check and upgrade automatically
 # - Upgrade logs can be found at: /var/tmp/dietpi/logs/dietpi-update_apt.log
-CONFIG_CHECK_APT_UPDATES=1
+CONFIG_CHECK_APT_UPDATES=0
 
 # Network time sync: 0=disabled | 1=boot only | 2=boot + daily | 3=boot + hourly | 4=Daemon + Drift
 CONFIG_NTP_MODE=1
