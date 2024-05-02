@@ -84,6 +84,20 @@ if [[ "$VARIANT" == "iob-dietpi"* ]] ; then
         boot_dev=$(findmnt -o SOURCE "${MNT_DIR}/media" | tail -1)
         fatlabel "$boot_dev" ADSB-FEEDER
     fi
+
+    if [[ "$CONFIG_DIR" == "media" ]]; then
+        pushd "$MNT_DIR/boot"
+        echo 'removing files that will be copied from the boot / FAT partition on first dietpi boot from /boot on partition'
+        # the copying uses cp -uv "$TMP_MOUNT/$f" /boot/ to copy them from the FAT partition to /boot
+        # see: /var/lib/dietpi/services/fs_partition_resize.sh
+        # thus if the files from the image build are newer the user settings / user wifi settings won't be copied
+        # remove them (on normal dietpi images /boot is empty ... not sure if the other files should be there or not)
+        rm -vf 'dietpi.txt' 'dietpi-wifi.txt' 'dietpiEnv.txt' 'unattended_pivpn.conf' 'Automation_Custom_PreScript.sh' 'Automation_Custom_Script.sh'
+        echo 'remaining files in /boot on partition 2:'
+        ls
+        popd
+    fi
+
     sed -i "s/GIT_COMMIT_SHA/$GIT_COMMIT_SHA/" "${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh"
     sed -i "s/FEEDER_IMAGE_NAME/$FEEDER_IMAGE_NAME/" "${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh"
     sed -i "s/FEEDER_IMAGE_VERSION/$VERSION/" "${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh"
