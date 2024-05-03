@@ -100,18 +100,19 @@ class UltrafeederConfig:
                     f"adsb,{self._d.env_by_tags('mf_ip').list_get(self._micro)},30978,uat_in"
                 )
 
-        remote_sdr = self._d.env_by_tags("remote_sdr").value
-        # make sure we only ever use 1 SDR / network input for ultrafeeder
-        if self._d.env_by_tags("readsb_device_type").value != "":
-            pass
-        elif self._d.is_enabled("airspy"):
-            ret.add("adsb,airspy_adsb,30005,beast_in")
-        elif self._d.is_enabled("sdrplay"):
-            ret.add("adsb,sdrplay-beast1090,30005,beast_in")
-        elif remote_sdr:
-            if remote_sdr.find(",") == -1:
-                remote_sdr += ",30005"
-            ret.add(f"adsb,{remote_sdr.replace(' ', '')},beast_in")
+        if not is_stage2:
+            remote_sdr = self._d.env_by_tags("remote_sdr").value
+            # make sure we only ever use 1 SDR / network input for ultrafeeder
+            if self._d.env_by_tags("readsb_device_type").value != "":
+                pass
+            elif self._d.is_enabled("airspy"):
+                ret.add("adsb,airspy_adsb,30005,beast_in")
+            elif self._d.is_enabled("sdrplay"):
+                ret.add("adsb,sdrplay-beast1090,30005,beast_in")
+            elif remote_sdr:
+                if remote_sdr.find(",") == -1:
+                    remote_sdr += ",30005"
+                ret.add(f"adsb,{remote_sdr.replace(' ', '')},beast_in")
 
         # finally, add user provided things
         ultrafeeder_extra_args = self._d.env_by_tags("ultrafeeder_extra_args").value
