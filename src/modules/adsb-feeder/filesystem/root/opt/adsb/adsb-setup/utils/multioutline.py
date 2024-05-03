@@ -1,6 +1,7 @@
 import json
 from shapely.geometry import LinearRing, Polygon
 from shapely.ops import unary_union
+from shapely import is_valid_reason
 
 
 class MultiOutline:
@@ -19,23 +20,24 @@ class MultiOutline:
 
     def create(self, num):
         data = self._get_outlines(num)
-        num = len(data)
         result = {"multiRange": []}
         polygons = []
         for i in range(len(data)):
             try:
-                polygons.append(
-                    Polygon(
-                        shell=LinearRing(data[i]["actualRange"]["last24h"]["points"])
-                    )
+                p = Polygon(
+                    shell=LinearRing(data[i]["actualRange"]["last24h"]["points"])
                 )
+                r = is_valid_reason(p)
+                if r == "Valid Geometry":
+                    polygons.append(p)
+                else:
+                    print(f"can't create polygon from outline #{i} - {r}")
             except:
-                num -= 1
                 print(
                     f"can't create linear ring from outline #{i} - maybe there is no data, yet?"
                 )
         made_change = True
-        look_at = range(1, num)
+        look_at = range(1, len(polygons))
         while made_change:
             made_change = False
             to_consider = [0]

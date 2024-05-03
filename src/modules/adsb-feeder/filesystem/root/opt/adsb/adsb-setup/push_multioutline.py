@@ -10,7 +10,7 @@ n = make_int(sys.argv[1] if len(sys.argv) > 1 else 1)
 try:
     mo_data = MultiOutline().create(n)
 except:
-    print_err("failed to MultiOutline class - maybe just a timing issue?")
+    print_err("failed to create MultiOutline class - maybe just a timing issue?")
     exit(1)
 
 # now we need to inject this into the stage2 tar1090
