@@ -2145,12 +2145,12 @@ if __name__ == "__main__":
         config_dir.mkdir()
         env_file = adsb_dir / ".env"
         if env_file.exists():
-            env_file.rename(config_dir / ".env")
+            shutil.move(env_file, config_dir / ".env")
 
     for config_file in adsb_dir.glob("*.yml"):
         if config_file.exists():
             new_file = config_dir / config_file.name
-            config_file.rename(new_file)
+            shutil.move(config_file, new_file)
             print_err(f"moved {config_file} to {new_file}")
 
     if not pathlib.Path(config_dir / ".env").exists():
