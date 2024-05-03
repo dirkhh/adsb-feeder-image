@@ -116,7 +116,7 @@ class AdsbIm:
         self._d = Data()
         self._system = System(data=self._d)
         self._sdrdevices = SDRDevices()
-        for i in range(0, self._d.env_by_tags("num_micro_sites").value + 1):
+        for i in ([0] + self.micro_indices()):
             self._d.ultrafeeder.append(UltrafeederConfig(data=self._d, micro=i))
 
         self._agg_status_instances = dict()
@@ -231,8 +231,7 @@ class AdsbIm:
         self.update_meminfo()
 
         # finally, try to make sure that we have all the pieces that we need and recreate what's missing
-        n = self._d.env_by_tags("num_micro_sites").value + 1
-        for i in range(n):
+        for i in ([0] + self.micro_indices()):
             if not self._d.env_by_tags("adsblol_uuid").list_get(i):
                 self._d.env_by_tags("adsblol_uuid").list_set(i, str(uuid4()))
             if not self._d.env_by_tags("ultrafeeder_uuid").list_get(i):
@@ -358,7 +357,7 @@ class AdsbIm:
 
     def setup_ultrafeeder_args(self):
         # set all of the ultrafeeder config data up
-        for i in range(1 + self._d.env_by_tags("num_micro_sites").value):
+        for i in ([0] + self.micro_indices()):
             print_err(f"ultrafeeder_config {i}", level=2)
             if i >= len(self._d.ultrafeeder):
                 self._d.ultrafeeder.append(UltrafeederConfig(data=self._d, micro=i))
@@ -860,7 +859,7 @@ class AdsbIm:
     def stage2_stats(self):
         ret = []
         if self._d.is_enabled("stage2"):
-            for i in range(1, 1 + self._d.env_by_tags("num_micro_sites").value):
+            for i in self.micro_indices():
                 ip = self._d.env_by_tags("mf_ip").list_get(i)
                 try:
                     with open(
@@ -1221,10 +1220,10 @@ class AdsbIm:
             else:
                 print_err(f"couldn't find env list for {tags}")
         self._d.env_by_tags("num_micro_sites").value -= 1
-        # finally, recreate the stage2 yml files for those feeders that shifted down
+        # recreate the stage2 yml files
         # the index is used to pick the correct environment variables, the IP address
         # is used to distinguish the globe history and graphs for each micro feeder
-        for i in range(num, self._d.env_by_tags("num_micro_sites").value + 1):
+        for i in self.micro_indices():
             create_stage2_yml_files(i, self._d.env_by_tags("mf_ip").list_get(i))
 
     def setRtlGain(self):
@@ -1271,7 +1270,7 @@ class AdsbIm:
             arg = make_int(referer[m_arg + 3 :])
         else:
             arg = 0
-        if 0 < arg <= self._d.env_by_tags("num_micro_sites").value:
+        if arg in self.micro_indices():
             sitenum = arg
             site = self._d.env_by_tags("site_name").list_get(sitenum)
         else:
@@ -2022,13 +2021,17 @@ class AdsbIm:
         self.update_dns_state()
         return render_template("setup.html", mem=self._memtotal)
 
+    def micro_indices(self):
+        # micro proxies start at 1
+        return list(range(1, self._d.env_by_tags("num_micro_sites").value + 1))
+
     @check_restart_lock
     def stage2(self):
         if request.method == "POST":
             return self.update()
         # update the info from the micro feeders
-        for i in range(self._d.env_by_tags("num_micro_sites").value):
-            self.get_base_info(i + 1)  # micro proxies start at 1
+        for i in self.micro_indices():
+            self.get_base_info(i)
         return render_template("stage2.html")
 
     def support(self):
