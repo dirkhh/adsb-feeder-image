@@ -487,10 +487,15 @@ class AdsbIm:
     def push_multi_outline(self) -> None:
         if not self._d.is_enabled("stage2"):
             return
-        subprocess.run(
-            f"bash /opt/adsb/push_multioutline.sh {self._d.env_by_tags('num_micro_sites').value}",
-            shell=True,
+        def push_mo():
+            subprocess.run(
+                f"bash /opt/adsb/push_multioutline.sh {self._d.env_by_tags('num_micro_sites').value}",
+                shell=True,
+            )
+        thread = threading.Thread(
+            target=push_mo,
         )
+        thread.start()
 
     def restarting(self):
         return render_template("restarting.html")
