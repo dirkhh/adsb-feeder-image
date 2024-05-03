@@ -698,11 +698,13 @@ class AdsbIm:
             unchanged: List[str] = []
             saw_globe_history = False
             saw_graphs = False
+            uf_paths = set()
             for name in restored_files:
-                if name.startswith("ultrafeeder/globe_history/"):
-                    saw_globe_history = True
-                elif name.startswith("ultrafeeder/graphs1090/"):
-                    saw_graphs = True
+                if name.startswith("ultrafeeder/"):
+                    parts = name.split("/")
+                    if len(parts) < 3:
+                        continue
+                    uf_paths.add(parts[0] + "/" + parts[1] + "/")
                 elif os.path.isfile(adsb_path / name):
                     if filecmp.cmp(adsb_path / name, restore_path / name):
                         print_err(f"{name} is unchanged")
@@ -710,10 +712,9 @@ class AdsbIm:
                     else:
                         print_err(f"{name} is different from current version")
                         changed.append(name)
-            if saw_globe_history:
-                changed.append("ultrafeeder/globe_history/")
-            if saw_graphs:
-                changed.append("ultrafeeder/graphs1090/")
+
+            changed += list(uf_paths)
+
             print_err(f"offering the usr to restore the changed files: {changed}")
             return render_template(
                 "/restoreexecute.html", changed=changed, unchanged=unchanged
