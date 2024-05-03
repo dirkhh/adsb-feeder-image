@@ -266,7 +266,27 @@ class AdsbIm:
                 if virt and virt != "none":
                     board = f"Virtualized {platform.machine()} environment under {virt}"
                 else:
-                    board = f"Native on {platform.machine()} system"
+                    prod = ""
+                    manufacturer = ""
+                    try:
+                        prod = subprocess.run(
+                            "dmidecode -s system-product-name",
+                            shell=True,
+                            capture_output=True,
+                            text=True,
+                        )
+                        manufacturer = subprocess.run(
+                            "dmidecode -s system-manufacturer",
+                            shell=True,
+                            capture_output=True,
+                            text=True,
+                        )
+                    except:
+                        pass
+                    if prod or manufacturer:
+                        board = f"Native on {manufacturer.stdout.strip()} {prod.stdout.strip()} {platform.machine()} system"
+                    else:
+                        board = f"Native on {platform.machine()} system"
         if board == "":
             board = f"Unknown {platform.machine()} system"
         if board == "Firefly roc-rk3328-cc":
