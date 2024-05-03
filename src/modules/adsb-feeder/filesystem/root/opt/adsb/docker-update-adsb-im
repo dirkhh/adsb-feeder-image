@@ -41,7 +41,6 @@ fi
 # then all images on this prune list are deleted
 echo "PRUNING:"
 echo "$PRUNE_LIST"
-exit
 docker rmi $PRUNE_LIST # unquoted expansion required
 echo "PRUNING DONE"
 
