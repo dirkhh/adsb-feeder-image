@@ -1224,7 +1224,7 @@ class AdsbIm:
         # finally, recreate the stage2 yml files for those feeders that shifted down
         # the index is used to pick the correct environment variables, the IP address
         # is used to distinguish the globe history and graphs for each micro feeder
-        for i in range(num, self._d.env_by_tags("num_micro_sites").value):
+        for i in range(num, self._d.env_by_tags("num_micro_sites").value + 1):
             create_stage2_yml_files(i, self._d.env_by_tags("mf_ip").list_get(i))
 
     def setRtlGain(self):
