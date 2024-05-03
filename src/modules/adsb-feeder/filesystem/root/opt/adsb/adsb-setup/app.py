@@ -528,12 +528,13 @@ class AdsbIm:
     def create_backup_zip(self, include_graphs=False, include_heatmap=False):
         adsb_path = self._d.config_path
 
-        def graphs1090_writeback():
+        def graphs1090_writeback(uf_path, microIndex):
             # the rrd file will be updated via move after collectd is done writing it out
             # so killing collectd and waiting for the mtime to change is enough
 
-            def timeSinceWrite():
-                rrd_file = adsb_path / "ultrafeeder/graphs1090/rrd/localhost.tar.gz"
+            rrd_file = uf_path / "graphs1090/rrd/localhost.tar.gz"
+
+            def timeSinceWrite(rrd_file):
                 # because of the way the file gets updated, it will briefly not exist
                 # when the new copy is moved in place, which will make os.stat unhappy
                 try:
@@ -541,16 +542,23 @@ class AdsbIm:
                 except:
                     return time.time() - 0  # fallback to long time since last write
 
-            if timeSinceWrite() < 120:
+            context = f"graphs1090 writeback {microIndex}"
+
+            t = timeSinceWrite(rrd_file)
+            if t < 120:
                 print_err(
-                    f"graphs1090 writeback: not needed, timeSinceWrite: {round(timeSinceWrite())}s"
+                    f"{context}: not needed, timeSinceWrite: {round(t)}s"
                 )
                 return
 
-            print_err("graphs1090 writeback: requesting")
+            print_err(f"{context}: requesting")
             try:
+                if microIndex == 0:
+                    uf_container = "ultrafeeder"
+                else:
+                    uf_container = f"ultrafeeder_stage2_{microIndex}"
                 subprocess.call(
-                    "docker exec ultrafeeder pkill collectd", timeout=5.0, shell=True
+                    f"docker exec {uf_container} pkill collectd", timeout=5.0, shell=True
                 )
             except:
                 print_err(
@@ -564,8 +572,8 @@ class AdsbIm:
                 while count < 30:
                     count += increment
                     sleep(increment)
-                    if timeSinceWrite() < 120:
-                        print_err("graphs1090 writeback: success")
+                    if timeSinceWrite(rrd_file) < 120:
+                        print_err(f"{context}: success")
                         break
 
         fdOut, fdIn = os.pipe()
@@ -577,30 +585,36 @@ class AdsbIm:
                 with fobj as file, zipfile.ZipFile(file, mode="w") as backup_zip:
                     backup_zip.write(adsb_path / "config.json", arcname="config.json")
 
-                    if include_heatmap:
-                        uf_path = pathlib.Path(adsb_path / "ultrafeeder/globe_history")
-                        if uf_path.is_dir():
-                            for subpath in uf_path.iterdir():
+                    for microIndex in ([0] + self.micro_indices()):
+                        if microIndex == 0:
+                            uf_path = adsb_path / "ultrafeeder"
+                        else:
+                            uf_path = adsb_path / "ultrafeeder" / self._d.env_by_tags("mf_ip").list_get(microIndex)
+
+                        gh_path = uf_path / "globe_history"
+                        if include_heatmap and gh_path.is_dir():
+                            for subpath in gh_path.iterdir():
                                 pstring = str(subpath)
-                                if pstring.endswith(
-                                    "internal_state"
-                                ) or pstring.endswith("tar1090-update"):
+                                if subpath.name == "internal_state":
                                     continue
+                                if subpath.name == "tar1090-update":
+                                    continue
+
+                                print_err(f"add: {pstring}")
                                 for f in subpath.rglob("*"):
                                     backup_zip.write(
                                         f, arcname=f.relative_to(adsb_path)
                                     )
 
-                    # do graphs after heatmap data as this can pause a couple seconds in graphs1090_writeback
-                    # due to buffers, the download won't be recognized by the browsers until some data is added to the zipfile
-                    if include_graphs:
-                        graphs1090_writeback()
-                        graphs_path = pathlib.Path(
-                            adsb_path / "ultrafeeder/graphs1090/rrd/localhost.tar.gz"
-                        )
-                        backup_zip.write(
-                            graphs_path, arcname=graphs_path.relative_to(adsb_path)
-                        )
+                        # do graphs after heatmap data as this can pause a couple seconds in graphs1090_writeback
+                        # due to buffers, the download won't be recognized by the browsers until some data is added to the zipfile
+                        if include_graphs:
+                            graphs1090_writeback(uf_path, microIndex)
+                            graphs_path = uf_path / "graphs1090/rrd/localhost.tar.gz"
+                            backup_zip.write(
+                                graphs_path, arcname=graphs_path.relative_to(adsb_path)
+                            )
+
             except BrokenPipeError:
                 print_err(f"warning: backup download aborted mid-stream")
 
