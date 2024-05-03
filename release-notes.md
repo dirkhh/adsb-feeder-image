@@ -1,4 +1,5 @@
 Changes since v2.0.0 include:
+- app mode: carefully prune docker images (only prune images that are used by adsb.im)
 - add option to set default tar1090 query arguments to the expert page
 - minor updates to the image name, DietPi WiFi config issues, and unnecessary work being done (the latter to reduce load that causes some of the remaining RPi3 MLAT issues)
 - more UI reshuffling: create system mgmt page and move things that should be under system to that page from the Expert page
