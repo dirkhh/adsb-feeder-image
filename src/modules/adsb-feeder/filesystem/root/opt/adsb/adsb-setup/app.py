@@ -116,7 +116,7 @@ class AdsbIm:
         self._d = Data()
         self._system = System(data=self._d)
         self._sdrdevices = SDRDevices()
-        for i in range(0, self._d.env_by_tags("num_micro_sites").value + 1):
+        for i in ([0] + self.micro_indices()):
             self._d.ultrafeeder.append(UltrafeederConfig(data=self._d, micro=i))
 
         self._agg_status_instances = dict()
@@ -231,8 +231,7 @@ class AdsbIm:
         self.update_meminfo()
 
         # finally, try to make sure that we have all the pieces that we need and recreate what's missing
-        n = self._d.env_by_tags("num_micro_sites").value + 1
-        for i in range(n):
+        for i in ([0] + self.micro_indices()):
             if not self._d.env_by_tags("adsblol_uuid").list_get(i):
                 self._d.env_by_tags("adsblol_uuid").list_set(i, str(uuid4()))
             if not self._d.env_by_tags("ultrafeeder_uuid").list_get(i):
@@ -358,7 +357,7 @@ class AdsbIm:
 
     def setup_ultrafeeder_args(self):
         # set all of the ultrafeeder config data up
-        for i in range(1 + self._d.env_by_tags("num_micro_sites").value):
+        for i in ([0] + self.micro_indices()):
             print_err(f"ultrafeeder_config {i}", level=2)
             if i >= len(self._d.ultrafeeder):
                 self._d.ultrafeeder.append(UltrafeederConfig(data=self._d, micro=i))
@@ -488,10 +487,15 @@ class AdsbIm:
     def push_multi_outline(self) -> None:
         if not self._d.is_enabled("stage2"):
             return
-        subprocess.run(
-            f"bash /opt/adsb/push_multioutline.sh {self._d.env_by_tags('num_micro_sites').value}",
-            shell=True,
+        def push_mo():
+            subprocess.run(
+                f"bash /opt/adsb/push_multioutline.sh {self._d.env_by_tags('num_micro_sites').value}",
+                shell=True,
+            )
+        thread = threading.Thread(
+            target=push_mo,
         )
+        thread.start()
 
     def restarting(self):
         return render_template("restarting.html")
@@ -524,12 +528,13 @@ class AdsbIm:
     def create_backup_zip(self, include_graphs=False, include_heatmap=False):
         adsb_path = self._d.config_path
 
-        def graphs1090_writeback():
+        def graphs1090_writeback(uf_path, microIndex):
             # the rrd file will be updated via move after collectd is done writing it out
             # so killing collectd and waiting for the mtime to change is enough
 
-            def timeSinceWrite():
-                rrd_file = adsb_path / "ultrafeeder/graphs1090/rrd/localhost.tar.gz"
+            rrd_file = uf_path / "graphs1090/rrd/localhost.tar.gz"
+
+            def timeSinceWrite(rrd_file):
                 # because of the way the file gets updated, it will briefly not exist
                 # when the new copy is moved in place, which will make os.stat unhappy
                 try:
@@ -537,16 +542,23 @@ class AdsbIm:
                 except:
                     return time.time() - 0  # fallback to long time since last write
 
-            if timeSinceWrite() < 120:
+            context = f"graphs1090 writeback {microIndex}"
+
+            t = timeSinceWrite(rrd_file)
+            if t < 120:
                 print_err(
-                    f"graphs1090 writeback: not needed, timeSinceWrite: {round(timeSinceWrite())}s"
+                    f"{context}: not needed, timeSinceWrite: {round(t)}s"
                 )
                 return
 
-            print_err("graphs1090 writeback: requesting")
+            print_err(f"{context}: requesting")
             try:
+                if microIndex == 0:
+                    uf_container = "ultrafeeder"
+                else:
+                    uf_container = f"ultrafeeder_stage2_{microIndex}"
                 subprocess.call(
-                    "docker exec ultrafeeder pkill collectd", timeout=5.0, shell=True
+                    f"docker exec {uf_container} pkill collectd", timeout=5.0, shell=True
                 )
             except:
                 print_err(
@@ -560,8 +572,8 @@ class AdsbIm:
                 while count < 30:
                     count += increment
                     sleep(increment)
-                    if timeSinceWrite() < 120:
-                        print_err("graphs1090 writeback: success")
+                    if timeSinceWrite(rrd_file) < 120:
+                        print_err(f"{context}: success")
                         break
 
         fdOut, fdIn = os.pipe()
@@ -573,30 +585,36 @@ class AdsbIm:
                 with fobj as file, zipfile.ZipFile(file, mode="w") as backup_zip:
                     backup_zip.write(adsb_path / "config.json", arcname="config.json")
 
-                    if include_heatmap:
-                        uf_path = pathlib.Path(adsb_path / "ultrafeeder/globe_history")
-                        if uf_path.is_dir():
-                            for subpath in uf_path.iterdir():
+                    for microIndex in ([0] + self.micro_indices()):
+                        if microIndex == 0:
+                            uf_path = adsb_path / "ultrafeeder"
+                        else:
+                            uf_path = adsb_path / "ultrafeeder" / self._d.env_by_tags("mf_ip").list_get(microIndex)
+
+                        gh_path = uf_path / "globe_history"
+                        if include_heatmap and gh_path.is_dir():
+                            for subpath in gh_path.iterdir():
                                 pstring = str(subpath)
-                                if pstring.endswith(
-                                    "internal_state"
-                                ) or pstring.endswith("tar1090-update"):
+                                if subpath.name == "internal_state":
                                     continue
+                                if subpath.name == "tar1090-update":
+                                    continue
+
+                                print_err(f"add: {pstring}")
                                 for f in subpath.rglob("*"):
                                     backup_zip.write(
                                         f, arcname=f.relative_to(adsb_path)
                                     )
 
-                    # do graphs after heatmap data as this can pause a couple seconds in graphs1090_writeback
-                    # due to buffers, the download won't be recognized by the browsers until some data is added to the zipfile
-                    if include_graphs:
-                        graphs1090_writeback()
-                        graphs_path = pathlib.Path(
-                            adsb_path / "ultrafeeder/graphs1090/rrd/localhost.tar.gz"
-                        )
-                        backup_zip.write(
-                            graphs_path, arcname=graphs_path.relative_to(adsb_path)
-                        )
+                        # do graphs after heatmap data as this can pause a couple seconds in graphs1090_writeback
+                        # due to buffers, the download won't be recognized by the browsers until some data is added to the zipfile
+                        if include_graphs:
+                            graphs1090_writeback(uf_path, microIndex)
+                            graphs_path = uf_path / "graphs1090/rrd/localhost.tar.gz"
+                            backup_zip.write(
+                                graphs_path, arcname=graphs_path.relative_to(adsb_path)
+                            )
+
             except BrokenPipeError:
                 print_err(f"warning: backup download aborted mid-stream")
 
@@ -680,11 +698,13 @@ class AdsbIm:
             unchanged: List[str] = []
             saw_globe_history = False
             saw_graphs = False
+            uf_paths = set()
             for name in restored_files:
-                if name.startswith("ultrafeeder/globe_history/"):
-                    saw_globe_history = True
-                elif name.startswith("ultrafeeder/graphs1090/"):
-                    saw_graphs = True
+                if name.startswith("ultrafeeder/"):
+                    parts = name.split("/")
+                    if len(parts) < 3:
+                        continue
+                    uf_paths.add(parts[0] + "/" + parts[1] + "/")
                 elif os.path.isfile(adsb_path / name):
                     if filecmp.cmp(adsb_path / name, restore_path / name):
                         print_err(f"{name} is unchanged")
@@ -692,10 +712,9 @@ class AdsbIm:
                     else:
                         print_err(f"{name} is different from current version")
                         changed.append(name)
-            if saw_globe_history:
-                changed.append("ultrafeeder/globe_history/")
-            if saw_graphs:
-                changed.append("ultrafeeder/graphs1090/")
+
+            changed += list(uf_paths)
+
             print_err(f"offering the usr to restore the changed files: {changed}")
             return render_template(
                 "/restoreexecute.html", changed=changed, unchanged=unchanged
@@ -860,7 +879,7 @@ class AdsbIm:
     def stage2_stats(self):
         ret = []
         if self._d.is_enabled("stage2"):
-            for i in range(1, 1 + self._d.env_by_tags("num_micro_sites").value):
+            for i in self.micro_indices():
                 ip = self._d.env_by_tags("mf_ip").list_get(i)
                 try:
                     with open(
@@ -1221,10 +1240,10 @@ class AdsbIm:
             else:
                 print_err(f"couldn't find env list for {tags}")
         self._d.env_by_tags("num_micro_sites").value -= 1
-        # finally, recreate the stage2 yml files for those feeders that shifted down
+        # recreate the stage2 yml files
         # the index is used to pick the correct environment variables, the IP address
         # is used to distinguish the globe history and graphs for each micro feeder
-        for i in range(num, self._d.env_by_tags("num_micro_sites").value + 1):
+        for i in self.micro_indices():
             create_stage2_yml_files(i, self._d.env_by_tags("mf_ip").list_get(i))
 
     def setRtlGain(self):
@@ -1271,7 +1290,7 @@ class AdsbIm:
             arg = make_int(referer[m_arg + 3 :])
         else:
             arg = 0
-        if 0 < arg <= self._d.env_by_tags("num_micro_sites").value:
+        if arg in self.micro_indices():
             sitenum = arg
             site = self._d.env_by_tags("site_name").list_get(sitenum)
         else:
@@ -2022,13 +2041,17 @@ class AdsbIm:
         self.update_dns_state()
         return render_template("setup.html", mem=self._memtotal)
 
+    def micro_indices(self):
+        # micro proxies start at 1
+        return list(range(1, self._d.env_by_tags("num_micro_sites").value + 1))
+
     @check_restart_lock
     def stage2(self):
         if request.method == "POST":
             return self.update()
         # update the info from the micro feeders
-        for i in range(self._d.env_by_tags("num_micro_sites").value):
-            self.get_base_info(i + 1)  # micro proxies start at 1
+        for i in self.micro_indices():
+            self.get_base_info(i)
         return render_template("stage2.html")
 
     def support(self):
