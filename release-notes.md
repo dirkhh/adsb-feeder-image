@@ -1,30 +1,5 @@
-Changes since v2.0.0 include:
+Changes since v2.0.1 include:
 - add backup + restore for stage2 microproxies
-- app mode: carefully prune docker images (only prune images that are used by adsb.im)
-- add option to set default tar1090 query arguments to the expert page
-- minor updates to the image name, DietPi WiFi config issues, and unnecessary work being done (the latter to reduce load that causes some of the remaining RPi3 MLAT issues)
-- more UI reshuffling: create system mgmt page and move things that should be under system to that page from the Expert page
-- more UI reshuffling: move backup/restore into the menu under System
-- make heatmap shown consistent regardless from where you get to it
-- ultrafeeder/rtlsdr: on the fly gain changes without restarting the decoder or container
-- make logs less verbose and improve the diagnostic uploader
-- add ready to go VM images, drop the iob builds, drop the 32bit Pi3 build
-- fix autogain reset for UAT SDRs
-- fix out of space build error preventing some images from getting built
-- further improvements of boot time for DietPi images
-- add missing Env variable that broke the option to remove the config link from the map
-- add a second set of DietPi images that should boot much quicker as most of the dependencies are installed at build time
-- make initial autogain adjustment quicker / no more restarting the decoder to change gain
-- fix dump978 when using rtl-sdr blog v4 SDR
-- add an option to remove the config link from the map
-- change the file name extension of backups from .zip to .backup
-- disable docker healthcheck for all containers (hopefully improve MLAT on pi3)
-- add micro feeder status info to index and stage2 settings page
-- work around broken PlaneFinder container on RPi5
-- re-enable tar1090 update at start
-- add multi-outline for stage 2 maps
-- various small UI adjustments
-
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)
