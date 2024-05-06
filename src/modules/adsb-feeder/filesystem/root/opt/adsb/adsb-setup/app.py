@@ -1064,7 +1064,10 @@ class AdsbIm:
             base_info, status = generic_get_json(f"http://{ip}:1099/api/base_info")
         if status == 200 and base_info != None:
             print_err(f"got {base_info} for {ip}")
-            self._d.env_by_tags("site_name").list_set(n, base_info["name"])
+            if do_import:
+                # only accept the remote name if this is our initial import
+                # after that they user may have overwritten it
+                self._d.env_by_tags("site_name").list_set(n, base_info["name"])
             self._d.env_by_tags("lat").list_set(n, base_info["lat"])
             self._d.env_by_tags("lng").list_set(n, base_info["lng"])
             self._d.env_by_tags("alt").list_set(n, base_info["alt"])
