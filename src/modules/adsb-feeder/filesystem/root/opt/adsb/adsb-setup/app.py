@@ -1161,7 +1161,7 @@ class AdsbIm:
             self._d.env_by_tags("mf_ip").list_get(i) for i in self.micro_indices()
         }:
             print_err(f"IP address {ip} already listed as a micro site")
-            return False
+            return (False, f"IP address {ip} already listed as a micro site")
         print_err(
             f"setting up a new micro site at {ip} do_import={do_import} do_restore={do_restore}"
         )
@@ -1183,7 +1183,7 @@ class AdsbIm:
             self._d.env_by_tags("tz").list_set(n, "UTC")
             self._d.env_by_tags("mf_version").list_set(n, "not an adsb.im feeder")
             self._d.env_by_tags(["uat978", "is_enabled"]).list_set(n, uat)
-            return True
+            return (True, "")
 
         # now let's see if we can get the data from the micro feeder
         if self.get_base_info(n + 1, do_import=do_import):
@@ -1198,10 +1198,10 @@ class AdsbIm:
         else:
             # oh well, remove the IP address
             self._d.env_by_tags("mf_ip").list_remove()
-            return False
+            return (False, "unable to get base info from micro feeder")
 
         self._d.env_by_tags(["uat978", "is_enabled"]).list_set(n, uat)
-        return True
+        return (True, "")
 
     def remove_micro_site(self, num):
         # carefully shift everything down
@@ -1508,18 +1508,20 @@ class AdsbIm:
                             micro_data[mk] = form.get(mk)
                     do_import = key.startswith("import_micro")
                     do_restore = key == "import_micro_full"
-                    if self.setup_new_micro_site(
+                    status, message = self.setup_new_micro_site(
                         ip,
                         uat=is_true(uat),
                         is_adsbim=is_adsbim,
                         do_import=do_import,
                         do_restore=do_restore,
                         micro_data=micro_data,
-                    ):
+                    )
+                    if status:
                         print_err("successfully added new micro site")
                         self._next_url_from_director = url_for("stage2")
                     else:
-                        print_err("failed to add new micro site")
+                        print_err(f"failed to add new micro site: {message}")
+                        flash(f"failed to add new micro site: {message}", "danger")
                         next_url = url_for("stage2")
                     # running this will result in the status showing up on the stage 2 page
                     self._d.env_by_tags("stage2").value = True
