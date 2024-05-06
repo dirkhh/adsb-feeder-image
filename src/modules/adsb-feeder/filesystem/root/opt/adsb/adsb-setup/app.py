@@ -1514,6 +1514,9 @@ class AdsbIm:
                     else:
                         print_err("failed to add new micro site")
                         next_url = url_for("stage2")
+                    # running this will result in the status showing up on the stage 2 page
+                    self._d.set_stage2(True)
+                    self._system.background_up_containers()
                     continue
                 if key.startswith("remove_micro_"):
                     # user has clicked Remove micro feeder on Stage 2 page

@@ -91,6 +91,17 @@ class System:
         # give the shell script a couple seconds to get going before we return the waiting page
         time.sleep(2.0)
 
+    def background_up_containers(self):
+        if self.docker_restarting():
+            print_err(
+                "already restarting containers - not trying to run docker-compose-start"
+            )
+            return
+        try:
+            subprocess.call("bash /opt/adsb/docker-compose-start &", shell=True)
+        except:
+            print_err("failed to start the container start script in the background")
+
     def docker_restarting(self):
         return os.path.exists("/opt/adsb/docker.lock")
 
