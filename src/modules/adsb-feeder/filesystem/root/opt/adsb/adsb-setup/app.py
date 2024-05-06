@@ -1515,15 +1515,17 @@ class AdsbIm:
                         micro_data=micro_data,
                     ):
                         print_err("successfully added new micro site")
+                        self._next_url_from_director = url_for("stage2")
                     else:
                         print_err("failed to add new micro site")
-                    next_url = url_for("stage2")
+                        next_url = url_for("stage2")
                     continue
                 if key.startswith("remove_micro_"):
                     # user has clicked Remove micro feeder on Stage 2 page
                     # grab the micro feeder number that we know the user has provided
                     num = int(key[len("remove_micro_") :])
                     self.remove_micro_site(num)
+                    self._next_url_from_director = url_for("stage2")
                     continue
                 if key.startswith("edit_micro_"):
                     # user has clicked Edit micro feeder on Stage 2 page
