@@ -1,10 +1,10 @@
 Changes since v2.0.1 include:
-- apply settings immediately when adding a microfeeder / fix microfeeder IP change
+- stage2: apply settings immediately when adding a microproxy / fix microproxy IP change
 - improve handling of gain and SDR assignments on update and restore
-- allow simple editing of site name and IP address for micro feeders
-- stop multioutline from failing on systems with pre-v2.0 versions of Shapely
-- don't show the restarting message when shutting down a feeder
-- add backup + restore for stage2 microproxies
+- stage2: allow simple editing of site name and IP address for micro proxies
+- stage2: stop multioutline from failing on systems with pre-v2.0 versions of Shapely
+- don't show the restarting message when shutting down
+- stage2: add backup + restore for microproxies
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)
