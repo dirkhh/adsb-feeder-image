@@ -116,7 +116,7 @@ class AdsbIm:
         self._d = Data()
         self._system = System(data=self._d)
         self._sdrdevices = SDRDevices()
-        for i in ([0] + self.micro_indices()):
+        for i in [0] + self.micro_indices():
             self._d.ultrafeeder.append(UltrafeederConfig(data=self._d, micro=i))
 
         self._agg_status_instances = dict()
@@ -231,7 +231,7 @@ class AdsbIm:
         self.update_meminfo()
 
         # finally, try to make sure that we have all the pieces that we need and recreate what's missing
-        for i in ([0] + self.micro_indices()):
+        for i in [0] + self.micro_indices():
             if not self._d.env_by_tags("adsblol_uuid").list_get(i):
                 self._d.env_by_tags("adsblol_uuid").list_set(i, str(uuid4()))
             if not self._d.env_by_tags("ultrafeeder_uuid").list_get(i):
@@ -357,7 +357,7 @@ class AdsbIm:
 
     def setup_ultrafeeder_args(self):
         # set all of the ultrafeeder config data up
-        for i in ([0] + self.micro_indices()):
+        for i in [0] + self.micro_indices():
             print_err(f"ultrafeeder_config {i}", level=2)
             if i >= len(self._d.ultrafeeder):
                 self._d.ultrafeeder.append(UltrafeederConfig(data=self._d, micro=i))
@@ -487,11 +487,13 @@ class AdsbIm:
     def push_multi_outline(self) -> None:
         if not self._d.is_enabled("stage2"):
             return
+
         def push_mo():
             subprocess.run(
                 f"bash /opt/adsb/push_multioutline.sh {self._d.env_by_tags('num_micro_sites').value}",
                 shell=True,
             )
+
         thread = threading.Thread(
             target=push_mo,
         )
@@ -546,9 +548,7 @@ class AdsbIm:
 
             t = timeSinceWrite(rrd_file)
             if t < 120:
-                print_err(
-                    f"{context}: not needed, timeSinceWrite: {round(t)}s"
-                )
+                print_err(f"{context}: not needed, timeSinceWrite: {round(t)}s")
                 return
 
             print_err(f"{context}: requesting")
@@ -558,7 +558,9 @@ class AdsbIm:
                 else:
                     uf_container = f"ultrafeeder_stage2_{microIndex}"
                 subprocess.call(
-                    f"docker exec {uf_container} pkill collectd", timeout=5.0, shell=True
+                    f"docker exec {uf_container} pkill collectd",
+                    timeout=5.0,
+                    shell=True,
                 )
             except:
                 print_err(
@@ -585,11 +587,15 @@ class AdsbIm:
                 with fobj as file, zipfile.ZipFile(file, mode="w") as backup_zip:
                     backup_zip.write(adsb_path / "config.json", arcname="config.json")
 
-                    for microIndex in ([0] + self.micro_indices()):
+                    for microIndex in [0] + self.micro_indices():
                         if microIndex == 0:
                             uf_path = adsb_path / "ultrafeeder"
                         else:
-                            uf_path = adsb_path / "ultrafeeder" / self._d.env_by_tags("mf_ip").list_get(microIndex)
+                            uf_path = (
+                                adsb_path
+                                / "ultrafeeder"
+                                / self._d.env_by_tags("mf_ip").list_get(microIndex)
+                            )
 
                         gh_path = uf_path / "globe_history"
                         if include_heatmap and gh_path.is_dir():
