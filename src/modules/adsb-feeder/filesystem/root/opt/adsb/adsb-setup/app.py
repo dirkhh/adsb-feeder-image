@@ -1267,18 +1267,9 @@ class AdsbIm:
                         False,
                         f"failed to move micro feeder data directory from {data_dir/old_ip} to {data_dir/ip}",
                     )
-            # ok, this seems to have worked, let's update the environment variables and restart the micro feeder proxy
-            print_err(f"restarting micro feeder {num} with {site_name} at {ip}")
-            self._d.env_by_tags("site_name").list_set(num, site_name)
+            # ok, this seems to have worked, let's update the environment variable IP
             self._d.env_by_tags("mf_ip").list_set(num, ip)
-            self.write_envfile()
-            try:
-                subprocess.run(
-                    f"/opt/adsb/docker-compose-adsb up -d ultrafeeder_stage2_{num}",
-                    shell=True,
-                )
-            except:
-                print_err(f"failed to restart micro feeder {num}")
+
         if site_name != self._d.env_by_tags("site_name").list_get(num):
             print_err(
                 f"update site name from {self._d.env_by_tags('site_name').list_get(num)} to {site_name}"
@@ -1541,7 +1532,8 @@ class AdsbIm:
                     self.edit_micro_site(
                         num, form.get(f"site_name_{num}"), form.get(f"mf_ip_{num}")
                     )
-                    next_url = url_for("stage2")
+                    self._next_url_from_director = url_for("stage2")
+                    continue
                 if key == "set_stage2_data":
                     # just grab the new data and go back
                     next_url = url_for("stage2")
