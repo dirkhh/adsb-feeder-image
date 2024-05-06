@@ -1,4 +1,5 @@
 Changes since v2.0.1 include:
+- don't show the restarting message when shutting down a feeder
 - add backup + restore for stage2 microproxies
 
 > [!NOTE]

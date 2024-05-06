@@ -1460,7 +1460,7 @@ class AdsbIm:
                 if allow_insecure and key == "shutdown":
                     # do shutdown
                     self._system.halt()
-                    return render_template("/waitandredirect.html")
+                    return render_template("/shutdownpage.html")
                 if allow_insecure and key == "reboot":
                     # initiate reboot
                     self._system.reboot()
