@@ -1,4 +1,5 @@
 Changes since v2.0.1 include:
+- stage2: show waiting spinner when making changes
 - fix: stage2 not starting due to syntax error / remove user env vars if unset / non-verbosely log docker pull to adsb-setup.log and dozzle proxy
 - stage2: apply settings immediately when adding a microproxy / fix microproxy IP change
 - improve handling of gain and SDR assignments on update and restore
