@@ -1157,7 +1157,9 @@ class AdsbIm:
     def setup_new_micro_site(
         self, ip, uat, is_adsbim, do_import=False, do_restore=False, micro_data={}
     ):
-        if ip in { self._d.env_by_tags("mf_ip").list_get(i) for i in self.micro_indices() }:
+        if ip in {
+            self._d.env_by_tags("mf_ip").list_get(i) for i in self.micro_indices()
+        }:
             print_err(f"IP address {ip} already listed as a micro site")
             return False
         print_err(
@@ -1303,9 +1305,7 @@ class AdsbIm:
             if not self._d.env_by_tags("adsblol_uuid").list_get(sitenum):
                 self._d.env_by_tags("adsblol_uuid").list_set(sitenum, str(uuid4()))
             if not self._d.env_by_tags("ultrafeeder_uuid").list_get(sitenum):
-                self._d.env_by_tags("ultrafeeder_uuid").list_set(
-                    sitenum, str(uuid4())
-                )
+                self._d.env_by_tags("ultrafeeder_uuid").list_set(sitenum, str(uuid4()))
 
         if self._d.is_enabled("stage2"):
 
@@ -1437,7 +1437,6 @@ class AdsbIm:
         else:
             self._multi_outline_bg = None
 
-
     @check_restart_lock
     def update(self):
         description = """
@@ -1524,6 +1523,8 @@ class AdsbIm:
                         next_url = url_for("stage2")
                     # running this will result in the status showing up on the stage 2 page
                     self._d.env_by_tags("stage2").value = True
+                    self.handle_implied_settings()
+                    self.write_envfile()
                     self._system.background_up_containers()
                     continue
                 if key.startswith("remove_micro_"):
@@ -1548,6 +1549,10 @@ class AdsbIm:
                         num, form.get(f"site_name_{num}"), form.get(f"mf_ip_{num}")
                     )
                     self._next_url_from_director = url_for("stage2")
+                    self.handle_implied_settings()
+                    self.write_envfile()
+                    self._system.background_up_containers()
+
                     continue
                 if key == "set_stage2_data":
                     # just grab the new data and go back
