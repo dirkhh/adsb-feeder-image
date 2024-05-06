@@ -23,12 +23,6 @@ class Data:
     settings = None
     _env_by_tags_dict = dict()
     ultrafeeder = []
-    is_stage2 = False
-
-    def set_stage2(self, value: bool):
-        stack_info(f"setting stage2 to {value}")
-        self.env_by_tags("stage2").value = value
-        self.is_stage2 = value
 
     _proxy_routes = [
         # endpoint, port, url_path
@@ -618,7 +612,7 @@ class Data:
                 print_err(f"ENV_FILE OTHR: {e._name} = {ret[e._name]}", level=2)
         # add convenience values
         # fmt: off
-        ret["AF_FALSE_ON_STAGE2"] = "false" if self.is_stage2 else "true"
+        ret["AF_FALSE_ON_STAGE2"] = "false" if self.is_enabled(["stage2"]) else "true"
         for i in range(1, 10):
             ret[f"AF_PIAWAREMAP_PORT_{i}"] = int(ret[f"AF_PIAWAREMAP_PORT"]) + i * 1000
             ret[f"AF_PIAWARESTAT_PORT_{i}"] = int(ret[f"AF_PIAWARESTAT_PORT"]) + i * 1000

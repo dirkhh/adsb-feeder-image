@@ -123,7 +123,6 @@ class AdsbIm:
         self._next_url_from_director = ""
 
         self._multi_outline_bg = None
-        self._d.set_stage2(self._d.is_enabled("stage2"))
 
         # no one should share a CPU serial with RadarBox, so always create fake cpuinfo;
         # also identify if we would use the thermal hack for RB and Ultrafeeder
@@ -470,7 +469,7 @@ class AdsbIm:
         return render_template("setup.html")
 
     def push_multi_outline(self) -> None:
-        if not self._d.is_stage2:
+        if not self._d.is_enabled("stage2"):
             return
 
         def push_mo():
@@ -868,7 +867,7 @@ class AdsbIm:
 
     def stage2_stats(self):
         ret = []
-        if self._d.is_stage2:
+        if self._d.is_enabled("stage2"):
             for i in self.micro_indices():
                 ip = self._d.env_by_tags("mf_ip").list_get(i)
                 try:
@@ -890,8 +889,6 @@ class AdsbIm:
                         ret.append({"pct": pct, "secs": secs})
                 except:
                     ret.append({"pct": 0, "secs": 0})
-        else:
-            print_err("stage2_stats: not stage2")
         return Response(json.dumps(ret), mimetype="application/json")
 
     def micro_settings(self):
@@ -944,7 +941,7 @@ class AdsbIm:
     def advanced(self):
         if request.method == "POST":
             return self.update()
-        if self._d.is_stage2:
+        if self._d.is_enabled("stage2"):
             return self.visualization()
         return render_template("advanced.html")
 
@@ -956,7 +953,7 @@ class AdsbIm:
         # or is this a regular feeder?
         # m=0 indicates we are looking at an integrated/micro feeder or at the stage 2 local aggregator
         # m>0 indicates we are looking at a micro-proxy
-        if self._d.is_stage2:
+        if self._d.is_enabled("stage2"):
             m = make_int(request.args.get("m"))
             site = self._d.env_by_tags("site_name").list_get(m)
             print_err(
@@ -1301,7 +1298,7 @@ class AdsbIm:
             tryWriteFile("/run/adsb-feeder-ultrafeeder/readsb/setGain", f"{gain}\n")
 
     def handle_implied_settings(self):
-        if self._d.is_stage2:
+        if self._d.is_enabled("stage2"):
             for sitenum in [0] + self.micro_indices():
                 if not self._d.env_by_tags("adsblol_uuid").list_get(sitenum):
                     self._d.env_by_tags("adsblol_uuid").list_set(sitenum, str(uuid4()))
@@ -1409,12 +1406,12 @@ class AdsbIm:
         self.setup_ultrafeeder_args()
 
         # set rtl-sdr 1090 gain, bit hacky but means we don't have to restart the bulky ultrafeeder for gain changes
-        if not self._d.is_stage2 and rtlsdr:
+        if not self._d.is_enabled("stage2") and rtlsdr:
             self.setRtlGain()
 
         # finally, check if this has given us enough configuration info to
         # start the containers
-        if self.base_is_configured() or self._d.is_stage2:
+        if self.base_is_configured() or self._d.is_enabled("stage2"):
             self._d.env_by_tags(["base_config", "is_enabled"]).value = True
             if self.at_least_one_aggregator():
                 self._d.env_by_tags("aggregators_chosen").value = True
@@ -1425,13 +1422,14 @@ class AdsbIm:
         # check if we need the stage2 multiOutline job
         # the extra check for > 1.8G is really for the off chance that someone set up
         # a stage to one a < 1.8G system prior to that requirement being added
-        if self._d.is_stage2 and self._memtotal > 1800000:
+        if self._d.is_enabled("stage2") and self._memtotal > 1800000:
             self._d.env_by_tags("tar1090_configjs_append").value = "multiOutline=true;"
             if not self._multi_outline_bg:
                 self.push_multi_outline()
                 self._multi_outline_bg = Background(60, self.push_multi_outline)
         else:
             self._multi_outline_bg = None
+
 
     @check_restart_lock
     def update(self):
@@ -1518,7 +1516,7 @@ class AdsbIm:
                         print_err("failed to add new micro site")
                         next_url = url_for("stage2")
                     # running this will result in the status showing up on the stage 2 page
-                    self._d.set_stage2(True)
+                    self._d.env_by_tags("stage2").value = True
                     self._system.background_up_containers()
                     continue
                 if key.startswith("remove_micro_"):
@@ -1549,7 +1547,7 @@ class AdsbIm:
                     next_url = url_for("stage2")
                 if key == "turn_off_stage2":
                     # let's just switch back
-                    self._d.set_stage2(False)
+                    self._d.env_by_tags("stage2").value = False
                     if self._multi_outline_bg:
                         self._multi_outline_bg.cancel()
                         self._multi_outline_bg = None
@@ -1759,7 +1757,7 @@ class AdsbIm:
                     self._d.env_by_tags(["tar1090_ac_db"]).value = True
                     self._d.env_by_tags(["mlathub_disable"]).value = False
                 if key == "aggregators" and value == "stage2":
-                    self._d.set_stage2(True)
+                    self._d.env_by_tags("stage2").value = True
                     if not self._multi_outline_bg:
                         self._d.env_by_tags("tar1090_configjs_append").value = (
                             "multiOutline=true;"
@@ -1906,7 +1904,7 @@ class AdsbIm:
         # is this a stage2 site and you are looking at an individual micro feeder,
         # or is this a regular feeder? If we have a query argument m that is a non-negative
         # number, then yes it is
-        if self._d.is_stage2:
+        if self._d.is_enabled("stage2"):
             print_err("setting up aggregators on a stage 2 system")
             try:
                 m = int(request.args.get("m"))
@@ -2127,7 +2125,7 @@ class AdsbIm:
         if request.method == "POST" and request.form.get("submit") == "go":
             return self.update()
         # is this a stage2 feeder?
-        if self._d.is_stage2:
+        if self._d.is_enabled("stage2"):
             return render_template("stage2.html")
         # make sure DNS works
         self.update_dns_state()
