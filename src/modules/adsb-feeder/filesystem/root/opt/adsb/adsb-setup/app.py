@@ -1356,7 +1356,9 @@ class AdsbIm:
                         do_restore=do_restore,
                         micro_data=micro_data,
                     ):
-                        continue
+                        print_err("successfully added new micro site")
+                    else:
+                        print_err("failed to add new micro site")
                     next_url = url_for("stage2")
                     continue
                 if key.startswith("remove_micro_"):
