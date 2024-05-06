@@ -21,6 +21,7 @@ class Data:
     secure_image_path = data_path / "adsb.im.secure_image"
     is_feeder_image = True
     settings = None
+    _env_by_tags_dict = dict()
     ultrafeeder = []
     is_stage2 = False
 
@@ -649,9 +650,16 @@ class Data:
             raise Exception(
                 f"env_by_tags called with invalid argument {_tags} of type {type(_tags)}"
             )
-        matches = []
         if not tags:
             return None
+
+        # make the list a tuple so it's hashable
+        tags = tuple(tags)
+        cached = self._env_by_tags_dict.get(tags)
+        if cached:
+            return cached
+
+        matches = []
         for e in self._env:
             if not e.tags:
                 print_err(f"{e} has no tags")
@@ -663,6 +671,8 @@ class Data:
             print_err(f"More than one match for tags {tags}")
             for e in matches:
                 print_err(f"  {e}")
+
+        self._env_by_tags_dict[tags] = matches[0]
         return matches[0]
 
     def _get_enabled_env_by_tags(self, tags):
