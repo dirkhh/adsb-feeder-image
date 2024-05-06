@@ -200,7 +200,11 @@ class Data:
         # 978
         # start the container (integrated / micro) or the replay
         Env("FEEDER_ENABLE_UAT978", default=[False], tags=["uat978", "is_enabled"]),
-        Env("FEEDER_UAT_REPLAY978", default=[False], tags=["replay978", "is_enabled", "false_is_empty"]),
+        Env(
+            "FEEDER_UAT_REPLAY978",
+            default=[False],
+            tags=["replay978", "is_enabled", "false_is_empty"],
+        ),
         # hostname ultrafeeder uses to get 978 data
         Env("FEEDER_UAT978_HOST", default=[""], tags=["978host"]),
         # add the URL to the dump978 map
