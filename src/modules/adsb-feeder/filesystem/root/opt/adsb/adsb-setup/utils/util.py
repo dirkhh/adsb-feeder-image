@@ -80,6 +80,7 @@ def generic_get_json(url: str, data=None):
         response = requests.request(
             method="GET" if data == None else "POST",
             url=url,
+            timeout=1.0,
             data=data,
             headers={
                 "Content-Type": "application/json",

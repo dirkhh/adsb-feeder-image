@@ -1523,7 +1523,7 @@ class AdsbIm:
                     return render_template("stage2.html", edit_index=num)
                 if key.startswith("cancel_edit_micro_"):
                     # discard changes
-                    return render_template("stage2.html", edit_index=0)
+                    return redirect(url_for("stage2"))
                 if key.startswith("save_edit_micro_"):
                     # save changes
                     num = int(key[len("save_edit_micro_") :])

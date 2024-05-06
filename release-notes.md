@@ -1,5 +1,5 @@
 Changes since v2.0.1 include:
-- apply settings immediately when adding a microfeeder
+- apply settings immediately when adding a microfeeder / fix microfeeder IP change
 - improve handling of gain and SDR assignments on update and restore
 - allow simple editing of site name and IP address for micro feeders
 - stop multioutline from failing on systems with pre-v2.0 versions of Shapely
