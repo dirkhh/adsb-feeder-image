@@ -1298,15 +1298,22 @@ class AdsbIm:
             tryWriteFile("/run/adsb-feeder-ultrafeeder/readsb/setGain", f"{gain}\n")
 
     def handle_implied_settings(self):
-        if self._d.is_enabled("stage2"):
-            for sitenum in [0] + self.micro_indices():
-                if not self._d.env_by_tags("adsblol_uuid").list_get(sitenum):
-                    self._d.env_by_tags("adsblol_uuid").list_set(sitenum, str(uuid4()))
-                if not self._d.env_by_tags("ultrafeeder_uuid").list_get(sitenum):
-                    self._d.env_by_tags("ultrafeeder_uuid").list_set(
-                        sitenum, str(uuid4())
-                    )
 
+        for sitenum in [0] + self.micro_indices():
+            if not self._d.env_by_tags("adsblol_uuid").list_get(sitenum):
+                self._d.env_by_tags("adsblol_uuid").list_set(sitenum, str(uuid4()))
+            if not self._d.env_by_tags("ultrafeeder_uuid").list_get(sitenum):
+                self._d.env_by_tags("ultrafeeder_uuid").list_set(
+                    sitenum, str(uuid4())
+                )
+
+        if self._d.is_enabled("stage2"):
+
+            # disable 1090 / 978 for stage2:
+            self._d.env_by_tags("readsb_device_type").value = ""
+            self._d.env_by_tags(["uat978", "is_enabled"]).list_set(0, False)
+
+            for sitenum in [0] + self.micro_indices():
                 self._d.env_by_tags("978url").list_set(sitenum, "")  # CHECK THIS
                 if self._d.env_by_tags(["uat978", "is_enabled"]).list_get(sitenum):
                     # always get UAT from the readsb uat_replay
@@ -2132,8 +2139,11 @@ class AdsbIm:
         return render_template("setup.html", mem=self._memtotal)
 
     def micro_indices(self):
-        # micro proxies start at 1
-        return list(range(1, self._d.env_by_tags("num_micro_sites").value + 1))
+        if self._d.is_enabled("stage2"):
+            # micro proxies start at 1
+            return list(range(1, self._d.env_by_tags("num_micro_sites").value + 1))
+        else:
+            return []
 
     @check_restart_lock
     def stage2(self):
