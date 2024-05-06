@@ -123,7 +123,17 @@
     </div>
   </form>
   {% endif %}
-
+  <div>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-warning">
+      {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+  </div>
   <div class="col-12">
     <h5 class="mb-2">Add micro feeder</h5>
     <div>To add a micro feeder enter the IP address and click the Check Micro Feeder button - this will ensure the IP

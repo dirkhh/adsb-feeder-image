@@ -1234,7 +1234,6 @@ class AdsbIm:
                     print_err(
                         f"can't move micro feeder data directory to {data_dir/ip} - it's already in use"
                     )
-                    # how do we message this as an error back to the UI
                     return (
                         False,
                         f"can't move micro feeder data directory to {data_dir/ip} - it's already in use",
@@ -1268,6 +1267,7 @@ class AdsbIm:
                 f"update site name from {self._d.env_by_tags('site_name').list_get(num)} to {site_name}"
             )
             self._d.env_by_tags("site_name").list_set(num, site_name)
+        return (True, "")
 
     def setRtlGain(self):
         def tryWriteFile(path, string):
@@ -1531,7 +1531,9 @@ class AdsbIm:
                     # user has clicked Remove micro feeder on Stage 2 page
                     # grab the micro feeder number that we know the user has provided
                     num = int(key[len("remove_micro_") :])
+                    name = self._d.env_by_tags("site_name").list_get(num)
                     self.remove_micro_site(num)
+                    flash(f"Removed micro site {name}", "success")
                     self._next_url_from_director = url_for("stage2")
                     continue
                 if key.startswith("edit_micro_"):
@@ -1541,18 +1543,21 @@ class AdsbIm:
                     return render_template("stage2.html", edit_index=num)
                 if key.startswith("cancel_edit_micro_"):
                     # discard changes
+                    flash(f"Cancelled changes", "success")
                     return redirect(url_for("stage2"))
                 if key.startswith("save_edit_micro_"):
                     # save changes
                     num = int(key[len("save_edit_micro_") :])
-                    self.edit_micro_site(
+                    success, message = self.edit_micro_site(
                         num, form.get(f"site_name_{num}"), form.get(f"mf_ip_{num}")
                     )
                     self._next_url_from_director = url_for("stage2")
-                    self.handle_implied_settings()
-                    self.write_envfile()
-                    self._system.background_up_containers()
-
+                    if success:
+                        self.handle_implied_settings()
+                        self.write_envfile()
+                        self._system.background_up_containers()
+                    else:
+                        flash(message, "error")
                     continue
                 if key == "set_stage2_data":
                     # just grab the new data and go back
