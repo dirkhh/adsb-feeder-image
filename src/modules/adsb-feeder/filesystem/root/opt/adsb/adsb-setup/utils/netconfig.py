@@ -38,12 +38,12 @@ class UltrafeederConfig:
         # should feed any aggregators themselves
         aggregator_selection = self._d.env_by_tags("aggregators").value
         print_err(
-            f"enabled_aggregators for {self._micro} with agg_sel {aggregator_selection} and stage2 {self._d.is_enabled('stage2')}",
+            f"enabled_aggregators for {self._micro} with agg_sel {aggregator_selection} and stage2 {self._d.is_stage2}",
             level=4,
         )
         if aggregator_selection == "micro":
             return {}
-        if self._d.is_enabled("stage2") and self._micro == 0:
+        if self._d.is_stage2 and self._micro == 0:
             return {}
         # be careful to set the correct values for the individual aggregators;
         # these values are used in the main landing page for the feeder to provide
@@ -66,14 +66,13 @@ class UltrafeederConfig:
         return ret
 
     def generate(self):
-        is_stage2 = self._d.is_enabled("stage2")
         num_micro = self._d.env_by_tags("num_micro_sites").value
         # when not in stage2 mode, no point in setting up the others
-        if self._micro > 0 and not is_stage2:
+        if self._micro > 0 and not self._d.is_stage2:
             return ""
         # in stage2 mode, don't feed from the internal aggregator, don't set up more
         # proxy ultrafeeders than are configured
-        if is_stage2 and (self._micro == 0 or self._micro > num_micro):
+        if self._d.is_stage2 and (self._micro == 0 or self._micro > num_micro):
             return ""
         print_err(
             f"generating netconfigs for {f'micro site {self._micro}' if self._micro > 0 else 'Ultrafeeder'}"
@@ -100,7 +99,7 @@ class UltrafeederConfig:
                     f"adsb,{self._d.env_by_tags('mf_ip').list_get(self._micro)},30978,uat_in"
                 )
 
-        if not is_stage2:
+        if not self._d.is_stage2:
             remote_sdr = self._d.env_by_tags("remote_sdr").value
             # make sure we only ever use 1 SDR / network input for ultrafeeder
             if self._d.env_by_tags("readsb_device_type").value != "":
