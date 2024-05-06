@@ -1252,6 +1252,60 @@ class AdsbIm:
         for i in self.micro_indices():
             create_stage2_yml_files(i, self._d.env_by_tags("mf_ip").list_get(i))
 
+    def edit_micro_site(self, num, site_name, ip):
+        print_err(
+            f"editing micro site {num} from {self._d.env_by_tags('site_name').list_get(num)} at {self._d.env_by_tags('mf_ip').list_get(num)} to {site_name} at {ip}"
+        )
+        old_ip = self._d.env_by_tags("mf_ip").list_get(num)
+        if old_ip != ip:
+            data_dir = pathlib.Path("/opt/adsb/config/ultrafeeder")
+            if (data_dir / f"{old_ip}").exists() and (data_dir / f"{old_ip}").is_dir():
+                # ok, as one would hope, there's an Ultrafeeder directory for the old IP
+                if (data_dir / f"{ip}").exists():
+                    print_err(
+                        f"can't move micro feeder data directory to {data_dir/ip} - it's already in use"
+                    )
+                    # how do we message this as an error back to the UI
+                    return (
+                        False,
+                        f"can't move micro feeder data directory to {data_dir/ip} - it's already in use",
+                    )
+                try:
+                    subprocess.run(
+                        f"/opt/adsb/docker-compose-adsb down ultrafeeder_stage2_{num} -t 20",
+                        shell=True,
+                    )
+                except:
+                    print_err(f"failed to stop micro feeder {num}")
+                    return (False, f"failed to stop micro feeder {num}")
+                try:
+                    os.rename(data_dir / f"{old_ip}", data_dir / f"{ip}")
+                except:
+                    print_err(
+                        f"failed to move micro feeder data directory from {data_dir/old_ip} to {data_dir/ip}"
+                    )
+                    return (
+                        False,
+                        f"failed to move micro feeder data directory from {data_dir/old_ip} to {data_dir/ip}",
+                    )
+            # ok, this seems to have worked, let's update the environment variables and restart the micro feeder proxy
+            print_err(f"restarting micro feeder {num} with {site_name} at {ip}")
+            self._d.env_by_tags("site_name").list_set(num, site_name)
+            self._d.env_by_tags("mf_ip").list_set(num, ip)
+            self.write_envfile()
+            try:
+                subprocess.run(
+                    f"/opt/adsb/docker-compose-adsb up -d ultrafeeder_stage2_{num}",
+                    shell=True,
+                )
+            except:
+                print_err(f"failed to restart micro feeder {num}")
+        if site_name != self._d.env_by_tags("site_name").list_get(num):
+            print_err(
+                f"update site name from {self._d.env_by_tags('site_name').list_get(num)} to {site_name}"
+            )
+            self._d.env_by_tags("site_name").list_set(num, site_name)
+
     def setRtlGain(self):
         def tryWriteFile(path, string):
             try:
@@ -1373,6 +1427,21 @@ class AdsbIm:
                     num = int(key[len("remove_micro_") :])
                     self.remove_micro_site(num)
                     continue
+                if key.startswith("edit_micro_"):
+                    # user has clicked Edit micro feeder on Stage 2 page
+                    # grab the micro feeder number that we know the user has provided
+                    num = int(key[len("edit_micro_") :])
+                    return render_template("stage2.html", edit_index=num)
+                if key.startswith("cancel_edit_micro_"):
+                    # discard changes
+                    return render_template("stage2.html", edit_index=0)
+                if key.startswith("save_edit_micro_"):
+                    # save changes
+                    num = int(key[len("save_edit_micro_") :])
+                    self.edit_micro_site(
+                        num, form.get(f"site_name_{num}"), form.get(f"mf_ip_{num}")
+                    )
+                    next_url = url_for("stage2")
                 if key == "set_stage2_data":
                     # just grab the new data and go back
                     next_url = url_for("stage2")

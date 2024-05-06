@@ -67,11 +67,35 @@
             <td>Lat/Long@Alt</td>
             <td>Feeder Version</td>
             <td>Status</td>
-            <td>Remove</td>
+            <td>Action</td>
           </thead>
           <tbody>
             {% for site in env_value_by_tag('site_name') %}
             {% if loop.index0 != 0 %}<!-- skip the entry for the host -->
+            {% if loop.index0 == edit_index %}<!-- edit mode -->
+            <tr class="align-middle">
+              <td>
+                <input type="text" name="site_name_{{ loop.index0 }}" value="{{ site }}"
+                       class="form-control accept_edit" />
+              </td>
+              <td class="text-center">
+                <input type="text" name="mf_ip_{{ loop.index0 }}" class="form-control accept_edit"
+                       value="{{ list_value_by_tag('mf_ip', loop.index0) }}" />
+              </td>
+              <td class="text-center">{{ list_value_by_tag('lat', loop.index0) }} /
+                {{ list_value_by_tag('lng', loop.index0) }} / {{ list_value_by_tag('alt', loop.index0) }}m
+              </td>
+              <td class="text-center"> {{ list_value_by_tag('mf_version', loop.index0)}}
+              </td>
+              <td class="text-center"><span id="mf_status_{{ loop.index0 }}"></span></td>
+              <td class="text-center">
+                <button type="submit" name="save_edit_micro_{{ loop.index0 }}" value="go" title="Save changes"
+                        id="save_edit" class="btn btn-danger btn-floating btn-sm">&#x2714;</button>
+                <button type="submit" name="cancel_edit_micro_{{ loop.index0 }}" value="go" title="Cancel"
+                        class="btn btn-info btn-floating btn-sm">&#x2716;</button>
+              </td>
+            </tr>
+            {% else %}
             <tr class="align-middle">
               <td>
                 <a href="http://{{ list_value_by_tag('mf_ip', loop.index0) }}">{{ site }}</a>
@@ -84,10 +108,13 @@
               </td>
               <td class="text-center"><span id="mf_status_{{ loop.index0 }}"></span></td>
               <td class="text-center">
-                <button type="submit" name="remove_micro_{{ loop.index0 }}" value="go"
+                <button type="submit" name="remove_micro_{{ loop.index0 }}" value="go" title="Remove this micro feeder"
                         class="btn btn-danger btn-floating btn-sm">&#x232B;</button>
+                <button type="submit" name="edit_micro_{{ loop.index0 }}" value="go" title="Edit this micro feeder"
+                        class="btn btn-info btn-floating btn-sm">&#x270e;</button>
               </td>
             </tr>
+            {% endif %}
             {% endif %}
             {% endfor %}
           </tbody>
@@ -329,5 +356,15 @@
   };
   // start the micro feeder check if needed
   check_mf_status();
+  jQuery(document).ready(function () {
+    $(".accept_edit").on('keypress', function (e) {
+      if ((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13)) {
+        $("#save_edit").click();
+        return false;
+      } else {
+        return true;
+      }
+    });
+  });
 </script>
 {% endblock %}
