@@ -1,4 +1,6 @@
 Changes since v2.0.1 include:
+- allow simple editing of site name and IP address for micro feeders
+- stop multioutline from failing on systems with pre-v2.0 versions of Shapely
 - don't show the restarting message when shutting down a feeder
 - add backup + restore for stage2 microproxies
 
