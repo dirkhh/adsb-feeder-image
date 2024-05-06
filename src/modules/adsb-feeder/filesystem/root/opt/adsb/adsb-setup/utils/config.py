@@ -1,5 +1,6 @@
 import json
 import os
+import os.path
 import tempfile
 from .util import print_err
 
@@ -84,6 +85,10 @@ def write_values_to_env_file(values):
     # write the user env in the form that can be easily inserted into the yml file
     # using the name here so it comes from the values passed in
     val = values.get("_ADSBIM_STATE_EXTRA_ENV", None)
+    if not val and os.path.isfile(USER_ENV_FILE_PATH):
+        # truncate the file if it exists and no value is set
+        with open(USER_ENV_FILE_PATH, "w") as f:
+            pass
     if val:
         with open(USER_ENV_FILE_PATH, "w") as f:
             lines = val.split("\r\n")
