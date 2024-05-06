@@ -122,6 +122,8 @@ class AdsbIm:
         self._agg_status_instances = dict()
         self._next_url_from_director = ""
 
+        self._multi_outline_bg = None
+
         # no one should share a CPU serial with RadarBox, so always create fake cpuinfo;
         # also identify if we would use the thermal hack for RB and Ultrafeeder
         self._d.env_by_tags("rbthermalhack").value = (
@@ -384,7 +386,6 @@ class AdsbIm:
         self._routemanager.add_proxy_routes(self.proxy_routes)
         debug = os.environ.get("ADSBIM_DEBUG") is not None
         self._debug_cleanup()
-        self.write_envfile()
         self.update_dns_state()
         # in no_server mode we want to exit right after the housekeeping, so no
         # point in running this in the background
@@ -433,23 +434,14 @@ class AdsbIm:
                 "ghcr.io/sdr-enthusiasts/docker-planefinder:5.0.161_arm64"
             )
 
+        self.handle_implied_settings()
+        self.write_envfile()
+
         # if all the user wanted is to make sure the housekeeping tasks are completed,
         # don't start the flask app and exit instead
         if no_server:
-            self.setup_ultrafeeder_args()
-            self.write_envfile()
             signal.raise_signal(signal.SIGTERM)
             return
-
-        # check if we need the stage2 multiOutline job
-        # the extra check for > 1.8G is really for the off chance that someone set up
-        # a stage to one a < 1.8G system prior to that requirement being added
-        if self._d.is_enabled("stage2") and self._memtotal > 1800000:
-            self._d.env_by_tags("tar1090_configjs_append").value = "multiOutline=true;"
-            self.push_multi_outline()
-            self._multi_outline_bg = Background(60, self.push_multi_outline)
-        else:
-            self._multi_outline_bg = None
 
         self.app.run(
             host="0.0.0.0",
@@ -785,8 +777,6 @@ class AdsbIm:
             self.update_boardname()
             self.update_version()
 
-            self.setRtlGain()
-
             # make sure we are connected to the right Zerotier network
             zt_network = self._d.env_by_tags("zerotierid").value
             if (
@@ -801,6 +791,7 @@ class AdsbIm:
                         "timeout expired joining Zerotier network... trying to continue..."
                     )
 
+            self.handle_implied_settings()
             self.write_envfile()
 
             try:
@@ -1196,13 +1187,6 @@ class AdsbIm:
             self._d.env_by_tags("tz").list_set(n, "UTC")
             self._d.env_by_tags("mf_version").list_set(n, "not an adsb.im feeder")
             self._d.env_by_tags(["uat978", "is_enabled"]).list_set(n, uat)
-            if uat:
-                # always get UAT from the readsb uat_replay
-                self._d.env_by_tags("replay978").list_set(
-                    n, "--net-uat-replay-port 30978"
-                )
-                self._d.env_by_tags("978host").list_set(n, f"ultrafeeder_{n}")
-                self._d.env_by_tags("978piaware").list_set(n, "relay")
             return True
 
         # now let's see if we can get the data from the micro feeder
@@ -1222,11 +1206,6 @@ class AdsbIm:
             return False
 
         self._d.env_by_tags(["uat978", "is_enabled"]).list_set(n, uat)
-        if uat:
-            # always get UAT from the readsb uat_replay
-            self._d.env_by_tags("replay978").list_set(n, "--net-uat-replay-port 30978")
-            self._d.env_by_tags("978host").list_set(n, f"ultrafeeder_{n}")
-            self._d.env_by_tags("978piaware").list_set(n, "relay")
         return True
 
     def remove_micro_site(self, num):
@@ -1336,6 +1315,126 @@ class AdsbIm:
             # this adjusts the gain while readsb is running
             tryWriteFile("/run/adsb-feeder-ultrafeeder/readsb/setGain", f"{gain}\n")
 
+    def handle_implied_settings(self):
+        # first grab the SDRs plugged in and check if we have one identified for UAT
+        self._sdrdevices._ensure_populated()
+        env978 = self._d.env_by_tags("978serial")
+        env1090 = self._d.env_by_tags("1090serial")
+        if env978.value != "" and not any(
+            [sdr._serial == env978.value for sdr in self._sdrdevices.sdrs]
+        ):
+            env978.value = ""
+        if env1090.value != "" and not any(
+            [sdr._serial == env1090.value for sdr in self._sdrdevices.sdrs]
+        ):
+            env1090.value = ""
+        auto_assignment = self._sdrdevices.addresses_per_frequency
+
+        purposes = self._sdrdevices.purposes()
+
+        # if we have an actual asignment, that overrides the auto-assignment,
+        # delete the auto-assignment
+        for frequency in [978, 1090]:
+            if any(
+                auto_assignment[frequency] == self._d.env_by_tags(purpose).value
+                for purpose in purposes
+            ):
+                auto_assignment[frequency] = ""
+        if not env1090.value and auto_assignment[1090]:
+            env1090.value = auto_assignment[1090]
+        if not env978.value and auto_assignment[978]:
+            env978.value = auto_assignment[978]
+
+
+        # handle 978 settings for stage1
+        if env978.value:
+            self._d.env_by_tags(["uat978", "is_enabled"]).list_set(0, True)
+            self._d.env_by_tags("978url").list_set(0, "http://dump978/skyaware978" )
+            self._d.env_by_tags("978host").list_set(0, "dump978")
+            self._d.env_by_tags("978piaware").list_set(0, "relay")
+        else:
+            self._d.env_by_tags(["uat978", "is_enabled"]).list_set(0, False)
+            self._d.env_by_tags("978url").list_set(0, "")
+            self._d.env_by_tags("978host").list_set(0, "")
+            self._d.env_by_tags("978piaware").list_set(0, "")
+
+        # CHECK_ME for stage2 handling of 978 state
+        for sitenum in self.micro_indices():
+            self._d.env_by_tags("978url").list_set(sitenum, "") # CHECK THIS
+            if self._d.env_by_tags(["uat978", "is_enabled"]).list_get(sitenum):
+                # always get UAT from the readsb uat_replay
+                self._d.env_by_tags("replay978").list_set(sitenum, "--net-uat-replay-port 30978")
+                self._d.env_by_tags("978host").list_set(sitenum, f"ultrafeeder_{sitenum}")
+                self._d.env_by_tags("978piaware").list_set(sitenum, "relay")
+            else:
+                self._d.env_by_tags("replay978").list_set(sitenum, "")
+                self._d.env_by_tags("978host").list_set(sitenum, "")
+                self._d.env_by_tags("978piaware").list_set(sitenum, "")
+
+        # next check for airspy devices
+        airspy = any([sdr._type == "airspy" for sdr in self._sdrdevices.sdrs])
+        self._d.env_by_tags(["airspy", "is_enabled"]).value = airspy
+
+        # SDRplay devices
+        sdrplay = any([sdr._type == "sdrplay" for sdr in self._sdrdevices.sdrs])
+        self._d.env_by_tags(["sdrplay", "is_enabled"]).value = sdrplay
+
+        # next - if we have exactly one SDR and it hasn't been assigned to anything, use it for 1090
+        if (
+            len(self._sdrdevices.sdrs) == 1
+            and not airspy
+            and not any(self._d.env_by_tags(p).value for p in purposes)
+        ):
+            env1090.value = self._sdrdevices.sdrs[0]._serial
+
+        rtlsdr = any(
+            sdr._type == "rtlsdr" and sdr._serial == env1090.value
+            for sdr in self._sdrdevices.sdrs
+        )
+        if not rtlsdr:
+            env1090.value = ""
+        self._d.env_by_tags("readsb_device_type").value = "rtlsdr" if rtlsdr else ""
+
+        if verbose & 1:
+            print_err(f"in the end we have")
+            print_err(f"1090serial {env1090.value}")
+            print_err(f"978serial {env978.value}")
+            print_err(
+                f"airspy container is {self._d.is_enabled(['airspy', 'is_enabled'])}"
+            )
+            print_err(
+                f"SDRplay container is {self._d.is_enabled(['sdrplay', 'is_enabled'])}"
+            )
+            print_err(
+                f"dump978 container {self._d.list_is_enabled(['uat978', 'is_enabled'], 0)}"
+            )
+
+        # set all of the ultrafeeder config data up
+        self.setup_ultrafeeder_args()
+
+        # set rtl-sdr 1090 gain, bit hacky but means we don't have to restart the bulky ultrafeeder for gain changes
+        if rtlsdr:
+            self.setRtlGain()
+
+        # finally, check if this has given us enough configuration info to
+        # start the containers
+        if self.base_is_configured() or self._d.is_enabled("stage2"):
+            self._d.env_by_tags(["base_config", "is_enabled"]).value = True
+            if self.at_least_one_aggregator():
+                self._d.env_by_tags("aggregators_chosen").value = True
+
+        # check if we need the stage2 multiOutline job
+        # the extra check for > 1.8G is really for the off chance that someone set up
+        # a stage to one a < 1.8G system prior to that requirement being added
+        if self._d.is_enabled("stage2") and self._memtotal > 1800000:
+            self._d.env_by_tags("tar1090_configjs_append").value = "multiOutline=true;"
+            if not self._multi_outline_bg:
+                self.push_multi_outline()
+                self._multi_outline_bg = Background(60, self.push_multi_outline)
+        else:
+            self._multi_outline_bg = None
+
+
     @check_restart_lock
     def update(self):
         description = """
@@ -1359,7 +1458,6 @@ class AdsbIm:
         print_err(f"handling input from {referer} and site # {sitenum} / {site}")
         # in the HTML, every input field needs to have a name that is concatenated by "--"
         # and that matches the tags of one Env
-        purposes = self._sdrdevices.purposes()
         form: Dict = request.form
         seen_go = False
         next_url = None
@@ -1669,6 +1767,7 @@ class AdsbIm:
                 # this relies on the web page to ensure that each SDR is only asigned on purpose
                 # the key in quesiton will be explicitely set and does not need clearing
                 # empty string means no SDRs assigned to that purpose
+                purposes = self._sdrdevices.purposes()
                 if key in purposes and value != "":
                     for clear_key in purposes:
                         if (
@@ -1693,96 +1792,8 @@ class AdsbIm:
                     self._d.env_by_tags("site_name").list_set(sitenum, value)
         # done handling the input data
         # what implied settings do we have (and could we simplify them?)
-        # first grab the SDRs plugged in and check if we have one identified for UAT
-        self._sdrdevices._ensure_populated()
-        env978 = self._d.env_by_tags("978serial")
-        env1090 = self._d.env_by_tags("1090serial")
-        if env978.value != "" and not any(
-            [sdr._serial == env978.value for sdr in self._sdrdevices.sdrs]
-        ):
-            env978.value = ""
-        if env1090.value != "" and not any(
-            [sdr._serial == env1090.value for sdr in self._sdrdevices.sdrs]
-        ):
-            env1090.value = ""
-        auto_assignment = self._sdrdevices.addresses_per_frequency
-        # if we have an actual asignment, that overrides the auto-assignment,
-        # delete the auto-assignment
-        for frequency in [978, 1090]:
-            if any(
-                auto_assignment[frequency] == self._d.env_by_tags(purpose).value
-                for purpose in purposes
-            ):
-                auto_assignment[frequency] = ""
-        if not env1090.value and auto_assignment[1090]:
-            env1090.value = auto_assignment[1090]
-        if not env978.value and auto_assignment[978]:
-            env978.value = auto_assignment[978]
-        if env978.value:
-            self._d.env_by_tags(["uat978", "is_enabled"]).list_set(sitenum, True)
-            self._d.env_by_tags("978url").list_set(
-                sitenum, "http://dump978/skyaware978"
-            )
-            self._d.env_by_tags("978host").list_set(sitenum, "dump978")
-            self._d.env_by_tags("978piaware").list_set(sitenum, "relay")
-        else:
-            self._d.env_by_tags(["uat978", "is_enabled"]).list_set(sitenum, False)
-            self._d.env_by_tags("978url").list_set(sitenum, "")
-            self._d.env_by_tags("978host").list_set(sitenum, "")
-            self._d.env_by_tags("978piaware").list_set(sitenum, "")
 
-        # next check for airspy devices
-        airspy = any([sdr._type == "airspy" for sdr in self._sdrdevices.sdrs])
-        self._d.env_by_tags(["airspy", "is_enabled"]).value = airspy
-
-        # SDRplay devices
-        sdrplay = any([sdr._type == "sdrplay" for sdr in self._sdrdevices.sdrs])
-        self._d.env_by_tags(["sdrplay", "is_enabled"]).value = sdrplay
-
-        # next - if we have exactly one SDR and it hasn't been assigned to anything, use it for 1090
-        if (
-            len(self._sdrdevices.sdrs) == 1
-            and not airspy
-            and not any(self._d.env_by_tags(p).value for p in purposes)
-        ):
-            env1090.value = self._sdrdevices.sdrs[0]._serial
-
-        rtlsdr = any(
-            sdr._type == "rtlsdr" and sdr._serial == env1090.value
-            for sdr in self._sdrdevices.sdrs
-        )
-        if not rtlsdr:
-            env1090.value = ""
-        self._d.env_by_tags("readsb_device_type").value = "rtlsdr" if rtlsdr else ""
-
-        if verbose & 1:
-            print_err(f"in the end we have")
-            print_err(f"1090serial {env1090.value}")
-            print_err(f"978serial {env978.value}")
-            print_err(
-                f"airspy container is {self._d.is_enabled(['airspy', 'is_enabled'])}"
-            )
-            print_err(
-                f"SDRplay container is {self._d.is_enabled(['sdrplay', 'is_enabled'])}"
-            )
-            print_err(
-                f"dump978 container {self._d.list_is_enabled(['uat978', 'is_enabled'], sitenum)}"
-            )
-
-        # set all of the ultrafeeder config data up
-        self.setup_ultrafeeder_args()
-
-        # set rtl-sdr 1090 gain, bit hacky but means we don't have to restart the bulky ultrafeeder for gain changes
-        if rtlsdr:
-            self.setRtlGain()
-
-        # finally, check if this has given us enough configuration info to
-        # start the containers
-        agg_chosen_env = self._d.env_by_tags("aggregators_chosen")
-        if self.base_is_configured() or self._d.is_enabled("stage2"):
-            self._d.env_by_tags(["base_config", "is_enabled"]).value = True
-            if self.at_least_one_aggregator():
-                agg_chosen_env.value = True
+        self.handle_implied_settings()
 
         # write all this out to the .env file so that a docker-compose run will find it
         self.write_envfile()
@@ -1797,7 +1808,7 @@ class AdsbIm:
             return redirect(next_url)
         if self._d.is_enabled("base_config"):
             print_err("base config is completed", level=2)
-            if agg_chosen_env.value == True:
+            if self._d.env_by_tags("aggregators_chosen").value == True:
                 print_err("base config is completed", level=2)
                 if self._d.is_enabled("sdrplay") and not self._d.is_enabled(
                     "sdrplay_license_accepted"
