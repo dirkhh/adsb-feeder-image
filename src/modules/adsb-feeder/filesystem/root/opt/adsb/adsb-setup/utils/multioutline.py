@@ -1,7 +1,12 @@
 import json
 from shapely.geometry import LinearRing, Polygon
 from shapely.ops import unary_union
-from shapely import is_valid_reason
+
+use_is_valid_reason = True
+try:
+    from shapely.validation import is_valid_reason
+except:
+    use_is_valid_reason = False
 
 
 class MultiOutline:
@@ -23,19 +28,29 @@ class MultiOutline:
         result = {"multiRange": []}
         polygons = []
         for i in range(len(data)):
-            try:
-                p = Polygon(
-                    shell=LinearRing(data[i]["actualRange"]["last24h"]["points"])
-                )
-                r = is_valid_reason(p)
-                if r == "Valid Geometry":
-                    polygons.append(p)
-                else:
-                    print(f"can't create polygon from outline #{i} - {r}")
-            except:
-                print(
-                    f"can't create linear ring from outline #{i} - maybe there is no data, yet?"
-                )
+            if len(data[i]["actualRange"]["last24h"]["points"]) > 2:
+                try:
+                    p = Polygon(
+                        shell=LinearRing(data[i]["actualRange"]["last24h"]["points"])
+                    )
+                    if p:
+                        if use_is_valid_reason:
+                            r = is_valid_reason(p)
+                            if r == "Valid Geometry":
+                                polygons.append(p)
+                            else:
+                                print(f"can't create polygon from outline #{i} - {r}")
+                        else:
+                            try:
+                                polygons.append(p)
+                            except:
+                                print(f"can't create polygon from outline #{i}")
+                    else:
+                        print(f"can't create polygon from outline #{i}")
+                except:
+                    print(
+                        f"can't create linear ring from outline #{i} - maybe there is no data, yet?"
+                    )
         made_change = True
         look_at = range(1, len(polygons))
         while made_change:

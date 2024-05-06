@@ -11,7 +11,7 @@ try:
     mo_data = MultiOutline().create(n)
 except:
     print_err("failed to create MultiOutline class - maybe just a timing issue?")
-    exit(1)
+    exit(0)
 
 # now we need to inject this into the stage2 tar1090
 with TemporaryDirectory(prefix="/tmp/adsb") as tmpdir:
