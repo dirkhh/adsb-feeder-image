@@ -1157,7 +1157,7 @@ class AdsbIm:
     def setup_new_micro_site(
         self, ip, uat, is_adsbim, do_import=False, do_restore=False, micro_data={}
     ):
-        if ip in self._d.env_by_tags("mf_ip").value:
+        if ip in { self._d.env_by_tags("mf_ip").list_get(i) for i in self.micro_indices() }:
             print_err(f"IP address {ip} already listed as a micro site")
             return False
         print_err(
@@ -1186,7 +1186,7 @@ class AdsbIm:
         # now let's see if we can get the data from the micro feeder
         if self.get_base_info(n + 1, do_import=do_import):
             print_err(
-                f"added new micro site {self._d.env_by_tags('site_name').value[n + 1]} at {ip}"
+                f"added new micro site {self._d.env_by_tags('site_name').list_get(n + 1)} at {ip}"
             )
             n += 1
             self._d.env_by_tags("num_micro_sites").value = n
