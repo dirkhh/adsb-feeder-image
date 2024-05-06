@@ -232,14 +232,6 @@ class AdsbIm:
         self.update_version()
         self.update_meminfo()
 
-        # finally, try to make sure that we have all the pieces that we need and recreate what's missing
-        for i in [0] + self.micro_indices():
-            if not self._d.env_by_tags("adsblol_uuid").list_get(i):
-                self._d.env_by_tags("adsblol_uuid").list_set(i, str(uuid4()))
-            if not self._d.env_by_tags("ultrafeeder_uuid").list_get(i):
-                self._d.env_by_tags("ultrafeeder_uuid").list_set(i, str(uuid4()))
-            create_stage2_yml_files(i, self._d.env_by_tags("mf_ip").list_get(i))
-
         # now all the envs are loaded and reconciled with the data on file - which means we should
         # actually write out the potentially updated values (e.g. when plain values were converted
         # to lists)
@@ -1177,7 +1169,6 @@ class AdsbIm:
             print_err(f"Micro feeder at {ip} is not an adsb.im feeder")
             n += 1
             self._d.env_by_tags("num_micro_sites").value = n
-            create_stage2_yml_files(n, ip)
             self._d.env_by_tags("site_name").list_set(
                 n, micro_data.get("micro_site_name", "")
             )
@@ -1196,7 +1187,6 @@ class AdsbIm:
             )
             n += 1
             self._d.env_by_tags("num_micro_sites").value = n
-            create_stage2_yml_files(n, ip)
             if do_restore:
                 print_err(f"attempting to restore graphs and history from {ip}")
                 self.import_graphs_and_history_from_remote(ip)
@@ -1225,11 +1215,6 @@ class AdsbIm:
             else:
                 print_err(f"couldn't find env list for {tags}")
         self._d.env_by_tags("num_micro_sites").value -= 1
-        # recreate the stage2 yml files
-        # the index is used to pick the correct environment variables, the IP address
-        # is used to distinguish the globe history and graphs for each micro feeder
-        for i in self.micro_indices():
-            create_stage2_yml_files(i, self._d.env_by_tags("mf_ip").list_get(i))
 
     def edit_micro_site(self, num, site_name, ip):
         print_err(
@@ -1257,6 +1242,9 @@ class AdsbIm:
                 except:
                     print_err(f"failed to stop micro feeder {num}")
                     return (False, f"failed to stop micro feeder {num}")
+                print_err(
+                    f"moving micro feeder data directory from {data_dir/old_ip} to {data_dir/ip}"
+                )
                 try:
                     os.rename(data_dir / f"{old_ip}", data_dir / f"{ip}")
                 except:
@@ -1307,6 +1295,13 @@ class AdsbIm:
             tryWriteFile("/run/adsb-feeder-ultrafeeder/readsb/setGain", f"{gain}\n")
 
     def handle_implied_settings(self):
+
+        for i in [0] + self.micro_indices():
+            if not self._d.env_by_tags("adsblol_uuid").list_get(i):
+                self._d.env_by_tags("adsblol_uuid").list_set(i, str(uuid4()))
+            if not self._d.env_by_tags("ultrafeeder_uuid").list_get(i):
+                self._d.env_by_tags("ultrafeeder_uuid").list_set(i, str(uuid4()))
+
         # first grab the SDRs plugged in and check if we have one identified for UAT
         self._sdrdevices._ensure_populated()
         env978 = self._d.env_by_tags("978serial")
@@ -1413,6 +1408,9 @@ class AdsbIm:
             self._d.env_by_tags(["base_config", "is_enabled"]).value = True
             if self.at_least_one_aggregator():
                 self._d.env_by_tags("aggregators_chosen").value = True
+
+        for i in self.micro_indices():
+            create_stage2_yml_files(i, self._d.env_by_tags("mf_ip").list_get(i))
 
         # check if we need the stage2 multiOutline job
         # the extra check for > 1.8G is really for the off chance that someone set up
