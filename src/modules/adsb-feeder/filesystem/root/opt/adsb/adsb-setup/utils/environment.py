@@ -68,6 +68,9 @@ class Env:
                     f"got value {value_in_file} of type {type(value_in_file)} from file - discarding as type of {self._name} should be {type(self._default)}"
                 )
             else:
+                if type(value_in_file) == list and self.is_bool:
+                    self._value = [ is_true(v) for v in value_in_file ]
+                    return
                 self._value = value_in_file
 
             return
@@ -141,6 +144,10 @@ class Env:
             self._reconcile(value)
 
     def list_set(self, idx, value):
+        # mess with value in case we are a bool
+        # we get "1" from .env files and "on" from checkboxes in HTML
+        if self.is_bool:
+            value = is_true(value)
         idx = make_int(idx)
         print_err(f"list_set {self._name}[{idx}] = {value}")
         if type(self._value) != list:
