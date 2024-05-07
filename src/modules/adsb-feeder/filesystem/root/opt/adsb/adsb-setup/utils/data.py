@@ -65,6 +65,10 @@ class Data:
                 "/fa-status.json/",
                 "/planefinder-stat/",
             ]:
+                # idx is the id of the stage2 microfeeder
+                # example endpoint: '/fa-status.json_<int:idx>/'
+                # this is passed to the URL handling function in flask.py
+                # this function will add (idx * 1000) to the port
                 if endpoint[-1] == "/":
                     ret.append([endpoint[:-1] + f"_<int:idx>/", port, path])
                 else:
