@@ -61,7 +61,7 @@ if grep -q "_IS_BASE_CONFIG_FINISHED=True" /opt/adsb/config/.env 2> /dev/null ; 
 	$docker_compose "${COMPOSE_FILES[@]}" "$@"
 	if [ "$1" = "up" ] ; then
 		# try to figure out if this was successful
-		echo "finished attempting to bring up the containers" >&2
+		echo "$(date -u +"%FT%T.%3NZ") finished attempting to bring up the containers" >&2
 		tempfile=$(mktemp)
 		$docker_compose "${COMPOSE_FILES[@]}" ps > "$tempfile"
 		if ! grep -q ultrafeeder "$tempfile" ; then
@@ -76,6 +76,6 @@ if grep -q "_IS_BASE_CONFIG_FINISHED=True" /opt/adsb/config/.env 2> /dev/null ; 
 		rm -f "$tempfile"
 	fi
 else
-	echo "things aren't configured, yet, only starting Dozzle and the logger container"
+	echo "$(date -u +"%FT%T.%3NZ") things aren't configured, yet, only starting Dozzle and the logger container"
 	$docker_compose -f /opt/adsb/config/dozzle.yml "$@"
 fi
