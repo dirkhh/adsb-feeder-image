@@ -1,4 +1,7 @@
 Changes since v2.0.1 include:
+- stage2: many more UI changes
+- overall performance improvements (faster access to the global data the setup app uses)
+- stage2: better feedback to the user when operations fail or changes are made
 - stage2: show waiting spinner when making changes
 - fix: stage2 not starting due to syntax error / remove user env vars if unset / non-verbosely log docker pull to adsb-setup.log and dozzle proxy
 - stage2: apply settings immediately when adding a microproxy / fix microproxy IP change
