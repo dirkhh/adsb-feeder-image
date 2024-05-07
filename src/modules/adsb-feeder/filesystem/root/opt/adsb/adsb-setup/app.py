@@ -341,10 +341,12 @@ class AdsbIm:
             print_err("secure_image has been set")
 
     def update_dns_state(self):
-        dns_state = self._system.check_dns()
-        self._d.env_by_tags("dns_state").value = dns_state
-        if not dns_state:
-            print_err("we appear to have lost DNS")
+        def update_dns():
+            dns_state = self._system.check_dns()
+            self._d.env_by_tags("dns_state").value = dns_state
+            if not dns_state:
+                print_err("we appear to have lost DNS")
+        threading.Thread(target=update_dns).start()
 
     def write_envfile(self):
         write_values_to_env_file(self._d.envs_for_envfile)
@@ -378,10 +380,10 @@ class AdsbIm:
         self._routemanager.add_proxy_routes(self.proxy_routes)
         debug = os.environ.get("ADSBIM_DEBUG") is not None
         self._debug_cleanup()
-        self.update_dns_state()
         # in no_server mode we want to exit right after the housekeeping, so no
         # point in running this in the background
         if not no_server:
+            self.update_dns_state()
             self._dns_watch = Background(3600, self.update_dns_state)
         # prepare for app use (vs ADS-B Feeder Image use)
         # newer images will include a flag file that indicates that this is indeed
