@@ -106,9 +106,12 @@
       </div>
     </div>
   </div>
-  <div class="col-12 gy-2 gx-3 align-items-center form-group" id="noSdrs" style="display: none;">
+  <div class="col-12 gy-2 gx-3 align-items-center" id="noSdrs" style="display: none;">
     No SDRs found. If you have SDRs attached to the computer this software is running on, then a reboot may be
     required before the web UI can see the SDRs.
+  </div>
+  <div class="col-12 gy-2 gx-3 align-items-center form-group" id="remote_sdr"
+      {% if is_enabled('stage2') or env_value_by_tag('1090serial') != '' or is_enabled('airspy') %}style="display: none;"{% endif %}>
     <label class="form-label" for="remote_sdr">
       If you are intending to use this feeder with a remote device that has the SDR connected to it and offers
       <code>beast_out</code> (like the micro
