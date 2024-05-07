@@ -196,7 +196,7 @@ class AdsbIm:
             "piamapport", "piastatport", "frport", "pfport"
         )
 
-        self.proxy_routes = self._d.proxy_routes
+        self._routemanager.add_proxy_routes(self._d.proxy_routes)
         self.app.add_url_rule("/propagateTZ", "propagateTZ", self.get_tz)
         self.app.add_url_rule("/restarting", "restarting", self.restarting)
         self.app.add_url_rule("/restart", "restart", self.restart, methods=["GET", "POST"])
@@ -377,7 +377,6 @@ class AdsbIm:
             self._d.env_by_tags("dazzleport").value = 1094
 
     def run(self, no_server=False):
-        self._routemanager.add_proxy_routes(self.proxy_routes)
         debug = os.environ.get("ADSBIM_DEBUG") is not None
         self._debug_cleanup()
         # in no_server mode we want to exit right after the housekeeping, so no
