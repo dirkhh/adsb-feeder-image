@@ -147,12 +147,17 @@ class Env:
         if self.is_bool:
             value = is_true(value)
         idx = make_int(idx)
-        print_err(f"list_set {self._name}[{idx}] = {value}")
         if type(self._value) != list:
             stack_info(f"{self._name} is not a list, converting")
             self._value = [self._value]
             self.list_set(idx, value)
             return
+
+        if idx < len(self._value) and self._value[idx] == value:
+            # no change, return silently
+            return
+
+        print_err(f"list_set {self._name}[{idx}] = {value}")
         if type(self._default) == list and len(self._default) == 1:
             default_value = self._default[0]
         else:
