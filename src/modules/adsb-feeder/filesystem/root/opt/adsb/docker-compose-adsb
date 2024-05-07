@@ -29,7 +29,7 @@ if kill -0 "$PARENTPID" &> /dev/null ; then
 else
 	PARENTPROC="process $PARENTPID (appears already gone)"
 fi
-echo "$PARENTPROC called docker-compose-adsb" "$@" >&2
+echo "$(date -u +"%FT%T.%3NZ") $PARENTPROC called docker-compose-adsb" "$@" >&2
 
 lockFile="/opt/adsb/docker-starting.lock"
 if ( set -o noclobber; echo "$@" > "$lockFile") 2> /dev/null; then
@@ -53,16 +53,16 @@ fi
 # the very first time we still need to check for the old name of the environment variable
 # To make this less ugly, check for the partial name
 if grep -q "_IS_BASE_CONFIG_FINISHED=True" /opt/adsb/config/.env 2> /dev/null ; then
-	echo "calling docker compose for the enabled containers"
 	source /opt/adsb/default.docker-compose
 	cd /opt/adsb/config || echo "config folder is missing?" >&2
 	if [ -f .env.user ] ; then
 		# now inject the user env values
-		for yaml in *.yml ; do
-			python3 /opt/adsb/scripts/inject-env.py "$yaml" .env.user
-		done
+        echo "$(date -u +"%FT%T.%3NZ") inject user env"
+        python3 /opt/adsb/scripts/inject-env.py .env.user *.yml
 	fi
+    echo "$(date -u +"%FT%T.%3NZ") sync"
 	sync # graphs1090 writeback calls sync, to avoid timeouts during compose call sync now to empty the write cache
+    echo "$(date -u +"%FT%T.%3NZ") $docker_compose ${COMPOSE_FILES[@]} $@"
 	$docker_compose "${COMPOSE_FILES[@]}" "$@"
 	if [ "$1" = "up" ] ; then
 		# try to figure out if this was successful
