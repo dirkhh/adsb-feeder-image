@@ -58,20 +58,21 @@ class Data:
         ret = []
         for [endpoint, _env, path] in self._proxy_routes:
             env = "AF_" + _env.upper() + "_PORT"
-            ret.append([endpoint, self.env(env).value, path])
+            port = self.env(env).value
+            ret.append([endpoint, port, path])
             if endpoint in [
                 "/fr24-monitor.json",
                 "/fa-status.json/",
                 "/planefinder-stat/",
             ]:
-                # preparing routes for up to 30 sites
-                for i in range(1, 31):
-                    port = int(self.env(env).value) + i * 1000
-                    if endpoint[-1] == "/":
-                        ret.append([endpoint[:-1] + f"_{i}/", port, path])
-                    else:
-                        ret.append([endpoint + f"_{i}", port, path])
-        print_err(f"proxy_routes {ret}", level=2)
+                # idx is the id of the stage2 microfeeder
+                # example endpoint: '/fa-status.json_<int:idx>/'
+                # this is passed to the URL handling function in flask.py
+                # this function will add (idx * 1000) to the port
+                if endpoint[-1] == "/":
+                    ret.append([endpoint[:-1] + f"_<int:idx>/", port, path])
+                else:
+                    ret.append([endpoint + f"_<int:idx>", port, path])
         return ret
 
     # these are the default values for the env file

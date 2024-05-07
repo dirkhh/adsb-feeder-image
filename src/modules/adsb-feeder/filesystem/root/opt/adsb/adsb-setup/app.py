@@ -196,7 +196,7 @@ class AdsbIm:
             "piamapport", "piastatport", "frport", "pfport"
         )
 
-        self.proxy_routes = self._d.proxy_routes
+        self._routemanager.add_proxy_routes(self._d.proxy_routes)
         self.app.add_url_rule("/propagateTZ", "propagateTZ", self.get_tz)
         self.app.add_url_rule("/restarting", "restarting", self.restarting)
         self.app.add_url_rule("/restart", "restart", self.restart, methods=["GET", "POST"])
@@ -341,10 +341,12 @@ class AdsbIm:
             print_err("secure_image has been set")
 
     def update_dns_state(self):
-        dns_state = self._system.check_dns()
-        self._d.env_by_tags("dns_state").value = dns_state
-        if not dns_state:
-            print_err("we appear to have lost DNS")
+        def update_dns():
+            dns_state = self._system.check_dns()
+            self._d.env_by_tags("dns_state").value = dns_state
+            if not dns_state:
+                print_err("we appear to have lost DNS")
+        threading.Thread(target=update_dns).start()
 
     def write_envfile(self):
         write_values_to_env_file(self._d.envs_for_envfile)
@@ -375,13 +377,12 @@ class AdsbIm:
             self._d.env_by_tags("dazzleport").value = 1094
 
     def run(self, no_server=False):
-        self._routemanager.add_proxy_routes(self.proxy_routes)
         debug = os.environ.get("ADSBIM_DEBUG") is not None
         self._debug_cleanup()
-        self.update_dns_state()
         # in no_server mode we want to exit right after the housekeeping, so no
         # point in running this in the background
         if not no_server:
+            self.update_dns_state()
             self._dns_watch = Background(3600, self.update_dns_state)
         # prepare for app use (vs ADS-B Feeder Image use)
         # newer images will include a flag file that indicates that this is indeed
@@ -1031,14 +1032,16 @@ class AdsbIm:
     def get_base_info(self, n, do_import=False):
         ip = self._d.env_by_tags("mf_ip").list_get(n)
         print_err(f"getting info from {ip} with do_import={do_import}")
+        timeout = 2.0
         # try:
         if do_import:
-            micro_settings, status = generic_get_json(f"http://{ip}/api/micro_settings")
+            micro_settings, status = generic_get_json(f"http://{ip}/api/micro_settings", timeout=timeout)
             print_err(f"micro_settings API on {ip}: {status}, {micro_settings}")
             if status != 200 or micro_settings == None:
                 # maybe we're running on 1099?
                 micro_settings, status = generic_get_json(
-                    f"http://{ip}:1099/api/micro_settings"
+                    f"http://{ip}:1099/api/micro_settings",
+                    timeout=timeout
                 )
                 print_err(
                     f"micro_settings API on {ip}:1099: {status}, {micro_settings}"
@@ -1055,10 +1058,10 @@ class AdsbIm:
                         e.list_set(n, value)
                 return True
         # we fall through here if we can't get the micro settings
-        base_info, status = generic_get_json(f"http://{ip}/api/base_info")
+        base_info, status = generic_get_json(f"http://{ip}/api/base_info", timeout=timeout)
         if status != 200 or base_info == None:
             # maybe we're running on 1099?
-            base_info, status = generic_get_json(f"http://{ip}:1099/api/base_info")
+            base_info, status = generic_get_json(f"http://{ip}:1099/api/base_info", timeout=timeout)
         if status == 200 and base_info != None:
             print_err(f"got {base_info} for {ip}")
             if do_import or not self._d.env_by_tags("site_name").list_get(n):
@@ -2163,6 +2166,8 @@ class AdsbIm:
             return self.update()
         # update the info from the micro feeders
         for i in self.micro_indices():
+            if self._d.env_by_tags("mf_version").list_get(i) == "not an adsb.im feeder":
+                continue
             self.get_base_info(i)
         return render_template("stage2.html")
 

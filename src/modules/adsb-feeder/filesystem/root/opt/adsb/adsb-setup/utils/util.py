@@ -73,14 +73,14 @@ def make_int(value):
         return 0
 
 
-def generic_get_json(url: str, data=None):
+def generic_get_json(url: str, data=None, timeout=5.0):
     requests.packages.urllib3.util.connection.HAS_IPV6 = False
     status = -1
     try:
         response = requests.request(
             method="GET" if data == None else "POST",
             url=url,
-            timeout=1.0,
+            timeout=timeout,
             data=data,
             headers={
                 "Content-Type": "application/json",
