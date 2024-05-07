@@ -1,4 +1,6 @@
 Changes since v2.0.1 include:
+- various speedups for the app / applying settings
+- allow for remote beast source when SDR is configured as other or 978
 - stage2: many more UI changes
 - overall performance improvements (faster access to the global data the setup app uses)
 - stage2: better feedback to the user when operations fail or changes are made
