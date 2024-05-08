@@ -1,5 +1,5 @@
 from uuid import uuid4
-from utils.util import is_true, print_err
+from utils.util import is_true, print_err, mf_get_ip_and_triplet
 
 
 class NetConfig:
@@ -89,18 +89,23 @@ class UltrafeederConfig:
                 self._d.env_by_tags(uuid_tag).list_set(self._micro, uuid)
             ret.add(netconfig.generate(mlat_privacy=mlat_privacy, uuid=uuid))
         ret.discard("")
+
         # now we need to add the inbound links (if needed)
-        if self._d.list_is_enabled("uat978", self._micro):
-            if self._micro == 0:
-                # the dump978 container if this is an integrated feeder
-                ret.add("adsb,dump978,30978,uat_in")
-            else:
+
+        # add primary data input for microproxy
+        if is_stage2 and self._micro > 0:
+            ip = self._d.env_by_tags("mf_ip").list_get(self._micro)
+            ip, triplet = mf_get_ip_and_triplet(ip)
+            ret.add(f"adsb,{triplet}")
+            if self._d.list_is_enabled("uat978", self._micro):
                 # or the UAT port on the micro feeder
-                ret.add(
-                    f"adsb,{self._d.env_by_tags('mf_ip').list_get(self._micro)},30978,uat_in"
-                )
+                ret.add(f"adsb,{ip},30978,uat_in")
 
         if not is_stage2:
+            if self._d.list_is_enabled("uat978", self._micro):
+                # the dump978 container if this is an integrated feeder
+                ret.add("adsb,dump978,30978,uat_in")
+
             remote_sdr = self._d.env_by_tags("remote_sdr").value
             # make sure we only ever use 1 SDR / network input for ultrafeeder
             if self._d.env_by_tags("readsb_device_type").value != "":

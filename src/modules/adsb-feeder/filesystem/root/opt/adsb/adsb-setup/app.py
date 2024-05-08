@@ -33,7 +33,7 @@ from utils.config import (
     write_values_to_config_json,
     write_values_to_env_file,
 )
-from utils.util import create_fake_info, make_int, print_err
+from utils.util import create_fake_info, make_int, print_err, mf_get_ip_and_triplet
 
 # nofmt: on
 # isort: off
@@ -871,6 +871,7 @@ class AdsbIm:
         if self._d.is_enabled("stage2"):
             for i in self.micro_indices():
                 ip = self._d.env_by_tags("mf_ip").list_get(i)
+                ip, triplet = mf_get_ip_and_triplet(ip)
                 try:
                     with open(
                         f"/run/adsb-feeder-ultrafeeder_{i}/readsb/stats.prom"
@@ -1031,6 +1032,8 @@ class AdsbIm:
 
     def get_base_info(self, n, do_import=False):
         ip = self._d.env_by_tags("mf_ip").list_get(n)
+        ip, triplet = mf_get_ip_and_triplet(ip)
+
         print_err(f"getting info from {ip} with do_import={do_import}")
         timeout = 2.0
         # try:
@@ -1080,6 +1083,9 @@ class AdsbIm:
         return False
 
     def check_remote_feeder(self, ip):
+        print_err(f"check_remote_feeder({ip})")
+        ip, triplet = mf_get_ip_and_triplet(ip)
+
         url = f"http://{ip}/api/base_info"
         print_err(f"checking remote feeder {url}")
         try:
@@ -1109,9 +1115,10 @@ class AdsbIm:
             # now return the json_dict which will give the caller all the relevant data
             # including whether this is a v2 or not
             return make_response(json.dumps(json_dict), 200)
+
         # ok, it's not a recent adsb.im version, it could still be a feeder
         uf = self._d.env_by_tags(["ultrafeeder", "container"]).value
-        cmd = f"docker run --rm --entrypoint /usr/local/bin/readsb {uf} --net --net-connector {ip},30005,beast_in --quiet --auto-exit=2"
+        cmd = f"docker run --rm --entrypoint /usr/local/bin/readsb {uf} --net --net-connector {triplet} --quiet --auto-exit=2"
         print_err(f"running: {cmd}")
         try:
             response = subprocess.run(
@@ -1126,7 +1133,7 @@ class AdsbIm:
                 "failed to use readsb in ultrafeeder container to check on remote feeder status"
             )
             return make_response(json.dumps({"status": "fail"}), 200)
-        if not re.search("Beast TCP input: Connection established", output):
+        if not re.search("input: Connection established", output):
             print_err(f"can't connect to beast_output on remote feeder: {output}")
             return make_response(json.dumps({"status": "fail"}), 200)
         return make_response(json.dumps({"status": "ok"}), 200)
@@ -1158,23 +1165,25 @@ class AdsbIm:
         print_err(f"done importing graphs and history from {ip}")
 
     def setup_new_micro_site(
-        self, ip, uat, is_adsbim, do_import=False, do_restore=False, micro_data={}
+        self, key, uat, is_adsbim, do_import=False, do_restore=False, micro_data={}
     ):
-        if ip in {
+        # the key here can be a readsb net connector triplet in the form ip,port,protocol
+        # usually it's just the ip
+        if key in {
             self._d.env_by_tags("mf_ip").list_get(i) for i in self.micro_indices()
         }:
-            print_err(f"IP address {ip} already listed as a micro site")
-            return (False, f"IP address {ip} already listed as a micro site")
+            print_err(f"IP address {key} already listed as a micro site")
+            return (False, f"IP address {key} already listed as a micro site")
         print_err(
-            f"setting up a new micro site at {ip} do_import={do_import} do_restore={do_restore}"
+            f"setting up a new micro site at {key} do_import={do_import} do_restore={do_restore}"
         )
         n = self._d.env_by_tags("num_micro_sites").value
         # store the IP address so that get_base_info works
-        self._d.env_by_tags("mf_ip").list_set(n + 1, ip)
+        self._d.env_by_tags("mf_ip").list_set(n + 1, key)
         if not is_adsbim:
             # well that's unfortunate
             # we might get asked to create a UI for this at some point. Not today, though
-            print_err(f"Micro feeder at {ip} is not an adsb.im feeder")
+            print_err(f"Micro feeder at {key} is not an adsb.im feeder")
             n += 1
             self._d.env_by_tags("num_micro_sites").value = n
             self._d.env_by_tags("site_name").list_set(
@@ -1191,13 +1200,13 @@ class AdsbIm:
         # now let's see if we can get the data from the micro feeder
         if self.get_base_info(n + 1, do_import=do_import):
             print_err(
-                f"added new micro site {self._d.env_by_tags('site_name').list_get(n + 1)} at {ip}"
+                f"added new micro site {self._d.env_by_tags('site_name').list_get(n + 1)} at {key}"
             )
             n += 1
             self._d.env_by_tags("num_micro_sites").value = n
             if do_restore:
-                print_err(f"attempting to restore graphs and history from {ip}")
-                self.import_graphs_and_history_from_remote(ip)
+                print_err(f"attempting to restore graphs and history from {key}")
+                self.import_graphs_and_history_from_remote(key)
         else:
             # oh well, remove the IP address
             self._d.env_by_tags("mf_ip").list_remove()

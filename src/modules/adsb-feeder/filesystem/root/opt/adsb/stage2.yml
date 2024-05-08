@@ -21,7 +21,6 @@ services:
       #
       # --------------------------------------------------
       # readsb/decoder parameters:
-      - BEASTHOST=${AF_MICRO_IP_STAGE2NUM}
       - READSB_LAT=${FEEDER_LAT_STAGE2NUM}
       - READSB_LON=${FEEDER_LONG_STAGE2NUM}
       - READSB_ALT=${FEEDER_ALT_M_STAGE2NUM}
