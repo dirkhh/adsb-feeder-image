@@ -127,3 +127,17 @@ def create_fake_info():
         with open("/opt/adsb/rb/thermal_zone0/temp", "w") as fake_temp:
             print("12345\n", file=fake_temp)
     return not pathlib.Path("/sys/class/thermal/thermal_zone0/temp").exists()
+
+
+def mf_get_ip_and_triplet(ip):
+    # mf_ip for microproxies can either be an IP or a triplet of ip,port,protocol
+    split = ip.split(",")
+    if (len(split) != 1):
+        # the function was passed a triplet, set the ip to the first part
+        triplet = ip
+        ip = split[0]
+    else:
+        # the fucntion was passed an IP, port 30005 and protocol beast_in are implied
+        triplet = f"{ip},30005,beast_in"
+
+    return (ip, triplet)
