@@ -8,11 +8,7 @@ services:
     hostname: ultrafeeder_STAGE2NUM
     restart: always
     ports:
-      - ${AF_TAR1090_PORT_STAGE2NUM:-809STAGE2NUM}:80 # to expose the web interface
-      - 311STAGE2NUM3:31003 # MLATHUB SBS output
-      - 311STAGE2NUM4:31004 # MLATHUB Beast input
-      - 311STAGE2NUM5:31005 # MLATHUB Beast output
-      - 311STAGE2NUM6:31006 # MLATHUB Beast reduce output
+      - ${AF_TAR1090_PORT_STAGE2NUM}:80 # to expose the web interface
     environment:
       # --------------------------------------------------
       # general parameters:
