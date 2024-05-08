@@ -59,15 +59,21 @@ class MultiOutline:
             for i in look_at:
                 combined = False
                 for j in to_consider:
-                    if not polygons[j].disjoint(polygons[i]):
-                        p = unary_union([polygons[j], polygons[i]])
-                        polygons[j] = p
-                        made_change = True
-                        combined = True
+                    try:
+                        if not polygons[j].disjoint(polygons[i]):
+                            p = unary_union([polygons[j], polygons[i]])
+                            polygons[j] = p
+                            made_change = True
+                            combined = True
+                    except:
+                        pass
                 if not combined:
                     to_consider.append(i)
             look_at = to_consider[1:]
         for i in to_consider:
-            points = [[x, y] for x, y, a in polygons[i].exterior.coords]
-            result["multiRange"].append(points)
+            try:
+                points = [[x, y] for x, y, a in polygons[i].exterior.coords]
+                result["multiRange"].append(points)
+            except:
+                pass
         return result
