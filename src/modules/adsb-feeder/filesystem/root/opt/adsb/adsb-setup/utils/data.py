@@ -64,6 +64,8 @@ class Data:
                 "/fr24-monitor.json",
                 "/fa-status.json/",
                 "/planefinder-stat/",
+                "/fa-status/",
+                "/fr24/",
             ]:
                 # idx is the id of the stage2 microfeeder
                 # example endpoint: '/fa-status.json_<int:idx>/'
