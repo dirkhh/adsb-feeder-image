@@ -20,6 +20,7 @@
   <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
       <a class="navbar-brand" href="{{ url_for("director") }}">ADS-B Feeder</a>
+      <a class="btn btn-primary mx-3" href="/map{{ env_value_by_tag('tar1090_query_params') }}">Live Map</a>
       <button class="navbar-toggler" type="button" data-mdb-toggle="collapse" data-mdb-target="#navbarNav"
               aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <svg viewBox="-5 0 10 8" width="1.5em">
@@ -28,17 +29,17 @@
       </button>
       <div class="collapse navbar-collapse " id="navbarNav">
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-          <!-- Live Map -->
-          <li class="nav-item {% if not is_enabled('base_config') %}d-none{% endif %}"><a class="nav-link"
-               href="/map{{ env_value_by_tag('tar1090_query_params') }}">Live Map</a></li>
-          <!-- Additional Maps -->
+          <!-- Maps -->
           <li class="nav-item dropdown {% if not is_enabled('base_config') %}d-none{% endif %}">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMaps" role="button"
-               data-mdb-toggle="dropdown" aria-expanded="false">Addtl Maps</a>
+               data-mdb-toggle="dropdown" aria-expanded="false">Maps</a>
             <ul class="dropdown-menu" aria-labelledby="navbarDropdownMaps">
+              <li><a class="dropdown-item" href="/map{{ env_value_by_tag('tar1090_query_params') }}">Live Traffic</a>
+              </li>
               <li><a class="dropdown-item" href="/map/?heatmap">Heatmap</a></li>
               <li><a class="dropdown-item" href="/map/?pTracks">Tracks</a></li>
               <li><a class="dropdown-item" href="/map/?replay">Replay</a></li>
+              <li><a class="dropdown-item" href="/visualization">Options</a></li>
               {% if is_enabled('stage2') %}
               <!-- awkward double dropdown for the micro proxies -->
               {% for site in env_value_by_tag('site_name') %}
@@ -47,11 +48,12 @@
                 <a class="dropdown-item" href="#">{{site}} &raquo;</a>
                 <ul class="dropdown-menu dropdown-submenu">
                   {% set url = no_port_url ~ ":" ~ (loop.index0 + 8090) %}
-                  <li><a class="dropdown-item" href="{{ url }}/{{env_value_by_tag('tar1090_query_params') }}">Main
-                      Map</a></li>
+                  <li><a class="dropdown-item" href="{{ url }}/{{env_value_by_tag('tar1090_query_params') }}">Live
+                      Traffic</a></li>
                   <li><a class="dropdown-item" href="{{ url }}/?heatmap">Heatmap</a></li>
                   <li><a class="dropdown-item" href="{{ url }}/?pTracks">Tracks</a></li>
                   <li><a class="dropdown-item" href="{{ url }}/?replay">Replay</a></li>
+                  <li><a class="dropdown-item" href="/visualization?m={{loop.index0}}">Options</a></li>
                 </ul>
               </li>
               {% endif %}
@@ -59,22 +61,6 @@
               {% endif %}
             </ul>
           </li>
-          <!-- Map Options -->
-          {% if not is_enabled('stage2') %}
-          <li class="nav-item"> <a class="nav-link {% if not is_enabled('base_config') %}d-none{% endif %}"
-               href="/visualization">Map Options</a>
-          </li>
-          {% else %}
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownViz" role="button" data-mdb-toggle="dropdown"
-               aria-expanded="false">Map Options</a>
-            <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuViz">
-              {% for site in env_value_by_tag('site_name') %}
-              <li><a class="dropdown-item" href="/visualization?m={{loop.index0}}">{{site}}</a></li>
-              {% endfor %}
-            </ul>
-          </li>
-          {% endif %}
           <!-- Data Sharing -->
           {% if not is_enabled('stage2') %}
           <li class="nav-item"><a
@@ -114,7 +100,7 @@
               <li><a class="dropdown-item" href="/logs/">Logs</a></li>
               <li><a class="dropdown-item" href="/info">Support Info</a></li>
               <li><a class="dropdown-item" href="/support">Share Diagnostics</a></li>
-              <li><a class="dropdown-item" href="/systemmgmt">System Mgmt</a></li>
+              <li><a class="dropdown-item" href="/systemmgmt">Management</a></li>
               <li><a class="dropdown-item" href="/backup">Backup</a></li>
               <li><a class="dropdown-item" href="/restore">Restore</a></li>
               <li><a class="dropdown-item" href="/stats">{%if is_enabled('stage2')%}Combined {%endif%}Stats</a></li>
