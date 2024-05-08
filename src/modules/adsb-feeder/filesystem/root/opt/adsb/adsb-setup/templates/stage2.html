@@ -92,17 +92,22 @@
               </td>
             </tr>
             {% else %}
+            {% set no_port_url = request.scheme ~ "://" ~ request.host.rsplit(':', 1)[0] %}
             <tr class="align-middle">
               <td>
-                <a href="http://{{ list_value_by_tag('mf_ip', loop.index0) }}">{{ site }}</a>
+                <a href="{{no_port_url}}:{{ 8090 + loop.index }}">{{ site }}</a>
               </td>
-              <td class="text-center">{{ list_value_by_tag('mf_ip', loop.index0) }}</td>
+              <td class="text-center">
+                <a
+                   href="http://{{ list_value_by_tag('mf_ip', loop.index0) }}">{{ list_value_by_tag('mf_ip', loop.index0) }}</a>
+              </td>
               <td class="text-center">{{ list_value_by_tag('lat', loop.index0) }} /
                 {{ list_value_by_tag('lng', loop.index0) }} / {{ list_value_by_tag('alt', loop.index0) }}m
               </td>
               <td class="text-center"> {{ list_value_by_tag('mf_version', loop.index0)}}
               </td>
-              <td class="text-center"><span id="mf_status_{{ loop.index0 }}"></span></td>
+              <td class="text-center"><a id="mf_status_{{ loop.index0 }}"
+                   href="{{no_port_url}}:{{ 8090 + loop.index }}/graphs1090/"></a></td>
               <td class="text-center">
                 <button type="submit" name="remove_micro_{{ loop.index0 }}" value="go" title="Remove this micro feeder"
                         class="btn btn-danger btn-floating btn-sm">&#x232B;</button>
@@ -142,8 +147,7 @@
         </div>
         <div class="col-12 col-sm-7 col-md-8 col-lg-9 mb-3">
           <input type="text" id="add_micro_feeder_ip" name="add_micro_feeder_ip" required placeholder="1.2.3.4"
-                 class="form-control"
-                 title="valid IPv4 address" />
+                 class="form-control" title="valid IPv4 address" />
         </div>
         <div id="mf_step1" class="col-12">
           <button type="button" class="btn btn-primary" onclick="check_micro_feeder();">Check micro feeder</button>
