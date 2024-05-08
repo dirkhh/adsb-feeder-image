@@ -1526,11 +1526,6 @@ class AdsbIm:
                         print_err(f"failed to add new micro site: {message}")
                         flash(f"failed to add new micro site: {message}", "danger")
                         next_url = url_for("stage2")
-                    # running this will result in the status showing up on the stage 2 page
-                    self._d.env_by_tags("stage2").value = True
-                    self.handle_implied_settings()
-                    self.write_envfile()
-                    self._system.background_up_containers()
                     continue
                 if key.startswith("remove_micro_"):
                     # user has clicked Remove micro feeder on Stage 2 page
@@ -1556,13 +1551,11 @@ class AdsbIm:
                     success, message = self.edit_micro_site(
                         num, form.get(f"site_name_{num}"), form.get(f"mf_ip_{num}")
                     )
-                    self._next_url_from_director = url_for("stage2")
                     if success:
-                        self.handle_implied_settings()
-                        self.write_envfile()
-                        self._system.background_up_containers()
+                        self._next_url_from_director = url_for("stage2")
                     else:
                         flash(message, "error")
+                        next_url = url_for("stage2")
                     continue
                 if key == "set_stage2_data":
                     # just grab the new data and go back
@@ -1784,6 +1777,7 @@ class AdsbIm:
                     self._d.env_by_tags(["tar1090_ac_db"]).value = True
                     self._d.env_by_tags(["mlathub_disable"]).value = False
                 if key == "aggregators" and value == "stage2":
+                    next_url = url_for("stage2")
                     self._d.env_by_tags("stage2").value = True
                     if not self._multi_outline_bg:
                         self._d.env_by_tags("tar1090_configjs_append").value = (
@@ -1792,6 +1786,14 @@ class AdsbIm:
                         self.push_multi_outline()
                         self._multi_outline_bg = Background(60, self.push_multi_outline)
                     self._d.env_by_tags("site_name").list_set(0, form.get("site_name"))
+                if (
+                    key == "aggregators"
+                    and not self._d.env_by_tags("aggregators_chosen").value
+                    and not self._d.is_enabled("stage2")
+                    and not value == "micro"
+                ):
+                    # show the aggregator selection
+                    next_url = url_for("aggregators")
                 # finally, painfully ensure that we remove explicitly asigned SDRs from other asignments
                 # this relies on the web page to ensure that each SDR is only asigned on purpose
                 # the key in quesiton will be explicitely set and does not need clearing
@@ -1837,17 +1839,11 @@ class AdsbIm:
             return redirect(next_url)
         if self._d.is_enabled("base_config"):
             print_err("base config is completed", level=2)
-            if self._d.env_by_tags("aggregators_chosen").value == True:
-                print_err("base config is completed", level=2)
-                if self._d.is_enabled("sdrplay") and not self._d.is_enabled(
-                    "sdrplay_license_accepted"
-                ):
-                    return redirect(url_for("sdrplay_license"))
-                return redirect(url_for("restarting"))
-            if self._d.env_by_tags("aggregators").value == "stage2":
-                return redirect(url_for("stage2"))
-            if self._d.env_by_tags("aggregators").value != "micro":
-                return redirect(url_for("aggregators"))
+            if self._d.is_enabled("sdrplay") and not self._d.is_enabled(
+                "sdrplay_license_accepted"
+            ):
+                return redirect(url_for("sdrplay_license"))
+            return redirect(url_for("restarting"))
         print_err("base config not completed", level=2)
         return redirect(url_for("director"))
 
