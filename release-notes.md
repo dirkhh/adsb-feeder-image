@@ -1,4 +1,10 @@
 Changes since v2.0.1 include:
+- stage2: allow more systems to be used as micro feeder by allowing host,port,protocol triplets - this allows for example to use a planefiner device as micro feeder
+- stage2: fix bug that prevent user from updating the stage2 name
+- stage2: fix rbfeeder script to grab serial from the correct log
+- use the human-friendly status pages for FA and FR24
+- several fixes to how aggregators that require keys are handled: enable them right away once a key has been provided, auto-disable them without a key
+- yet another significant UI / top level main menu change - hopefully this will settle down and stay stable
 - small changes to config file handling and activity logging to improve consistency and reduce clutter
 - start additional aggregator containers right after the required keys have been obtained / entered
 - various speedups for the app / applying settings
