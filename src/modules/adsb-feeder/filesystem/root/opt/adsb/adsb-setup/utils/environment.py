@@ -180,8 +180,9 @@ class Env:
             return self._value[idx]
         if type(self._default) == list and len(self._default) == 1:
             while len(self._value) <= idx:
-                print_err(f"{self._name}: appending default")
                 self._value.append(self._default[0])
+                print_err(f"{self._name} -> list_get({idx}) appended default {self._default[0]}, new len: {len(self._value)}")
+                self._reconcile(self._value)
             return self._value[idx]
 
         if type(self._default) != list:
