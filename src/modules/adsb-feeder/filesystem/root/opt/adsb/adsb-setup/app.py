@@ -2159,7 +2159,10 @@ class AdsbIm:
 
     @check_restart_lock
     def setup(self):
-        if request.method == "POST" and request.form.get("submit") == "go":
+        if request.method == "POST" and (
+            request.form.get("submit") == "go"
+            or request.form.get("set_stage2_data") == "go"
+        ):
             return self.update()
         # is this a stage2 feeder?
         if self._d.is_enabled("stage2"):
