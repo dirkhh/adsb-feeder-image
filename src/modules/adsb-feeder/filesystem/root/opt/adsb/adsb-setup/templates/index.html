@@ -63,10 +63,12 @@
         </thead>
         <tbody>
           {% for site in env_value_by_tag('site_name') if not site == list_value_by_tag('site_name', 0) %}
+          {% set no_port_url = request.scheme ~ "://" ~ request.host.rsplit(':', 1)[0] %}
           <tr>
             <td class="text-center" scope="row">{{loop.index}}</td>
-            <td class="text-left">{{site}}</td>
-            <td class="text-center"><span id="mf_status_{{loop.index}}"></span></td>
+            <td class="text-left"><a href="{{no_port_url}}:{{ 8090 + loop.index }}">{{site}}</a></td>
+            <td class="text-center"><a id="mf_status_{{loop.index}}"
+                 href="{{no_port_url}}:{{ 8090 + loop.index }}/graphs1090/"></a></td>
           </tr>
           {% endfor %}
         </tbody>
