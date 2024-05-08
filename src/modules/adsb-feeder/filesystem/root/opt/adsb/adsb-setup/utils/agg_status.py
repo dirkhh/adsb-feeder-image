@@ -212,9 +212,10 @@ class AggStatus:
             station_serial = self._d.env_by_tags(["radarbox", "sn"]).list_get(self._idx)
             if not station_serial:
                 # dang, I hate this part
+                suffix = "" if self._idx == 0 else f"_{self._idx}"
                 try:
                     result = subprocess.run(
-                        "docker logs rbfeeder | grep 'station serial number' | tail -1",
+                        f"docker logs rbfeeder{suffix} | grep 'station serial number' | tail -1",
                         shell=True,
                         capture_output=True,
                         text=True,
