@@ -1,4 +1,6 @@
 Changes since v2.0.1 include:
+- small changes to config file handling and activity logging to improve consistency and reduce clutter
+- start additional aggregator containers right after the required keys have been obtained / entered
 - various speedups for the app / applying settings
 - allow for remote beast source when SDR is configured as other or 978
 - stage2: many more UI changes
