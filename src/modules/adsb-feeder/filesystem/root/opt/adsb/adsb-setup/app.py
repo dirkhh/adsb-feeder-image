@@ -1712,6 +1712,11 @@ class AdsbIm:
                     if not is_successful:
                         print_err(f"did not successfully enable {base}")
 
+                    # immediately start the containers in case the user doesn't click "i'm done here" after requesting a key
+                    seen_go = True
+                    # go back to the page we were on after applying settings
+                    self._next_url_from_director = request.url
+
                 continue
             # now handle other form input
             if key == "clear_range" and value == "1":
