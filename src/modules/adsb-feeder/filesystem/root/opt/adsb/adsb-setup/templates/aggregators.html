@@ -115,7 +115,7 @@
       <a href="https://www.flightradar24.com/privacy-policy">flightradar24</a>
       <div class="form-group" id="FR_FIELDS">
         <label for="flightradar--key">
-          {% if not is_enabled('uat978') %}
+          {% if not list_is_enabled('uat978',m) %}
           Enter your FR24 sharing key (or enter your email address and click the button to request a sharing key)
           {% else %}
           Enter your two FR24 sharing keys (first one for ADS-B/1090, second one for UAT). For either or both of the
