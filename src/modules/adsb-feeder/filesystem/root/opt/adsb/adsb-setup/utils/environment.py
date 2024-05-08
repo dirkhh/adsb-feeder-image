@@ -109,8 +109,6 @@ class Env:
 
     @property
     def value(self):
-        if self.is_bool:
-            return is_true(self._value)
         if self._value_call:
             return self._value_call()
         elif self._value != None:
