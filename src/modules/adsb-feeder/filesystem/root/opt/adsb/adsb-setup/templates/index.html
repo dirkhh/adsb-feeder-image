@@ -40,7 +40,7 @@
     <h5>You are running in micro feeder mode</h5>
     {% if env_value_by_tag('stage2_listeners') != [] %}
     <p class="mt-3">The following stage2 systems have accessed this feeder:
-      {% for s in env_value_by_tag('stage2_listeners')%} {{s}}{% if not loop.last %},{%endif%}{%endfor%}
+      {% for s in env_value_by_tag('stage2_listeners')%}{% if s != '' %}{{s}}{% if not loop.last %},{%endif%}{%endif%}{%endfor%}
     </p>
     {% else %}
     <p>Connect a stage 2 system that feeds aggregators to this system.</p>

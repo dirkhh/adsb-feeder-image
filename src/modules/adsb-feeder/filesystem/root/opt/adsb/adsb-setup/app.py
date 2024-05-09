@@ -851,6 +851,10 @@ class AdsbIm:
         print_err(f"access to base_info from {listener}")
         if not listener in stage2_listeners:
             idx = len(stage2_listeners)
+            # beware - the default is an array with an empty string, so we need to overwrite this
+            # when we get the first actual listener
+            if self._d.env_by_tags("stage2_listeners").list_get(0) == "":
+                idx = 0
             self._d.env_by_tags("stage2_listeners").list_set(idx, listener)
         response = make_response(
             json.dumps(
