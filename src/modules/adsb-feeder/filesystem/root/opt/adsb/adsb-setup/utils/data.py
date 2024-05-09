@@ -213,7 +213,7 @@ class Data:
         # Misc
         Env(
             "_ADSBIM_HEYWHATSTHAT_ENABLED",
-            [False],
+            default=[False],
             tags=["heywhatsthat", "is_enabled"],
         ),
         Env(
