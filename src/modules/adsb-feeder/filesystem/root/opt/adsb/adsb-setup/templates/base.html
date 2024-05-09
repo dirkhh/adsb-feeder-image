@@ -47,7 +47,7 @@
               <li>
                 <a class="dropdown-item" href="#">{{site}} &raquo;</a>
                 <ul class="dropdown-menu dropdown-submenu">
-                  {% set url = no_port_url ~ ":" ~ (loop.index0 + 8090) %}
+                  {% set url = "/map_" ~ loop.index0 %}
                   <li><a class="dropdown-item" href="{{ url }}/{{env_value_by_tag('tar1090_query_params') }}">Live
                       Traffic</a></li>
                   <li><a class="dropdown-item" href="{{ url }}/?heatmap">Heatmap</a></li>
@@ -106,8 +106,7 @@
               <li><a class="dropdown-item" href="/stats">{%if is_enabled('stage2')%}Combined {%endif%}Stats</a></li>
               {% for site in env_value_by_tag('site_name') %}
               {% if loop.index0 != 0 %}
-              {% set url = no_port_url ~ ":" ~ (loop.index0 + 8090) %}
-              <li><a class="dropdown-item" href="{{ url }}/graphs1090/">{{site}} Stats</a></li>
+              <li><a class="dropdown-item" href="/stats_{{loop.index0}}/">{{site}} Stats</a></li>
               {% endif %}
               {% endfor %}
             </ul>

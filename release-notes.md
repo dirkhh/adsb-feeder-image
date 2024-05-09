@@ -1,4 +1,5 @@
 Changes since v2.0.1 include:
+- stage2: fix map / stats links for microsites
 - stage2: add additional aggregator links to the stage2 feeder home page
 - stage2: add links to dump978 for micro feeders providing UAT978 data
 - stage2: add links to live traffic and stats when showing the micro feeders connected to a stage2

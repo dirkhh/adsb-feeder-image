@@ -1513,13 +1513,8 @@ class AdsbIm:
             if value == "go" or value.startswith("go-") or value == "wait":
                 if key == "showmap" and value.startswith("go-"):
                     idx = make_int(value[3:])
-                    port = (
-                        8090 + idx
-                        if idx > 0
-                        else self._d.env_by_tags("tar1090port").value
-                    )
                     self._next_url_from_director = (
-                        f"http://{request.host.split(':')[0]}:{port}/"
+                        f"/map_{idx}/"
                     )
                     print_err(
                         f"after applying changes, go to map at {self._next_url_from_director}"

@@ -66,6 +66,8 @@ class Data:
                 "/planefinder-stat/",
                 "/fa-status/",
                 "/fr24/",
+                "/map/",
+                "/stats/",
             ]:
                 # idx is the id of the stage2 microfeeder
                 # example endpoint: '/fa-status.json_<int:idx>/'
@@ -617,11 +619,13 @@ class Data:
         # add convenience values
         # fmt: off
         ret["AF_FALSE_ON_STAGE2"] = "false" if self.is_enabled(["stage2"]) else "true"
-        for i in range(1, 10):
-            ret[f"AF_PIAWAREMAP_PORT_{i}"] = int(ret[f"AF_PIAWAREMAP_PORT"]) + i * 1000
-            ret[f"AF_PIAWARESTAT_PORT_{i}"] = int(ret[f"AF_PIAWARESTAT_PORT"]) + i * 1000
-            ret[f"AF_FLIGHTRADAR_PORT_{i}"] = int(ret[f"AF_FLIGHTRADAR_PORT"]) + i * 1000
-            ret[f"AF_PLANEFINDER_PORT_{i}"] = int(ret[f"AF_PLANEFINDER_PORT"]) + i * 1000
+        if self.is_enabled(["stage2"]):
+            for i in range(1, self.env_by_tags("num_micro_sites").value + 1):
+                ret[f"AF_TAR1090_PORT_{i}"] = int(ret[f"AF_TAR1090_PORT"]) + i * 1000
+                ret[f"AF_PIAWAREMAP_PORT_{i}"] = int(ret[f"AF_PIAWAREMAP_PORT"]) + i * 1000
+                ret[f"AF_PIAWARESTAT_PORT_{i}"] = int(ret[f"AF_PIAWARESTAT_PORT"]) + i * 1000
+                ret[f"AF_FLIGHTRADAR_PORT_{i}"] = int(ret[f"AF_FLIGHTRADAR_PORT"]) + i * 1000
+                ret[f"AF_PLANEFINDER_PORT_{i}"] = int(ret[f"AF_PLANEFINDER_PORT"]) + i * 1000
         return ret
         # fmt: on
 
