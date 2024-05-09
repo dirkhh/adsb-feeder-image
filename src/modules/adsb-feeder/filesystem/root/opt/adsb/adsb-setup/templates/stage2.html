@@ -92,7 +92,6 @@
               </td>
             </tr>
             {% else %}
-            {% set no_port_url = request.scheme ~ "://" ~ request.host.rsplit(':', 1)[0] %}
             <tr class="align-middle">
               <td>
                 <a href="/map_{{loop.index0}}/">{{ site }}</a>
@@ -106,8 +105,7 @@
               </td>
               <td class="text-center"> {{ list_value_by_tag('mf_version', loop.index0)}}
               </td>
-              <td class="text-center"><a id="mf_status_{{ loop.index0 }}"
-                   href="/stats_{{loop.index0}}/"></a></td>
+              <td class="text-center"><a id="mf_status_{{ loop.index0 }}" href="/stats_{{loop.index0}}/"></a></td>
               <td class="text-center">
                 <button type="submit" name="remove_micro_{{ loop.index0 }}" value="go" title="Remove this micro feeder"
                         class="btn btn-danger btn-floating btn-sm">&#x232B;</button>
