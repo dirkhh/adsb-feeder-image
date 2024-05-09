@@ -213,9 +213,22 @@
         respond, so if you get an error, please wait a moment and try again.
       </div>
     </div>
+    {# figure out what's enabled for the integrated feeder or the microfeeders #}
     {% for idx in ns.site_indices %}
     {% if list_is_enabled("uat978", idx) %}
     {% set ns.uat978 = true %}
+    {% endif %}
+    {% if list_is_enabled("adsblol", idx) %}
+    {% set ns.adsblol = true %}
+    {% endif %}
+    {% if list_is_enabled("adsbx", idx) %}
+    {% set ns.adsbx = true %}
+    {% endif %}
+    {% if list_is_enabled("flightradar", idx) %}
+    {% set ns.flightradar = true %}
+    {% endif %}
+    {% if list_is_enabled("planefinder", idx) %}
+    {% set ns.planefinder = true %}
     {% endif %}
     {% endfor %}
     <div id="UAT978" class="row {% if not ns.uat978 %}d-none{% endif %}">
@@ -239,13 +252,11 @@
         </ul>
       </div>
     </div>
-    {% if not is_enabled('stage2') %}
-    <div class="row mt-3" {% if not ( is_enabled('adsblol') or is_enabled('flightradar') or is_enabled('planefinder') or
-        is_enabled('adsbx')) %} style="display: none;" {% endif %}>
+    <div class="row mt-3 {% if not (ns.adsblol or ns.flightradar or ns.planefinder or ns.adsbx) %}d-none{% endif %}">
       <div class="col-12">
         <h5>Additional aggregator links</h5>
       </div>
-      <div {% if not is_enabled('adsblol') %}style="display: none;" {% endif %} class="col-12">
+      <div class="col-12 {% if not ns.adsblol %}d-none{% endif %}">
         <div class="lead">ADSB.lol</div>
         <ul>
           <li>
@@ -274,15 +285,19 @@
           </li>
         </ul>
       </div>
-      <div {% if not is_enabled('flightradar') %}style="display: none;" {% endif %} class="col-12">
+      <div class="col-12 {% if not ns.flightradar %}d-none{% endif %}">
         <div class="lead">FlightRadar 24</div>
         <ul>
+          {% for idx in ns.site_indices %}
+          {% if list_is_enabled("flightradar", idx) %}
           <li>
-            <a href="/fr-status">FR24 status</a>
+            <a href="/fr-status{% if idx > 0 %}_{{ idx }}{% endif %}">FR24 status</a>
           </li>
+          {% endif %}
+          {% endfor %}
         </ul>
       </div>
-      <div {% if not is_enabled('planefinder') %}style="display: none;" {% endif %} class="col-12">
+      <div class="col-12 {% if not ns.planefinder %}d-none{% endif %}">
         <div class="lead">PlaneFinder</div>
         <ul>
           <li>
@@ -290,7 +305,7 @@
           </li>
         </ul>
       </div>
-      <div {% if not is_enabled('adsbx') %}style="display: none;" {% endif %} class="col-12">
+      <div class="col-12 {% if not ns.adsbx %}d-none{% endif %}">
         <div class="lead">ADSBExchange</div>
         <ul>
           <li>
@@ -302,7 +317,6 @@
         </ul>
       </div>
     </div>
-    {% endif %}
   </div>
   <div class="col-12 {% if not stage2_suggestion %} d-none {% endif %}">
     Running the containers for the commercial aggregators on systems with 1GB of RAM or less can cause problems - it
