@@ -63,7 +63,6 @@
         </thead>
         <tbody>
           {% for site in env_value_by_tag('site_name') if not site == list_value_by_tag('site_name', 0) %}
-          {% set no_port_url = request.scheme ~ "://" ~ request.host.rsplit(':', 1)[0] %}
           <tr>
             <td class="text-center" scope="row">{{loop.index}}</td>
             <td class="text-left"><a href="/map_{{loop.index}}/">{{site}}</a></td>
@@ -255,96 +254,98 @@
       <div class="col-12">
         <h5>Additional aggregator links</h5>
       </div>
-      <div class="col-12 {% if not ns.adsblol %}d-none{% endif %}">
+      <div class="col-12 mb-2 {% if not ns.adsblol %}d-none{% endif %}">
         <div class="lead">ADSB.lol</div>
-        <ul>
+        <ul class="mb-0">
           <li>
             <a href="https://status.adsb.lol/">ADSB.lol status</a>
           </li>
           <li>
             <a href="https://www.adsb.lol/docs/feeders-only/introduction/">ADSB.lol feeder introduction</a>
           </li>
-          {% for idx in ns.site_indices %}
-          {% if list_is_enabled("adsblol", idx) %}
-          <li>
-            {% if idx == 0 %}
-            <a href="https://my.adsb.lol/">personal ADSB.lol URL with the planes you are sending</a>
-            {% else %}
-            <a id="adsblol-link-{{ idx }}">{{ list_value_by_tag('site_name', idx) }} personal ADSB.lol URL</a>
-            {% endif %}
-          </li>
-          <li>
-            <a
-               href="https://mlat.adsb.lol/syncmap/#lat={{ list_value_by_tag('lat', idx) }}#lon={{ list_value_by_tag('lng', idx) }}#zoom=10">ADSB.lol
-              MLAT feeder map for the area around {{ list_value_by_tag('site_name', idx) }}</a>
-            <br />
-          </li>
-          {% endif %}
-          {% endfor %}
-          {% if is_enabled('stage2') %}
-          (on the MLAT maps only feeders that have MLAT privacy disabled will be shown)
-          {% else %}
-          {% if list_is_enabled("mlat_privacy", 0) %}
-          (since you have MLAT privacy enabled, your feeder won't be shown)
-          {% else %}
-          (your feeder will be at an approximate location as {{ list_value_by_tag('site_name', 0) }})
-          {% endif %}
+          {% if num_micro_sites == 1 %}
+          <li><a href="https://my.adsb.lol/">personal ADSB.lol URL with the planes you are sending</a></li>
+          <li><a
+               href="https://mlat.adsb.lol/syncmap/#lat={{ list_value_by_tag('lat', 0) }}#lon={{ list_value_by_tag('lng', 0) }}#zoom=10">ADSB.lol
+              MLAT feeder map for the area around {{ list_value_by_tag('site_name', 0) }}</a></li>
           {% endif %}
         </ul>
+        {% if num_micro_sites > 1 %}
+        <table class="table table-sm table-borderless lh-1 w-auto mt-0 mb-0 ms-2">
+          <tbody>
+            {% for idx in ns.site_indices %}
+            {% if list_is_enabled("adsblol", idx) %}
+            <tr>
+              <th>{{ list_value_by_tag('site_name', idx) }}</th>
+              <td><a class="ms-1" id="adsblol-link-{{ idx }}"> personal URL</a></td>
+              <td><a
+                   href="https://mlat.adsb.lol/syncmap/#lat={{ list_value_by_tag('lat', idx) }}#lon={{ list_value_by_tag('lng', idx) }}#zoom=10">MLAT
+                  feeder map</a></td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+        {% endif %}
+        {% if is_enabled('stage2') %}
+        (on the MLAT maps only feeders that have MLAT privacy disabled will be shown)
+        {% else %}
+        {% if list_is_enabled("mlat_privacy", 0) %}
+        (since you have MLAT privacy enabled, your feeder won't be shown)
+        {% else %}
+        (your feeder will be at an approximate location as {{ list_value_by_tag('site_name', 0) }})
+        {% endif %}
+        {% endif %}
       </div>
       <div class="col-12 {% if not ns.flightradar %}d-none{% endif %}">
         <div class="lead">FlightRadar 24</div>
-        <ul>
-          {% for idx in ns.site_indices %}
-          {% if list_is_enabled("flightradar", idx) %}
-          <li>
-            {% if idx == 0 %}
-            <a href="/fr24">FR24 status</a>
-            {% else %}
-            <a href="/fr24_{{ idx }}">{{ list_value_by_tag('site_name', idx) }} FR24 status</a>
+        <table class="table table-sm table-borderless lh-1 w-auto mt-0 mb-0 ms-2">
+          <tbody>
+            {% for idx in ns.site_indices %}
+            {% if list_is_enabled("flightradar", idx) %}
+            {% if idx != 0 %}{% set suffix = '_'~idx %}{% else %}{% set suffix = '' %}{% endif %}
+            <tr>
+              <th>{{ list_value_by_tag('site_name', idx) }}</th>
+              <td><a href="/fr24{{ suffix }}">FR24 status</a></td>
+            </tr>
             {% endif %}
-          </li>
-          {% endif %}
-          {% endfor %}
-        </ul>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
       <div class="col-12 {% if not ns.planefinder %}d-none{% endif %}">
         <div class="lead">PlaneFinder</div>
-        <ul>
-          {% for idx in ns.site_indices %}
-          {% if list_is_enabled("planefinder", idx) %}
-          <li>
-            {% if idx == 0 %}
-            <a href="/planefinder-stat">Local Planefinder map</a>
-            {% else %}
-            <a href="/planefinder-stat_{{ idx }}">{{ list_value_by_tag('site_name', idx) }} Planefinder map</a>
+        <table class="table table-sm table-borderless lh-1 w-auto mt-0 mb-0 ms-2">
+          <tbody>
+            {% for idx in ns.site_indices %}
+            {% if list_is_enabled("planefinder", idx) %}
+            {% if idx != 0 %}{% set suffix = '_'~idx %}{% else %}{% set suffix = '' %}{% endif %}
+            <tr>
+              <th>{{ list_value_by_tag('site_name', idx) }}</th>
+              <td><a href="/planefinder-stat{{ suffix }}">{{ list_value_by_tag('site_name', idx) }} Planefinder map</a>
+              </td>
+            </tr>
             {% endif %}
-          </li>
-          {% endif %}
-          {% endfor %}
-        </ul>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
       <div class="col-12 {% if not ns.adsbx %}d-none{% endif %}">
         <div class="lead">ADSBExchange</div>
-        <ul>
-          {% for idx in ns.site_indices %}
-          {% if list_is_enabled("adsbx", idx) %}
-          {% if idx == 0 %}
-          {% set s = "" %}
-          {% set suffix = "" %}
-          {% else %}
-          {% set s = list_value_by_tag('site_name', idx) + " " %}
-          {% set suffix = "_" ~ idx %}
-          {% endif %}
-          <li>
-            <a id="adsbxstatlink{{suffix}}" href="">{{s}}ADSBx Anywhere Stats</a>
-          </li>
-          <li>
-            <a id="adsbxmaplink{{suffix}}" href="">{{s}}ADSBx Anywhere Map</a>
-          </li>
-          {% endif %}
-          {% endfor %}
-        </ul>
+        <table class="table table-sm table-borderless lh-1 w-auto mt-0 mb-0 ms-2">
+          <tbody>
+            {% for idx in ns.site_indices %}
+            {% if list_is_enabled("adsbx", idx) %}
+            {% if idx != 0 %}{% set suffix = '_'~idx %}{% else %}{% set suffix = '' %}{% endif %}
+            <tr>
+              <th>{{ list_value_by_tag('site_name', idx) }}</th>
+              <td><a id="adsbxstatlink{{suffix}}" href="">{{s}}ADSBx Anywhere Stats</a></td>
+              <td><a id="adsbxmaplink{{suffix}}" href="">{{s}}ADSBx Anywhere Map</a></td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
