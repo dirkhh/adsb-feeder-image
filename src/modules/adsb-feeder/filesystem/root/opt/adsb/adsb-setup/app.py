@@ -1337,13 +1337,17 @@ class AdsbIm:
             if not self._d.env_by_tags("ultrafeeder_uuid").list_get(sitenum):
                 self._d.env_by_tags("ultrafeeder_uuid").list_set(sitenum, str(uuid4()))
 
-            # disable other aggregators if their key isn't set:
-
             for agg in [
                 submit_key.replace("--submit", "")
                 for submit_key in self._other_aggregators.keys()
             ]:
                 if self._d.env_by_tags([agg, "is_enabled"]).list_get(sitenum):
+                    # disable other aggregators for the combined data of stage2
+                    if sitenum == 0 and self._d.is_enabled("stage2"):
+                        self._d.env_by_tags([agg, "is_enabled"]).list_set(
+                            sitenum, False
+                        )
+                    # disable other aggregators if their key isn't set
                     if self._d.env_by_tags([agg, "key"]).list_get(sitenum) == "":
                         print_err(
                             f"empty key, disabling: agg: {agg}, sitenum: {sitenum}"
