@@ -1332,6 +1332,11 @@ class AdsbIm:
     def handle_implied_settings(self):
 
         for sitenum in [0] + self.micro_indices():
+
+            # make sure use_route_api is populated with the default:
+            self._d.env_by_tags("route_api").list_get(sitenum)
+
+            # make sure the uuids are populated:
             if not self._d.env_by_tags("adsblol_uuid").list_get(sitenum):
                 self._d.env_by_tags("adsblol_uuid").list_set(sitenum, str(uuid4()))
             if not self._d.env_by_tags("ultrafeeder_uuid").list_get(sitenum):
