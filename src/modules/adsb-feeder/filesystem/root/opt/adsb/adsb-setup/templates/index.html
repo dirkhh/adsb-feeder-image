@@ -213,15 +213,29 @@
         respond, so if you get an error, please wait a moment and try again.
       </div>
     </div>
-    <div id="UAT978" {% if not is_enabled('uat978') %}style="display: none;" {% endif %} class="row">
+    {% for idx in ns.site_indices %}
+    {% if list_is_enabled("uat978", idx) %}
+    {% set ns.uat978 = true %}
+    {% endif %}
+    {% endfor %}
+    <div id="UAT978" class="row {% if not ns.uat978 %}d-none{% endif %}">
       <div class="col-12">
         <h5>UAT978 Mapping Interface</h5>
       </div>
       <div class="col-12">
         <ul>
+          {% for idx in ns.site_indices %}
+          {% if list_is_enabled("uat978", idx) %}
           <li>
+            {% if idx == 0 %}
             <a href="/dump978">Dump978 map</a>
+            {% else %}
+            <a href="http://{{ list_value_by_tag('mf_ip', idx) }}/dump978">{{ list_value_by_tag('site_name', idx) }}
+              Dump978 map</a>
+            {% endif %}
           </li>
+          {% endif %}
+          {% endfor %}
         </ul>
       </div>
     </div>
