@@ -1513,9 +1513,7 @@ class AdsbIm:
             if value == "go" or value.startswith("go-") or value == "wait":
                 if key == "showmap" and value.startswith("go-"):
                     idx = make_int(value[3:])
-                    self._next_url_from_director = (
-                        f"/map_{idx}/"
-                    )
+                    self._next_url_from_director = f"/map_{idx}/"
                     print_err(
                         f"after applying changes, go to map at {self._next_url_from_director}"
                     )
