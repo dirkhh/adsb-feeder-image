@@ -346,6 +346,7 @@ class AdsbIm:
             self._d.env_by_tags("dns_state").value = dns_state
             if not dns_state:
                 print_err("we appear to have lost DNS")
+
         threading.Thread(target=update_dns).start()
 
     def write_envfile(self):
@@ -1326,11 +1327,18 @@ class AdsbIm:
 
             # disable other aggregators if their key isn't set:
 
-            for agg in [ submit_key.replace("--submit", "") for submit_key in self._other_aggregators.keys() ]:
+            for agg in [
+                submit_key.replace("--submit", "")
+                for submit_key in self._other_aggregators.keys()
+            ]:
                 if self._d.env_by_tags([agg, "is_enabled"]).list_get(sitenum):
                     if self._d.env_by_tags([agg, "key"]).list_get(sitenum) == "":
-                        print_err(f"empty key, disabling: agg: {agg}, sitenum: {sitenum}")
-                        self._d.env_by_tags([agg, "is_enabled"]).list_set(sitenum, False)
+                        print_err(
+                            f"empty key, disabling: agg: {agg}, sitenum: {sitenum}"
+                        )
+                        self._d.env_by_tags([agg, "is_enabled"]).list_set(
+                            sitenum, False
+                        )
 
         if self._d.is_enabled("stage2"):
 
