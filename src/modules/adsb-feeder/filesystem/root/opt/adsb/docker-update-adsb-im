@@ -39,9 +39,11 @@ if ! [ -f os.adsb.feeder.image ]; then
 fi
 
 # then all images on this prune list are deleted
-echo "PRUNING:"
-echo "$PRUNE_LIST"
-docker rmi $PRUNE_LIST # unquoted expansion required
+if [[ -n "$PRUNE_LIST" ]]; then
+    echo "PRUNING:"
+    echo "$PRUNE_LIST"
+    docker rmi $PRUNE_LIST # unquoted expansion required
+fi
 echo "PRUNING DONE"
 
 
