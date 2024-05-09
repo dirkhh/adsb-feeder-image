@@ -67,8 +67,7 @@
           <tr>
             <td class="text-center" scope="row">{{loop.index}}</td>
             <td class="text-left"><a href="/map_{{loop.index}}/">{{site}}</a></td>
-            <td class="text-center"><a id="mf_status_{{loop.index}}"
-                 href="/stats_{{loop.index}}/"></a></td>
+            <td class="text-center"><a id="mf_status_{{loop.index}}" href="/stats_{{loop.index}}/"></a></td>
           </tr>
           {% endfor %}
         </tbody>
@@ -358,17 +357,19 @@
 </div>
 <script>
   $(document).ready(function () {
-    fetch("https://api.ipify.org?format=json")
-      .then(response => response.json())
-      .then(data => {
-        let feeder_ip = "{{ env_value_by_tags(['feeder_ip']) }}"
-        if (data["ip"] != feeder_ip) {
-          console.log("IP check: browser got", data, "feeder has", feeder_ip);
-          $("#ip-mismatch").show()
-        } else {
-          $("#ip-mismatch").hide()
-        }
-      });
+    if ("{{ env_value_by_tags(['aggregators']) }}" != 'micro') {
+      fetch("https://api.ipify.org?format=json")
+        .then(response => response.json())
+        .then(data => {
+          let feeder_ip = "{{ env_value_by_tags(['feeder_ip']) }}"
+          if (data["ip"] != feeder_ip) {
+            console.log("IP check: browser got", data, "feeder has", feeder_ip);
+            $("#ip-mismatch").show()
+          } else {
+            $("#ip-mismatch").hide()
+          }
+        });
+    }
     fetch("/api/status/im")
       .then(response => response.json())
       .then(data => {
