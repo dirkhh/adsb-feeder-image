@@ -865,6 +865,11 @@ class AdsbIm:
                     "alt": self._d.env_by_tags("alt").list_get(0),
                     "tz": self._d.env_by_tags("tz").list_get(0),
                     "version": self._d.env_by_tags("base_version").value,
+                    "airspy_at_port": (
+                        self._d.env_by_tags("airspyport").value
+                        if self._d.is_enabled("airspy")
+                        else 0
+                    ),
                 }
             )
         )
@@ -1094,6 +1099,9 @@ class AdsbIm:
             self._d.env_by_tags("alt").list_set(n, base_info["alt"])
             self._d.env_by_tags("tz").list_set(n, base_info["tz"])
             self._d.env_by_tags("mf_version").list_set(n, base_info["version"])
+            aap = base_info.get("airspy_at_port")
+            if aap and aap != 0:
+                self._d.env_by_tags("airspyurl").list_set(n, f"http://{ip}:{aap}")
             return True
         #    except:
         #        pass
@@ -1428,6 +1436,10 @@ class AdsbIm:
             # next check for airspy devices
             airspy = any([sdr._type == "airspy" for sdr in self._sdrdevices.sdrs])
             self._d.env_by_tags(["airspy", "is_enabled"]).value = airspy
+            if airspy:
+                self._d.env_by_tags("airspyurl").list_set(
+                    0, f"http://airspy_adsb:{self._d.env_by_tags('airspyport').value}/"
+                )
 
             # SDRplay devices
             sdrplay = any([sdr._type == "sdrplay" for sdr in self._sdrdevices.sdrs])

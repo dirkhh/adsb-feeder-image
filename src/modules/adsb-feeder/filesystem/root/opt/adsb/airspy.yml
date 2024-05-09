@@ -9,6 +9,8 @@ services:
     restart: always
     devices:
       - /dev/bus/usb:/dev/bus/usb
+    ports:
+      - ${FEEDER_AIRSPY_PORT:-8070}:80
     environment:
       - AIRSPY_ADSB_VERBOSE=true
       - AIRSPY_ADSB_TIMEOUT=90
@@ -26,7 +28,6 @@ services:
       # USER_PROVIDED_ENV_END
     volumes:
       - /run/adsb-feeder-airspy:/run
-      - /run/adsb-feeder-shared:/run/airspy_adsb
     tmpfs:
       - /tmp:size=128M
       - /var/log:size=32M

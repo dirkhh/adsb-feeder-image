@@ -95,6 +95,7 @@ services:
       - GRAPHS1090_DARKMODE=true
       - ENABLE_978=${FEEDER_ENABLE_UAT978}
       - URL_978=${FEEDER_URL_978}
+      - URL_AIRSPY=${FEEDER_URL_AIRSPY:-}
       - S6_KILL_GRACETIME=1000
       #
       # USER_PROVIDED_ENV_START
@@ -105,7 +106,6 @@ services:
       - /proc/diskstats:/proc/diskstats:ro
       - /dev:/dev:ro
       - /run/adsb-feeder-ultrafeeder:/run
-      - /run/adsb-feeder-shared:/run/airspy_adsb
       - thermal_fix:${FEEDER_RB_THERMAL_HACK:-/tmp/rbt}:ro
     tmpfs:
       - /tmp:size=128M

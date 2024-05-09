@@ -214,6 +214,10 @@ class Data:
         Env("FEEDER_UAT978_HOST", default=[""], tags=["978host"]),
         # add the URL to the dump978 map
         Env("FEEDER_URL_978", default=[""], tags=["978url"]),
+        # URL to get Airspy stats (used in stage2)
+        Env("FEEDER_URL_AIRSPY", default=[""], tags=["airspyurl"]),
+        # port for Airspy stats (used in micro feeder and handed to stage2 via base_info)
+        Env("FEEDER_AIRSPY_PORT", default=8070, tags=["airspyport"]),
         # magic setting for piaware to get 978 data
         Env("FEEDER_PIAWARE_UAT978", default=[""], tags=["978piaware"]),
         # Misc
