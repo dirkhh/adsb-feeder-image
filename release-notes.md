@@ -1,4 +1,7 @@
 Changes since v2.0.1 include:
+- stage2: fix route api settings
+- stage2: more tuning of the stage2 home page
+- micro feeder: don't show empty string as listener
 - stage2: fix map / stats links for microsites
 - stage2: add additional aggregator links to the stage2 feeder home page
 - stage2: add links to dump978 for micro feeders providing UAT978 data
