@@ -172,6 +172,7 @@ class Data:
         # Ultrafeeder config, used for all 4 types of Ultrafeeder instances
         Env("FEEDER_ULTRAFEEDER_CONFIG", tags=["ultrafeeder_config"]),
         Env("ADSBLOL_UUID", default=[""], tags=["adsblol_uuid"]),
+        Env("ADSBLOL_LINK", default=[""], tags=["adsblol_link"]),
         Env("ULTRAFEEDER_UUID", default=[""], tags=["ultrafeeder_uuid"]),
         Env("MLAT_PRIVACY", default=[False], tags=["mlat_privacy", "is_enabled"]),
         Env(

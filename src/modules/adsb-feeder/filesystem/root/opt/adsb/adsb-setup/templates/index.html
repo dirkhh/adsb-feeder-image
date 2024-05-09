@@ -265,24 +265,32 @@
           <li>
             <a href="https://www.adsb.lol/docs/feeders-only/introduction/">ADSB.lol feeder introduction</a>
           </li>
+          {% for idx in ns.site_indices %}
+          {% if list_is_enabled("adsblol", idx) %}
           <li>
+            {% if idx == 0 %}
             <a href="https://my.adsb.lol/">personal ADSB.lol URL with the planes you are sending</a>
+            {% else %}
+            <a id="adsblol-link-{{ idx }}">{{ list_value_by_tag('site_name', idx) }} personal ADSB.lol URL</a>
+            {% endif %}
           </li>
           <li>
             <a
-               href="https://mlat.adsb.lol/syncmap/#lat={{ list_value_by_tag('lat', 0) }}#lon={{ list_value_by_tag('lng', 0) }}#zoom=10">ADSB.lol
-              MLAT feeder map</a>
+               href="https://mlat.adsb.lol/syncmap/#lat={{ list_value_by_tag('lat', idx) }}#lon={{ list_value_by_tag('lng', idx) }}#zoom=10">ADSB.lol
+              MLAT feeder map for the area around {{ list_value_by_tag('site_name', idx) }}</a>
             <br />
-            {% if is_enabled('stage2') %}
-            (only those of your feeders that have MLAT privacy disabled will be shown)
-            {% else %}
-            {% if list_is_enabled("mlat_privacy", 0) %}
-            (since you have MLAT privacy enabled, your feeder won't be shown)
-            {% else %}
-            (your feeder will be at an approximate location as {{ list_value_by_tag('site_name', 0) }})
-            {% endif %}
-            {% endif %}
           </li>
+          {% endif %}
+          {% endfor %}
+          {% if is_enabled('stage2') %}
+          (on the MLAT maps only feeders that have MLAT privacy disabled will be shown)
+          {% else %}
+          {% if list_is_enabled("mlat_privacy", 0) %}
+          (since you have MLAT privacy enabled, your feeder won't be shown)
+          {% else %}
+          (your feeder will be at an approximate location as {{ list_value_by_tag('site_name', 0) }})
+          {% endif %}
+          {% endif %}
         </ul>
       </div>
       <div class="col-12 {% if not ns.flightradar %}d-none{% endif %}">
@@ -291,7 +299,11 @@
           {% for idx in ns.site_indices %}
           {% if list_is_enabled("flightradar", idx) %}
           <li>
-            <a href="/fr-status{% if idx > 0 %}_{{ idx }}{% endif %}">FR24 status</a>
+            {% if idx == 0 %}
+            <a href="/fr24">FR24 status</a>
+            {% else %}
+            <a href="/fr24_{{ idx }}">{{ list_value_by_tag('site_name', idx) }} FR24 status</a>
+            {% endif %}
           </li>
           {% endif %}
           {% endfor %}
@@ -300,20 +312,39 @@
       <div class="col-12 {% if not ns.planefinder %}d-none{% endif %}">
         <div class="lead">PlaneFinder</div>
         <ul>
+          {% for idx in ns.site_indices %}
+          {% if list_is_enabled("planefinder", idx) %}
           <li>
-            <a href="/planefinder">Local Planefinder map</a>
+            {% if idx == 0 %}
+            <a href="/planefinder-stat">Local Planefinder map</a>
+            {% else %}
+            <a href="/planefinder-stat_{{ idx }}">{{ list_value_by_tag('site_name', idx) }} Planefinder map</a>
+            {% endif %}
           </li>
+          {% endif %}
+          {% endfor %}
         </ul>
       </div>
       <div class="col-12 {% if not ns.adsbx %}d-none{% endif %}">
         <div class="lead">ADSBExchange</div>
         <ul>
+          {% for idx in ns.site_indices %}
+          {% if list_is_enabled("adsbx", idx) %}
+          {% if idx == 0 %}
+          {% set s = "" %}
+          {% set suffix = "" %}
+          {% else %}
+          {% set s = list_value_by_tag('site_name', idx) + " " %}
+          {% set suffix = "_" ~ idx %}
+          {% endif %}
           <li>
-            <a id="adsbxstatlink" href="">ADSBx Anywhere Stats</a>
+            <a id="adsbxstatlink{{suffix}}" href="">{{s}}ADSBx Anywhere Stats</a>
           </li>
           <li>
-            <a id="adsbxmaplink" href="">ADSBx Anywhere Map</a>
+            <a id="adsbxmaplink{{suffix}}" href="">{{s}}ADSBx Anywhere Map</a>
           </li>
+          {% endif %}
+          {% endfor %}
         </ul>
       </div>
     </div>
@@ -391,9 +422,21 @@
         } else {
           $("#" + agg + "span" + idx).addClass('text-dark')
         }
+        if (agg == "adsblol") {
+          if (idx > 0) {
+            console.log("set adsblol-link" + idx + " to " + data["adsblollink"])
+            $("#adsblol-link-" + idx).attr("href", data["adsblollink"])
+          }
+        }
         if (agg == "adsbx") {
-          $("#adsbxstatlink").attr("href", "https://www.adsbexchange.com/api/feeders/?feed=" + data["adsbxfeederid"])
-          $("#adsbxmaplink").attr("href", "https://globe.adsbexchange.com/?feed=" + data["adsbxfeederid"])
+          if (idx == 0) {
+            $("#adsbxstatlink").attr("href", "https://www.adsbexchange.com/api/feeders/?feed=" + data["adsbxfeederid"])
+            $("#adsbxmaplink").attr("href", "https://globe.adsbexchange.com/?feed=" + data["adsbxfeederid"])
+          } else {
+            console.log("set adsbxstatlink" + idx)
+            $("#adsbxstatlink_" + idx).attr("href", "https://www.adsbexchange.com/api/feeders/?feed=" + data["adsbxfeederid"])
+            $("#adsbxmaplink_" + idx).attr("href", "https://globe.adsbexchange.com/?feed=" + data["adsbxfeederid"])
+          }
         }
       });
   }

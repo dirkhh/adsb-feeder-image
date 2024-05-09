@@ -89,15 +89,15 @@ class AggStatus:
                 if lolclients:
                     lolbeast = lolclients.get("beast")
                     lolmlat = lolclients.get("mlat")
-                    self._beast = (
-                        T.Yes
-                        if isinstance(lolbeast, list)
-                        and any(
-                            b.get("uuid", "xxxxxxxx-xxxx-")[:14] == uuid[:14]
-                            for b in lolbeast
-                        )
-                        else T.No
-                    )
+                    self._beast = T.No
+                    if isinstance(lolbeast, list):
+                        for entry in lolbeast:
+                            if entry.get("uuid", "xxxxxxxx-xxxx-")[:14] == uuid[:14]:
+                                self._beast = T.Yes
+                                self._d.env_by_tags("adsblol_link").list_set(
+                                    self._idx, entry.get("adsblol_my_url")
+                                )
+                                break
                     self._mlat = (
                         T.Yes
                         if isinstance(lolmlat, list)
@@ -108,6 +108,7 @@ class AggStatus:
                         else T.No
                     )
                     self._last_check = datetime.now()
+
                 else:
                     print_err(f"adsblol returned status {status}")
         if self._agg == "flyitaly":

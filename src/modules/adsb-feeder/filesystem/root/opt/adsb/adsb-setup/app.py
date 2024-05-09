@@ -938,6 +938,14 @@ class AdsbIm:
                     "adsbxfeederid": self._d.env_by_tags("adsbxfeederid").list_get(idx),
                 }
             )
+        elif agg == "adsblol":
+            return json.dumps(
+                {
+                    "beast": status.beast,
+                    "mlat": status.mlat,
+                    "adsblollink": self._d.env_by_tags("adsblol_link").list_get(idx),
+                }
+            )
         return json.dumps({"beast": status.beast, "mlat": status.mlat})
 
     @check_restart_lock

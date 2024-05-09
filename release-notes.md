@@ -1,4 +1,7 @@
 Changes since v2.0.1 include:
+- stage2: add additional aggregator links to the stage2 feeder home page
+- stage2: add links to dump978 for micro feeders providing UAT978 data
+- stage2: add links to live traffic and stats when showing the micro feeders connected to a stage2
 - stage2: allow more systems to be used as micro feeder by allowing host,port,protocol triplets - this allows for example to use a planefiner device as micro feeder
 - stage2: fix bug that prevent user from updating the stage2 name
 - stage2: fix rbfeeder script to grab serial from the correct log
