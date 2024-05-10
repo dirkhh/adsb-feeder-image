@@ -1457,10 +1457,9 @@ class AdsbIm:
             # next check for airspy devices
             airspy = any([sdr._type == "airspy" for sdr in self._sdrdevices.sdrs])
             self._d.env_by_tags(["airspy", "is_enabled"]).value = airspy
-            if airspy:
-                self._d.env_by_tags("airspyurl").list_set(
-                    0, f"http://airspy_adsb:{self._d.env_by_tags('airspyport').value}/"
-                )
+            self._d.env_by_tags("airspyurl").list_set(
+                0, f"http://airspy_adsb" if airspy else ""
+            )
             # SDRplay devices
             sdrplay = any([sdr._type == "sdrplay" for sdr in self._sdrdevices.sdrs])
             self._d.env_by_tags(["sdrplay", "is_enabled"]).value = sdrplay
