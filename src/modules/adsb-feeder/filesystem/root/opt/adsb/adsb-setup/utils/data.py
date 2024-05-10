@@ -218,6 +218,8 @@ class Data:
         Env("FEEDER_URL_AIRSPY", default=[""], tags=["airspyurl"]),
         # port for Airspy stats (used in micro feeder and handed to stage2 via base_info)
         Env("FEEDER_AIRSPY_PORT", default=8070, tags=["airspyport"]),
+        # URL to get remote 1090 stats data (for gain, %-age of strong signals, and signal graph)
+        Env("FEEDER_URL_1090_SIGNAL", default=[""], tags=["1090signalurl"]),
         # magic setting for piaware to get 978 data
         Env("FEEDER_PIAWARE_UAT978", default=[""], tags=["978piaware"]),
         # Misc
