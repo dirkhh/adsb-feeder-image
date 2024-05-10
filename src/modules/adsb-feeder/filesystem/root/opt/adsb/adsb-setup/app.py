@@ -1249,7 +1249,11 @@ class AdsbIm:
     def remove_micro_site(self, num):
         # carefully shift everything down
         print_err(f"removing micro site {num}")
-        for t in self.microfeeder_setting_tags + ("mf_ip",):
+        for t in self.microfeeder_setting_tags + (
+            "mf_ip",
+            "airspyurl",
+            "1090signalurl",
+        ):
             tags = t.split("--")
             e = self._d.env_by_tags(tags)
             if e and type(e._value) == list:
