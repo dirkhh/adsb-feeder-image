@@ -172,11 +172,7 @@ class Data:
         Env("FEEDER_UNUSED_SERIAL_3", tags=["other-3"]),
         #
         # Ultrafeeder config, used for all 4 types of Ultrafeeder instances
-        Env(
-            "FEEDER_ULTRAFEEDER_CONFIG",
-            default=[""],
-            tags=["ultrafeeder_config"]
-        ),
+        Env("FEEDER_ULTRAFEEDER_CONFIG", default=[""], tags=["ultrafeeder_config"]),
         Env("ADSBLOL_UUID", default=[""], tags=["adsblol_uuid"]),
         Env("ADSBLOL_LINK", default=[""], tags=["adsblol_link"]),
         Env("ULTRAFEEDER_UUID", default=[""], tags=["ultrafeeder_uuid"]),
