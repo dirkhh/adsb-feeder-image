@@ -1105,7 +1105,7 @@ class AdsbIm:
             else:
                 # if we don't have an airspy, we assume that there's an RTL SDR
                 self._d.env_by_tags("1090signalurl").list_set(
-                    n, f"http://{ip}:8080/data/stats.json"
+                    n, f"http://{ip}:8080"
                 )
             return True
         #    except:
