@@ -870,6 +870,11 @@ class AdsbIm:
                         if self._d.is_enabled("airspy")
                         else 0
                     ),
+                    "rtlsdr_at_port": (
+                        self._d.env_by_tags("tar1090port").value
+                        if self._d.env_by_tags("readsb_device_type").value == "rtlsdr"
+                        else 0
+                    ),
                 }
             )
         )
@@ -1099,14 +1104,21 @@ class AdsbIm:
             self._d.env_by_tags("alt").list_set(n, base_info["alt"])
             self._d.env_by_tags("tz").list_set(n, base_info["tz"])
             self._d.env_by_tags("mf_version").list_set(n, base_info["version"])
+
             aap = base_info.get("airspy_at_port")
+            rap = base_info.get("rtlsdr_at_port")
+            airspyurl = ""
+            rtlsdrurl = ""
+
             if aap and aap != 0:
-                self._d.env_by_tags("airspyurl").list_set(n, f"http://{ip}:{aap}")
-            else:
-                # if we don't have an airspy, we assume that there's an RTL SDR
-                self._d.env_by_tags("1090signalurl").list_set(
-                    n, f"http://{ip}:8080"
-                )
+                airspyurl = f"http://{ip}:{aap}"
+            if rap and rap != 0:
+                rtlsdrurl = f"http://{ip}:{rap}"
+
+            self._d.env_by_tags("airspyurl").list_set(n, airspyurl)
+            self._d.env_by_tags("rtlsdrurl").list_set(n, rtlsdrurl)
+
+
             return True
         #    except:
         #        pass
