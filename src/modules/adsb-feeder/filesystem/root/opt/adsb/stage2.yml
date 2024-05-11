@@ -34,6 +34,8 @@ services:
       - ULTRAFEEDER_CONFIG=${FEEDER_ULTRAFEEDER_CONFIG_STAGE2NUM}
       - MLAT_USER=${MLAT_SITE_NAME_STAGE2NUM}
       - UUID=${ULTRAFEEDER_UUID_STAGE2NUM}
+      # reduce delay starting up various mlat-clients, default is 15 seconds
+      - MLAT_STARTUP_STAGGER=1
       #
       # --------------------------------------------------
       # TAR1090 (Map Web Page) parameters:
