@@ -119,9 +119,10 @@ if [ "$NATIVE_DIETPI" != "1" ] ; then
 
 		# ensure that we get predictable interface names
 		echo "extraargs=net.ifnames=0" >> /boot/armbianEnv.txt
-
-		sed -i 's/Wants=network-online.target/Wants=network-pre.target/;s/After=network.target network-online.target/Before=wpa_supplicant.service network.target network-online.target/' /usr/lib/systemd/system/armbian-firstrun-config.service
-		systemctl enable armbian-firstrun-config
+		if [[ -f /usr/lib/systemd/system/armbian-firstrun-config.service ]] ; then
+			sed -i 's/Wants=network-online.target/Wants=network-pre.target/;s/After=network.target network-online.target/Before=wpa_supplicant.service network.target network-online.target/' /usr/lib/systemd/system/armbian-firstrun-config.service
+			systemctl list-unit-files armbian-firstrun-config &>/dev/null && systemctl enable armbian-firstrun-config
+		fi
 	fi
 
 	# Enable services at boot
