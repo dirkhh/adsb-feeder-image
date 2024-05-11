@@ -82,7 +82,7 @@
          title="aggregators that don't require you to create an account or provide an email address">semi-anonymous
       </a>
       aggregators do you want to feed? {% if mem > 1800000 %}Or is this a stage 2 setup?{% else %}(Stage 2 setup
-      unsupported with {{ mem }} GB of memory){% endif %}
+      unsupported with {{ (mem / 1024) | int }} MB of memory (1800 MB required){% endif %}
     </label>
     <br />
     <div>
