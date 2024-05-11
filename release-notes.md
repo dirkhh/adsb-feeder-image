@@ -1,4 +1,5 @@
 Changes since v2.0.1 include:
+- stage2: receive Airspy stats as well as full RTL stats, including gain, an signal strength details
 - update a all SDR-E containers to their latest versions
 - Airspy: use http transport for stats - allowing stage2 to get access to the stats as well
 - stage2: fix route api settings
