@@ -36,7 +36,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [lepotato, odroidc4, nanopi-neo3-dietpi, orangepi-5plus-dietpi, orangepi-zero3-dietpi, raspberrypi64-pi-2-3-4-5, raspberrypi64-dietpi-pi-2-3-4, raspberrypi64-dietpi-pi-5, x86-64-native, x86-64-vm]
+        name: [lepotato, odroidc4, odroidxu4, nanopi-neo3-dietpi, orangepi-5plus-dietpi, orangepi-zero3-dietpi, raspberrypi64-pi-2-3-4-5, raspberrypi64-dietpi-pi-2-3-4, raspberrypi64-dietpi-pi-5, x86-64-native, x86-64-vm]
         include:
         - name: lepotato
           base_arch: arm64
@@ -48,6 +48,11 @@ jobs:
           variant: armbian
           url: https://github.com/armbian/community/releases/download/24.5.0-trunk.563/Armbian_community_24.5.0-trunk.563_Odroidc4_bookworm_current_6.6.30_minimal.img.xz
           magic_path: "repository/src/image-armbian/odroidc4.img.xz"
+        - name: odroidxu4
+          base_arch: armv7l
+          variant: armbian
+          url: https://dl.armbian.com/odroidxu4/archive/Armbian_24.2.1_Odroidxu4_bookworm_current_6.1.77_minimal.img.xz
+          magic_path: "repository/src/image-armbian/odroidxu4.img.xz"
         - name: nanopi-neo3-dietpi
           variant: dietpi-fat-2
           base_arch: arm64
