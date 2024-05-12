@@ -62,6 +62,11 @@
           <th class="text-center" scope="col">Status (pos/min)</th>
         </thead>
         <tbody>
+          <tr>
+            <td class="text-center" scope="row">*</td>
+            <td class="text-left"><a href="/map/">{{ list_value_by_tag("site_name", 0) }}</a></td>
+            <td class="text-center"><a id="mf_status_0" href="/stats/"></a></td>
+          </tr>
           {% for site in env_value_by_tag('site_name') if not site == list_value_by_tag('site_name', 0) %}
           <tr>
             <td class="text-center" scope="row">{{loop.index}}</td>

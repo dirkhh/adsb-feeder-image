@@ -138,9 +138,9 @@
               color_class = "text-warning";
               tooltip = "receiving unusually little data"
             }
-            $("#mf_status_" + (i + 1)).attr('class', color_class);
-            $("#mf_status_" + (i + 1)).attr('title', tooltip);
-            $("#mf_status_" + (i + 1)).text(d["pct"] + " pos/min");
+            $("#mf_status_" + i).attr('class', color_class);
+            $("#mf_status_" + i).attr('title', tooltip);
+            $("#mf_status_" + i).text(d["pct"] + " pos/min");
           })
         })
         .finally(() => {

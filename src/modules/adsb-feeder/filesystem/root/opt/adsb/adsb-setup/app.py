@@ -889,12 +889,13 @@ class AdsbIm:
     def stage2_stats(self):
         ret = []
         if self._d.is_enabled("stage2"):
-            for i in self.micro_indices():
+            for i in [0] + self.micro_indices():
                 ip = self._d.env_by_tags("mf_ip").list_get(i)
                 ip, triplet = mf_get_ip_and_triplet(ip)
+                suffix = f"_{i}" if i != 0 else ""
                 try:
                     with open(
-                        f"/run/adsb-feeder-ultrafeeder_{i}/readsb/stats.prom"
+                        f"/run/adsb-feeder-ultrafeeder{suffix}/readsb/stats.prom"
                     ) as f:
                         pct = 0
                         secs = 0
