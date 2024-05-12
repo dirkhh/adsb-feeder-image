@@ -203,8 +203,8 @@ class Data:
         Env("FEEDER_ENABLE_UAT978", default=[False], tags=["uat978", "is_enabled"]),
         Env(
             "FEEDER_UAT_REPLAY978",
-            default=[False],
-            tags=["replay978", "is_enabled", "false_is_empty"],
+            default=[""],
+            tags=["replay978"],
         ),
         # hostname ultrafeeder uses to get 978 data
         Env("FEEDER_UAT978_HOST", default=[""], tags=["978host"]),

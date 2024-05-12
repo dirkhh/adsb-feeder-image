@@ -1,4 +1,5 @@
 Changes since v2.0.2 include:
+- stage2: fix UAT978 forwading
 - add an installer .iso for native x86_64 PC
 
 > [!NOTE]
