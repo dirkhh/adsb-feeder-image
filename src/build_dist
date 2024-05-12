@@ -119,6 +119,19 @@ if [[ "$VARIANT" == "iob-dietpi"* ]] ; then
         pwd
         ls -l
     fi
+    if [[ "$VARIANT" == "iob-dietpi-root-only" && "$BASE_IMG" == *"NativePC"* ]] ; then
+        # now let's create the installer iso image
+        if [[ ! -d "${DIR}/../../DietPi" ]] ; then
+            echo "DietPi not found in \${DIR}/../../"
+            ls -l "${DIR}/../../"
+            exit 0
+        fi
+        cd image-dietpi || exit 0
+        export FP_ROOT_DEV=1 CLONING_TOOL="Clonezilla" OUTPUT_IMG_NAME="${BASE_IMG%.img}" MOUNT_IT="Off" SKIP_ARCHIVE=1 SKIP_FIRSTBOOT_RESIZE=1
+        G_GITOWNER=dirkhh G_GITBRANCH=adsbim bash -x ../../../DietPi/.build/images/dietpi-imager "$BASE_IMG"
+        pwd
+        ls -l
+    fi
     exit 0
 else
     VERSION=$(bash "${DIR}/get_version.sh")

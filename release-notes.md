@@ -1,36 +1,5 @@
-Changes since v2.0.1 include:
-- re-add Odroid C4 and add Odroid XU4 builds
-- stage2: receive Airspy stats as well as full RTL stats, including gain, an signal strength details
-- update a all SDR-E containers to their latest versions
-- Airspy: use http transport for stats - allowing stage2 to get access to the stats as well
-- stage2: fix route api settings
-- stage2: more tuning of the stage2 home page
-- micro feeder: don't show empty string as listener
-- stage2: fix map / stats links for microsites
-- stage2: add additional aggregator links to the stage2 feeder home page
-- stage2: add links to dump978 for micro feeders providing UAT978 data
-- stage2: add links to live traffic and stats when showing the micro feeders connected to a stage2
-- stage2: allow more systems to be used as micro feeder by allowing host,port,protocol triplets - this allows for example to use a planefiner device as micro feeder
-- stage2: fix bug that prevent user from updating the stage2 name
-- stage2: fix rbfeeder script to grab serial from the correct log
-- use the human-friendly status pages for FA and FR24
-- several fixes to how aggregators that require keys are handled: enable them right away once a key has been provided, auto-disable them without a key
-- yet another significant UI / top level main menu change - hopefully this will settle down and stay stable
-- small changes to config file handling and activity logging to improve consistency and reduce clutter
-- start additional aggregator containers right after the required keys have been obtained / entered
-- various speedups for the app / applying settings
-- allow for remote beast source when SDR is configured as other or 978
-- stage2: many more UI changes
-- overall performance improvements (faster access to the global data the setup app uses)
-- stage2: better feedback to the user when operations fail or changes are made
-- stage2: show waiting spinner when making changes
-- fix: stage2 not starting due to syntax error / remove user env vars if unset / non-verbosely log docker pull to adsb-setup.log and dozzle proxy
-- stage2: apply settings immediately when adding a microproxy / fix microproxy IP change
-- improve handling of gain and SDR assignments on update and restore
-- stage2: allow simple editing of site name and IP address for micro proxies
-- stage2: stop multioutline from failing on systems with pre-v2.0 versions of Shapely
-- don't show the restarting message when shutting down
-- stage2: add backup + restore for microproxies
+Changes since v2.0.2 include:
+- add an installer .iso for native x86_64 PC
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)

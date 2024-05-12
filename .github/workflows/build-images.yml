@@ -260,6 +260,10 @@ jobs:
             sudo mv -v "$img" uploads/"${final_name}"
           done
         fi
+        if [[ ${MAGIC_PATH} == *NativePC* ]] ; then
+          BUILT_ISO="$(find $WORKSPACE -name "*.iso" | head -n 1)"
+          sudo mv -v "${BUILT_ISO}" uploads/"${IMAGE%.img}.iso"
+        fi
 
     - name: Compress img
       id: compress
@@ -288,6 +292,10 @@ jobs:
         *)
           echo "simply compress ${IMAGE}"
           sudo xz -z -1 -T0 "${IMAGE}"
+          if [ -f ${IMAGE%.img}.iso ] ; then
+            sudo xz -z -1 -T0 ${IMAGE%.img}.iso
+            echo "image=${IMAGE%.img}.iso.xz" >> $GITHUB_OUTPUT
+          fi
           echo "image=${IMAGE}.xz" >> $GITHUB_OUTPUT
           ;;
         esac
