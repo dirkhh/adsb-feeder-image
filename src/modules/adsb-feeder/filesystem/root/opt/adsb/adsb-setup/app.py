@@ -875,6 +875,11 @@ class AdsbIm:
                         if self._d.env_by_tags("readsb_device_type").value == "rtlsdr"
                         else 0
                     ),
+                    "dump978_at_port": (
+                        self._d.env_by_tags("uatport").value
+                        if self._d.is_enabled("uat978")
+                        else 0
+                    ),
                 }
             )
         )
@@ -1107,17 +1112,21 @@ class AdsbIm:
 
             aap = base_info.get("airspy_at_port")
             rap = base_info.get("rtlsdr_at_port")
+            dap = base_info.get("dump978_at_port")
             airspyurl = ""
             rtlsdrurl = ""
+            dump978url = ""
 
             if aap and aap != 0:
                 airspyurl = f"http://{ip}:{aap}"
             if rap and rap != 0:
                 rtlsdrurl = f"http://{ip}:{rap}"
+            if dap and dap != 0:
+                dump978url = f"http://{ip}:{dap}/skyaware978"
 
             self._d.env_by_tags("airspyurl").list_set(n, airspyurl)
             self._d.env_by_tags("rtlsdrurl").list_set(n, rtlsdrurl)
-
+            self._d.env_by_tags("978url").list_set(n, dump978url)
 
             return True
         #    except:
@@ -1397,7 +1406,6 @@ class AdsbIm:
             self._d.env_by_tags(["uat978", "is_enabled"]).list_set(0, False)
 
             for sitenum in [0] + self.micro_indices():
-                self._d.env_by_tags("978url").list_set(sitenum, "")  # CHECK THIS
                 if self._d.env_by_tags(["uat978", "is_enabled"]).list_get(sitenum):
                     # always get UAT from the readsb uat_replay
                     self._d.env_by_tags("replay978").list_set(
