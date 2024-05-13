@@ -66,13 +66,23 @@ class Data:
                 "/planefinder-stat/",
                 "/fa-status/",
                 "/fr24/",
+            ]:
+                # inc_port is the id of the stage2 microfeeder
+                # example endpoint: '/fa-status.json_<int:inc_port>/'
+                # this is passed to the URL handling function in flask.py
+                # this function will add (inc_port * 1000) to the port
+                if endpoint[-1] == "/":
+                    ret.append([endpoint[:-1] + f"_<int:inc_port>/", port, path])
+                else:
+                    ret.append([endpoint + f"_<int:inc_port>", port, path])
+            if endpoint in [
                 "/map/",
                 "/stats/",
             ]:
                 # idx is the id of the stage2 microfeeder
-                # example endpoint: '/fa-status.json_<int:idx>/'
+                # example endpoint: '/map_<int:idx>/'
                 # this is passed to the URL handling function in flask.py
-                # this function will add (idx * 1000) to the port
+                # this function will insert /idx into the URL after the domain
                 if endpoint[-1] == "/":
                     ret.append([endpoint[:-1] + f"_<int:idx>/", port, path])
                 else:
@@ -311,6 +321,7 @@ class Data:
         Env("AF_WEBPORT", default=80, tags=["webport"]),
         Env("AF_DAZZLE_PORT", default=9999, tags=["dazzleport"]),
         Env("AF_TAR1090_PORT", default=8080, tags=["tar1090port"]),
+        Env("AF_TAR1090_PORT_ADJUSTED", default=8080, tags=["tar1090portadjusted"]),
         Env("AF_UAT978_PORT", default=9780, tags=["uatport"]),
         Env("AF_PIAWAREMAP_PORT", default=8081, tags=["piamapport"]),
         Env("AF_PIAWARESTAT_PORT", default=8082, tags=["piastatport"]),

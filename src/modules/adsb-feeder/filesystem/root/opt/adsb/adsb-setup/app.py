@@ -1401,6 +1401,9 @@ class AdsbIm:
                         )
 
         if self._d.is_enabled("stage2"):
+            # for stage2 tar1090port is used for the webproxy
+            # move the exposed port for the combined ultrafeeder to 8078 to avoid a port conflict
+            self._d.env_by_tags("tar1090portadjusted").value = 8078
 
             # disable 1090 / 978 for stage2:
             self._d.env_by_tags("readsb_device_type").value = ""
@@ -1422,6 +1425,7 @@ class AdsbIm:
                     self._d.env_by_tags("978piaware").list_set(sitenum, "")
 
         else:
+            self._d.env_by_tags("tar1090portadjusted").value = self._d.env_by_tags("tar1090port").value
             # first grab the SDRs plugged in and check if we have one identified for UAT
             self._sdrdevices._ensure_populated()
             env978 = self._d.env_by_tags("978serial")

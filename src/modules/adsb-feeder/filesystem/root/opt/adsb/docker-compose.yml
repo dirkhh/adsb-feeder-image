@@ -10,7 +10,7 @@ services:
     device_cgroup_rules:
       - 'c 189:* rwm'
     ports:
-      - ${AF_TAR1090_PORT:-8080}:80 # to expose the web interface
+      - ${AF_TAR1090_PORT_ADJUSTED:-8080}:80 # to expose the web interface
       - 30001:30001 # Raw input
       - 30002:30002 # Raw output
       - 30003:30003 # SBS output
