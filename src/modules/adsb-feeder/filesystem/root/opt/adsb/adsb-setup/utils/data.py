@@ -82,7 +82,7 @@ class Data:
                 # idx is the id of the stage2 microfeeder
                 # example endpoint: '/map_<int:idx>/'
                 # this is passed to the URL handling function in flask.py
-                # this function will /idx to the URL
+                # this function will insert /idx into the URL after the domain
                 if endpoint[-1] == "/":
                     ret.append([endpoint[:-1] + f"_<int:idx>/", port, path])
                 else:
