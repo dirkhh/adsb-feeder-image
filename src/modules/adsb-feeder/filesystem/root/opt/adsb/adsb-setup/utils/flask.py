@@ -19,19 +19,22 @@ class RouteManager:
             self.app.add_url_rule(endpoint, endpoint, r)
 
     def function_factory(self, orig_endpoint, new_port, new_path):
-        # idx is the id of the stage2 microfeeder
-        def f(idx=0):
-            return self.my_redirect(orig_endpoint, new_port, new_path, idx=idx)
+        # inc_port / idx is the id of the stage2 microfeeder
+        def f(idx=0, inc_port=0):
+            return self.my_redirect(orig_endpoint, new_port, new_path, idx=idx, inc_port=inc_port)
 
         return f
 
-    def my_redirect(self, orig, new_port, new_path, idx=0):
-        # idx is the id of the stage2 microfeeder
-        # example endpoint: '/fa-status.json_<int:idx>/'
-        new_port += idx * 1000
+    def my_redirect(self, orig, new_port, new_path, idx=0, inc_port=0):
+        # inc_port / idx is the id of the stage2 microfeeder
+        # example endpoint: '/fa-status.json_<int:inc_port>/'
+        # example endpoint: '/map_<int:idx>/'
+        new_port += inc_port * 1000
         host_url = request.host_url.rstrip("/ ")
         host_url = re.sub(":\\d+$", "", host_url)
         new_path = new_path.rstrip("/ ")
+        if idx > 0:
+            new_path = f"/{idx}{new_path}"
         q: str = ""
         if request.query_string:
             q = f"?{request.query_string.decode()}"
