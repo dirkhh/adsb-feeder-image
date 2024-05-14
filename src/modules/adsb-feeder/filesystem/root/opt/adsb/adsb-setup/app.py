@@ -193,6 +193,7 @@ class AdsbIm:
             "hpradar--is_enabled",
             "alive--is_enabled",
             "uat978--is_enabled", "978url", "978piaware",
+            "replay978", "978host",
         )
 
         self._routemanager.add_proxy_routes(self._d.proxy_routes)
