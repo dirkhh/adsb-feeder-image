@@ -1,4 +1,8 @@
 Changes since v2.0.2 include:
+- stronger warning to have ssh access before securing the image
+- add missing shutdown template
+- stage2: improve backup/restore
+- stage2: add reverse proxy to simplify access to the various micro-proxies; this avoids using ports that are blocked
 - stage2: add summary line to the micro feeder table on the home page to consistently get to map and stats for not just the micro feeders but also the full stage2 (thanks @eddieb for the suggestion)
 - stage2: fix UAT978 forwading and UAT978 statistics
 - add an installer .iso for native x86_64 PC
