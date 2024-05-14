@@ -548,7 +548,7 @@ class Data:
         Env(
             "AF_IS_STAGE2",
             default=False,
-            tags=["stage2", "is_enabled", "norestore"],
+            tags=["stage2", "is_enabled"],
         ),
         Env(
             "AF_NUM_MICRO_SITES",

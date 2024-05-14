@@ -192,8 +192,8 @@ class AdsbIm:
             "radarplane--is_enabled",
             "hpradar--is_enabled",
             "alive--is_enabled",
-            "uat978--is_enabled", "978url", "uatport", "978piaware",
-            "piamapport", "piastatport", "frport", "pfport"
+            "uat978--is_enabled", "978url", "978piaware",
+            "replay978", "978host",
         )
 
         self._routemanager.add_proxy_routes(self._d.proxy_routes)
@@ -621,6 +621,8 @@ class AdsbIm:
         thread.start()
 
         site_name = self._d.env_by_tags("site_name").list_get(0)
+        if self._d.is_enabled("stage2"):
+            site_name = f"stage2-{site_name}"
         now = datetime.now().replace(microsecond=0).isoformat().replace(":", "-")
         download_name = f"adsb-feeder-config-{site_name}-{now}.backup"
         return send_file(
@@ -1662,11 +1664,17 @@ class AdsbIm:
                     self._d.env_by_tags("aggregators_chosen").value = True
                 if allow_insecure and key == "shutdown":
                     # do shutdown
-                    self._system.halt()
+                    def do_halt():
+                        sleep(0.5)
+                        self._system.halt()
+                    threading.Thread(target=do_halt).start()
                     return render_template("/shutdownpage.html")
                 if allow_insecure and key == "reboot":
                     # initiate reboot
-                    self._system.reboot()
+                    def do_reboot():
+                        sleep(0.5)
+                        self._system.reboot()
+                    threading.Thread(target=do_reboot).start()
                     return render_template("/waitandredirect.html")
                 if key == "restart_containers":
                     self.write_envfile()

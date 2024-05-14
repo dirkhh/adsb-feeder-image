@@ -49,16 +49,19 @@
     <form method="POST" onsubmit="show_spinner(); return true;">
       <div class="row align-items-center">
         <div class="col-8">
-          <label for="secure_image">Attempt to make it somewhat harder for a local user to
-            gain access to the image. Of course, anyone with physical access to the feeder hardware can
-            circumvent
-            the protection attempted here. Make sure you have an ssh key set up and tested before doing this, or
-            you will permanently log yourself out of this image.
+          <label for="secure_image">
+              Attempt to make it somewhat harder for someone on the local
+              network to gain access to the image. Of course, anyone with
+              physical access to the feeder hardware can circumvent the
+              protection attempted here. Make sure you have an SSH key set up
+              and tested before doing this, or you will permanently lock
+              yourself out of this image.
           </label>
         </div>
         <div class="col-4">
-          <button type="submit" class="btn btn-primary mx-auto w-100" name="secure_image" value="go">Update
-            Settings</button>
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="secure_image" value="go">
+              Yes, SSH is working.<br>Secure the image
+          </button>
         </div>
       </div>
     </form>
