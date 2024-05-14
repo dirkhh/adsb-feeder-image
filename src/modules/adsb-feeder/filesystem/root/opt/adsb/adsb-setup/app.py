@@ -1658,11 +1658,17 @@ class AdsbIm:
                     self._d.env_by_tags("aggregators_chosen").value = True
                 if allow_insecure and key == "shutdown":
                     # do shutdown
-                    self._system.halt()
+                    def do_halt():
+                        sleep(0.5)
+                        self._system.halt()
+                    threading.Thread(target=do_halt).start()
                     return render_template("/shutdownpage.html")
                 if allow_insecure and key == "reboot":
                     # initiate reboot
-                    self._system.reboot()
+                    def do_reboot():
+                        sleep(0.5)
+                        self._system.reboot()
+                    threading.Thread(target=do_reboot).start()
                     return render_template("/waitandredirect.html")
                 if key == "restart_containers":
                     self.write_envfile()
