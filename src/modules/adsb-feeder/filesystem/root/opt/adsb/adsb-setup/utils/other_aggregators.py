@@ -314,13 +314,6 @@ class RadarBox(Aggregator):
             print_err("failed to download the RadarBox docker image")
             return None
 
-        # make sure we have the RadarBox hacks in place if needed
-        cmdline = f"bash /opt/adsb/rb-hack-setup.sh"
-        try:
-            subprocess.run(cmdline, timeout=10.0, shell=True)
-        except:
-            print_err("rb-hack-setup.sh failed")
-
         # make sure we correctly enable the hacks
         extra_env = "-v /opt/adsb/rb/cpuinfo:/proc/cpuinfo "
         if self._d.env_by_tags("rbthermalhack").value != "":
