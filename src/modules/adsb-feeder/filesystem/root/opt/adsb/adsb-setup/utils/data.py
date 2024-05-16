@@ -4,7 +4,7 @@ from pathlib import Path
 
 from .environment import Env
 from .netconfig import NetConfig
-from .util import is_true, print_err, stack_info
+from .util import is_true, print_err
 
 
 @dataclass

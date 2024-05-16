@@ -8,7 +8,6 @@ import pathlib
 import pickle
 import platform
 import re
-from tempfile import TemporaryDirectory
 import requests
 import secrets
 import signal
@@ -1105,7 +1104,7 @@ class AdsbIm:
             print_err(f"got {base_info} for {ip}")
             if do_import or not self._d.env_by_tags("site_name").list_get(n):
                 # only accept the remote name if this is our initial import
-                # after that they user may have overwritten it
+                # after that the user may have overwritten it
                 self._d.env_by_tags("site_name").list_set(n, base_info["name"])
             self._d.env_by_tags("lat").list_set(n, base_info["lat"])
             self._d.env_by_tags("lng").list_set(n, base_info["lng"])
@@ -1667,6 +1666,7 @@ class AdsbIm:
                     def do_halt():
                         sleep(0.5)
                         self._system.halt()
+
                     threading.Thread(target=do_halt).start()
                     return render_template("/shutdownpage.html")
                 if allow_insecure and key == "reboot":
@@ -1674,6 +1674,7 @@ class AdsbIm:
                     def do_reboot():
                         sleep(0.5)
                         self._system.reboot()
+
                     threading.Thread(target=do_reboot).start()
                     return render_template("/waitandredirect.html")
                 if key == "restart_containers":

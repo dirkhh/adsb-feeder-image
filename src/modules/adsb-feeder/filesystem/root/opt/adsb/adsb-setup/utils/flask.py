@@ -1,8 +1,7 @@
 import re
-import sys
 from functools import wraps
 
-from utils.util import make_int, print_err
+from utils.util import print_err
 
 from flask import Flask, redirect, request
 
@@ -14,14 +13,16 @@ class RouteManager:
     def add_proxy_routes(self, proxy_routes):
         print_err(f"adding proxy_routes {proxy_routes}", level=2)
         for endpoint, port, url_path in proxy_routes:
-            #print_err(f"add_proxy_route {endpoint} {port } {url_path}")
+            # print_err(f"add_proxy_route {endpoint} {port } {url_path}")
             r = self.function_factory(endpoint, port, url_path)
             self.app.add_url_rule(endpoint, endpoint, r)
 
     def function_factory(self, orig_endpoint, new_port, new_path):
         # inc_port / idx is the id of the stage2 microfeeder
         def f(idx=0, inc_port=0):
-            return self.my_redirect(orig_endpoint, new_port, new_path, idx=idx, inc_port=inc_port)
+            return self.my_redirect(
+                orig_endpoint, new_port, new_path, idx=idx, inc_port=inc_port
+            )
 
         return f
 

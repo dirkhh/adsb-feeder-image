@@ -1,6 +1,3 @@
-import json
-from os import path
-import re
 from typing import List, Union
 from utils.config import read_values_from_config_json, write_values_to_config_json
 from utils.util import is_true, print_err, stack_info, make_int
@@ -25,10 +22,9 @@ class Env:
             self._default = default
 
         if type(self._default) == list:
-            self._value = [ self._default[0] ]
+            self._value = [self._default[0]]
         else:
-            self._value =  self._default
-
+            self._value = self._default
 
         if value != None:
             # only overwrite the default value if an actual Value was passed in
@@ -69,7 +65,7 @@ class Env:
                 )
             else:
                 if type(value_in_file) == list and self.is_bool:
-                    self._value = [ is_true(v) for v in value_in_file ]
+                    self._value = [is_true(v) for v in value_in_file]
                     return
                 self._value = value_in_file
 
@@ -115,7 +111,7 @@ class Env:
             return self._value
         elif self._default != None:
             if type(self._default) == list:
-                return [ self._default[0] ]
+                return [self._default[0]]
             else:
                 return self._default
             return self._default
@@ -181,14 +177,20 @@ class Env:
         if type(self._default) == list and len(self._default) == 1:
             while len(self._value) <= idx:
                 self._value.append(self._default[0])
-                print_err(f"{self._name} -> list_get({idx}) appended default {self._default[0]}, new len: {len(self._value)}")
+                print_err(
+                    f"{self._name} -> list_get({idx}) appended default {self._default[0]}, new len: {len(self._value)}"
+                )
                 self._reconcile(self._value)
             return self._value[idx]
 
         if type(self._default) != list:
-            print_err(f"{self._name}: default type should be list: {type(self._default)}")
+            print_err(
+                f"{self._name}: default type should be list: {type(self._default)}"
+            )
         if type(self._default) == list and len(self._default) != 1:
-            print_err(f"{self._name}: default list len should be 1: {len(self._default)}")
+            print_err(
+                f"{self._name}: default list len should be 1: {len(self._default)}"
+            )
 
         stack_info(
             f"{self._name} only has {len(self._value)} values and no default, asking for {idx}"

@@ -132,7 +132,7 @@ def create_fake_info():
 def mf_get_ip_and_triplet(ip):
     # mf_ip for microproxies can either be an IP or a triplet of ip,port,protocol
     split = ip.split(",")
-    if (len(split) != 1):
+    if len(split) != 1:
         # the function was passed a triplet, set the ip to the first part
         triplet = ip
         ip = split[0]
