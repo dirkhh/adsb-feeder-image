@@ -336,6 +336,9 @@ class AggStatus:
                 print_err(f"adsbx returned {status}")
                 return
             self._last_check = datetime.now()
+            if self._beast == T.No:
+                self._mlat = T.No
+                return
             # now check mlat - which we can't really get easily from their status page
             # but can get from our docker logs again
             container_name = (
@@ -360,6 +363,8 @@ class AggStatus:
             if match:
                 self._mlat = T.Yes if match.group(1) != "0.0" else T.No
                 self._last_check = datetime.now()
+            else:
+                self._mlat = T.Unknown
 
         elif self._agg == "tat":
             # get the data from the status text site
