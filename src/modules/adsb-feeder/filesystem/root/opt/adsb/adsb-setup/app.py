@@ -1060,6 +1060,19 @@ class AdsbIm:
             except:
                 print_err("failed to allow root ssh login")
 
+    def unique_site_name(self, name, idx=-1):
+        # make sure that a site name is unique - if the idx is given that's
+        # the current value and excluded from the check
+        existing_names = self._d.env_by_tags("site_name")
+        names = [
+            existing_names.list_get(n)
+            for n in range(0, len(existing_names.value))
+            if n != idx
+        ]
+        while name in names:
+            name += "_"
+        return name
+
     def get_base_info(self, n, do_import=False):
         ip = self._d.env_by_tags("mf_ip").list_get(n)
         ip, triplet = mf_get_ip_and_triplet(ip)
@@ -1105,7 +1118,9 @@ class AdsbIm:
             if do_import or not self._d.env_by_tags("site_name").list_get(n):
                 # only accept the remote name if this is our initial import
                 # after that the user may have overwritten it
-                self._d.env_by_tags("site_name").list_set(n, base_info["name"])
+                self._d.env_by_tags("site_name").list_set(
+                    n, self.unique_site_name(base_info["name"])
+                )
             self._d.env_by_tags("lat").list_set(n, base_info["lat"])
             self._d.env_by_tags("lng").list_set(n, base_info["lng"])
             self._d.env_by_tags("alt").list_set(n, base_info["alt"])
@@ -1241,7 +1256,7 @@ class AdsbIm:
             n += 1
             self._d.env_by_tags("num_micro_sites").value = n
             self._d.env_by_tags("site_name").list_set(
-                n, micro_data.get("micro_site_name", "")
+                n, self.unique_site_name(micro_data.get("micro_site_name", ""))
             )
             self._d.env_by_tags("lat").list_set(n, micro_data.get("micro_lat", ""))
             self._d.env_by_tags("lng").list_set(n, micro_data.get("micro_lng", ""))
@@ -1336,7 +1351,9 @@ class AdsbIm:
             print_err(
                 f"update site name from {self._d.env_by_tags('site_name').list_get(num)} to {site_name}"
             )
-            self._d.env_by_tags("site_name").list_set(num, site_name)
+            self._d.env_by_tags("site_name").list_set(
+                num, self.unique_site_name(site_name)
+            )
         return (True, "")
 
     def setRtlGain(self):
@@ -1426,7 +1443,9 @@ class AdsbIm:
                     self._d.env_by_tags("978piaware").list_set(sitenum, "")
 
         else:
-            self._d.env_by_tags("tar1090portadjusted").value = self._d.env_by_tags("tar1090port").value
+            self._d.env_by_tags("tar1090portadjusted").value = self._d.env_by_tags(
+                "tar1090port"
+            ).value
             # first grab the SDRs plugged in and check if we have one identified for UAT
             self._sdrdevices._ensure_populated()
             env978 = self._d.env_by_tags("978serial")
@@ -1882,7 +1901,9 @@ class AdsbIm:
                         )
                         self.push_multi_outline()
                         self._multi_outline_bg = Background(60, self.push_multi_outline)
-                    self._d.env_by_tags("site_name").list_set(0, form.get("site_name"))
+                    self._d.env_by_tags("site_name").list_set(
+                        0, self.unique_site_name(form.get("site_name"), 0)
+                    )
                 if (
                     key == "aggregators"
                     and not self._d.env_by_tags("aggregators_chosen").value
@@ -1917,7 +1938,9 @@ class AdsbIm:
                     else:
                         e.value = value
                 if key == "site_name":
-                    self._d.env_by_tags("site_name").list_set(sitenum, value)
+                    self._d.env_by_tags("site_name").list_set(
+                        sitenum, self.unique_site_name(value, sitenum)
+                    )
         # done handling the input data
         # what implied settings do we have (and could we simplify them?)
 

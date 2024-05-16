@@ -1,4 +1,5 @@
 Changes since v2.0.2 include:
+- stage2: ensure all site names are unique
 - stronger warning to have ssh access before securing the image
 - add missing shutdown template
 - stage2: improve backup/restore
