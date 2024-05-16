@@ -59,11 +59,11 @@
         <table class="table table-bordered table-sm lh-1 table-striped">
           <thead>
             <td>Site</td>
-            <td>IP</td>
-            <td>Lat/Long@Alt</td>
-            <td>Feeder Version</td>
-            <td>Status</td>
-            <td>Action</td>
+            <td class="text-center">IP</td>
+            <td class="text-center">Lat/Long@Alt</td>
+            <td class="text-center">Feeder Version</td>
+            <td class="text-center">Status / Stats</td>
+            <td class="text-center">Action</td>
           </thead>
           <tbody>
             {% for site in env_value_by_tag('site_name') %}

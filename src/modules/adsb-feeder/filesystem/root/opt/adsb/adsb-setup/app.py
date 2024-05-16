@@ -903,16 +903,19 @@ class AdsbIm:
                         found = 0
                         for line in f:
                             if "position_count_total" in line:
-                                pct = int(line.split()[1])
+                                pps = int(int(line.split()[1]) / 60)
                                 found |= 1
+                            if "readsb_messages_valid" in line:
+                                mps = int(int(line.split()[1]) / 60)
+                                found |= 4
                             if ip in line:
                                 secs = int(line.split()[1])
                                 found |= 2
-                            if found == 3:
+                            if found == 7:
                                 break
-                        ret.append({"pct": pct, "secs": secs})
+                        ret.append({"pps": pps, "mps": mps, "secs": secs})
                 except:
-                    ret.append({"pct": 0, "secs": 0})
+                    ret.append({"pps": 0, "mps": 0, "secs": 0})
         return Response(json.dumps(ret), mimetype="application/json")
 
     def micro_settings(self):

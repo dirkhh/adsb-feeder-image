@@ -1,4 +1,5 @@
 Changes since v2.0.2 include:
+- stage2: show site statistics in messages / positions per second to make things more consistent with tar1090
 - stage2: ensure all site names are unique
 - stronger warning to have ssh access before securing the image
 - add missing shutdown template
