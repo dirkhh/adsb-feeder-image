@@ -8,9 +8,15 @@ from utils.util import make_int, print_err
 
 n = make_int(sys.argv[1] if len(sys.argv) > 1 else 1)
 try:
-    mo_data = MultiOutline().create(n)
+    mo_data = MultiOutline().create_outline(n)
 except:
     print_err("failed to create MultiOutline class - maybe just a timing issue?")
+    exit(0)
+
+try:
+    hwt_data = MultiOutline().create_heywhatsthat(n)
+except:
+    print_err("failed to create HeyWhatsthat class - maybe just a timing issue?")
     exit(0)
 
 # now we need to inject this into the stage2 tar1090
@@ -18,10 +24,17 @@ with TemporaryDirectory(prefix="/tmp/adsb") as tmpdir:
     try:
         with open(f"{tmpdir}/multiOutline.json", "w") as f:
             json.dump(mo_data, f)
+        with open(f"{tmpdir}/upintheair.json", "w") as f:
+            json.dump(hwt_data, f)
     except:
-        print_err("failed to write multiOutline.json")
+        print_err("failed to write multiOutline.json or heywhatsthat.json")
     else:
         cmd = f"docker cp {tmpdir}/multiOutline.json ultrafeeder:/run/readsb/"
+        try:
+            subprocess.run(cmd, shell=True, check=True)
+        except subprocess.SubprocessError:
+            print_err("failed to push multiOutline.json")
+        cmd = f"docker cp {tmpdir}/upintheair.json ultrafeeder:/usr/local/share/tar1090/html-webroot/upintheair.json"
         try:
             subprocess.run(cmd, shell=True, check=True)
         except subprocess.SubprocessError:

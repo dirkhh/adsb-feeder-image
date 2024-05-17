@@ -1,5 +1,7 @@
 Changes since v2.0.2 include:
+- stage2: create multi-heywhatsthat-outline to show the theoretical combined coverage of all micro feeders (assuming they all have HeyWhatsThat IDs)
 - stage2: dynamically update the micro feeder information on the stage2 page
+- fix potentially inconsistent feeder status for adsbX
 - stage2: show site statistics in messages / positions per second to make things more consistent with tar1090
 - stage2: ensure all site names are unique
 - stronger warning to have ssh access before securing the image
