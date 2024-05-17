@@ -847,6 +847,25 @@ class AdsbIm:
         return Response(jsonString, mimetype="application/json")
 
     def base_info(self):
+        if not self._d.is_enabled("stage2"):
+            return self.my_base_info()
+        # for a stage2 we return the base info for each of the micro feeders
+        info_array = []
+        for i in self.micro_indices():
+            if self._d.env_by_tags("mf_version").list_get(i) != "not an adsb.im feeder":
+                self.get_base_info(i)
+            info_array.append(
+                {
+                    "mf_ip": self._d.env_by_tags("mf_ip").list_get(i),
+                    "mf_version": self._d.env_by_tags("mf_version").list_get(i),
+                    "lat": self._d.env_by_tags("lat").list_get(i),
+                    "lng": self._d.env_by_tags("lng").list_get(i),
+                    "alt": self._d.env_by_tags("alt").list_get(i),
+                }
+            )
+        return Response(json.dumps(info_array), mimetype="application/json")
+
+    def my_base_info(self):
         listener = request.remote_addr
         stage2_listeners = self._d.env_by_tags("stage2_listeners").value
         print_err(f"access to base_info from {listener}")
@@ -2291,11 +2310,6 @@ class AdsbIm:
     def stage2(self):
         if request.method == "POST":
             return self.update()
-        # update the info from the micro feeders
-        for i in self.micro_indices():
-            if self._d.env_by_tags("mf_version").list_get(i) == "not an adsb.im feeder":
-                continue
-            self.get_base_info(i)
         return render_template("stage2.html")
 
     def support(self):

@@ -97,13 +97,14 @@
                 <a href="/map_{{loop.index0}}/">{{ site }}</a>
               </td>
               <td class="text-center">
-                <a
+                <a id="table_mf_ip_{{ loop.index0 }}"
                    href="http://{{ list_value_by_tag('mf_ip', loop.index0) }}">{{ list_value_by_tag('mf_ip', loop.index0) }}</a>
               </td>
-              <td class="text-center">{{ list_value_by_tag('lat', loop.index0) }} /
+              <td class="text-center" id="table_mf_lla_{{ loop.index0 }}">{{ list_value_by_tag('lat', loop.index0) }} /
                 {{ list_value_by_tag('lng', loop.index0) }} / {{ list_value_by_tag('alt', loop.index0) }}m
               </td>
-              <td class="text-center"> {{ list_value_by_tag('mf_version', loop.index0)}}
+              <td class="text-center" id="table_mf_version_{{ loop.index0 }}">
+                {{ list_value_by_tag('mf_version', loop.index0)}}
               </td>
               <td class="text-center"><a id="mf_status_{{ loop.index0 }}" href="/stats_{{loop.index0}}/"></a></td>
               <td class="text-center">
@@ -366,6 +367,28 @@
   };
   // start the micro feeder check if needed
   check_mf_status();
+  function get_base_info() {
+    let n = parseInt("{{ env_value_by_tag('num_micro_sites') }}")
+    if (isNaN(n)) n = 0;
+    if (n == 0) return;
+    let url = "/api/base_info";
+    fetch(url, {
+      method: "GET", cors: "no-cors"
+    })
+      .then(response => { return response.json() })
+      .then(data => {
+        data.forEach((d, i) => {
+          let idx = i + 1; // the ids are 1-based
+          $("#table_mf_ip_" + idx).text(d["mf_ip"]);
+          $("#table_mf_lla_" + idx).text(d["lat"] + " / " + d["lng"] + " / " + d["alt"]);
+          $("#table_mf_version_" + idx).text(d["mf_version"]);
+        })
+      })
+      .finally(() => {
+        setTimeout(get_base_info, 300000);
+      });
+  }
+  get_base_info();
   jQuery(document).ready(function () {
     $(".accept_edit").on('keypress', function (e) {
       if ((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13)) {

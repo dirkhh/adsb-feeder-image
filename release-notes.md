@@ -1,4 +1,5 @@
 Changes since v2.0.2 include:
+- stage2: dynamically update the micro feeder information on the stage2 page
 - stage2: show site statistics in messages / positions per second to make things more consistent with tar1090
 - stage2: ensure all site names are unique
 - stronger warning to have ssh access before securing the image
