@@ -284,6 +284,38 @@ class AggStatus:
             else:
                 print_err(f"airplanes.james returned {status}")
         elif self._agg == "adsbx":
+            if not self._d.env_by_tags("adsbxfeederid").list_get(self._idx):
+                # get the adsbexchange feeder id for the anywhere map / status things
+                print_err(f"don't have the adsbX Feeder ID for {self._idx}, yet")
+                container_name = (
+                    "ultrafeeder"
+                    if self._idx == 0
+                    else f"ultrafeeder_stage2_{self._idx}"
+                )
+                try:
+                    result = subprocess.run(
+                        f"docker logs {container_name} | grep 'www.adsbexchange.com/api/feeders' | tail -1",
+                        shell=True,
+                        capture_output=True,
+                        text=True,
+                    )
+                    output = result.stdout
+                except:
+                    print_err("got exception trying to look at the adsbx logs")
+                    return
+                match = re.search(
+                    r"www.adsbexchange.com/api/feeders/\?feed=([^&\s]*)",
+                    output,
+                )
+                if match:
+                    adsbx_id = match.group(1)
+                    self._d.env_by_tags("adsbxfeederid").list_set(self._idx, adsbx_id)
+                else:
+                    print_err(
+                        f"ran: docker logs {container_name} | grep 'www.adsbexchange.com/api/feeders' | tail -1"
+                    )
+                    print_err(f"failed to find adsbx ID in response {output}")
+
             self._last_check = datetime.now()
             # let's check the ultrafeeder net connector status to see if there is a TCP beast connection to adsbexchange
             try:
