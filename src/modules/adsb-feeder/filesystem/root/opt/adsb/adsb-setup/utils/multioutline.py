@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import subprocess
 import time
 from shapely.geometry import LinearRing, Polygon
@@ -10,6 +11,7 @@ try:
     from shapely.validation import is_valid_reason
 except:
     use_is_valid_reason = False
+    from shapely.validation import explain_validity
 
 
 class MultiOutline:
@@ -28,27 +30,34 @@ class MultiOutline:
 
     def _get_heywhatsthat(self, num):
         data = []
+        hwt_feeders = []
         now = time.time()
         os.makedirs("/opt/adsb/data", exist_ok=True)
-        for i in range(1, num + 1):
+        with open("/opt/adsb/config/.env", "r") as env:
+            for line in env:
+                match = re.search(r"_ADSBIM_HEYWHATSTHAT_ENABLED_(\d+)=True", line)
+                if match:
+                    hwt_feeders.append(int(match.group(1)))
+        for i in hwt_feeders:
             if (
                 not os.path.exists(f"/opt/adsb/data/heywhatsthat_{i}.json")
                 or os.path.getmtime(f"/opt/adsb/data/heywhatsthat_{i}.json")
                 < now - 3600
             ):
-                if True:  # try:
+                try:
                     subprocess.run(
                         f"docker cp  ultrafeeder_stage2_{i}:/usr/local/share/tar1090/html-webroot/upintheair.json /opt/adsb/data/heywhatsthat_{i}.json",
                         shell=True,
                         check=True,
                     )
-                # except:
-                #    pass
-            if True:  # try:
+                except:
+                    # likely that simply means that there is no upintheair.json
+                    pass
+            try:
                 hwt = json.load(open(f"/opt/adsb/data/heywhatsthat_{i}.json"))
-                # except:
-                #    pass
-                # else:
+            except:
+                pass
+            else:
                 data.append(hwt)
         return data
 
@@ -69,7 +78,6 @@ class MultiOutline:
             alt = data[0]["rings"][idx]["alt"]
             multi_range = self.create(data, hwt_alt=alt).get("multiRange")
             for i in range(len(multi_range)):
-                # r = [{"points": p, "alt": alt} for p in multi_range[i]]
                 result["rings"].append({"points": multi_range[i], "alt": alt})
         return result
 
@@ -114,27 +122,36 @@ class MultiOutline:
             to_consider = [0]
             for i in look_at:
                 combined = False
+                if not polygons[i] or not polygons[i].is_valid:
+                    print(f"polygons[{i}]: {explain_validity(polygons[i])}")
+                    polygons[i] = polygons[i].buffer(0.0001)
                 for j in to_consider:
+                    if not polygons[j].is_valid:
+                        print(f"polygons[{j}]: {explain_validity(polygons[j])}")
+                        polygons[j] = polygons[j].buffer(0.0001)
                     try:
                         if not polygons[j].disjoint(polygons[i]):
                             p = unary_union([polygons[j], polygons[i]])
                             polygons[j] = p
                             made_change = True
                             combined = True
-                    except:
-                        print(f"exception while combining polygons #{j} and #{i}")
+                    except Exception as e:
+                        print(
+                            f"exception {e} while combining polygons #{j} and #{i} for hwt_alt={hwt_alt}"
+                        )
                         pass
                 if not combined:
                     to_consider.append(i)
             look_at = to_consider[1:]
         for i in to_consider:
             try:
-                if hwt_alt == 0:
-                    points = [[x, y] for x, y, a in polygons[i].exterior.coords]
+                coords = polygons[i].exterior.coords
+                if len(coords[0]) == 3:
+                    points = [[x, y] for x, y, a in coords]
                 else:
-                    points = [[x, y] for x, y in polygons[i].exterior.coords]
+                    points = [[x, y] for x, y in coords]
                 result["multiRange"].append(points)
-            except:
-                print(f"can't get points from polygon #{i} exterior coords")
+            except Exception as e:
+                print(f"can't get points from polygon #{i} exterior coords: {e}")
                 pass
         return result
