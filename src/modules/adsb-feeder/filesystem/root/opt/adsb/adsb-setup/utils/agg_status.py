@@ -284,7 +284,8 @@ class AggStatus:
             else:
                 print_err(f"airplanes.james returned {status}")
         elif self._agg == "adsbx":
-            if not self._d.env_by_tags("adsbxfeederid").list_get(self._idx):
+            feeder_id = self._d.env_by_tags("adsbxfeederid").list_get(self._idx)
+            if not feeder_id or len(feeder_id) != 12:
                 # get the adsbexchange feeder id for the anywhere map / status things
                 print_err(f"don't have the adsbX Feeder ID for {self._idx}, yet")
                 container_name = (
