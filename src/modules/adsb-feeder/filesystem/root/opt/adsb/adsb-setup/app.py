@@ -1902,7 +1902,12 @@ class AdsbIm:
                 if key == "alt":
                     # remove decimals as well
                     value = str(int(float(value)))
+                if key == "uatgain":
+                    if value == "":
+                        value = "autogain"
                 if key == "gain":
+                    if value == "":
+                        value = "autogain"
                     self._d.env_by_tags(["gain_airspy"]).value = (
                         "auto" if value == "autogain" else value
                     )

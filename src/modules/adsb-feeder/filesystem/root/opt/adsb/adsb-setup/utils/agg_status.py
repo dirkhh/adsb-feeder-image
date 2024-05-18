@@ -284,61 +284,25 @@ class AggStatus:
             else:
                 print_err(f"airplanes.james returned {status}")
         elif self._agg == "adsbx":
-            # another one where we need to grab an ID from the docker logs
-            if not self._d.env_by_tags("adsbxfeederid").list_get(self._idx):
-                print_err(f"don't have the adsbX Feeder ID for {self._idx}, yet")
-                container_name = (
-                    "ultrafeeder"
-                    if self._idx == 0
-                    else f"ultrafeeder_stage2_{self._idx}"
+            self._last_check = datetime.now()
+            # let's check the ultrafeeder net connector status to see if there is a TCP beast connection to adsbexchange
+            try:
+                suffix = "" if self._idx == 0 else f"_{self._idx}"
+                result = subprocess.run(
+                    f"grep -F -e adsbexchange.com /run/adsb-feeder-ultrafeeder{suffix}/readsb/stats.prom | cut -d' ' -f2",
+                    shell=True,
+                    capture_output=True,
+                    text=True,
                 )
                 try:
-                    result = subprocess.run(
-                        f"docker logs {container_name} | grep 'www.adsbexchange.com/api/feeders' | tail -1",
-                        shell=True,
-                        capture_output=True,
-                        text=True,
-                    )
-                    output = result.stdout
+                    tcp_uptime = int(result.stdout)
                 except:
-                    print_err("got exception trying to look at the adsbx logs")
-                    return
-                match = re.search(
-                    r"www.adsbexchange.com/api/feeders/\?feed=([0-9a-zA-Z]*)",
-                    output,
-                )
-                if match:
-                    adsbx_id = match.group(1)
-                else:
-                    print_err(
-                        f"ran: docker logs {container_name} | grep 'www.adsbexchange.com/api/feeders' | tail -1"
-                    )
-                    print_err(f"failed to find adsbx ID in response {output}")
-                    return
-                self._d.env_by_tags("adsbxfeederid").list_set(self._idx, adsbx_id)
-            # let's get the feeder status from their feed status page
-            feederid = self._d.env_by_tags("adsbxfeederid").list_get(self._idx)
-            html_url = f"https://www.adsbexchange.com/api/feeders/?feed={feederid}"
-            adsbx_text, status = self.get_plain(html_url)
-            if adsbx_text and status == 200:
-                match = re.search(r'"data":([^]]+])', adsbx_text)
-                if match:
-                    self._beast = (
-                        T.No
-                        if match.group(1).endswith(",0]")
-                        or match.group(1).endswith('0",]')
-                        else T.Yes
-                    )
-                else:
-                    print_err(f"failed to find adsbx Status in response {adsbx_text}")
-                    return
-            else:
-                print_err(f"adsbx returned {status}")
-                return
-            self._last_check = datetime.now()
-            if self._beast == T.No:
-                self._mlat = T.No
-                return
+                    print_err(f"WARNING: adsbx tcp uptime check returned: {result.stdout}")
+                self._beast = T.Yes if tcp_uptime > 5 else T.No
+            except:
+                self._beast = T.No
+                pass
+
             # now check mlat - which we can't really get easily from their status page
             # but can get from our docker logs again
             container_name = (
@@ -346,7 +310,7 @@ class AggStatus:
             )
             try:
                 result = subprocess.run(
-                    f"docker logs --since=20m {container_name} | grep '\[mlat-client]\[feed.adsbexchange.com] Results:'",
+                    f"docker logs --since=20m {container_name} | grep '\[mlat-client]\[feed.adsbexchange.com] peer_count' | tail -n1",
                     shell=True,
                     capture_output=True,
                     text=True,
@@ -357,12 +321,14 @@ class AggStatus:
                 )
                 return
             match = re.search(
-                r".mlat-client..feed.adsbexchange.com. Results:[^0-9]*([0-9.]*) positions/minute",
+                r".mlat-client..feed.adsbexchange.com. peer_count:\s*([0-9.]*)\s*outlier_percent:\s*([0-9.]*)\s*bad_sync_timeout:\s*([0-9.]*)",
                 result.stdout,
             )
             if match:
-                self._mlat = T.Yes if match.group(1) != "0.0" else T.No
-                self._last_check = datetime.now()
+                peer_count = make_int(match.group(1))
+                bad_sync_timeout = make_int(match.group(3))
+                #print_err(f"peer_count: {peer_count} bad_sync: {bad_sync_timeout}")
+                self._mlat = T.Yes if peer_count > 0 and bad_sync_timeout == 0 else T.No
             else:
                 self._mlat = T.Unknown
 
