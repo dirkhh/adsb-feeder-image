@@ -81,6 +81,9 @@ class System:
     def reboot(self) -> None:
         subprocess.call("reboot", shell=True)
 
+    def os_update(self) -> None:
+        subprocess.call("apt-get update && apt-get upgrade -y", shell=True)
+
     def restart_containers(self):
         try:
             subprocess.call("bash /opt/adsb/docker-compose-restart-all &", shell=True)

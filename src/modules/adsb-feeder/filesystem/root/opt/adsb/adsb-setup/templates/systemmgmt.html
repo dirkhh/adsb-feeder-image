@@ -89,7 +89,7 @@
     </form>
   </div>
   <div class="col-12 col-lg-6">
-    <h5 class="mt-3">Nightly system update settings</h5>
+    <h5 class="mt-3">System update settings</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
       <div class="row align-items-center">
         <div class="col-8">
@@ -106,8 +106,16 @@
               night</label>
           </div>
         </div>
-        <button type="submit" class="btn btn-primary mb-3 mx-3 col-sm-3" name="nightly_update" value="go">Update
-          Settings</button>
+        <div class="col-4">
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="nightly_update" value="go">Update
+            Settings</button>
+        </div>
+        <div class="col-8">
+        </div>
+        <div class="col-4">
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="os_update" value="go">Trigger OS Update
+            Now</button>
+        </div>
       </div>
     </form>
   </div>

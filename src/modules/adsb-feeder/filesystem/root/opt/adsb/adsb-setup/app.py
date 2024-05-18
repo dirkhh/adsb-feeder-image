@@ -1744,6 +1744,10 @@ class AdsbIm:
                 if key == "nightly_update" or key == "zerotier":
                     # this will be handled through the separate key/value pairs
                     pass
+                if key == "os_update":
+                    self._system.os_update()
+                    self._next_url_from_director = request.url
+                    continue
                 if allow_insecure and key == "tailscale":
                     # grab extra arguments if given
                     ts_args = form.get("tailscale_extras", "")
