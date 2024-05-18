@@ -19,7 +19,6 @@ services:
     environment:
       - BEASTHOST=ultrafeeder
       - UAT_RECEIVER_HOST=${FEEDER_UAT978_HOST}
-      - UAT_RECEIVER_PORT=${FEEDER_UAT978_PORT:-30978}
       - LAT=${FEEDER_LAT}
       - LONG=${FEEDER_LONG}
       - ALT=${FEEDER_ALT_M}
