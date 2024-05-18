@@ -1,4 +1,6 @@
 Changes since v2.0.2 include:
+- yet another attempt to fix adsbX status... why can't aggregators just provide a sane API with a JSON status based on some ID (that isn't your IP address)?
+- assume that an empty gain setting means autogain
 - actual working fix for the stage2 Radarbox UAT issue
 - add button to update the base OS
 - stage2: create multi-heywhatsthat-outline to show the theoretical combined coverage of all micro feeders (assuming they all have HeyWhatsThat IDs)
