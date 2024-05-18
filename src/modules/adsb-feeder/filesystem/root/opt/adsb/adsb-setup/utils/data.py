@@ -218,6 +218,7 @@ class Data:
         ),
         # hostname ultrafeeder uses to get 978 data
         Env("FEEDER_UAT978_HOST", default=[""], tags=["978host"]),
+        Env("FEEDER_RB_UAT978_HOST", default=[""], tags=["rb978host"]),
         # add the URL to the dump978 map
         Env("FEEDER_URL_978", default=[""], tags=["978url"]),
         # URL to get Airspy stats (used in stage2)

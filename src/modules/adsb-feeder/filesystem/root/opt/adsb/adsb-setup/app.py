@@ -1458,10 +1458,14 @@ class AdsbIm:
                     self._d.env_by_tags("978host").list_set(
                         sitenum, f"ultrafeeder_{sitenum}"
                     )
+                    self._d.env_by_tags("rb978host").list_set(
+                        sitenum, self._d.env_by_tags("mf_ip").list_get(sitenum)
+                    )
                     self._d.env_by_tags("978piaware").list_set(sitenum, "relay")
                 else:
                     self._d.env_by_tags("replay978").list_set(sitenum, "")
                     self._d.env_by_tags("978host").list_set(sitenum, "")
+                    self._d.env_by_tags("rb978host").list_set(sitenum, "")
                     self._d.env_by_tags("978piaware").list_set(sitenum, "")
 
         else:
