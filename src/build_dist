@@ -69,7 +69,13 @@ if [[ "$VARIANT" == "iob-dietpi"* ]] ; then
         # here we don't need to mount a second partition at all; instead we just modify the files in /boot on the root partition
         # we do, however, need to make sure that the image is big enough - the VM disks come only with about a gig of storage which
         # is nowhere near enough - so let's make it 16G. The compression at the end makes this still fairly small.
-        qemu-img resize -f raw "$BASE_IMG" 16G
+        # On the flip side in order for the .iso to install on small Thin Clients, we need to have a smaller root partition
+        # for that to work. So let's do 2G for that case
+        if [[ "$BASE_IMG" == *"NativePC"* ]] ; then
+            qemu-img resize -f raw "$BASE_IMG" 2G
+        else
+            qemu-img resize -f raw "$BASE_IMG" 16G
+        fi
         echo ", +" | sfdisk -N 1 "$BASE_IMG"
         mount_image "$BASE_IMG" 1 "$MNT_DIR"
         CONFIG_DIR="boot"

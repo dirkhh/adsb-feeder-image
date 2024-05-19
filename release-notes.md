@@ -1,4 +1,5 @@
 Changes since v2.0.2 include:
+- make sure x86-64 native .iso can install on small target systems with only 4G disk space
 - yet another attempt to fix adsbX status... why can't aggregators just provide a sane API with a JSON status based on some ID (that isn't your IP address)?
 - assume that an empty gain setting means autogain
 - actual working fix for the stage2 Radarbox UAT issue
