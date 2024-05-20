@@ -13,8 +13,7 @@ for container_line in $(grep "_CONTAINER=" /opt/adsb/config/.env); do
 	(echo "$image" | {
 		IFS='/' read -r x user container
 		if [[ $user == "sdr-enthusiasts" ]] ; then
-			package_url="https://github.com/${user}/${container}/pkgs/container/{$container}/versions?filters%5Bversion_type%5D=tagged"
-			latestbuild=$(curl -s "$package_url" | grep latest-build- | sed -E 's/.*tag=(latest-build-[0-9]+)".*/\1/' | sort | tail -1)
+			latestbuild=$(curl -shttps://fredclausen.com/imageapi//api/v1/images/byname/${container}/recommended | jq '.images[]|.tag')
 			sed -i "s|${image}|ghcr.io/${user}/${container}:${latestbuild}|" /opt/adsb/config/.env
 			sed -i "s|${image}.*|ghcr.io/${user}/${container}:${latestbuild}|" /opt/adsb/docker.image.versions
 			echo "ghcr.io/sdr-enthusiasts/$container:$latestbuild"
