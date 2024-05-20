@@ -66,7 +66,7 @@ jobs:
         - name: orangepi-zero3-dietpi
           variant: dietpi-fat-2
           base_arch: arm64
-          dietpi_machine: 83.1
+          dietpi_machine: 83
           magic_path: "repository/src/image-dietpi/DietPi_OrangePiZero3-ARMv8-Bookworm.img"
         - name: raspberrypi64-pi-2-3-4-5
           base_arch: arm64
