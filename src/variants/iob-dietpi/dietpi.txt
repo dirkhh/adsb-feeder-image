@@ -45,7 +45,7 @@ AUTO_SETUP_NET_HOSTNAME=adsb-feeder
 AUTO_SETUP_NET_ETH_FORCE_SPEED=0
 
 # Delay service starts at boot until network is established: 0=disabled | 1=enabled
-AUTO_SETUP_BOOT_WAIT_FOR_NETWORK=1
+AUTO_SETUP_BOOT_WAIT_FOR_NETWORK=0
 
 ##### Misc options #####
 # Swap space size to generate: 0 => disable | 1 => auto | 2 and up => size in MiB
