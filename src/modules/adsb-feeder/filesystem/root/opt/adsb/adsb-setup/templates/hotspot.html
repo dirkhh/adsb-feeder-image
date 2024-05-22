@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <!-- Google Fonts Roboto. Copyright 2011 Google Inc. All Rights Reserved. See {{ url_for('static', filename='fonts/LICENSE.txt') }} -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts.css') }}" />
+  <!-- MDB -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/mdb.min.css') }}" />
+  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" />
+  <title>
+    ADS-B Feeder Image Hotspot
+  </title>
+</head>
+
+<body>
+  <div id="loader" style="display: none"></div>
+  <div id="overlay" style="display: none">
+    <div id="overlaytext">
+      please wait
+      <br />
+      this could take several minutes
+    </div>
+  </div>
+  <div class="container pt-5 mt-3">
+    <h1 class="mt-5">Wifi Setup</h1>
+    {% if comment == "" %}
+    <div class="mt-3">The ADS-B Feeder Image wasn't able to connect to a network. Please enter an SSID and password so
+      that we can connect to the network and continue the setup.</div>
+    {% else %}
+    <div class="mt-3">{{ comment }}</div>
+    {% endif %}
+    {% if not comment.startswith("Success") %}
+    <form method="post">
+      <div class="form-group row mt-3">
+        <span class="col-md">
+          <label for="ssid">SSID</label>
+        </span>
+        <span class="col-md">
+          <input type="text" id="ssid" name="ssid" required placeholder="SSID" class="form-control" />
+        </span>
+        <span class="col-md">
+          <label for="passwd">Password</label>
+        </span>
+        <span class="col-md">
+          <input type="text" id="passwd" name="passwd" required placeholder="Password" class="form-control" />
+        </span>
+        <button type="submit" name="submit" value="go" class="col-md btn btn-primary">Configure</button>
+      </div>
+    </form>
+    {% endif %}
+    <footer class="text-center text-lg-start bg-light text-muted">
+      <hr class="mt-5" />
+      <section class="d-flex justify-content-center justify-content-lg-between border-bottom small">
+        <div class="me-5 d-lg-block">
+          <span>
+            Running <a href="https://adsb.im/home">ADS-B Feeder Image</a> {{ version }}
+          </span>
+        </div>
+      </section>
+    </footer>
+  </div>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/mdb.min.js') }}"></script>
+</body>
+
+</html>
