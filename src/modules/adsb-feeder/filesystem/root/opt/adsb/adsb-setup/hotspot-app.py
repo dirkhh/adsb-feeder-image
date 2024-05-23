@@ -92,8 +92,12 @@ class Hotspot:
     def setup_hotspot(self):
         if not self._dnsserver:
             print_err("creating DNS server")
-            self._dnsserver = socketserver.ThreadingUDPServer(("", 53), DNSHandler)
-        print_err("starting DNS server")
+            try:
+                self._dnsserver = socketserver.ThreadingUDPServer(("", 53), DNSHandler)
+            except OSError as e:
+                print_err(f"failed to create DNS server: {e}")
+            else:
+                print_err("starting DNS server")
         self._dns_thread = threading.Thread(target=self._dnsserver.serve_forever)
         self._dns_thread.start()
         subprocess.run(
