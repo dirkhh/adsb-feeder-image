@@ -1,6 +1,7 @@
 import os
 import pathlib
 import signal
+import socketserver
 import subprocess
 import threading
 from time import sleep
@@ -10,7 +11,8 @@ from flask import (
     render_template,
     request,
 )
-from sys import argv, exit
+from sys import argv
+from fakedns import DNSHandler
 
 
 class Hotspot:
@@ -26,6 +28,8 @@ class Hotspot:
         self.restart_state = ""
         self.ssid = ""
         self.passwd = ""
+        self._dnsserver = None
+        self._dns_thread = None
 
         self.app.add_url_rule("/restarting", view_func=self.restarting)
 
@@ -69,12 +73,16 @@ class Hotspot:
         self.app.run(host="0.0.0.0", port=80)
 
     def setup_hotspot(self):
+        self._dnsserver = socketserver.ThreadingUDPServer(("", 53), DNSHandler)
+        self._dns_thread = threading.Thread(target=self._dnsserver.serve_forever)
+        self._dns_thread.start()
         subprocess.run(
             f"ip li set {self.wlan} up && ip ad add 192.168.199.1/24 broadcast 192.168.199.255 dev {self.wlan} && systemctl start hostapd.service && systemctl start isc-dhcp-server.service",
             shell=True,
         )
 
     def teardown_hotspot(self):
+        self._dnsserver.shutdown()
         subprocess.run(
             f"systemctl stop hostapd.service && systemctl stop isc-dhcp-server.service && ip addr flush {self.wlan} && ip link set dev {self.wlan} down",
             shell=True,
