@@ -18,7 +18,8 @@ class DNSHandler(socketserver.BaseRequestHandler):
         # If request doesn't even contain full header, don't respond.
         if len(nonzeros) < DNS_HEADER_LENGTH:
             print(
-                f"note: data length too small: overall {len(data)}, without trailing zeros {len(nonzeros)}"
+                f"note: data length too small: overall {len(data)}, without trailing zeros {len(nonzeros)}",
+                file=sys.stderr,
             )
             return
 
@@ -34,9 +35,6 @@ class DNSHandler(socketserver.BaseRequestHandler):
             name = str(b".".join(question["name"]), encoding="UTF-8")
             if question["qtype"] == b"\x00\x01" and question["qclass"] == b"\x00\x01":
                 accepted_questions.append(question)
-                print("\033[32m{}\033[39m".format(name))
-            else:
-                print("\033[31m{}\033[39m".format(name))
 
         response = (
             self.dns_response_header(data)
