@@ -95,7 +95,9 @@ fi
 if [ "$NATIVE_DIETPI" != "1" ] ; then
 	# Install dependencies
 	apt-get update
-	apt-get install -y gnupg
+	apt-get install -y gnupg hostapd isc-dhcp-server
+	systemctl mask hostapd.service
+	systemctl mask isc-dhcp-server.service
 
 	# install zerotier and tailscale, first get their repo
 

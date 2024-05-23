@@ -1,0 +1,13 @@
+[Unit]
+Description=ADS-B Feeder Hotspot Service
+After=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/adsb
+ExecStart=/usr/bin/bash /opt/adsb/scripts/net-or-hotspot.sh
+TimeoutStartSec=0
+
+[Install]
+WantedBy=multi-user.target

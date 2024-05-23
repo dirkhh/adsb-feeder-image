@@ -39,6 +39,13 @@ class Hotspot:
         self.passwd = ""
         self._dnsserver = None
         self._dns_thread = None
+        if pathlib.Path("/boot/dietpi").exists():
+            self._baseos = "dietpi"
+        elif pathlib.Path("/etc/rpi-issue").exists():
+            self._baseos = "raspbian"
+        else:
+            print_err("unknown baseos - giving up")
+            sys.exit(1)
 
         self.app.add_url_rule("/restarting", view_func=self.restarting)
 
@@ -108,29 +115,41 @@ class Hotspot:
     def setup_wifi(self):
         self.teardown_hotspot()
         print_err(f"connecting to {self.ssid}")
-        # switch hotplug to allow wifi
-        with open("/etc/network/interfaces", "r") as current, open(
-            "/etc/network/interfaces.new", "w"
-        ) as update:
-            lines = current.readlines()
-            for line in lines:
-                if "allow-hotplug" in line:
-                    if self.wlan in line:
-                        update.write(f"allow-hotplug {self.wlan}\n")
+        if self._baseos == "dietpi":
+            # switch hotplug to allow wifi
+            with open("/etc/network/interfaces", "r") as current, open(
+                "/etc/network/interfaces.new", "w"
+            ) as update:
+                lines = current.readlines()
+                for line in lines:
+                    if "allow-hotplug" in line:
+                        if self.wlan in line:
+                            update.write(f"allow-hotplug {self.wlan}\n")
+                        else:
+                            update.write(f"# {line}")
                     else:
-                        update.write(f"# {line}")
-                else:
-                    update.write(f"{line}")
-            os.remove("/etc/network/interfaces")
-            os.rename("/etc/network/interfaces.new", "/etc/network/interfaces")
-        output = subprocess.run(
-            f"wpa_passphrase {self.ssid} {self.passwd} > /etc/wpa_supplicant/wpa_supplicant.conf && systemctl restart networking.service",
-            shell=True,
-            capture_output=True,
-        )
-        print_err(
-            f"restarted networking.service: {output.returncode}\n{output.stderr.decode()}\n{output.stdout.decode()}"
-        )
+                        update.write(f"{line}")
+                os.remove("/etc/network/interfaces")
+                os.rename("/etc/network/interfaces.new", "/etc/network/interfaces")
+            output = subprocess.run(
+                f"wpa_passphrase {self.ssid} {self.passwd} > /etc/wpa_supplicant/wpa_supplicant.conf && systemctl restart networking.service",
+                shell=True,
+                capture_output=True,
+            )
+            print_err(
+                f"restarted networking.service: {output.returncode}\n{output.stderr.decode()}\n{output.stdout.decode()}"
+            )
+        elif self._baseos == "raspbian":
+            output = subprocess.run(
+                f"nmcli d wifi connect {self.ssid} password {self.passwd} ifname {self.wlan}",
+                shell=True,
+                capture_output=True,
+            )
+            print_err(
+                f"started wlan connection to {self.ssid}: {output.returncode}\n{output.stderr.decode()}\n{output.stdout.decode()}"
+            )
+        else:
+            print_err(f"unknown baseos: can't set up wifi")
 
         # sleep for a few seconds to make sure we connect to the network
         time.sleep(5.0)
@@ -145,25 +164,66 @@ class Hotspot:
         time.sleep(2.0)
         print_err(f"testing the {self.ssid} network")
         self.teardown_hotspot()
-        try:
-            result = subprocess.run(
-                f'bash -c "wpa_supplicant -i{self.wlan} -c<(wpa_passphrase {self.ssid} {self.passwd})"',
-                shell=True,
-                capture_output=True,
-                timeout=10.0,
-            )
-        except subprocess.TimeoutExpired as e:
-            # that's the expected behavior
-            output = e.output.decode()
-            if e.stderr:
-                output += e.stderr.decode()
+        if self._baseos == "dietpi":
+            try:
+                result = subprocess.run(
+                    f'bash -c "wpa_supplicant -i{self.wlan} -c<(wpa_passphrase {self.ssid} {self.passwd})"',
+                    shell=True,
+                    capture_output=True,
+                    timeout=10.0,
+                )
+            except subprocess.TimeoutExpired as e:
+                # that's the expected behavior
+                output = e.output.decode()
+                if e.stderr:
+                    output += e.stderr.decode()
+            else:
+                output = result.stdout.decode()
+                if result.stderr:
+                    output += result.stderr.decode()
+            success = "CTRL-EVENT-CONNECTED" in output
+        elif self._baseos == "raspbian":
+            try:
+                result = subprocess.run(
+                    f"nmcli d wifi connect {self.ssid} password {self.passwd} ifname {self.wlan}",
+                    shell=True,
+                    capture_output=True,
+                )
+            except subprocess.SubprocessError as e:
+                # something went wrong
+                output = e.output.decode()
+                if e.stderr:
+                    output += e.stderr.decode()
+            else:
+                output = result.stdout.decode()
+                if result.stderr:
+                    output += result.stderr.decode()
+            success = "successfully activated" in output
+            # even though we want to be on this network, let's shut it down and go back to
+            # hotspot mode so we can tell the user about it
+            try:
+                result = subprocess.run(
+                    f"nmcli con down {self.ssid}",
+                    shell=True,
+                    capture_output=True,
+                )
+            except subprocess.SubprocessError as e:
+                # something went wrong
+                output = e.output.decode()
+                if e.stderr:
+                    output += e.stderr.decode()
+                print_err(f"failed to disconnect from {self.ssid}: {output}")
+            else:
+                output = result.stdout.decode()
+                if result.stderr:
+                    output += result.stderr.decode()
+                print_err(f"disconnected from {self.ssid}: {output}")
         else:
-            output = result.stdout.decode()
-            if result.stderr:
-                output += result.stderr.decode()
-
+            print_err(f"unknown baseos: can't test wifi")
+            success = False
+        self.teardown_hotspot()
         self.restart_state = "done"
-        if "CTRL-EVENT-CONNECTED" in output:
+        if success:
             self.comment = "Success. The installation will continue (and this network will disconnect) in a few seconds."
         else:
             self.comment = (
@@ -175,7 +235,7 @@ class Hotspot:
 
         # now we bring back up the hotspot in order to deliver the result to the user
         self.setup_hotspot()
-        if self.comment.startswith("Success"):
+        if success:
             # we wait a fairly long time to be sure that the browser catches on and shows
             # the 'continue' page
             print_err("waiting for browser to show 'continue' page")

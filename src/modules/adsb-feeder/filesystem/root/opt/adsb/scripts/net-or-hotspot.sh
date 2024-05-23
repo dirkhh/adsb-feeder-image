@@ -9,6 +9,7 @@ if [[ $gateway == "" ]] || ! ping -c 1 -W 1 "$gateway" &> /dev/null ; then
     # that's not good, let's start an access point
     echo "No internet connection detected, starting access point"
     systemctl unmask hostapd.service
+    systemctl unmask isc-dhcp-server.service
     wlan=$(iw dev | grep Interface | cut -d' ' -f2)
     if [[ $wlan == "" ]] ; then
         echo "No wireless interface detected, giving up"
