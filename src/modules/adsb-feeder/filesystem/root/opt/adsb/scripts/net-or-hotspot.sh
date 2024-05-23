@@ -1,8 +1,12 @@
 #!/bin/bash
 
+# this needs to run as root
+if [ "$(id -u)" != "0" ] ; then
+	echo "this command requires superuser privileges - please run as sudo bash $0"
+	exit 1
+fi
+
 # is there a gateway?
-exec > >(tee -a /opt/adsb/bootstrap.log) 2>&1
-set -x
 gateway=$(ip route | awk '/default/ { print $3 }')
 
 if [[ $gateway == "" ]] || ! ping -c 1 -W 1 "$gateway" &> /dev/null ; then
@@ -25,5 +29,9 @@ if [[ $gateway == "" ]] || ! ping -c 1 -W 1 "$gateway" &> /dev/null ; then
         cp /opt/adsb/accesspoint/isc-dhcp-server /etc/default/isc-dhcp-server
         python3 /opt/adsb/adsb-setup/hotspot-app.py "$wlan"
     done
+    # the hotspot creates that file to indicate we should continue, let's clean it up
     rm -f /opt/adsb/continueboot
+    echo "successfully connected to network"
+else
+    echo "we are able to ping ${gateway}, no need to start an access point"
 fi
