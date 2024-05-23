@@ -1,11 +1,11 @@
 [Unit]
 Description=ADS-B Feeder Setup Service
-After=network-online.target
+After=network-online.target adsb-hotspot.service
 
 [Service]
 RemainAfterExit=yes
 WorkingDirectory=/opt/adsb/adsb-setup
-ExecStartPre=/usr/bin/bash /opt/adsb/finish-update.sh
+ExecStartPre=/usr/bin/bash /opt/adsb/pre-start.sh
 ExecStart=/usr/bin/python3 /opt/adsb/adsb-setup/app.py
 Restart=always
 RestartSec=5
