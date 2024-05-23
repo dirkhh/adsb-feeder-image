@@ -1,6 +1,6 @@
 [Unit]
 Description=ADS-B Feeder Bootstrap Service
-After=network-online.target
+After=network-online.target adsb-hotspot.service
 
 [Service]
 Type=oneshot

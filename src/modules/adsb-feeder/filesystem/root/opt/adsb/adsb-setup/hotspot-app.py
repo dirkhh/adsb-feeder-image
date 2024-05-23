@@ -98,8 +98,8 @@ class Hotspot:
                 print_err(f"failed to create DNS server: {e}")
             else:
                 print_err("starting DNS server")
-        self._dns_thread = threading.Thread(target=self._dnsserver.serve_forever)
-        self._dns_thread.start()
+            self._dns_thread = threading.Thread(target=self._dnsserver.serve_forever)
+            self._dns_thread.start()
         subprocess.run(
             f"ip li set {self.wlan} up && ip ad add 192.168.199.1/24 broadcast 192.168.199.255 dev {self.wlan} && systemctl start hostapd.service && systemctl start isc-dhcp-server.service",
             shell=True,
@@ -107,17 +107,18 @@ class Hotspot:
         print_err("started hotspot")
 
     def teardown_hotspot(self):
-        if self._dnsserver:
-            print_err("shutting down DNS server")
-            self._dnsserver.shutdown()
         subprocess.run(
-            f"systemctl stop hostapd.service && systemctl stop isc-dhcp-server.service && ip addr flush {self.wlan} && ip link set dev {self.wlan} down",
+            f"systemctl stop hostapd.service && systemctl stop isc-dhcp-server.service && ip ad del 192.168.199.1/24 dev {self.wlan} && ip addr flush {self.wlan} && ip link set dev {self.wlan} down",
             shell=True,
         )
         print_err("turned off hotspot")
 
     def setup_wifi(self):
         self.teardown_hotspot()
+        if self._dnsserver:
+            print_err("shutting down DNS server")
+            self._dnsserver.shutdown()
+
         print_err(f"connecting to {self.ssid}")
         if self._baseos == "dietpi":
             # switch hotplug to allow wifi
@@ -203,6 +204,10 @@ class Hotspot:
                 if result.stderr:
                     output += result.stderr.decode()
             success = "successfully activated" in output
+            if success:
+                print_err(f"successfully connected to {self.ssid}")
+            else:
+                print_err(f"failed to connect to {self.ssid}: {output}")
             # even though we want to be on this network, let's shut it down and go back to
             # hotspot mode so we can tell the user about it
             try:
@@ -225,7 +230,6 @@ class Hotspot:
         else:
             print_err(f"unknown baseos: can't test wifi")
             success = False
-        self.teardown_hotspot()
         self.restart_state = "done"
         if success:
             self.comment = "Success. The installation will continue (and this network will disconnect) in a few seconds."

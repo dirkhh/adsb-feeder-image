@@ -18,9 +18,6 @@ else
 	exit
 fi
 
-# let's figure out if we have internet access
-bash /opt/adsb/scripts/net-or-hotspot.sh
-
 bash /opt/adsb/docker-pull.sh &
 
 # the code below enables the redirection from the my.adsb.im service to the
