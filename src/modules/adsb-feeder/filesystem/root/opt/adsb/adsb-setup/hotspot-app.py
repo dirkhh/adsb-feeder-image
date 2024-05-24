@@ -46,20 +46,15 @@ class Hotspot:
         else:
             print_err("unknown baseos - giving up")
             sys.exit(1)
-        try:
-            output = subprocess.run(
-                f"iw dev {self.wlan} scan  | grep SSID: | tr -d ' \t' | cut -d: -f2",
-                shell=True,
-                capture_output=True,
-            )
-        except subprocess.CalledProcessError as e:
-            print_err(f"error scanning for SSIDs: {e}")
-        else:
-            print_err(f"wlan list: {output.stdout.decode()}")
-            self.ssids = []
-            for line in output.stdout.decode().split():
-                if line and line not in self.ssids:
-                    self.ssids.append(line)
+        print_err("trying to scan for SSIDs")
+        self.ssids = []
+        i = 0
+        while i < 10:
+            i += 1
+            self.scan_ssids()
+            if len(self.ssids) > 0:
+                break
+            time.sleep(2.0)
 
         self.app.add_url_rule("/restarting", view_func=self.restarting)
 
@@ -76,6 +71,33 @@ class Hotspot:
         self.app.add_url_rule(
             "/<path:path>", view_func=self.catch_all, methods=["GET", "POST"]
         )
+
+    def scan_ssids(self):
+        try:
+            if self._baseos == "raspbian":
+                output = subprocess.run(
+                    "nmcli -f SSID  dev wifi | tail -n +2",
+                    shell=True,
+                    capture_output=True,
+                )
+            else:
+                output = subprocess.run(
+                    f"ip li set up dev {self.wlan} && iw dev {self.wlan} scan  | grep SSID: | tr -d ' \t' | cut -d: -f2",
+                    shell=True,
+                    capture_output=True,
+                )
+        except subprocess.CalledProcessError as e:
+            print_err(f"error scanning for SSIDs: {e}")
+            return
+        ssids = []
+        for line in output.stdout.decode().split():
+            if line and line not in self.ssids:
+                ssids.append(line)
+        if len(ssids) > 0:
+            print_err(f"found SSIDs: {ssids}")
+            self.ssids = ssids
+        else:
+            print_err("no SSIDs found")
 
     def restart(self):
         if request.method == "POST":
