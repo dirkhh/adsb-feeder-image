@@ -193,7 +193,7 @@ class Hotspot:
         elif self._baseos == "raspbian":
             # we should be all set already on raspbian
             print_err(
-                f"started wlan connection to {self.ssid}: {output.returncode}\n{output.stderr.decode()}\n{output.stdout.decode()}"
+                f"started wlan connection to {self.ssid}"
             )
         else:
             print_err(f"unknown baseos: can't set up wifi")
