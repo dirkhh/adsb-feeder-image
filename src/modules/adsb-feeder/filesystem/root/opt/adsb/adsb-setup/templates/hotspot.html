@@ -36,10 +36,15 @@
     <form method="post">
       <div class="form-group row mt-3">
         <span class="col-md">
-          <label for="ssid">SSID</label>
+          <label for="ssidinput">SSID</label>
         </span>
         <span class="col-md">
-          <input type="text" id="ssid" name="ssid" required placeholder="SSID" class="form-control" />
+          <input class="form-control" list="ssidlist" id="ssidinput" name="ssid" placeholder="Pick or enter SSID">
+          <datalist id="ssidlist">
+            {% for ssid in ssids %}
+            <option value="{{ ssid }}" />
+            {% endfor %}
+          </datalist>
         </span>
         <span class="col-md">
           <label for="passwd">Password</label>

@@ -46,6 +46,20 @@ class Hotspot:
         else:
             print_err("unknown baseos - giving up")
             sys.exit(1)
+        try:
+            output = subprocess.run(
+                f"iw dev {self.wlan} scan  | grep SSID: | tr -d ' \t' | cut -d: -f2",
+                shell=True,
+                capture_output=True,
+            )
+        except subprocess.CalledProcessError as e:
+            print_err(f"error scanning for SSIDs: {e}")
+        else:
+            print_err(f"wlan list: {output.stdout.decode()}")
+            self.ssids = []
+            for line in output.stdout.decode().split():
+                if line and line not in self.ssids:
+                    self.ssids.append(line)
 
         self.app.add_url_rule("/restarting", view_func=self.restarting)
 
@@ -79,7 +93,7 @@ class Hotspot:
             self.passwd = request.form.get("passwd")
             return redirect("/restarting")
         return render_template(
-            "hotspot.html", version=self.version, comment=self.comment
+            "hotspot.html", version=self.version, comment=self.comment, ssids=self.ssids
         )
 
     def restarting(self):
