@@ -8,6 +8,7 @@ RemainAfterExit=yes
 WorkingDirectory=/opt/adsb
 ExecStart=/usr/bin/bash /opt/adsb/scripts/net-or-hotspot.sh
 TimeoutStartSec=0
+SyslogIdentifier=adsb-hotspot
 
 [Install]
 WantedBy=multi-user.target
