@@ -90,7 +90,7 @@ class Hotspot:
         self.app.run(host="0.0.0.0", port=80)
 
     def setup_hotspot(self):
-        if not self._dnsserver:
+        if not self._dnsserver and not self._dns_thread:
             print_err("creating DNS server")
             try:
                 self._dnsserver = socketserver.ThreadingUDPServer(("", 53), DNSHandler)
@@ -98,12 +98,18 @@ class Hotspot:
                 print_err(f"failed to create DNS server: {e}")
             else:
                 print_err("starting DNS server")
-            self._dns_thread = threading.Thread(target=self._dnsserver.serve_forever)
-            self._dns_thread.start()
+                self._dns_thread = threading.Thread(
+                    target=self._dnsserver.serve_forever
+                )
+                self._dns_thread.start()
         subprocess.run(
             f"ip li set {self.wlan} up && ip ad add 192.168.199.1/24 broadcast 192.168.199.255 dev {self.wlan} && systemctl start hostapd.service && systemctl start isc-dhcp-server.service",
             shell=True,
         )
+        # strangely, at least on Raspbian there seem to be scenarios where hostapd only works after a restart
+        # annoying as that may be - give it a few seconds and restart - just to be sure (there's no easy way to tell if it's needed)
+        time.sleep(5)
+        subprocess.run(f"systemctl restart hostapd.service", shell=True)
         print_err("started hotspot")
 
     def teardown_hotspot(self):
@@ -114,10 +120,14 @@ class Hotspot:
         print_err("turned off hotspot")
 
     def setup_wifi(self):
-        self.teardown_hotspot()
         if self._dnsserver:
             print_err("shutting down DNS server")
             self._dnsserver.shutdown()
+        print_err("disabling hotspot and DHCP")
+        subprocess.run(
+            f"systemctl disable --now hostapd.service && systemctl disable --now isc-dhcp-server.service",
+            shell=True,
+        )
 
         print_err(f"connecting to {self.ssid}")
         if self._baseos == "dietpi":
@@ -145,11 +155,7 @@ class Hotspot:
                 f"restarted networking.service: {output.returncode}\n{output.stderr.decode()}\n{output.stdout.decode()}"
             )
         elif self._baseos == "raspbian":
-            output = subprocess.run(
-                f"nmcli d wifi connect {self.ssid} password {self.passwd} ifname {self.wlan}",
-                shell=True,
-                capture_output=True,
-            )
+            # we should be all set already on raspbian
             print_err(
                 f"started wlan connection to {self.ssid}: {output.returncode}\n{output.stderr.decode()}\n{output.stdout.decode()}"
             )
@@ -208,47 +214,18 @@ class Hotspot:
                 print_err(f"successfully connected to {self.ssid}")
             else:
                 print_err(f"failed to connect to {self.ssid}: {output}")
-            # even though we want to be on this network, let's shut it down and go back to
-            # hotspot mode so we can tell the user about it
-            try:
-                result = subprocess.run(
-                    f"nmcli con down {self.ssid}",
-                    shell=True,
-                    capture_output=True,
-                )
-            except subprocess.SubprocessError as e:
-                # something went wrong
-                output = e.output.decode()
-                if e.stderr:
-                    output += e.stderr.decode()
-                print_err(f"failed to disconnect from {self.ssid}: {output}")
-            else:
-                output = result.stdout.decode()
-                if result.stderr:
-                    output += result.stderr.decode()
-                print_err(f"disconnected from {self.ssid}: {output}")
-        else:
-            print_err(f"unknown baseos: can't test wifi")
-            success = False
-        self.restart_state = "done"
-        if success:
-            self.comment = "Success. The installation will continue (and this network will disconnect) in a few seconds."
-        else:
+
+        if not success:
             self.comment = (
                 "Failed to connect, wrong SSID or password, please try again."
             )
-        print_err(
-            f"{self.comment}: attempt to connect resulted in {output} - returning to hotspot mode"
-        )
+            # now we bring back up the hotspot in order to deliver the result to the user
+            # and have them try again
+            self.setup_hotspot()
+            self.restart_state = "done"
+            return
 
-        # now we bring back up the hotspot in order to deliver the result to the user
-        self.setup_hotspot()
-        if success:
-            # we wait a fairly long time to be sure that the browser catches on and shows
-            # the 'continue' page
-            print_err("waiting for browser to show 'continue' page")
-            time.sleep(10.0)
-            self.setup_wifi()
+        self.setup_wifi()
 
 
 if __name__ == "__main__":

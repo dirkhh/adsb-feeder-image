@@ -50,6 +50,12 @@
         <button type="submit" name="submit" value="go" class="col-md btn btn-primary">Configure</button>
       </div>
     </form>
+    <div class="mt-4">
+      Once you click the <strong>Configure</strong> button, the Hotspot connection will drop and the feeder will attempt
+      to connect to the network that you specified. If that WiFi connection is successful, the feeder should become
+      available on that WiFi network as <code>adsb-feeder.local</code>. If the connection fails, the feeder will once
+      again bring up this hotspot and you can try entering the credentials again.
+    </div>
     {% endif %}
     <footer class="text-center text-lg-start bg-light text-muted">
       <hr class="mt-5" />
