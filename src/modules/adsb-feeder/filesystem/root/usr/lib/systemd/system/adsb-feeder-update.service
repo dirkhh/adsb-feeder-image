@@ -11,6 +11,7 @@ RemainAfterExit=no
 WorkingDirectory=/opt/adsb
 ExecStart=/usr/bin/bash /opt/adsb/feeder-update -wait
 TimeoutStartSec=0
+SyslogIdentifier=adsb-feeder-update
 
 [Install]
 
