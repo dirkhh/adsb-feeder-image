@@ -6,9 +6,6 @@
 /boot/dietpi/func/dietpi-set_software ntpd-mode 0
 apt install -y --no-install-recommends chrony
 
-# make systemd journal persistent
-sed -i -e 's/.*Storage=.*/Storage=persistent/' /etc/systemd/journald.conf
-
 # copy the blocklisting code from Ramon Kolb's install-docker.sh script
 # DOCKER-INSTALL.SH -- Installation script for the Docker infrastructure on a Raspbian or Ubuntu system
 # Usage: source <(curl -s https://raw.githubusercontent.com/sdr-enthusiasts/docker-install/main/docker-install.sh)
