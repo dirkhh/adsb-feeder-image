@@ -176,6 +176,7 @@ class Data:
         Env("UAT_SDR_GAIN", default="autogain", tags=["uatgain"]),
         Env("FEEDER_SERIAL_1090", tags=["1090serial"]),
         Env("FEEDER_SERIAL_978", tags=["978serial"]),
+        Env("FEEDER_UAT_DEVICE_TYPE", default="rtlsdr", tags=["uat_device_type"]),
         Env("FEEDER_UNUSED_SERIAL_0", tags=["other-0"]),
         Env("FEEDER_UNUSED_SERIAL_1", tags=["other-1"]),
         Env("FEEDER_UNUSED_SERIAL_2", tags=["other-2"]),

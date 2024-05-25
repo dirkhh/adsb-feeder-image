@@ -32,6 +32,8 @@ class SDR:
             serial_match = re.search(r"iSerial\s+\d+\s+(.*)$", line)
             if serial_match:
                 self._serial_probed = serial_match.group(1).strip()
+        if not self._serial_probed and self._type == "stratuxv3":
+            self._serial_probed = "stratuxv3 w/o serial"
         if not self._serial_probed and self._type == "sdrplay":
             return "SDRplay w/o serial"
         return self._serial_probed
@@ -84,31 +86,37 @@ class SDRDevices:
             return
         lsusb_text = result.stdout.decode()
         self.lsusb_output = f"lsusb: {lsusb_text}"
-        output = io.StringIO(lsusb_text)
+
+        output = lsusb_text.split("\n")
         self.sdrs = []
-        for line in output:
-            for pidvid in (
-                "1d50:60a1",
-                "0bda:2838",
-                "0bda:2832",
+
+        def check_pidvid(pv_list=[], sdr_type=None):
+            if not sdr_type:
+                print_err("WARNING: bad code in check_pidvid")
+
+            for pidvid in pv_list:
+                #print_err(f"checking {sdr_type} with pidvid {pidvid}")
+                for line in output:
+                    address = self._get_address_for_pid_vid(pidvid, line)
+                    if address:
+                        print_err(f"get_sdr_info() found SDR {pidvid} of type {sdr_type} at {address}")
+                        self.sdrs.append(SDR(sdr_type, address))
+
+
+        check_pidvid(pv_list=["0bda:2838", "0bda:2832"], sdr_type="rtlsdr")
+        check_pidvid(pv_list=["0403:7028"], sdr_type="stratuxv3")
+        check_pidvid(pv_list=["1d50:60a1"], sdr_type="airspy")
+
+        sdrplay_pv_list = [
                 "1df7:2500",
                 "1df7:3000",
                 "1df7:3010",
                 "1df7:3020",
                 "1df7:3030",
                 "1df7:3050",
-            ):
-                address = self._get_address_for_pid_vid(pidvid, line)
-                if address:
-                    print(f"get_sdr_info() found SDR {pidvid} at {address}")
-                    if pidvid.startswith("1df7"):
-                        candidate = SDR("sdrplay", address)
-                    elif pidvid == "1d50:60a1":
-                        candidate = SDR("airspy", address)
-                    else:
-                        candidate = SDR("rtlsdr", address)
+                ]
 
-                    self.sdrs.append(candidate)
+        check_pidvid(pv_list=sdrplay_pv_list, sdr_type="sdrplay")
 
         found_serials = set()
         self.duplicates = set()
@@ -136,6 +144,7 @@ class SDRDevices:
     def addresses_per_frequency(self, frequencies: list = [1090, 978]):
         self._ensure_populated()
         # - if we find an airspy, that's for 1090
+        # - if we find an stratuxv3, that's for 978
         # - if we find an RTL SDR with serial 1090 or 00001090 - well, that's for 1090 (unless you have an airspy)
         # - if we find an RTL SDR with serial 978 or 00000978 - that's for 978
         # - if we find just one RTL SDR and no airspy, then that RTL SDR is for 1090
@@ -144,6 +153,8 @@ class SDRDevices:
         for sdr in self.sdrs:
             if sdr._type == "airspy":
                 ret[1090] = sdr._serial
+            elif sdr._type == "stratuxv3":
+                ret[978] = sdr._serial
             elif sdr._type == "sdrplay":
                 ret[1090] = sdr._serial
             elif sdr._type == "rtlsdr":

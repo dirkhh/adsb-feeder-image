@@ -1501,6 +1501,12 @@ class AdsbIm:
             if not env978.value and auto_assignment[978]:
                 env978.value = auto_assignment[978]
 
+            stratuxv3 = any([sdr._serial == env978.value and sdr._type == "stratuxv3" for sdr in self._sdrdevices.sdrs])
+            if stratuxv3:
+                self._d.env_by_tags("uat_device_type").value = "stratuxv3"
+            else:
+                self._d.env_by_tags("uat_device_type").value = "rtlsdr"
+
             # handle 978 settings for stage1
             if env978.value:
                 self._d.env_by_tags(["uat978", "is_enabled"]).list_set(0, True)
