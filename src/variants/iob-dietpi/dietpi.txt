@@ -86,7 +86,7 @@ AUTO_SETUP_SSH_SERVER_INDEX=-1
 #AUTO_SETUP_SSH_PUBKEY=ssh-ed25519 AAAAAAAA111111111111BBBBBBBBBBBB222222222222cccccccccccc333333333333 mySSHkey
 
 # Logging mode choice: 0=none/custom | -1=RAMlog hourly clear | -2=RAMlog hourly save to disk + clear | -3=Rsyslog + Logrotate
-AUTO_SETUP_LOGGING_INDEX=-1
+AUTO_SETUP_LOGGING_INDEX=0
 # RAMlog max tmpfs size (MiB). 50 MiB should be fine for single use. 200+ MiB for heavy webserver access log etc.
 AUTO_SETUP_RAMLOG_MAXSIZE=50
 
