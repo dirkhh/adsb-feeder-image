@@ -13,10 +13,15 @@ for container_line in $(grep "_CONTAINER=" /opt/adsb/config/.env); do
 	(echo "$image" | {
 		IFS='/' read -r x user container
 		if [[ $user == "sdr-enthusiasts" ]] ; then
-			latestbuild=$(curl -shttps://fredclausen.com/imageapi//api/v1/images/byname/${container}/recommended | jq '.images[]|.tag')
-			sed -i "s|${image}|ghcr.io/${user}/${container}:${latestbuild}|" /opt/adsb/config/.env
-			sed -i "s|${image}.*|ghcr.io/${user}/${container}:${latestbuild}|" /opt/adsb/docker.image.versions
-			echo "ghcr.io/sdr-enthusiasts/$container:$latestbuild"
+			out=$(curl -sS https://fredclausen.com/imageapi//api/v1/images/byname/${container}/recommended)
+			if latestbuild=$(jq -r '.images[]|.tag' <<< "$out"); then
+				oldbuild=$(grep -e $container /opt/adsb/docker.image.versions | cut -d: -f2)
+				echo "ghcr.io/sdr-enthusiasts/$container:$latestbuild (was $oldbuild)"
+				sed -i "s|${image}.*|ghcr.io/${user}/${container}:${latestbuild}|" /opt/adsb/config/.env
+				sed -i "s|${image}.*|ghcr.io/${user}/${container}:${latestbuild}|" /opt/adsb/docker.image.versions
+			else
+				echo "jq error for input $out"
+			fi
 		fi
 	})
 done
