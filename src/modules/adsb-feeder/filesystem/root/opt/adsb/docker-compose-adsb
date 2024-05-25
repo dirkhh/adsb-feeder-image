@@ -32,10 +32,16 @@ fi
 echo "$(date -u +"%FT%T.%3NZ") $PARENTPROC called docker-compose-adsb" "$@" >&2
 
 lockFile="/opt/adsb/docker-starting.lock"
-if ( set -o noclobber; echo "$@" > "$lockFile") 2> /dev/null; then
+
+if [[ -f "$lockFile" ]] && ! pgrep -F $lockFile &>/dev/null; then
+	echo "docker-compose-adsb lockfile present but associated PID not running, removing lockfile" >&2
+	rm -f "$lockFile"
+fi
+
+if ( set -o noclobber; echo "$$" > "$lockFile") 2> /dev/null; then
 	trap 'rm -f "$lockFile"; exit $?' INT TERM EXIT
 else
-	echo "docker-compose-adsb is already running for $(<$lockFile)" >&2
+	echo "docker-compose-adsb is already running: $(pgrep -a -F $lockFile)" >&2
 	# prevent restart loop
 	sleep 1."$RANDOM"
 	exit
