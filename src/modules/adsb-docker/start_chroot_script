@@ -33,11 +33,9 @@ export DEBIAN_FRONTEND=noninteractive
     chmod a+rwx /etc/docker
     cat > /etc/docker/daemon.json <<EOF
 {
-  "log-driver": "local",
-  "log-opts": {
-    "max-size": "10m",
-    "max-file": "3"
-  }
+  "log-driver": "journald",
+  "log-level": "warn",
+  "debug": "false"
 }
 EOF
     chmod u=rw,go=r /etc/docker/daemon.json
