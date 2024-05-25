@@ -1520,13 +1520,13 @@ class AdsbIm:
                 self._d.env_by_tags("978piaware").list_set(0, "")
 
             # next check for airspy devices
-            airspy = any([sdr._type == "airspy" for sdr in self._sdrdevices.sdrs])
+            airspy = any([sdr._serial == env1090.value and sdr._type == "airspy" for sdr in self._sdrdevices.sdrs])
             self._d.env_by_tags(["airspy", "is_enabled"]).value = airspy
             self._d.env_by_tags("airspyurl").list_set(
                 0, f"http://airspy_adsb" if airspy else ""
             )
             # SDRplay devices
-            sdrplay = any([sdr._type == "sdrplay" for sdr in self._sdrdevices.sdrs])
+            sdrplay = any([sdr._serial == env1090.value and sdr._type == "sdrplay" for sdr in self._sdrdevices.sdrs])
             self._d.env_by_tags(["sdrplay", "is_enabled"]).value = sdrplay
 
             # next - if we have exactly one SDR and it hasn't been assigned to anything, use it for 1090
