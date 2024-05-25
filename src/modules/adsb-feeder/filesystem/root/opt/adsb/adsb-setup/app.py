@@ -2339,7 +2339,7 @@ class AdsbIm:
                 print_err("trying to upload the logs")
                 try:
                     result = subprocess.run(
-                        "bash /opt/adsb/log-sanitizer.sh | curl -F 'sprunge=<-' http://sprunge.us",
+                        "bash /opt/adsb/log-sanitizer.sh | curl -F'expires=168' -F'file=@-'  https://0x0.st",
                         shell=True,
                         capture_output=True,
                     )
