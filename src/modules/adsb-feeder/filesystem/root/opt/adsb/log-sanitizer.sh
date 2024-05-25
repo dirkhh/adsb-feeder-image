@@ -25,7 +25,7 @@ for VAR in $SANITISE_VARS; do
       echo "WARNING: $VAR is empty, this is a critical variable, exiting"
     fi
   else
-    echo "handling ${MY_VAR} for ${VAR}"
+    echo "removing all references to ${VAR}"
     SANITISED_LOG=$(echo "$SANITISED_LOG" | sed "s/${MY_VAR}/MY_REAL_${VAR}/g")
     # Otherwise we just strip it out, and put it back into SANITISED_LOG
   fi
