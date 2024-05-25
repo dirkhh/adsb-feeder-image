@@ -77,8 +77,13 @@ touch /opt/adsb/os.adsb.feeder.image
 touch /opt/adsb/adsb.im.passwd.and.keys
 cp ~root/.ssh/authorized_keys ~root/.ssh/adsb.im.installkey
 
-# setup initial .env with container versions
-mkdir -p /opt/adsb/config
+# create a symlink so the config files reside where they should be in /mnt/dietpi_userdata/adsb-feeder
+mkdir -p /mnt/dietpi_userdata/adsb-feeder/config
+ln -s /mnt/dietpi_userdata/adsb-feeder/config /opt/adsb/
+
+# move the services in place
+mv /opt/adsb/etc/systemd/system/* /etc/systemd/system
+
 ENV_FILE=/opt/adsb/config/.env
 cp /opt/adsb/docker.image.versions "$ENV_FILE"
 echo "_ADSBIM_BASE_VERSION=$(cat /opt/adsb/adsb.im.version)" >> "$ENV_FILE"
