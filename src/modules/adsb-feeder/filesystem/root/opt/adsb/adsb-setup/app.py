@@ -1615,15 +1615,16 @@ class AdsbIm:
         else:
             site = ""
             sitenum = 0
-        print_err(f"handling input from {referer} and site # {sitenum} / {site}")
+        allow_insecure = not self.check_secure_image()
+        print_err(f"handling input from {referer} and site # {sitenum} / {site} (allow insecure is {allow_insecure})")
         # in the HTML, every input field needs to have a name that is concatenated by "--"
         # and that matches the tags of one Env
         form: Dict = request.form
         seen_go = False
         next_url = None
-        allow_insecure = not self.check_secure_image()
         for key, value in form.items():
-            print_err(f"handling {key} -> {value} (allow insecure is {allow_insecure})")
+            emptyStringPrint = "''"
+            print_err(f"handling {key} -> {emptyStringPrint if value == '' else value}")
             # this seems like cheating... let's capture all of the submit buttons
             if value == "go" or value.startswith("go-"):
                 seen_go = True
