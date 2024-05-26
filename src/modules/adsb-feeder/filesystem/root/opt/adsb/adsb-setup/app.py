@@ -82,6 +82,14 @@ from utils import (
 
 from werkzeug.utils import secure_filename
 
+from flask.logging import logging as flask_logging
+
+# don't log static assets
+class NoStatic(flask_logging.Filter):
+    def filter(record):
+        return 'GET /static/' not in record.getMessage()
+flask_logging.getLogger("werkzeug").addFilter(NoStatic)
+
 
 class AdsbIm:
     def __init__(self):
