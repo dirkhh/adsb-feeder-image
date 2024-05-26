@@ -629,11 +629,7 @@ class Data:
                 if oldValue != newValue and not envKey.startswith("_ADSBIM_STATE"):
                     emptyStringPrint = "''"
                     print_err(
-                        f"{descriptor}: - {envKey} = {emptyStringPrint if oldValue == '' else oldValue}",
-                        level=2,
-                    )
-                    print_err(
-                        f"{descriptor}: + {envKey} = {emptyStringPrint if newValue == '' else newValue}",
+                        f"{descriptor}: {envKey} = {emptyStringPrint if newValue == '' else newValue}",
                         level=2,
                     )
 
