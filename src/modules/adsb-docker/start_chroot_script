@@ -35,7 +35,7 @@ export DEBIAN_FRONTEND=noninteractive
 {
   "log-driver": "journald",
   "log-level": "warn",
-  "debug": "false"
+  "debug": false
 }
 EOF
     chmod u=rw,go=r /etc/docker/daemon.json
