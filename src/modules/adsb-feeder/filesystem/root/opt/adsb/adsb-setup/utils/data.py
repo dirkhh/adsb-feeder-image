@@ -5,6 +5,7 @@ from pathlib import Path
 from .environment import Env
 from .netconfig import NetConfig
 from .util import is_true, print_err
+from utils.config import read_values_from_env_file
 
 
 @dataclass
@@ -603,6 +604,10 @@ class Data:
 
     @property
     def envs_for_envfile(self):
+
+        # read old values from env file so we can debug print only those that have changed
+        old_values = read_values_from_env_file()
+
         def adjust_bool_impl(e, value):
             if "false_is_zero" in e.tags:
                 return "1" if is_true(value) else "0"
@@ -617,24 +622,46 @@ class Data:
 
         ret = {}
         for e in self._env:
+            def printChanged(descriptor, envKey, newValue, oldValue):
+                # omit state vars as they are never in the env file so we don't know if they changed
+                oldValue = str(oldValue)
+                newValue = str(newValue)
+                if oldValue != newValue and not envKey.startswith("_ADSBIM_STATE"):
+                    emptyStringPrint = "''"
+                    print_err(
+                        f"{descriptor}: {envKey} = {emptyStringPrint if oldValue == '' else oldValue} =>",
+                        level=2,
+                    )
+                    print_err(
+                        f"{descriptor}: {envKey} = {emptyStringPrint if newValue == '' else newValue} =>",
+                        level=2,
+                    )
+
             if type(e._value) == list:
                 for i in range(len(e._value)):
                     suffix = "" if i == 0 else f"_{i}"
                     value = e._value[i]
-                    ret[e._name + suffix] = (
+                    envKey = e._name + suffix
+                    newValue = (
                         adjust_bool(e, value)
                         if type(value) == bool or "is_enabled" in e.tags
                         else value
                     )
-                    print_err(
-                        f"ENV_FILE LIST: {e._name}{suffix} = {ret[e._name + suffix]}",
-                        level=2,
-                    )
+                    ret[envKey] = newValue
+
+                    oldValue = old_values.get(envKey)
+                    printChanged("ENV_FILE LIST", envKey, newValue, oldValue)
+
             else:
-                ret[e.name] = (
+                envKey = e._name
+                newValue = (
                     adjust_bool(e, e._value) if type(e._value) == bool else e._value
                 )
-                print_err(f"ENV_FILE OTHR: {e._name} = {ret[e._name]}", level=2)
+                ret[envKey] = newValue
+
+                oldValue = old_values.get(envKey)
+                printChanged("ENV_FILE OTHR", envKey, newValue, oldValue)
+
         # add convenience values
         # fmt: off
         ret["AF_FALSE_ON_STAGE2"] = "false" if self.is_enabled(["stage2"]) else "true"
