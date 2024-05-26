@@ -64,7 +64,10 @@ if grep -q "_IS_BASE_CONFIG_FINISHED=True" /opt/adsb/config/.env 2> /dev/null ; 
 	echo "$(date -u +"%FT%T.%3NZ") sync"
 	sync # graphs1090 writeback calls sync, to avoid timeouts during compose call sync now to empty the write cache
 	echo "$(date -u +"%FT%T.%3NZ") $docker_compose ${COMPOSE_FILES[@]} $@"
-	$docker_compose "${COMPOSE_FILES[@]}" "$@"
+	# if docker compose errors, run it a 2nd time
+	if ! $docker_compose "${COMPOSE_FILES[@]}" "$@"; then
+		$docker_compose "${COMPOSE_FILES[@]}" "$@"
+	fi
 	if [ "$1" = "up" ] ; then
 		# try to figure out if this was successful
 		echo "$(date -u +"%FT%T.%3NZ") finished attempting to bring up the containers" >&2
