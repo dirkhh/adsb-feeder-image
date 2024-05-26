@@ -905,7 +905,7 @@ class AdsbIm:
                     ),
                     "dump978_at_port": (
                         self._d.env_by_tags("uatport").value
-                        if self._d.is_enabled("uat978")
+                        if self._d.list_is_enabled(['uat978', 'is_enabled'], 0)
                         else 0
                     ),
                 }
