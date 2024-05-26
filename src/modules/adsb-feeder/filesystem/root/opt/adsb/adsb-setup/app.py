@@ -2460,11 +2460,14 @@ if __name__ == "__main__":
         if env_file.exists():
             shutil.move(env_file, config_dir / ".env")
 
+    moved = False
     for config_file in adsb_dir.glob("*.yml"):
         if config_file.exists():
+            moved = True
             new_file = config_dir / config_file.name
             shutil.move(config_file, new_file)
-            print_err(f"moved {config_file} to {new_file}")
+    if moved:
+        print_err(f"moved yml files to {config_dir}")
 
     if not pathlib.Path(config_dir / ".env").exists():
         # I don't understand how that could happen
