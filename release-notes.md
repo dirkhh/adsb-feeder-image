@@ -1,27 +1,16 @@
-Changes since v2.0.2 include:
-- make sure x86-64 native .iso can install on small target systems with only 4G disk space
-- yet another attempt to fix adsbX status... why can't aggregators just provide a sane API with a JSON status based on some ID (that isn't your IP address)?
-- assume that an empty gain setting means autogain
-- actual working fix for the stage2 Radarbox UAT issue
-- add button to update the base OS
-- stage2: create multi-heywhatsthat-outline to show the theoretical combined coverage of all micro feeders (assuming they all have HeyWhatsThat IDs)
-- stage2: dynamically update the micro feeder information on the stage2 page
-- fix potentially inconsistent feeder status for adsbX
-- stage2: show site statistics in messages / positions per second to make things more consistent with tar1090
-- stage2: ensure all site names are unique
-- stronger warning to have ssh access before securing the image
-- add missing shutdown template
-- stage2: improve backup/restore
-- stage2: add reverse proxy to simplify access to the various micro-proxies; this avoids using ports that are blocked
-- stage2: add summary line to the micro feeder table on the home page to consistently get to map and stats for not just the micro feeders but also the full stage2 (thanks @eddieb for the suggestion)
-- stage2: fix UAT978 forwading and UAT978 statistics
-- add an installer .iso for native x86_64 PC
+Changes since v2.0.3 include:
+- logging improvements: dietpi: make journal persistent; non-dietpi: use journald logging driver for docker; syslog identifiers for services
+- change log upload from out of service sprunge.us to 0x0.st
+- ensure spurious lockFile doesn't prevent docker-compose-adsb from running
+- update container versions (this will take a moment when updating)
+- alpha: stratuxv3 UAT receiver support
+- alpha: wifi config via access point when there is no network connectivity
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)
 
 > [!WARNING]
-> Images that start with `adsb-im-iob` can take up to **20 minutes** at first boot. Images without `iob` in their name still can take more than 5 minutes before the web interface is available. Please be patient.
+> Images can take more than 5 minutes before the web interface is available. Please be patient.
 >
 > Not all images support WiFi, DietPi based images that do support WiFi (e.g. DietPi images for Raspberry Pi) require editing two files on the DOS partition included with the image BEFORE the first boot. Please look at the [adsb.im FAQ](https://adsb.im/faq) for details.
 
