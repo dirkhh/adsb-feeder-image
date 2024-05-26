@@ -165,7 +165,7 @@ class Env:
         else:
             self._value[idx] = value
         self._reconcile(self._value)
-        print_err(f"after reconcile {self._name} = {self._value}")
+        #print_err(f"after reconcile {self._name} = {self._value}")
 
     def list_get(self, idx):
         idx = make_int(idx)
