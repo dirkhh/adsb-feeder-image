@@ -175,6 +175,7 @@ class AdsbIm:
             ["radarvirtuel", "RadarVirtuel", "https://www.radarvirtuel.com/", [""]],
             ["1090uk", "1090MHz UK", "https://1090mhz.uk", ["https://www.1090mhz.uk/mystatus.php?key=<FEEDER_1090UK_API_KEY>"]],
         ]
+        self.last_aggregator_debug_print = None
         self.microfeeder_setting_tags = (
             "site_name", "lat", "lng", "alt", "tz", "mf_version",
             "adsblol_uuid", "ultrafeeder_uuid", "mlat_privacy", "route_api",
@@ -2296,7 +2297,10 @@ class AdsbIm:
                     status_link_list[0] = final_link
                 else:
                     status_link_list.append(final_link)
-        print_err(f"final aggregator structure: {aggregators}")
+        agg_debug_print = f"final aggregator structure: {aggregators}"
+        if agg_debug_print != self.last_aggregator_debug_print:
+            self.last_aggregator_debug_print = agg_debug_print
+            print_err(agg_debug_print)
         board = self._d.env_by_tags("board_name").value
         self._d.settings = matrix
         # there are many other boards I should list here - but Pi 3 and Pi Zero are probably the most common
