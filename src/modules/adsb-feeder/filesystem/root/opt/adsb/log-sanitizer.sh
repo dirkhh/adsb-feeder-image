@@ -1,8 +1,35 @@
 #!/bin/bash
 # CC0 - public domain
 
+SEPARATOR="
+----------------------------------------------------------------------------------------------------------
+"
 # We read the file
-SANITISED_LOG=$(</opt/adsb/adsb-setup.log)
+# and also append a bunch of other diagnostic info
+SANITISED_LOG="
+$(</opt/adsb/adsb-setup.log)
+${SEPARATOR}
+config.json:
+$(</opt/adsb/config/config.json)
+${SEPARATOR}
+.env:
+$(</opt/adsb/config/.env)
+${SEPARATOR}
+df:
+$(df -h | grep -v overlay)
+${SEPARATOR}
+uname -a:
+$(uname -a)
+${SEPARATOR}
+free -h:
+$(free -h)
+${SEPARATOR}
+lsusb -t:
+$(lsusb -t)
+${SEPARATOR}
+lsusb -v:
+$(lsusb -v)
+"
 
 # We set vars to empty
 SANITISE_VARS="FEEDER_LAT FEEDER_LONG ADSBLOL_UUID AF_MICRO_IP ULTRAFEEDER_UUID FEEDER_1090UK_API_KEY
@@ -30,6 +57,8 @@ for VAR in $SANITISE_VARS; do
     # Otherwise we just strip it out, and put it back into SANITISED_LOG
   fi
 done
+# print a new line do delineate our debug output above
+echo
 # now get rid of anything that looks like an IP address
 SANITISED_LOG=$(sed -r 's/((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])/<hidden-ip-address>/g' <<< $SANITISED_LOG)
 # finally, replace everything that looks like a uuid
