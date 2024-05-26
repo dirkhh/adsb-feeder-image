@@ -1,4 +1,6 @@
 Changes since v2.0.3 include:
+- clean up adsb-setup.log for better readability
+- include more info in diagnostic share
 - logging improvements: dietpi: make journal persistent; non-dietpi: use journald logging driver for docker; syslog identifiers for services
 - change log upload from out of service sprunge.us to 0x0.st
 - ensure spurious lockFile doesn't prevent docker-compose-adsb from running
