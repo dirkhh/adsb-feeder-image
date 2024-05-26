@@ -49,7 +49,7 @@ class Data:
         ["/planefinder-stat/", "PLANEFINDER", "/stats.html"],
         ["/dump978/", "UAT978", "/skyaware978/"],
         ["/logs/", "DAZZLE", "/"],
-        ["/dozzle/", "DAZZLE", "/"],
+        ["/dozzle/<sub_path>", "DAZZLE", "/"],
         ["/config/", "DAZZLE", "/setup"],
     ]
 
