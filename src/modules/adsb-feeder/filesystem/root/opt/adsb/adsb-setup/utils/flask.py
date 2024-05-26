@@ -11,7 +11,7 @@ class RouteManager:
         self.app = app
 
     def add_proxy_routes(self, proxy_routes):
-        print_err(f"adding proxy_routes {proxy_routes}", level=2)
+        #print_err(f"adding proxy_routes {proxy_routes}", level=2)
         for endpoint, port, url_path in proxy_routes:
             # print_err(f"add_proxy_route {endpoint} {port } {url_path}")
             r = self.function_factory(endpoint, port, url_path)
