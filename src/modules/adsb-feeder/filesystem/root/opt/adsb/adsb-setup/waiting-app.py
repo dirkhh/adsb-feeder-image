@@ -1,4 +1,5 @@
 from flask import Flask, Response, render_template
+import re
 from sys import argv
 import time
 
@@ -13,8 +14,9 @@ def stream_log():
 
     def tail():
         line = ""
+        ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
         while True:
-            tmp = file.readline()
+            tmp = ansi_escape.sub("", file.readline())
             if tmp:
                 line += tmp
                 if line.endswith("\n"):
