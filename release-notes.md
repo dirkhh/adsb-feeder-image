@@ -1,4 +1,5 @@
 Changes since v2.0.3 include:
+- fix Odroid XU4 image build
 - re-add image for Orange Pi 3 LTS (this time DietPi based)
 - add a 'waiting app' that shows sign of life (and log files) during the long first boot of a DietPi based image
 - yet another update to Ultrafeeder version
