@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset=" utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <!-- Google Fonts Roboto. Copyright 2011 Google Inc. All Rights Reserved. See {{ url_for('static', filename='fonts/LICENSE.txt') }} -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts.css') }}" />
+  <!-- MDB -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/mdb.min.css') }}" />
+  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" />
+  <!-- Spinner -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+
+  <title>
+    {{ action }} the ADS-B Feeder system
+  </title>
+</head>
+
+<body>
+  <div id="loader" style="display: none"></div>
+  <div id="overlay" style="display: none">
+    <div id="overlaytext">
+      please wait
+      <br />
+      this could take several minutes
+    </div>
+  </div>
+  <div class="bgimage">
+    <img src="/static/images/adsbim-background_768p.png" alt="">
+  </div>
+  <div class="container pt-5 mt-3">
+    <h1>{{action}} the ADS-B Feeder system</h1>
+    <h3 class="my-3">Please be patient</h3>
+    <div class="row overflow-auto" style="height: 75vh" id="logcontainer">
+      <pre class="col-6-sm col-12 small" id="log"></pre>
+    </div>
+  </div>
+
+  <script src="/static/js/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8="
+          crossorigin="anonymous"></script>
+
+  <script>
+    document.addEventListener('readystatechange', event => {
+      if (event.target.readyState === "complete") {
+        // show_spinner();
+        //setTimeout(checkStatus, 10000);
+        console.log("starting stream");
+        stream()
+      }
+    });
+
+    function stream() {
+      var streamlog = new EventSource("/stream-log");
+      console.log("created EventSource" + streamlog)
+      streamlog.onmessage = function (e) {
+        console.log("got message: " + e.data);
+        if (e.data == "close") {
+          streamlog.close();
+        } else {
+          console.log("scroll top to " + $('#log')[0].scrollHeight)
+          $('#log').append(e.data + "\n");
+          $('#logcontainer').scrollTop($('#logcontainer')[0].scrollHeight);
+        }
+      };
+    }
+    function checkStatus() {
+      var request = new XMLHttpRequest();
+      request.open('GET', '/running');
+      request.timeout = 2000;
+      request.ontimeout = function () {
+        console.log(`still waiting for /running to become available`);
+        setTimeout(checkStatus, 2000);
+      };
+      request.onload = function () {
+        if (request.readyState === 4 && request.status === 200 && request.responseText === 'OK') {
+          console.log('restarting the ADS-B Feeder infra completed, redirect user');
+          window.location = '/';
+        } else {
+          console.log(`request returned with readyState ${request.readyState}, status ${request.status} and text ${request.responseText}; keep waiting`);
+          setTimeout(checkStatus, 2000);
+        }
+      };
+      request.onerror = function () {
+        console.log("request returned an error - let's hope it's just restarting and try again");
+        setTimeout(checkStatus, 2000);
+      };
+      request.send();
+    };
+  </script>
+</body>
+
+</html>

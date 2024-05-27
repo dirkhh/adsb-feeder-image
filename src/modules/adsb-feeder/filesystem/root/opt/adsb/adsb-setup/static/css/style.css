@@ -81,3 +81,26 @@ left: auto;
 .dropdown-menu > li:hover > .dropdown-submenu {
 display: block;
 }
+
+#log.small {
+font-size: 6px;
+}
+
+.bgimage {
+    width: 100%;
+    height: 500px;
+    max-height: 768px;
+    overflow: hidden;
+    margin: 0;
+    position: fixed;
+    left: 0;
+    z-index: -1;
+    background-color: white;
+}
+.bgimage img {
+    position:absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    max-width: 100%;
+  z-index: -1;
+}
