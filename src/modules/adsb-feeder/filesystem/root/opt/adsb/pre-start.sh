@@ -8,6 +8,11 @@ if [ -f /opt/adsb/verbose ] ; then
 	mv /opt/adsb/verbose /opt/adsb/config/verbose
 fi
 
+# if the waiting app is running, stop it
+[[ -f /opt/adsb/adsb-setup/waiting-app.pid ]] && kill $(cat /opt/adsb/adsb-setup/waiting-app.pid) || true
+# and if that doesn't do it, try the big hammer
+pkill -f 'python3 /opt/adsb/adsb-setup/waiting-app.py' || true
+
 ACTION="update to"
 if [[ -f "/opt/adsb/finish-update.done" ]]; then
 	# so we have completed one of the 'post 0.15' updates already.
