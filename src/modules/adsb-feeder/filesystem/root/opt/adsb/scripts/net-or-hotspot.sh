@@ -10,15 +10,15 @@ fi
 gateway=$(ip route | awk '/default/ { print $3 }')
 
 if [[ $gateway == "" ]] || ! ping -c 1 -W 1 "$gateway" &> /dev/null ; then
-    # that's not good, let's start an access point
-    echo "No internet connection detected, starting access point"
-    systemctl unmask hostapd.service
-    systemctl unmask isc-dhcp-server.service
+    # that's not good, let's try to start an access point
     wlan=$(iw dev | grep Interface | cut -d' ' -f2)
     if [[ $wlan == "" ]] ; then
         echo "No wireless interface detected, giving up"
-    exit 1
+        exit 1
     fi
+    echo "No internet connection detected, starting access point"
+    systemctl unmask hostapd.service
+    systemctl unmask isc-dhcp-server.service
     if [[ $wlan != "wlan0" ]] ; then
         sed -i "s/wlan0/$wlan/g" /etc/default/isc-dhcp-server
         sed -i "s/wlan0/$wlan/g" /etc/hostapd/hostapd.conf
