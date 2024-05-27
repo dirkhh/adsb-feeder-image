@@ -50,16 +50,19 @@
         stream()
       }
     });
-
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
     function stream() {
       var streamlog = new EventSource("/stream-log");
       console.log("created EventSource" + streamlog)
       streamlog.onmessage = function (e) {
-        console.log("got message: " + e.data);
-        if (e.data == "close") {
+        if (e.data == "PAGERELOAD") {
           streamlog.close();
+          console.log("received reload message, about to force a reload on the browser");
+          sleep(5000) // give the adsb-setup time to come up
+          window.location = '/';
         } else {
-          console.log("scroll top to " + $('#log')[0].scrollHeight)
           $('#log').append(e.data + "\n");
           $('#logcontainer').scrollTop($('#logcontainer')[0].scrollHeight);
         }

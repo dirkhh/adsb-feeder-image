@@ -21,6 +21,9 @@ def stream_log():
                 line += tmp
                 if line.endswith("\n"):
                     yield f"{line}\n\n"
+                    if "restart : adsb-setup" in line:
+                        yield f"data: FINISHED -- about to reload page\n\n"
+                        yield f"data: PAGERELOAD \n\n"
                     line = "data:"
             else:
                 time.sleep(0.2)
