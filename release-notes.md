@@ -1,4 +1,8 @@
 Changes since v2.0.3 include:
+- re-add image for Orange Pi 3 LTS (this time DietPi based)
+- add a 'waiting app' that shows sign of life (and log files) during the long first boot of a DietPi based image
+- yet another update to Ultrafeeder version
+- pull Ultrafeeder earlier after first boot so that by the time the user is done configuring it will already be available
 - clean up adsb-setup.log for better readability
 - include more info in diagnostic share
 - logging improvements: dietpi: make journal persistent; non-dietpi: use journald logging driver for docker; syslog identifiers for services
