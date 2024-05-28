@@ -1,20 +1,9 @@
 #!/bin/bash
 
-# since Flask makes it rather painful to run background tasks while keeping the web UI responsive,
-# it seems easier to simply do this externally with a shell script.
-# Ugly, but pragmatic
+exec &>>/opt/adsb/adsb-setup.log
 
-# first we wait for the Python app to be ready with the semaphore file
-while [ ! -f /opt/adsb/docker.lock ] ; do
-    echo "waiting for the semaphore file" >> /opt/adsb/adsb-setup.log
-    sleep 1
-done
-
-# clean up that file when we are done - which will tell the UI to stop with the restarting page
-trap 'rm -f /opt/adsb/docker.lock ; echo "removed the semaphore file" >> /opt/adsb/adsb-setup.log' INT TERM EXIT
-
-echo "tearing down the docker containers" >> /opt/adsb/adsb-setup.log
+echo "tearing down the docker containers"
 /opt/adsb/docker-compose-adsb down
-echo "bringing up the docker containers" >> /opt/adsb/adsb-setup.log
+echo "bringing up the docker containers"
 /opt/adsb/docker-compose-start
-echo "done restarting the containers" >> /opt/adsb/adsb-setup.log
+echo "done restarting the containers"

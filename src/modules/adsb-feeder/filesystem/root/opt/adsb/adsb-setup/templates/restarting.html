@@ -8,34 +8,6 @@
   function checkSoon() {
     setTimeout(checkRestartStatus, 2000);
   }
-  function restartSoon() {
-    setTimeout(requestRestart, 2000);
-  }
-  function requestRestart() {
-    // Trigger restart and then start checking the restart status
-    var restartRequest = new XMLHttpRequest();
-    restartRequest.open("POST", "/restart");
-    restartRequest.onload = function () {
-      if (restartRequest.status === 200) {
-        checkRestartStatus();
-      } else {
-        restartSoon(); // try again
-        // ops, we got an error from the server
-        alert("post to /restart failed - please report");
-      }
-    };
-    restartRequest.timeout = httpTimeout;
-    restartRequest.ontimeout = function () {
-      console.log("POST /restart timeout");
-      restartSoon();
-    };
-    restartRequest.onerror = function () {
-      restartSoon(); // try again
-      // ops, we got an error trying to talk to the server
-      alert("cannot talk to server sending the restart request - please report");
-    };
-    restartRequest.send();
-  }
 
   function checkRestartStatus() {
     var request = new XMLHttpRequest();
@@ -76,7 +48,7 @@
   document.addEventListener("readystatechange", (event) => {
     if (event.target.readyState === "complete") {
       show_spinner();
-      requestRestart();
+      checkRestartStatus();
     }
   });
 

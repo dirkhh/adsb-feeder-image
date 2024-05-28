@@ -497,17 +497,10 @@ class AdsbIm:
         return render_template("restarting.html")
 
     def restart(self):
-        if request.method == "POST":
-            self.write_envfile()
-            resp = self._system._restart.adsb_system_restart()
-            return "restarting" if resp else "already restarting"
-        if request.method == "GET":
-            self._system._restart.wait_restart_done(timeout=10)
-            return self._system._restart.state
+        self._system._restart.wait_restart_done(timeout=10)
+        return self._system._restart.state
 
     def running(self):
-        if self._system.docker_restarting():
-            return "containers restarting", 202
         return "OK"
 
     def backup(self):
@@ -1742,8 +1735,8 @@ class AdsbIm:
                 if key == "restart_containers":
                     self.write_envfile()
                     # almost certainly overkill, but...
-                    self._system.restart_containers()
-                    return render_template("/waitandredirect.html")
+                    self._system._restart.restart_containers()
+                    return render_template("/restarting.html")
                 if key == "secure_image":
                     self.set_secure_image()
                 if key == "no_config_link":
@@ -2015,6 +2008,9 @@ class AdsbIm:
                 "sdrplay_license_accepted"
             ):
                 return redirect(url_for("sdrplay_license"))
+
+            self.write_envfile()
+            self._system._restart.compose_up()
             return redirect(url_for("restarting"))
         print_err("base config not completed", level=2)
         return redirect(url_for("director"))
