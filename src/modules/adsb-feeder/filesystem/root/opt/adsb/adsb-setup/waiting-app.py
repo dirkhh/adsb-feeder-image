@@ -1,5 +1,6 @@
 from flask import Flask, Response, render_template
 import re
+import os
 from sys import argv
 import time
 
@@ -10,30 +11,29 @@ action = "Restarting the"
 
 @app.route("/stream-log")
 def stream_log():
-    file = open(logfile, "r")
 
     def tail():
-        line = ""
-        ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
-        while True:
-            tmp = ansi_escape.sub("", file.readline())
-            if tmp:
-                line += tmp
-                if line.endswith("\n"):
-                    yield f"{line}\n\n"
-                    if "restart : adsb-setup" in line:
-                        yield f"data: FINISHED -- about to reload page\n\n"
-                        yield f"data: PAGERELOAD \n\n"
-                    line = "data:"
-            else:
-                time.sleep(0.2)
+        with open(logfile, "r") as file:
+            ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
+            tmp = file.read()[-16 * 1024:]
+            # discard anything but the last 16 kB
+            while True:
+                tmp += file.read(16 * 1024)
+                if tmp and tmp.find("\n") != -1:
+                    block, tmp = tmp.rsplit("\n", 1)
+                    block = ansi_escape.sub("", block)
+                    lines = block.split("\n")
+                    data = "".join(["data: " + line + "\n" for line in lines])
+                    yield data + "\n\n"
+                else:
+                    time.sleep(0.2)
 
     return Response(tail(), mimetype="text/event-stream")
 
 
-@app.route("/restarting")
+@app.route("/restart")
 def restarting():
-    return "restarting"
+    return "stream-log"
 
 
 @app.route("/", defaults={"path": ""})
