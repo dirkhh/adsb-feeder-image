@@ -15,8 +15,8 @@ class Lock:
     def __init__(self):
         self.lock = threading.Lock()
 
-    def acquire(self, blocking=True):
-        return self.lock.acquire(blocking=blocking)
+    def acquire(self, blocking=True, timeout=-1):
+        return self.lock.acquire(blocking=blocking, timeout=timeout)
 
     def release(self):
         return self.lock.release()
@@ -64,6 +64,11 @@ class Restart:
         threading.Thread(target=do_restart).start()
 
         return True
+
+    def wait_restart_done(self, timeout=-1):
+        # acquire and release the lock immediately
+        if self.lock.acquire(blocking=True, timeout=timeout):
+            self.lock.release()
 
     @property
     def state(self):

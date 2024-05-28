@@ -502,6 +502,7 @@ class AdsbIm:
             resp = self._system._restart.adsb_system_restart()
             return "restarting" if resp else "already restarting"
         if request.method == "GET":
+            self._system._restart.wait_restart_done(timeout=10)
             return self._system._restart.state
 
     def running(self):
