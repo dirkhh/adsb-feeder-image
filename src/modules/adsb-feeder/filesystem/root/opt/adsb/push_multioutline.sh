@@ -7,8 +7,8 @@ trap 'echo -e "[ERROR] $SCRIPT_PATH in line $LINENO when executing: $BASH_COMMAN
 
 # this needs to run as root
 if [ "$(id -u)" != "0" ] ; then
-	echo "this command requires superuser privileges - please run as sudo bash $0"
-	exit 1
+    echo "this command requires superuser privileges - please run as sudo bash $0"
+    exit 1
 fi
 
 # let's make sure we have shapely installed (it's not in the image by default since

@@ -2,8 +2,8 @@
 
 # this needs to run as root
 if [ $(id -u) != "0" ] ; then
-	echo "this command requires superuser privileges - please run as sudo bash $0"
-	exit 1
+    echo "this command requires superuser privileges - please run as sudo bash $0"
+    exit 1
 fi
 
 cd /opt/adsb || exit 0
@@ -17,14 +17,14 @@ find . -name adsb-setup.log.\* -ctime +7 | xargs rm -f
 
 # check in the .env file what we should do
 if grep -q "^AF_IS_NIGHTLY_BASE_UPDATE_ENABLED=True" config/.env ; then
-	# do an OS update - either using the DietPi update tool or by just using apt
-	if [ -x /boot/dietpi/dietpi-update ] ; then
-		G_INTERACTIVE=0 CONFIG_CHECK_APT_UPDATES=2 dietpi-update 1 >> /opt/adsb/adsb-setup.log 2>&1
-	else
-		apt update >> /opt/adsb/adsb-setup.log 2>&1
-		apt upgrade -y >> /opt/adsb/adsb-setup.log 2>&1
-	fi
+    # do an OS update - either using the DietPi update tool or by just using apt
+    if [ -x /boot/dietpi/dietpi-update ] ; then
+        G_INTERACTIVE=0 CONFIG_CHECK_APT_UPDATES=2 dietpi-update 1 >> /opt/adsb/adsb-setup.log 2>&1
+    else
+        apt update >> /opt/adsb/adsb-setup.log 2>&1
+        apt upgrade -y >> /opt/adsb/adsb-setup.log 2>&1
+    fi
 fi
 if grep "^AF_IS_NIGHTLY_FEEDER_UPDATE_ENABLED=True" config/.env ; then
-	bash /opt/adsb/feeder-update
+    bash /opt/adsb/feeder-update
 fi

@@ -5,17 +5,17 @@
 
 # this needs to run as root
 if [ "$(id -u)" != "0" ] ; then
-	echo "this command requires superuser privileges - please run as sudo bash $0"
-	exit 1
+    echo "this command requires superuser privileges - please run as sudo bash $0"
+    exit 1
 fi
 
 # identify the calling process for better log messages
 PARENTPID=$(ps -cp $$ -o ppid="")
 if kill -0 "$PARENTPID" &> /dev/null ; then
-	# shellcheck disable=SC2086 # the ps -q call fails with quotes around the variable
-	PARENTPROC=$(ps -q$PARENTPID -o args=)
+    # shellcheck disable=SC2086 # the ps -q call fails with quotes around the variable
+    PARENTPROC=$(ps -q$PARENTPID -o args=)
 else
-	PARENTPROC="process $PARENTPID (appears already gone)"
+    PARENTPROC="process $PARENTPID (appears already gone)"
 fi
 echo "$PARENTPROC called $0" "$@" >> /opt/adsb/adsb-setup.log
 
@@ -23,7 +23,7 @@ if [ ! -f /opt/adsb/config/config.json ] ; then
     echo "create config.json file from scratch" >> /opt/adsb/adsb-setup.log
     source /opt/adsb/docker.image.versions
     _ADSBIM_BASE_VERSION=$(cat /opt/adsb/adsb.im.version)
-	_ADSBIM_CONTAINER_VERSION=$(cat /opt/adsb/adsb.im.version)
+    _ADSBIM_CONTAINER_VERSION=$(cat /opt/adsb/adsb.im.version)
     echo " \
     { \
     \"ULTRAFEEDER_CONTAINER\": \"$ULTRAFEEDER_CONTAINER\", \

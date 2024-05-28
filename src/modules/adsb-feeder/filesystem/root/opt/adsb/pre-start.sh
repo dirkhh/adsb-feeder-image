@@ -4,8 +4,8 @@
 # is (re)started
 
 if [ -f /opt/adsb/verbose ] ; then
-	mkdir -p /opt/adsb/config
-	mv /opt/adsb/verbose /opt/adsb/config/verbose
+    mkdir -p /opt/adsb/config
+    mv /opt/adsb/verbose /opt/adsb/config/verbose
 fi
 
 # if the waiting app is running, stop it
@@ -15,12 +15,12 @@ pkill -f 'python3 /opt/adsb/adsb-setup/waiting-app.py' || true
 
 ACTION="update to"
 if [[ -f "/opt/adsb/finish-update.done" ]]; then
-	# so we have completed one of the 'post 0.15' updates already.
-	# let's see if the version changed (i.e. if this is another new update)
-	# if not, then we ran this script already and can exit
-	cmp /opt/adsb/finish-update.done /opt/adsb/adsb.im.version > /dev/null 2>&1 && exit 0
+    # so we have completed one of the 'post 0.15' updates already.
+    # let's see if the version changed (i.e. if this is another new update)
+    # if not, then we ran this script already and can exit
+    cmp /opt/adsb/finish-update.done /opt/adsb/adsb.im.version > /dev/null 2>&1 && exit 0
 else
-	ACTION="initial install of"
+    ACTION="initial install of"
 fi
 
 # if we updated from a fairly old version, the feeder-update script will have written
@@ -35,8 +35,8 @@ USR_BIN_APPS=('docker-compose-start' 'docker-compose-adsb' 'docker-update-adsb-i
               'nightly-update-adsb-im' 'secure-image' 'identify-airspt' 'feeder-update')
 
 for app in "${USR_BIN_APPS[@]}"; do
-	[[ -f "/usr/bin/$app" ]] || continue
-	[[ -f "/opt/adsb/$app" ]] && rm -f "/usr/bin/$app"
+    [[ -f "/usr/bin/$app" ]] || continue
+    [[ -f "/opt/adsb/$app" ]] && rm -f "/usr/bin/$app"
 done
 
 [[ -f /etc/adsb.im.version ]] && rm -f /etc/adsb.im.version
@@ -48,12 +48,12 @@ done
 [[ -d /opt/adsb/config ]] || mkdir -p /opt/adsb/config
 cd /opt/adsb/config
 if [ ! -f .env ] ; then
-	cp /opt/adsb/docker.image.versions .env
-	echo "_ADSBIM_BASE_VERSION=$(cat /opt/adsb/adsb.im.version)" >> .env
-	echo "_ADSBIM_CONTAINER_VERSION=$(cat /opt/adsb/adsb.im.version)" >> .env
+    cp /opt/adsb/docker.image.versions .env
+    echo "_ADSBIM_BASE_VERSION=$(cat /opt/adsb/adsb.im.version)" >> .env
+    echo "_ADSBIM_CONTAINER_VERSION=$(cat /opt/adsb/adsb.im.version)" >> .env
 fi
 if [ ! -f config.json ] ; then
-	bash /opt/adsb/create-json-from-env.sh
+    bash /opt/adsb/create-json-from-env.sh
 fi
 
 # remember that we handled the housekeeping for this version

@@ -2,8 +2,8 @@
 
 # this needs to run as root
 if [ $(id -u) != "0" ] ; then
-	echo "this command requires superuser privileges - please run as sudo bash $0"
-	exit 1
+    echo "this command requires superuser privileges - please run as sudo bash $0"
+    exit 1
 fi
 
 # this is the script that replaces part of the bootstrap code in the feeder image.
@@ -14,9 +14,9 @@ touch /opt/adsb/app.adsb.feeder.image
 # so let's cheat and do that here
 source /etc/os-release
 if (( $VERSION_ID < 12 )) ; then
-	pip3 install -U requests
+    pip3 install -U requests
 else
-	apt-get install -y python3-requests
+    apt-get install -y python3-requests
 fi
 
 cd /opt/adsb/config
@@ -31,7 +31,7 @@ echo "AF_PIAWARESTAT_PORT=1093" >> .env
 echo "AF_DAZZLE_PORT=1094" >> .env
 
 if [ ! -f /opt/adsb/feeder-image.name ] ; then
-	echo "ADS-B Feeder app" > /opt/adsb/feeder-image-name
+    echo "ADS-B Feeder app" > /opt/adsb/feeder-image-name
 fi
 
 # while the user is getting ready, let's try to pull the ultrafeeder docker

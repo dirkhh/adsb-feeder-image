@@ -5,46 +5,46 @@
 
 # this needs to run as root
 if [ "$(id -u)" != "0" ] ; then
-	echo "this command requires superuser privileges - please run as sudo bash $0"
-	exit 1
+    echo "this command requires superuser privileges - please run as sudo bash $0"
+    exit 1
 fi
 
 # identify the calling process for better log messages
 PARENTPID=$(ps -cp $$ -o ppid="")
 if kill -0 "$PARENTPID" &> /dev/null ; then
-	# shellcheck disable=SC2086 # the ps -q call fails with quotes around the variable
-	PARENTPROC=$(ps -q$PARENTPID -o args=)
-	if [[ $PARENTPROC = */opt/adsb/docker-compose-start* ]] ; then
-		# this one is special as it's just a pretty wrapper around this script,
-		# so instead look for the process that called docker-compose-start
-		# shellcheck disable=SC2086 # the ps -p call fails with quotes around the variable
-		PARENTPID=$(ps -cp $PARENTPID -o ppid="")
-		if kill -0 "$PARENTPID" &> /dev/null ; then
-			# shellcheck disable=SC2086 # the ps -q call fails with quotes around the variable
-			PARENTPROC=$(ps -q$PARENTPID -o args=)
-		else
-			PARENTPROC="process $PARENTPID (appears already gone)"
-		fi
-	fi
+    # shellcheck disable=SC2086 # the ps -q call fails with quotes around the variable
+    PARENTPROC=$(ps -q$PARENTPID -o args=)
+    if [[ $PARENTPROC = */opt/adsb/docker-compose-start* ]] ; then
+        # this one is special as it's just a pretty wrapper around this script,
+        # so instead look for the process that called docker-compose-start
+        # shellcheck disable=SC2086 # the ps -p call fails with quotes around the variable
+        PARENTPID=$(ps -cp $PARENTPID -o ppid="")
+        if kill -0 "$PARENTPID" &> /dev/null ; then
+            # shellcheck disable=SC2086 # the ps -q call fails with quotes around the variable
+            PARENTPROC=$(ps -q$PARENTPID -o args=)
+        else
+            PARENTPROC="process $PARENTPID (appears already gone)"
+        fi
+    fi
 else
-	PARENTPROC="process $PARENTPID (appears already gone)"
+    PARENTPROC="process $PARENTPID (appears already gone)"
 fi
 echo "$(date -u +"%FT%T.%3NZ") $PARENTPROC called docker-compose-adsb" "$@" >&2
 
 lockFile="/opt/adsb/docker-starting.lock"
 
 if [[ -f "$lockFile" ]] && ! pgrep -F $lockFile &>/dev/null; then
-	echo "docker-compose-adsb lockfile present but associated PID not running, removing lockfile" >&2
-	rm -f "$lockFile"
+    echo "docker-compose-adsb lockfile present but associated PID not running, removing lockfile" >&2
+    rm -f "$lockFile"
 fi
 
 if ( set -o noclobber; echo "$$" > "$lockFile") 2> /dev/null; then
-	trap 'rm -f "$lockFile"; exit $?' INT TERM EXIT
+    trap 'rm -f "$lockFile"; exit $?' INT TERM EXIT
 else
-	echo "docker-compose-adsb is already running: $(pgrep -a -F $lockFile)" >&2
-	# prevent restart loop
-	sleep 1."$RANDOM"
-	exit
+    echo "docker-compose-adsb is already running: $(pgrep -a -F $lockFile)" >&2
+    # prevent restart loop
+    sleep 1."$RANDOM"
+    exit
 fi
 
 docker_compose="docker compose"
@@ -54,37 +54,37 @@ $docker_compose version &> /dev/null || docker_compose="docker-compose"
 # the very first time we still need to check for the old name of the environment variable
 # To make this less ugly, check for the partial name
 if grep -q "_IS_BASE_CONFIG_FINISHED=True" /opt/adsb/config/.env 2> /dev/null ; then
-	source /opt/adsb/default.docker-compose
-	cd /opt/adsb/config || echo "config folder is missing?" >&2
-	if [ -f .env.user ] ; then
-		# now inject the user env values
-		echo "$(date -u +"%FT%T.%3NZ") inject user env"
-		python3 /opt/adsb/scripts/inject-env.py .env.user *.yml
-	fi
-	echo "$(date -u +"%FT%T.%3NZ") sync"
-	sync # graphs1090 writeback calls sync, to avoid timeouts during compose call sync now to empty the write cache
-	echo "$(date -u +"%FT%T.%3NZ") $docker_compose ${COMPOSE_FILES[@]} $@"
-	# third time's a charm
+    source /opt/adsb/default.docker-compose
+    cd /opt/adsb/config || echo "config folder is missing?" >&2
+    if [ -f .env.user ] ; then
+        # now inject the user env values
+        echo "$(date -u +"%FT%T.%3NZ") inject user env"
+        python3 /opt/adsb/scripts/inject-env.py .env.user *.yml
+    fi
+    echo "$(date -u +"%FT%T.%3NZ") sync"
+    sync # graphs1090 writeback calls sync, to avoid timeouts during compose call sync now to empty the write cache
+    echo "$(date -u +"%FT%T.%3NZ") $docker_compose ${COMPOSE_FILES[@]} $@"
+    # third time's a charm
     for i in {1..3}; do
         $docker_compose "${COMPOSE_FILES[@]}" "$@" && break
     done
-	if [ "$1" = "up" ] ; then
-		# try to figure out if this was successful
-		echo "$(date -u +"%FT%T.%3NZ") finished attempting to bring up the containers" >&2
-		tempfile=$(mktemp)
-		$docker_compose "${COMPOSE_FILES[@]}" ps > "$tempfile"
-		if ! grep -q ultrafeeder "$tempfile" ; then
-			(
-				echo "it looks like ultrafeeder didn't come up"
-				echo "docker thinks these containers are running:"
-				cat "$tempfile"
-				echo "docker thinks these networks are defined:"
-				docker network ls
-			) >&2
-		fi
-		rm -f "$tempfile"
-	fi
+    if [ "$1" = "up" ] ; then
+        # try to figure out if this was successful
+        echo "$(date -u +"%FT%T.%3NZ") finished attempting to bring up the containers" >&2
+        tempfile=$(mktemp)
+        $docker_compose "${COMPOSE_FILES[@]}" ps > "$tempfile"
+        if ! grep -q ultrafeeder "$tempfile" ; then
+            (
+                echo "it looks like ultrafeeder didn't come up"
+                echo "docker thinks these containers are running:"
+                cat "$tempfile"
+                echo "docker thinks these networks are defined:"
+                docker network ls
+            ) >&2
+        fi
+        rm -f "$tempfile"
+    fi
 else
-	echo "$(date -u +"%FT%T.%3NZ") things aren't configured, yet, only starting Dozzle and the logger container"
-	$docker_compose -f /opt/adsb/config/dozzle.yml "$@"
+    echo "$(date -u +"%FT%T.%3NZ") things aren't configured, yet, only starting Dozzle and the logger container"
+    $docker_compose -f /opt/adsb/config/dozzle.yml "$@"
 fi

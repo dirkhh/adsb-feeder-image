@@ -2,8 +2,8 @@
 
 # this needs to run as root
 if [ $(id -u) != "0" ] ; then
-	echo "this command requires superuser privileges - please run as sudo bash $0"
-	exit 1
+    echo "this command requires superuser privileges - please run as sudo bash $0"
+    exit 1
 fi
 
 # clean up after ourselves
@@ -15,9 +15,9 @@ do
         IMAGE=$(echo $i | cut -d@ -f1)
         ID=$(echo $i | cut -d@ -f2)
         grep "$IMAGE" /opt/adsb/config/.env &> /dev/null && docker rmi "$ID" &> /dev/null || true
-	# these two images could conceivably be used by something else
-	# if they are currently running, they won't be removed
-	# if they aren't, they are tiny and easy to re-download
-	[[ "$IMAGE" == "amir20/dozzle" ]] && docker rmi "$ID" &> /dev/null || true
-	[[ "$IMAGE" == "alpine" ]] && docker rmi "$ID" >& /dev/null || true
+    # these two images could conceivably be used by something else
+    # if they are currently running, they won't be removed
+    # if they aren't, they are tiny and easy to re-download
+    [[ "$IMAGE" == "amir20/dozzle" ]] && docker rmi "$ID" &> /dev/null || true
+    [[ "$IMAGE" == "alpine" ]] && docker rmi "$ID" >& /dev/null || true
 done

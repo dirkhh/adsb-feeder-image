@@ -4,8 +4,8 @@
 
 # this needs to run as root
 if [ $(id -u) != "0" ] ; then
-	echo "this command requires superuser privileges - please run as sudo bash $0"
-	exit 1
+    echo "this command requires superuser privileges - please run as sudo bash $0"
+    exit 1
 fi
 
 bash /opt/adsb/docker-compose-adsb pull
