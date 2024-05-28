@@ -96,10 +96,6 @@ cp /opt/adsb/docker.image.versions "$ENV_FILE"
 echo "_ADSBIM_BASE_VERSION=$(cat /opt/adsb/adsb.im.version)" >> "$ENV_FILE"
 echo "_ADSBIM_CONTAINER_VERSION=$(cat /opt/adsb/adsb.im.version)" >> "$ENV_FILE"
 
-# mask the services that should be off unless we use the hotspot
-systemctl mask hostapd.service
-systemctl mask isc-dhcp-server.service
-
 # make sure all the ADS-B Feeder services are enabled and started
 systemctl enable --now adsb-bootstrap.service
 systemctl enable --now adsb-setup.service
