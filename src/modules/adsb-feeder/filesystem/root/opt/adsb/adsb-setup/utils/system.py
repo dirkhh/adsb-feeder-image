@@ -15,8 +15,8 @@ class Lock:
     def __init__(self):
         self.lock = threading.Lock()
 
-    def acquire(self):
-        return self.lock.acquire()
+    def acquire(self, blocking=True):
+        return self.lock.acquire(blocking=blocking)
 
     def release(self):
         return self.lock.release()
@@ -38,19 +38,32 @@ class Restart:
     def __init__(self, lock: Lock):
         self.lock = lock
 
-    def restart_systemd(self):
-        if self.lock.locked():
+    def adsb_system_restart(self):
+
+        gotLock = self.lock.acquire(blocking=False)
+
+        if not gotLock:
+            # we could not acquire the lock
             print_err("restart locked")
             return False
-        with self.lock:
-            print_err("Calling /opt/adsb/adsb-system-restart.sh")
-            # discard output, script is logging directly to /opt/adsb/adsb-setup.log
-            subprocess.run(
-                "/usr/bin/bash /opt/adsb/adsb-system-restart.sh",
-                shell=True,
-                capture_output=True,
-            )
-            return True
+
+        # we have acquired the lock
+
+        def do_restart():
+            try:
+                print_err("Calling /opt/adsb/adsb-system-restart.sh")
+                # discard output, script is logging directly to /opt/adsb/adsb-setup.log
+                subprocess.run(
+                    "/usr/bin/bash /opt/adsb/adsb-system-restart.sh",
+                    shell=True,
+                    capture_output=True,
+                )
+            finally:
+                self.lock.release()
+
+        threading.Thread(target=do_restart).start()
+
+        return True
 
     @property
     def state(self):

@@ -499,7 +499,7 @@ class AdsbIm:
     def restart(self):
         if request.method == "POST":
             self.write_envfile()
-            resp = self._system._restart.restart_systemd()
+            resp = self._system._restart.adsb_system_restart()
             return "restarting" if resp else "already restarting"
         if request.method == "GET":
             return self._system._restart.state
