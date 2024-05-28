@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# dietpi deletes and creates a new /etc/machine-id after systemd-journald starts up
+# thus systemd-journald is writing to /var/log/journal/<old-machine-id>
+# journalctl on the other hand tries to read from /var/log/journal/<new-machine-id>
+# the log in the <old-machine-id> will be hard to access
+# optimally this would be somehow patched into dietpi but let's do this workaround for now
+# this workaround expects the journal to already be in /var/log and not in /run
+# there should only be 1 folder in /var/log/journal in the unexpected case of multiple, just take a guess
+mv "/var/log/journal/$(ls /var/log/journal/ | head -n1)" "/var/log/journal/$(cat /etc/machine-id)"
+systemctl restart systemd-journald
+
 # install chrony for better time synchronization compared to systemd-timesyncd
 # when chrony is installed it's imperative that CONFIG_NTP_MODE=0
 # (custom/disabled) is set in dietpi.txt to avoid breakage of dietpi-update
