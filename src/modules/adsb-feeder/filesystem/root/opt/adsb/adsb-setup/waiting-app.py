@@ -6,7 +6,7 @@ import time
 
 app = Flask(__name__)
 logfile = "/opt/adsb/adsb-setup.log"
-action = "Restarting the"
+action = "Restarting"
 
 
 @app.route("/stream-log")

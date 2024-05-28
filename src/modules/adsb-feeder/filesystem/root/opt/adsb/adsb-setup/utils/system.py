@@ -39,7 +39,11 @@ class Restart:
     def __init__(self, lock: Lock):
         self.lock = lock
 
-    def bg_run(self, cmdline=None):
+    def bg_run(self, cmdline=None, func=None):
+
+        if not cmdline and not func:
+            print_err(f"WARNING: bg_run called without something to do")
+            return False
 
         gotLock = self.lock.acquire(blocking=False)
 
@@ -52,13 +56,16 @@ class Restart:
 
         def do_restart():
             try:
-                print_err(f"Calling {cmdline}")
-                # discard output, scripts should log directly to /opt/adsb/adsb-setup.log
-                subprocess.run(
-                    cmdline,
-                    shell=True,
-                    capture_output=True,
-                )
+                if cmdline:
+                    print_err(f"Calling {cmdline}")
+                    # discard output, scripts should log directly to /opt/adsb/adsb-setup.log
+                    subprocess.run(
+                        cmdline,
+                        shell=True,
+                        capture_output=True,
+                    )
+                if func:
+                    func()
             finally:
                 self.lock.release()
 
