@@ -14,5 +14,7 @@ bash /opt/adsb/docker-compose-adsb pull
 # this is just for the first boot while the user configures the basics
 if ! docker images | grep -qs docker-adsb-ultrafeeder; then
     source /opt/adsb/docker.image.versions
-    docker pull "$ULTRAFEEDER_CONTAINER"
+    for i in {1..3}; do
+        docker pull "$ULTRAFEEDER_CONTAINER" && break
+    done
 fi
