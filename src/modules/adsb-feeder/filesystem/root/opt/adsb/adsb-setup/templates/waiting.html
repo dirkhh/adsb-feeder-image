@@ -56,6 +56,11 @@
     function stream() {
       var streamlog = new EventSource("/stream-log");
       console.log("created EventSource" + streamlog)
+      streamlog.onerror = function (e) {
+          console.log("received error, about to force a reload on the browser");
+          sleep(5000) // give the adsb-setup time to come up
+          window.location = '/';
+      }
       streamlog.onmessage = function (e) {
         if (e.data == "PAGERELOAD") {
           streamlog.close();
