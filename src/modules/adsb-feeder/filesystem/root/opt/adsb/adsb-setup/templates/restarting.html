@@ -5,7 +5,8 @@
 
 <script>
   // wait_restart python fucntion waits 5 seconds, so make this a bit longer than that
-  httpTimeout = 6000;
+  const httpTimeout = 6000;
+  const restartingSince = new Date().getTime();
   function checkSoon() {
     setTimeout(checkRestartStatus, 2000);
   }
@@ -19,6 +20,11 @@
         console.log('redirecting')
         window.location.replace("/");
       } else if (request.status === 200 && request.responseText === "restarting") {
+        if (new Date().getTime() - restartingSince > 10 * 1000) {
+          // been waiting for more than 10 seconds, let's show the log scroller so the user has something to look at
+          window.location.replace("/waiting");
+          return;
+        }
         // restart is still in progress, check again immediately
         // the server does the delaying during the request processing
         // if the server is done with the restart, the request will return immediately

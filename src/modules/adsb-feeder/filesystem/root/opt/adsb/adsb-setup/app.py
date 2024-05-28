@@ -208,6 +208,8 @@ class AdsbIm:
         self.app.add_url_rule("/propagateTZ", "propagateTZ", self.get_tz)
         self.app.add_url_rule("/restarting", "restarting", self.restarting)
         self.app.add_url_rule("/restart", "restart", self.restart, methods=["GET", "POST"])
+        self.app.add_url_rule("/waiting", "waiting", self.waiting)
+        self.app.add_url_rule("/stream-log", "stream_log", self.stream_log)
         self.app.add_url_rule("/running", "running", self.running)
         self.app.add_url_rule("/backup", "backup", self.backup)
         self.app.add_url_rule("/backupexecutefull", "backupexecutefull", self.backup_execute_full)
@@ -2399,6 +2401,31 @@ class AdsbIm:
             ufargs=ufargs,
             envvars=envvars,
         )
+
+    def waiting(self):
+        return render_template("waiting.html")
+
+    def stream_log(self):
+        logfile = "/opt/adsb/adsb-setup.log"
+        action = "Starting the"
+
+        def tail():
+            with open(logfile, "r") as file:
+                ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
+                tmp = file.read()[-16 * 1024:]
+                # discard anything but the last 16 kB
+                while self._system._restart.state == "restarting":
+                    tmp += file.read(16 * 1024)
+                    if tmp and tmp.find("\n") != -1:
+                        block, tmp = tmp.rsplit("\n", 1)
+                        block = ansi_escape.sub("", block)
+                        lines = block.split("\n")
+                        data = "".join(["data: " + line + "\n" for line in lines])
+                        yield data + "\n\n"
+                    else:
+                        time.sleep(0.2)
+
+        return Response(tail(), mimetype="text/event-stream")
 
 
 def create_stage2_yml_from_template(stage2_yml_name, n, ip, template_file):

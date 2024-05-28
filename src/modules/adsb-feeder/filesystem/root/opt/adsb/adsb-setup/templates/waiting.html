@@ -76,6 +76,10 @@
             return;
           } else if (request.responseText === 'stream-log') {
             console.log('continue reading the stream log, redirect user');
+            window.location = '/waiting';
+            return;
+          } else if (request.responseText === 'restarting') {
+            console.log('continue reading the stream log, redirect user');
             // we use a page reload here instead of just opening the stream log again
             // as apparently browsers like to run out of memory if you open the event source a bunch of times
             window.location = '/';
