@@ -4,7 +4,8 @@
 <h1 class="mt-3 text-center text-danger">{% block title %} Restarting the ADS-B Feeder system {% endblock %}</h1>
 
 <script>
-  httpTimeout = 15000;
+  // wait_restart python fucntion waits 5 seconds, so make this a bit longer than that
+  httpTimeout = 6000;
   function checkSoon() {
     setTimeout(checkRestartStatus, 2000);
   }

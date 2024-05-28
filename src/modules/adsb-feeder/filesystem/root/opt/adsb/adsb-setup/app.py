@@ -497,7 +497,7 @@ class AdsbIm:
         return render_template("restarting.html")
 
     def restart(self):
-        self._system._restart.wait_restart_done(timeout=10)
+        self._system._restart.wait_restart_done(timeout=5)
         return self._system._restart.state
 
     def running(self):
@@ -1726,16 +1726,13 @@ class AdsbIm:
                     return render_template("/shutdownpage.html")
                 if allow_insecure and key == "reboot":
                     # initiate reboot
-                    def do_reboot():
-                        sleep(0.5)
-                        self._system.reboot()
-
-                    threading.Thread(target=do_reboot).start()
-                    return render_template("/waitandredirect.html")
+                    self._system.reboot()
+                    return render_template("/restarting.html")
                 if key == "restart_containers":
                     self.write_envfile()
                     # almost certainly overkill, but...
-                    self._system._restart.restart_containers()
+                    self._system._restart.bg_run(cmdline="bash /opt/adsb/docker-compose-restart-all")
+                    self._next_url_from_director = request.url
                     return render_template("/restarting.html")
                 if key == "secure_image":
                     self.set_secure_image()
@@ -1751,10 +1748,8 @@ class AdsbIm:
                         channel = self.extract_channel()
                     self.set_channel(channel)
                     print_err(f"updating feeder to {channel} channel")
-                    # start this in the background so it doesn't prevent showing the waiting screen
-                    cmdline = "systemctl start adsb-feeder-update.service &"
-                    subprocess.run(cmdline, timeout=5.0, shell=True)
-                    return render_template("/waitandredirect.html")
+                    self._system._restart.bg_run(cmdline="systemctl start adsb-feeder-update.service")
+                    return render_template("/restarting.html")
                 if key == "nightly_update" or key == "zerotier":
                     # this will be handled through the separate key/value pairs
                     pass
@@ -2010,8 +2005,9 @@ class AdsbIm:
                 return redirect(url_for("sdrplay_license"))
 
             self.write_envfile()
-            self._system._restart.compose_up()
-            return redirect(url_for("restarting"))
+            # adsb-system-restart mainly does a compose up
+            self._system._restart.bg_run(cmdline="bash /opt/adsb/adsb-system-restart.sh")
+            return render_template("/restarting.html")
         print_err("base config not completed", level=2)
         return redirect(url_for("director"))
 

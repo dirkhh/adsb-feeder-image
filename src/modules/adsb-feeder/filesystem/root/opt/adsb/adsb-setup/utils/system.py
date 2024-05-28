@@ -4,6 +4,7 @@ import socket
 import subprocess
 import threading
 import time
+from time import sleep
 
 from .data import Data
 from .util import print_err
@@ -38,13 +39,7 @@ class Restart:
     def __init__(self, lock: Lock):
         self.lock = lock
 
-    def restart_containers(self):
-        return self.restart(cmdline="bash /opt/adsb/docker-compose-restart-all")
-
-    def compose_up(self):
-        return self.restart(cmdline="bash /opt/adsb/adsb-system-restart.sh")
-
-    def restart(self, cmdline=None):
+    def bg_run(self, cmdline=None):
 
         gotLock = self.lock.acquire(blocking=False)
 
@@ -101,7 +96,18 @@ class System:
         subprocess.call("halt", shell=True)
 
     def reboot(self) -> None:
-        subprocess.call("reboot", shell=True)
+        gotLock = self._restart.lock.acquire(blocking=False)
+
+        def do_reboot():
+            sleep(0.5)
+            subprocess.call("reboot", shell=True)
+            # just in case the reboot doesn't work,
+            # release the lock after 30 seconds:
+            if gotLock:
+                sleep(30)
+                self.lock.release()
+
+        threading.Thread(target=do_reboot).start()
 
     def os_update(self) -> None:
         subprocess.call("apt-get update && apt-get upgrade -y", shell=True)
