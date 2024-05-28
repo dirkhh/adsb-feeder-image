@@ -23,6 +23,10 @@
         // the server does the delaying during the request processing
         // if the server is done with the restart, the request will return immediately
         checkRestartStatus();
+      } else if (request.status === 200 && request.responseText === "stream-log") {
+        // the waiting-app has been detective active, switch to it
+        console.log('redirecting for stream log')
+        window.location.replace("/");
       } else {
         // ops, we got an error from the server - could be it is briefly turned off for
         // an update or something
