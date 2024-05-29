@@ -39,7 +39,7 @@ class Restart:
     def __init__(self, lock: Lock):
         self.lock = lock
 
-    def bg_run(self, cmdline=None, func=None):
+    def bg_run(self, cmdline=None, func=None, silent=False):
 
         if not cmdline and not func:
             print_err(f"WARNING: bg_run called without something to do")
@@ -58,11 +58,10 @@ class Restart:
             try:
                 if cmdline:
                     print_err(f"Calling {cmdline}")
-                    # discard output, scripts should log directly to /opt/adsb/adsb-setup.log
                     subprocess.run(
                         cmdline,
                         shell=True,
-                        capture_output=True,
+                        capture_output=silent,
                     )
                 if func:
                     func()

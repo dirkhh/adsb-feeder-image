@@ -2019,7 +2019,7 @@ class AdsbIm:
 
             self.write_envfile()
             # adsb-system-restart mainly does a compose up
-            self._system._restart.bg_run(cmdline="bash /opt/adsb/adsb-system-restart.sh")
+            self._system._restart.bg_run(cmdline="bash /opt/adsb/adsb-system-restart.sh", silent=True)
             return render_template("/restarting.html")
         print_err("base config not completed", level=2)
         return redirect(url_for("director"))
