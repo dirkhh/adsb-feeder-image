@@ -25,6 +25,7 @@ from os import urandom
 from time import sleep
 from typing import Dict, List
 from zlib import compress
+from copy import deepcopy
 
 from utils.config import (
     read_values_from_config_json,
@@ -208,6 +209,8 @@ class AdsbIm:
         self.app.add_url_rule("/propagateTZ", "propagateTZ", self.get_tz)
         self.app.add_url_rule("/restarting", "restarting", self.restarting)
         self.app.add_url_rule("/restart", "restart", self.restart, methods=["GET", "POST"])
+        self.app.add_url_rule("/waiting", "waiting", self.waiting)
+        self.app.add_url_rule("/stream-log", "stream_log", self.stream_log)
         self.app.add_url_rule("/running", "running", self.running)
         self.app.add_url_rule("/backup", "backup", self.backup)
         self.app.add_url_rule("/backupexecutefull", "backupexecutefull", self.backup_execute_full)
@@ -497,16 +500,10 @@ class AdsbIm:
         return render_template("restarting.html")
 
     def restart(self):
-        if request.method == "POST":
-            self.write_envfile()
-            resp = self._system._restart.restart_systemd()
-            return "restarting" if resp else "already restarting"
-        if request.method == "GET":
-            return self._system._restart.state
+        self._system._restart.wait_restart_done(timeout=5)
+        return self._system._restart.state
 
     def running(self):
-        if self._system.docker_restarting():
-            return "containers restarting", 202
         return "OK"
 
     def backup(self):
@@ -669,142 +666,152 @@ class AdsbIm:
 
     def executerestore(self):
         if request.method == "GET":
-            # the user has uploaded a zip file and we need to take a look.
-            # be very careful with the content of this zip file...
-            print_err("zip file uploaded, looking at the content")
-            filename = request.args["zipfile"]
-            adsb_path = pathlib.Path("/opt/adsb/config")
-            restore_path = adsb_path / "restore"
-            restore_path.mkdir(mode=0o755, exist_ok=True)
-            restored_files: List[str] = []
-            with zipfile.ZipFile(restore_path / filename, "r") as restore_zip:
-                for name in restore_zip.namelist():
-                    print_err(f"found file {name} in archive")
-                    # remove files with a name that results in a path that doesn't start with our decompress path
-                    if not str(
-                        os.path.normpath(os.path.join(restore_path, name))
-                    ).startswith(str(restore_path)):
-                        print_err(f"restore skipped for path breakout name: {name}")
-                        continue
-                    # only accept the .env file and config.json and files for ultrafeeder
-                    if (
-                        name != ".env"
-                        and name != "config.json"
-                        and not name.startswith("ultrafeeder/")
-                    ):
-                        continue
-                    restore_zip.extract(name, restore_path)
-                    restored_files.append(name)
-            # now check which ones are different from the installed versions
-            changed: List[str] = []
-            unchanged: List[str] = []
-            saw_globe_history = False
-            saw_graphs = False
-            uf_paths = set()
-            for name in restored_files:
-                if name.startswith("ultrafeeder/"):
-                    parts = name.split("/")
-                    if len(parts) < 3:
-                        continue
-                    uf_paths.add(parts[0] + "/" + parts[1] + "/")
-                elif os.path.isfile(adsb_path / name):
-                    if filecmp.cmp(adsb_path / name, restore_path / name):
-                        print_err(f"{name} is unchanged")
-                        unchanged.append(name)
-                    else:
-                        print_err(f"{name} is different from current version")
-                        changed.append(name)
+            return self.restore_get(request)
+        if request.method == "POST":
+            form = deepcopy(request.form)
+            def do_restore_post():
+                self.restore_post(form)
+            self._system._restart.bg_run(func=do_restore_post)
+            return render_template("/restarting.html")
 
-            changed += list(uf_paths)
+    def restore_get(self, request):
+        # the user has uploaded a zip file and we need to take a look.
+        # be very careful with the content of this zip file...
+        print_err("zip file uploaded, looking at the content")
+        filename = request.args["zipfile"]
+        adsb_path = pathlib.Path("/opt/adsb/config")
+        restore_path = adsb_path / "restore"
+        restore_path.mkdir(mode=0o755, exist_ok=True)
+        restored_files: List[str] = []
+        with zipfile.ZipFile(restore_path / filename, "r") as restore_zip:
+            for name in restore_zip.namelist():
+                print_err(f"found file {name} in archive")
+                # remove files with a name that results in a path that doesn't start with our decompress path
+                if not str(
+                    os.path.normpath(os.path.join(restore_path, name))
+                ).startswith(str(restore_path)):
+                    print_err(f"restore skipped for path breakout name: {name}")
+                    continue
+                # only accept the .env file and config.json and files for ultrafeeder
+                if (
+                    name != ".env"
+                    and name != "config.json"
+                    and not name.startswith("ultrafeeder/")
+                ):
+                    continue
+                restore_zip.extract(name, restore_path)
+                restored_files.append(name)
+        # now check which ones are different from the installed versions
+        changed: List[str] = []
+        unchanged: List[str] = []
+        saw_globe_history = False
+        saw_graphs = False
+        uf_paths = set()
+        for name in restored_files:
+            if name.startswith("ultrafeeder/"):
+                parts = name.split("/")
+                if len(parts) < 3:
+                    continue
+                uf_paths.add(parts[0] + "/" + parts[1] + "/")
+            elif os.path.isfile(adsb_path / name):
+                if filecmp.cmp(adsb_path / name, restore_path / name):
+                    print_err(f"{name} is unchanged")
+                    unchanged.append(name)
+                else:
+                    print_err(f"{name} is different from current version")
+                    changed.append(name)
 
-            print_err(f"offering the usr to restore the changed files: {changed}")
-            return render_template(
-                "/restoreexecute.html", changed=changed, unchanged=unchanged
+        changed += list(uf_paths)
+
+        print_err(f"offering the usr to restore the changed files: {changed}")
+        return render_template(
+            "/restoreexecute.html", changed=changed, unchanged=unchanged
+        )
+
+    def restore_post(self, form):
+        # they have selected the files to restore
+        print_err("restoring the files the user selected")
+        adsb_path = pathlib.Path("/opt/adsb/config")
+        (adsb_path / "ultrafeeder").mkdir(mode=0o755, exist_ok=True)
+        restore_path = adsb_path / "restore"
+        restore_path.mkdir(mode=0o755, exist_ok=True)
+        try:
+            subprocess.call(
+                "/opt/adsb/docker-compose-adsb down -t 20", timeout=40.0, shell=True
             )
-        else:
-            # they have selected the files to restore
-            print_err("restoring the files the user selected")
-            adsb_path = pathlib.Path("/opt/adsb/config")
-            (adsb_path / "ultrafeeder").mkdir(mode=0o755, exist_ok=True)
-            restore_path = adsb_path / "restore"
-            restore_path.mkdir(mode=0o755, exist_ok=True)
+        except subprocess.TimeoutExpired:
+            print_err("timeout expired stopping docker... trying to continue...")
+        for name, value in form.items():
+            if value == "1":
+                print_err(f"restoring {name}")
+                dest = adsb_path / name
+                if dest.is_file():
+                    shutil.move(dest, adsb_path / (name + ".dist"))
+                elif dest.is_dir():
+                    shutil.rmtree(dest, ignore_errors=True)
+
+                shutil.move(restore_path / name, dest)
+
+                if name == ".env":
+                    if "config.json" in form.keys():
+                        # if we are restoring the config.json file, we don't need to restore the .env
+                        # this should never happen, but better safe than sorry
+                        continue
+                    # so this is a backup from an older system, let's try to make this work
+                    # read them in, replace the ones that match a norestore tag with the current value
+                    # and then write this all back out as config.json
+                    values = read_values_from_env_file()
+                    for e in self._d._env:
+                        if "norestore" in e.tags:
+                            # this overwrites the value in the file we just restored with the current value of the running image,
+                            # iow it doesn't restore that value from the backup
+                            values[e.name] = e.value
+                    write_values_to_config_json(
+                        values, reason="execute_restore from .env"
+                    )
+
+        # clean up the restore path
+        restore_path = pathlib.Path("/opt/adsb/config/restore")
+        shutil.rmtree(restore_path, ignore_errors=True)
+
+        # now that everything has been moved into place we need to read all the values from config.json
+        # of course we do not want to pull values marked as norestore
+        print_err("finished restoring files, syncing the configuration")
+
+        for e in self._d._env:
+            e._reconcile(e._value, pull=("norestore" not in e.tags))
+            print_err(
+                f"{'wrote out' if 'norestore' in e.tags else 'read in'} {e.name}: {e.value}"
+            )
+
+        # finally make sure that a couple of the key settings are up to date
+        self.update_boardname()
+        self.update_version()
+
+        # make sure we are connected to the right Zerotier network
+        zt_network = self._d.env_by_tags("zerotierid").value
+        if (
+            zt_network and len(zt_network) == 16
+        ):  # that's the length of a valid network id
             try:
                 subprocess.call(
-                    "/opt/adsb/docker-compose-adsb down -t 20", timeout=40.0, shell=True
+                    f"zerotier_cli join {zt_network}", timeout=30.0, shell=True
                 )
             except subprocess.TimeoutExpired:
-                print_err("timeout expired stopping docker... trying to continue...")
-            for name, value in request.form.items():
-                if value == "1":
-                    print_err(f"restoring {name}")
-                    dest = adsb_path / name
-                    if dest.is_file():
-                        shutil.move(dest, adsb_path / (name + ".dist"))
-                    elif dest.is_dir():
-                        shutil.rmtree(dest, ignore_errors=True)
-
-                    shutil.move(restore_path / name, dest)
-
-                    if name == ".env":
-                        if "config.json" in request.form.keys():
-                            # if we are restoring the config.json file, we don't need to restore the .env
-                            # this should never happen, but better safe than sorry
-                            continue
-                        # so this is a backup from an older system, let's try to make this work
-                        # read them in, replace the ones that match a norestore tag with the current value
-                        # and then write this all back out as config.json
-                        values = read_values_from_env_file()
-                        for e in self._d._env:
-                            if "norestore" in e.tags:
-                                # this overwrites the value in the file we just restored with the current value of the running image,
-                                # iow it doesn't restore that value from the backup
-                                values[e.name] = e.value
-                        write_values_to_config_json(
-                            values, reason="execute_restore from .env"
-                        )
-
-            # clean up the restore path
-            restore_path = pathlib.Path("/opt/adsb/config/restore")
-            shutil.rmtree(restore_path, ignore_errors=True)
-
-            # now that everything has been moved into place we need to read all the values from config.json
-            # of course we do not want to pull values marked as norestore
-            print_err("finished restoring files, syncing the configuration")
-
-            for e in self._d._env:
-                e._reconcile(e._value, pull=("norestore" not in e.tags))
                 print_err(
-                    f"{'wrote out' if 'norestore' in e.tags else 'read in'} {e.name}: {e.value}"
+                    "timeout expired joining Zerotier network... trying to continue..."
                 )
 
-            # finally make sure that a couple of the key settings are up to date
-            self.update_boardname()
-            self.update_version()
+        self.handle_implied_settings()
+        self.write_envfile()
 
-            # make sure we are connected to the right Zerotier network
-            zt_network = self._d.env_by_tags("zerotierid").value
-            if (
-                zt_network and len(zt_network) == 16
-            ):  # that's the length of a valid network id
-                try:
-                    subprocess.call(
-                        f"zerotier_cli join {zt_network}", timeout=30.0, shell=True
-                    )
-                except subprocess.TimeoutExpired:
-                    print_err(
-                        "timeout expired joining Zerotier network... trying to continue..."
-                    )
-
-            self.handle_implied_settings()
-            self.write_envfile()
-
-            try:
-                subprocess.call(
-                    "/opt/adsb/docker-compose-start", timeout=180.0, shell=True
-                )
-            except subprocess.TimeoutExpired:
-                print_err("timeout expired re-starting docker... trying to continue...")
-            return redirect(url_for("director"))
+        try:
+            subprocess.call(
+                "/opt/adsb/docker-compose-start", timeout=180.0, shell=True
+            )
+        except subprocess.TimeoutExpired:
+            print_err("timeout expired re-starting docker... trying to continue...")
+        return redirect(url_for("director"))
 
     def base_is_configured(self):
         base_config: set[Env] = {env for env in self._d._env if env.is_mandatory}
@@ -1732,17 +1739,14 @@ class AdsbIm:
                     return render_template("/shutdownpage.html")
                 if allow_insecure and key == "reboot":
                     # initiate reboot
-                    def do_reboot():
-                        sleep(0.5)
-                        self._system.reboot()
-
-                    threading.Thread(target=do_reboot).start()
-                    return render_template("/waitandredirect.html")
+                    self._system.reboot()
+                    return render_template("/restarting.html")
                 if key == "restart_containers":
                     self.write_envfile()
                     # almost certainly overkill, but...
-                    self._system.restart_containers()
-                    return render_template("/waitandredirect.html")
+                    self._system._restart.bg_run(cmdline="bash /opt/adsb/docker-compose-restart-all")
+                    self._next_url_from_director = request.url
+                    return render_template("/restarting.html")
                 if key == "secure_image":
                     self.set_secure_image()
                 if key == "no_config_link":
@@ -1757,10 +1761,8 @@ class AdsbIm:
                         channel = self.extract_channel()
                     self.set_channel(channel)
                     print_err(f"updating feeder to {channel} channel")
-                    # start this in the background so it doesn't prevent showing the waiting screen
-                    cmdline = "systemctl start adsb-feeder-update.service &"
-                    subprocess.run(cmdline, timeout=5.0, shell=True)
-                    return render_template("/waitandredirect.html")
+                    self._system._restart.bg_run(cmdline="systemctl start adsb-feeder-update.service")
+                    return render_template("/restarting.html")
                 if key == "nightly_update" or key == "zerotier":
                     # this will be handled through the separate key/value pairs
                     pass
@@ -2014,7 +2016,11 @@ class AdsbIm:
                 "sdrplay_license_accepted"
             ):
                 return redirect(url_for("sdrplay_license"))
-            return redirect(url_for("restarting"))
+
+            self.write_envfile()
+            # adsb-system-restart mainly does a compose up
+            self._system._restart.bg_run(cmdline="bash /opt/adsb/adsb-system-restart.sh")
+            return render_template("/restarting.html")
         print_err("base config not completed", level=2)
         return redirect(url_for("director"))
 
@@ -2406,6 +2412,30 @@ class AdsbIm:
             ufargs=ufargs,
             envvars=envvars,
         )
+
+    def waiting(self):
+        return render_template("waiting.html", action="Applyin settings to")
+
+    def stream_log(self):
+        logfile = "/opt/adsb/adsb-setup.log"
+
+        def tail():
+            with open(logfile, "r") as file:
+                ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
+                tmp = file.read()[-16 * 1024:]
+                # discard anything but the last 16 kB
+                while self._system._restart.state == "restarting":
+                    tmp += file.read(16 * 1024)
+                    if tmp and tmp.find("\n") != -1:
+                        block, tmp = tmp.rsplit("\n", 1)
+                        block = ansi_escape.sub("", block)
+                        lines = block.split("\n")
+                        data = "".join(["data: " + line + "\n" for line in lines])
+                        yield data + "\n\n"
+                    else:
+                        time.sleep(0.2)
+
+        return Response(tail(), mimetype="text/event-stream")
 
 
 def create_stage2_yml_from_template(stage2_yml_name, n, ip, template_file):

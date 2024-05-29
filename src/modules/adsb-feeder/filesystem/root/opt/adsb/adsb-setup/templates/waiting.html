@@ -44,50 +44,57 @@
   <script>
     document.addEventListener('readystatechange', event => {
       if (event.target.readyState === "complete") {
-        // show_spinner();
-        //setTimeout(checkStatus, 10000);
         console.log("starting stream");
-        stream()
+        stream();
       }
     });
-    function sleep(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
-    }
     function stream() {
       var streamlog = new EventSource("/stream-log");
       console.log("created EventSource" + streamlog)
+      streamlog.onerror = function (e) {
+        setTimeout(checkStatus, 1);
+      }
       streamlog.onmessage = function (e) {
-        if (e.data == "PAGERELOAD") {
-          streamlog.close();
-          console.log("received reload message, about to force a reload on the browser");
-          sleep(5000) // give the adsb-setup time to come up
-          window.location = '/';
-        } else {
-          $('#log').append(e.data + "\n");
-          $('#logcontainer').scrollTop($('#logcontainer')[0].scrollHeight);
-        }
+        $('#log').append(e.data + "\n");
+        $('#logcontainer').scrollTop($('#logcontainer')[0].scrollHeight);
       };
     }
+    const checkDelay = 1000;
     function checkStatus() {
       var request = new XMLHttpRequest();
-      request.open('GET', '/running');
+      request.open('GET', '/restart');
       request.timeout = 2000;
       request.ontimeout = function () {
-        console.log(`still waiting for /running to become available`);
-        setTimeout(checkStatus, 2000);
+        console.log(`still waiting for /restart to become available`);
+        setTimeout(checkStatus, checkDelay);
       };
       request.onload = function () {
-        if (request.readyState === 4 && request.status === 200 && request.responseText === 'OK') {
-          console.log('restarting the ADS-B Feeder infra completed, redirect user');
-          window.location = '/';
+        if (request.readyState === 4 && request.status === 200) {
+          if (request.responseText === 'done') {
+            console.log('restarting the ADS-B Feeder infra completed, redirect user');
+            window.location = '/';
+            return;
+          } else if (request.responseText === 'stream-log') {
+            console.log('continue reading the stream log, redirect user');
+            window.location = '/waiting';
+            return;
+          } else if (request.responseText === 'restarting') {
+            console.log('continue reading the stream log, redirect user');
+            // we use a page reload here instead of just opening the stream log again
+            // as apparently browsers like to run out of memory if you open the event source a bunch of times
+            window.location = '/';
+            return;
+          } else {
+            setTimeout(checkStatus, checkDelay);
+          }
         } else {
           console.log(`request returned with readyState ${request.readyState}, status ${request.status} and text ${request.responseText}; keep waiting`);
-          setTimeout(checkStatus, 2000);
+          setTimeout(checkStatus, checkDelay);
         }
       };
       request.onerror = function () {
         console.log("request returned an error - let's hope it's just restarting and try again");
-        setTimeout(checkStatus, 2000);
+        setTimeout(checkStatus, checkDelay);
       };
       request.send();
     };

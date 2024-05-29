@@ -47,7 +47,7 @@ waiting_placeholder() {
         fi
     done
     # finally start the waiting-app
-    start_wait_app "$PORT" &
+    start_wait_app "$PORT" /opt/adsb/adsb-setup.log "Updating the" &
 }
 
 # if this is an update where the previous version of the image used /var/log/adsb-setup.log

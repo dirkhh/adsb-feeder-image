@@ -4,27 +4,12 @@
 <h1 class="mt-3 text-center text-danger">{% block title %} Restarting the ADS-B Feeder system {% endblock %}</h1>
 
 <script>
-  document.addEventListener("readystatechange", (event) => {
-    if (event.target.readyState === "complete") {
-      show_spinner();
-      // Trigger restart and then start checking the restart status
-      var restartRequest = new XMLHttpRequest();
-      restartRequest.open("POST", "/restart");
-      restartRequest.onload = function () {
-        if (restartRequest.status === 200) {
-          checkRestartStatus();
-        } else {
-          // ops, we got an error from the server
-          alert("post to /restart failed - please report");
-        }
-      };
-      restartRequest.onerror = function () {
-        // ops, we got an error trying to talk to the server
-        alert("cannot talk to server sending the restart request - please report");
-      };
-      restartRequest.send();
-    }
-  });
+  // wait_restart python fucntion waits 5 seconds, so make this a bit longer than that
+  const httpTimeout = 6000;
+  const restartingSince = new Date().getTime();
+  function checkSoon() {
+    setTimeout(checkRestartStatus, 2000);
+  }
 
   function checkRestartStatus() {
     var request = new XMLHttpRequest();
@@ -32,24 +17,51 @@
     request.onload = function () {
       if (request.status === 200 && request.responseText === "done") {
         // restarting the ADS-B infra completed, redirect user
+        console.log('redirecting')
         window.location.replace("/");
       } else if (request.status === 200 && request.responseText === "restarting") {
-        // restart is still in progress, show progress and check again after a delay
-        setTimeout(checkRestartStatus, 2000);
+        if (new Date().getTime() - restartingSince > 10 * 1000) {
+          // been waiting for more than 10 seconds, let's show the log scroller so the user has something to look at
+          window.location.replace("/waiting");
+          return;
+        }
+        // restart is still in progress, check again immediately
+        // the server does the delaying during the request processing
+        // if the server is done with the restart, the request will return immediately
+        checkRestartStatus();
+      } else if (request.status === 200 && request.responseText === "stream-log") {
+        // the waiting-app has been detective active, switch to it
+        console.log('redirecting for stream log')
+        window.location.replace("/");
       } else {
         // ops, we got an error from the server - could be it is briefly turned off for
         // an update or something
-        console.log("request to GET /restart resulted in ", request.status);
-        setTimeout(checkRestartStatus, 2000);
+        console.log("request to GET /restart returned unexpected responseText: ", request.respsoneText);
+        checkSoon();
       }
     };
+
+    request.timeout = httpTimeout;
+    request.ontimeout = function () {
+      console.log("GET /restart timeout");
+      checkSoon();
+    };
+
     request.onerror = function () {
       // ops, we got an error trying to talk to the server - could be it is briefly turned off for
       // an update or something
       console.log("request to GET /restart resulted in an error: ", request.status);
-      setTimeout(checkRestartStatus, 2000);
+      checkSoon();
     };
     request.send();
   }
+
+  document.addEventListener("readystatechange", (event) => {
+    if (event.target.readyState === "complete") {
+      show_spinner();
+      checkRestartStatus();
+    }
+  });
+
 </script>
 {% endblock %}

@@ -4,6 +4,7 @@ import socket
 import subprocess
 import threading
 import time
+from time import sleep
 
 from .data import Data
 from .util import print_err
@@ -15,8 +16,8 @@ class Lock:
     def __init__(self):
         self.lock = threading.Lock()
 
-    def acquire(self):
-        return self.lock.acquire()
+    def acquire(self, blocking=True, timeout=-1):
+        return self.lock.acquire(blocking=blocking, timeout=timeout)
 
     def release(self):
         return self.lock.release()
@@ -38,19 +39,44 @@ class Restart:
     def __init__(self, lock: Lock):
         self.lock = lock
 
-    def restart_systemd(self):
-        if self.lock.locked():
-            print_err("restart locked")
+    def bg_run(self, cmdline=None, func=None):
+
+        if not cmdline and not func:
+            print_err(f"WARNING: bg_run called without something to do")
             return False
-        with self.lock:
-            print_err("Calling /opt/adsb/adsb-system-restart.sh")
-            # discard output, script is logging directly to /opt/adsb/adsb-setup.log
-            subprocess.run(
-                "/usr/bin/bash /opt/adsb/adsb-system-restart.sh",
-                shell=True,
-                capture_output=True,
-            )
-            return True
+
+        gotLock = self.lock.acquire(blocking=False)
+
+        if not gotLock:
+            # we could not acquire the lock
+            print_err(f"restart locked, couldn't run: {cmdline}")
+            return False
+
+        # we have acquired the lock
+
+        def do_restart():
+            try:
+                if cmdline:
+                    print_err(f"Calling {cmdline}")
+                    # discard output, scripts should log directly to /opt/adsb/adsb-setup.log
+                    subprocess.run(
+                        cmdline,
+                        shell=True,
+                        capture_output=True,
+                    )
+                if func:
+                    func()
+            finally:
+                self.lock.release()
+
+        threading.Thread(target=do_restart).start()
+
+        return True
+
+    def wait_restart_done(self, timeout=-1):
+        # acquire and release the lock immediately
+        if self.lock.acquire(blocking=True, timeout=timeout):
+            self.lock.release()
 
     @property
     def state(self):
@@ -65,8 +91,6 @@ class Restart:
 
 class System:
     def __init__(self, data: Data):
-        if os.path.exists("/opt/adsb/docker.lock"):
-            os.remove("/opt/adsb/docker.lock")
         self._restart_lock = Lock()
         self._restart = Restart(self._restart_lock)
         self._d = data
@@ -79,34 +103,21 @@ class System:
         subprocess.call("halt", shell=True)
 
     def reboot(self) -> None:
-        subprocess.call("reboot", shell=True)
+        gotLock = self._restart.lock.acquire(blocking=False)
+
+        def do_reboot():
+            sleep(0.5)
+            subprocess.call("reboot", shell=True)
+            # just in case the reboot doesn't work,
+            # release the lock after 30 seconds:
+            if gotLock:
+                sleep(30)
+                self.lock.release()
+
+        threading.Thread(target=do_reboot).start()
 
     def os_update(self) -> None:
         subprocess.call("apt-get update && apt-get upgrade -y", shell=True)
-
-    def restart_containers(self):
-        try:
-            subprocess.call("bash /opt/adsb/docker-compose-restart-all &", shell=True)
-        except:
-            print_err("failed to start the container restart script in the background")
-            return
-        open("/opt/adsb/docker.lock", "w").close()
-        # give the shell script a couple seconds to get going before we return the waiting page
-        time.sleep(2.0)
-
-    def background_up_containers(self):
-        if self.docker_restarting():
-            print_err(
-                "already restarting containers - not trying to run docker-compose-start"
-            )
-            return
-        try:
-            subprocess.call("bash /opt/adsb/docker-compose-start &", shell=True)
-        except:
-            print_err("failed to start the container start script in the background")
-
-    def docker_restarting(self):
-        return os.path.exists("/opt/adsb/docker.lock")
 
     def check_dns(self):
         try:
