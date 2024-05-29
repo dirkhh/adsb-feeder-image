@@ -192,10 +192,22 @@
     function show_spinner() {
       document.getElementById("loader").style.display = "block";
       document.getElementById("overlay").style.display = "block";
+      console.log('show_spinner');
+    }
+    function hide_spinner() {
+      document.getElementById("loader").style.display = "none";
+      document.getElementById("overlay").style.display = "none";
+      console.log('hide_spinner');
     }
     $(document).ready(function () {
       $('[data-toggle="tooltip"]').tooltip();
+
+      $(document).find('form').each((key, value) => {
+        //console.log(value)
+        value.addEventListener("submit", (event) => { show_spinner(); });
+      });
     });
+
     $("form").submit(function () {
       // stupid hack to get checkboxes that are unchecked into Flask
       // first hide the form (so the checkboxes don't visibly turn back on)
