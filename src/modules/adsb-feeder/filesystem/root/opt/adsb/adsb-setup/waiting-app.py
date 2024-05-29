@@ -6,7 +6,7 @@ import time
 
 app = Flask(__name__)
 logfile = "/opt/adsb/adsb-setup.log"
-action = "Restarting"
+title = "Restarting the ADS-B Feeder System"
 
 
 @app.route("/stream-log")
@@ -39,7 +39,7 @@ def restarting():
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def waiting(path):
-    return render_template("waiting.html", action=action)
+    return render_template("waiting.html", title=title)
 
 
 if __name__ == "__main__":
@@ -49,5 +49,5 @@ if __name__ == "__main__":
     if len(argv) >= 3:
         logfile = argv[2]
     if len(argv) >= 4:
-        action = argv[3]
+        title = argv[3] + " the ADS-B Feeder System"
     app.run(host="0.0.0.0", port=port)

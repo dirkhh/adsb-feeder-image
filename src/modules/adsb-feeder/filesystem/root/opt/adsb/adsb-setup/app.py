@@ -2414,7 +2414,7 @@ class AdsbIm:
         )
 
     def waiting(self):
-        return render_template("waiting.html", action="Applyin settings to")
+        return render_template("waiting.html", title="ADS-B Feeder performing requested actions")
 
     def stream_log(self):
         logfile = "/opt/adsb/adsb-setup.log"

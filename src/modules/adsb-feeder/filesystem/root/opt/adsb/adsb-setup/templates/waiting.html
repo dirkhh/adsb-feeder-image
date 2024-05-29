@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
 
   <title>
-    {{ action }} the ADS-B Feeder system
+    {{ title }}
   </title>
 </head>
 
@@ -31,7 +31,7 @@
     <img src="/static/images/adsbim-background_768p.png" alt="">
   </div>
   <div class="container pt-5 mt-3">
-    <h1>{{action}} the ADS-B Feeder system</h1>
+    <h1>{{ title }}</h1>
     <h3 class="my-3">Please be patient</h3>
     <div class="row overflow-auto" style="height: 75vh" id="logcontainer">
       <pre class="col-6-sm col-12 small" id="log"></pre>
