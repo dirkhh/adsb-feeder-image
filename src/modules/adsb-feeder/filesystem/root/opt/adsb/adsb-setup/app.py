@@ -1767,9 +1767,9 @@ class AdsbIm:
                     # this will be handled through the separate key/value pairs
                     pass
                 if key == "os_update":
-                    self._system.os_update()
+                    self._system._restart.bg_run(func=self._system.os_update)
                     self._next_url_from_director = request.url
-                    continue
+                    return render_template("/restarting.html")
                 if allow_insecure and key == "tailscale":
                     # grab extra arguments if given
                     ts_args = form.get("tailscale_extras", "")
