@@ -86,6 +86,7 @@ services:
       # options for the µImage:
       - TAR1090_ENABLE_AC_DB=${FEEDER_ENABLE_AC_DB:-true}
       - MLATHUB_DISABLE=${FEEDER_MLATHUB_DISABLE}
+      - READSB_NET_BR_OPTIMIZE_FOR_MLAT=${READSB_NET_BR_OPTIMIZE_FOR_MLAT}
       # --------------------------------------------------
       # GRAPHS1090 (Decoder and System Status Web Page) parameters:
       # The two 978 related parameters should only be included if you are running dump978 for UAT reception (USA only)

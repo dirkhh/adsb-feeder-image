@@ -1456,6 +1456,12 @@ class AdsbIm:
                             sitenum, False
                         )
 
+        if self._d.env_by_tags("aggregators").value == "micro":
+            self._d.env_by_tags("beast-reduce-optimize-for-mlat").value = True
+        else:
+            self._d.env_by_tags("beast-reduce-optimize-for-mlat").value = False
+
+
         if self._d.is_enabled("stage2"):
             # for stage2 tar1090port is used for the webproxy
             # move the exposed port for the combined ultrafeeder to 8078 to avoid a port conflict

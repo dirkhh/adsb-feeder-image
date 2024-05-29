@@ -182,6 +182,8 @@ class Data:
         Env("FEEDER_UNUSED_SERIAL_1", tags=["other-1"]),
         Env("FEEDER_UNUSED_SERIAL_2", tags=["other-2"]),
         Env("FEEDER_UNUSED_SERIAL_3", tags=["other-3"]),
+        Env("READSB_NET_BR_OPTIMIZE_FOR_MLAT", tags=["beast-reduce-optimize-for-mlat"]),
+
         #
         # Ultrafeeder config, used for all 4 types of Ultrafeeder instances
         Env("FEEDER_ULTRAFEEDER_CONFIG", default=[""], tags=["ultrafeeder_config"]),

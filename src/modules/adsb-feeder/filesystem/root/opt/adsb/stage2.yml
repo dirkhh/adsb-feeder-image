@@ -28,7 +28,7 @@ services:
       # docker stop ultrafeeder will result in proper readsb exit which writes the state anyhow
       - READSB_WRITE_STATE_ONLY_ON_EXIT=true
       # if the micro feeder includes a UAT SDR, use the replay feature so we connect to it only once
-      - READSB_EXTRA_ARGS=${FEEDER_UAT_REPLAY978_STAGE2NUM}
+      - READSB_AUTOMATION_ARGS=${FEEDER_UAT_REPLAY978_STAGE2NUM}
       # Sources and Aggregator connections:
       # (Note - remove the ones you are not using / feeding)
       - ULTRAFEEDER_CONFIG=${FEEDER_ULTRAFEEDER_CONFIG_STAGE2NUM}
