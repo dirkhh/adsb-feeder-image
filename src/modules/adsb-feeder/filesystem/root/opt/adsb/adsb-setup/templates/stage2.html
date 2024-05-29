@@ -329,6 +329,7 @@
     }
   });
   function check_micro_feeder() {
+    show_spinner();
     let ip = $("#add_micro_feeder_ip").val()
     if (ip.length > 3) {
       let url = "/api/check_remote_feeder/" + ip;
@@ -338,6 +339,7 @@
       })
         .then(response => { console.log(response); return response.json() })
         .then(data => {
+          hide_spinner();
           console.log(data)
           if ('name' in data) {
             if ('micro_settings' in data && data['micro_settings'] == true) {
@@ -360,6 +362,7 @@
           }
         })
         .catch(error => {
+          hide_spinner();
           console.log("received error", error);
           $("#add_micro_feeder_name").text("Unable to detect feeder at " + ip);
         });
