@@ -1,4 +1,7 @@
 Changes since v2.0.3 include:
+- reduce micro feeder memory footprint
+- many small changes to if and when the waiting spinner is shown
+- reduce the data transferred between micro feeder and stage 2 instance
 - display waiting app log scroller for feeder updates / improve log scroller robustness
 - the please wait page now instantly returns you to the webinterface once the system is done applying settings
 - hand off user from the first boot waiting app to the installed system / adsb-setup app
