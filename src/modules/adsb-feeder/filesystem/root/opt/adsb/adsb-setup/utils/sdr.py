@@ -158,9 +158,9 @@ class SDRDevices:
             elif sdr._type == "sdrplay":
                 ret[1090] = sdr._serial
             elif sdr._type == "rtlsdr":
-                if sdr._serial in {"1090", "00001090"}:
+                if "1090" in sdr._serial:
                     ret[1090] = sdr._serial
-                elif sdr._serial in {"978", "00000978"}:
+                elif "978" in sdr._serial:
                     ret[978] = sdr._serial
         if not ret[1090] and not ret[978] and len(self.sdrs) == 1:
             ret[1090] = self.sdrs[0]._serial
