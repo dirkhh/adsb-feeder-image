@@ -5,7 +5,7 @@ PartOf=docker.service
 
 [Service]
 WorkingDirectory=/opt/adsb
-ExecStartPre=mount -o remount,exec /run
+ExecStartPre=-mount -o remount,exec /run
 ExecStart=/opt/adsb/docker-compose-start
 RemainAfterExit=yes
 ExecStop=/opt/adsb/docker-compose-adsb down -t 30
