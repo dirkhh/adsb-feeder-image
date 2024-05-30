@@ -1497,6 +1497,9 @@ class AdsbIm:
             self._d.env_by_tags("readsb_device_type").value = ""
             self._d.env_by_tags(["uat978", "is_enabled"]).list_set(0, False)
 
+            # set unlimited range for the stage2 tar1090
+            self._d.env_by_tags("max_range").list_set(0, 0)
+
             for sitenum in [0] + self.micro_indices():
                 if self._d.env_by_tags(["uat978", "is_enabled"]).list_get(sitenum):
                     # always get UAT from the readsb uat_replay
@@ -1520,6 +1523,10 @@ class AdsbIm:
             self._d.env_by_tags("tar1090portadjusted").value = self._d.env_by_tags(
                 "tar1090port"
             ).value
+
+            # for regular feeders or micro feeders a max range of 300nm seem reasonable
+            self._d.env_by_tags("max_range").list_set(0, 300)
+
             # first grab the SDRs plugged in and check if we have one identified for UAT
             self._sdrdevices._ensure_populated()
             env978 = self._d.env_by_tags("978serial")

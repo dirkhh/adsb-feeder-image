@@ -183,7 +183,7 @@ class Data:
         Env("FEEDER_UNUSED_SERIAL_2", tags=["other-2"]),
         Env("FEEDER_UNUSED_SERIAL_3", tags=["other-3"]),
         Env("READSB_NET_BR_OPTIMIZE_FOR_MLAT", tags=["beast-reduce-optimize-for-mlat"]),
-
+        Env("FEEDER_MAX_RANGE", default=[300], tags=["max_range"]),
         #
         # Ultrafeeder config, used for all 4 types of Ultrafeeder instances
         Env("FEEDER_ULTRAFEEDER_CONFIG", default=[""], tags=["ultrafeeder_config"]),
@@ -625,6 +625,7 @@ class Data:
 
         ret = {}
         for e in self._env:
+
             def printChanged(descriptor, envKey, newValue, oldValue):
                 # omit state vars as they are never in the env file so we don't know if they changed
                 oldValue = str(oldValue)

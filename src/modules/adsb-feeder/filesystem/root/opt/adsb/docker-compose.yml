@@ -48,6 +48,7 @@ services:
       - READSB_MODEAC=false
       - READSB_RX_LOCATION_ACCURACY=2
       - READSB_STATS_RANGE=true
+      - READSB_MAX_RANGE=${FEEDER_MAX_RANGE:-300}
       # --write-state-only-on-exit only affects the heatmap/replay data and traces
       # this configuration has no traces and the heatmap/replay data are written every 30 min anyhow
       # docker stop ultrafeeder will result in proper readsb exit which writes the state anyhow
