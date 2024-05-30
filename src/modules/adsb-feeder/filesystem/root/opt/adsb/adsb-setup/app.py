@@ -10,6 +10,7 @@ import platform
 import re
 import requests
 import secrets
+import semver
 import signal
 import shutil
 import string
@@ -1222,6 +1223,18 @@ class AdsbIm:
                         json_dict["micro_settings"] = True
                     else:
                         json_dict["micro_settings"] = False
+                # does it support beast reduce optimized for mlat (brofm)?
+                json_dict["brofm"] = False
+                if "version" in json_dict:
+                    try:
+                        # we don't want to include the channel, nor the leading 'v'
+                        version = json_dict.get("version").split("(")[0][1:]
+                        if semver.compare(version, "2.1.0-beta.4") >= 0:
+                            json_dict["brofm"] = True
+                    except:
+                        print_err(
+                            f"wasn't able to parse {version} as semver and compare..."
+                        )
             # now return the json_dict which will give the caller all the relevant data
             # including whether this is a v2 or not
             return make_response(json.dumps(json_dict), 200)
@@ -1275,7 +1288,14 @@ class AdsbIm:
         print_err(f"done importing graphs and history from {ip}")
 
     def setup_new_micro_site(
-        self, key, uat, is_adsbim, do_import=False, do_restore=False, micro_data={}
+        self,
+        key,
+        uat,
+        is_adsbim,
+        brofm,
+        do_import=False,
+        do_restore=False,
+        micro_data={},
     ):
         # the key here can be a readsb net connector triplet in the form ip,port,protocol
         # usually it's just the ip
@@ -1289,7 +1309,10 @@ class AdsbIm:
         )
         n = self._d.env_by_tags("num_micro_sites").value
         # store the IP address so that get_base_info works
-        self._d.env_by_tags("mf_ip").list_set(n + 1, key)
+        if brofm:
+            self._d.env_by_tags("mf_ip").list_set(n + 1, f"{key},30006,beast_in")
+        else:
+            self._d.env_by_tags("mf_ip").list_set(n + 1, key)
         if not is_adsbim:
             # well that's unfortunate
             # we might get asked to create a UI for this at some point. Not today, though
@@ -1681,6 +1704,7 @@ class AdsbIm:
                     # grab the IP that we know the user has provided
                     ip = form.get("add_micro_feeder_ip")
                     uat = form.get("micro_uat")
+                    mreduce = form.get("micro_reduce")
                     is_adsbim = key != "add_other"
                     micro_data = {}
                     if not is_adsbim:
@@ -1697,6 +1721,7 @@ class AdsbIm:
                         ip,
                         uat=is_true(uat),
                         is_adsbim=is_adsbim,
+                        brofm=is_true(mreduce),
                         do_import=do_import,
                         do_restore=do_restore,
                         micro_data=micro_data,
