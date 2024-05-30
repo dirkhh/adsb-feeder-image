@@ -183,7 +183,7 @@ class Hotspot:
                 os.remove("/etc/network/interfaces")
                 os.rename("/etc/network/interfaces.new", "/etc/network/interfaces")
             output = subprocess.run(
-                f"wpa_passphrase {self.ssid} {self.passwd} > /etc/wpa_supplicant/wpa_supplicant.conf && systemctl restart networking.service",
+                f'wpa_passphrase {self.ssid} "{self.passwd}" > /etc/wpa_supplicant/wpa_supplicant.conf && systemctl restart networking.service',
                 shell=True,
                 capture_output=True,
             )
@@ -192,9 +192,7 @@ class Hotspot:
             )
         elif self._baseos == "raspbian":
             # we should be all set already on raspbian
-            print_err(
-                f"started wlan connection to {self.ssid}"
-            )
+            print_err(f"started wlan connection to {self.ssid}")
         else:
             print_err(f"unknown baseos: can't set up wifi")
 
@@ -214,7 +212,7 @@ class Hotspot:
         if self._baseos == "dietpi":
             try:
                 result = subprocess.run(
-                    f'bash -c "wpa_supplicant -i{self.wlan} -c<(wpa_passphrase {self.ssid} {self.passwd})"',
+                    f'bash -c "wpa_supplicant -i{self.wlan} -c<(wpa_passphrase {self.ssid} "{self.passwd}")"',
                     shell=True,
                     capture_output=True,
                     timeout=10.0,
@@ -232,7 +230,7 @@ class Hotspot:
         elif self._baseos == "raspbian":
             try:
                 result = subprocess.run(
-                    f"nmcli d wifi connect {self.ssid} password {self.passwd} ifname {self.wlan}",
+                    f'nmcli d wifi connect {self.ssid} password "{self.passwd}" ifname {self.wlan}',
                     shell=True,
                     capture_output=True,
                 )
