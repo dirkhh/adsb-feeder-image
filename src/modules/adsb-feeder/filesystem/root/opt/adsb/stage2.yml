@@ -65,6 +65,11 @@ services:
       # How often the statistics data the graphs are generated from are written to disk (in seconds)
       - GRAPHS1090_REDUCE_IO_FLUSH_IVAL=21600
       - GRAPHS1090_DARKMODE=true
+      # for the micro proxies, we don't want to show the system data (as that wouldn't be from the micro feeder)
+      # and we want to have reasonable page and tab titles so the user knows which micro feeder they are looking at
+      - GRAPHS1090_HIDE_SYSTEM=true
+      - GRAPHS1090_WWW_TITLE=${GRAPHS1090_WWW_TITLE_STAGE2NUM}
+      - GRAPHS1090_WWW_HEADER=${GRAPHS1090_WWW_HEADER_STAGE2NUM}
       - URL_AIRSPY=${FEEDER_URL_AIRSPY_STAGE2NUM:-}
       - URL_1090_SIGNAL=${FEEDER_URL_RTLSDR_STAGE2NUM:-}
       - ENABLE_978=${FEEDER_ENABLE_UAT978_STAGE2NUM}
