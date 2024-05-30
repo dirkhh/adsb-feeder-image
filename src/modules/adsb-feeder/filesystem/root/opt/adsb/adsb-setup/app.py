@@ -85,10 +85,13 @@ from werkzeug.utils import secure_filename
 
 from flask.logging import logging as flask_logging
 
+
 # don't log static assets
 class NoStatic(flask_logging.Filter):
     def filter(record):
-        return 'GET /static/' not in record.getMessage()
+        return "GET /static/" not in record.getMessage()
+
+
 flask_logging.getLogger("werkzeug").addFilter(NoStatic)
 
 
@@ -669,8 +672,10 @@ class AdsbIm:
             return self.restore_get(request)
         if request.method == "POST":
             form = deepcopy(request.form)
+
             def do_restore_post():
                 self.restore_post(form)
+
             self._system._restart.bg_run(func=do_restore_post)
             return render_template("/restarting.html")
 
@@ -806,9 +811,7 @@ class AdsbIm:
         self.write_envfile()
 
         try:
-            subprocess.call(
-                "/opt/adsb/docker-compose-start", timeout=180.0, shell=True
-            )
+            subprocess.call("/opt/adsb/docker-compose-start", timeout=180.0, shell=True)
         except subprocess.TimeoutExpired:
             print_err("timeout expired re-starting docker... trying to continue...")
         return redirect(url_for("director"))
@@ -913,7 +916,7 @@ class AdsbIm:
                     ),
                     "dump978_at_port": (
                         self._d.env_by_tags("uatport").value
-                        if self._d.list_is_enabled(['uat978', 'is_enabled'], 0)
+                        if self._d.list_is_enabled(["uat978", "is_enabled"], 0)
                         else 0
                     ),
                 }
@@ -1461,7 +1464,6 @@ class AdsbIm:
         else:
             self._d.env_by_tags("beast-reduce-optimize-for-mlat").value = False
 
-
         if self._d.is_enabled("stage2"):
             # for stage2 tar1090port is used for the webproxy
             # move the exposed port for the combined ultrafeeder to 8078 to avoid a port conflict
@@ -1523,7 +1525,12 @@ class AdsbIm:
             if not env978.value and auto_assignment[978]:
                 env978.value = auto_assignment[978]
 
-            stratuxv3 = any([sdr._serial == env978.value and sdr._type == "stratuxv3" for sdr in self._sdrdevices.sdrs])
+            stratuxv3 = any(
+                [
+                    sdr._serial == env978.value and sdr._type == "stratuxv3"
+                    for sdr in self._sdrdevices.sdrs
+                ]
+            )
             if stratuxv3:
                 self._d.env_by_tags("uat_device_type").value = "stratuxv3"
             else:
@@ -1542,13 +1549,23 @@ class AdsbIm:
                 self._d.env_by_tags("978piaware").list_set(0, "")
 
             # next check for airspy devices
-            airspy = any([sdr._serial == env1090.value and sdr._type == "airspy" for sdr in self._sdrdevices.sdrs])
+            airspy = any(
+                [
+                    sdr._serial == env1090.value and sdr._type == "airspy"
+                    for sdr in self._sdrdevices.sdrs
+                ]
+            )
             self._d.env_by_tags(["airspy", "is_enabled"]).value = airspy
             self._d.env_by_tags("airspyurl").list_set(
                 0, f"http://airspy_adsb" if airspy else ""
             )
             # SDRplay devices
-            sdrplay = any([sdr._serial == env1090.value and sdr._type == "sdrplay" for sdr in self._sdrdevices.sdrs])
+            sdrplay = any(
+                [
+                    sdr._serial == env1090.value and sdr._type == "sdrplay"
+                    for sdr in self._sdrdevices.sdrs
+                ]
+            )
             self._d.env_by_tags(["sdrplay", "is_enabled"]).value = sdrplay
 
             # next - if we have exactly one SDR and it hasn't been assigned to anything, use it for 1090
@@ -1630,7 +1647,9 @@ class AdsbIm:
             site = ""
             sitenum = 0
         allow_insecure = not self.check_secure_image()
-        print_err(f"handling input from {referer} and site # {sitenum} / {site} (allow insecure is {allow_insecure})")
+        print_err(
+            f"handling input from {referer} and site # {sitenum} / {site} (allow insecure is {allow_insecure})"
+        )
         # in the HTML, every input field needs to have a name that is concatenated by "--"
         # and that matches the tags of one Env
         form: Dict = request.form
@@ -1750,7 +1769,9 @@ class AdsbIm:
                 if key == "restart_containers":
                     self.write_envfile()
                     # almost certainly overkill, but...
-                    self._system._restart.bg_run(cmdline="bash /opt/adsb/docker-compose-restart-all")
+                    self._system._restart.bg_run(
+                        cmdline="bash /opt/adsb/docker-compose-restart-all"
+                    )
                     self._next_url_from_director = request.url
                     return render_template("/restarting.html")
                 if key == "secure_image":
@@ -1767,7 +1788,9 @@ class AdsbIm:
                         channel = self.extract_channel()
                     self.set_channel(channel)
                     print_err(f"updating feeder to {channel} channel")
-                    self._system._restart.bg_run(cmdline="systemctl start adsb-feeder-update.service")
+                    self._system._restart.bg_run(
+                        cmdline="systemctl start adsb-feeder-update.service"
+                    )
                     return render_template("/restarting.html")
                 if key == "nightly_update" or key == "zerotier":
                     # this will be handled through the separate key/value pairs
@@ -2025,7 +2048,9 @@ class AdsbIm:
 
             self.write_envfile()
             # adsb-system-restart mainly does a compose up
-            self._system._restart.bg_run(cmdline="bash /opt/adsb/adsb-system-restart.sh", silent=True)
+            self._system._restart.bg_run(
+                cmdline="bash /opt/adsb/adsb-system-restart.sh", silent=True
+            )
             return render_template("/restarting.html")
         print_err("base config not completed", level=2)
         return redirect(url_for("director"))
@@ -2420,7 +2445,9 @@ class AdsbIm:
         )
 
     def waiting(self):
-        return render_template("waiting.html", title="ADS-B Feeder performing requested actions")
+        return render_template(
+            "waiting.html", title="ADS-B Feeder performing requested actions"
+        )
 
     def stream_log(self):
         logfile = "/opt/adsb/adsb-setup.log"
@@ -2428,7 +2455,7 @@ class AdsbIm:
         def tail():
             with open(logfile, "r") as file:
                 ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
-                tmp = file.read()[-16 * 1024:]
+                tmp = file.read()[-16 * 1024 :]
                 # discard anything but the last 16 kB
                 while self._system._restart.state == "restarting":
                     tmp += file.read(16 * 1024)
