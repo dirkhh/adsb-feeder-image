@@ -9,6 +9,7 @@ services:
     restart: always
     device_cgroup_rules:
       - 'c 189:* rwm'
+      - 'c 188:* rwm'
     environment:
       - TZ=${FEEDER_TZ}
       - LAT=${FEEDER_LAT}
