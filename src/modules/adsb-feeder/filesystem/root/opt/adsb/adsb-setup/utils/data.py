@@ -673,8 +673,8 @@ class Data:
                 ret[f"AF_FLIGHTRADAR_PORT_{i}"] = int(ret[f"AF_FLIGHTRADAR_PORT"]) + i * 1000
                 ret[f"AF_PLANEFINDER_PORT_{i}"] = int(ret[f"AF_PLANEFINDER_PORT"]) + i * 1000
                 site_name = self.env_by_tags("site_name").list_get(i)
-                ret[f"GRAPHS1090_WWW_TITLE_{i}"] = f"{site_name} graphs1090 stats"
-                ret[f"GRAPHS1090_WWW_HEADER_{i}"] = f"Performance Graphs: {site_name}"
+                ret[f"GRAPHS1090_WWW_TITLE_{i}"] = f"{site_name}_graphs1090_stats"
+                ret[f"GRAPHS1090_WWW_HEADER_{i}"] = f"Performance_Graphs:_{site_name}"
         return ret
         # fmt: on
 
