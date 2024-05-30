@@ -1308,11 +1308,12 @@ class AdsbIm:
             f"setting up a new micro site at {key} do_import={do_import} do_restore={do_restore}"
         )
         n = self._d.env_by_tags("num_micro_sites").value
+
         # store the IP address so that get_base_info works
-        if brofm:
-            self._d.env_by_tags("mf_ip").list_set(n + 1, f"{key},30006,beast_in")
-        else:
-            self._d.env_by_tags("mf_ip").list_set(n + 1, key)
+        self._d.env_by_tags("mf_ip").list_set(n + 1, key)
+
+        self._d.env_by_tags("mf_brofm").list_set(n + 1, brofm)
+
         if not is_adsbim:
             # well that's unfortunate
             # we might get asked to create a UI for this at some point. Not today, though

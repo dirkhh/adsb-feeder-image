@@ -94,9 +94,12 @@ class UltrafeederConfig:
 
         # add primary data input for microproxy
         if is_stage2 and self._micro > 0:
-            ip = self._d.env_by_tags("mf_ip").list_get(self._micro)
-            ip, triplet = mf_get_ip_and_triplet(ip)
-            ret.add(f"adsb,{triplet}")
+            mf_ip = self._d.env_by_tags("mf_ip").list_get(self._micro)
+            ip, triplet = mf_get_ip_and_triplet(mf_ip)
+            if mf_ip == ip and self._d.env_by_tags("mf_brofm").list_get(self._micro):
+                ret.add(f"adsb,{ip},30006,beast_in")
+            else:
+                ret.add(f"adsb,{triplet}")
             if self._d.list_is_enabled("uat978", self._micro):
                 # or the UAT port on the micro feeder
                 ret.add(f"adsb,{ip},30978,uat_in")
