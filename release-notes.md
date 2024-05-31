@@ -1,4 +1,5 @@
 Changes since v2.0.3 include:
+- stage2: gracefully deal with not having any HeyWhatsThat outlines
 - hotspot: support passwords with spaces
 - stage2: use site name for page and tab titles in micro proxy graph1090
 - stage2: UI changes to support lower bandwidth communication with (new enough) micro feeders. This drops many of the messages, but none of the positions.

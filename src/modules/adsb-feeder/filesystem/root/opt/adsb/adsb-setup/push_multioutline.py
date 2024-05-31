@@ -13,19 +13,21 @@ except:
     print_err("failed to create MultiOutline class")
     exit(0)
 
+hwt_data = None
 try:
     hwt_data = MultiOutline().create_heywhatsthat(n)
 except:
-    print_err("failed to create HeyWhatsthat class")
-    exit(0)
+    # this can happen if none of the micro feeds have HeyWhatsthat IDs
+    pass
 
 # now we need to inject this into the stage2 tar1090
 datadir = "/opt/adsb/data"
 try:
     with open(f"{datadir}/multiOutline.json", "w") as f:
         json.dump(mo_data, f)
-    with open(f"{datadir}/upintheair.json", "w") as f:
-        json.dump(hwt_data, f)
+    if hwt_data is not None:
+        with open(f"{datadir}/upintheair.json", "w") as f:
+            json.dump(hwt_data, f)
 except:
     print_err("failed to write multiOutline.json or heywhatsthat.json")
 else:
@@ -34,8 +36,9 @@ else:
         subprocess.run(cmd, shell=True, check=True)
     except subprocess.SubprocessError:
         print_err("failed to push multiOutline.json")
-    cmd = f"docker cp {datadir}/upintheair.json ultrafeeder:/usr/local/share/tar1090/html-webroot/upintheair.json"
-    try:
-        subprocess.run(cmd, shell=True, check=True)
-    except subprocess.SubprocessError:
-        print_err("failed to push multiOutline.json")
+    if hwt_data is not None:
+        cmd = f"docker cp {datadir}/upintheair.json ultrafeeder:/usr/local/share/tar1090/html-webroot/upintheair.json"
+        try:
+            subprocess.run(cmd, shell=True, check=True)
+        except subprocess.SubprocessError:
+            print_err("failed to push multiOutline.json")
