@@ -917,7 +917,7 @@ class AdsbIm:
                     ),
                     "dump978_at_port": (
                         self._d.env_by_tags("uatport").value
-                        if self._d.list_is_enabled(["uat978", "is_enabled"], 0)
+                        if self._d.list_is_enabled(["uat978"], 0)
                         else 0
                     ),
                 }
@@ -1619,15 +1619,9 @@ class AdsbIm:
                 print_err(f"in the end we have")
                 print_err(f"1090serial {env1090.value}")
                 print_err(f"978serial {env978.value}")
-                print_err(
-                    f"airspy container is {self._d.is_enabled(['airspy', 'is_enabled'])}"
-                )
-                print_err(
-                    f"SDRplay container is {self._d.is_enabled(['sdrplay', 'is_enabled'])}"
-                )
-                print_err(
-                    f"dump978 container {self._d.list_is_enabled(['uat978', 'is_enabled'], 0)}"
-                )
+                print_err(f"airspy container is {self._d.is_enabled(['airspy'])}")
+                print_err(f"SDRplay container is {self._d.is_enabled(['sdrplay'])}")
+                print_err(f"dump978 container {self._d.list_is_enabled(['uat978'], 0)}")
 
         # set all of the ultrafeeder config data up
         self.setup_ultrafeeder_args()

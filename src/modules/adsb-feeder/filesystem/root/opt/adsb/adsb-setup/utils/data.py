@@ -566,7 +566,7 @@ class Data:
             tags=["stage2_listeners"],
         ),
         Env("AF_MICRO_IP", default=[""], tags=["mf_ip"]),
-        Env("AF_MICRO_BROFM", default=[False], tags=["mf_brofm"]),
+        Env("AF_MICRO_BROFM", default=[False], tags=["mf_brofm", "is_enabled"]),
         Env("AF_FEEDER_VERSION", default=[""], tags=["mf_version"]),
     }
 
