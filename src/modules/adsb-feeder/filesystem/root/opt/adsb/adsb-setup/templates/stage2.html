@@ -358,7 +358,7 @@
             if ('dump978_at_port' in data && data['dump978_at_port'] > 0) {
               $("#uat_div").removeClass("d-none");
             }
-            if ('brofm' in data && data['brofm'] == true) {
+            if ('brofm_capable' in data && data['brofm_capable'] == true) {
               $("#beast_reduce").removeClass("d-none");
             }
           } else if ('status' in data && data['status'] == "ok") {

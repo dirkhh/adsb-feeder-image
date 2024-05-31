@@ -874,6 +874,19 @@ class AdsbIm:
         for i in self.micro_indices():
             if self._d.env_by_tags("mf_version").list_get(i) != "not an adsb.im feeder":
                 self.get_base_info(i)
+                uat_capable = self._d.env_by_tags("978url").list_get(i) != ""
+                brofm_capable = False
+                try:
+                    # we don't want to include the channel, nor the leading 'v'
+                    version = (
+                        self._d.env_by_tags("mf_version").list_get(i).split("(")[0][1:]
+                    )
+                    if semver.compare(version, "2.1.0-beta.4") >= 0:
+                        brofm_capable = True
+                except:
+                    print_err(
+                        f"wasn't able to parse {version} as semver and compare..."
+                    )
             info_array.append(
                 {
                     "mf_ip": self._d.env_by_tags("mf_ip").list_get(i),
@@ -881,6 +894,9 @@ class AdsbIm:
                     "lat": self._d.env_by_tags("lat").list_get(i),
                     "lng": self._d.env_by_tags("lng").list_get(i),
                     "alt": self._d.env_by_tags("alt").list_get(i),
+                    "uat_capable": uat_capable,
+                    "brofm_capable": brofm_capable,
+                    "brofm_enabled": self._d.list_is_enabled("mf_brofm", idx=i),
                 }
             )
         return Response(json.dumps(info_array), mimetype="application/json")
@@ -1224,13 +1240,13 @@ class AdsbIm:
                     else:
                         json_dict["micro_settings"] = False
                 # does it support beast reduce optimized for mlat (brofm)?
-                json_dict["brofm"] = False
+                json_dict["brofm_capable"] = False
                 if "version" in json_dict:
                     try:
                         # we don't want to include the channel, nor the leading 'v'
                         version = json_dict.get("version").split("(")[0][1:]
                         if semver.compare(version, "2.1.0-beta.4") >= 0:
-                            json_dict["brofm"] = True
+                            json_dict["brofm_capable"] = True
                     except:
                         print_err(
                             f"wasn't able to parse {version} as semver and compare..."
