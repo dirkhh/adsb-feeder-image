@@ -56,9 +56,11 @@
           <thead>
             <td>Site</td>
             <td class="text-center">IP</td>
-            <td class="text-center">Lat/Long@Alt</td>
-            <td class="text-center">Feeder Version</td>
+            <td class="text-center d-none d-md-table-cell">Lat/Long@Alt</td>
+            <td class="text-center d-none d-md-table-cell">Feeder Version</td>
             <td class="text-center">Status / Stats</td>
+            <td class="text-center">UAT</td>
+            <td class="text-center small">Bandwidth<br />Reduce</td>
             <td class="text-center">Action</td>
           </thead>
           <tbody>
@@ -68,18 +70,25 @@
             <tr class="align-middle">
               <td>
                 <input type="text" name="site_name_{{ loop.index0 }}" value="{{ site }}"
-                       class="form-control accept_edit" />
+                       class="form-control-sm accept_edit" />
               </td>
               <td class="text-center">
-                <input type="text" name="mf_ip_{{ loop.index0 }}" class="form-control accept_edit"
-                       value="{{ list_value_by_tag('mf_ip', loop.index0) }}" />
+                <input type="text" name="mf_ip_{{ loop.index0 }}" class="form-control-sm accept_edit"
+                       value="{{ list_value_by_tag('mf_ip', loop.index0).replace(',30006,beast_in', '') }}" />
               </td>
-              <td class="text-center">{{ list_value_by_tag('lat', loop.index0) }} /
+              <td class="text-center d-none d-md-table-cell">{{ list_value_by_tag('lat', loop.index0) }} /
                 {{ list_value_by_tag('lng', loop.index0) }} / {{ list_value_by_tag('alt', loop.index0) }}m
               </td>
-              <td class="text-center"> {{ list_value_by_tag('mf_version', loop.index0)}}
+              <td class="text-center d-none d-md-table-cell">
+                {{ list_value_by_tag('mf_version', loop.index0).split('(')[0] }}
               </td>
               <td class="text-center"><span id="mf_status_{{ loop.index0 }}"></span></td>
+              <td class="text-center"><input type="checkbox" class="form-check-input" name="mf_uat_{{ loop.index0 }}"
+                       id="mf_uat_{{ loop.index0 }}" {% if list_is_enabled('uat978', loop.index0) %}checked="checked"
+                       {% endif %} /></td>
+              <td class="text-center"><input type="checkbox" class="form-check-input" name="mf_brofm_{{ loop.index0 }}"
+                       id="mf_brofm_{{ loop.index0 }}"
+                       {% if list_is_enabled('mf_brofm', loop.index0) %}checked="checked" {% endif %} /></td>
               <td class="text-center">
                 <button type="submit" name="save_edit_micro_{{ loop.index0 }}" value="go" title="Save changes"
                         id="save_edit" class="btn btn-danger btn-floating btn-sm">&#x2714;</button>
@@ -94,15 +103,24 @@
               </td>
               <td class="text-center">
                 <a id="table_mf_ip_{{ loop.index0 }}"
-                   href="http://{{ list_value_by_tag('mf_ip', loop.index0) }}">{{ list_value_by_tag('mf_ip', loop.index0) }}</a>
+                   href="http://{{ list_value_by_tag('mf_ip', loop.index0).split(',')[0] }}">{{ list_value_by_tag('mf_ip', loop.index0).replace(',30006,beast_in', '') }}</a>
               </td>
-              <td class="text-center" id="table_mf_lla_{{ loop.index0 }}">{{ list_value_by_tag('lat', loop.index0) }} /
+              <td class="text-center d-none d-md-table-cell" id="table_mf_lla_{{ loop.index0 }}">
+                {{ list_value_by_tag('lat', loop.index0) }} /
                 {{ list_value_by_tag('lng', loop.index0) }} / {{ list_value_by_tag('alt', loop.index0) }}m
               </td>
-              <td class="text-center" id="table_mf_version_{{ loop.index0 }}">
-                {{ list_value_by_tag('mf_version', loop.index0)}}
+              <td class="text-center d-none d-md-table-cell" id="table_mf_version_{{ loop.index0 }}">
+                {{ list_value_by_tag('mf_version', loop.index0).split('(')[0]}}
               </td>
               <td class="text-center"><a id="mf_status_{{ loop.index0 }}" href="/stats_{{loop.index0}}/"></a></td>
+              <td class="text-center"><span
+                      id="table_mf_uat_{{ loop.index0 }}">{% if list_is_enabled('uat978', loop.index0) %}&#10003;{% endif %}</span>
+              </td>
+              <td class="text-center"><span
+                      id="table_mf_brofm_{{ loop.index0 }}">{% if list_is_enabled('mf_brofm', loop.index0) %}&#10003;
+                  {% endif %}</span>
+              </td>
+
               <td class="text-center">
                 <button type="submit" name="remove_micro_{{ loop.index0 }}" value="go" title="Remove this micro feeder"
                         class="btn btn-danger btn-floating btn-sm">&#x232B;</button>
@@ -391,9 +409,11 @@
       .then(data => {
         data.forEach((d, i) => {
           let idx = i + 1; // the ids are 1-based
-          $("#table_mf_ip_" + idx).text(d["mf_ip"]);
+          //$("#table_mf_ip_" + idx).text(d["mf_ip"]);
           $("#table_mf_lla_" + idx).text(d["lat"] + " / " + d["lng"] + " / " + d["alt"]);
           $("#table_mf_version_" + idx).text(d["mf_version"]);
+          $("#mf_uat_" + idx).prop('disabled', d["uat_capable"] == false);
+          $("#mf_brofm_" + idx).prop('disabled', d["brofm_capable"] == false);
         })
       })
       .finally(() => {

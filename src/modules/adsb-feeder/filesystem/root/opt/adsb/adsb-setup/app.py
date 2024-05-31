@@ -1387,7 +1387,7 @@ class AdsbIm:
                 print_err(f"couldn't find env list for {tags}")
         self._d.env_by_tags("num_micro_sites").value -= 1
 
-    def edit_micro_site(self, num, site_name, ip):
+    def edit_micro_site(self, num, site_name, ip, uat, brofm):
         print_err(
             f"editing micro site {num} from {self._d.env_by_tags('site_name').list_get(num)} at {self._d.env_by_tags('mf_ip').list_get(num)} to {site_name} at {ip}"
         )
@@ -1435,6 +1435,14 @@ class AdsbIm:
             self._d.env_by_tags("site_name").list_set(
                 num, self.unique_site_name(site_name)
             )
+        if uat != self._d.env_by_tags("uat978").list_get(num):
+            print_err(
+                f"update uat978 from {self._d.env_by_tags('uat978').list_get(num)} to {uat}"
+            )
+            self._d.env_by_tags("uat978").list_set(num, uat)
+            self.setup_or_disable_uat(num)
+
+        self._d.env_by_tags("mf_brofm").list_set(num, brofm)
         return (True, "")
 
     def setRtlGain(self):
@@ -1466,6 +1474,23 @@ class AdsbIm:
 
             # this adjusts the gain while readsb is running
             tryWriteFile("/run/adsb-feeder-ultrafeeder/readsb/setGain", f"{gain}\n")
+
+    def setup_or_disable_uat(self, sitenum):
+        if self._d.list_is_enabled(["uat978"], sitenum):
+            # always get UAT from the readsb uat_replay
+            self._d.env_by_tags("replay978").list_set(
+                sitenum, "--net-uat-replay-port 30978"
+            )
+            self._d.env_by_tags("978host").list_set(sitenum, f"ultrafeeder_{sitenum}")
+            self._d.env_by_tags("rb978host").list_set(
+                sitenum, self._d.env_by_tags("mf_ip").list_get(sitenum)
+            )
+            self._d.env_by_tags("978piaware").list_set(sitenum, "relay")
+        else:
+            self._d.env_by_tags("replay978").list_set(sitenum, "")
+            self._d.env_by_tags("978host").list_set(sitenum, "")
+            self._d.env_by_tags("rb978host").list_set(sitenum, "")
+            self._d.env_by_tags("978piaware").list_set(sitenum, "")
 
     def handle_implied_settings(self):
 
@@ -1517,23 +1542,7 @@ class AdsbIm:
             self._d.env_by_tags("max_range").list_set(0, 0)
 
             for sitenum in [0] + self.micro_indices():
-                if self._d.env_by_tags(["uat978", "is_enabled"]).list_get(sitenum):
-                    # always get UAT from the readsb uat_replay
-                    self._d.env_by_tags("replay978").list_set(
-                        sitenum, "--net-uat-replay-port 30978"
-                    )
-                    self._d.env_by_tags("978host").list_set(
-                        sitenum, f"ultrafeeder_{sitenum}"
-                    )
-                    self._d.env_by_tags("rb978host").list_set(
-                        sitenum, self._d.env_by_tags("mf_ip").list_get(sitenum)
-                    )
-                    self._d.env_by_tags("978piaware").list_set(sitenum, "relay")
-                else:
-                    self._d.env_by_tags("replay978").list_set(sitenum, "")
-                    self._d.env_by_tags("978host").list_set(sitenum, "")
-                    self._d.env_by_tags("rb978host").list_set(sitenum, "")
-                    self._d.env_by_tags("978piaware").list_set(sitenum, "")
+                self.setup_or_disable_uat(sitenum)
 
         else:
             self._d.env_by_tags("tar1090portadjusted").value = self._d.env_by_tags(
@@ -1774,7 +1783,11 @@ class AdsbIm:
                     # save changes
                     num = int(key[len("save_edit_micro_") :])
                     success, message = self.edit_micro_site(
-                        num, form.get(f"site_name_{num}"), form.get(f"mf_ip_{num}")
+                        num,
+                        form.get(f"site_name_{num}"),
+                        form.get(f"mf_ip_{num}"),
+                        form.get(f"mf_uat_{num}"),
+                        form.get(f"mf_brofm_{num}"),
                     )
                     if success:
                         self._next_url_from_director = url_for("stage2")
