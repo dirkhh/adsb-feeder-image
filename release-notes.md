@@ -1,4 +1,8 @@
 Changes since v2.0.3 include:
+- hotspot: support passwords with spaces
+- stage2: use site name for page and tab titles in micro proxy graph1090
+- stage2: UI changes to support lower bandwidth communication with (new enough) micro feeders. This drops many of the messages, but none of the positions.
+- Stratux support for uat978
 - reduce micro feeder memory footprint
 - many small changes to if and when the waiting spinner is shown
 - reduce the data transferred between micro feeder and stage 2 instance
