@@ -866,27 +866,31 @@ class AdsbIm:
         )
         return Response(jsonString, mimetype="application/json")
 
+    def brofm_capable(self, version=""):
+        try:
+            # we don't want to include the channel, nor the leading 'v'
+            version = (version.split("(")[0][1:])
+            if semver.compare(version, "2.1.0-beta.4") >= 0:
+                return True
+        except:
+            print_err(
+                f"wasn't able to parse {version} as semver and compare..."
+            )
+        return False
+
     def base_info(self):
         if not self._d.is_enabled("stage2"):
             return self.my_base_info()
         # for a stage2 we return the base info for each of the micro feeders
         info_array = []
         for i in self.micro_indices():
+            uat_capable = False
+            brofm_capable = False
             if self._d.env_by_tags("mf_version").list_get(i) != "not an adsb.im feeder":
                 self.get_base_info(i)
                 uat_capable = self._d.env_by_tags("978url").list_get(i) != ""
-                brofm_capable = False
-                try:
-                    # we don't want to include the channel, nor the leading 'v'
-                    version = (
-                        self._d.env_by_tags("mf_version").list_get(i).split("(")[0][1:]
-                    )
-                    if semver.compare(version, "2.1.0-beta.4") >= 0:
-                        brofm_capable = True
-                except:
-                    print_err(
-                        f"wasn't able to parse {version} as semver and compare..."
-                    )
+                brofm_capable = self.brofm_capable(version=self._d.env_by_tags("mf_version").list_get(i))
+
             info_array.append(
                 {
                     "mf_ip": self._d.env_by_tags("mf_ip").list_get(i),
@@ -1044,7 +1048,10 @@ class AdsbIm:
         # m=0 indicates we are looking at an integrated/micro feeder or at the stage 2 local aggregator
         # m>0 indicates we are looking at a micro-proxy
         if self._d.is_enabled("stage2"):
-            m = make_int(request.args.get("m"))
+            if request.args.get("m"):
+                m = make_int(request.args.get("m"))
+            else:
+                m = 0
             site = self._d.env_by_tags("site_name").list_get(m)
             print_err(
                 "setting up visualization on a stage 2 system for site {site} (m={m})"
@@ -1242,15 +1249,8 @@ class AdsbIm:
                 # does it support beast reduce optimized for mlat (brofm)?
                 json_dict["brofm_capable"] = False
                 if "version" in json_dict:
-                    try:
-                        # we don't want to include the channel, nor the leading 'v'
-                        version = json_dict.get("version").split("(")[0][1:]
-                        if semver.compare(version, "2.1.0-beta.4") >= 0:
-                            json_dict["brofm_capable"] = True
-                    except:
-                        print_err(
-                            f"wasn't able to parse {version} as semver and compare..."
-                        )
+                    json_dict["brofm_capable"] = self.brofm_capable(version=json_dict.get("version"))
+
             # now return the json_dict which will give the caller all the relevant data
             # including whether this is a v2 or not
             return make_response(json.dumps(json_dict), 200)
@@ -2224,9 +2224,11 @@ class AdsbIm:
         if request.method == "POST":
             return self.update()
         if not self._d.is_enabled("base_config"):
+            print_err(f"director redirecting to setup, base_config not completed")
             return self.setup()
         # if we already figured out where to go next, let's just do that
         if self._next_url_from_director:
+            print_err(f"director redirecting to next_url_from_director: {self._next_url_from_director}")
             url = self._next_url_from_director
             self._next_url_from_director = ""
             if re.match(r"^http://\d+\.\d+\.\d+\.\d+:\d+$", url):
@@ -2250,6 +2252,7 @@ class AdsbIm:
 
         # do we have duplicate SDR serials?
         if len(self._sdrdevices.duplicates) > 0:
+            print_err("director redirecting to advanced: duplicate SDR serials")
             return self.advanced()
 
         # check that "something" is configured as input
@@ -2260,13 +2263,15 @@ class AdsbIm:
             self._d.env_by_tags("1090serial").value
             or self._d.env_by_tags("978serial").value
             or self._d.is_enabled("airspy")
-        ):
+        ) and not self._d.is_enabled("stage2"):
+            print_err("director redirecting to advanced: devices present but not configured")
             return self.advanced()
 
         # if the user chose to individually pick aggregators but hasn't done so,
         # they need to go to the aggregator page
         if self.at_least_one_aggregator() or self._d.env_by_tags("aggregators_chosen"):
             return self.index()
+        print_err("director redirecting to aggregators: to be configured")
         return self.aggregators()
 
     @check_restart_lock
