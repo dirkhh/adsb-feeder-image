@@ -351,9 +351,9 @@
     }
   });
   function check_micro_feeder() {
-    show_spinner();
     let ip = $("#add_micro_feeder_ip").val()
     if (ip.length > 3) {
+      show_spinner();
       let url = "/api/check_remote_feeder/" + ip;
       console.log("Accessing", url);
       fetch(url, {
