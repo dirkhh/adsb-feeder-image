@@ -10,7 +10,6 @@ import platform
 import re
 import requests
 import secrets
-import semver
 import signal
 import shutil
 import string
@@ -207,6 +206,7 @@ class AdsbIm:
             "alive--is_enabled",
             "uat978--is_enabled", "978url", "978piaware",
             "replay978", "978host",
+            "mf_brofm", "mf_brofm_capable",
         )
 
         self._routemanager.add_proxy_routes(self._d.proxy_routes)
@@ -866,18 +866,6 @@ class AdsbIm:
         )
         return Response(jsonString, mimetype="application/json")
 
-    def brofm_capable(self, version=""):
-        try:
-            # we don't want to include the channel, nor the leading 'v'
-            version = (version.split("(")[0][1:])
-            if semver.compare(version, "2.1.0-beta.4") >= 0:
-                return True
-        except:
-            print_err(
-                f"wasn't able to parse {version} as semver and compare..."
-            )
-        return False
-
     def base_info(self):
         if not self._d.is_enabled("stage2"):
             return self.my_base_info()
@@ -885,11 +873,9 @@ class AdsbIm:
         info_array = []
         for i in self.micro_indices():
             uat_capable = False
-            brofm_capable = False
             if self._d.env_by_tags("mf_version").list_get(i) != "not an adsb.im feeder":
                 self.get_base_info(i)
                 uat_capable = self._d.env_by_tags("978url").list_get(i) != ""
-                brofm_capable = self.brofm_capable(version=self._d.env_by_tags("mf_version").list_get(i))
 
             info_array.append(
                 {
@@ -899,7 +885,10 @@ class AdsbIm:
                     "lng": self._d.env_by_tags("lng").list_get(i),
                     "alt": self._d.env_by_tags("alt").list_get(i),
                     "uat_capable": uat_capable,
-                    "brofm_capable": brofm_capable,
+                    "brofm_capable": (
+                        self._d.list_is_enabled("mf_brofm_capable", idx=i)
+                        or self._d.list_is_enabled("mf_brofm", idx=i)
+                    ),
                     "brofm_enabled": self._d.list_is_enabled("mf_brofm", idx=i),
                 }
             )
@@ -939,6 +928,9 @@ class AdsbIm:
                         self._d.env_by_tags("uatport").value
                         if self._d.list_is_enabled(["uat978"], 0)
                         else 0
+                    ),
+                    "brofm_capable": (
+                        self._d.env_by_tags("aggregators").value == "micro"
                     ),
                 }
             )
@@ -1210,6 +1202,8 @@ class AdsbIm:
             self._d.env_by_tags("rtlsdrurl").list_set(n, rtlsdrurl)
             self._d.env_by_tags("978url").list_set(n, dump978url)
 
+            self._d.env_by_tags("mf_brofm_capable").list_set(n, bool(base_info.get("brofm_capable")))
+
             return True
         #    except:
         #        pass
@@ -1247,9 +1241,7 @@ class AdsbIm:
                     else:
                         json_dict["micro_settings"] = False
                 # does it support beast reduce optimized for mlat (brofm)?
-                json_dict["brofm_capable"] = False
-                if "version" in json_dict:
-                    json_dict["brofm_capable"] = self.brofm_capable(version=json_dict.get("version"))
+                json_dict["brofm_capable"] = bool(json_dict.get("brofm_capable"))
 
             # now return the json_dict which will give the caller all the relevant data
             # including whether this is a v2 or not
