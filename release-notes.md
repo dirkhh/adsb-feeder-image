@@ -1,4 +1,5 @@
 Changes since v2.0.3 include:
+- remove dependency on semver for the moment fixing some situations of the package missing
 - stage2: gracefully deal with not having any HeyWhatsThat outlines
 - hotspot: support passwords with spaces
 - stage2: use site name for page and tab titles in micro proxy graph1090
