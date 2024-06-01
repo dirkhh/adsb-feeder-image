@@ -242,6 +242,7 @@ class AdsbIm:
         self.app.add_url_rule("/api/check_remote_feeder/<ip>", "check_remote_feeder", self.check_remote_feeder)
         self.app.add_url_rule(f"/api/status/<agg>", "beast", self.agg_status)
         self.app.add_url_rule(f"/api/status/<agg>/<idx>", "beast", self.agg_status)
+        self.app.add_url_rule("/api/stage2_connection", "stage2_connection", self.stage2_connection)
         # fmt: on
         self.update_boardname()
         self.update_version()
@@ -896,15 +897,11 @@ class AdsbIm:
 
     def my_base_info(self):
         listener = request.remote_addr
-        stage2_listeners = self._d.env_by_tags("stage2_listeners").value
+        tm = int(time.time())
         print_err(f"access to base_info from {listener}")
-        if not listener in stage2_listeners:
-            idx = len(stage2_listeners)
-            # beware - the default is an array with an empty string, so we need to overwrite this
-            # when we get the first actual listener
-            if self._d.env_by_tags("stage2_listeners").list_get(0) == "":
-                idx = 0
-            self._d.env_by_tags("stage2_listeners").list_set(idx, listener)
+        l_env = self._d.env_by_tags("last_stage2_contact")
+        l_env.list_set(0, listener)
+        l_env.list_set(1, tm)
         response = make_response(
             json.dumps(
                 {
@@ -968,6 +965,34 @@ class AdsbIm:
                 except:
                     ret.append({"pps": 0, "mps": 0, "secs": 0})
         return Response(json.dumps(ret), mimetype="application/json")
+
+    def stage2_connection(self):
+        if (
+            not self._d.env_by_tags("aggregators").value == "micro"
+            or len(self._d.env_by_tags("last_stage2_contact").value) != 2
+        ):
+            return Response(
+                json.dumps({"stage2_connected": "never"}), mimetype="application/json"
+            )
+        now = int(time.time())
+        last = make_int(self._d.env_by_tags("last_stage2_contact").list_get(1))
+        since = now - last
+        hrs, min = divmod(since // 60, 60)
+        if hrs > 0:
+            time_since = "more than an hour"
+        elif min > 15:
+            time_since = f"{min} minutes"
+        else:
+            time_since = "recent"
+        return Response(
+            json.dumps(
+                {
+                    "stage2_connected": time_since,
+                    "address": self._d.env_by_tags("last_stage2_contact").list_get(0),
+                }
+            ),
+            mimetype="application/json",
+        )
 
     def micro_settings(self):
         microsettings = {}
