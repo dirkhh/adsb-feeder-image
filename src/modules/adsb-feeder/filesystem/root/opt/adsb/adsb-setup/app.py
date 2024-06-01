@@ -1202,7 +1202,9 @@ class AdsbIm:
             self._d.env_by_tags("rtlsdrurl").list_set(n, rtlsdrurl)
             self._d.env_by_tags("978url").list_set(n, dump978url)
 
-            self._d.env_by_tags("mf_brofm_capable").list_set(n, bool(base_info.get("brofm_capable")))
+            self._d.env_by_tags("mf_brofm_capable").list_set(
+                n, bool(base_info.get("brofm_capable"))
+            )
 
             return True
         #    except:
@@ -2220,7 +2222,9 @@ class AdsbIm:
             return self.setup()
         # if we already figured out where to go next, let's just do that
         if self._next_url_from_director:
-            print_err(f"director redirecting to next_url_from_director: {self._next_url_from_director}")
+            print_err(
+                f"director redirecting to next_url_from_director: {self._next_url_from_director}"
+            )
             url = self._next_url_from_director
             self._next_url_from_director = ""
             if re.match(r"^http://\d+\.\d+\.\d+\.\d+:\d+$", url):
@@ -2249,14 +2253,20 @@ class AdsbIm:
 
         # check that "something" is configured as input
         if (
-            len(self._sdrdevices) > 1
-            or any([sdr._type == "airspy" for sdr in self._sdrdevices.sdrs])
-        ) and not (
-            self._d.env_by_tags("1090serial").value
-            or self._d.env_by_tags("978serial").value
-            or self._d.is_enabled("airspy")
-        ) and not self._d.is_enabled("stage2"):
-            print_err("director redirecting to advanced: devices present but not configured")
+            (
+                len(self._sdrdevices) > 1
+                or any([sdr._type == "airspy" for sdr in self._sdrdevices.sdrs])
+            )
+            and not (
+                self._d.env_by_tags("1090serial").value
+                or self._d.env_by_tags("978serial").value
+                or self._d.is_enabled("airspy")
+            )
+            and not self._d.is_enabled("stage2")
+        ):
+            print_err(
+                "director redirecting to advanced: devices present but not configured"
+            )
             return self.advanced()
 
         # if the user chose to individually pick aggregators but hasn't done so,

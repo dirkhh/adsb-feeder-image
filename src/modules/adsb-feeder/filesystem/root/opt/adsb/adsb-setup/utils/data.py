@@ -567,7 +567,11 @@ class Data:
         ),
         Env("AF_MICRO_IP", default=[""], tags=["mf_ip"]),
         Env("AF_MICRO_BROFM", default=[False], tags=["mf_brofm", "is_enabled"]),
-        Env("AF_MICRO_BROFM_CAPABLE", default=[False], tags=["mf_brofm_capable", "is_enabled"]),
+        Env(
+            "AF_MICRO_BROFM_CAPABLE",
+            default=[False],
+            tags=["mf_brofm_capable", "is_enabled"],
+        ),
         Env("AF_FEEDER_VERSION", default=[""], tags=["mf_version"]),
     }
 
