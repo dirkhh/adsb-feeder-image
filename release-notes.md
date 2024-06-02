@@ -1,4 +1,6 @@
 Changes since v2.0.3 include:
+- update to latest Ultrafeeder and Webproxy images
+- better status message for micro feeders connected to a stage 2
 - remove dependency on semver for the moment fixing some situations of the package missing
 - stage2: gracefully deal with not having any HeyWhatsThat outlines
 - hotspot: support passwords with spaces
