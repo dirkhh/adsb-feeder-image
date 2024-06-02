@@ -1,4 +1,5 @@
 Changes since v2.0.3 include:
+- stage2: add missing stage2_checks function
 - update to latest Ultrafeeder and Webproxy images
 - better status message for micro feeders connected to a stage 2
 - remove dependency on semver for the moment fixing some situations of the package missing

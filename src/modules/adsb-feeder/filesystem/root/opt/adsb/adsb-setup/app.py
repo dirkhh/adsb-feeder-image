@@ -505,6 +505,11 @@ class AdsbIm:
         )
         thread.start()
 
+    def stage2_checks(self):
+        for i in self.micro_indices():
+            if self._d.env_by_tags("mf_version").list_get(i) != "not an adsb.im feeder":
+                self.get_base_info(i)
+
     def restarting(self):
         return render_template("restarting.html")
 
