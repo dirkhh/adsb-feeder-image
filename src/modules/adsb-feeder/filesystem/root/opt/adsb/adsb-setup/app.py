@@ -401,6 +401,10 @@ class AdsbIm:
         if not no_server:
             self.update_dns_state()
             self._dns_watch = Background(3600, self.update_dns_state)
+            if self._d.is_enabled("stage2"):
+                # let's make sure we tell the micro feeders every ten minutes that
+                # the stage2 is around, looking at them
+                self._stage2_checks = Background(600, self.stage2_checks)
         # prepare for app use (vs ADS-B Feeder Image use)
         # newer images will include a flag file that indicates that this is indeed
         # a full image - but in case of upgrades from older version, this heuristic
