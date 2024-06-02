@@ -13,7 +13,8 @@
   <!-- Spinner -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
   <title>
-    {{ list_value_by_tag("site_name", 0) }}{% if list_value_by_tag("site_name", 0) != "" }: {$ endif %}{% block title %}{% endblock %}
+    {{ list_value_by_tag("site_name", 0) }}{% if list_value_by_tag("site_name", 0) != "" %}:
+    {% endif %}{% block title %}{% endblock %}
   </title>
   <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
