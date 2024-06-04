@@ -1,32 +1,26 @@
 Changes since v2.0.3 include:
-- stage2: add missing stage2_checks function
-- update to latest Ultrafeeder and Webproxy images
+- WiFi config via hotspot when there is no network connectivity
+- fix requesting a key for OpenSky
+- update container versions (this will take a moment when updating)
 - better status message for micro feeders connected to a stage 2
-- remove dependency on semver for the moment fixing some situations of the package missing
 - stage2: gracefully deal with not having any HeyWhatsThat outlines
-- hotspot: support passwords with spaces
 - stage2: use site name for page and tab titles in micro proxy graph1090
 - stage2: UI changes to support lower bandwidth communication with (new enough) micro feeders. This drops many of the messages, but none of the positions.
 - Stratux support for uat978
 - reduce micro feeder memory footprint
 - many small changes to if and when the waiting spinner is shown
-- reduce the data transferred between micro feeder and stage 2 instance
 - display waiting app log scroller for feeder updates / improve log scroller robustness
 - the please wait page now instantly returns you to the webinterface once the system is done applying settings
 - hand off user from the first boot waiting app to the installed system / adsb-setup app
 - fix Odroid XU4 image build
 - re-add image for Orange Pi 3 LTS (this time DietPi based)
 - add a 'waiting app' that shows sign of life (and log files) during the long first boot of a DietPi based image
-- yet another update to Ultrafeeder version
 - pull Ultrafeeder earlier after first boot so that by the time the user is done configuring it will already be available
 - clean up adsb-setup.log for better readability
 - include more info in diagnostic share
 - logging improvements: dietpi: make journal persistent; non-dietpi: use journald logging driver for docker; syslog identifiers for services
 - change log upload from out of service sprunge.us to 0x0.st
 - ensure spurious lockFile doesn't prevent docker-compose-adsb from running
-- update container versions (this will take a moment when updating)
-- alpha: stratuxv3 UAT receiver support
-- alpha: wifi config via access point when there is no network connectivity
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)
