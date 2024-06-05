@@ -3,11 +3,21 @@ import re
 import os
 from sys import argv
 import time
+import math
+import sys
 
 app = Flask(__name__)
 logfile = "/opt/adsb/adsb-setup.log"
 title = "Restarting the ADS-B Feeder System"
 
+def print_err(*args, **kwargs):
+    level = int(kwargs.pop("level", 0))
+    if level > 0 and int(verbose) & int(level) == 0:
+        return
+    timestamp = time.strftime(
+        "%Y-%m-%dT%H:%M:%S", time.gmtime()
+    ) + ".{0:03.0f}Z".format(math.modf(time.time())[0] * 1000)
+    print(*((timestamp,) + args), file=sys.stderr, **kwargs)
 
 @app.route("/stream-log")
 def stream_log():
@@ -50,4 +60,7 @@ if __name__ == "__main__":
         logfile = argv[2]
     if len(argv) >= 4:
         title = argv[3] + " the ADS-B Feeder System"
+
+    print_err(f"Starting waiting-app.py on port {port} with title \"{title}\" streaming logfile {logfile}")
+
     app.run(host="0.0.0.0", port=port)
