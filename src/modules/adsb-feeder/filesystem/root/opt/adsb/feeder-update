@@ -213,10 +213,10 @@ sed -i "s/\"_ADSBIM_BASE_VERSION\": \"[^\"]*\"/\"_ADSBIM_BASE_VERSION\": \"$SEDV
 # also updates .env/config.json with new container versions from docker.image.versions
 python3 /opt/adsb/adsb-setup/app.py --update-config || true # this always exits 1 and that's fine
 
-echo "finally, trigger a container upgrade so that they match the new image"
+echo "$(date -u +"%FT%T.%3NZ") finally, trigger a container upgrade so that they match the new image"
 /opt/adsb/docker-update-adsb-im
 
-echo "restart the service"
+echo "$(date -u +"%FT%T.%3NZ") restart the service"
 trap - EXIT
 systemctl daemon-reload
 kill_wait_app
@@ -225,4 +225,4 @@ systemctl start adsb-setup.service
 systemctl enable adsb-update.service
 systemctl enable adsb-update.timer
 
-echo "update to ${VERSION} complete"
+echo "$(date -u +"%FT%T.%3NZ") update to ${VERSION} complete"

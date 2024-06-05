@@ -9,8 +9,6 @@ if [ -f /opt/adsb/verbose ] ; then
 fi
 
 # if the waiting app is running, stop it
-[[ -f /opt/adsb/adsb-setup/waiting-app.pid ]] && kill $(cat /opt/adsb/adsb-setup/waiting-app.pid) || true
-# and if that doesn't do it, try the big hammer
 pkill -f 'python3 /opt/adsb/adsb-setup/waiting-app.py' || true
 
 ACTION="update to"
@@ -28,7 +26,7 @@ fi
 [[ -f /etc/adsb.im.version && ! -f /opt/adsb/adsb.im.version ]] && mv -f /etc/adsb.im.version /opt/adsb/adsb.im.version
 
 NEW_VERSION=$(</opt/adsb/adsb.im.version)
-echo "final housekeeping for the $ACTION $NEW_VERSION" >> /opt/adsb/adsb-setup.log
+echo "$(date -u +"%FT%T.%3NZ") final housekeeping for the $ACTION $NEW_VERSION" >> /opt/adsb/adsb-setup.log
 
 # remove any left-over apps and files from previous versions
 USR_BIN_APPS=('docker-compose-start' 'docker-compose-adsb' 'docker-update-adsb-im' \
