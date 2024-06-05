@@ -42,7 +42,7 @@ cleanup() {
     # make sure this doesn't fail if the kill fails for some reason
     kill_wait_app
     /opt/adsb/docker-compose-start
-    systemctl start adsb-setup.service
+    systemctl restart adsb-setup.service
 }
 
 waiting_placeholder() {
@@ -224,7 +224,7 @@ trap - EXIT
 systemctl daemon-reload
 kill_wait_app
 
-systemctl start adsb-setup.service
+systemctl restart adsb-setup.service
 systemctl enable adsb-update.service
 systemctl enable adsb-update.timer
 
