@@ -8,8 +8,26 @@ if [ -f /opt/adsb/verbose ] ; then
     mv /opt/adsb/verbose /opt/adsb/config/verbose
 fi
 
+kill_wait_app() {
+    PORT=$(grep AF_WEBPORT /opt/adsb/config/.env | cut -d= -f2)
+    PORTHEX=$(printf "%04x" "$PORT")
+
+    # figure out if something is listening to that port and give it some time to stop running
+    # keep killing the wait the app while waiting for the port
+    for i in {1..100}; do
+        pkill -f 'python3 /opt/adsb/adsb-setup/waiting-app.py' || true
+        sleep 0.1
+        if ! grep /proc/net/tcp -F -e ": 00000000:${PORTHEX}" -qs; then
+            return
+        fi
+    done
+    # let's complain loudly once we've been unsuccessful for 10 seconds
+    echo "$(date -u +"%FT%T.%3NZ") FATAL: There's still something running on port $PORT but not waiting anymore"
+    netstat -tlpn
+}
+
 # if the waiting app is running, stop it
-pkill -f 'python3 /opt/adsb/adsb-setup/waiting-app.py' || true
+kill_wait_app
 
 ACTION="update to"
 if [[ -f "/opt/adsb/finish-update.done" ]]; then
