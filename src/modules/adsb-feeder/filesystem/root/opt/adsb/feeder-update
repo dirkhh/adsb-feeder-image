@@ -12,7 +12,7 @@ if [ "$(id -u)" != "0" ] ; then
 fi
 
 start_wait_app() {
-    python3 /opt/adsb/adsb-setup/waiting-app.py "$@"
+    python3 /opt/adsb/adsb-setup/waiting-app.py "$@" &>> /opt/adsb/adsb-setup.log
 }
 kill_wait_app() {
     PORT=$(grep AF_WEBPORT /opt/adsb/config/.env | cut -d= -f2)
