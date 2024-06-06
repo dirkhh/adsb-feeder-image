@@ -86,7 +86,6 @@ services:
       - /run/adsb-feeder-ultrafeeder_STAGE2NUM:/run
       - thermal_fix:${FEEDER_RB_THERMAL_HACK:-/tmp/rbt}:ro
     tmpfs:
-      - /tmp:size=128M
       - /var/log:size=32M
 
 volumes:
