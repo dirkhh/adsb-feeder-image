@@ -227,5 +227,7 @@ kill_wait_app
 systemctl restart adsb-setup.service
 systemctl enable adsb-update.service
 systemctl enable adsb-update.timer
+systemctl enable adsb-hotspot.service
+systemctl start adsb-hotspot.service
 
 echo "$(date -u +"%FT%T.%3NZ") update to ${VERSION} complete"
