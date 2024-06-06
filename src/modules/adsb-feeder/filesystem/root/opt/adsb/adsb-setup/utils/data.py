@@ -323,15 +323,17 @@ class Data:
             tags=["board_name", "norestore"],
         ),
         # ports used by our proxy system
-        Env("AF_WEBPORT", default=80, tags=["webport"]),
-        Env("AF_DAZZLE_PORT", default=9999, tags=["dazzleport"]),
-        Env("AF_TAR1090_PORT", default=8080, tags=["tar1090port"]),
+        Env("AF_WEBPORT", default=80, tags=["webport", "norestore"]),
+        Env("AF_DAZZLE_PORT", default=9999, tags=["dazzleport", "norestore"]),
+        Env("AF_TAR1090_PORT", default=8080, tags=["tar1090port", "norestore"]),
         Env("AF_TAR1090_PORT_ADJUSTED", default=8080, tags=["tar1090portadjusted"]),
-        Env("AF_UAT978_PORT", default=9780, tags=["uatport"]),
-        Env("AF_PIAWAREMAP_PORT", default=8081, tags=["piamapport"]),
-        Env("AF_PIAWARESTAT_PORT", default=8082, tags=["piastatport"]),
+        Env("AF_UAT978_PORT", default=9780, tags=["uatport", "norestore"]),
+        Env("AF_PIAWAREMAP_PORT", default=8081, tags=["piamapport", "norestore"]),
+        Env("AF_PIAWARESTAT_PORT", default=8082, tags=["piastatport", "norestore"]),
+
         Env("AF_FLIGHTRADAR_PORT", default=8754, tags=["frport"]),
         Env("AF_PLANEFINDER_PORT", default=30053, tags=["pfport"]),
+
         Env("_ADSBIM_STATE_PACKAGE", tags=["pack", "norestore"]),
         Env(
             "_ADSBIM_STATE_IMAGE_NAME",
@@ -350,6 +352,11 @@ class Data:
             "AF_IS_SECURE_IMAGE",
             default=False,
             tags=["secure_image", "is_enabled", "norestore"],
+        ),
+        Env(
+            "AF_APP_INIT_DONE",
+            default=False,
+            tags=["app_init_done", "is_enabled", "norestore"],
         ),
         Env(
             "AF_IS_FLIGHTRADAR24_ENABLED",

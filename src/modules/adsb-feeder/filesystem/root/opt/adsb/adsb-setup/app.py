@@ -379,19 +379,20 @@ class AdsbIm:
             )
 
     def setup_app_ports(self):
-        in_json = read_values_from_config_json()
-        if "AF_WEBPORT" not in in_json.keys():
+        if not self._d.is_enabled("app_init_done"):
             # ok, we don't have them explicitly set, so let's set them up
             # with the app defaults
             self._d.env_by_tags("webport").value = 1099
             self._d.env_by_tags("tar1090_image_config_link").value = (
-                "http://HOSTNAME:1099/"
+                f"http://HOSTNAME:{self._d.env_by_tags('webport').value}/"
             )
             self._d.env_by_tags("tar1090port").value = 1090
             self._d.env_by_tags("uatport").value = 1091
             self._d.env_by_tags("piamapport").value = 1092
             self._d.env_by_tags("piastatport").value = 1093
             self._d.env_by_tags("dazzleport").value = 1094
+
+            self._d.env_by_tags("app_init_done").value = True
 
     def run(self, no_server=False):
         debug = os.environ.get("ADSBIM_DEBUG") is not None
