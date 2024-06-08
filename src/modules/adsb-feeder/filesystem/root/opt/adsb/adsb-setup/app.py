@@ -16,6 +16,7 @@ import string
 import subprocess
 import threading
 import time
+import tempfile
 from uuid import uuid4
 import sys
 import zipfile
@@ -1317,20 +1318,36 @@ class AdsbIm:
                 self._d.config_path / "ultrafeeder" / f"{ip}-{now}",
             )
         url = f"http://{ip}/backupexecutefull"
-        with requests.get(url, stream=True) as response, zipfile.ZipFile(
-            io.BytesIO(response.content)
-        ) as zf:
-            zf.extractall(path=self._d.config_path / "ultrafeeder" / ip)
-        # deal with the duplicate "ultrafeeder in the path"
-        shutil.move(
-            self._d.config_path / "ultrafeeder" / ip / "ultrafeeder" / "globe_history",
-            self._d.config_path / "ultrafeeder" / ip / "globe_history",
-        )
-        shutil.move(
-            self._d.config_path / "ultrafeeder" / ip / "ultrafeeder" / "graphs1090",
-            self._d.config_path / "ultrafeeder" / ip / "graphs1090",
-        )
-        print_err(f"done importing graphs and history from {ip}")
+        # make tmpfile
+        fd, tmpfile = tempfile.mkstemp(dir=self._d.config_path / "ultrafeeder")
+        os.close(fd)
+
+        # stream writing to a file with requests library is a pain so just use curl
+        try:
+            subprocess.run(
+                f"curl -o {tmpfile} {url}",
+                shell=True,
+                check=True,
+            )
+
+            with zipfile.ZipFile(tmpfile) as zf:
+                zf.extractall(path=self._d.config_path / "ultrafeeder" / ip)
+            # deal with the duplicate "ultrafeeder in the path"
+            shutil.move(
+                self._d.config_path / "ultrafeeder" / ip / "ultrafeeder" / "globe_history",
+                self._d.config_path / "ultrafeeder" / ip / "globe_history",
+            )
+            shutil.move(
+                self._d.config_path / "ultrafeeder" / ip / "ultrafeeder" / "graphs1090",
+                self._d.config_path / "ultrafeeder" / ip / "graphs1090",
+            )
+
+            print_err(f"done importing graphs and history from {ip}")
+        except:
+            print_err(f"ERROR when importing graphs and history from {ip}")
+        finally:
+            os.remove(tmpfile)
+
 
     def setup_new_micro_site(
         self,
