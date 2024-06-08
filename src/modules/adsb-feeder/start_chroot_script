@@ -95,7 +95,7 @@ fi
 if [ "$NATIVE_DIETPI" != "1" ] ; then
 	# Install dependencies
 	apt-get update
-	apt-get install -y gnupg hostapd isc-dhcp-server
+	apt-get install -y gnupg hostapd isc-dhcp-server avahi-utils
 	systemctl mask hostapd.service
 	systemctl mask isc-dhcp-server.service
 

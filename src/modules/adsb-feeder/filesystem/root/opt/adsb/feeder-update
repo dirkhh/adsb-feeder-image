@@ -177,6 +177,22 @@ if [[ ${#missing[@]} -gt 0 ]] ; then
     fi
 fi
 
+if [ -f /opt/adsb/os.adsb.feeder.image ] ; then
+    # if this is a full image, we also need avahi-publish, which may not be available in older images
+    if ! which avahi-publish &>/dev/null ; then
+        echo "newer versions of the adsb.im ADS-B Feeder Image require the avahi-utils package - trying to install"
+        grep -i fedora /etc/os-release &> /dev/null && dnf install -y avahi-tools
+        grep -i centos /etc/os-release &> /dev/null && dnf install -y avahi-tools
+        grep -i suse /etc/os-release &> /dev/null && zypper install -y avahi-tools
+        grep -i debian /etc/os-release &> /dev/null && apt-get install -y avahi-utils
+        # now let's check again
+        if ! which avahi-publish &>/dev/null ; then
+            echo "cannot install avahi-utils package - please contact the adsb.im maintainer"
+            exit 1
+        fi
+    fi
+fi
+
 echo "prepare the files that we need to replace"
 mkdir -p "${DIR}/root"
 cp -r src/modules/adsb-feeder/filesystem/root "${DIR}"
@@ -187,7 +203,7 @@ cd "${DIR}/root"
 
 # if this an app and not the full image, prune some of the files that aren't
 # wanted for the app and copy the trees we need over
-if [ ! -f /opt/adsb/os.adsb.feeder.im ] ; then
+if [ ! -f /opt/adsb/os.adsb.feeder.image ] ; then
     rm -f ./usr/lib/systemd/system/adsb-bootstrap.service
     cp -a ./usr/lib/systemd/system/* /etc/systemd/system/
     cp -a ./opt/adsb/* /opt/adsb

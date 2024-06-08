@@ -395,6 +395,20 @@ class AdsbIm:
 
             self._d.env_by_tags("app_init_done").value = True
 
+    def mdns_alias_service(self, site_name: str):
+        os_flag_file = self._d.data_path / "os.adsb.feeder.image"
+        if not os_flag_file.exists():
+            return
+        # create a valid hostname from the site name and set it up as mDNS alias
+        # while a '-' is allowed in a hostname, the avahi service can't deal with that it seems,
+        # so let's go alphanumeric only
+        host_name = "".join(c for c in site_name if c.isalnum())
+        host_name = host_name.strip("-")[:63]
+        if host_name:
+            subprocess.run(
+                f"/opt/adsb/scripts/mdns-alias-setup.sh f{host_name}", shell=True
+            )
+
     def run(self, no_server=False):
         debug = os.environ.get("ADSBIM_DEBUG") is not None
         self._debug_cleanup()
@@ -458,6 +472,11 @@ class AdsbIm:
         if no_server:
             signal.raise_signal(signal.SIGTERM)
             return
+
+        # make sure the avahi alias service runs on an adsb.im image
+        site_name = self._d.env_by_tags("site_name").list_get(0)
+        if site_name and os_flag_file.exists():
+            self.mdns_alias_service(site_name)
 
         self.app.run(
             host="0.0.0.0",
@@ -1334,7 +1353,11 @@ class AdsbIm:
                 zf.extractall(path=self._d.config_path / "ultrafeeder" / ip)
             # deal with the duplicate "ultrafeeder in the path"
             shutil.move(
-                self._d.config_path / "ultrafeeder" / ip / "ultrafeeder" / "globe_history",
+                self._d.config_path
+                / "ultrafeeder"
+                / ip
+                / "ultrafeeder"
+                / "globe_history",
                 self._d.config_path / "ultrafeeder" / ip / "globe_history",
             )
             shutil.move(
@@ -1347,7 +1370,6 @@ class AdsbIm:
             print_err(f"ERROR when importing graphs and history from {ip}")
         finally:
             os.remove(tmpfile)
-
 
     def setup_new_micro_site(
         self,
@@ -2085,9 +2107,9 @@ class AdsbIm:
                         )
                         self.push_multi_outline()
                         self._multi_outline_bg = Background(60, self.push_multi_outline)
-                    self._d.env_by_tags("site_name").list_set(
-                        0, self.unique_site_name(form.get("site_name"), 0)
-                    )
+                    unique_name = self.unique_site_name(form.get("site_name"), 0)
+                    self._d.env_by_tags("site_name").list_set(0, unique_name)
+                    self.mdns_alias_service(unique_name)
                 if (
                     key == "aggregators"
                     and not self._d.env_by_tags("aggregators_chosen").value
@@ -2122,9 +2144,10 @@ class AdsbIm:
                     else:
                         e.value = value
                 if key == "site_name":
-                    self._d.env_by_tags("site_name").list_set(
-                        sitenum, self.unique_site_name(value, sitenum)
-                    )
+                    unique_name = self.unique_site_name(value, sitenum)
+                    self._d.env_by_tags("site_name").list_set(sitenum, unique_name)
+                    if sitenum == 0:
+                        self.mdns_alias_service(unique_name)
         # done handling the input data
         # what implied settings do we have (and could we simplify them?)
 
