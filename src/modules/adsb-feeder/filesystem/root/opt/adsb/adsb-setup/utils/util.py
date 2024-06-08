@@ -1,3 +1,4 @@
+import hashlib
 import inspect
 import itertools
 import math
@@ -14,6 +15,9 @@ verbose = (
     if not os.path.exists("/opt/adsb/config/verbose")
     else int(open("/opt/adsb/config/verbose", "r").read().strip())
 )
+
+# create a board unique but otherwise random / anonymous ID
+idhash = hashlib.md5(pathlib.Path("/etc/machine-id").read_text().encode()).hexdigest()
 
 
 def stack_info(msg=""):
@@ -75,6 +79,9 @@ def make_int(value):
 
 def generic_get_json(url: str, data=None, timeout=5.0):
     requests.packages.urllib3.util.connection.HAS_IPV6 = False
+    # use image specific but random value for user agent to distinguish
+    # between requests from the same IP but different feeders
+    agent = f"ADS-B Image-{idhash[:8]}"
     status = -1
     try:
         response = requests.request(
@@ -84,7 +91,7 @@ def generic_get_json(url: str, data=None, timeout=5.0):
             data=data,
             headers={
                 "Content-Type": "application/json",
-                "User-Agent": "ADS-B Image",
+                "User-Agent": agent,
             },
         )
         json_response = response.json()
