@@ -34,23 +34,7 @@
       document.addEventListener("readystatechange", (event) => {
         if (event.target.readyState === "complete") {
           show_spinner();
-          // Trigger restart and then start checking the restart status
-          var restartRequest = new XMLHttpRequest();
-          restartRequest.open("POST", "/restart");
-          restartRequest.onload = function () {
-            if (restartRequest.status === 200) {
-              checkRestartStatus();
-            } else {
-              // ops, we got an error from the server -- could be that we just switched off the hotspot, so keep trying
-              console.log("request to POST /restart resulted in ", restartRequest.status);
-              setTimeout(checkRestartStatus, 1000);
-            }
-          };
-          restartRequest.onerror = function () {
-            // ops, we got an error trying to talk to the server
-            alert("cannot talk to server sending the restart request - please report");
-          };
-          restartRequest.send();
+          checkRestartStatus();
         }
       });
 
@@ -70,6 +54,10 @@
             console.log("request to GET /restart resulted in ", request.status);
             setTimeout(checkRestartStatus, 2000);
           }
+        };
+        request.timeout = 2000;
+        request.ontimeout = function () {
+          checkRestartStatus();
         };
         request.onerror = function () {
           // ops, we got an error trying to talk to the server - could be it is briefly turned off for

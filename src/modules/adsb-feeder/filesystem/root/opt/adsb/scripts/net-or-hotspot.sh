@@ -23,6 +23,9 @@ if [[ $gateway == "" ]] || ! ping -c 1 -W 1 "$gateway" &> /dev/null ; then
         sed -i "s/wlan0/$wlan/g" /etc/default/isc-dhcp-server
         sed -i "s/wlan0/$wlan/g" /etc/hostapd/hostapd.conf
     fi
+
+    # the hotspot creates that file to indicate we should continue, let's clean it up
+    rm -f /opt/adsb/continueboot
     while [[ ! -f /opt/adsb/continueboot ]]; do
         cp /opt/adsb/accesspoint/hostapd.conf /etc/hostapd/hostapd.conf
         cp /opt/adsb/accesspoint/dhcpd.conf /etc/dhcp/dhcpd.conf
@@ -31,6 +34,7 @@ if [[ $gateway == "" ]] || ! ping -c 1 -W 1 "$gateway" &> /dev/null ; then
     done
     # the hotspot creates that file to indicate we should continue, let's clean it up
     rm -f /opt/adsb/continueboot
+
     echo "successfully connected to network"
 else
     echo "we are able to ping ${gateway}, no need to start an access point"

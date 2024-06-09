@@ -34,7 +34,7 @@ class Hotspot:
         else:
             self.version = "unknown"
         self.comment = ""
-        self.restart_state = ""
+        self.restart_state = "done"
         self.ssid = ""
         self.passwd = ""
         self._dnsserver = None
@@ -100,20 +100,23 @@ class Hotspot:
             print_err("no SSIDs found")
 
     def restart(self):
-        if request.method == "POST":
-            self.restart_state = "restarting"
-            thread = threading.Thread(target=self.test_wifi)
-            thread.start()
-            print_err("started wifi test thread")
-            return self.restart_state
-        if request.method == "GET":
-            return self.restart_state
+        return self.restart_state
 
     def catch_all(self, path):
+        if self.restart_state == "restarting":
+            return redirect("/restarting")
+
         if request.method == "POST":
+            self.restart_state = "restarting"
+
             self.ssid = request.form.get("ssid")
             self.passwd = request.form.get("passwd")
+
+            threading.Thread(target=self.test_wifi).start()
+            print_err("started wifi test thread")
+
             return redirect("/restarting")
+
         return render_template(
             "hotspot.html", version=self.version, comment=self.comment, ssids=self.ssids
         )
@@ -183,7 +186,7 @@ class Hotspot:
                 os.remove("/etc/network/interfaces")
                 os.rename("/etc/network/interfaces.new", "/etc/network/interfaces")
             output = subprocess.run(
-                f'wpa_passphrase {self.ssid} "{self.passwd}" > /etc/wpa_supplicant/wpa_supplicant.conf && systemctl restart networking.service',
+                f'wpa_passphrase "{self.ssid}" "{self.passwd}" > /etc/wpa_supplicant/wpa_supplicant.conf && systemctl restart networking.service',
                 shell=True,
                 capture_output=True,
             )
@@ -212,7 +215,7 @@ class Hotspot:
         if self._baseos == "dietpi":
             try:
                 result = subprocess.run(
-                    f'bash -c "wpa_supplicant -i{self.wlan} -c<(wpa_passphrase {self.ssid} "{self.passwd}")"',
+                    f'bash -c "wpa_supplicant -i{self.wlan} -c<(wpa_passphrase "{self.ssid}" "{self.passwd}")"',
                     shell=True,
                     capture_output=True,
                     timeout=10.0,
@@ -230,7 +233,7 @@ class Hotspot:
         elif self._baseos == "raspbian":
             try:
                 result = subprocess.run(
-                    f'nmcli d wifi connect {self.ssid} password "{self.passwd}" ifname {self.wlan}',
+                    f'nmcli d wifi connect "{self.ssid}" password "{self.passwd}" ifname {self.wlan}',
                     shell=True,
                     capture_output=True,
                 )
@@ -260,6 +263,8 @@ class Hotspot:
             return
 
         self.setup_wifi()
+        self.restart_state = "done"
+        return
 
 
 if __name__ == "__main__":
