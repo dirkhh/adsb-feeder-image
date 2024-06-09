@@ -57,7 +57,19 @@ waiting_placeholder() {
 # and this is the first time we use the new location, copy the existing log over
 [ ! -f /opt/adsb/adsb-setup.log ] && [ -f /var/log/adsb-setup.log ] && cp /var/log/adsb-setup.log /opt/adsb/adsb-setup.log
 
+exec 3>&1
 exec &>>/opt/adsb/adsb-setup.log
+
+# identify the calling process for better log messages
+PARENTPID=$(ps -cp $$ -o ppid="")
+if kill -0 "$PARENTPID" &> /dev/null ; then
+    # shellcheck disable=SC2086 # the ps -q call fails with quotes around the variable
+    PARENTPROC=$(ps -q$PARENTPID -o args=)
+else
+    PARENTPROC="process $PARENTPID (appears already gone)"
+fi
+echo "$(date -u +"%FT%T.%3NZ") $PARENTPROC called feeder-update" "$@"
+echo "$(date -u +"%FT%T.%3NZ") $PARENTPROC called feeder-update" "$@" >&3
 
 trap cleanup EXIT
 
@@ -132,6 +144,7 @@ else
         # the cleanup trap will be re-initialized in the child script, so disable it here
         trap - EXIT
         bash $XTRACE /opt/adsb-feeder-update/feeder-update "$TARGET" "$BRANCH" "$@" -go
+        echo "$(date -u +"%FT%T.%3NZ") update complete" >&3
     else
         echo "can't find /opt/adsb-feeder-update/feeder-update after update to $TARGET"
     fi
