@@ -1216,8 +1216,7 @@ class AdsbIm:
                     e = self._d.env_by_tags(tags)
                     if e:
                         e.list_set(n, value)
-                return True
-        # we fall through here if we can't get the micro settings
+
         base_info, status = generic_get_json(
             f"http://{ip}/api/base_info", timeout=timeout
         )
