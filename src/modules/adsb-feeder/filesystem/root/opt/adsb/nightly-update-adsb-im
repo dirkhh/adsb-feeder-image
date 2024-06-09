@@ -6,6 +6,16 @@ if [ $(id -u) != "0" ] ; then
     exit 1
 fi
 
+# identify the calling process for better log messages
+PARENTPID=$(ps -cp $$ -o ppid="")
+if kill -0 "$PARENTPID" &> /dev/null ; then
+    # shellcheck disable=SC2086 # the ps -q call fails with quotes around the variable
+    PARENTPROC=$(ps -q$PARENTPID -o args=)
+else
+    PARENTPROC="process $PARENTPID (appears already gone)"
+fi
+echo "$(date -u +"%FT%T.%3NZ") $PARENTPROC called nightly-update-adsb-im" "$@" >&2
+
 cd /opt/adsb || exit 0
 
 # only rotate log if longer than 5000 lines

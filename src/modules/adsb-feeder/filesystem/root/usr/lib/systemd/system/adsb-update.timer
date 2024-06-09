@@ -3,7 +3,6 @@
 
 [Unit]
 Description=Run Nightly ADS-B Feeder Image Updates
-Requires=adsb-update.service
 
 [Timer]
 Unit=adsb-update.service
