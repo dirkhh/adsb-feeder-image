@@ -3,6 +3,7 @@ Description=ADS-B Feeder Setup Service
 After=network-online.target adsb-hotspot.service
 
 [Service]
+SyslogIdentifier=adsb-setup
 WorkingDirectory=/opt/adsb/adsb-setup
 ExecStartPre=/usr/bin/bash /opt/adsb/pre-start.sh
 ExecStart=/usr/bin/python3 /opt/adsb/adsb-setup/app.py
