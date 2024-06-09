@@ -153,9 +153,7 @@ else
 	systemctl enable adsb-hotspot.service
 	systemctl enable adsb-update.timer
 fi
-# finally, remove the service used for the app and not the image and create a
-# flag file as indicator that this is a complete ADS-B Feeder Image, and not
-# just the app running on a different OS.
-rm /usr/lib/systemd/system/adsb-nonimage.service
+# finally, create a flag file as indicator that this is a complete ADS-B Feeder
+# Image, and not just the app running on a different OS.
 touch /opt/adsb/os.adsb.feeder.image
 
