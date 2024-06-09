@@ -20,6 +20,6 @@ services:
     healthcheck:
       disable: true
     stop_signal: SIGKILL
-    command: tail -n500 -f /opt/adsb-setup.log
+    command: tail -n0 -f /opt/adsb-setup.log
     volumes:
       - /opt/adsb/adsb-setup.log:/opt/adsb-setup.log
