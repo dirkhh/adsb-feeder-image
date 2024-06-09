@@ -4,6 +4,7 @@ After=docker.service network-online.target adsb-setup.service
 PartOf=docker.service
 
 [Service]
+SyslogIdentifier=adsb-docker
 WorkingDirectory=/opt/adsb
 ExecStartPre=-mount -o remount,exec /run
 ExecStart=/opt/adsb/docker-compose-start
