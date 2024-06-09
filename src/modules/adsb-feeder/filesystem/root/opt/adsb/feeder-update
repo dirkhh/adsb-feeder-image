@@ -176,13 +176,24 @@ missing=()
 if ! python3 -c "import requests" &>/dev/null ; then
     missing+=("python3-requests")
 fi
+# get hostapd / isc-dhcpd-server if necessary
+if ! command -v hostapd &>/dev/null || ! dhcpd --version 2>&1 | grep -qs -e isc-dhcpd; then
+    missing+=("hostapd" "isc-dhcp-server")
+    # make sure they are never enabled by masking the services
+    systemctl mask hostapd
+    systemctl mask isc-dhcp-server
+fi
+# get avahi-utils if necessary
+if ! command -v avahi-publish &>/dev/null || ! command -v avahi-resolve &>/dev/null; then
+    missing+=("avahi-utils")
+fi
 if [[ ${#missing[@]} -gt 0 ]] ; then
     # let's try to install it
     echo "newer versions of the adsb.im ADS-B Feeder Image require the Python3 ${missing[@]} package(s) - trying to install"
     grep -i fedora /etc/os-release &> /dev/null && dnf install -y "${missing[@]}"
     grep -i centos /etc/os-release &> /dev/null && dnf install -y "${missing[@]}"
     grep -i suse /etc/os-release &> /dev/null && zypper install -y "${missing[@]}"
-    grep -i debian /etc/os-release &> /dev/null && apt-get install -y "${missing[@]}"
+    grep -i debian /etc/os-release &> /dev/null && apt-get update && apt-get install -y "${missing[@]}"
     # now let's check again
     if ! python3 -c "import requests" &>/dev/null ; then
         echo "cannot install Python3 requests package - please contact the adsb.im maintainer"
