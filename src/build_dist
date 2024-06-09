@@ -119,7 +119,7 @@ if [[ "$VARIANT" == "iob-dietpi"* ]] ; then
     # systemctl mask isc-dhcp-server.service
     ln -sf /dev/null "$MNT_DIR"/etc/systemd/system/isc-dhcp-server.service
     # enable hotspot service
-    ln -sf /etc/systemd/system/adsb-hotspot.service "$MNT_DIR"/etc/systemd/system/multi-user.target.wants/adsb-hotspot.service
+    ln -sf /usr/lib/systemd/system/adsb-hotspot.service "$MNT_DIR"/etc/systemd/system/multi-user.target.wants/adsb-hotspot.service
 
     sed -i "s/GIT_COMMIT_SHA/$GIT_COMMIT_SHA/" "${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh"
     sed -i "s/FEEDER_IMAGE_NAME/$FEEDER_IMAGE_NAME/" "${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh"

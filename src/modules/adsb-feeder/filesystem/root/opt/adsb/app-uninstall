@@ -10,7 +10,7 @@ exit_with_message() { echo "$1"; exit; }
 [ "$(id -u)" == "0" ] || exit_with_message "Please run this as superuser, e.g. as sudo bash $0"
 
 # stop and remove the services
-services=(adsb-docker.service adsb-feeder-update.service adsb-nonimage.service adsb-setup.service adsb-update.service adsb-update.timer)
+services=(adsb-bootstrap.service  adsb-docker.service  adsb-feeder-update.service  adsb-hotspot.service  adsb-nonimage.service  adsb-setup.service  adsb-update.service  adsb-update.timer)
 
 for service in "${services[@]}"
 do

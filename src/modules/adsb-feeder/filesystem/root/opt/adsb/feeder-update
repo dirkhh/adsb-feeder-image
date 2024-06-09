@@ -185,16 +185,38 @@ echo "copy the updated files in place"
 # shellcheck disable=SC2164
 cd "${DIR}/root"
 
-# if this an app and not the full image, prune some of the files that aren't
+
+# remove adsb.im services from /etc/systemd/system that were previously placed there
+services=(adsb-bootstrap.service  adsb-docker.service  adsb-feeder-update.service  adsb-hotspot.service  adsb-nonimage.service  adsb-setup.service  adsb-update.service  adsb-update.timer)
+for service in "${services[@]}"; do
+    rm -vf "/etc/systemd/system/$service"
+done
+
+
+# if this an app and not the full image, prune some of the files that aren't wanted for the app
 # wanted for the app and copy the trees we need over
-if [ ! -f /opt/adsb/os.adsb.feeder.im ] ; then
+if [ ! -f /opt/adsb/os.adsb.feeder.image ] ; then
+    rm -f ./usr/lib/systemd/system/adsb-hotspot.service
     rm -f ./usr/lib/systemd/system/adsb-bootstrap.service
-    cp -a ./usr/lib/systemd/system/* /etc/systemd/system/
-    cp -a ./opt/adsb/* /opt/adsb
+    cp -v -a -t ./usr/lib/systemd/system/* /usr/lib/systemd/system/
+    cp -v -a -t /opt/adsb/* /opt/adsb
 else
     # copy the complete tree into the / filesystem
-    cp -r . /
+    cp -v -a -r . /
+
+    systemctl enable adsb-hotspot.service
 fi
+
+systemctl enable adsb-docker.service
+
+# the timer is gonna start the service
+# if the service is enabled it's gonna start on boot which is not the desired behaviour
+systemctl disable adsb-update.service
+systemctl enable adsb-update.timer
+
+systemctl enable adsb-setup.service
+
+systemctl daemon-reload
 
 # shellcheck disable=SC2164
 cd /opt/adsb
@@ -221,13 +243,9 @@ echo "$(date -u +"%FT%T.%3NZ") finally, trigger a container upgrade so that they
 
 echo "$(date -u +"%FT%T.%3NZ") restart the service"
 trap - EXIT
-systemctl daemon-reload
+
 kill_wait_app
 
 systemctl restart adsb-setup.service
-systemctl enable adsb-update.service
-systemctl enable adsb-update.timer
-systemctl enable adsb-hotspot.service
-systemctl start adsb-hotspot.service
 
 echo "$(date -u +"%FT%T.%3NZ") update to ${VERSION} complete"

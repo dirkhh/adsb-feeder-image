@@ -74,8 +74,8 @@ apt install -y --no-install-recommends chrony
 git clone 'https://github.com/dirkhh/adsb-feeder-image.git' /tmp/adsb-feeder
 cd /tmp/adsb-feeder
 git checkout GIT_COMMIT_SHA  # <- gets replaced before use
-mv /tmp/adsb-feeder/src/modules/adsb-feeder/filesystem/root/usr/lib/systemd/system/* /etc/systemd/system/
-mv /tmp/adsb-feeder/src/modules/adsb-feeder/filesystem/root/opt/adsb /opt/
+mv -v /tmp/adsb-feeder/src/modules/adsb-feeder/filesystem/root/usr/lib/systemd/system/* /usr/lib/systemd/system/
+mv -v /tmp/adsb-feeder/src/modules/adsb-feeder/filesystem/root/opt/adsb /opt/
 cd /opt/adsb
 rm -rf /tmp/adsb-feeder
 echo "FEEDER_IMAGE_NAME" > /opt/adsb/feeder-image.name  # <- gets replaced before use
@@ -89,7 +89,7 @@ mkdir -p /mnt/dietpi_userdata/adsb-feeder/config
 ln -s /mnt/dietpi_userdata/adsb-feeder/config /opt/adsb/
 
 # move the services in place
-mv /opt/adsb/etc/systemd/system/* /etc/systemd/system
+mv -v /opt/adsb/usr/lib/systemd/system/* /usr/lib/systemd/system
 
 ENV_FILE=/opt/adsb/config/.env
 cp /opt/adsb/docker.image.versions "$ENV_FILE"
