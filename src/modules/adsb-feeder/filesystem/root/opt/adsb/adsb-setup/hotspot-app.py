@@ -141,6 +141,13 @@ class Hotspot:
                     target=self._dnsserver.serve_forever
                 )
                 self._dns_thread.start()
+
+        if self._baseos == "raspbian":
+            subprocess.run(
+                f"systemctl stop NetworkManager",
+                shell=True,
+            )
+
         subprocess.run(
             f"ip li set {self.wlan} up && ip ad add 192.168.199.1/24 broadcast 192.168.199.255 dev {self.wlan} && systemctl start hostapd.service && systemctl start isc-dhcp-server.service",
             shell=True,
@@ -156,6 +163,16 @@ class Hotspot:
             f"systemctl stop hostapd.service && systemctl stop isc-dhcp-server.service && ip ad del 192.168.199.1/24 dev {self.wlan} && ip addr flush {self.wlan} && ip link set dev {self.wlan} down",
             shell=True,
         )
+        if self._baseos == "raspbian":
+            subprocess.run(
+                f"systemctl restart NetworkManager",
+                shell=True,
+            )
+            # wait a bit for NetworkManager to be actually working
+            # couldn't find a way to check when networkmanager is up
+            # 1 second sleep was insufficient on a pi3
+            # 2.5 second sleep worked fine on a pi3, let's hope 5 seconds works on all devices
+            time.sleep(5)
         print_err("turned off hotspot")
 
     def setup_wifi(self):
