@@ -406,7 +406,8 @@ class AdsbIm:
         host_name = host_name.strip("-")[:63]
         if host_name:
             subprocess.run(
-                f"/opt/adsb/scripts/mdns-alias-setup.sh f{host_name}", shell=True
+                f"/usr/bin/bash /opt/adsb/scripts/mdns-alias-setup.sh f{host_name}",
+                shell=True,
             )
 
     def run(self, no_server=False):
