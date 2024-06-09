@@ -12,7 +12,7 @@ on:
 jobs:
   # first, prepare the sources by moving the 'latest' tag to the current SHA
   prepare:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     # check the sources out in the 'expected place' for the following step that tags them
     - name: Checkout Project Repository
@@ -32,7 +32,7 @@ jobs:
         message: "latest commit"
   # next run all the board builds
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
