@@ -221,6 +221,7 @@ for service in "${services[@]}"; do
     rm -vf "/etc/systemd/system/$service"
 done
 
+services_enable=()
 
 # if this an app and not the full image, prune some of the files that aren't wanted for the app
 # wanted for the app and copy the trees we need over
@@ -233,19 +234,25 @@ else
     # copy the complete tree into the / filesystem
     cp -v -a -r . /
 
-    systemctl enable adsb-hotspot.service
+    services_enable+=("adsb-hotspot.service")
 fi
 
-systemctl enable adsb-docker.service
+echo "$(date -u +"%FT%T.%3NZ") updating systemd services ..."
+
+services_enable+=("adsb-docker.service")
 
 # the timer is gonna start the service
 # if the service is enabled it's gonna start on boot which is not the desired behaviour
 systemctl disable adsb-update.service
-systemctl enable adsb-update.timer
 
-systemctl enable adsb-setup.service
+services_enable+=("adsb-update.timer")
+services_enable+=("adsb-setup.service")
+
+systemctl enable "${services_enable[@]}"
 
 systemctl daemon-reload
+
+echo "$(date -u +"%FT%T.%3NZ") updating systemd services ... done"
 
 # shellcheck disable=SC2164
 cd /opt/adsb
