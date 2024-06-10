@@ -1,4 +1,5 @@
 Changes since v2.1.0 include:
+- fix two small bugs in beta.1
 - add secondary .local name for the image once configured, based on the site name (e.g. mysite.local)
 - hotspot: fix several issues where hotspot wouldn't work in updated images, after a reboot, in certain situations where WiFi passwords changed
 - app: avoid several problems during updates; more robust install
