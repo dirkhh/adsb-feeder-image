@@ -1127,7 +1127,11 @@ class AdsbIm:
 
     def clear_range_outline(self, idx=0):
         # is the file where we expect it?
-        globe_history = "globe_history" if idx == 0 else f"globe_history_{idx}"
+        if idx == 0:
+            globe_history = "globe_history"
+        else:
+            globe_history = f"{self._d.env_by_tags('mf_ip').list_get(idx)}/globe_history"
+
         rangedirs = (
             self._d.config_path
             / "ultrafeeder"
@@ -1140,9 +1144,10 @@ class AdsbIm:
             return
 
         # try to stop the Ultrafeeder container, then remove the range outline, then restart everything
+        container = "ultrafeeder" if idx == 0 else f"ultrafeeder_stage2_{idx}"
         try:
             subprocess.call(
-                "/opt/adsb/docker-compose-adsb down ultrafeeder",
+                f"/opt/adsb/docker-compose-adsb down {container}",
                 timeout=40.0,
                 shell=True,
             )
@@ -1151,11 +1156,11 @@ class AdsbIm:
                 "timeout expired stopping ultrafeeder... trying to continue anyway..."
             )
         rangedirs.unlink(missing_ok=True)
+        print_err(f"removed the range outline at path {rangedirs}")
         try:
             subprocess.call("/opt/adsb/docker-compose-start", timeout=180.0, shell=True)
         except subprocess.TimeoutExpired:
             print_err("timeout expired re-starting docker... trying to continue...")
-        print_err("removed the range outline")
 
     def set_rpw(self):
         try:
