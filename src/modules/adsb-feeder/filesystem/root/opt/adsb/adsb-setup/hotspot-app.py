@@ -277,8 +277,8 @@ class Hotspot:
                         timeout=5.0,
                     )
                     result = subprocess.run(
-                        f"wpa_supplicant -i{self.wlan} -c '{tmpConf}'",
-                        shell=True,
+                        ["wpa_supplicant", f"-i{self.wlan}", f"-c{tmpConf}"],
+                        shell=False,
                         capture_output=True,
                         timeout=5.0,
                     )

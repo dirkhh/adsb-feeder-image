@@ -44,6 +44,11 @@ if [[ $wlan != "wlan0" ]] ; then
 fi
 
 systemctl unmask hostapd.service isc-dhcp-server.service
+for service in hostapd.service isc-dhcp-server.service; do
+    if systemctl is-enabled "$service"; then
+        systemctl disable "$service"
+    fi
+done
 
 while true; do
     echo "No internet connection detected, starting access point"
