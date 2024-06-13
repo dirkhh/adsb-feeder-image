@@ -1,4 +1,5 @@
 Changes since v2.1.0 include:
+- lots of hotspot code tweaks to make it more consistent (hopefully)
 - update ultrafeeder to latest version
 - fix two small bugs in beta.1
 - add secondary .local name for the image once configured, based on the site name (e.g. mysite.local)
