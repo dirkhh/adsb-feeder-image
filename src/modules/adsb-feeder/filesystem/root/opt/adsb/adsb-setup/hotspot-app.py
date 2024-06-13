@@ -90,7 +90,7 @@ class Hotspot:
             print_err(f"error scanning for SSIDs: {e}")
             return
         ssids = []
-        for line in output.stdout.decode().split():
+        for line in output.stdout.decode().split("\n"):
             if line and line != "--" and line not in ssids:
                 ssids.append(line)
         if len(ssids) > 0:
