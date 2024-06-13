@@ -228,8 +228,19 @@ class Hotspot:
                         update.write(f"{line}")
                 os.remove("/etc/network/interfaces")
                 os.rename("/etc/network/interfaces.new", "/etc/network/interfaces")
+
+            with open("/etc/wpa_supplicant/wpa_supplicant.conf", "w") as conf:
+                conf.write("""
+# WiFi country code, set here in case the access point does send one
+country=GB
+# Grant all members of group "netdev" permissions to configure WiFi, e.g. via wpa_cli or wpa_gui
+ctrl_interface=DIR=/run/wpa_supplicant GROUP=netdev
+# Allow wpa_cli/wpa_gui to overwrite this config file
+update_config=1
+                """)
+
             output = subprocess.run(
-                f"wpa_passphrase '{self.ssid}' '{self.passwd}' > /etc/wpa_supplicant/wpa_supplicant.conf && systemctl restart --no-block networking.service",
+                f"wpa_passphrase '{self.ssid}' '{self.passwd}' >> /etc/wpa_supplicant/wpa_supplicant.conf && systemctl restart --no-block networking.service",
                 shell=True,
                 capture_output=True,
             )
