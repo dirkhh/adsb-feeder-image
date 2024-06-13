@@ -175,11 +175,6 @@ class Hotspot:
         if self._dnsserver:
             print_err("shutting down DNS server")
             self._dnsserver.shutdown()
-        print_err("disabling hotspot and DHCP")
-        subprocess.run(
-            f"systemctl disable --now hostapd.service && systemctl disable --now isc-dhcp-server.service",
-            shell=True,
-        )
 
         print_err(f"connecting to '{self.ssid}'")
         if self._baseos == "dietpi":
@@ -212,11 +207,10 @@ class Hotspot:
         else:
             print_err(f"unknown baseos: can't set up wifi")
 
-        # sleep for a few seconds to make sure we connect to the network
-        time.sleep(5.0)
-        # I guess here I should test the network, eh?
+        # the shell script that launched this app will do a final connectivity check
+        # if there is no connectivity despite being able to join the wifi, it will re-launch this app (unlikely)
+
         print_err("exiting the hotspot app")
-        open("/opt/adsb/continueboot", "w").close()
         signal.raise_signal(signal.SIGTERM)
         os._exit(0)
 
