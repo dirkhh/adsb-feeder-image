@@ -1,4 +1,4 @@
-HOST=adsb-feeder.local
+HOST ?= adsb-feeder.local
 SSH_CONTROL=/tmp/adsb-setup-ssh-control-${HOST}
 
 ssh-control:
