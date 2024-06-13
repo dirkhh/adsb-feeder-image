@@ -82,7 +82,7 @@ class Hotspot:
                 )
             else:
                 output = subprocess.run(
-                    f"ip li set up dev {self.wlan} && iw dev {self.wlan} scan  | grep SSID: | tr -d ' \t' | cut -d: -f2",
+                    f"ip li set up dev {self.wlan} && iw dev {self.wlan} scan | grep SSID: | sed -e 's/^[:space:]*SSID: //'",
                     shell=True,
                     capture_output=True,
                 )
