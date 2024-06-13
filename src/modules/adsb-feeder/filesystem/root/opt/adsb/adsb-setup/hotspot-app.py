@@ -237,6 +237,8 @@ country=GB
 ctrl_interface=DIR=/run/wpa_supplicant GROUP=netdev
 # Allow wpa_cli/wpa_gui to overwrite this config file
 update_config=1
+# disable p2p as it can cause errors
+p2p_disabled=1
                 """)
 
             output = subprocess.run(
