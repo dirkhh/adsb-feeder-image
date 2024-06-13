@@ -232,7 +232,7 @@ class Hotspot:
         if self._baseos == "dietpi":
             try:
                 result = subprocess.run(
-                    f'bash -c "wpa_supplicant -i{self.wlan} -c<(wpa_passphrase "{self.ssid}" "{self.passwd}")"',
+                    f"bash -c \"wpa_supplicant -i{self.wlan} -c<(wpa_passphrase '{self.ssid}' '{self.passwd}')\"",
                     shell=True,
                     capture_output=True,
                     timeout=10.0,
