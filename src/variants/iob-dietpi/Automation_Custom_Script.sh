@@ -7,8 +7,9 @@
 # optimally this would be somehow patched into dietpi but let's do this workaround for now
 # this workaround expects the journal to already be in /var/log and not in /run
 # there should only be 1 folder in /var/log/journal in the unexpected case of multiple, just take a guess
-mv "/var/log/journal/$(ls /var/log/journal/ | head -n1)" "/var/log/journal/$(cat /etc/machine-id)"
-systemctl restart systemd-journald
+mkdir -p /var/log/journal
+mv -v "/var/log/journal/$(ls /var/log/journal/ | head -n1)" "/var/log/journal/$(cat /etc/machine-id)"
+systemctl restart systemd-journald && echo "journal should now be persistent"
 
 # install chrony for better time synchronization compared to systemd-timesyncd
 # when chrony is installed it's imperative that CONFIG_NTP_MODE=0
