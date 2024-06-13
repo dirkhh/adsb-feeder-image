@@ -168,11 +168,7 @@ class Hotspot:
                 f"systemctl restart NetworkManager",
                 shell=True,
             )
-            # wait a bit for NetworkManager to be actually working
-            # couldn't find a way to check when networkmanager is up
-            # 1 second sleep was insufficient on a pi3
-            # 2.5 second sleep worked fine on a pi3, let's hope 5 seconds works on all devices
-            time.sleep(5)
+            # used to wait here, just spin around the wifi instead
         print_err("turned off hotspot")
 
     def setup_wifi(self):
@@ -229,45 +225,53 @@ class Hotspot:
         time.sleep(2.0)
         print_err(f"testing the '{self.ssid}' network")
         self.teardown_hotspot()
-        if self._baseos == "dietpi":
-            try:
-                result = subprocess.run(
-                    f"bash -c \"wpa_supplicant -i{self.wlan} -c<(wpa_passphrase '{self.ssid}' '{self.passwd}')\"",
-                    shell=True,
-                    capture_output=True,
-                    timeout=10.0,
-                )
-            except subprocess.TimeoutExpired as e:
-                # that's the expected behavior
-                output = e.output.decode()
-                if e.stderr:
-                    output += e.stderr.decode()
-            else:
-                output = result.stdout.decode()
-                if result.stderr:
-                    output += result.stderr.decode()
-            success = "CTRL-EVENT-CONNECTED" in output
-        elif self._baseos == "raspbian":
-            try:
-                result = subprocess.run(
-                    f"nmcli d wifi connect '{self.ssid}' password '{self.passwd}' ifname {self.wlan}",
-                    shell=True,
-                    capture_output=True,
-                )
-            except subprocess.SubprocessError as e:
-                # something went wrong
-                output = e.output.decode()
-                if e.stderr:
-                    output += e.stderr.decode()
-            else:
-                output = result.stdout.decode()
-                if result.stderr:
-                    output += result.stderr.decode()
-            success = "successfully activated" in output
+        # try for a while because it takes a bit for NetworkManager to come back up (for raspbian it was started in teardown_hotspot
+        startTime = time.time()
+        while time.time() - startTime < 17:
+            if self._baseos == "dietpi":
+                try:
+                    result = subprocess.run(
+                        f"bash -c \"wpa_supplicant -i{self.wlan} -c<(wpa_passphrase '{self.ssid}' '{self.passwd}')\"",
+                        shell=True,
+                        capture_output=True,
+                        timeout=5.0,
+                    )
+                except subprocess.TimeoutExpired as e:
+                    # that's the expected behavior
+                    output = e.output.decode()
+                    if e.stderr:
+                        output += e.stderr.decode()
+                else:
+                    output = result.stdout.decode()
+                    if result.stderr:
+                        output += result.stderr.decode()
+                success = "CTRL-EVENT-CONNECTED" in output
+            elif self._baseos == "raspbian":
+                try:
+                    result = subprocess.run(
+                        f"nmcli d wifi connect '{self.ssid}' password '{self.passwd}' ifname {self.wlan}",
+                        shell=True,
+                        capture_output=True,
+                        timeout=5.0,
+                    )
+                except subprocess.SubprocessError as e:
+                    # something went wrong
+                    output = e.output.decode()
+                    if e.stderr:
+                        output += e.stderr.decode()
+                else:
+                    output = result.stdout.decode()
+                    if result.stderr:
+                        output += result.stderr.decode()
+                success = "successfully activated" in output
+
             if success:
                 print_err(f"successfully connected to '{self.ssid}'")
+                break
             else:
                 print_err(f"failed to connect to '{self.ssid}': {output}")
+                # just to safeguard against super fast spin, sleep a tiny bit
+                time.sleep(0.1)
 
         if not success:
             self.comment = (
