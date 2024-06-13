@@ -10,5 +10,6 @@ docker system prune -a -f
 
 echo "FACTORY RESET DONE" >> /opt/adsb/adsb-setup.log
 
-systemctl enable --now adsb-bootstrap.service
-systemctl restart adsb-setup
+systemctl enable adsb-bootstrap.service
+systemctl stop adsb-docker
+systemctl restart adsb-bootstrap adsb-setup adsb-docker
