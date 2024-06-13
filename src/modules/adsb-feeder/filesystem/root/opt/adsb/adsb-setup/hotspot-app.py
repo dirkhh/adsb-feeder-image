@@ -162,7 +162,15 @@ class Hotspot:
                 )
                 self._dns_thread.start()
 
-        if self._baseos == "raspbian":
+        # in case of a wifi already being configured with wrong password,
+        # we need to stop the relevant service to prevent it from disrupting hostapd
+
+        if self._baseos == "dietpi":
+            subprocess.run(
+                f"systemctl stop networking.service",
+                shell=True,
+            )
+        elif self._baseos == "raspbian":
             subprocess.run(
                 f"systemctl stop NetworkManager",
                 shell=True,
@@ -183,12 +191,17 @@ class Hotspot:
             f"systemctl stop hostapd.service && systemctl stop isc-dhcp-server.service && ip ad del 192.168.199.1/24 dev {self.wlan} && ip addr flush {self.wlan} && ip link set dev {self.wlan} down",
             shell=True,
         )
-        if self._baseos == "raspbian":
+        if self._baseos == "dietpi":
+            subprocess.run(
+                f"systemctl restart networking.service",
+                shell=True,
+            )
+        elif self._baseos == "raspbian":
             subprocess.run(
                 f"systemctl restart NetworkManager",
                 shell=True,
             )
-            # used to wait here, just spin around the wifi instead
+        # used to wait here, just spin around the wifi instead
         print_err("turned off hotspot")
 
     def setup_wifi(self):
