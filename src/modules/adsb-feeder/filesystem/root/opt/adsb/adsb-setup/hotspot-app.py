@@ -76,7 +76,7 @@ class Hotspot:
         try:
             if self._baseos == "raspbian":
                 output = subprocess.run(
-                    "nmcli -f SSID  dev wifi | tail -n +2",
+                    "nmcli --terse --fields SSID dev wifi",
                     shell=True,
                     capture_output=True,
                 )
