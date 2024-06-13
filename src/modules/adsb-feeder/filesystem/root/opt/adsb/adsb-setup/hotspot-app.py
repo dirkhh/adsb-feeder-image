@@ -51,12 +51,11 @@ class Hotspot:
         print_err("trying to scan for SSIDs")
         self.ssids = []
         i = 0
-        while i < 10:
-            i += 1
+        startTime = time.time()
+        while time.time() - startTime < 20:
             self.scan_ssids()
             if len(self.ssids) > 0:
                 break
-            time.sleep(2.0)
 
         self.app.add_url_rule("/restarting", view_func=self.restarting)
 
@@ -84,7 +83,8 @@ class Hotspot:
                 )
             else:
                 output = subprocess.run(
-                    f"ip li set up dev {self.wlan} && iw dev {self.wlan} scan | grep SSID: | sed -e 's/^[:space:]*SSID: //'",
+                    f"wpa_cli -i {self.wlan} scan &>/dev/null; sleep 6; wpa_cli -i {self.wlan} scan_results 2<&1 | tail -n+3 | cut -f5",
+                    executable="/usr/bin/bash",
                     shell=True,
                     capture_output=True,
                 )
