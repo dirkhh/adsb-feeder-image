@@ -212,6 +212,7 @@ class AdsbIm:
 
         self._routemanager.add_proxy_routes(self._d.proxy_routes)
         self.app.add_url_rule("/propagateTZ", "propagateTZ", self.get_tz)
+        self.app.add_url_rule("/hotspot_test", "hotspot_test", self.hotspot_test)
         self.app.add_url_rule("/restarting", "restarting", self.restarting)
         self.app.add_url_rule("/restart", "restart", self.restart, methods=["GET", "POST"])
         self.app.add_url_rule("/waiting", "waiting", self.waiting)
@@ -531,6 +532,11 @@ class AdsbIm:
         for i in self.micro_indices():
             if self._d.env_by_tags("mf_version").list_get(i) != "not an adsb.im feeder":
                 self.get_base_info(i)
+
+    def hotspot_test(self):
+        return render_template(
+            "hotspot.html", version="123", comment="comment", ssids=list(range(20))
+        )
 
     def restarting(self):
         return render_template("restarting.html")
