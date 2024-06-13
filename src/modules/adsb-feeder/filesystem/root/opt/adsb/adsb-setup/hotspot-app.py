@@ -6,6 +6,7 @@ import socketserver
 import subprocess
 import sys
 import threading
+import tempfile
 import time
 from flask import (
     Flask,
@@ -265,8 +266,17 @@ class Hotspot:
         while time.time() - startTime < 17:
             if self._baseos == "dietpi":
                 try:
+                    fd, tmpConf = tempfile.mkstemp()
+                    os.close(fd)
                     result = subprocess.run(
-                        f"bash -c \"wpa_supplicant -i{self.wlan} -c<(wpa_passphrase '{self.ssid}' '{self.passwd}')\"",
+                        f"wpa_passphrase '{self.ssid}' '{self.passwd}' > '{tmpConf}'",
+                        shell=True,
+                        check=True,
+                        capture_output=True,
+                        timeout=5.0,
+                    )
+                    result = subprocess.run(
+                        f"wpa_supplicant -i{self.wlan} -c '{tmpConf}'",
                         shell=True,
                         capture_output=True,
                         timeout=5.0,
@@ -280,7 +290,11 @@ class Hotspot:
                     output = result.stdout.decode()
                     if result.stderr:
                         output += result.stderr.decode()
+                finally:
+                    pathlib.Path(tmpConf).unlink(missing_ok=True)
+
                 success = "CTRL-EVENT-CONNECTED" in output
+
             elif self._baseos == "raspbian":
                 try:
                     result = subprocess.run(
