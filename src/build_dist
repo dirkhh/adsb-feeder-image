@@ -121,6 +121,10 @@ if [[ "$VARIANT" == "iob-dietpi"* ]] ; then
     # enable hotspot service
     ln -sf /usr/lib/systemd/system/adsb-hotspot.service "$MNT_DIR"/etc/systemd/system/multi-user.target.wants/adsb-hotspot.service
 
+    # reduce default networking timeout from 300 to 120 seconds for dietpi
+    echo WAIT_ONLINE_TIMEOUT=120 >> "$MNT_DIR"/etc/default/networking
+
+
     sed -i "s/GIT_COMMIT_SHA/$GIT_COMMIT_SHA/" "${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh"
     sed -i "s/FEEDER_IMAGE_NAME/$FEEDER_IMAGE_NAME/" "${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh"
     sed -i "s/FEEDER_IMAGE_VERSION/$VERSION/" "${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh"

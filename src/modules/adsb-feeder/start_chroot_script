@@ -99,6 +99,9 @@ if [ "$NATIVE_DIETPI" != "1" ] ; then
 	systemctl mask hostapd.service
 	systemctl mask isc-dhcp-server.service
 
+    # reduce default networking timeout from 300 to 120 seconds for dietpi
+    echo WAIT_ONLINE_TIMEOUT=120 >> /etc/default/networking
+
 	# install zerotier and tailscale, first get their repo
 
 	DEBIAN_DISTRO=$(head -1 /etc/apt/sources.list | cut -d\  -f 3)
