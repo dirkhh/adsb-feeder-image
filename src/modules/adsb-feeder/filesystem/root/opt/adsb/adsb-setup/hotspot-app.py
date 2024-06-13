@@ -185,7 +185,7 @@ class Hotspot:
             shell=True,
         )
 
-        print_err(f"connecting to {self.ssid}")
+        print_err(f"connecting to '{self.ssid}'")
         if self._baseos == "dietpi":
             # switch hotplug to allow wifi
             with open("/etc/network/interfaces", "r") as current, open(
@@ -203,7 +203,7 @@ class Hotspot:
                 os.remove("/etc/network/interfaces")
                 os.rename("/etc/network/interfaces.new", "/etc/network/interfaces")
             output = subprocess.run(
-                f'wpa_passphrase "{self.ssid}" "{self.passwd}" > /etc/wpa_supplicant/wpa_supplicant.conf && systemctl restart networking.service',
+                f"wpa_passphrase '{self.ssid}' '{self.passwd}' > /etc/wpa_supplicant/wpa_supplicant.conf && systemctl restart networking.service",
                 shell=True,
                 capture_output=True,
             )
@@ -212,7 +212,7 @@ class Hotspot:
             )
         elif self._baseos == "raspbian":
             # we should be all set already on raspbian
-            print_err(f"started wlan connection to {self.ssid}")
+            print_err(f"started wlan connection to '{self.ssid}'")
         else:
             print_err(f"unknown baseos: can't set up wifi")
 
@@ -227,7 +227,7 @@ class Hotspot:
     def test_wifi(self):
         # the parent process needs to return from the call to POST
         time.sleep(2.0)
-        print_err(f"testing the {self.ssid} network")
+        print_err(f"testing the '{self.ssid}' network")
         self.teardown_hotspot()
         if self._baseos == "dietpi":
             try:
@@ -250,7 +250,7 @@ class Hotspot:
         elif self._baseos == "raspbian":
             try:
                 result = subprocess.run(
-                    f'nmcli d wifi connect "{self.ssid}" password "{self.passwd}" ifname {self.wlan}',
+                    f"nmcli d wifi connect '{self.ssid}' password '{self.passwd}' ifname {self.wlan}",
                     shell=True,
                     capture_output=True,
                 )
@@ -265,9 +265,9 @@ class Hotspot:
                     output += result.stderr.decode()
             success = "successfully activated" in output
             if success:
-                print_err(f"successfully connected to {self.ssid}")
+                print_err(f"successfully connected to '{self.ssid}'")
             else:
-                print_err(f"failed to connect to {self.ssid}: {output}")
+                print_err(f"failed to connect to '{self.ssid}': {output}")
 
         if not success:
             self.comment = (
