@@ -9,19 +9,18 @@ fi
 function test_network() {
     # is there a gateway?
     gateway=$(ip route | awk '/default/ { print $3 }')
-    if [[ $gateway != "" ]] && ping -c 2 -W 1 "$gateway" &> /dev/null ; then
+    if [[ $gateway != "" ]] && ping -c 1 -W 1 "$gateway" &> /dev/null ; then
         return 0
     fi
     return 1
 }
 
-if test_network; then
+if test_network || test_network; then
     echo "we are able to ping ${gateway}, no need to start an access point"
     exit 0
 fi
 
 # that's not good, let's try to start an access point
-echo "No internet connection detected, starting access point"
 
 for i in {1..10}; do
     wlan=$(iw dev | grep Interface | cut -d' ' -f2)
@@ -47,14 +46,16 @@ fi
 systemctl unmask hostapd.service isc-dhcp-server.service
 
 while true; do
+    echo "No internet connection detected, starting access point"
     python3 /opt/adsb/adsb-setup/hotspot-app.py "$wlan"
 
     for i in {1..15}; do
+        sleep 1 &
         if test_network; then
             # break outer loop as well if network tests good
             break 2
         fi
-        sleep 1
+        wait
     done
 done
 

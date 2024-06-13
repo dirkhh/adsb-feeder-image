@@ -39,6 +39,7 @@ class Hotspot:
         self.passwd = ""
         self._dnsserver = None
         self._dns_thread = None
+
         if pathlib.Path("/boot/dietpi").exists():
             self._baseos = "dietpi"
         elif pathlib.Path("/etc/rpi-issue").exists():
@@ -107,6 +108,7 @@ class Hotspot:
             return redirect("/restarting")
 
         if request.method == "POST":
+            self.lastUserInput = time.time()
             self.restart_state = "restarting"
 
             self.ssid = request.form.get("ssid")
@@ -126,6 +128,24 @@ class Hotspot:
 
     def run(self):
         self.setup_hotspot()
+
+        self.lastUserInput = time.time()
+        def idle_exit():
+            while True:
+                idleTime = time.time() - self.lastUserInput
+                if idleTime > 300:
+                    break
+
+                time.sleep(300 - idleTime)
+
+            # 5 minutes without user interaction: quit the app and have the shell script check if networking is working now
+            self.restart_state = "restarting"
+            self.teardown_hotspot()
+            print_err("exiting the hotspot app after 5 minutes idle")
+            signal.raise_signal(signal.SIGTERM)
+
+        threading.Thread(target=idle_exit).start()
+
         self.app.run(host="0.0.0.0", port=80)
 
     def setup_hotspot(self):
@@ -288,4 +308,5 @@ if __name__ == "__main__":
         wlan = argv[1]
     print_err(f"starting hotspot for {wlan}")
     hotspot = Hotspot(wlan)
+
     hotspot.run()
