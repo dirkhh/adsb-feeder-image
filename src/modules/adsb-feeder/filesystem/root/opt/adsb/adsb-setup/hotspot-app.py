@@ -178,23 +178,24 @@ class Hotspot:
             )
 
         subprocess.run(
-            f"ip li set {self.wlan} up && ip ad add 192.168.199.1/24 broadcast 192.168.199.255 dev {self.wlan} && systemctl start hostapd.service && systemctl start isc-dhcp-server.service",
+            f"ip li set {self.wlan} up && ip ad add 192.168.199.1/24 broadcast 192.168.199.255 dev {self.wlan} && systemctl start hostapd.service",
             shell=True,
         )
-        # strangely, at least on Raspbian there seem to be scenarios where hostapd only works after a restart
-        # annoying as that may be - give it a few seconds and restart - just to be sure (there's no easy way to tell if it's needed)
-        time.sleep(5)
-        subprocess.run(f"systemctl restart hostapd.service", shell=True)
+        time.sleep(2)
+        subprocess.run(
+            f"systemctl start isc-dhcp-server.service",
+            shell=True,
+        )
         print_err("started hotspot")
 
     def teardown_hotspot(self):
         subprocess.run(
-            f"systemctl stop hostapd.service && systemctl stop isc-dhcp-server.service && ip ad del 192.168.199.1/24 dev {self.wlan} && ip addr flush {self.wlan} && ip link set dev {self.wlan} down",
+            f"systemctl stop isc-dhcp-server.service; systemctl stop hostapd.service; ip ad del 192.168.199.1/24 dev {self.wlan}; ip addr flush {self.wlan}; ip link set dev {self.wlan} down",
             shell=True,
         )
         if self._baseos == "dietpi":
             subprocess.run(
-                f"systemctl restart --no-block networking.service",
+                f"systemctl restart networking.service",
                 shell=True,
             )
         elif self._baseos == "raspbian":
@@ -324,7 +325,7 @@ class Hotspot:
 
         if self._baseos == "dietpi":
             subprocess.run(
-                f"systemctl restart --no-block networking.service",
+                f"systemctl restart networking.service",
                 shell=True,
             )
 
