@@ -195,7 +195,7 @@ class Hotspot:
         )
         if self._baseos == "dietpi":
             subprocess.run(
-                f"systemctl restart networking.service",
+                f"systemctl restart --no-block networking.service",
                 shell=True,
             )
         elif self._baseos == "raspbian":
@@ -229,7 +229,7 @@ class Hotspot:
                 os.remove("/etc/network/interfaces")
                 os.rename("/etc/network/interfaces.new", "/etc/network/interfaces")
             output = subprocess.run(
-                f"wpa_passphrase '{self.ssid}' '{self.passwd}' > /etc/wpa_supplicant/wpa_supplicant.conf && systemctl restart networking.service",
+                f"wpa_passphrase '{self.ssid}' '{self.passwd}' > /etc/wpa_supplicant/wpa_supplicant.conf && systemctl restart --no-block networking.service",
                 shell=True,
                 capture_output=True,
             )
@@ -325,7 +325,7 @@ class Hotspot:
 
         if self._baseos == "dietpi":
             subprocess.run(
-                f"systemctl restart networking.service",
+                f"systemctl restart --no-block networking.service",
                 shell=True,
             )
 
