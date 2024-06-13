@@ -193,7 +193,7 @@ class Hotspot:
         )
         if self._baseos == "dietpi":
             subprocess.run(
-                f"systemctl restart networking.service",
+                f"systemctl restart --no-block networking.service",
                 shell=True,
             )
         elif self._baseos == "raspbian":
@@ -252,6 +252,14 @@ class Hotspot:
         time.sleep(2.0)
         print_err(f"testing the '{self.ssid}' network")
         self.teardown_hotspot()
+
+        # wpa_supplicant will step over each other unless we stop networking service during this test
+        if self._baseos == "dietpi":
+            subprocess.run(
+                f"systemctl stop networking.service",
+                shell=True,
+            )
+
         # try for a while because it takes a bit for NetworkManager to come back up (for raspbian it was started in teardown_hotspot
         startTime = time.time()
         while time.time() - startTime < 17:
@@ -299,6 +307,12 @@ class Hotspot:
                 print_err(f"failed to connect to '{self.ssid}': {output}")
                 # just to safeguard against super fast spin, sleep a tiny bit
                 time.sleep(0.1)
+
+        if self._baseos == "dietpi":
+            subprocess.run(
+                f"systemctl restart --no-block networking.service",
+                shell=True,
+            )
 
         if not success:
             self.comment = (
