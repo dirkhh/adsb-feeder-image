@@ -111,6 +111,7 @@ if [[ "$VARIANT" == "iob-dietpi"* ]] ; then
     rm -f "$MNT_DIR/etc/systemd/system/multi-user.target.wants/dietpi-ramlog.service"
     rm -f "$MNT_DIR/etc/systemd/system/multi-user.target.wants/dietpi-ramlog_disable.service"
     rm -rf "$MNT_DIR"/var/tmp/dietpi/logs/dietpi-ramlog_store
+    sed --follow-symlinks -i '/[[:blank:]]\/var\/log[[:blank:]]/d' "$MNT_DIR"/etc/fstab
     echo 'INDEX_LOGGING=0' >> "$MNT_DIR"/boot/dietpi/.installed
     echo 'aSOFTWARE_INSTALL_STATE[103]=0' >> "$MNT_DIR"/boot/dietpi/.installed
 
