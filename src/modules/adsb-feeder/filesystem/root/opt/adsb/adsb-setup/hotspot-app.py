@@ -91,7 +91,7 @@ class Hotspot:
             return
         ssids = []
         for line in output.stdout.decode().split():
-            if line and line not in self.ssids:
+            if line and line != "--" and line not in ssids:
                 ssids.append(line)
         if len(ssids) > 0:
             print_err(f"found SSIDs: {ssids}")
