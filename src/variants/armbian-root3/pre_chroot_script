@@ -53,7 +53,7 @@ else
   apt-get clean
 fi
 apt-get update --allow-releaseinfo-change || true
-apt-get -y --force-yes install avahi-daemon || true
+apt-get -y --force-yes install avahi-utils || true
 apt-get -y --force-yes install iptables
 
 mkdir -p /var/run/wpa_supplicant
