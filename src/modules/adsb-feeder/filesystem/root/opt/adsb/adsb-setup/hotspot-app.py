@@ -256,6 +256,30 @@ class Hotspot:
         # used to wait here, just spin around the wifi instead
         print_err("turned off hotspot")
 
+    def writeWpaConf(self, ssid=None, passwd=None, path=None):
+        try:
+            with open(path, "w") as conf:
+                conf.write(
+"""
+# WiFi country code, set here in case the access point does send one
+country=GB
+# Grant all members of group "netdev" permissions to configure WiFi, e.g. via wpa_cli or wpa_gui
+ctrl_interface=DIR=/run/wpa_supplicant GROUP=netdev
+# Allow wpa_cli/wpa_gui to overwrite this config file
+update_config=1
+# disable p2p as it can cause errors
+p2p_disabled=1
+"""
+                )
+                output = subprocess.run(
+                    ["wpa_passphrase", f"{ssid}", f"{passwd}"],
+                    capture_output=True,
+                    check=True,
+                )
+                conf.write(output.stdout.decode())
+        except:
+            print_err(f"ERROR when writing wpa supplicant config to {path}")
+
     def setup_wifi(self):
         if self._dnsserver:
             print_err("shutting down DNS server")
@@ -279,20 +303,10 @@ class Hotspot:
                 os.remove("/etc/network/interfaces")
                 os.rename("/etc/network/interfaces.new", "/etc/network/interfaces")
 
-            with open("/etc/wpa_supplicant/wpa_supplicant.conf", "w") as conf:
-                conf.write("""
-# WiFi country code, set here in case the access point does send one
-country=GB
-# Grant all members of group "netdev" permissions to configure WiFi, e.g. via wpa_cli or wpa_gui
-ctrl_interface=DIR=/run/wpa_supplicant GROUP=netdev
-# Allow wpa_cli/wpa_gui to overwrite this config file
-update_config=1
-# disable p2p as it can cause errors
-p2p_disabled=1
-                """)
+            self.writeWpaConf(ssid=self.ssid, passwd=self.passwd, path="/etc/wpa_supplicant/wpa_supplicant.conf")
 
             output = subprocess.run(
-                f"wpa_passphrase '{self.ssid}' '{self.passwd}' >> /etc/wpa_supplicant/wpa_supplicant.conf && systemctl restart --no-block networking.service",
+                f"systemctl restart --no-block networking.service",
                 shell=True,
                 capture_output=True,
             )
@@ -332,13 +346,9 @@ p2p_disabled=1
                 try:
                     fd, tmpConf = tempfile.mkstemp()
                     os.close(fd)
-                    result = subprocess.run(
-                        f"wpa_passphrase '{self.ssid}' '{self.passwd}' > '{tmpConf}'",
-                        shell=True,
-                        check=True,
-                        capture_output=True,
-                        timeout=5.0,
-                    )
+
+                    self.writeWpaConf(ssid=self.ssid, passwd=self.passwd, path=tmpConf)
+
                     result = subprocess.run(
                         ["wpa_supplicant", f"-i{self.wlan}", f"-c{tmpConf}"],
                         shell=False,
@@ -362,8 +372,7 @@ p2p_disabled=1
             elif self._baseos == "raspbian":
                 try:
                     result = subprocess.run(
-                        f"nmcli d wifi connect '{self.ssid}' password '{self.passwd}' ifname {self.wlan}",
-                        shell=True,
+                        ["nmcli", "d", "wifi", "connect", f"{self.ssid}", "password", f"{self.passwd}", "ifname", f"{self.wlan}"],
                         capture_output=True,
                         timeout=5.0,
                     )
