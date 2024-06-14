@@ -9,7 +9,13 @@ fi
 function test_network() {
     # is there a gateway?
     gateway=$(ip route | awk '/default/ { print $3 }')
-    if [[ $gateway != "" ]] && ping -c 1 -W 1 "$gateway" &> /dev/null ; then
+    if [[ $gateway == "" ]]; then
+       return 1
+    fi
+    if ping -c 1 -W 0.5 "$gateway" &> /dev/null ; then
+        return 0
+    fi
+    if ping -c 1 -W 0.5 8.8.8.8 &> /dev/null ; then
         return 0
     fi
     return 1
