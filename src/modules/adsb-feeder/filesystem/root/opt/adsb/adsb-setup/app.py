@@ -1810,7 +1810,7 @@ class AdsbIm:
                     # grab the IP that we know the user has provided
                     ip = form.get("add_micro_feeder_ip")
                     uat = form.get("micro_uat")
-                    mreduce = form.get("micro_reduce")
+                    brofm = is_true(form.get("micro_reduce")) and key == "add_micro"
                     is_adsbim = key != "add_other"
                     micro_data = {}
                     if not is_adsbim:
@@ -1827,7 +1827,7 @@ class AdsbIm:
                         ip,
                         uat=is_true(uat),
                         is_adsbim=is_adsbim,
-                        brofm=is_true(mreduce),
+                        brofm=brofm,
                         do_import=do_import,
                         do_restore=do_restore,
                         micro_data=micro_data,
