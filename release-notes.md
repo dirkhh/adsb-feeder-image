@@ -1,4 +1,5 @@
 Changes since v2.1.0 include:
+- internal code changes, workaround for gateway not responding to ping
 - lots of hotspot code tweaks to make it more consistent (hopefully)
 - update ultrafeeder to latest version
 - fix two small bugs in beta.1
