@@ -1,13 +1,14 @@
 [Unit]
 Description=Add secondary mDNS entry %I as alias for %H.local
-Requires=avahi-daemon.service
+Requires=avahi-daemon.service network-online.target
 After=avahi-daemon.service
 
 [Service]
 Type=simple
 ExecStart=/bin/bash -c "/usr/bin/avahi-publish -a -R %I $(avahi-resolve -4 -n %H.local > /dev/null && ip route get 1 | awk '{print $7;exit}')"
 Restart=always
-RestartSec=5
+RestartSec=30
+SyslogIdentifier=adsb-avahi-alias
 
 [Install]
 WantedBy=multi-user.target
