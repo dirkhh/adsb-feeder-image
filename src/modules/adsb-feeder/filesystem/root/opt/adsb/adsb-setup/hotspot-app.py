@@ -73,28 +73,78 @@ class Hotspot:
             "/<path:path>", view_func=self.catch_all, methods=["GET", "POST"]
         )
 
-    def scan_ssids(self):
-        try:
-            if self._baseos == "raspbian":
-                output = subprocess.run(
-                    "nmcli --terse --fields SSID dev wifi",
-                    shell=True,
-                    capture_output=True,
-                )
-            else:
-                output = subprocess.run(
-                    f"wpa_cli -i {self.wlan} scan &>/dev/null; sleep 6; wpa_cli -i {self.wlan} scan_results 2<&1 | tail -n+3 | cut -f5",
-                    executable="/usr/bin/bash",
-                    shell=True,
-                    capture_output=True,
-                )
-        except subprocess.CalledProcessError as e:
-            print_err(f"error scanning for SSIDs: {e}")
-            return
+    def wpa_cli_scan(self):
         ssids = []
-        for line in output.stdout.decode().split("\n"):
-            if line and line != "--" and line not in ssids:
-                ssids.append(line)
+        try:
+            proc = subprocess.Popen(
+                    ["wpa_cli", f"-i{self.wlan}"],
+                    stderr=subprocess.STDOUT,
+                    stdout=subprocess.PIPE,
+                    stdin=subprocess.PIPE,
+                    text=True,
+                    )
+            os.set_blocking(proc.stdout.fileno(), False)
+
+            output = ""
+
+            startTime = time.time()
+            while time.time() - startTime < 15:
+                line = proc.stdout.readline()
+                if not line:
+                    time.sleep(0.01)
+                    continue
+
+                output += line
+                #print(line, end="")
+                if line.count("Interactive mode"):
+                    proc.stdin.write("scan\n")
+                    proc.stdin.flush()
+                if line.count("CTRL-EVENT-SCAN-RESULTS"):
+                    proc.stdin.write("scan_results\n")
+                    proc.stdin.flush()
+                    break
+
+            startTime = time.time()
+            while time.time() - startTime < 1:
+                line = proc.stdout.readline()
+                if not line:
+                    time.sleep(0.01)
+                    continue
+
+                output += line
+                if line.count("\t"):
+                    fields = line.rstrip("\n").split("\t")
+                    if len(fields) == 5:
+                        ssids.append(fields[4])
+
+        except:
+            print_err(f"ERROR in wpa_cli_scan(), wpa_cli ouput: {output}")
+        finally:
+            if proc:
+                proc.terminate()
+
+        return ssids
+
+
+    def scan_ssids(self):
+        if self._baseos == "raspbian":
+            try:
+                output = subprocess.run(
+                        "nmcli --terse --fields SSID dev wifi",
+                        shell=True,
+                        capture_output=True,
+                        )
+            except subprocess.CalledProcessError as e:
+                print_err(f"error scanning for SSIDs: {e}")
+                return
+
+            ssids = []
+            for line in output.stdout.decode().split("\n"):
+                if line and line != "--" and line not in ssids:
+                    ssids.append(line)
+        else:
+            ssids = self.wpa_cli_scan()
+
         if len(ssids) > 0:
             print_err(f"found SSIDs: {ssids}")
             self.ssids = ssids
