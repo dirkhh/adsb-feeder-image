@@ -407,8 +407,7 @@ class AdsbIm:
         host_name = host_name.strip("-")[:63]
         if host_name:
             subprocess.run(
-                f"/usr/bin/bash /opt/adsb/scripts/mdns-alias-setup.sh {host_name}",
-                shell=True,
+                ["/usr/bin/bash", "/opt/adsb/scripts/mdns-alias-setup.sh", f"{host_name}"],
             )
 
     def run(self, no_server=False):
@@ -506,7 +505,8 @@ class AdsbIm:
         # Set it as datetimectl too
         try:
             subprocess.run(
-                f"timedatectl set-timezone {browser_timezone}", shell=True, check=True
+                ["timedatectl", "set-timezone", f"{browser_timezone}"],
+                check=True
             )
         except subprocess.SubprocessError:
             print_err("failed to set up timezone")
@@ -519,8 +519,7 @@ class AdsbIm:
 
         def push_mo():
             subprocess.run(
-                f"bash /opt/adsb/push_multioutline.sh {self._d.env_by_tags('num_micro_sites').value}",
-                shell=True,
+                ["bash", "/opt/adsb/push_multioutline.sh", f"{self._d.env_by_tags('num_micro_sites').value}"],
             )
 
         thread = threading.Thread(
@@ -839,7 +838,8 @@ class AdsbIm:
         ):  # that's the length of a valid network id
             try:
                 subprocess.call(
-                    f"zerotier_cli join {zt_network}", timeout=30.0, shell=True
+                    ["zerotier_cli", "join", f"{zt_network}"],
+                    timeout=30.0,
                 )
             except subprocess.TimeoutExpired:
                 print_err(
@@ -1317,12 +1317,11 @@ class AdsbIm:
 
         # ok, it's not a recent adsb.im version, it could still be a feeder
         uf = self._d.env_by_tags(["ultrafeeder", "container"]).value
-        cmd = f"docker run --rm --entrypoint /usr/local/bin/readsb {uf} --net --net-connector {triplet} --quiet --auto-exit=2"
+        cmd = ["docker", "run", "--rm", "--entrypoint", "/usr/local/bin/readsb", f"{uf}", "--net", "--net-connector", f"{triplet}", "--quiet", "--auto-exit=2"]
         print_err(f"running: {cmd}")
         try:
             response = subprocess.run(
                 cmd,
-                shell=True,
                 timeout=30.0,
                 capture_output=True,
             )
@@ -1355,8 +1354,7 @@ class AdsbIm:
         # stream writing to a file with requests library is a pain so just use curl
         try:
             subprocess.run(
-                f"curl -o {tmpfile} {url}",
-                shell=True,
+                ["curl", "-o", f"{tmpfile}", f"{url}"],
                 check=True,
             )
 
@@ -2074,7 +2072,7 @@ class AdsbIm:
                         )
                         sleep(5.0)  # this gives the service enough time to get ready
                         subprocess.call(
-                            f"/usr/sbin/zerotier-cli join {value}", shell=True
+                            ["/usr/sbin/zerotier-cli", "join", f"{value}"],
                         )
                     except:
                         print_err("exception trying to set up zerorier - giving up")
@@ -2405,7 +2403,7 @@ class AdsbIm:
         if zt_network:
             try:
                 result = subprocess.run(
-                    f"zerotier-cli get {zt_network} ip4 2>/dev/null",
+                    ["zerotier-cli", "get", f"{zt_network}", "ip4"],
                     shell=True,
                     capture_output=True,
                     timeout=2.0,
