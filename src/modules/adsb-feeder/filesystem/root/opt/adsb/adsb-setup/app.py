@@ -396,6 +396,11 @@ class AdsbIm:
 
             self._d.env_by_tags("app_init_done").value = True
 
+    def onlyAlphaNum(self, name):
+        new_name = "".join(c for c in name if c.isalnum())
+        new_name = new_name.strip("-")[:63]
+        return new_name
+
     def mdns_alias_service(self, site_name: str):
         os_flag_file = self._d.data_path / "os.adsb.feeder.image"
         if not os_flag_file.exists():
@@ -403,8 +408,7 @@ class AdsbIm:
         # create a valid hostname from the site name and set it up as mDNS alias
         # while a '-' is allowed in a hostname, the avahi service can't deal with that it seems,
         # so let's go alphanumeric only
-        host_name = "".join(c for c in site_name if c.isalnum())
-        host_name = host_name.strip("-")[:63]
+        host_name = self.onlyAlphaNum(site_name)
         if host_name:
             subprocess.run(
                 ["/usr/bin/bash", "/opt/adsb/scripts/mdns-alias-setup.sh", f"{host_name}"],
@@ -1958,36 +1962,57 @@ class AdsbIm:
                     print_err(f"starting tailscale (args='{ts_args}')")
                     try:
                         subprocess.run(
-                            "/usr/bin/systemctl enable --now tailscaled",
-                            shell=True,
+                            ["/usr/bin/systemctl", "enable", "--now", "tailscaled"],
                             timeout=20.0,
                         )
-                        result = subprocess.run(
-                            f"/usr/bin/tailscale up {ts_args} --accept-dns=false 2> /tmp/out &",
-                            shell=True,
-                            capture_output=False,
-                            timeout=30.0,
+                        cmd = ["/usr/bin/tailscale", "up" ]
+
+                        name = self.onlyAlphaNum(self._d.env_by_tags("site_name").list_get(0))
+                        cmd += [f"--hostname={name}"]
+
+                        if ts_args:
+                            cmd += f"{ts_args}".split(" ")
+                        cmd += ["--accept-dns=false"]
+                        print_err(f"running {cmd}")
+                        proc = subprocess.Popen(
+                            cmd,
+                            stderr=subprocess.PIPE,
+                            stdout=subprocess.DEVNULL,
+                            text=True,
                         )
+                        os.set_blocking(proc.stderr.fileno(), False)
                     except:
                         # this really needs a user visible error...
                         print_err("exception trying to set up tailscale - giving up")
                         continue
-                    while True:
-                        sleep(1.0)
-                        with open("/tmp/out") as out:
-                            output = out.read()
-                        # standard tailscale result
-                        match = re.search(r"(https://login\.tailscale.*)", output)
-                        if match:
-                            break
-                        # when using a login-server
-                        match = re.search(r"(https://.*/register/nodekey.*)", output)
-                        if match:
-                            break
+                    else:
+                        startTime = time.time()
+                        match = None
+                        while time.time() - startTime < 30:
+                            output = proc.stderr.readline()
+                            if not output:
+                                if proc.poll() != None:
+                                    break
+                                time.sleep(0.1)
+                                continue
+                            print_err(output.rstrip("\n"))
+                            # standard tailscale result
+                            match = re.search(r"(https://login\.tailscale.*)", output)
+                            if match:
+                                break
+                            # when using a login-server
+                            match = re.search(r"(https://.*/register/nodekey.*)", output)
+                            if match:
+                                break
 
-                    login_link = match.group(1)
-                    print_err(f"found login link {login_link}")
-                    self._d.env_by_tags("tailscale_ll").value = login_link
+                        proc.terminate()
+
+                    if match:
+                        login_link = match.group(1)
+                        print_err(f"found login link {login_link}")
+                        self._d.env_by_tags("tailscale_ll").value = login_link
+                    else:
+                        print_err(f"ERROR: tailscale didn't provide a login link within 30 seconds")
                     return redirect(url_for("systemmgmt"))
                 # tailscale handling uses 'continue' to avoid deep nesting - don't add other keys
                 # here at the end - instead insert them before tailscale
