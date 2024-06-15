@@ -53,9 +53,9 @@ if [[ $wlan != "wlan0" ]] ; then
     sed -i "s/wlan0/$wlan/g" /etc/hostapd/hostapd.conf
 fi
 
-systemctl unmask hostapd.service isc-dhcp-server.service
+systemctl unmask hostapd.service isc-dhcp-server.service &>/dev/null
 for service in hostapd.service isc-dhcp-server.service; do
-    if systemctl is-enabled "$service"; then
+    if systemctl is-enabled "$service" &>/dev/null; then
         systemctl disable "$service"
     fi
 done
@@ -72,7 +72,7 @@ done
 
 # systemctl disable takes 8 seconds for these 2 services,
 # stopping them and masking them is sufficient to stop them from starting so do that instead
-systemctl stop hostapd.service isc-dhcp-server.service
-systemctl mask hostapd.service isc-dhcp-server.service
+systemctl stop hostapd.service isc-dhcp-server.service &>/dev/null
+systemctl mask hostapd.service isc-dhcp-server.service &>/dev/null
 
 echo "successfully connected to network"
