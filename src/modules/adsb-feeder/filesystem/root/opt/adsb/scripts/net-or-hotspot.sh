@@ -20,21 +20,25 @@ function test_network() {
     fi
     return 1
 }
+function check_network() {
+    for i in {1..20}; do
+        sleep 1 &
+        if test_network; then
+            return 0
+        fi
+        wait
+    done
+    return 1
+}
 
-if test_network || test_network; then
-    echo "we are able to ping ${gateway}, no need to start an access point"
+if check_network; then
+    echo "we are able to ping ${gateway} or 8.8.8.8, no need to start an access point"
     exit 0
 fi
 
 # that's not good, let's try to start an access point
 
-for i in {1..10}; do
-    wlan=$(iw dev | grep Interface | cut -d' ' -f2)
-    if [[ $wlan != "" ]] ; then
-        break
-    fi
-    sleep 1
-done
+wlan=$(iw dev | grep Interface | cut -d' ' -f2)
 if [[ $wlan == "" ]] ; then
     echo "No wireless interface detected, giving up"
     exit 1
@@ -60,14 +64,10 @@ while true; do
     echo "No internet connection detected, starting access point"
     python3 /opt/adsb/adsb-setup/hotspot-app.py "$wlan"
 
-    for i in {1..15}; do
-        sleep 1 &
-        if test_network; then
-            # break outer loop as well if network tests good
-            break 2
-        fi
-        wait
-    done
+    if check_network; then
+        # break outer loop as well if network tests good
+        break
+    fi
 done
 
 # systemctl disable takes 8 seconds for these 2 services,
