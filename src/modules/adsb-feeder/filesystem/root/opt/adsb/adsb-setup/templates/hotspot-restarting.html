@@ -31,10 +31,17 @@
     <h1 class="mt-3 text-center text-danger">{% block title %} Trying to connect to WiFi {% endblock %}</h1>
 
     <script>
+      function after60() {
+        // hide spinner after 60 seconds and change the overlay text
+        document.getElementById("loader").style.display = "none";
+        document.getElementById("overlaytext").innerHTML = "Device has probably joined the configured network!";
+      }
       document.addEventListener("readystatechange", (event) => {
         if (event.target.readyState === "complete") {
           show_spinner();
           checkRestartStatus();
+
+          setTimeout(after60, 60 * 1000);
         }
       });
 
