@@ -1,4 +1,7 @@
 Changes since v2.1.0 include:
+- hotspot dietpi: join the network much quicker
+- hotspot raspbian: avoid possible race condition that would stop the hotspot from starting
+- hotspot: be more patient with slow networks, use channel 6 instead of 1
 - internal code changes, workaround for gateway not responding to ping
 - lots of hotspot code tweaks to make it more consistent (hopefully)
 - update ultrafeeder to latest version
