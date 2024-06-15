@@ -263,7 +263,7 @@ class Hotspot:
             )
         elif self._baseos == "raspbian":
             subprocess.run(
-                f"systemctl stop NetworkManager",
+                f"systemctl stop NetworkManager wpa_supplicant",
                 shell=True,
             )
 
@@ -310,7 +310,7 @@ class Hotspot:
             )
         elif self._baseos == "raspbian":
             subprocess.run(
-                f"systemctl restart NetworkManager",
+                f"systemctl restart wpa_supplicant NetworkManager",
                 shell=True,
             )
         # used to wait here, just spin around the wifi instead
