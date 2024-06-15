@@ -75,6 +75,7 @@ class Hotspot:
 
     def wpa_cli_reconfigure(self):
         connected = False
+        output = ""
         try:
             proc = subprocess.Popen(
                     ["wpa_cli", f"-i{self.wlan}"],
@@ -85,7 +86,6 @@ class Hotspot:
                     )
             os.set_blocking(proc.stdout.fileno(), False)
 
-            output = ""
 
             startTime = time.time()
             reconfigured = False
@@ -106,10 +106,14 @@ class Hotspot:
                     connected = True
                     break
         except:
-            print_err(f"ERROR in wpa_cli_scan(), wpa_cli ouput: {output}")
+            pass
         finally:
             if proc:
                 proc.terminate()
+
+
+        if not connected:
+            print_err(f"Couldn't connect after wpa_cli reconfigure: ouput: {output}")
 
         return connected
 
@@ -379,28 +383,29 @@ p2p_disabled=1
                     )
                 except subprocess.SubprocessError as e:
                     # something went wrong
-                    output = e.output.decode()
+                    output = ""
+                    if e.stdout:
+                        output += e.stdout.decode()
                     if e.stderr:
                         output += e.stderr.decode()
                 else:
-                    output = result.stdout.decode()
-                    if result.stderr:
-                        output += result.stderr.decode()
+                    output = result.stdout.decode() + result.stderr.decode()
+
                 success = "successfully activated" in output
 
                 if success:
                     break
                 else:
-                    time.sleep(0.5)
+                    # just to safeguard against super fast spin, sleep a bit
+                    print_err(f"failed to connect to '{self.ssid}': {output}")
+                    time.sleep(2)
                     continue
-
-            if not success:
-                print_err(f"failed to connect to '{self.ssid}': {output}")
-                # just to safeguard against super fast spin, sleep a bit
 
         if success:
             print_err(f"successfully connected to '{self.ssid}'")
         else:
+            print_err(f"test_wifi failed to connect to '{self.ssid}'")
+
             self.comment = (
                 "Failed to connect, wrong SSID or password, please try again."
             )
