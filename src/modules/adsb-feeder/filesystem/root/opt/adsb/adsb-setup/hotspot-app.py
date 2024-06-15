@@ -215,7 +215,7 @@ class Hotspot:
         )
 
     def restarting(self):
-        return render_template("restart-wait.html")
+        return render_template("hotspot-restarting.html")
 
     def run(self):
         self.setup_hotspot()
