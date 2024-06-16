@@ -1972,11 +1972,14 @@ class AdsbIm:
                     unique_name = self.unique_site_name(form.get("site_name"), 0)
                     self._d.env_by_tags("site_name").list_set(0, unique_name)
                     self.mdns_alias_service(unique_name)
+                # if this is a regular feeder and the user is changing to 'individual' selection
+                # (either in initial setup or when coming back to that setting later), show them
+                # the aggregator selection page next
                 if (
                     key == "aggregators"
-                    and not self._d.env_by_tags("aggregators_chosen").value
                     and not self._d.is_enabled("stage2")
-                    and not value == "micro"
+                    and value == "individual"
+                    and self._d.env_by_tags("aggregators").value != "individual"
                 ):
                     # show the aggregator selection
                     next_url = url_for("aggregators")
