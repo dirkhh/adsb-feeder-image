@@ -1,4 +1,5 @@
 Changes since v2.1.0 include:
+- first boot / first configuration: avoid interrupting docker pull to eliminate extra downloading
 - Basic Setup: don't force the user to go through the data sharing page if they pick "all" or "privacy" during basic setup
 - DietPi builds: don't clone the feeder image on first boot - we use custom DietPi images that have the correct version pre-installed
 - hotspot dietpi: join the network much quicker
