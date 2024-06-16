@@ -2028,7 +2028,6 @@ class AdsbIm:
             if self._d.is_enabled("sdrplay") and not self._d.is_enabled("sdrplay_license_accepted"):
                 return redirect(url_for("sdrplay_license"))
 
-            self.write_envfile()
             # adsb-system-restart mainly does a compose up
             self._system._restart.bg_run(cmdline="bash /opt/adsb/adsb-system-restart.sh", silent=True)
             return render_template("/restarting.html")
