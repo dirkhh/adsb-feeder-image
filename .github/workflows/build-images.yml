@@ -57,22 +57,26 @@ jobs:
           variant: dietpi-fat-2
           base_arch: arm64
           dietpi_machine: 56
-          magic_path: "repository/src/image-dietpi/DietPi_NanoPiNEO3-ARMv8-Bookworm.img"
+          url: https://github.com/dirkhh/DietPi/releases/download/latest/DietPi_NanoPiNEO3-ARMv8-Bookworm.img.xz
+          magic_path: "repository/src/image-dietpi/DietPi_NanoPiNEO3-ARMv8-Bookworm.img.xz"
         - name: orangepi-3LTS-dietpi
           variant: dietpi-fat-2
           base_arch: arm64
           dietpi_machine: 89
-          magic_path: "repository/src/image-dietpi/DietPi_OrangePi3LTS-ARMv8-Bookworm.img"
+          url: https://github.com/dirkhh/DietPi/releases/download/latest/DietPi_OrangePi3LTS-ARMv8-Bookworm.img.xz
+          magic_path: "repository/src/image-dietpi/DietPi_OrangePi3LTS-ARMv8-Bookworm.img.xz"
         - name: orangepi-5plus-dietpi
           variant: dietpi-fat-2
           base_arch: arm64
           dietpi_machine: 82
-          magic_path: "repository/src/image-dietpi/DietPi_OrangePi5Plus-ARMv8-Bookworm.img"
+          url: https://github.com/dirkhh/DietPi/releases/download/latest/DietPi_OrangePi5Plus-ARMv8-Bookworm.img.xz
+          magic_path: "repository/src/image-dietpi/DietPi_OrangePi5Plus-ARMv8-Bookworm.img.xz"
         - name: orangepi-zero3-dietpi
           variant: dietpi-fat-2
           base_arch: arm64
           dietpi_machine: 83
-          magic_path: "repository/src/image-dietpi/DietPi_OrangePiZero3-ARMv8-Bookworm.img"
+          url: https://github.com/dirkhh/DietPi/releases/download/latest/DietPi_OrangePiZero3-ARMv8-Bookworm.img.xz
+          magic_path: "repository/src/image-dietpi/DietPi_OrangePiZero3-ARMv8-Bookworm.img.xz"
         - name: raspberrypi64-pi-2-3-4-5
           base_arch: arm64
           variant: default
@@ -82,24 +86,26 @@ jobs:
           base_arch: arm64
           variant: dietpi-fat-1
           dietpi_machine: 4
-          magic_path: "repository/src/image-dietpi/DietPi_RPi-ARMv8-Bookworm.img"
+          url: https://github.com/dirkhh/DietPi/releases/download/latest/DietPi_RPi234-ARMv8-Bookworm.img.xz
+          magic_path: "repository/src/image-dietpi/DietPi_RPi-ARMv8-Bookworm.img.xz"
         - name: raspberrypi64-dietpi-pi-5
           base_arch: arm64
           variant: dietpi-fat-1
           dietpi_machine: 5
-          magic_path: "repository/src/image-dietpi/DietPi_RPi5-ARMv8-Bookworm.img"
+          url: https://github.com/dirkhh/DietPi/releases/download/latest/DietPi_RPi5-ARMv8-Bookworm.img.xz
+          magic_path: "repository/src/image-dietpi/DietPi_RPi5-ARMv8-Bookworm.img.xz"
         - name: x86-64-native
           variant: dietpi-root-only
           base_arch: x86_64
           dietpi_machine: 21
-          magic_path: "repository/src/image-dietpi/DietPi_NativePC-BIOS-x86_64-Bookworm.img"
+          url: https://github.com/dirkhh/DietPi/releases/download/latest/DietPi_NativePC-BIOS-x86_64-Bookworm.img.xz
+          magic_path: "repository/src/image-dietpi/DietPi_NativePC-BIOS-x86_64-Bookworm.img.xz"
         - name: x86-64-vm
           variant: dietpi-root-only
           base_arch: x86_64
           dietpi_machine: 20
-          magic_path: "repository/src/image-dietpi/DietPi_VM-x86_64-Bookworm.img"
-
-
+          url: https://github.com/dirkhh/DietPi/releases/download/latest/DietPi_VM-x86_64-Bookworm.img.xz
+          magic_path: "repository/src/image-dietpi/DietPi_VM-x86_64-Bookworm.img.xz"
 
     env:
       IMG_NAME: ${{ matrix.name }}
@@ -159,18 +165,10 @@ jobs:
         mkdir -p image image-armbian image-dietpi
 
     - name: Download image
-      if: ${{ ! startsWith(env.VARIANT, 'dietpi') }}
       run: |
         MAGIC_DIR=$(dirname "${MAGIC_PATH}")
         mkdir -p "${MAGIC_DIR}"
         wget -qO "${MAGIC_PATH}" "$IMAGE_URL"
-
-    - name: Build DietPi Image
-      if: ${{ startsWith(env.VARIANT, 'dietpi') }}
-      run: |
-        cd DietPi/.build/images
-        sudo G_GITOWNER=dirkhh G_GITBRANCH=adsbim G_ADSB_SHA=${{ github.sha }} ./dietpi-build -m ${{ env.DIETPI_MACHINE }} -o dirkhh -b adsbim --preinst 141 --sizeincrement 600
-        mv DietPi*.img ../../../${{ env.MAGIC_PATH }}
 
     - name: create a reasonable tag for this run - either a short sha or the tag we were called with
       id: tag

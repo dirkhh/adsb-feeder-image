@@ -72,17 +72,9 @@ apt install -y --no-install-recommends chrony
 #
 # End of Ramon Kolb's docker-install.sh
 #
-git clone 'https://github.com/dirkhh/adsb-feeder-image.git' /tmp/adsb-feeder
-cd /tmp/adsb-feeder
-git checkout GIT_COMMIT_SHA  # <- gets replaced before use
-mv -v /tmp/adsb-feeder/src/modules/adsb-feeder/filesystem/root/usr/lib/systemd/system/* /usr/lib/systemd/system/
-mv -v /tmp/adsb-feeder/src/modules/adsb-feeder/filesystem/root/opt/adsb /opt/
-cd /opt/adsb
-rm -rf /tmp/adsb-feeder
-echo "FEEDER_IMAGE_NAME" > /opt/adsb/feeder-image.name  # <- gets replaced before use
-echo "FEEDER_IMAGE_VERSION" > /opt/adsb/adsb.im.version # <- gets replaced before use
-touch /opt/adsb/os.adsb.feeder.image
-touch /opt/adsb/adsb.im.passwd.and.keys
+
+# most of the feeder image is already installed, we just do a few final steps that need
+# to happen after first boot
 cp ~root/.ssh/authorized_keys ~root/.ssh/adsb.im.installkey
 
 # create a symlink so the config files reside where they should be in /mnt/dietpi_userdata/adsb-feeder

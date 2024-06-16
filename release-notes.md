@@ -1,4 +1,5 @@
 Changes since v2.1.0 include:
+- DietPi builds: don't clone the feeder image on first boot - we use custom DietPi images that have the correct version pre-installed
 - hotspot dietpi: join the network much quicker
 - hotspot raspbian: avoid possible race condition that would stop the hotspot from starting
 - hotspot: be more patient with slow networks, use channel 6 instead of 1

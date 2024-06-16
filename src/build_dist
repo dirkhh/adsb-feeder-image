@@ -103,6 +103,14 @@ if [[ "$VARIANT" == "iob-dietpi"* ]] ; then
         ls
         popd
     fi
+    # make sure that the pre-installed feeder image matches the one we are building
+    mkdir -p "$MNT_DIR/opt/adsb/usr/lib/systemd/system/"
+    cp -v -a "$DIR"/modules/adsb-feeder/filesystem/root/usr/lib/systemd/system/* "$MNT_DIR"/opt/adsb/usr/lib/systemd/system/
+    cp -v -a -r "$DIR"/modules/adsb-feeder/filesystem/root/opt/adsb "$MNT_DIR"/opt/
+    echo "$FEEDER_IMAGE_NAME" > "$MNT_DIR"/opt/adsb/feeder-image.name
+    echo "$VERSION" > "$MNT_DIR"/opt/adsb/adsb.im.version
+    touch "$MNT_DIR"/opt/adsb/os.adsb.feeder.image
+    touch "$MNT_DIR"/opt/adsb/adsb.im.passwd.and.keys
 
     # make systemd journal persistent for dietpi
     sed -i -e 's/.*Storage=.*/Storage=persistent/' "$MNT_DIR/etc/systemd/journald.conf"
@@ -130,10 +138,6 @@ EOF
     # reduce default networking timeout from 300 to 120 seconds for dietpi
     echo WAIT_ONLINE_TIMEOUT=120 >> "$MNT_DIR"/etc/default/networking
 
-
-    sed -i "s/GIT_COMMIT_SHA/$GIT_COMMIT_SHA/" "${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh"
-    sed -i "s/FEEDER_IMAGE_NAME/$FEEDER_IMAGE_NAME/" "${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh"
-    sed -i "s/FEEDER_IMAGE_VERSION/$VERSION/" "${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh"
     sed -i "s/ADSB_RANDOM_PASSWORD/$ROOT_PWD/" "${DIR}/variants/iob-dietpi/dietpi.txt"
     echo "AUTO_SETUP_SSH_PUBKEY=$SSH_PUB_KEY" >> "${DIR}/variants/iob-dietpi/dietpi.txt"
     cp "${DIR}/variants/iob-dietpi/dietpi.txt" "$MNT_DIR"/"$CONFIG_DIR"
