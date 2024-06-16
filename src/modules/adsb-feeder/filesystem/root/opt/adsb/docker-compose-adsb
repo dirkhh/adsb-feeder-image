@@ -29,29 +29,18 @@ if kill -0 "$PARENTPID" &> /dev/null ; then
 else
     PARENTPROC="process $PARENTPID (appears already gone)"
 fi
-echo "$(date -u +"%FT%T.%3NZ") $PARENTPROC called docker-compose-adsb" "$@" >&2
+
+echo "$(date -u +"%FT%T.%3NZ") $$: $PARENTPROC called docker-compose-adsb $@"
+
 
 lockFile="/opt/adsb/docker-starting.lock"
+exec 9>>"$lockFile"
 
-while ! ( set -o noclobber; echo "$$" > "$lockFile") 2> /dev/null; do
-    if [[ -f "$lockFile" ]] && ! pgrep -F $lockFile &>/dev/null; then
-        echo "$(date -u +"%FT%T.%3NZ") docker-compose-adsb lockfile present but associated PID not running, removing lockfile" >&2
-        rm -f "$lockFile"
-        continue
-    fi
-    if [[ -z "$waiting_for_lock" ]]; then
-        echo "$(date -u +"%FT%T.%3NZ") docker-compose-adsb is already running, will wait for: $(pgrep -a -F $lockFile)" >&2
-        waiting_for_lock=1
-    fi
-    sleep 0.1
-done
-
-if [[ -n "$waiting_for_lock" ]]; then
-    echo "$(date -u +"%FT%T.%3NZ") docker-compose-adsb finished waiting for lock" >&2
-    waiting_for_lock=
+if ! flock --exclusive --nonblock 9; then
+    echo "$(date -u +"%FT%T.%3NZ") $$: docker-compose-adsb will wait for lock"
+    flock --exclusive 9
+    echo "$(date -u +"%FT%T.%3NZ") $$: docker-compose-adsb finished waiting for lock"
 fi
-
-trap 'rm -f "$lockFile"; exit $?' INT TERM EXIT
 
 docker_compose="docker compose"
 $docker_compose version &> /dev/null || docker_compose="docker-compose"
