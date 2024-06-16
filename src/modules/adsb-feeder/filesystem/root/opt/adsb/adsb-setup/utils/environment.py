@@ -48,9 +48,7 @@ class Env:
                         self._value = [value_in_file]
                         stack_info(f"converting {self._name} to list {self._value}")
                         return
-                    if type(self._default[0]) == bool and (
-                        value_in_file.lower() in ["true", "false", "0", "1"]
-                    ):
+                    if type(self._default[0]) == bool and (value_in_file.lower() in ["true", "false", "0", "1"]):
                         self._value = [is_true(value_in_file)]
                         stack_info(f"converting {self._name} to list {self._value}")
                         return
@@ -127,9 +125,7 @@ class Env:
         # already modifies the existing object in memory - so we need to force a comparison
         # to the value in the file
         if type(self._value) == list:
-            stack_info(
-                f"WAIT == using standard setter to assign a list {self} -- {value} -- {type(value)}"
-            )
+            stack_info(f"WAIT == using standard setter to assign a list {self} -- {value} -- {type(value)}")
             self.list_set(0, value)
             self._reconcile(value)
             return
@@ -165,7 +161,7 @@ class Env:
         else:
             self._value[idx] = value
         self._reconcile(self._value)
-        #print_err(f"after reconcile {self._name} = {self._value}")
+        # print_err(f"after reconcile {self._name} = {self._value}")
 
     def list_get(self, idx):
         idx = make_int(idx)
@@ -184,17 +180,11 @@ class Env:
             return self._value[idx]
 
         if type(self._default) != list:
-            print_err(
-                f"{self._name}: default type should be list: {type(self._default)}"
-            )
+            print_err(f"{self._name}: default type should be list: {type(self._default)}")
         if type(self._default) == list and len(self._default) != 1:
-            print_err(
-                f"{self._name}: default list len should be 1: {len(self._default)}"
-            )
+            print_err(f"{self._name}: default list len should be 1: {len(self._default)}")
 
-        stack_info(
-            f"{self._name} only has {len(self._value)} values and no default, asking for {idx}"
-        )
+        stack_info(f"{self._name} only has {len(self._value)} values and no default, asking for {idx}")
         return ""
 
     def list_remove(self, idx=-1):

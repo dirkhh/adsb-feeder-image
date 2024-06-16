@@ -11,7 +11,7 @@ class RouteManager:
         self.app = app
 
     def add_proxy_routes(self, proxy_routes):
-        #print_err(f"adding proxy_routes {proxy_routes}", level=2)
+        # print_err(f"adding proxy_routes {proxy_routes}", level=2)
         for endpoint, port, url_path in proxy_routes:
             # print_err(f"add_proxy_route {endpoint} {port } {url_path}")
             r = self.function_factory(endpoint, port, url_path)
@@ -20,9 +20,7 @@ class RouteManager:
     def function_factory(self, orig_endpoint, new_port, new_path):
         # inc_port / idx is the id of the stage2 microfeeder
         def f(idx=0, inc_port=0, sub_path=""):
-            return self.my_redirect(
-                orig_endpoint, new_port, new_path, idx=idx, inc_port=inc_port, sub_path=sub_path
-            )
+            return self.my_redirect(orig_endpoint, new_port, new_path, idx=idx, inc_port=inc_port, sub_path=sub_path)
 
         return f
 

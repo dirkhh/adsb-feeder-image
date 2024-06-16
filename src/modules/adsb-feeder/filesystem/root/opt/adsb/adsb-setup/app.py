@@ -114,9 +114,7 @@ class AdsbIm:
 
             return {
                 "is_enabled": lambda tag: self._d.is_enabled(tag),
-                "list_is_enabled": lambda tag, idx: self._d.list_is_enabled(
-                    tag, idx=idx
-                ),
+                "list_is_enabled": lambda tag, idx: self._d.list_is_enabled(tag, idx=idx),
                 "env_value_by_tag": lambda tag: get_value([tag]),  # single tag
                 "env_value_by_tags": lambda tags: get_value(tags),  # list of tags
                 "list_value_by_tag": lambda tag, idx: list_value_by_tags([tag], idx),
@@ -138,9 +136,7 @@ class AdsbIm:
 
         # no one should share a CPU serial with RadarBox, so always create fake cpuinfo;
         # also identify if we would use the thermal hack for RB and Ultrafeeder
-        self._d.env_by_tags("rbthermalhack").value = (
-            "/sys/class/thermal" if create_fake_info() else ""
-        )
+        self._d.env_by_tags("rbthermalhack").value = "/sys/class/thermal" if create_fake_info() else ""
 
         # Ensure secure_image is set the new way if before the update it was set only as env variable
         if self._d.is_enabled("secure_image"):
@@ -376,9 +372,7 @@ class AdsbIm:
             print_err(f"ultrafeeder_config {i}", level=2)
             if i >= len(self._d.ultrafeeder):
                 self._d.ultrafeeder.append(UltrafeederConfig(data=self._d, micro=i))
-            self._d.env_by_tags("ultrafeeder_config").list_set(
-                i, self._d.ultrafeeder[i].generate()
-            )
+            self._d.env_by_tags("ultrafeeder_config").list_set(i, self._d.ultrafeeder[i].generate())
 
     def setup_app_ports(self):
         if not self._d.is_enabled("app_init_done"):
@@ -410,9 +404,7 @@ class AdsbIm:
         # so let's go alphanumeric only
         host_name = self.onlyAlphaNum(site_name)
         if host_name:
-            subprocess.run(
-                ["/usr/bin/bash", "/opt/adsb/scripts/mdns-alias-setup.sh", f"{host_name}"],
-            )
+            subprocess.run(["/usr/bin/bash", "/opt/adsb/scripts/mdns-alias-setup.sh", f"{host_name}"])
 
     def run(self, no_server=False):
         debug = os.environ.get("ADSBIM_DEBUG") is not None
@@ -443,9 +435,7 @@ class AdsbIm:
         if not os_flag_file.exists():
             # we are running as an app under DietPi or some other OS
             self._d.is_feeder_image = False
-            with open(
-                self._d.data_path / "adsb-setup/templates/systemmgmt.html", "r+"
-            ) as systemmgmt_file:
+            with open(self._d.data_path / "adsb-setup/templates/systemmgmt.html", "r+") as systemmgmt_file:
                 systemmgmt_html = systemmgmt_file.read()
                 systemmgmt_file.seek(0)
                 systemmgmt_file.write(
@@ -508,10 +498,7 @@ class AdsbIm:
         self._d.env("FEEDER_TZ").value = browser_timezone
         # Set it as datetimectl too
         try:
-            subprocess.run(
-                ["timedatectl", "set-timezone", f"{browser_timezone}"],
-                check=True
-            )
+            subprocess.run(["timedatectl", "set-timezone", f"{browser_timezone}"], check=True)
         except subprocess.SubprocessError:
             print_err("failed to set up timezone")
 
@@ -523,7 +510,7 @@ class AdsbIm:
 
         def push_mo():
             subprocess.run(
-                ["bash", "/opt/adsb/push_multioutline.sh", f"{self._d.env_by_tags('num_micro_sites').value}"],
+                ["bash", "/opt/adsb/push_multioutline.sh", f"{self._d.env_by_tags('num_micro_sites').value}"]
             )
 
         thread = threading.Thread(
@@ -537,9 +524,7 @@ class AdsbIm:
                 self.get_base_info(i)
 
     def hotspot_test(self):
-        return render_template(
-            "hotspot.html", version="123", comment="comment", ssids=list(range(20))
-        )
+        return render_template("hotspot.html", version="123", comment="comment", ssids=list(range(20)))
 
     def restarting(self):
         return render_template("restarting.html")
@@ -599,9 +584,7 @@ class AdsbIm:
                     shell=True,
                 )
             except:
-                print_err(
-                    "failed to kill collectd - just using the localhost.tar.gz that's already there"
-                )
+                print_err("failed to kill collectd - just using the localhost.tar.gz that's already there")
                 pass
             else:
                 count = 0
@@ -627,11 +610,7 @@ class AdsbIm:
                         if microIndex == 0:
                             uf_path = adsb_path / "ultrafeeder"
                         else:
-                            uf_path = (
-                                adsb_path
-                                / "ultrafeeder"
-                                / self._d.env_by_tags("mf_ip").list_get(microIndex)
-                            )
+                            uf_path = adsb_path / "ultrafeeder" / self._d.env_by_tags("mf_ip").list_get(microIndex)
 
                         gh_path = uf_path / "globe_history"
                         if include_heatmap and gh_path.is_dir():
@@ -644,18 +623,14 @@ class AdsbIm:
 
                                 print_err(f"add: {pstring}")
                                 for f in subpath.rglob("*"):
-                                    backup_zip.write(
-                                        f, arcname=f.relative_to(adsb_path)
-                                    )
+                                    backup_zip.write(f, arcname=f.relative_to(adsb_path))
 
                         # do graphs after heatmap data as this can pause a couple seconds in graphs1090_writeback
                         # due to buffers, the download won't be recognized by the browsers until some data is added to the zipfile
                         if include_graphs:
                             graphs1090_writeback(uf_path, microIndex)
                             graphs_path = uf_path / "graphs1090/rrd/localhost.tar.gz"
-                            backup_zip.write(
-                                graphs_path, arcname=graphs_path.relative_to(adsb_path)
-                            )
+                            backup_zip.write(graphs_path, arcname=graphs_path.relative_to(adsb_path))
 
             except BrokenPipeError:
                 print_err(f"warning: backup download aborted mid-stream")
@@ -734,17 +709,11 @@ class AdsbIm:
             for name in restore_zip.namelist():
                 print_err(f"found file {name} in archive")
                 # remove files with a name that results in a path that doesn't start with our decompress path
-                if not str(
-                    os.path.normpath(os.path.join(restore_path, name))
-                ).startswith(str(restore_path)):
+                if not str(os.path.normpath(os.path.join(restore_path, name))).startswith(str(restore_path)):
                     print_err(f"restore skipped for path breakout name: {name}")
                     continue
                 # only accept the .env file and config.json and files for ultrafeeder
-                if (
-                    name != ".env"
-                    and name != "config.json"
-                    and not name.startswith("ultrafeeder/")
-                ):
+                if name != ".env" and name != "config.json" and not name.startswith("ultrafeeder/"):
                     continue
                 restore_zip.extract(name, restore_path)
                 restored_files.append(name)
@@ -771,9 +740,7 @@ class AdsbIm:
         changed += list(uf_paths)
 
         print_err(f"offering the usr to restore the changed files: {changed}")
-        return render_template(
-            "/restoreexecute.html", changed=changed, unchanged=unchanged
-        )
+        return render_template("/restoreexecute.html", changed=changed, unchanged=unchanged)
 
     def restore_post(self, form):
         # they have selected the files to restore
@@ -783,9 +750,7 @@ class AdsbIm:
         restore_path = adsb_path / "restore"
         restore_path.mkdir(mode=0o755, exist_ok=True)
         try:
-            subprocess.call(
-                "/opt/adsb/docker-compose-adsb down -t 20", timeout=40.0, shell=True
-            )
+            subprocess.call("/opt/adsb/docker-compose-adsb down -t 20", timeout=40.0, shell=True)
         except subprocess.TimeoutExpired:
             print_err("timeout expired stopping docker... trying to continue...")
         for name, value in form.items():
@@ -813,9 +778,7 @@ class AdsbIm:
                             # this overwrites the value in the file we just restored with the current value of the running image,
                             # iow it doesn't restore that value from the backup
                             values[e.name] = e.value
-                    write_values_to_config_json(
-                        values, reason="execute_restore from .env"
-                    )
+                    write_values_to_config_json(values, reason="execute_restore from .env")
 
         # clean up the restore path
         restore_path = pathlib.Path("/opt/adsb/config/restore")
@@ -827,9 +790,7 @@ class AdsbIm:
 
         for e in self._d._env:
             e._reconcile(e._value, pull=("norestore" not in e.tags))
-            print_err(
-                f"{'wrote out' if 'norestore' in e.tags else 'read in'} {e.name}: {e.value}"
-            )
+            print_err(f"{'wrote out' if 'norestore' in e.tags else 'read in'} {e.name}: {e.value}")
 
         # finally make sure that a couple of the key settings are up to date
         self.update_boardname()
@@ -837,18 +798,14 @@ class AdsbIm:
 
         # make sure we are connected to the right Zerotier network
         zt_network = self._d.env_by_tags("zerotierid").value
-        if (
-            zt_network and len(zt_network) == 16
-        ):  # that's the length of a valid network id
+        if zt_network and len(zt_network) == 16:  # that's the length of a valid network id
             try:
                 subprocess.call(
                     ["zerotier_cli", "join", f"{zt_network}"],
                     timeout=30.0,
                 )
             except subprocess.TimeoutExpired:
-                print_err(
-                    "timeout expired joining Zerotier network... trying to continue..."
-                )
+                print_err("timeout expired joining Zerotier network... trying to continue...")
 
         self.handle_implied_settings()
         self.write_envfile()
@@ -886,12 +843,8 @@ class AdsbIm:
         # and then update with the actual settings
         serial_guess: Dict[str, str] = self._sdrdevices.addresses_per_frequency
         print_err(f"serial guess: {serial_guess}")
-        serials: Dict[str, str] = {
-            f: self._d.env_by_tags(f"{f}serial").value for f in [978, 1090]
-        }
-        used_serials = {
-            self._d.env_by_tags(f).value for f in self._sdrdevices.purposes()
-        }
+        serials: Dict[str, str] = {f: self._d.env_by_tags(f"{f}serial").value for f in [978, 1090]}
+        used_serials = {self._d.env_by_tags(f).value for f in self._sdrdevices.purposes()}
         for f in [978, 1090]:
             if not serials[f] and serial_guess[f] not in used_serials:
                 serials[f] = serial_guess[f]
@@ -952,24 +905,16 @@ class AdsbIm:
                     "alt": self._d.env_by_tags("alt").list_get(0),
                     "tz": self._d.env_by_tags("tz").list_get(0),
                     "version": self._d.env_by_tags("base_version").value,
-                    "airspy_at_port": (
-                        self._d.env_by_tags("airspyport").value
-                        if self._d.is_enabled("airspy")
-                        else 0
-                    ),
+                    "airspy_at_port": (self._d.env_by_tags("airspyport").value if self._d.is_enabled("airspy") else 0),
                     "rtlsdr_at_port": (
                         self._d.env_by_tags("tar1090port").value
                         if self._d.env_by_tags("readsb_device_type").value == "rtlsdr"
                         else 0
                     ),
                     "dump978_at_port": (
-                        self._d.env_by_tags("uatport").value
-                        if self._d.list_is_enabled(["uat978"], 0)
-                        else 0
+                        self._d.env_by_tags("uatport").value if self._d.list_is_enabled(["uat978"], 0) else 0
                     ),
-                    "brofm_capable": (
-                        self._d.env_by_tags("aggregators").value == "micro"
-                    ),
+                    "brofm_capable": (self._d.env_by_tags("aggregators").value == "micro"),
                 }
             )
         )
@@ -984,9 +929,7 @@ class AdsbIm:
                 ip, triplet = mf_get_ip_and_triplet(ip)
                 suffix = f"_{i}" if i != 0 else ""
                 try:
-                    with open(
-                        f"/run/adsb-feeder-ultrafeeder{suffix}/readsb/stats.prom"
-                    ) as f:
+                    with open(f"/run/adsb-feeder-ultrafeeder{suffix}/readsb/stats.prom") as f:
                         pct = 0
                         secs = 0
                         found = 0
@@ -1012,9 +955,7 @@ class AdsbIm:
             not self._d.env_by_tags("aggregators").value == "micro"
             or len(self._d.env_by_tags("last_stage2_contact").value) != 2
         ):
-            return Response(
-                json.dumps({"stage2_connected": "never"}), mimetype="application/json"
-            )
+            return Response(json.dumps({"stage2_connected": "never"}), mimetype="application/json")
         now = int(time.time())
         last = make_int(self._d.env_by_tags("last_stage2_contact").list_get(1))
         since = now - last
@@ -1111,9 +1052,7 @@ class AdsbIm:
             else:
                 m = 0
             site = self._d.env_by_tags("site_name").list_get(m)
-            print_err(
-                "setting up visualization on a stage 2 system for site {site} (m={m})"
-            )
+            print_err("setting up visualization on a stage 2 system for site {site} (m={m})")
         else:
             site = ""
             m = 0
@@ -1142,13 +1081,7 @@ class AdsbIm:
         else:
             globe_history = f"{self._d.env_by_tags('mf_ip').list_get(idx)}/globe_history"
 
-        rangedirs = (
-            self._d.config_path
-            / "ultrafeeder"
-            / globe_history
-            / "internal_state"
-            / "rangeDirs.gz"
-        )
+        rangedirs = self._d.config_path / "ultrafeeder" / globe_history / "internal_state" / "rangeDirs.gz"
         if not rangedirs.exists() and rangedirs.is_file():
             print_err(f"can't seem to find the range outline file {rangedirs}")
             return
@@ -1162,9 +1095,7 @@ class AdsbIm:
                 shell=True,
             )
         except subprocess.TimeoutExpired:
-            print_err(
-                "timeout expired stopping ultrafeeder... trying to continue anyway..."
-            )
+            print_err("timeout expired stopping ultrafeeder... trying to continue anyway...")
         rangedirs.unlink(missing_ok=True)
         print_err(f"removed the range outline at path {rangedirs}")
         try:
@@ -1192,11 +1123,7 @@ class AdsbIm:
         # make sure that a site name is unique - if the idx is given that's
         # the current value and excluded from the check
         existing_names = self._d.env_by_tags("site_name")
-        names = [
-            existing_names.list_get(n)
-            for n in range(0, len(existing_names.value))
-            if n != idx
-        ]
+        names = [existing_names.list_get(n) for n in range(0, len(existing_names.value)) if n != idx]
         while name in names:
             name += "_"
         return name
@@ -1209,18 +1136,12 @@ class AdsbIm:
         timeout = 2.0
         # try:
         if do_import:
-            micro_settings, status = generic_get_json(
-                f"http://{ip}/api/micro_settings", timeout=timeout
-            )
+            micro_settings, status = generic_get_json(f"http://{ip}/api/micro_settings", timeout=timeout)
             print_err(f"micro_settings API on {ip}: {status}, {micro_settings}")
             if status != 200 or micro_settings == None:
                 # maybe we're running on 1099?
-                micro_settings, status = generic_get_json(
-                    f"http://{ip}:1099/api/micro_settings", timeout=timeout
-                )
-                print_err(
-                    f"micro_settings API on {ip}:1099: {status}, {micro_settings}"
-                )
+                micro_settings, status = generic_get_json(f"http://{ip}:1099/api/micro_settings", timeout=timeout)
+                print_err(f"micro_settings API on {ip}:1099: {status}, {micro_settings}")
 
             if status == 200 and micro_settings != None:
                 for key, value in micro_settings.items():
@@ -1232,22 +1153,16 @@ class AdsbIm:
                     if e:
                         e.list_set(n, value)
 
-        base_info, status = generic_get_json(
-            f"http://{ip}/api/base_info", timeout=timeout
-        )
+        base_info, status = generic_get_json(f"http://{ip}/api/base_info", timeout=timeout)
         if status != 200 or base_info == None:
             # maybe we're running on 1099?
-            base_info, status = generic_get_json(
-                f"http://{ip}:1099/api/base_info", timeout=timeout
-            )
+            base_info, status = generic_get_json(f"http://{ip}:1099/api/base_info", timeout=timeout)
         if status == 200 and base_info != None:
             print_err(f"got {base_info} for {ip}")
             if do_import or not self._d.env_by_tags("site_name").list_get(n):
                 # only accept the remote name if this is our initial import
                 # after that the user may have overwritten it
-                self._d.env_by_tags("site_name").list_set(
-                    n, self.unique_site_name(base_info["name"])
-                )
+                self._d.env_by_tags("site_name").list_set(n, self.unique_site_name(base_info["name"]))
             self._d.env_by_tags("lat").list_set(n, base_info["lat"])
             self._d.env_by_tags("lng").list_set(n, base_info["lng"])
             self._d.env_by_tags("alt").list_set(n, base_info["alt"])
@@ -1272,9 +1187,7 @@ class AdsbIm:
             self._d.env_by_tags("rtlsdrurl").list_set(n, rtlsdrurl)
             self._d.env_by_tags("978url").list_set(n, dump978url)
 
-            self._d.env_by_tags("mf_brofm_capable").list_set(
-                n, bool(base_info.get("brofm_capable"))
-            )
+            self._d.env_by_tags("mf_brofm_capable").list_set(n, bool(base_info.get("brofm_capable")))
 
             return True
         #    except:
@@ -1321,7 +1234,19 @@ class AdsbIm:
 
         # ok, it's not a recent adsb.im version, it could still be a feeder
         uf = self._d.env_by_tags(["ultrafeeder", "container"]).value
-        cmd = ["docker", "run", "--rm", "--entrypoint", "/usr/local/bin/readsb", f"{uf}", "--net", "--net-connector", f"{triplet}", "--quiet", "--auto-exit=2"]
+        cmd = [
+            "docker",
+            "run",
+            "--rm",
+            "--entrypoint",
+            "/usr/local/bin/readsb",
+            f"{uf}",
+            "--net",
+            "--net-connector",
+            f"{triplet}",
+            "--quiet",
+            "--auto-exit=2",
+        ]
         print_err(f"running: {cmd}")
         try:
             response = subprocess.run(
@@ -1331,9 +1256,7 @@ class AdsbIm:
             )
             output = response.stderr.decode("utf-8")
         except:
-            print_err(
-                "failed to use readsb in ultrafeeder container to check on remote feeder status"
-            )
+            print_err("failed to use readsb in ultrafeeder container to check on remote feeder status")
             return make_response(json.dumps({"status": "fail"}), 200)
         if not re.search("input: Connection established", output):
             print_err(f"can't connect to beast_output on remote feeder: {output}")
@@ -1366,11 +1289,7 @@ class AdsbIm:
                 zf.extractall(path=self._d.config_path / "ultrafeeder" / ip)
             # deal with the duplicate "ultrafeeder in the path"
             shutil.move(
-                self._d.config_path
-                / "ultrafeeder"
-                / ip
-                / "ultrafeeder"
-                / "globe_history",
+                self._d.config_path / "ultrafeeder" / ip / "ultrafeeder" / "globe_history",
                 self._d.config_path / "ultrafeeder" / ip / "globe_history",
             )
             shutil.move(
@@ -1396,14 +1315,10 @@ class AdsbIm:
     ):
         # the key here can be a readsb net connector triplet in the form ip,port,protocol
         # usually it's just the ip
-        if key in {
-            self._d.env_by_tags("mf_ip").list_get(i) for i in self.micro_indices()
-        }:
+        if key in {self._d.env_by_tags("mf_ip").list_get(i) for i in self.micro_indices()}:
             print_err(f"IP address {key} already listed as a micro site")
             return (False, f"IP address {key} already listed as a micro site")
-        print_err(
-            f"setting up a new micro site at {key} do_import={do_import} do_restore={do_restore}"
-        )
+        print_err(f"setting up a new micro site at {key} do_import={do_import} do_restore={do_restore}")
         n = self._d.env_by_tags("num_micro_sites").value
 
         # store the IP address so that get_base_info works
@@ -1417,9 +1332,7 @@ class AdsbIm:
             print_err(f"Micro feeder at {key} is not an adsb.im feeder")
             n += 1
             self._d.env_by_tags("num_micro_sites").value = n
-            self._d.env_by_tags("site_name").list_set(
-                n, self.unique_site_name(micro_data.get("micro_site_name", ""))
-            )
+            self._d.env_by_tags("site_name").list_set(n, self.unique_site_name(micro_data.get("micro_site_name", "")))
             self._d.env_by_tags("lat").list_set(n, micro_data.get("micro_lat", ""))
             self._d.env_by_tags("lng").list_set(n, micro_data.get("micro_lng", ""))
             self._d.env_by_tags("alt").list_set(n, micro_data.get("micro_alt", ""))
@@ -1430,9 +1343,7 @@ class AdsbIm:
 
         # now let's see if we can get the data from the micro feeder
         if self.get_base_info(n + 1, do_import=do_import):
-            print_err(
-                f"added new micro site {self._d.env_by_tags('site_name').list_get(n + 1)} at {key}"
-            )
+            print_err(f"added new micro site {self._d.env_by_tags('site_name').list_get(n + 1)} at {key}")
             n += 1
             self._d.env_by_tags("num_micro_sites").value = n
             if do_restore:
@@ -1457,9 +1368,7 @@ class AdsbIm:
             tags = t.split("--")
             e = self._d.env_by_tags(tags)
             if e and type(e._value) == list:
-                print_err(
-                    f"shifting {e.name} down and deleting last element {e._value}"
-                )
+                print_err(f"shifting {e.name} down and deleting last element {e._value}")
                 for i in range(num, self._d.env_by_tags("num_micro_sites").value):
                     e.list_set(i, e.list_get(i + 1))
                 if len(e._value) > self._d.env_by_tags("num_micro_sites").value:
@@ -1478,9 +1387,7 @@ class AdsbIm:
             if (data_dir / f"{old_ip}").exists() and (data_dir / f"{old_ip}").is_dir():
                 # ok, as one would hope, there's an Ultrafeeder directory for the old IP
                 if (data_dir / f"{ip}").exists():
-                    print_err(
-                        f"can't move micro feeder data directory to {data_dir/ip} - it's already in use"
-                    )
+                    print_err(f"can't move micro feeder data directory to {data_dir/ip} - it's already in use")
                     return (
                         False,
                         f"can't move micro feeder data directory to {data_dir/ip} - it's already in use",
@@ -1493,15 +1400,11 @@ class AdsbIm:
                 except:
                     print_err(f"failed to stop micro feeder {num}")
                     return (False, f"failed to stop micro feeder {num}")
-                print_err(
-                    f"moving micro feeder data directory from {data_dir/old_ip} to {data_dir/ip}"
-                )
+                print_err(f"moving micro feeder data directory from {data_dir/old_ip} to {data_dir/ip}")
                 try:
                     os.rename(data_dir / f"{old_ip}", data_dir / f"{ip}")
                 except:
-                    print_err(
-                        f"failed to move micro feeder data directory from {data_dir/old_ip} to {data_dir/ip}"
-                    )
+                    print_err(f"failed to move micro feeder data directory from {data_dir/old_ip} to {data_dir/ip}")
                     return (
                         False,
                         f"failed to move micro feeder data directory from {data_dir/old_ip} to {data_dir/ip}",
@@ -1510,16 +1413,10 @@ class AdsbIm:
             self._d.env_by_tags("mf_ip").list_set(num, ip)
 
         if site_name != self._d.env_by_tags("site_name").list_get(num):
-            print_err(
-                f"update site name from {self._d.env_by_tags('site_name').list_get(num)} to {site_name}"
-            )
-            self._d.env_by_tags("site_name").list_set(
-                num, self.unique_site_name(site_name)
-            )
+            print_err(f"update site name from {self._d.env_by_tags('site_name').list_get(num)} to {site_name}")
+            self._d.env_by_tags("site_name").list_set(num, self.unique_site_name(site_name))
         if uat != self._d.env_by_tags("uat978").list_get(num):
-            print_err(
-                f"update uat978 from {self._d.env_by_tags('uat978').list_get(num)} to {uat}"
-            )
+            print_err(f"update uat978 from {self._d.env_by_tags('uat978').list_get(num)} to {uat}")
             self._d.env_by_tags("uat978").list_set(num, uat)
             self.setup_or_disable_uat(num)
 
@@ -1559,13 +1456,9 @@ class AdsbIm:
     def setup_or_disable_uat(self, sitenum):
         if self._d.list_is_enabled(["uat978"], sitenum):
             # always get UAT from the readsb uat_replay
-            self._d.env_by_tags("replay978").list_set(
-                sitenum, "--net-uat-replay-port 30978"
-            )
+            self._d.env_by_tags("replay978").list_set(sitenum, "--net-uat-replay-port 30978")
             self._d.env_by_tags("978host").list_set(sitenum, f"ultrafeeder_{sitenum}")
-            self._d.env_by_tags("rb978host").list_set(
-                sitenum, self._d.env_by_tags("mf_ip").list_get(sitenum)
-            )
+            self._d.env_by_tags("rb978host").list_set(sitenum, self._d.env_by_tags("mf_ip").list_get(sitenum))
             self._d.env_by_tags("978piaware").list_set(sitenum, "relay")
         else:
             self._d.env_by_tags("replay978").list_set(sitenum, "")
@@ -1586,24 +1479,15 @@ class AdsbIm:
             if not self._d.env_by_tags("ultrafeeder_uuid").list_get(sitenum):
                 self._d.env_by_tags("ultrafeeder_uuid").list_set(sitenum, str(uuid4()))
 
-            for agg in [
-                submit_key.replace("--submit", "")
-                for submit_key in self._other_aggregators.keys()
-            ]:
+            for agg in [submit_key.replace("--submit", "") for submit_key in self._other_aggregators.keys()]:
                 if self._d.env_by_tags([agg, "is_enabled"]).list_get(sitenum):
                     # disable other aggregators for the combined data of stage2
                     if sitenum == 0 and self._d.is_enabled("stage2"):
-                        self._d.env_by_tags([agg, "is_enabled"]).list_set(
-                            sitenum, False
-                        )
+                        self._d.env_by_tags([agg, "is_enabled"]).list_set(sitenum, False)
                     # disable other aggregators if their key isn't set
                     if self._d.env_by_tags([agg, "key"]).list_get(sitenum) == "":
-                        print_err(
-                            f"empty key, disabling: agg: {agg}, sitenum: {sitenum}"
-                        )
-                        self._d.env_by_tags([agg, "is_enabled"]).list_set(
-                            sitenum, False
-                        )
+                        print_err(f"empty key, disabling: agg: {agg}, sitenum: {sitenum}")
+                        self._d.env_by_tags([agg, "is_enabled"]).list_set(sitenum, False)
 
         if self._d.env_by_tags("aggregators").value == "micro":
             self._d.env_by_tags("beast-reduce-optimize-for-mlat").value = True
@@ -1626,9 +1510,7 @@ class AdsbIm:
                 self.setup_or_disable_uat(sitenum)
 
         else:
-            self._d.env_by_tags("tar1090portadjusted").value = self._d.env_by_tags(
-                "tar1090port"
-            ).value
+            self._d.env_by_tags("tar1090portadjusted").value = self._d.env_by_tags("tar1090port").value
 
             # for regular feeders or micro feeders a max range of 300nm seem reasonable
             self._d.env_by_tags("max_range").list_set(0, 300)
@@ -1637,13 +1519,9 @@ class AdsbIm:
             self._sdrdevices._ensure_populated()
             env978 = self._d.env_by_tags("978serial")
             env1090 = self._d.env_by_tags("1090serial")
-            if env978.value != "" and not any(
-                [sdr._serial == env978.value for sdr in self._sdrdevices.sdrs]
-            ):
+            if env978.value != "" and not any([sdr._serial == env978.value for sdr in self._sdrdevices.sdrs]):
                 env978.value = ""
-            if env1090.value != "" and not any(
-                [sdr._serial == env1090.value for sdr in self._sdrdevices.sdrs]
-            ):
+            if env1090.value != "" and not any([sdr._serial == env1090.value for sdr in self._sdrdevices.sdrs]):
                 env1090.value = ""
             auto_assignment = self._sdrdevices.addresses_per_frequency
 
@@ -1652,10 +1530,7 @@ class AdsbIm:
             # if we have an actual asignment, that overrides the auto-assignment,
             # delete the auto-assignment
             for frequency in [978, 1090]:
-                if any(
-                    auto_assignment[frequency] == self._d.env_by_tags(purpose).value
-                    for purpose in purposes
-                ):
+                if any(auto_assignment[frequency] == self._d.env_by_tags(purpose).value for purpose in purposes):
                     auto_assignment[frequency] = ""
             if not env1090.value and auto_assignment[1090]:
                 env1090.value = auto_assignment[1090]
@@ -1663,10 +1538,7 @@ class AdsbIm:
                 env978.value = auto_assignment[978]
 
             stratuxv3 = any(
-                [
-                    sdr._serial == env978.value and sdr._type == "stratuxv3"
-                    for sdr in self._sdrdevices.sdrs
-                ]
+                [sdr._serial == env978.value and sdr._type == "stratuxv3" for sdr in self._sdrdevices.sdrs]
             )
             if stratuxv3:
                 self._d.env_by_tags("uat_device_type").value = "stratuxv3"
@@ -1686,23 +1558,11 @@ class AdsbIm:
                 self._d.env_by_tags("978piaware").list_set(0, "")
 
             # next check for airspy devices
-            airspy = any(
-                [
-                    sdr._serial == env1090.value and sdr._type == "airspy"
-                    for sdr in self._sdrdevices.sdrs
-                ]
-            )
+            airspy = any([sdr._serial == env1090.value and sdr._type == "airspy" for sdr in self._sdrdevices.sdrs])
             self._d.env_by_tags(["airspy", "is_enabled"]).value = airspy
-            self._d.env_by_tags("airspyurl").list_set(
-                0, f"http://airspy_adsb" if airspy else ""
-            )
+            self._d.env_by_tags("airspyurl").list_set(0, f"http://airspy_adsb" if airspy else "")
             # SDRplay devices
-            sdrplay = any(
-                [
-                    sdr._serial == env1090.value and sdr._type == "sdrplay"
-                    for sdr in self._sdrdevices.sdrs
-                ]
-            )
+            sdrplay = any([sdr._serial == env1090.value and sdr._type == "sdrplay" for sdr in self._sdrdevices.sdrs])
             self._d.env_by_tags(["sdrplay", "is_enabled"]).value = sdrplay
 
             # next - if we have exactly one SDR and it hasn't been assigned to anything, use it for 1090
@@ -1713,10 +1573,7 @@ class AdsbIm:
             ):
                 env1090.value = self._sdrdevices.sdrs[0]._serial
 
-            rtlsdr = any(
-                sdr._type == "rtlsdr" and sdr._serial == env1090.value
-                for sdr in self._sdrdevices.sdrs
-            )
+            rtlsdr = any(sdr._type == "rtlsdr" and sdr._serial == env1090.value for sdr in self._sdrdevices.sdrs)
             if not rtlsdr:
                 env1090.value = ""
             self._d.env_by_tags("readsb_device_type").value = "rtlsdr" if rtlsdr else ""
@@ -1778,9 +1635,7 @@ class AdsbIm:
             site = ""
             sitenum = 0
         allow_insecure = not self.check_secure_image()
-        print_err(
-            f"handling input from {referer} and site # {sitenum} / {site} (allow insecure is {allow_insecure})"
-        )
+        print_err(f"handling input from {referer} and site # {sitenum} / {site} (allow insecure is {allow_insecure})")
         # in the HTML, every input field needs to have a name that is concatenated by "--"
         # and that matches the tags of one Env
         form: Dict = request.form
@@ -1796,18 +1651,12 @@ class AdsbIm:
                 if key == "showmap" and value.startswith("go-"):
                     idx = make_int(value[3:])
                     self._next_url_from_director = f"/map_{idx}/"
-                    print_err(
-                        f"after applying changes, go to map at {self._next_url_from_director}"
-                    )
+                    print_err(f"after applying changes, go to map at {self._next_url_from_director}")
                 if key == "sdrplay_license_accept":
                     self._d.env_by_tags("sdrplay_license_accepted").value = True
                 if key == "sdrplay_license_reject":
                     self._d.env_by_tags("sdrplay_license_accepted").value = False
-                if (
-                    key == "add_micro"
-                    or key == "add_other"
-                    or key.startswith("import_micro")
-                ):
+                if key == "add_micro" or key == "add_other" or key.startswith("import_micro"):
                     # user has clicked Add micro feeder on Stage 2 page
                     # grab the IP that we know the user has provided
                     ip = form.get("add_micro_feeder_ip")
@@ -1906,9 +1755,7 @@ class AdsbIm:
                 if key == "restart_containers":
                     self.write_envfile()
                     # almost certainly overkill, but...
-                    self._system._restart.bg_run(
-                        cmdline="bash /opt/adsb/docker-compose-restart-all"
-                    )
+                    self._system._restart.bg_run(cmdline="bash /opt/adsb/docker-compose-restart-all")
                     self._next_url_from_director = request.url
                     return render_template("/restarting.html")
                 if key == "secure_image":
@@ -1925,9 +1772,7 @@ class AdsbIm:
                         channel = self.extract_channel()
                     self.set_channel(channel)
                     print_err(f"updating feeder to {channel} channel")
-                    self._system._restart.bg_run(
-                        cmdline="systemctl start adsb-feeder-update.service"
-                    )
+                    self._system._restart.bg_run(cmdline="systemctl start adsb-feeder-update.service")
                     return render_template("/restarting.html")
                 if key == "nightly_update" or key == "zerotier":
                     # this will be handled through the separate key/value pairs
@@ -1955,9 +1800,7 @@ class AdsbIm:
                             ts_cli_value,
                         )
                         if not match:
-                            print_err(
-                                f"the login server URL didn't make sense {ts_cli_value}"
-                            )
+                            print_err(f"the login server URL didn't make sense {ts_cli_value}")
                             continue
                     print_err(f"starting tailscale (args='{ts_args}')")
                     try:
@@ -1965,7 +1808,7 @@ class AdsbIm:
                             ["/usr/bin/systemctl", "enable", "--now", "tailscaled"],
                             timeout=20.0,
                         )
-                        cmd = ["/usr/bin/tailscale", "up" ]
+                        cmd = ["/usr/bin/tailscale", "up"]
 
                         name = self.onlyAlphaNum(self._d.env_by_tags("site_name").list_get(0))
                         cmd += [f"--hostname={name}"]
@@ -2031,9 +1874,7 @@ class AdsbIm:
                             print_err(f"can't find a site for sitenum {l_sitenum}")
                             l_sitenum = 0
                         else:
-                            print_err(
-                                f"found other aggregator {key} for site {l_site} sitenum {l_sitenum}"
-                            )
+                            print_err(f"found other aggregator {key} for site {l_site} sitenum {l_sitenum}")
                     is_successful = False
                     base = key.replace("--submit", "")
                     aggregator_argument = form.get(f"{base}--key", None)
@@ -2044,13 +1885,9 @@ class AdsbIm:
                         user = form.get(f"{base}--user", None)
                         aggregator_argument += f"::{user}"
                     aggregator_object = self._other_aggregators[key]
-                    print_err(
-                        f"got aggregator object {aggregator_object} -- activating for sitenum {l_sitenum}"
-                    )
+                    print_err(f"got aggregator object {aggregator_object} -- activating for sitenum {l_sitenum}")
                     try:
-                        is_successful = aggregator_object._activate(
-                            aggregator_argument, l_sitenum
-                        )
+                        is_successful = aggregator_object._activate(aggregator_argument, l_sitenum)
                     except Exception as e:
                         print_err(f"error activating {key}: {e}")
                     if not is_successful:
@@ -2092,9 +1929,7 @@ class AdsbIm:
                     self._d.env_by_tags("ssh_configured").value = True
                 if allow_insecure and key == "zerotierid":
                     try:
-                        subprocess.call(
-                            "/usr/bin/systemctl enable --now zerotier-one", shell=True
-                        )
+                        subprocess.call("/usr/bin/systemctl enable --now zerotier-one", shell=True)
                         sleep(5.0)  # this gives the service enough time to get ready
                         subprocess.call(
                             ["/usr/sbin/zerotier-cli", "join", f"{value}"],
@@ -2113,9 +1948,7 @@ class AdsbIm:
                 if key == "gain":
                     if value == "":
                         value = "autogain"
-                    self._d.env_by_tags(["gain_airspy"]).value = (
-                        "auto" if value == "autogain" else value
-                    )
+                    self._d.env_by_tags(["gain_airspy"]).value = "auto" if value == "autogain" else value
                 # deal with the micro feeder and stage2 initial setup
                 if key == "aggregators" and value == "micro":
                     self._d.env_by_tags(["tar1090_ac_db"]).value = False
@@ -2124,10 +1957,7 @@ class AdsbIm:
                     # disable all the aggregators in micro mode
                     for ev in self._d._env:
                         if "is_enabled" in ev.tags:
-                            if (
-                                "other_aggregator" in ev.tags
-                                or "ultrafeeder" in ev.tags
-                            ):
+                            if "other_aggregator" in ev.tags or "ultrafeeder" in ev.tags:
                                 ev.list_set(0, False)
                 else:
                     self._d.env_by_tags(["tar1090_ac_db"]).value = True
@@ -2136,9 +1966,7 @@ class AdsbIm:
                     next_url = url_for("stage2")
                     self._d.env_by_tags("stage2").value = True
                     if not self._multi_outline_bg:
-                        self._d.env_by_tags("tar1090_configjs_append").value = (
-                            "multiOutline=true;"
-                        )
+                        self._d.env_by_tags("tar1090_configjs_append").value = "multiOutline=true;"
                         self.push_multi_outline()
                         self._multi_outline_bg = Background(60, self.push_multi_outline)
                     unique_name = self.unique_site_name(form.get("site_name"), 0)
@@ -2159,10 +1987,7 @@ class AdsbIm:
                 purposes = self._sdrdevices.purposes()
                 if key in purposes and value != "":
                     for clear_key in purposes:
-                        if (
-                            clear_key != key
-                            and value == self._d.env_by_tags(clear_key).value
-                        ):
+                        if clear_key != key and value == self._d.env_by_tags(clear_key).value:
                             print_err(f"clearing: {str(clear_key)} old value: {value}")
                             self._d.env_by_tags(clear_key).value = ""
                 # when dealing with micro feeder aggregators, we need to keep the site number
@@ -2200,16 +2025,12 @@ class AdsbIm:
             return redirect(next_url)
         if self._d.is_enabled("base_config"):
             print_err("base config is completed", level=2)
-            if self._d.is_enabled("sdrplay") and not self._d.is_enabled(
-                "sdrplay_license_accepted"
-            ):
+            if self._d.is_enabled("sdrplay") and not self._d.is_enabled("sdrplay_license_accepted"):
                 return redirect(url_for("sdrplay_license"))
 
             self.write_envfile()
             # adsb-system-restart mainly does a compose up
-            self._system._restart.bg_run(
-                cmdline="bash /opt/adsb/adsb-system-restart.sh", silent=True
-            )
+            self._system._restart.bg_run(cmdline="bash /opt/adsb/adsb-system-restart.sh", silent=True)
             return render_template("/restarting.html")
         print_err("base config not completed", level=2)
         return redirect(url_for("director"))
@@ -2273,11 +2094,7 @@ class AdsbIm:
                 tag = [tag]
             if type(tag) != list:
                 print_err(f"PROBLEM::: tag is {type(tag)}")
-            return (
-                "checked"
-                if self._d.list_is_enabled(["ultrafeeder"] + tag, idx=m)
-                else ""
-            )
+            return "checked" if self._d.list_is_enabled(["ultrafeeder"] + tag, idx=m) else ""
 
         def others_enabled(tag, m=0):
             # stack_info(f"tags are {type(tag)} {tag}")
@@ -2285,11 +2102,7 @@ class AdsbIm:
                 tag = [tag]
             if type(tag) != list:
                 print_err(f"PROBLEM::: tag is {type(tag)}")
-            return (
-                "checked"
-                if self._d.list_is_enabled(["other_aggregator"] + tag, idx=m)
-                else ""
-            )
+            return "checked" if self._d.list_is_enabled(["other_aggregator"] + tag, idx=m) else ""
 
         # is this a stage2 site and you are looking at an individual micro feeder,
         # or is this a regular feeder? If we have a query argument m that is a non-negative
@@ -2316,9 +2129,7 @@ class AdsbIm:
             others_enabled=others_enabled,
             site=site,
             m=str(m),
-            piastatport=str(
-                m * 1000 + make_int(self._d.env_by_tags("piastatport").value)
-            ),
+            piastatport=str(m * 1000 + make_int(self._d.env_by_tags("piastatport").value)),
         )
 
     @check_restart_lock
@@ -2331,9 +2142,7 @@ class AdsbIm:
             return self.setup()
         # if we already figured out where to go next, let's just do that
         if self._next_url_from_director:
-            print_err(
-                f"director redirecting to next_url_from_director: {self._next_url_from_director}"
-            )
+            print_err(f"director redirecting to next_url_from_director: {self._next_url_from_director}")
             url = self._next_url_from_director
             self._next_url_from_director = ""
             if re.match(r"^http://\d+\.\d+\.\d+\.\d+:\d+$", url):
@@ -2362,10 +2171,7 @@ class AdsbIm:
 
         # check that "something" is configured as input
         if (
-            (
-                len(self._sdrdevices) > 1
-                or any([sdr._type == "airspy" for sdr in self._sdrdevices.sdrs])
-            )
+            (len(self._sdrdevices) > 1 or any([sdr._type == "airspy" for sdr in self._sdrdevices.sdrs]))
             and not (
                 self._d.env_by_tags("1090serial").value
                 or self._d.env_by_tags("978serial").value
@@ -2373,9 +2179,7 @@ class AdsbIm:
             )
             and not self._d.is_enabled("stage2")
         ):
-            print_err(
-                "director redirecting to advanced: devices present but not configured"
-            )
+            print_err("director redirecting to advanced: devices present but not configured")
             return self.advanced()
 
         # if the user chose to individually pick aggregators but hasn't done so,
@@ -2459,9 +2263,7 @@ class AdsbIm:
                 self._d.env_by_tags("under_voltage").value = True
 
         # now let's check for disk space
-        self._d.env_by_tags("low_disk").value = (
-            shutil.disk_usage("/").free < 1024 * 1024 * 1024
-        )
+        self._d.env_by_tags("low_disk").value = shutil.disk_usage("/").free < 1024 * 1024 * 1024
 
         # if we get to show the feeder homepage, the user should have everything figured out
         # and we can remove the pre-installed ssh-keys and password
@@ -2493,15 +2295,11 @@ class AdsbIm:
             for i in range(n):
                 matrix[i] |= 1 << idx if self._d.list_is_enabled(agg, i) else 0
                 if template_link.startswith("/"):
-                    final_link = url_start + template_link.replace(
-                        "STG2IDX", "" if i == 0 else f"_{i}"
-                    )
+                    final_link = url_start + template_link.replace("STG2IDX", "" if i == 0 else f"_{i}")
                 else:
                     match = re.search("<([^>]*)>", template_link)
                     if match:
-                        final_link = template_link.replace(
-                            match.group(0), self._d.env(match.group(1)).list_get(i)
-                        )
+                        final_link = template_link.replace(match.group(0), self._d.env(match.group(1)).list_get(i))
                 if i == 0:
                     status_link_list[0] = final_link
                 else:
@@ -2529,8 +2327,7 @@ class AdsbIm:
     @check_restart_lock
     def setup(self):
         if request.method == "POST" and (
-            request.form.get("submit") == "go"
-            or request.form.get("set_stage2_data") == "go"
+            request.form.get("submit") == "go" or request.form.get("set_stage2_data") == "go"
         ):
             return self.update()
         # is this a stage2 feeder?
@@ -2578,17 +2375,11 @@ class AdsbIm:
         current = self._d.env_by_tags("base_version").value
         ufargs = self._d.env_by_tags("ultrafeeder_extra_args").value
         envvars = self._d.env_by_tags("ultrafeeder_extra_env").value
-        sdrs = (
-            [f"{sdr}" for sdr in self._sdrdevices.sdrs]
-            if len(self._sdrdevices.sdrs) > 0
-            else ["none"]
-        )
+        sdrs = [f"{sdr}" for sdr in self._sdrdevices.sdrs] if len(self._sdrdevices.sdrs) > 0 else ["none"]
 
         def simple_cmd_result(cmd):
             try:
-                result = subprocess.run(
-                    cmd, shell=True, capture_output=True, timeout=2.0
-                )
+                result = subprocess.run(cmd, shell=True, capture_output=True, timeout=2.0)
                 return result.stdout.decode("utf-8")
             except:
                 return f"failed to run '{cmd}'"
@@ -2617,9 +2408,7 @@ class AdsbIm:
         )
 
     def waiting(self):
-        return render_template(
-            "waiting.html", title="ADS-B Feeder performing requested actions"
-        )
+        return render_template("waiting.html", title="ADS-B Feeder performing requested actions")
 
     def stream_log(self):
         logfile = "/opt/adsb/adsb-setup.log"
@@ -2647,11 +2436,7 @@ def create_stage2_yml_from_template(stage2_yml_name, n, ip, template_file):
     if n:
         with open(template_file, "r") as stage2_yml_template:
             with open(stage2_yml_name, "w") as stage2_yml:
-                stage2_yml.write(
-                    stage2_yml_template.read()
-                    .replace("STAGE2NUM", f"{n}")
-                    .replace("STAGE2IP", ip)
-                )
+                stage2_yml.write(stage2_yml_template.read().replace("STAGE2NUM", f"{n}").replace("STAGE2IP", ip))
     else:
         print_err(f"could not find micro feedernumber in {stage2_yml_name}")
 
@@ -2672,9 +2457,7 @@ def create_stage2_yml_files(n, ip):
         [f"rb_{n}.yml", "rb_stage2_template.yml"],
         [f"rv_{n}.yml", "rv_stage2_template.yml"],
     ]:
-        create_stage2_yml_from_template(
-            f"/opt/adsb/config/{yml_file}", n, ip, f"/opt/adsb/config/{template}"
-        )
+        create_stage2_yml_from_template(f"/opt/adsb/config/{yml_file}", n, ip, f"/opt/adsb/config/{template}")
 
 
 if __name__ == "__main__":

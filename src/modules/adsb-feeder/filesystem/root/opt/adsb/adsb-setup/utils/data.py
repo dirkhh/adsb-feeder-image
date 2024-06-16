@@ -330,10 +330,8 @@ class Data:
         Env("AF_UAT978_PORT", default=9780, tags=["uatport", "norestore"]),
         Env("AF_PIAWAREMAP_PORT", default=8081, tags=["piamapport", "norestore"]),
         Env("AF_PIAWARESTAT_PORT", default=8082, tags=["piastatport", "norestore"]),
-
         Env("AF_FLIGHTRADAR_PORT", default=8754, tags=["frport"]),
         Env("AF_PLANEFINDER_PORT", default=30053, tags=["pfport"]),
-
         Env("_ADSBIM_STATE_PACKAGE", tags=["pack", "norestore"]),
         Env(
             "_ADSBIM_STATE_IMAGE_NAME",
@@ -611,9 +609,7 @@ class Data:
                 continue
             key = items[0]
             value = items[1]
-            entry = Env(
-                key, tags=[tag_for_name.get(key, key), "container", "norestore"]
-            )
+            entry = Env(key, tags=[tag_for_name.get(key, key), "container", "norestore"])
             entry.value = value  # always use value from docker.image.versions as definitive source
             _env.add(entry)  # add to _env set
 
@@ -654,11 +650,7 @@ class Data:
                     suffix = "" if i == 0 else f"_{i}"
                     value = e._value[i]
                     envKey = e._name + suffix
-                    newValue = (
-                        adjust_bool(e, value)
-                        if type(value) == bool or "is_enabled" in e.tags
-                        else value
-                    )
+                    newValue = adjust_bool(e, value) if type(value) == bool or "is_enabled" in e.tags else value
                     ret[envKey] = newValue
 
                     oldValue = old_values.get(envKey)
@@ -666,9 +658,7 @@ class Data:
 
             else:
                 envKey = e._name
-                newValue = (
-                    adjust_bool(e, e._value) if type(e._value) == bool else e._value
-                )
+                newValue = adjust_bool(e, e._value) if type(e._value) == bool else e._value
                 ret[envKey] = newValue
 
                 oldValue = old_values.get(envKey)
@@ -710,9 +700,7 @@ class Data:
         elif type(_tags) == list:
             tags = _tags
         else:
-            raise Exception(
-                f"env_by_tags called with invalid argument {_tags} of type {type(_tags)}"
-            )
+            raise Exception(f"env_by_tags called with invalid argument {_tags} of type {type(_tags)}")
         if not tags:
             return None
 

@@ -94,17 +94,12 @@ class AggStatus:
                         for entry in lolbeast:
                             if entry.get("uuid", "xxxxxxxx-xxxx-")[:14] == uuid[:14]:
                                 self._beast = T.Yes
-                                self._d.env_by_tags("adsblol_link").list_set(
-                                    self._idx, entry.get("adsblol_my_url")
-                                )
+                                self._d.env_by_tags("adsblol_link").list_set(self._idx, entry.get("adsblol_my_url"))
                                 break
                     self._mlat = (
                         T.Yes
                         if isinstance(lolmlat, list)
-                        and any(
-                            b.get("uuid", "xxxxxxxx-xxxx-")[:14] == uuid[:14]
-                            for b in lolmlat
-                        )
+                        and any(b.get("uuid", "xxxxxxxx-xxxx-")[:14] == uuid[:14] for b in lolmlat)
                         else T.No
                     )
                     self._last_check = datetime.now()
@@ -136,11 +131,7 @@ class AggStatus:
             adsbfi_dict, status = self.get_json(json_ip_url)
             if adsbfi_dict and status == 200:
                 mlat_array = adsbfi_dict.get("mlat", [])
-                self._mlat = (
-                    T.Yes
-                    if any(m.get("user", "") == name for m in mlat_array)
-                    else T.No
-                )
+                self._mlat = T.Yes if any(m.get("user", "") == name for m in mlat_array) else T.No
                 self._last_check = datetime.now()
             else:
                 print_err(f"adsbfi v1/myip returned {status}")
@@ -148,8 +139,7 @@ class AggStatus:
             if adsbfi_dict and status == 200:
                 self._beast = (
                     T.Yes
-                    if len(adsbfi_dict.get("beast", [])) > 0
-                    and adsbfi_dict.get("beast")[0].get("receiverId") == uuid
+                    if len(adsbfi_dict.get("beast", [])) > 0 and adsbfi_dict.get("beast")[0].get("receiverId") == uuid
                     else T.No
                 )
                 self._last_check = datetime.now()
@@ -172,18 +162,8 @@ class AggStatus:
             fa_dict, status = self.get_json(json_url)
             if fa_dict and status == 200:
                 # print_err(f"fa status.json returned {fa_dict}")
-                self._beast = (
-                    T.Yes
-                    if fa_dict.get("adept")
-                    and fa_dict.get("adept").get("status") == "green"
-                    else T.No
-                )
-                self._mlat = (
-                    T.Yes
-                    if fa_dict.get("mlat")
-                    and fa_dict.get("mlat").get("status") == "green"
-                    else T.No
-                )
+                self._beast = T.Yes if fa_dict.get("adept") and fa_dict.get("adept").get("status") == "green" else T.No
+                self._mlat = T.Yes if fa_dict.get("mlat") and fa_dict.get("mlat").get("status") == "green" else T.No
                 self._last_check = datetime.now()
             else:
                 print_err(f"flightaware at {json_url} returned {status}")
@@ -193,9 +173,7 @@ class AggStatus:
             fr_dict, status = self.get_json(json_url)
             if fr_dict and status == 200:
                 # print_err(f"fr monitor.json returned {fr_dict}")
-                self._beast = (
-                    T.Yes if fr_dict.get("feed_status") == "connected" else T.No
-                )
+                self._beast = T.Yes if fr_dict.get("feed_status") == "connected" else T.No
                 self._last_check = datetime.now()
             else:
                 print_err(f"flightradar at {json_url} returned {status}")
@@ -225,14 +203,10 @@ class AggStatus:
                     print_err("got exception trying to look at the rbfeeder logs")
                     return
                 serial_text = result.stdout.strip()
-                match = re.search(
-                    r"This is your station serial number: ([A-Z0-9]+)", serial_text
-                )
+                match = re.search(r"This is your station serial number: ([A-Z0-9]+)", serial_text)
                 if match:
                     station_serial = match.group(1)
-                    self._d.env_by_tags(["radarbox", "sn"]).list_set(
-                        self._idx, station_serial
-                    )
+                    self._d.env_by_tags(["radarbox", "sn"]).list_set(self._idx, station_serial)
             if station_serial:
                 html_url = f"https://www.radarbox.com/stations/{station_serial}"
                 rb_page, status = self.get_plain(html_url)
@@ -263,21 +237,13 @@ class AggStatus:
                 beast_clients = a_dict.get("beast_clients")
                 # print_err(f"alife returned {beast_clients}", level=8)
                 if beast_clients:
-                    self._beast = (
-                        T.Yes
-                        if any(bc.get("uuid") == uuid for bc in beast_clients)
-                        else T.No
-                    )
+                    self._beast = T.Yes if any(bc.get("uuid") == uuid for bc in beast_clients) else T.No
                 mlat_clients = a_dict.get("mlat_clients")
                 # print_err(f"alife returned {mlat_clients}")
                 if mlat_clients:
                     self._mlat = (
                         T.Yes
-                        if any(
-                            isinstance(mc.get("uuid"), list)
-                            and mc.get("uuid")[0] == uuid
-                            for mc in mlat_clients
-                        )
+                        if any(isinstance(mc.get("uuid"), list) and mc.get("uuid")[0] == uuid for mc in mlat_clients)
                         else T.No
                     )
                 self._last_check = datetime.now()
@@ -288,11 +254,7 @@ class AggStatus:
             if not feeder_id or len(feeder_id) != 12:
                 # get the adsbexchange feeder id for the anywhere map / status things
                 print_err(f"don't have the adsbX Feeder ID for {self._idx}, yet")
-                container_name = (
-                    "ultrafeeder"
-                    if self._idx == 0
-                    else f"ultrafeeder_stage2_{self._idx}"
-                )
+                container_name = "ultrafeeder" if self._idx == 0 else f"ultrafeeder_stage2_{self._idx}"
                 try:
                     result = subprocess.run(
                         f"docker logs {container_name} | grep 'www.adsbexchange.com/api/feeders' | tail -1",
@@ -312,9 +274,7 @@ class AggStatus:
                     adsbx_id = match.group(1)
                     self._d.env_by_tags("adsbxfeederid").list_set(self._idx, adsbx_id)
                 else:
-                    print_err(
-                        f"ran: docker logs {container_name} | grep 'www.adsbexchange.com/api/feeders' | tail -1"
-                    )
+                    print_err(f"ran: docker logs {container_name} | grep 'www.adsbexchange.com/api/feeders' | tail -1")
                     print_err(f"failed to find adsbx ID in response {output}")
 
             self._last_check = datetime.now()
@@ -338,9 +298,7 @@ class AggStatus:
 
             # now check mlat - which we can't really get easily from their status page
             # but can get from our docker logs again
-            container_name = (
-                "ultrafeeder" if self._idx == 0 else f"ultrafeeder_stage2_{self._idx}"
-            )
+            container_name = "ultrafeeder" if self._idx == 0 else f"ultrafeeder_stage2_{self._idx}"
             try:
                 result = subprocess.run(
                     f"docker logs --since=20m {container_name} | grep '\[mlat-client]\[feed.adsbexchange.com] peer_count' | tail -n1",
@@ -349,9 +307,7 @@ class AggStatus:
                     text=True,
                 )
             except:
-                print_err(
-                    f"got exception trying to look at the adsbx docker logs from {container_name}"
-                )
+                print_err(f"got exception trying to look at the adsbx docker logs from {container_name}")
                 return
             match = re.search(
                 r".mlat-client..feed.adsbexchange.com. peer_count:\s*([0-9.]*)\s*outlier_percent:\s*([0-9.]*)\s*bad_sync_timeout:\s*([0-9.]*)",
@@ -360,7 +316,7 @@ class AggStatus:
             if match:
                 peer_count = make_int(match.group(1))
                 bad_sync_timeout = make_int(match.group(3))
-                #print_err(f"peer_count: {peer_count} bad_sync: {bad_sync_timeout}")
+                # print_err(f"peer_count: {peer_count} bad_sync: {bad_sync_timeout}")
                 self._mlat = T.Yes if peer_count > 0 and bad_sync_timeout == 0 else T.No
             else:
                 self._mlat = T.Unknown
@@ -392,9 +348,7 @@ class AggStatus:
             html_url = f"https://www.planespotters.net/feed/status/{uf_uuid}"
             ps_text, status = self.get_plain(html_url)
             if ps_text and status == 200:
-                self._beast = (
-                    T.No if re.search("Feeder client not connected", ps_text) else T.Yes
-                )
+                self._beast = T.No if re.search("Feeder client not connected", ps_text) else T.Yes
                 self._last_check = datetime.now()
             else:
                 print_err(f"planespotters returned {status}")

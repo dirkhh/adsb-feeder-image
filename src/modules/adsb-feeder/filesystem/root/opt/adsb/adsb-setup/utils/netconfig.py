@@ -75,9 +75,7 @@ class UltrafeederConfig:
         # proxy ultrafeeders than are configured
         if is_stage2 and (self._micro == 0 or self._micro > num_micro):
             return ""
-        print_err(
-            f"generating netconfigs for {f'micro site {self._micro}' if self._micro > 0 else 'Ultrafeeder'}"
-        )
+        print_err(f"generating netconfigs for {f'micro site {self._micro}' if self._micro > 0 else 'Ultrafeeder'}")
         mlat_privacy = self._d.list_is_enabled("mlat_privacy", self._micro)
         ret = set()
         # let's grab the values, depending on the mode

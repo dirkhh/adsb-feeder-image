@@ -37,7 +37,12 @@ else:
     except subprocess.SubprocessError:
         print_err("failed to push multiOutline.json")
     if hwt_data is not None:
-        cmd = ["docker", "cp", f"{datadir}/upintheair.json", "ultrafeeder:/usr/local/share/tar1090/html-webroot/upintheair.json"]
+        cmd = [
+            "docker",
+            "cp",
+            f"{datadir}/upintheair.json",
+            "ultrafeeder:/usr/local/share/tar1090/html-webroot/upintheair.json",
+        ]
         try:
             subprocess.run(cmd, check=True)
         except subprocess.SubprocessError:

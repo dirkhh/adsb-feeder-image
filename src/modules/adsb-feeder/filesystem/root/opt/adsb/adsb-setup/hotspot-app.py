@@ -19,9 +19,9 @@ from fakedns import DNSHandler
 
 
 def print_err(*args, **kwargs):
-    timestamp = time.strftime(
-        "%Y-%m-%dT%H:%M:%S", time.gmtime()
-    ) + ".{0:03.0f}Z".format(math.modf(time.time())[0] * 1000)
+    timestamp = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()) + ".{0:03.0f}Z".format(
+        math.modf(time.time())[0] * 1000
+    )
     print(*((timestamp,) + args), file=sys.stderr, **kwargs)
 
 
@@ -59,9 +59,7 @@ class Hotspot:
 
         self.app.add_url_rule("/restarting", view_func=self.restarting)
 
-        self.app.add_url_rule(
-            "/restart", view_func=self.restart, methods=["POST", "GET"]
-        )
+        self.app.add_url_rule("/restart", view_func=self.restart, methods=["POST", "GET"])
         self.app.add_url_rule(
             "/",
             "/",
@@ -69,23 +67,20 @@ class Hotspot:
             defaults={"path": ""},
             methods=["GET", "POST"],
         )
-        self.app.add_url_rule(
-            "/<path:path>", view_func=self.catch_all, methods=["GET", "POST"]
-        )
+        self.app.add_url_rule("/<path:path>", view_func=self.catch_all, methods=["GET", "POST"])
 
     def wpa_cli_reconfigure(self):
         connected = False
         output = ""
         try:
             proc = subprocess.Popen(
-                    ["wpa_cli", f"-i{self.wlan}"],
-                    stderr=subprocess.STDOUT,
-                    stdout=subprocess.PIPE,
-                    stdin=subprocess.PIPE,
-                    text=True,
-                    )
+                ["wpa_cli", f"-i{self.wlan}"],
+                stderr=subprocess.STDOUT,
+                stdout=subprocess.PIPE,
+                stdin=subprocess.PIPE,
+                text=True,
+            )
             os.set_blocking(proc.stdout.fileno(), False)
-
 
             startTime = time.time()
             reconfigured = False
@@ -96,7 +91,7 @@ class Hotspot:
                     continue
 
                 output += line
-                #print(line, end="")
+                # print(line, end="")
                 if "Interactive mode" in line:
                     proc.stdin.write("reconfigure\n")
                     proc.stdin.flush()
@@ -111,7 +106,6 @@ class Hotspot:
             if proc:
                 proc.terminate()
 
-
         if not connected:
             print_err(f"Couldn't connect after wpa_cli reconfigure: ouput: {output}")
 
@@ -121,12 +115,12 @@ class Hotspot:
         ssids = []
         try:
             proc = subprocess.Popen(
-                    ["wpa_cli", f"-i{self.wlan}"],
-                    stderr=subprocess.STDOUT,
-                    stdout=subprocess.PIPE,
-                    stdin=subprocess.PIPE,
-                    text=True,
-                    )
+                ["wpa_cli", f"-i{self.wlan}"],
+                stderr=subprocess.STDOUT,
+                stdout=subprocess.PIPE,
+                stdin=subprocess.PIPE,
+                text=True,
+            )
             os.set_blocking(proc.stdout.fileno(), False)
 
             output = ""
@@ -139,7 +133,7 @@ class Hotspot:
                     continue
 
                 output += line
-                #print(line, end="")
+                # print(line, end="")
                 if line.count("Interactive mode"):
                     proc.stdin.write("scan\n")
                     proc.stdin.flush()
@@ -169,15 +163,14 @@ class Hotspot:
 
         return ssids
 
-
     def scan_ssids(self):
         if self._baseos == "raspbian":
             try:
                 output = subprocess.run(
-                        "nmcli --terse --fields SSID dev wifi",
-                        shell=True,
-                        capture_output=True,
-                        )
+                    "nmcli --terse --fields SSID dev wifi",
+                    shell=True,
+                    capture_output=True,
+                )
             except subprocess.CalledProcessError as e:
                 print_err(f"error scanning for SSIDs: {e}")
                 return
@@ -214,9 +207,7 @@ class Hotspot:
 
             return redirect("/restarting")
 
-        return render_template(
-            "hotspot.html", version=self.version, comment=self.comment, ssids=self.ssids
-        )
+        return render_template("hotspot.html", version=self.version, comment=self.comment, ssids=self.ssids)
 
     def restarting(self):
         return render_template("hotspot-restarting.html")
@@ -225,6 +216,7 @@ class Hotspot:
         self.setup_hotspot()
 
         self.lastUserInput = time.time()
+
         def idle_exit():
             while True:
                 idleTime = time.time() - self.lastUserInput
@@ -252,9 +244,7 @@ class Hotspot:
                 print_err(f"failed to create DNS server: {e}")
             else:
                 print_err("starting DNS server")
-                self._dns_thread = threading.Thread(
-                    target=self._dnsserver.serve_forever
-                )
+                self._dns_thread = threading.Thread(target=self._dnsserver.serve_forever)
                 self._dns_thread.start()
 
         # in case of a wifi already being configured with wrong password,
@@ -289,9 +279,7 @@ class Hotspot:
         )
         if self._baseos == "dietpi":
             # switch hotplug to allow wifi
-            with open("/etc/network/interfaces", "r") as current, open(
-                "/etc/network/interfaces.new", "w"
-            ) as update:
+            with open("/etc/network/interfaces", "r") as current, open("/etc/network/interfaces.new", "w") as update:
                 lines = current.readlines()
                 for line in lines:
                     if "allow-hotplug" in line:
@@ -324,7 +312,7 @@ class Hotspot:
         try:
             with open(path, "w") as conf:
                 conf.write(
-"""
+                    """
 # WiFi country code, set here in case the access point does send one
 country=GB
 # Grant all members of group "netdev" permissions to configure WiFi, e.g. via wpa_cli or wpa_gui
@@ -377,7 +365,17 @@ p2p_disabled=1
             while time.time() - startTime < 20:
                 try:
                     result = subprocess.run(
-                        ["nmcli", "d", "wifi", "connect", f"{self.ssid}", "password", f"{self.passwd}", "ifname", f"{self.wlan}"],
+                        [
+                            "nmcli",
+                            "d",
+                            "wifi",
+                            "connect",
+                            f"{self.ssid}",
+                            "password",
+                            f"{self.passwd}",
+                            "ifname",
+                            f"{self.wlan}",
+                        ],
                         capture_output=True,
                         timeout=20.0,
                     )
@@ -406,9 +404,7 @@ p2p_disabled=1
         else:
             print_err(f"test_wifi failed to connect to '{self.ssid}'")
 
-            self.comment = (
-                "Failed to connect, wrong SSID or password, please try again."
-            )
+            self.comment = "Failed to connect, wrong SSID or password, please try again."
             # now we bring back up the hotspot in order to deliver the result to the user
             # and have them try again
             self.setup_hotspot()
@@ -418,6 +414,7 @@ p2p_disabled=1
         self.setup_wifi()
         self.restart_state = "done"
         return
+
 
 if __name__ == "__main__":
     wlan = "wlan0"

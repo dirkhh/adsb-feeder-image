@@ -11,9 +11,7 @@ import sys
 import time
 
 verbose = (
-    0
-    if not os.path.exists("/opt/adsb/config/verbose")
-    else int(open("/opt/adsb/config/verbose", "r").read().strip())
+    0 if not os.path.exists("/opt/adsb/config/verbose") else int(open("/opt/adsb/config/verbose", "r").read().strip())
 )
 
 # create a board unique but otherwise random / anonymous ID
@@ -37,9 +35,7 @@ def stack_info(msg=""):
 
 
 # let's do this just once, not at every call
-_clean_control_chars = "".join(
-    map(chr, itertools.chain(range(0x00, 0x20), range(0x7F, 0xA0)))
-)
+_clean_control_chars = "".join(map(chr, itertools.chain(range(0x00, 0x20), range(0x7F, 0xA0))))
 _clean_control_char_re = re.compile("[%s]" % re.escape(_clean_control_chars))
 
 
@@ -51,9 +47,9 @@ def print_err(*args, **kwargs):
     level = int(kwargs.pop("level", 0))
     if level > 0 and int(verbose) & int(level) == 0:
         return
-    timestamp = time.strftime(
-        "%Y-%m-%dT%H:%M:%S", time.gmtime()
-    ) + ".{0:03.0f}Z".format(math.modf(time.time())[0] * 1000)
+    timestamp = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()) + ".{0:03.0f}Z".format(
+        math.modf(time.time())[0] * 1000
+    )
     print(*((timestamp,) + args), file=sys.stderr, **kwargs)
 
 

@@ -19,9 +19,7 @@ class MultiOutline:
         data = []
         for i in range(1, num + 1):
             try:
-                outline = json.load(
-                    open(f"/run/adsb-feeder-ultrafeeder_{i}/readsb/outline.json")
-                )
+                outline = json.load(open(f"/run/adsb-feeder-ultrafeeder_{i}/readsb/outline.json"))
             except:
                 pass
             else:
@@ -41,8 +39,7 @@ class MultiOutline:
         for i in hwt_feeders:
             if (
                 not os.path.exists(f"/opt/adsb/data/heywhatsthat_{i}.json")
-                or os.path.getmtime(f"/opt/adsb/data/heywhatsthat_{i}.json")
-                < now - 3600
+                or os.path.getmtime(f"/opt/adsb/data/heywhatsthat_{i}.json") < now - 3600
             ):
                 try:
                     subprocess.run(
@@ -112,9 +109,7 @@ class MultiOutline:
                     else:
                         print(f"can't create polygon from outline #{i}")
                 except:
-                    print(
-                        f"can't create linear ring from outline #{i} - maybe there is no data, yet?"
-                    )
+                    print(f"can't create linear ring from outline #{i} - maybe there is no data, yet?")
         made_change = True
         look_at = range(1, len(polygons))
         while made_change:
@@ -136,9 +131,7 @@ class MultiOutline:
                             made_change = True
                             combined = True
                     except Exception as e:
-                        print(
-                            f"exception {e} while combining polygons #{j} and #{i} for hwt_alt={hwt_alt}"
-                        )
+                        print(f"exception {e} while combining polygons #{j} and #{i} for hwt_alt={hwt_alt}")
                         pass
                 if not combined:
                     to_consider.append(i)

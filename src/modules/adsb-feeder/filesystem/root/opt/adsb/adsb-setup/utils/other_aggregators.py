@@ -85,9 +85,7 @@ class Aggregator:
         except subprocess.TimeoutExpired as exc:
             # for several of these containers "timeout" is actually the expected behavior;
             # they don't stop on their own. So just grab the output and kill the container
-            print_err(
-                f"docker run {cmdline} received a timeout error after {timeout} with output {exc.stdout}"
-            )
+            print_err(f"docker run {cmdline} received a timeout error after {timeout} with output {exc.stdout}")
             output = exc.stdout.decode()
             try:
                 result = subprocess.run(
@@ -97,9 +95,7 @@ class Aggregator:
                     capture_output=True,
                 )
             except subprocess.TimeoutExpired:
-                print_err(
-                    f"failed to remove the temp container {str(result.stdout)} / {str(result.stderr)}"
-                )
+                print_err(f"failed to remove the temp container {str(result.stdout)} / {str(result.stderr)}")
         except subprocess.SubprocessError as exc:
             print_err(f"docker run {cmdline} ended with an exception {exc}")
         else:
@@ -147,9 +143,7 @@ class FlightRadar24(Aggregator):
             f'-e FR24_EMAIL="{email}" {self.container} '
             f'-c "apt update && apt install -y expect && $(cat handsoff_signup_expect.sh)"'
         )
-        open("/opt/adsb/handsoff_signup.sh", "w").write(
-            f"#!/bin/bash\n{adsb_signup_command}"
-        )
+        open("/opt/adsb/handsoff_signup.sh", "w").write(f"#!/bin/bash\n{adsb_signup_command}")
         try:
             output = subprocess.run(
                 "bash /opt/adsb/handsoff_signup.sh",
@@ -163,9 +157,7 @@ class FlightRadar24(Aggregator):
             print_err("timeout running the adsb signup script")
             return None
 
-        sharing_key_match = re.search(
-            "Your sharing key \\(([a-zA-Z0-9]*)\\) has been", output
-        )
+        sharing_key_match = re.search("Your sharing key \\(([a-zA-Z0-9]*)\\) has been", output)
         if not sharing_key_match:
             print_err(f"couldn't find a sharing key in the container output: {output}")
             return None
@@ -184,9 +176,7 @@ class FlightRadar24(Aggregator):
             f'-e FR24_EMAIL="{email}" {self.container} '
             f'-c "apt update && apt install -y expect && $(cat handsoff_signup_expect_uat.sh)"'
         )
-        open("/opt/adsb/handsoff_signup_uat.sh", "w").write(
-            f"#!/bin/bash\n{uat_signup_command}"
-        )
+        open("/opt/adsb/handsoff_signup_uat.sh", "w").write(f"#!/bin/bash\n{uat_signup_command}")
         try:
             output = subprocess.run(
                 "bash /opt/adsb/handsoff_signup_uat.sh",
@@ -199,9 +189,7 @@ class FlightRadar24(Aggregator):
         except subprocess.TimeoutExpired:
             print_err("timeout running the adsb uat signup script")
             return None
-        sharing_key_match = re.search(
-            "Your sharing key \\(([a-zA-Z0-9]*)\\) has been", output
-        )
+        sharing_key_match = re.search("Your sharing key \\(([a-zA-Z0-9]*)\\) has been", output)
         if not sharing_key_match:
             print_err(f"couldn't find a sharing key in the container output: {output}")
             return None
@@ -224,9 +212,7 @@ class FlightRadar24(Aggregator):
         if not adsb_sharing_key and not uat_sharing_key:
             return False
         self._idx = make_int(idx)  # this way the properties work correctly
-        print_err(
-            f"FR_activate adsb |{adsb_sharing_key}| uat |{uat_sharing_key}| idx |{idx}|"
-        )
+        print_err(f"FR_activate adsb |{adsb_sharing_key}| uat |{uat_sharing_key}| idx |{idx}|")
         if is_email(adsb_sharing_key):
             # that's an email address, so we are looking to get a sharing key
             adsb_sharing_key = self._request_fr24_sharing_key(adsb_sharing_key)
@@ -242,9 +228,7 @@ class FlightRadar24(Aggregator):
         if adsb_sharing_key or uat_sharing_key:
             # we have at least one sharing key, let's just enable the container
             self._d.env_by_tags(["flightradar", "key"]).list_set(idx, adsb_sharing_key)
-            self._d.env_by_tags(["flightradar_uat", "key"]).list_set(
-                idx, uat_sharing_key
-            )
+            self._d.env_by_tags(["flightradar_uat", "key"]).list_set(idx, uat_sharing_key)
             self._d.env_by_tags(self._enabled_tags).list_set(idx, True)
 
         return True
@@ -369,9 +353,7 @@ class OpenSky(Aggregator):
         output = self._docker_run_with_timeout(cmdline, 60.0)
         serial_match = re.search("Got a new serial number: ([-a-zA-Z0-9]*)", output)
         if not serial_match:
-            print_err(
-                f"couldn't find a serial number in the container output: {output}"
-            )
+            print_err(f"couldn't find a serial number in the container output: {output}")
             return None
 
         return serial_match.group(1)

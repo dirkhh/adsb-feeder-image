@@ -10,14 +10,16 @@ app = Flask(__name__)
 logfile = "/opt/adsb/adsb-setup.log"
 title = "Restarting the ADS-B Feeder System"
 
+
 def print_err(*args, **kwargs):
     level = int(kwargs.pop("level", 0))
     if level > 0 and int(verbose) & int(level) == 0:
         return
-    timestamp = time.strftime(
-        "%Y-%m-%dT%H:%M:%S", time.gmtime()
-    ) + ".{0:03.0f}Z".format(math.modf(time.time())[0] * 1000)
+    timestamp = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()) + ".{0:03.0f}Z".format(
+        math.modf(time.time())[0] * 1000
+    )
     print(*((timestamp,) + args), file=sys.stderr, **kwargs)
+
 
 @app.route("/stream-log")
 def stream_log():
@@ -25,7 +27,7 @@ def stream_log():
     def tail():
         with open(logfile, "r") as file:
             ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
-            tmp = file.read()[-16 * 1024:]
+            tmp = file.read()[-16 * 1024 :]
             # discard anything but the last 16 kB
             while True:
                 tmp += file.read(16 * 1024)
@@ -61,6 +63,6 @@ if __name__ == "__main__":
     if len(argv) >= 4:
         title = argv[3] + " the ADS-B Feeder System"
 
-    print_err(f"Starting waiting-app.py on port {port} with title \"{title}\" streaming logfile {logfile}")
+    print_err(f'Starting waiting-app.py on port {port} with title "{title}" streaming logfile {logfile}')
 
     app.run(host="0.0.0.0", port=port)

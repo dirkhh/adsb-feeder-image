@@ -95,26 +95,25 @@ class SDRDevices:
                 print_err("WARNING: bad code in check_pidvid")
 
             for pidvid in pv_list:
-                #print_err(f"checking {sdr_type} with pidvid {pidvid}")
+                # print_err(f"checking {sdr_type} with pidvid {pidvid}")
                 for line in output:
                     address = self._get_address_for_pid_vid(pidvid, line)
                     if address:
                         print_err(f"get_sdr_info() found SDR {pidvid} of type {sdr_type} at {address}")
                         self.sdrs.append(SDR(sdr_type, address))
 
-
         check_pidvid(pv_list=["0bda:2838", "0bda:2832"], sdr_type="rtlsdr")
         check_pidvid(pv_list=["0403:7028"], sdr_type="stratuxv3")
         check_pidvid(pv_list=["1d50:60a1"], sdr_type="airspy")
 
         sdrplay_pv_list = [
-                "1df7:2500",
-                "1df7:3000",
-                "1df7:3010",
-                "1df7:3020",
-                "1df7:3030",
-                "1df7:3050",
-                ]
+            "1df7:2500",
+            "1df7:3000",
+            "1df7:3010",
+            "1df7:3020",
+            "1df7:3030",
+            "1df7:3050",
+        ]
 
         check_pidvid(pv_list=sdrplay_pv_list, sdr_type="sdrplay")
 
@@ -133,9 +132,7 @@ class SDRDevices:
 
     def _get_address_for_pid_vid(self, pidvid: str, line: str):
         address = ""
-        match = re.search(
-            f"Bus ([0-9a-fA-F]+) Device ([0-9a-fA-F]+): ID {pidvid}", line
-        )
+        match = re.search(f"Bus ([0-9a-fA-F]+) Device ([0-9a-fA-F]+): ID {pidvid}", line)
         if match:
             address = f"{match.group(1)}:{match.group(2)}"
         return address
