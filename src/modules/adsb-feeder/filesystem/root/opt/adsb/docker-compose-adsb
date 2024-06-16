@@ -92,5 +92,14 @@ if grep -q "_IS_BASE_CONFIG_FINISHED=True" /opt/adsb/config/.env 2> /dev/null ; 
     fi
 else
     echo "$(date -u +"%FT%T.%3NZ") things aren't configured, yet, only starting Dozzle and the logger container"
-    $docker_compose -f /opt/adsb/config/dozzle.yml "$@"
+    # third time's a charm
+    for i in {1..3}; do
+        $docker_compose -f /opt/adsb/config/dozzle.yml "$@" && break
+    done
+    if [[ "$1" == "pull" ]]; then
+        echo "$(date -u +"%FT%T.%3NZ") things aren't configured, yet, but for argument pull will also pull ultrafeeder"
+        for i in {1..3}; do
+            $docker_compose --env-file /opt/adsb/docker.image.versions -f /opt/adsb/config/docker-compose.yml pull && break
+        done
+    fi
 fi
