@@ -408,7 +408,6 @@ class AdsbIm:
 
     def run(self, no_server=False):
         debug = os.environ.get("ADSBIM_DEBUG") is not None
-        self._debug_cleanup()
         # in no_server mode we want to exit right after the housekeeping, so no
         # point in running this in the background
         if not no_server:
@@ -478,16 +477,6 @@ class AdsbIm:
             port=int(self._d.env_by_tags("webport").value),
             debug=debug,
         )
-
-    def _debug_cleanup(self):
-        """
-        This is a debug function to clean up the docker-starting.lock file
-        """
-        # rm /opt/adsb/docker-starting.lock
-        try:
-            os.remove(self._d.data_path / "docker-starting.lock")
-        except FileNotFoundError:
-            pass
 
     def get_tz(self):
         browser_timezone = request.args.get("tz")
