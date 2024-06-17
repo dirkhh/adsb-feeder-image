@@ -631,6 +631,12 @@ class Data:
             print_err(f"adjust_bool({e}, {e.tags}) = {v}", level=8)
             return v
 
+        def adjust_heywhatsthat(enabled, value):
+            new_value = []
+            for i in range(len(value)):
+                new_value.append(value[i] if enabled[i] else "")
+            return new_value
+
         ret = {}
         for e in self._env:
 
@@ -646,9 +652,15 @@ class Data:
                     )
 
             if type(e._value) == list:
-                for i in range(len(e._value)):
+                if e._name == "FEEDER_HEYWHATSTHAT_ID":
+                    actual_value = adjust_heywhatsthat(
+                        self.env_by_tags(["heywhatsthat", "is_enabled"])._value, e._value
+                    )
+                else:
+                    actual_value = e._value
+                for i in range(len(actual_value)):
                     suffix = "" if i == 0 else f"_{i}"
-                    value = e._value[i]
+                    value = actual_value[i]
                     envKey = e._name + suffix
                     newValue = adjust_bool(e, value) if type(value) == bool or "is_enabled" in e.tags else value
                     ret[envKey] = newValue
