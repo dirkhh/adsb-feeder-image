@@ -1360,7 +1360,7 @@ class AdsbIm:
                 print_err(f"shifting {e.name} down and deleting last element {e._value}")
                 for i in range(num, self._d.env_by_tags("num_micro_sites").value):
                     e.list_set(i, e.list_get(i + 1))
-                if len(e._value) > self._d.env_by_tags("num_micro_sites").value:
+                while len(e._value) > self._d.env_by_tags("num_micro_sites").value:
                     e.list_remove()
             else:
                 print_err(f"couldn't find env list for {tags}")
