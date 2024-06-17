@@ -41,10 +41,25 @@ FEEDER_PLANEFINDER_SHARECODE FEEDER_OPENSKY_USERNAME FEEDER_OPENSKY_SERIAL FEEDE
 # We set vars that cannot be empty, have to be stripped
 IMPORTANT_VARS="FEEDER_LAT FEEDER_LONG AF_MICRO_IP"
 
+NUM_MICRO_SITES=$(grep -e "^AF_NUM_MICRO_SITES=" /opt/adsb/config/.env | cut -d'=' -f2)
+
+
+SANITISE_VARS_ORIG="$SANITISE_VARS"
+IMPORTANT_VARS_ORIG="$IMPORTANT_VARS"
+
+for i in $(seq $NUM_MICRO_SITES); do
+    for VAR in $SANITISE_VARS_ORIG; do
+        SANITISE_VARS+=" ${VAR}_${i}"
+    done
+    for VAR in $IMPORTANT_VARS_ORIG; do
+        IMPORTANT_VARS+=" ${VAR}_${i}"
+    done
+done
+
 # For each
 for VAR in $SANITISE_VARS; do
   # We get the value of the variable
-  MY_VAR=$(grep ^$VAR= /opt/adsb/config/.env | cut -d'=' -f2)
+  MY_VAR=$(grep -e "^${VAR}=" /opt/adsb/config/.env | cut -d'=' -f2)
   # MY_VAR is empty, and it is one of FEEDER_LAT FEEDER_LONG ADSBLOL_UUID, bail out
   if [ -z "$MY_VAR" ] ; then
     if [[ "$IMPORTANT_VARS" == *"$VAR"* ]]; then
