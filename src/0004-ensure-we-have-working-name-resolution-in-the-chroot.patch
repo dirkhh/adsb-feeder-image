@@ -1,0 +1,31 @@
+From d6c33be5887e439d34b1f0ccc3e7da0cdcfb9c69 Mon Sep 17 00:00:00 2001
+From: Dirk Hohndel <dirk@hohndel.org>
+Date: Tue, 18 Jun 2024 00:10:16 +0000
+Subject: [PATCH] ensure we have working name resolution in the chroot
+
+If there's no /etc/resolv.conf, copy the one from the build host.
+
+Signed-off-by: Dirk Hohndel <dirk@hohndel.org>
+---
+ src/custompios | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/src/custompios b/src/custompios
+index d44c6d2..80ecfca 100755
+--- a/src/custompios
++++ b/src/custompios
+@@ -156,6 +156,11 @@ pushd $BASE_WORKSPACE
+     mount --bind "$BASE_APT_CACHE" $BASE_MOUNT_PATH/var/cache/apt
+   fi
+
++  # make sure we have working name resolution
++  if [ ! -f "${BASE_MOUNT_PATH}/etc/resolv.conf" ] || [ $(wc -l < "${BASE_MOUNT_PATH}/etc/resolv.conf") = "0" ]; then
++    cat /etc/resolv.conf > "${BASE_MOUNT_PATH}/etc/resolv.conf"
++  fi
++
+   #Edit pi filesystem
+   pushd $BASE_MOUNT_PATH
+
+--
+2.34.1
+

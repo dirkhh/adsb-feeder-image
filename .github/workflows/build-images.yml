@@ -162,6 +162,7 @@ jobs:
         patch -p1 < ../repository/src/0001-allow-running-natively-on-x86_64.patch
         patch -p1 < ../repository/src/0002-reduce-space-used-when-running-in-GitHub-action.patch
         patch -p1 < ../repository/src/0003-don-t-try-to-configure-wifi-if-it-isn-t-there.patch
+        patch -p1 < ../repository/src/0004-ensure-we-have-working-name-resolution-in-the-chroot.patch
 
     - name: Update CustomPiOS Paths and create image directories
       run: |
