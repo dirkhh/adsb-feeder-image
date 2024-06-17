@@ -7,6 +7,10 @@ SEPARATOR="
 # We read the file
 # and also append a bunch of other diagnostic info
 SANITIZED_LOG="
+journalctl -e -n3000:
+$(journalctl -e -n3000)
+${SEPARATOR}
+adsb-setup.log:
 $(</opt/adsb/adsb-setup.log)
 ${SEPARATOR}
 config.json:
