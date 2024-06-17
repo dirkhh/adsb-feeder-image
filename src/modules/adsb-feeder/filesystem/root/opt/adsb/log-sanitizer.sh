@@ -6,7 +6,7 @@ SEPARATOR="
 "
 # We read the file
 # and also append a bunch of other diagnostic info
-SANITISED_LOG="
+SANITIZED_LOG="
 $(</opt/adsb/adsb-setup.log)
 ${SEPARATOR}
 config.json:
@@ -32,7 +32,7 @@ $(lsusb -v)
 "
 
 # We set vars to empty
-SANITISE_VARS="FEEDER_LAT FEEDER_LONG ADSBLOL_UUID AF_MICRO_IP ULTRAFEEDER_UUID FEEDER_1090UK_API_KEY
+SANITIZE_VARS="FEEDER_LAT FEEDER_LONG ADSBLOL_UUID AF_MICRO_IP ULTRAFEEDER_UUID FEEDER_1090UK_API_KEY
 FEEDER_ADSBHUB_STATION_KEY FEEDER_FR24_SHARING_KEY FEEDER_FR24_UAT_SHARING_KEY
 FEEDER_PLANEWATCH_API_KEY FEEDER_RADARBOX_SHARING_KEY FEEDER_RV_FEEDER_KEY
 _ADSB_STATE_SSH_KEY FEEDER_PIAWARE_FEEDER_ID FEEDER_RADARBOX_SHARING_KEY FEEDER_RADARBOX_SN
@@ -44,12 +44,12 @@ IMPORTANT_VARS="FEEDER_LAT FEEDER_LONG AF_MICRO_IP"
 NUM_MICRO_SITES=$(grep -e "^AF_NUM_MICRO_SITES=" /opt/adsb/config/.env | cut -d'=' -f2)
 
 
-SANITISE_VARS_ORIG="$SANITISE_VARS"
+SANITIZE_VARS_ORIG="$SANITIZE_VARS"
 IMPORTANT_VARS_ORIG="$IMPORTANT_VARS"
 
 for i in $(seq $NUM_MICRO_SITES); do
-    for VAR in $SANITISE_VARS_ORIG; do
-        SANITISE_VARS+=" ${VAR}_${i}"
+    for VAR in $SANITIZE_VARS_ORIG; do
+        SANITIZE_VARS+=" ${VAR}_${i}"
     done
     for VAR in $IMPORTANT_VARS_ORIG; do
         IMPORTANT_VARS+=" ${VAR}_${i}"
@@ -57,7 +57,7 @@ for i in $(seq $NUM_MICRO_SITES); do
 done
 
 # For each
-for VAR in $SANITISE_VARS; do
+for VAR in $SANITIZE_VARS; do
   # We get the value of the variable
   MY_VAR=$(grep -e "^${VAR}=" /opt/adsb/config/.env | cut -d'=' -f2)
   # MY_VAR is empty, and it is one of FEEDER_LAT FEEDER_LONG ADSBLOL_UUID, bail out
@@ -68,17 +68,17 @@ for VAR in $SANITISE_VARS; do
     fi
   else
     echo "removing all references to ${VAR}"
-    SANITISED_LOG=$(echo "$SANITISED_LOG" | sed "s/${MY_VAR}/MY_REAL_${VAR}/g")
-    # Otherwise we just strip it out, and put it back into SANITISED_LOG
+    SANITIZED_LOG=$(echo "$SANITIZED_LOG" | sed "s/${MY_VAR}/MY_REAL_${VAR}/g")
+    # Otherwise we just strip it out, and put it back into SANITIZED_LOG
   fi
 done
 # print a new line do delineate our debug output above
 echo
 # now get rid of anything that looks like an IP address
-SANITISED_LOG=$(sed -r 's/((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])/<hidden-ip-address>/g' <<< $SANITISED_LOG)
+SANITIZED_LOG=$(sed -r 's/((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])/<hidden-ip-address>/g' <<< $SANITIZED_LOG)
 # finally, replace everything that looks like a uuid
-SANITISED_LOG=$(sed -r 's/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/<hidden-uuid>/g' <<< $SANITISED_LOG)
+SANITIZED_LOG=$(sed -r 's/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/<hidden-uuid>/g' <<< $SANITIZED_LOG)
 #
 # Then we echo the sanitised log
-echo "$SANITISED_LOG"
+echo "$SANITIZED_LOG"
 
