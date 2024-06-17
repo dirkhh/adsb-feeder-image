@@ -201,9 +201,7 @@ class AdsbIm:
             "radarplane--is_enabled",
             "hpradar--is_enabled",
             "alive--is_enabled",
-            "uat978--is_enabled", "978url", "978piaware",
-            "replay978", "978host",
-            "mf_brofm", "mf_brofm_capable",
+            "uat978--is_enabled",
         )
 
         self._routemanager.add_proxy_routes(self._d.proxy_routes)
@@ -1353,6 +1351,10 @@ class AdsbIm:
             "mf_ip",
             "airspyurl",
             "1090signalurl",
+            "978url", "978piaware",
+            "replay978", "978host",
+            "mf_brofm", "mf_brofm_capable",
+            "ultrafeeder_config", "rb978host",
         ):
             tags = t.split("--")
             e = self._d.env_by_tags(tags)
