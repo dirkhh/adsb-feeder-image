@@ -50,6 +50,7 @@ waiting_placeholder() {
     kill_wait_app
 
     # finally start the waiting-app
+    PORT=$(grep AF_WEBPORT /opt/adsb/config/.env | cut -d= -f2)
     start_wait_app "$PORT" /opt/adsb/adsb-setup.log "Updating the" &
 }
 
