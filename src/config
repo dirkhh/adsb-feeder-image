@@ -13,3 +13,4 @@ export BASE_OVERRIDE_HOSTNAME=adsb-feeder
 
 export MODULES="base(network,adsb-feeder(adsb-docker))"
 
+export BASE_IMAGE_ENLARGEROOT=1500
