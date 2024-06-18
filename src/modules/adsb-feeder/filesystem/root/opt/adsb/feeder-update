@@ -239,8 +239,8 @@ services_enable=()
 if [ ! -f /opt/adsb/os.adsb.feeder.image ] ; then
     rm -f ./usr/lib/systemd/system/adsb-hotspot.service
     rm -f ./usr/lib/systemd/system/adsb-bootstrap.service
-    cp -v -a -t ./usr/lib/systemd/system/* /usr/lib/systemd/system/
-    cp -v -a -t /opt/adsb/* /opt/adsb
+    cp -v -a ./usr/lib/systemd/system/* /usr/lib/systemd/system/
+    cp -v -a ./opt/adsb/* /opt/adsb
 else
     # copy the complete tree into the / filesystem
     cp -v -a -r . /
