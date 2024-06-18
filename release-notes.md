@@ -1,4 +1,5 @@
 Changes since v2.1.1 include:
+- app-install: fix conflict with DietPi install script (will be addressed in DietPi in the future)
 - app-install: fix feeder-update copy
 
 > [!NOTE]
