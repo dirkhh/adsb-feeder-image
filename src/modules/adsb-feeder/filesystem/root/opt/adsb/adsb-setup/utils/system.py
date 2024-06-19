@@ -102,6 +102,7 @@ class System:
         subprocess.call("halt", shell=True)
 
     def reboot(self) -> None:
+        # best effort: allow reboot even if lock is held
         gotLock = self._restart.lock.acquire(blocking=False)
 
         def do_reboot():
@@ -111,7 +112,7 @@ class System:
             # release the lock after 30 seconds:
             if gotLock:
                 sleep(30)
-                self.lock.release()
+                self._restart.lock.release()
 
         threading.Thread(target=do_reboot).start()
 
