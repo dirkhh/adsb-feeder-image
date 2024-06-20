@@ -34,6 +34,9 @@ ${SEPARATOR}
 lsusb -vt:
 $(lsusb -vt)
 ${SEPARATOR}
+grep -e sdr_info /opt/adsb/adsb-setup.log:
+$(grep -e sdr_info /opt/adsb/adsb-setup.log)
+${SEPARATOR}
 lsusb -v:
 $(lsusb -v)
 ${SEPARATOR}
