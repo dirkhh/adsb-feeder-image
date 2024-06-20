@@ -393,7 +393,7 @@ class AdsbIm:
         new_name = new_name.strip("-")[:63]
         return new_name
 
-    def mdns_alias_service(self, site_name: str):
+    def set_hostname(self, site_name: str):
         os_flag_file = self._d.data_path / "os.adsb.feeder.image"
         if not os_flag_file.exists():
             return
@@ -403,6 +403,7 @@ class AdsbIm:
         host_name = self.onlyAlphaNum(site_name)
         if host_name:
             subprocess.run(["/usr/bin/bash", "/opt/adsb/scripts/mdns-alias-setup.sh", f"{host_name}"])
+            subprocess.run(["/usr/bin/hostnamectl", "hostname", f"{host_name}"])
 
     def run(self, no_server=False):
         debug = os.environ.get("ADSBIM_DEBUG") is not None
@@ -468,7 +469,7 @@ class AdsbIm:
         # make sure the avahi alias service runs on an adsb.im image
         site_name = self._d.env_by_tags("site_name").list_get(0)
         if site_name and os_flag_file.exists():
-            self.mdns_alias_service(site_name)
+            self.set_hostname(site_name)
 
         self.app.run(
             host="0.0.0.0",
@@ -1966,7 +1967,7 @@ class AdsbIm:
                         self._multi_outline_bg = Background(60, self.push_multi_outline)
                     unique_name = self.unique_site_name(form.get("site_name"), 0)
                     self._d.env_by_tags("site_name").list_set(0, unique_name)
-                    self.mdns_alias_service(unique_name)
+                    self.set_hostname(unique_name)
                 # if this is a regular feeder and the user is changing to 'individual' selection
                 # (either in initial setup or when coming back to that setting later), show them
                 # the aggregator selection page next
@@ -2004,7 +2005,7 @@ class AdsbIm:
                     unique_name = self.unique_site_name(value, sitenum)
                     self._d.env_by_tags("site_name").list_set(sitenum, unique_name)
                     if sitenum == 0:
-                        self.mdns_alias_service(unique_name)
+                        self.set_hostname(unique_name)
         # done handling the input data
         # what implied settings do we have (and could we simplify them?)
 

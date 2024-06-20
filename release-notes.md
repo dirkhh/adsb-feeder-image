@@ -1,6 +1,5 @@
-Changes since v2.1.1 include:
-- app-install: fix conflict with DietPi install script (will be addressed in DietPi in the future)
-- app-install: fix feeder-update copy
+Changes since v2.1.2 include:
+- set station name as hostname as well
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)
