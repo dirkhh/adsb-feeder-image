@@ -188,6 +188,9 @@ fi
 if ! command -v avahi-publish &>/dev/null || ! command -v avahi-resolve &>/dev/null; then
     missing+=("avahi-utils")
 fi
+if ! command -v jq &>/dev/null; then
+    missing+=("jq")
+fi
 if [[ ${#missing[@]} -gt 0 ]] ; then
     # let's try to install it
     echo "newer versions of the adsb.im ADS-B Feeder Image require the Python3 ${missing[@]} package(s) - trying to install"
