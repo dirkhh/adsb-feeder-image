@@ -1351,10 +1351,14 @@ class AdsbIm:
             "mf_ip",
             "airspyurl",
             "1090signalurl",
-            "978url", "978piaware",
-            "replay978", "978host",
-            "mf_brofm", "mf_brofm_capable",
-            "ultrafeeder_config", "rb978host",
+            "978url",
+            "978piaware",
+            "replay978",
+            "978host",
+            "mf_brofm",
+            "mf_brofm_capable",
+            "ultrafeeder_config",
+            "rb978host",
         ):
             tags = t.split("--")
             e = self._d.env_by_tags(tags)
