@@ -99,8 +99,8 @@ class SDRDevices:
                 for line in output:
                     address = self._get_address_for_pid_vid(pidvid, line)
                     if address:
-                        print_err(f"get_sdr_info() found SDR {pidvid} of type {sdr_type} at {address}")
                         self.sdrs.append(SDR(sdr_type, address))
+                        print_err(f"get_sdr_info() found SDR: type: {sdr_type} serial: {self.sdrs[-1]._serial} address: {address} pidvid: {pidvid}")
 
         check_pidvid(pv_list=["0bda:2838", "0bda:2832"], sdr_type="rtlsdr")
         check_pidvid(pv_list=["0403:7028"], sdr_type="stratuxv3")
@@ -126,6 +126,9 @@ class SDRDevices:
                 self.duplicates.add(sdr._serial)
             else:
                 found_serials.add(sdr._serial)
+
+        if len(self.sdrs) == 0:
+            print_err("get_sdr_info() could not find any SDRs")
 
     def _ensure_populated(self):
         self.get_sdr_info()
