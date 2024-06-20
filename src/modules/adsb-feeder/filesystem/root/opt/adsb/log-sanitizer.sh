@@ -49,6 +49,20 @@ ${SEPARATOR}
 journalctl -e -n3000:
 $(journalctl -e -n3000)
 ${SEPARATOR}
+"
+
+oldlog=$(find /opt/adsb -name adsb-setup.log.\* | sort -r | head -n1)
+if [[ -n "$oldlog" ]]; then
+
+SANITIZED_LOG+="
+${oldlog}:
+$(eval "<$oldlog")
+${SEPARATOR}
+"
+
+fi
+
+SANITIZED_LOG+="
 adsb-setup.log:
 $(</opt/adsb/adsb-setup.log)
 ${SEPARATOR}
