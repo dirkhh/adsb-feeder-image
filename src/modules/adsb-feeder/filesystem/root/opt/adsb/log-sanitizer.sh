@@ -7,11 +7,35 @@ SEPARATOR="
 # We read the file
 # and also append a bunch of other diagnostic info
 SANITIZED_LOG="
-journalctl -e -n3000:
-$(journalctl -e -n3000)
+important:
+$(jq < /opt/adsb/config/config.json '{ version: ._ADSBIM_BASE_VERSION, board: ._ADSBIM_STATE_BOARD_NAME, base: ._ADSBIM_BASE_VERSION, user_env: ._ADSBIM_STATE_EXTRA_ENV, user_ultrafeeder: ._ADSBIM_STATE_ULTRAFEEDER_EXTRA_ARGS }')
 ${SEPARATOR}
-adsb-setup.log:
-$(</opt/adsb/adsb-setup.log)
+uname -a:
+$(uname -a)
+${SEPARATOR}
+df:
+$(df -h | grep -v overlay)
+${SEPARATOR}
+free -h:
+$(free -h)
+${SEPARATOR}
+docker ps:
+$(docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Image}}")
+${SEPARATOR}
+docker images:
+$(docker images -a --format "{{.Repository}}:{{.Tag}}")
+${SEPARATOR}
+docker network ls:
+$(docker network ls)
+${SEPARATOR}
+docker system df:
+$(docker system df)
+${SEPARATOR}
+lsusb -vt:
+$(lsusb -vt)
+${SEPARATOR}
+lsusb -v:
+$(lsusb -v)
 ${SEPARATOR}
 config.json:
 $(</opt/adsb/config/config.json)
@@ -19,20 +43,12 @@ ${SEPARATOR}
 .env:
 $(</opt/adsb/config/.env)
 ${SEPARATOR}
-df:
-$(df -h | grep -v overlay)
+journalctl -e -n3000:
+$(journalctl -e -n3000)
 ${SEPARATOR}
-uname -a:
-$(uname -a)
+adsb-setup.log:
+$(</opt/adsb/adsb-setup.log)
 ${SEPARATOR}
-free -h:
-$(free -h)
-${SEPARATOR}
-lsusb -t:
-$(lsusb -t)
-${SEPARATOR}
-lsusb -v:
-$(lsusb -v)
 "
 
 # We set vars to empty
