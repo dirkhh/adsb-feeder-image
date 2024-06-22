@@ -1,4 +1,6 @@
 Changes since v2.1.2 include:
+- new experimental Raspbian based Le Potato image that supports WiFi with many USB-WiFi adapters
+- many small improvements to logging and debuggability
 - set station name as hostname as well
 
 > [!NOTE]
