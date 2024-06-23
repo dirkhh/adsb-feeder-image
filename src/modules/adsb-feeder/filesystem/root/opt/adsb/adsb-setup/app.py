@@ -8,6 +8,7 @@ import pathlib
 import pickle
 import platform
 import re
+import shlex
 import requests
 import secrets
 import signal
@@ -1379,34 +1380,39 @@ class AdsbIm:
         )
         old_ip = self._d.env_by_tags("mf_ip").list_get(num)
         if old_ip != ip:
-            data_dir = pathlib.Path("/opt/adsb/config/ultrafeeder")
-            if (data_dir / f"{old_ip}").exists() and (data_dir / f"{old_ip}").is_dir():
-                # ok, as one would hope, there's an Ultrafeeder directory for the old IP
-                if (data_dir / f"{ip}").exists():
-                    print_err(f"can't move micro feeder data directory to {data_dir/ip} - it's already in use")
-                    return (
-                        False,
-                        f"can't move micro feeder data directory to {data_dir/ip} - it's already in use",
-                    )
-                try:
-                    subprocess.run(
-                        f"/opt/adsb/docker-compose-adsb down ultrafeeder_stage2_{num} -t 20",
-                        shell=True,
-                    )
-                except:
-                    print_err(f"failed to stop micro feeder {num}")
-                    return (False, f"failed to stop micro feeder {num}")
-                print_err(f"moving micro feeder data directory from {data_dir/old_ip} to {data_dir/ip}")
-                try:
-                    os.rename(data_dir / f"{old_ip}", data_dir / f"{ip}")
-                except:
-                    print_err(f"failed to move micro feeder data directory from {data_dir/old_ip} to {data_dir/ip}")
-                    return (
-                        False,
-                        f"failed to move micro feeder data directory from {data_dir/old_ip} to {data_dir/ip}",
-                    )
-            # ok, this seems to have worked, let's update the environment variable IP
-            self._d.env_by_tags("mf_ip").list_set(num, ip)
+            if any([s in ip for s in ["/", "\\", ":", "*", "?", '"', "<", ">", "|", "..", "$"]]):
+                print_err(f"found suspicious characters in IP address {ip} - let's not use this in a command")
+            else:
+                data_dir = pathlib.Path("/opt/adsb/config/ultrafeeder")
+                if (data_dir / f"{old_ip}").exists() and (data_dir / f"{old_ip}").is_dir():
+                    # ok, as one would hope, there's an Ultrafeeder directory for the old IP
+                    if (data_dir / f"{ip}").exists():
+                        print_err(f"can't move micro feeder data directory to {data_dir/ip} - it's already in use")
+                        return (
+                            False,
+                            f"can't move micro feeder data directory to {data_dir/ip} - it's already in use",
+                        )
+                    try:
+                        subprocess.run(
+                            f"/opt/adsb/docker-compose-adsb down ultrafeeder_stage2_{num} -t 20",
+                            shell=True,
+                        )
+                    except:
+                        print_err(f"failed to stop micro feeder {num}")
+                        return (False, f"failed to stop micro feeder {num}")
+                    print_err(f"moving micro feeder data directory from {data_dir/old_ip} to {data_dir/ip}")
+                    try:
+                        os.rename(data_dir / f"{old_ip}", data_dir / f"{ip}")
+                    except:
+                        print_err(
+                            f"failed to move micro feeder data directory from {data_dir/old_ip} to {data_dir/ip}"
+                        )
+                        return (
+                            False,
+                            f"failed to move micro feeder data directory from {data_dir/old_ip} to {data_dir/ip}",
+                        )
+                # ok, this seems to have worked, let's update the environment variable IP
+                self._d.env_by_tags("mf_ip").list_set(num, ip)
 
         if site_name != self._d.env_by_tags("site_name").list_get(num):
             print_err(f"update site name from {self._d.env_by_tags('site_name').list_get(num)} to {site_name}")
@@ -1810,7 +1816,7 @@ class AdsbIm:
                         cmd += [f"--hostname={name}"]
 
                         if ts_args:
-                            cmd += f"{ts_args}".split(" ")
+                            cmd += [f"--login-server={shlex.quote(ts_cli_value)}"]
                         cmd += ["--accept-dns=false"]
                         print_err(f"running {cmd}")
                         proc = subprocess.Popen(
