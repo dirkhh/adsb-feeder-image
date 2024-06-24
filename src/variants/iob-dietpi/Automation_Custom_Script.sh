@@ -61,8 +61,9 @@ apt install -y --no-install-recommends chrony jq
     fi
 
     echo "Deactivating biastees possibly turned on by kernel driver, device not found errors are expected:"
-    for i in 0 1 2 3; do rtl_biast -d "$i" -b 0; done
-    echo "Deactivation of biastees completed."
+    for i in 0 1 2 3; do
+        rtl_biast -d "$i" -b 0 &
+    done
 
 
 #
@@ -86,14 +87,10 @@ echo "_ADSBIM_BASE_VERSION=$(cat /opt/adsb/adsb.im.version)" >> "$ENV_FILE"
 echo "_ADSBIM_CONTAINER_VERSION=$(cat /opt/adsb/adsb.im.version)" >> "$ENV_FILE"
 
 # make sure all the ADS-B Feeder services are enabled and started
-systemctl enable --now adsb-bootstrap.service
-systemctl enable --now adsb-setup.service
-systemctl enable --now adsb-docker.service
-systemctl enable --now adsb-update.timer
+systemctl start adsb-bootstrap.service adsb-setup.service adsb-docker.service adsb-update.timer
+systemctl enable adsb-bootstrap.service adsb-setup.service adsb-docker.service adsb-update.timer
 
 # make sure the VPN services are stopped and disabled
-systemctl stop zerotier-one.service
-systemctl stop tailscaled.service
-systemctl disable zerotier-one.service
-systemctl disable tailscaled.service
+systemctl stop zerotier-one.service tailscaled.service
+systemctl disable zerotier-one.service tailscaled.service
 
