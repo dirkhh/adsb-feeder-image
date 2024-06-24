@@ -22,7 +22,7 @@ export DEBIAN_FRONTEND=noninteractive
     echo -n "Updating repositories... "
     apt-get update -qq -y >/dev/null
     echo -n "Ensuring dependencies are installed... "
-    apt-get install -qq -y apt-transport-https ca-certificates curl gnupg2 slirp4netns uidmap jq netcat-openbsd >/dev/null
+    apt-get install -qq -y git rtl-sdr apt-transport-https ca-certificates curl gnupg2 slirp4netns uidmap jq netcat-openbsd >/dev/null
     echo -n "Getting docker..."
     curl -fsSL https://get.docker.com -o get-docker.sh
     echo "Installing Docker... "
@@ -49,8 +49,6 @@ EOF
     BLOCKED_MODULES+=("rtl2832")
     BLOCKED_MODULES+=("rtl2838")
     BLOCKED_MODULES+=("dvb_core")
-    echo -n "Getting the latest RTL-SDR packages... "
-    apt-get install -q -y git rtl-sdr
     echo -n "Getting the latest UDEV rules... "
     mkdir -p /etc/udev/rules.d /etc/udev/hwdb.d
     # First install the UDEV rules for RTL-SDR dongles
@@ -95,4 +93,3 @@ fi
 
 #cleanup
 apt-get clean
-apt-get autoremove -y
