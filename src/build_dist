@@ -135,8 +135,8 @@ EOF
     # enable hotspot service
     ln -sf /usr/lib/systemd/system/adsb-hotspot.service "$MNT_DIR"/etc/systemd/system/multi-user.target.wants/adsb-hotspot.service
 
-    # reduce default networking timeout from 300 to 60 seconds for dietpi
-    echo WAIT_ONLINE_TIMEOUT=60 >> "$MNT_DIR"/etc/default/networking
+    # reduce default networking timeout from 300 to 120 seconds for dietpi
+    echo WAIT_ONLINE_TIMEOUT=120 >> "$MNT_DIR"/etc/default/networking
 
     sed -i "s/ADSB_RANDOM_PASSWORD/$ROOT_PWD/" "${DIR}/variants/iob-dietpi/dietpi.txt"
     echo "AUTO_SETUP_SSH_PUBKEY=$SSH_PUB_KEY" >> "${DIR}/variants/iob-dietpi/dietpi.txt"
