@@ -9,3 +9,15 @@ echo -e "$BASE_USER_PASSWORD\n$BASE_USER_PASSWORD" | (passwd pi)
 
 sed -i "/127.0.1.1 $(hostname)/d" /etc/hosts
 
+
+
+# free up space
+apt-get remove -y gcc g++ gdb || true
+apt-get remove -y libraspberrypi-doc || true
+apt-get autoremove -y
+apt clean
+find  /var/lib/apt/lists | grep -v InRelease | xargs rm -rf
+rm -rf /tmp/* /var/log/* /var/cache/debconf/templates.dat* /var/lib/dpkg/status-old
+
+dd if=/dev/zero of=/zeroes bs=1M || true
+rm -f /zeroes
