@@ -87,10 +87,8 @@ echo "_ADSBIM_BASE_VERSION=$(cat /opt/adsb/adsb.im.version)" >> "$ENV_FILE"
 echo "_ADSBIM_CONTAINER_VERSION=$(cat /opt/adsb/adsb.im.version)" >> "$ENV_FILE"
 
 # make sure all the ADS-B Feeder services are enabled and started
-systemctl start adsb-bootstrap.service adsb-setup.service adsb-docker.service adsb-update.timer
-systemctl enable adsb-bootstrap.service adsb-setup.service adsb-docker.service adsb-update.timer
+systemctl enable --now adsb-bootstrap.service adsb-setup.service adsb-docker.service adsb-update.timer
 
 # make sure the VPN services are stopped and disabled
-systemctl stop zerotier-one.service tailscaled.service
-systemctl disable zerotier-one.service tailscaled.service
+systemctl disable --now zerotier-one.service tailscaled.service
 
