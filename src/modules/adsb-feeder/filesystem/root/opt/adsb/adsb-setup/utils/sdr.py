@@ -99,8 +99,9 @@ class SDRDevices:
                 for line in output:
                     address = self._get_address_for_pid_vid(pidvid, line)
                     if address:
-                        self.sdrs.append(SDR(sdr_type, address))
-                        print_err(f"get_sdr_info() found SDR: type: {sdr_type} serial: {self.sdrs[-1]._serial} address: {address} pidvid: {pidvid}")
+                        new_sdr = SDR(sdr_type, address)
+                        self.sdrs.append(new_sdr)
+                        print_err(f"get_sdr_info() found SDR: type: {sdr_type} serial: {new_sdr._serial} address: {address} pidvid: {pidvid}")
 
         check_pidvid(pv_list=["0bda:2838", "0bda:2832"], sdr_type="rtlsdr")
         check_pidvid(pv_list=["0403:7028"], sdr_type="stratuxv3")
