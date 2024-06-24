@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+#
+# Copyright 2024 Dirk Hohndel <dirk@hohndel.org>
+# This file may distributed under GPLv3
+########
+
+## Source error handling, leave this in place
+set -xe
+
+# Source CustomPIOS common.sh
+source /common.sh
+install_cleanup_trap
+
+# what to remove
+[ -n "$PKGS_TO_REMOVE" ] || PKGS_TO_REMPOVE=( \
+"apt-file" \
+"bluez-obexd" \
+"bluez-tools" \
+"bsd-mailx" \
+"btrfs-progs" \
+"cloud-guest-utils" \
+"cloud-image-utils" \
+"cloud-initramfs-growroot" \
+"cloud-utils" \
+"command-not-found" \
+"debian-keyring" \
+"distro-info" \
+"dkms" \
+"drm-info" \
+"eatmydata" \
+"efibootmgr" \
+"exim4-base" \
+"exim4-config" \
+"exim4-daemon-light" \
+"firmware-amd-graphics" \
+"firmware-linux-nonfree" \
+"firmware-linux" \
+"g++" \
+"gcc" \
+"gdb" \
+"genisoimage" \
+"grub-common" \
+"grub-efi-arm64-bin" \
+"grub-efi-arm64-signed" \
+"grub-efi-arm64" \
+"grub2-common" \
+"i2c-tools" \
+"ibverbs-providers" \
+"libaio1" \
+"libapt-pkg-perl" \
+"libblockdev-mdraid2" \
+"libboost-iostreams1.74.0" \
+"libbrotli-dev" \
+"libbytesize-common" \
+"libbytesize1" \
+"libcamera-apps-lite" \
+"libcamera0.1" \
+"libeatmydata1" \
+"libefiboot1" \
+"libefivar1" \
+"libevent-2.1-7" \
+"libfile-find-rule-perl" \
+"libfreetype-dev" \
+"libfreetype6-dev" \
+"libfuse2" \
+"libgfapi0" \
+"libgfrpc0" \
+"libgfxdr0" \
+"libglusterfs0" \
+"libgnutls-dane0" \
+"libgpm2" \
+"libi2c0" \
+"libibverbs1" \
+"libical3" \
+"libidn12" \
+"libiniparser1" \
+"libiscsi7" \
+"liblockfile-bin" \
+"liblockfile1" \
+"liblzo2-2" \
+"libnfs13" \
+"libnumber-compare-perl" \
+"libpisp0.0.1" \
+"libpng-dev" \
+"libpng-tools" \
+"librados2" \
+"libraspberrypi0" \
+"libraspberrypi-doc" \
+"librbd1" \
+"librdmacm1" \
+"libregexp-assemble-perl" \
+"libretech-dtoverlay" \
+"libretech-gpio" \
+"libsodium23" \
+"libssh-4" \
+"libtext-glob-perl" \
+"libubootenv-tool" \
+"libubootenv0.1" \
+"libunbound8" \
+"liburing2" \
+"mdadm" \
+"mmc-utils" \
+"mtd-utils" \
+"os-prober" \
+"qemu-block-extra" \
+"qemu-utils" \
+"read-edid" \
+"rng-tools-debian" \
+"spi-tools" \
+"u-boot-tools" \
+"usrmerge" \
+"vim-runtime" \
+"vim" \
+"zlib1g-dev" )
+
+export DEBIAN_FRONTEND=noninteractive
+apt-get update --allow-releaseinfo-change
+if (( "${#PKGS_TO_REMPOVE}" > 0 )); then
+  apt-get purge -y "${PKGS_TO_REMPOVE[@]}"
+else
+  echo_red "No packages configured to be removed. [SKIPPED]"
+fi
+echo_green "Performing 'apt-get upgrade' ... "
+apt-get upgrade -y

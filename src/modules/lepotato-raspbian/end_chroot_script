@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# This file may distributed under GPLv3
+########
+
+### Cleanup
+apt-get clean -y
+apt-get autoclean -y
+find  /var/lib/apt/lists | grep -v InRelease | xargs rm -rf
+rm -rf /tmp/* /var/log/* /var/cache/debconf/templates.dat* /var/lib/dpkg/status-old
+
+# this is kinda harsh... but it makes the image easier to compress
+dd if=/dev/zero of=/zeroes bs=1M || true
+rm -f /zeroes

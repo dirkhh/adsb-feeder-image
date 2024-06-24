@@ -1,0 +1,18 @@
+VARIANT_CONFIG_DIR=$(realpath -s $(dirname $(realpath -s $BASH_SOURCE))/../..)
+BASE_ZIP_IMG=$(ls -t ${DIST_PATH}/image/*.{img,zip,7z,xz} | head -n 1)
+BASE_ARCH=arm64
+MODULES='base(lepotato-raspbian)'
+
+export DIST_NAME="lepotato-raspbian"
+export DIST_VERSION="2024-06-24"
+
+export RPI_IMAGER_NAME="${DIST_NAME}"
+export RPI_IMAGER_DESCRIPTION="A distro built with CustomPiOS"
+export RPI_IMAGER_WEBSITE="https://github.com/guysoft/CustomPiOS"
+export RPI_IMAGER_ICON="https://raw.githubusercontent.com/guysoft/CustomPiOS/devel/media/rpi-imager-CustomPiOS.png"
+
+export BASE_USER=pi
+export BASE_ADD_USER=yes
+
+
+export BASE_IMAGE_ENLARGEROOT=
