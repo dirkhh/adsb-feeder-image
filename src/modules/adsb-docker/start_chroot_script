@@ -22,7 +22,7 @@ export DEBIAN_FRONTEND=noninteractive
     echo -n "Updating repositories... "
     apt-get update -qq -y >/dev/null
     echo -n "Ensuring dependencies are installed... "
-    apt-get install -qq -y apt-transport-https ca-certificates curl gnupg2 slirp4netns software-properties-common uidmap w3m jq netcat-openbsd >/dev/null
+    apt-get install -qq -y apt-transport-https ca-certificates curl gnupg2 slirp4netns uidmap jq netcat-openbsd >/dev/null
     echo -n "Getting docker..."
     curl -fsSL https://get.docker.com -o get-docker.sh
     echo "Installing Docker... "
@@ -39,66 +39,6 @@ export DEBIAN_FRONTEND=noninteractive
 }
 EOF
     chmod u=rw,go=r /etc/docker/daemon.json
-    echo 'export PATH=/usr/bin:$PATH' >> ~/.bashrc
-    export PATH=/usr/bin:$PATH
-
-
-echo -n "Checking for Docker Compose installation... "
-if which docker-compose >/dev/null 2>&1
-then
-    echo "found! No need to install..."
-elif docker compose version >/dev/null 2>&1
-then
-    echo "Docker Compose plugin found. Creating an alias to it for \"docker-compose \"..."
-    echo "alias docker-compose=\"docker compose\"" >> ~/.bash_aliases
-    source ~/.bash_aliases
-else
-    echo "not found!"
-    echo "Installing Docker-compose... "
-    apt install -y docker-compose-plugin
-    echo "alias docker-compose=\"docker compose\"" >> ~/.bash_aliases
-    source ~/.bash_aliases
-
-    if docker-compose version
-    then
-      echo "Docker-compose was installed successfully. You can use either \"docker compose\" or \"docker-compose\", they are aliases of each other"
-    else
-      echo "Docker-compose was not installed correctly - you may need to do this manually."
-    fi
-fi
-
-# Now make sure that libseccomp2 >= version 2.4. This is necessary for Bullseye-based containers
-# This is often an issue on Buster and Stretch-based host systems with 32-bits Rasp Pi OS installed pre-November 2021.
-# The following code checks and corrects this - see also https://github.com/fredclausen/Buster-Docker-Fixes
-OS_VERSION="$(sed -n 's/\(^\s*VERSION_CODENAME=\)\(.*\)/\2/p' /etc/os-release)"
-[[ "$OS_VERSION" == "" ]] && OS_VERSION="$(sed -n 's/^\s*VERSION=.*(\(.*\)).*/\1/p' /etc/os-release)"
-OS_VERSION=${OS_VERSION^^}
-LIBVERSION_MAJOR="$(apt-cache policy libseccomp2 | grep -e libseccomp2: -A1 | tail -n1 | sed -n 's/.*:\s*\([0-9]*\).\([0-9]*\).*/\1/p')"
-LIBVERSION_MINOR="$(apt-cache policy libseccomp2 | grep -e libseccomp2: -A1 | tail -n1 | sed -n 's/.*:\s*\([0-9]*\).\([0-9]*\).*/\2/p')"
-
-if (( LIBVERSION_MAJOR < 2 )) || (( LIBVERSION_MAJOR == 2 && LIBVERSION_MINOR < 4 )) && [[ "${OS_VERSION}" == "BUSTER" ]]
-then
-  echo "libseccomp2 needs updating. Please wait while we do this."
-  apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 04EE7237B7D453EC 648ACFD622F3D138
-  echo "deb http://deb.debian.org/debian buster-backports main" | tee -a /etc/apt/sources.list.d/buster-backports.list
-  apt update
-  apt install -y -q -t buster-backports libseccomp2
-elif (( LIBVERSION_MAJOR < 2 )) || (( LIBVERSION_MAJOR == 2 && LIBVERSION_MINOR < 4 )) && [[ "${OS_VERSION}" == "STRETCH" ]]
-then
-  INSTALL_CANDIDATE=$(curl -qsL http://ftp.debian.org/debian/pool/main/libs/libseccomp/ |w3m -T text/html -dump | sed -n 's/^.*\(libseccomp2_2.5.*armhf.deb\).*/\1/p' | sort | tail -1)
-  curl -qsL -o /tmp/"${INSTALL_CANDIDATE}" http://ftp.debian.org/debian/pool/main/libs/libseccomp/${INSTALL_CANDIDATE}
-  dpkg -i /tmp/"${INSTALL_CANDIDATE}" && rm -f /tmp/"${INSTALL_CANDIDATE}"
-fi
-# Now make sure all went well
-LIBVERSION_MAJOR="$(apt-cache policy libseccomp2 | grep -e libseccomp2: -A1 | tail -n1 | sed -n 's/.*:\s*\([0-9]*\).\([0-9]*\).*/\1/p')"
-LIBVERSION_MINOR="$(apt-cache policy libseccomp2 | grep -e libseccomp2: -A1 | tail -n1 | sed -n 's/.*:\s*\([0-9]*\).\([0-9]*\).*/\2/p')"
-if (( LIBVERSION_MAJOR > 2 )) || (( LIBVERSION_MAJOR == 2 && LIBVERSION_MINOR >= 4 ))
-then
-   echo "Your system now uses libseccomp2 version $(apt-cache policy libseccomp2|sed -n 's/\s*Installed:\s*\(.*\)/\1/p')."
-else
-    echo "Something went wrong. Your system is using libseccomp2 v$(apt-cache policy libseccomp2|sed -n 's/\s*Installed:\s*\(.*\)/\1/p'), and it needs to be v2.4 or greater for the ADS-B containers to work properly."
-    echo "Please follow these instructions to fix this after this install script finishes: https://github.com/fredclausen/Buster-Docker-Fixes"
-fi
 
     BLOCKED_MODULES=("rtl2832_sdr")
     BLOCKED_MODULES+=("dvb_usb_rtl2832u")
