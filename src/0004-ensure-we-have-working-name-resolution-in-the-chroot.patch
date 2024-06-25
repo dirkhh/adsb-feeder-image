@@ -14,14 +14,12 @@ diff --git a/src/custompios b/src/custompios
 index d44c6d2..80ecfca 100755
 --- a/src/custompios
 +++ b/src/custompios
-@@ -156,6 +156,11 @@ pushd $BASE_WORKSPACE
+@@ -156,6 +156,9 @@ pushd $BASE_WORKSPACE
      mount --bind "$BASE_APT_CACHE" $BASE_MOUNT_PATH/var/cache/apt
    fi
 
 +  # make sure we have working name resolution
-+  if [ ! -f "${BASE_MOUNT_PATH}/etc/resolv.conf" ] || [ $(wc -l < "${BASE_MOUNT_PATH}/etc/resolv.conf") = "0" ]; then
-+    cat /etc/resolv.conf > "${BASE_MOUNT_PATH}/etc/resolv.conf"
-+  fi
++  cat /etc/resolv.conf > "${BASE_MOUNT_PATH}/etc/resolv.conf"
 +
    #Edit pi filesystem
    pushd $BASE_MOUNT_PATH
