@@ -25,6 +25,12 @@ function test_network() {
     curl --max-time $TIMEOUT akamai.com &> /dev/null &
     pids+=($!)
 
+    pgrep tailscaled &>/dev/null && tailscale status --json 2>/dev/null | jq -r .TailscaleIPs | grep -qs -v -e null &
+    pids+=($!)
+
+    pgrep zerotier-one &>/dev/null && zerotier-cli status 2>&1 | grep -qs -e ONLINE &
+    pids+=($!)
+
     # wait returns zero for a specific backgrounded pid when the exit status for that pid was zero
     # this also works for pids that have already exited when wait is called
     for pid in ${pids[@]}; do
