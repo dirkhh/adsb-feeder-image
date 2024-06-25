@@ -7,32 +7,46 @@ if [ "$(id -u)" != "0" ] ; then
 fi
 
 function test_network() {
+    pids=()
+
+    TIMEOUT=5
+    sleep $TIMEOUT &
+
     # is there a gateway?
     gateway=$(ip route | awk '/default/ { print $3 }')
-    if [[ $gateway == "" ]]; then
-       return 1
+    if [[ $gateway != "" ]]; then
+        ping -c 1 -W $TIMEOUT "$gateway" &> /dev/null &
+        pids+=($!)
     fi
-    if ping -c 1 -W 0.5 "$gateway" &> /dev/null ; then
-        return 0
-    fi
-    if ping -c 1 -W 0.5 8.8.8.8 &> /dev/null ; then
-        return 0
-    fi
+
+    ping -c 1 -W $TIMEOUT 8.8.8.8 &> /dev/null &
+    pids+=($!)
+
+    curl --max-time $TIMEOUT akamai.com &> /dev/null &
+    pids+=($!)
+
+    # wait returns zero for a specific backgrounded pid when the exit status for that pid was zero
+    # this also works for pids that have already exited when wait is called
+    for pid in ${pids[@]}; do
+        if wait $pid; then
+            return 0
+        fi
+    done
+
+    wait
     return 1
 }
 function check_network() {
-    for i in {1..20}; do
-        sleep 1 &
+    for i in {1..6}; do
         if test_network; then
             return 0
         fi
-        wait
     done
     return 1
 }
 
 if check_network; then
-    echo "we are able to ping ${gateway} or 8.8.8.8, no need to start an access point"
+    echo "network reachable, no need to start an access point"
     exit 0
 fi
 
