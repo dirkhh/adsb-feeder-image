@@ -46,7 +46,7 @@ jobs:
         - name: lepotato-raspbian
           base_arch: arm64
           variant: default
-          url: https://distro.libre.computer/ci/raspbian/12/2023-10-10-raspbian-bookworm-arm64-lite%2Baml-s905x-cc.img.xz
+          url: https://test.adsb.im/downloads/raspbian-bookworm-lepotato.img.xz
           magic_path: "repository/src/image/le-potato-raspbian.img.xz"
         - name: odroidc4
           base_arch: arm64
