@@ -878,6 +878,28 @@ class AdsbIm:
             )
         return Response(json.dumps(info_array), mimetype="application/json")
 
+    def get_latlngalt(self):
+        # get lat, lng, alt of an integrated or micro feeder either from gps data
+        # or from the env variables
+        lat = self._d.env_by_tags("lat").list_get(0)
+        lng = self._d.env_by_tags("lng").list_get(0)
+        alt = self._d.env_by_tags("alt").list_get(0)
+        gps_json = pathlib.Path("/run/adsb-feeder-ultrafeeder/readsb/gpsd.json")
+        if gps_json.exists():
+            with gps_json.open() as f:
+                gps = json.load(f)
+                if "lat" in gps and "lon" in gps:
+                    lat = gps["lat"]
+                    lng = gps["lon"]
+                if "alt" in gps:
+                    alt = gps["alt"]
+        # normalize to no more than 5 digits after the decimal point for lat/lng
+        # and whole meters for alt
+        lat = f"{float(lat):.5f}"
+        lng = f"{float(lng):.5f}"
+        alt = f"{float(alt):.0f}"
+        return lat, lng, alt
+
     def my_base_info(self):
         listener = request.remote_addr
         tm = int(time.time())
@@ -885,13 +907,14 @@ class AdsbIm:
         l_env = self._d.env_by_tags("last_stage2_contact")
         l_env.list_set(0, listener)
         l_env.list_set(1, tm)
+        lat, lng, alt = self.get_latlngalt()
         response = make_response(
             json.dumps(
                 {
                     "name": self._d.env_by_tags("site_name").list_get(0),
-                    "lat": self._d.env_by_tags("lat").list_get(0),
-                    "lng": self._d.env_by_tags("lng").list_get(0),
-                    "alt": self._d.env_by_tags("alt").list_get(0),
+                    "lat": lat,
+                    "lng": lng,
+                    "alt": alt,
                     "tz": self._d.env_by_tags("tz").list_get(0),
                     "version": self._d.env_by_tags("base_version").value,
                     "airspy_at_port": (self._d.env_by_tags("airspyport").value if self._d.is_enabled("airspy") else 0),
