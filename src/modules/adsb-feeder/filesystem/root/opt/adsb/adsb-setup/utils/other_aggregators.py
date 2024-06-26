@@ -40,7 +40,7 @@ class Aggregator:
 
     @property
     def lng(self):
-        return self._d.env_by_tags("lng").list_get(self._idx)
+        return self._d.env_by_tags("lon").list_get(self._idx)
 
     @property
     def alt(self):

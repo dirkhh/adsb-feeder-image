@@ -36,7 +36,7 @@
       <span class="col-md">
         <input type="text" id="lng" name="lng" required placeholder="Antenna longitude" class="form-control"
                pattern="(?:\+|-|)(:?(:?\d?\d|1[0-7]\d)(?:\.\d+)?|180(?:\.0+)?)" title="Number between -180 and 180"
-               value="{{ list_value_by_tag('lng', 0) }}" />
+               value="{{ list_value_by_tag('lon', 0) }}" />
       </span>
     </div>
     <div class="form-group">
@@ -77,7 +77,7 @@
                        value="{{ list_value_by_tag('mf_ip', loop.index0).replace(',30006,beast_in', '') }}" />
               </td>
               <td class="text-center d-none d-md-table-cell">{{ list_value_by_tag('lat', loop.index0) }} /
-                {{ list_value_by_tag('lng', loop.index0) }} / {{ list_value_by_tag('alt', loop.index0) }}m
+                {{ list_value_by_tag('lon', loop.index0) }} / {{ list_value_by_tag('alt', loop.index0) }}m
               </td>
               <td class="text-center d-none d-md-table-cell">
                 {{ list_value_by_tag('mf_version', loop.index0).split('(')[0] }}
@@ -107,7 +107,7 @@
               </td>
               <td class="text-center d-none d-md-table-cell" id="table_mf_lla_{{ loop.index0 }}">
                 {{ list_value_by_tag('lat', loop.index0) }} /
-                {{ list_value_by_tag('lng', loop.index0) }} / {{ list_value_by_tag('alt', loop.index0) }}m
+                {{ list_value_by_tag('lon', loop.index0) }} / {{ list_value_by_tag('alt', loop.index0) }}m
               </td>
               <td class="text-center d-none d-md-table-cell" id="table_mf_version_{{ loop.index0 }}">
                 {{ list_value_by_tag('mf_version', loop.index0).split('(')[0]}}

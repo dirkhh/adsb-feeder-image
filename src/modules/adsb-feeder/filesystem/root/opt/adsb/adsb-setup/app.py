@@ -869,7 +869,7 @@ class AdsbIm:
                     "mf_ip": self._d.env_by_tags("mf_ip").list_get(i),
                     "mf_version": self._d.env_by_tags("mf_version").list_get(i),
                     "lat": self._d.env_by_tags("lat").list_get(i),
-                    "lng": self._d.env_by_tags("lng").list_get(i),
+                    "lng": self._d.env_by_tags("lon").list_get(i),
                     "alt": self._d.env_by_tags("alt").list_get(i),
                     "uat_capable": uat_capable,
                     "brofm_capable": (
@@ -885,7 +885,7 @@ class AdsbIm:
         # get lat, lon, alt of an integrated or micro feeder either from gps data
         # or from the env variables
         lat = self._d.env_by_tags("lat").list_get(0)
-        lon = self._d.env_by_tags("lng").list_get(0)
+        lon = self._d.env_by_tags("lon").list_get(0)
         alt = self._d.env_by_tags("alt").list_get(0)
         gps_json = pathlib.Path("/run/adsb-feeder-ultrafeeder/readsb/gpsd.json")
         if self._d.is_enabled("use_gpsd") and gps_json.exists():
@@ -898,7 +898,7 @@ class AdsbIm:
                     lat = f"{float(lat):.5f}"
                     lon = f"{float(lon):.5f}"
                     self._d.env_by_tags("lat").list_set(0, lat)
-                    self._d.env_by_tags("lng").list_set(0, lon)
+                    self._d.env_by_tags("lon").list_set(0, lon)
                 if "alt" in gps:
                     alt = gps["alt"]
                     # normalize to whole meters for alt
@@ -1182,7 +1182,7 @@ class AdsbIm:
                 # after that the user may have overwritten it
                 self._d.env_by_tags("site_name").list_set(n, self.unique_site_name(base_info["name"]))
             self._d.env_by_tags("lat").list_set(n, base_info["lat"])
-            self._d.env_by_tags("lng").list_set(n, base_info["lng"])
+            self._d.env_by_tags("lon").list_set(n, base_info["lng"])
             self._d.env_by_tags("alt").list_set(n, base_info["alt"])
             self._d.env_by_tags("tz").list_set(n, base_info["tz"])
             self._d.env_by_tags("mf_version").list_set(n, base_info["version"])
@@ -1352,7 +1352,7 @@ class AdsbIm:
             self._d.env_by_tags("num_micro_sites").value = n
             self._d.env_by_tags("site_name").list_set(n, self.unique_site_name(micro_data.get("micro_site_name", "")))
             self._d.env_by_tags("lat").list_set(n, micro_data.get("micro_lat", ""))
-            self._d.env_by_tags("lng").list_set(n, micro_data.get("micro_lng", ""))
+            self._d.env_by_tags("lon").list_set(n, micro_data.get("micro_lng", ""))
             self._d.env_by_tags("alt").list_set(n, micro_data.get("micro_alt", ""))
             self._d.env_by_tags("tz").list_set(n, "UTC")
             self._d.env_by_tags("mf_version").list_set(n, "not an adsb.im feeder")

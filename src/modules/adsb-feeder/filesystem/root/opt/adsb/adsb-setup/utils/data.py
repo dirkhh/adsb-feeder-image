@@ -154,7 +154,7 @@ class Data:
     _env = {
         # Mandatory site data
         Env("FEEDER_LAT", default=[""], is_mandatory=True, tags=["lat"]),
-        Env("FEEDER_LONG", default=[""], is_mandatory=True, tags=["lng"]),
+        Env("FEEDER_LONG", default=[""], is_mandatory=True, tags=["lon"]),
         Env("FEEDER_ALT_M", default=[""], is_mandatory=True, tags=["alt"]),
         Env("FEEDER_TZ", default=[""], is_mandatory=True, tags=["tz"]),
         Env("MLAT_SITE_NAME", default=[""], is_mandatory=True, tags=["site_name"]),
