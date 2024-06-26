@@ -474,7 +474,7 @@ class AdsbIm:
 
         # if using gpsd, try to update the location
         if self._d.is_enabled("use_gpsd"):
-            self.get_latlngalt()
+            self.get_lat_lon_alt()
 
         self.app.run(
             host="0.0.0.0",
@@ -881,11 +881,11 @@ class AdsbIm:
             )
         return Response(json.dumps(info_array), mimetype="application/json")
 
-    def get_latlngalt(self):
-        # get lat, lng, alt of an integrated or micro feeder either from gps data
+    def get_lat_lon_alt(self):
+        # get lat, lon, alt of an integrated or micro feeder either from gps data
         # or from the env variables
         lat = self._d.env_by_tags("lat").list_get(0)
-        lng = self._d.env_by_tags("lng").list_get(0)
+        lon = self._d.env_by_tags("lng").list_get(0)
         alt = self._d.env_by_tags("alt").list_get(0)
         gps_json = pathlib.Path("/run/adsb-feeder-ultrafeeder/readsb/gpsd.json")
         if self._d.is_enabled("use_gpsd") and gps_json.exists():
@@ -893,18 +893,18 @@ class AdsbIm:
                 gps = json.load(f)
                 if "lat" in gps and "lon" in gps:
                     lat = gps["lat"]
-                    lng = gps["lon"]
-                    # normalize to no more than 5 digits after the decimal point for lat/lng
+                    lon = gps["lon"]
+                    # normalize to no more than 5 digits after the decimal point for lat/lon
                     lat = f"{float(lat):.5f}"
-                    lng = f"{float(lng):.5f}"
+                    lon = f"{float(lon):.5f}"
                     self._d.env_by_tags("lat").list_set(0, lat)
-                    self._d.env_by_tags("lng").list_set(0, lng)
+                    self._d.env_by_tags("lng").list_set(0, lon)
                 if "alt" in gps:
                     alt = gps["alt"]
                     # normalize to whole meters for alt
                     alt = f"{float(alt):.0f}"
                     self._d.env_by_tags("alt").list_set(0, alt)
-        return lat, lng, alt
+        return lat, lon, alt
 
     def my_base_info(self):
         listener = request.remote_addr
@@ -913,13 +913,13 @@ class AdsbIm:
         l_env = self._d.env_by_tags("last_stage2_contact")
         l_env.list_set(0, listener)
         l_env.list_set(1, tm)
-        lat, lng, alt = self.get_latlngalt()
+        lat, lon, alt = self.get_lat_lon_alt()
         response = make_response(
             json.dumps(
                 {
                     "name": self._d.env_by_tags("site_name").list_get(0),
                     "lat": lat,
-                    "lng": lng,
+                    "lng": lon,
                     "alt": alt,
                     "tz": self._d.env_by_tags("tz").list_get(0),
                     "version": self._d.env_by_tags("base_version").value,
@@ -1799,8 +1799,8 @@ class AdsbIm:
                     )
                 if key == "turn_on_gpsd":
                     self._d.env_by_tags(["use_gpsd", "is_enabled"]).value = True
-                    # this updates the lat/long/alt env variables as side effect, if there is a GPS fix
-                    self.get_latlngalt()
+                    # this updates the lat/lon/alt env variables as side effect, if there is a GPS fix
+                    self.get_lat_lon_alt()
                 if key == "turn_off_gpsd":
                     self._d.env_by_tags(["use_gpsd", "is_enabled"]).value = False
                 if key.startswith("update_feeder_aps"):
