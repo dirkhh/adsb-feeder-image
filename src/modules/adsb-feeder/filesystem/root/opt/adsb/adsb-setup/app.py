@@ -794,7 +794,7 @@ class AdsbIm:
         if zt_network and len(zt_network) == 16:  # that's the length of a valid network id
             try:
                 subprocess.call(
-                    ["zerotier_cli", "join", f"{zt_network}"],
+                    ["zerotier-cli", "join", f"{zt_network}"],
                     timeout=30.0,
                 )
             except subprocess.TimeoutExpired:
