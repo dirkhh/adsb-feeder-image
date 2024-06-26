@@ -807,7 +807,6 @@ class AdsbIm:
             subprocess.call("/opt/adsb/docker-compose-start", timeout=180.0, shell=True)
         except subprocess.TimeoutExpired:
             print_err("timeout expired re-starting docker... trying to continue...")
-        return redirect(url_for("director"))
 
     def base_is_configured(self):
         base_config: set[Env] = {env for env in self._d._env if env.is_mandatory}
