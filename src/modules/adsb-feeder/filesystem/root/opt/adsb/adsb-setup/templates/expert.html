@@ -76,6 +76,43 @@
       </div>
     </form>
   </div>
+  {% if is_enabled('has_gpsd') %}
+  {% if is_enabled('use_gpsd') %}
+  <div class="col-12 col-lg-6">
+    <h5 class="mt-3">GPS based location</h5>
+    <form method="POST">
+      <div class="row align-items-center">
+        <div class="col-8">
+          <label for="turn_off_gpsd">
+            Select this to stop using GPS derived location data.
+          </label>
+        </div>
+        <div class="col-4">
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="turn_off_gpsd" value="go">Update
+            Settings</button>
+        </div>
+      </div>
+    </form>
+  </div>
+  {% else %}
+  <div class="col-12 col-lg-6">
+    <h5 class="mt-3">GPS based location</h5>
+    <form method="POST">
+      <div class="row align-items-center">
+        <div class="col-8">
+          <label for="turn_on_gpsd">
+            You appear to have gpsd installed and configured. Select this to use GPS derived location data.
+          </label>
+        </div>
+        <div class="col-4">
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="turn_on_gpsd" value="go">Update
+            Settings</button>
+        </div>
+      </div>
+    </form>
+  </div>
+  {% endif %}
+  {% endif %}
   {% if env_value_by_tag('tar1090_image_config_link') != '' %}
   <div class="col-12 col-lg-6">
     <h5 class="mt-3">Don't show config link on map page</h5>

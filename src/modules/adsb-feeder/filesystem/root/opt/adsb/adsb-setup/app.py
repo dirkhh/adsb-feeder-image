@@ -472,6 +472,10 @@ class AdsbIm:
         if site_name and os_flag_file.exists():
             self.set_hostname(site_name)
 
+        # if using gpsd, try to update the location
+        if self._d.is_enabled("use_gpsd"):
+            self.get_latlngalt()
+
         self.app.run(
             host="0.0.0.0",
             port=int(self._d.env_by_tags("webport").value),
@@ -885,19 +889,22 @@ class AdsbIm:
         lng = self._d.env_by_tags("lng").list_get(0)
         alt = self._d.env_by_tags("alt").list_get(0)
         gps_json = pathlib.Path("/run/adsb-feeder-ultrafeeder/readsb/gpsd.json")
-        if gps_json.exists():
+        if self._d.is_enabled("use_gpsd") and gps_json.exists():
             with gps_json.open() as f:
                 gps = json.load(f)
                 if "lat" in gps and "lon" in gps:
                     lat = gps["lat"]
                     lng = gps["lon"]
+                    # normalize to no more than 5 digits after the decimal point for lat/lng
+                    lat = f"{float(lat):.5f}"
+                    lng = f"{float(lng):.5f}"
+                    self._d.env_by_tags("lat").list_set(0, lat)
+                    self._d.env_by_tags("lng").list_set(0, lng)
                 if "alt" in gps:
                     alt = gps["alt"]
-        # normalize to no more than 5 digits after the decimal point for lat/lng
-        # and whole meters for alt
-        lat = f"{float(lat):.5f}"
-        lng = f"{float(lng):.5f}"
-        alt = f"{float(alt):.0f}"
+                    # normalize to whole meters for alt
+                    alt = f"{float(alt):.0f}"
+                    self._d.env_by_tags("alt").list_set(0, alt)
         return lat, lng, alt
 
     def my_base_info(self):
@@ -1791,6 +1798,12 @@ class AdsbIm:
                     self._d.env_by_tags("tar1090_image_config_link").value = (
                         f"http://HOSTNAME:{self._d.env_by_tags('webport').value}/"
                     )
+                if key == "turn_on_gpsd":
+                    self._d.env_by_tags(["use_gpsd", "is_enabled"]).value = True
+                    # this updates the lat/long/alt env variables as side effect, if there is a GPS fix
+                    self.get_latlngalt()
+                if key == "turn_off_gpsd":
+                    self._d.env_by_tags(["use_gpsd", "is_enabled"]).value = False
                 if key.startswith("update_feeder_aps"):
                     channel = key.rsplit("_", 1)[-1]
                     if channel == "branch":
@@ -2066,6 +2079,8 @@ class AdsbIm:
     def expert(self):
         if request.method == "POST":
             return self.update()
+        # make sure we only show the gpsd option if gpsd is correctly configured and running
+        self._d.env_by_tags("has_gpsd").value = self._system.check_gpsd()
         return render_template("expert.html")
 
     @check_restart_lock

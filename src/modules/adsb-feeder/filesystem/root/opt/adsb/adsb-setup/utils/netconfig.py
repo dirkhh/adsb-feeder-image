@@ -128,6 +128,8 @@ class UltrafeederConfig:
             # this is one of the proxies - so it also should feed the aggregate map
             ret.add("adsb,ultrafeeder,30004,beast_out")
             ret.add("mlathub,ultrafeeder,30004,beast_out")
+        if self._d.is_enabled("use_gpsd"):
+            ret.add("gpsd,host.docker.internal,2947")
 
         # generate sorted listed for deterministic env var (avoid unnecessary container recreation by docker compose)
         ret = sorted(ret)

@@ -154,3 +154,16 @@ class System:
         else:
             return response.text, response.status_code
         return None, status
+
+    def check_gpsd(self):
+        # Create a TCP socket
+        s = socket.socket()
+        try:
+            s.connect(("172.17.0.1", 2947))
+            print(f"Connected to gpsd on 172.17.0.1:2947")
+            return True
+        except socket.error as e:
+            print(f"No gpsd on 172.17.0.1:2947 detected")
+            return False
+        finally:
+            s.close()

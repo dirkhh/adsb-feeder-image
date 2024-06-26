@@ -184,6 +184,8 @@ class Data:
         Env("FEEDER_UNUSED_SERIAL_3", tags=["other-3"]),
         Env("READSB_NET_BR_OPTIMIZE_FOR_MLAT", tags=["beast-reduce-optimize-for-mlat"]),
         Env("FEEDER_MAX_RANGE", default=[300], tags=["max_range"]),
+        Env("FEEDER_USE_GPSD", default=False, tags=["use_gpsd", "is_enabled"]),
+        Env("_ADSBIM_FEEDER_HAS_GPSD", default=False, tags=["has_gpsd", "is_enabled"]),
         #
         # Ultrafeeder config, used for all 4 types of Ultrafeeder instances
         Env("FEEDER_ULTRAFEEDER_CONFIG", default=[""], tags=["ultrafeeder_config"]),
