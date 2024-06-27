@@ -1,5 +1,6 @@
 Changes since v2.1.2 include:
-- if a feeder has working GPS that is enabled for readsb, include the derived lat/lng/alt in the base_info
+- if a feeder has working GPS/gpsd that is accessible for the Ultrafeeder container, add option to derive location from the GPS data
+- fix zerotier bring up after restore
 - make network checks more robust, trying to deal with corner cases where ICMP may be blocked or have extremely high latency
 - reduce image sizes some more by removing unnecessary components that were being bundled
 - update SDR-E containers
