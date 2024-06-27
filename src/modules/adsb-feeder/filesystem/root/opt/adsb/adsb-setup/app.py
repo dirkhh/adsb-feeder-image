@@ -179,7 +179,7 @@ class AdsbIm:
         ]
         self.last_aggregator_debug_print = None
         self.microfeeder_setting_tags = (
-            "site_name", "lat", "lng", "alt", "tz", "mf_version",
+            "site_name", "lat", "lon", "alt", "tz", "mf_version",
             "adsblol_uuid", "ultrafeeder_uuid", "mlat_privacy", "route_api",
             "uat978", "heywhatsthat", "heywhatsthat_id",
             "flightradar--key", "flightradar_uat--key", "flightradar--is_enabled",
@@ -1006,6 +1006,8 @@ class AdsbIm:
                         microsettings[t] = e._value
         # fix up the version
         microsettings["mf_version"] = self._d.env_by_tags("base_version").value
+        # ensure forward/backward compatibility with lng/lon change
+        microsettings["lng"] = microsettings["lon"]
         response = make_response(json.dumps(microsettings))
         response.headers.add("Access-Control-Allow-Origin", "*")
         return response
@@ -1163,6 +1165,9 @@ class AdsbIm:
 
             if status == 200 and micro_settings != None:
                 for key, value in micro_settings.items():
+                    # when getting values from a microfeeder older than v2.1.3
+                    if key == "lng":
+                        key = "lon"
                     if key not in self.microfeeder_setting_tags:
                         continue
                     tags = key.split("--")
@@ -1352,7 +1357,7 @@ class AdsbIm:
             self._d.env_by_tags("num_micro_sites").value = n
             self._d.env_by_tags("site_name").list_set(n, self.unique_site_name(micro_data.get("micro_site_name", "")))
             self._d.env_by_tags("lat").list_set(n, micro_data.get("micro_lat", ""))
-            self._d.env_by_tags("lon").list_set(n, micro_data.get("micro_lng", ""))
+            self._d.env_by_tags("lon").list_set(n, micro_data.get("micro_lon", ""))
             self._d.env_by_tags("alt").list_set(n, micro_data.get("micro_alt", ""))
             self._d.env_by_tags("tz").list_set(n, "UTC")
             self._d.env_by_tags("mf_version").list_set(n, "not an adsb.im feeder")
@@ -1699,7 +1704,7 @@ class AdsbIm:
                         for mk in [
                             "micro_site_name",
                             "micro_lat",
-                            "micro_lng",
+                            "micro_lon",
                             "micro_alt",
                         ]:
                             micro_data[mk] = form.get(mk)
@@ -1973,7 +1978,7 @@ class AdsbIm:
                         )
                     except:
                         print_err("exception trying to set up zerorier - giving up")
-                if key in {"lat", "lng", "alt"}:
+                if key in {"lat", "lon", "alt"}:
                     # remove letters, spaces, degree symbols
                     value = str(float(re.sub("[a-zA-Z° ]", "", value)))
                 if key == "alt":

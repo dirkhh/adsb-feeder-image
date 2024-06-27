@@ -39,7 +39,7 @@ class Aggregator:
         return self._d.env_by_tags("lat").list_get(self._idx)
 
     @property
-    def lng(self):
+    def lon(self):
         return self._d.env_by_tags("lon").list_get(self._idx)
 
     @property
@@ -139,7 +139,7 @@ class FlightRadar24(Aggregator):
 
         adsb_signup_command = (
             f"docker run --entrypoint /bin/bash --rm "
-            f'-e FEEDER_LAT="{self.lat}" -e FEEDER_LONG="{self.lng}" -e FEEDER_ALT_FT="{self.alt_ft}" '
+            f'-e FEEDER_LAT="{self.lat}" -e FEEDER_LONG="{self.lon}" -e FEEDER_ALT_FT="{self.alt_ft}" '
             f'-e FR24_EMAIL="{email}" {self.container} '
             f'-c "apt update && apt install -y expect && $(cat handsoff_signup_expect.sh)"'
         )
@@ -172,7 +172,7 @@ class FlightRadar24(Aggregator):
 
         uat_signup_command = (
             f"docker run --entrypoint /bin/bash --rm "
-            f'-e FEEDER_LAT="{self.lat}" -e FEEDER_LONG="{self.lng}" -e FEEDER_ALT_FT="{self.alt_ft}" '
+            f'-e FEEDER_LAT="{self.lat}" -e FEEDER_LONG="{self.lon}" -e FEEDER_ALT_FT="{self.alt_ft}" '
             f'-e FR24_EMAIL="{email}" {self.container} '
             f'-c "apt update && apt install -y expect && $(cat handsoff_signup_expect_uat.sh)"'
         )
@@ -305,7 +305,7 @@ class RadarBox(Aggregator):
 
         cmdline = (
             f"--rm -i --network config_default -e BEASTHOST=ultrafeeder -e LAT={self.lat} "
-            f"-e LONG={self.lng} -e ALT={self.alt} {extra_env} {docker_image}"
+            f"-e LONG={self.lon} -e ALT={self.alt} {extra_env} {docker_image}"
         )
         output = self._docker_run_with_timeout(cmdline, 45.0)
         sharing_key_match = re.search("Your new key is ([a-zA-Z0-9]*)", output)
@@ -348,7 +348,7 @@ class OpenSky(Aggregator):
 
         cmdline = (
             f"--rm -i --network config_default -e BEASTHOST=ultrafeeder -e LAT={self.lat} "
-            f"-e LONG={self.lng} -e ALT={self.alt} -e OPENSKY_USERNAME={user} {docker_image}"
+            f"-e LONG={self.lon} -e ALT={self.alt} -e OPENSKY_USERNAME={user} {docker_image}"
         )
         output = self._docker_run_with_timeout(cmdline, 60.0)
         serial_match = re.search("Got a new serial number: ([-a-zA-Z0-9]*)", output)

@@ -31,10 +31,10 @@
     </div>
     <div class="form-group row align-items-center mb-1">
       <span class="col-md">
-        <label for="lng">Longitude (-180 .. +180 -- please use 5 decimals , e.g. -122.12345)</label>
+        <label for="lon">Longitude (-180 .. +180 -- please use 5 decimals , e.g. -122.12345)</label>
       </span>
       <span class="col-md">
-        <input type="text" id="lng" name="lng" required placeholder="Antenna longitude" class="form-control"
+        <input type="text" id="lon" name="lon" required placeholder="Antenna longitude" class="form-control"
                pattern="(?:\+|-|)(:?(:?\d?\d|1[0-7]\d)(?:\.\d+)?|180(?:\.0+)?)" title="Number between -180 and 180"
                value="{{ list_value_by_tag('lon', 0) }}" />
       </span>
@@ -233,10 +233,10 @@
           </div>
           <div class="form-group row align-items-center mb-1">
             <span class="col-md">
-              <label for="micro_lng">Longitude (-180 .. +180 -- please use 5 decimals , e.g. -122.12345)</label>
+              <label for="micro_lon">Longitude (-180 .. +180 -- please use 5 decimals , e.g. -122.12345)</label>
             </span>
             <span class="col-md">
-              <input type="text" id="micro_lng" name="micro_lng" placeholder="Antenna longitude" class="form-control"
+              <input type="text" id="micro_lon" name="micro_lon" placeholder="Antenna longitude" class="form-control"
                      pattern="(?:\+|-|)(:?(:?\d?\d|1[0-7]\d)(?:\.\d+)?|180(?:\.0+)?)"
                      title="Number between -180 and 180" value="" />
             </span>
