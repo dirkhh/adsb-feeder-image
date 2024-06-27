@@ -156,14 +156,24 @@ class System:
         return None, status
 
     def check_gpsd(self):
-        # Create a TCP socket
-        s = socket.socket()
+        # find host address on the docker network
         try:
-            s.connect(("172.17.0.1", 2947))
-            print(f"Connected to gpsd on 172.17.0.1:2947")
-            return True
-        except socket.error as e:
-            print(f"No gpsd on 172.17.0.1:2947 detected")
-            return False
-        finally:
-            s.close()
+            result = subprocess.call(
+                "docker exec adsb-setup-proxy ip route | mawk '/default/{ print($3) }'", shell=True
+            )
+            gateway_ips = [result.decode("utf-8").strip()]
+        except:
+            # that sucks, try the two most common addresses
+            gateway_ips = ["172.17.0.1", "172.18.0.1"]
+        for ip in gateway_ips:
+            # Create a TCP socket
+            s = socket.socket()
+            try:
+                s.connect((ip, 2947))
+                print(f"Connected to gpsd on {ip}:2947")
+                return True
+            except socket.error as e:
+                print(f"No gpsd on {ip}:2947 detected")
+            finally:
+                s.close()
+        return False
