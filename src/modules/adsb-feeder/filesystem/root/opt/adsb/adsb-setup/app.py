@@ -869,7 +869,7 @@ class AdsbIm:
                     "mf_ip": self._d.env_by_tags("mf_ip").list_get(i),
                     "mf_version": self._d.env_by_tags("mf_version").list_get(i),
                     "lat": self._d.env_by_tags("lat").list_get(i),
-                    "lng": self._d.env_by_tags("lon").list_get(i),
+                    "lon": self._d.env_by_tags("lon").list_get(i),
                     "alt": self._d.env_by_tags("alt").list_get(i),
                     "uat_capable": uat_capable,
                     "brofm_capable": (
@@ -919,7 +919,8 @@ class AdsbIm:
                 {
                     "name": self._d.env_by_tags("site_name").list_get(0),
                     "lat": lat,
-                    "lng": lon,
+                    "lng": lon,  # include both spellings for backwards compatibility
+                    "lon": lon,
                     "alt": alt,
                     "tz": self._d.env_by_tags("tz").list_get(0),
                     "version": self._d.env_by_tags("base_version").value,
@@ -1187,7 +1188,11 @@ class AdsbIm:
                 # after that the user may have overwritten it
                 self._d.env_by_tags("site_name").list_set(n, self.unique_site_name(base_info["name"]))
             self._d.env_by_tags("lat").list_set(n, base_info["lat"])
-            self._d.env_by_tags("lon").list_set(n, base_info["lng"])
+            # deal with backwards compatibility
+            lon = base_info.get("lon", None)
+            if lon is None:
+                lon = base_info.get("lng", "")
+            self._d.env_by_tags("lon").list_set(n, lon)
             self._d.env_by_tags("alt").list_set(n, base_info["alt"])
             self._d.env_by_tags("tz").list_set(n, base_info["tz"])
             self._d.env_by_tags("mf_version").list_set(n, base_info["version"])

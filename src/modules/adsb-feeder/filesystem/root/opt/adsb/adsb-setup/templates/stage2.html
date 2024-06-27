@@ -410,7 +410,8 @@
         data.forEach((d, i) => {
           let idx = i + 1; // the ids are 1-based
           //$("#table_mf_ip_" + idx).text(d["mf_ip"]);
-          $("#table_mf_lla_" + idx).text(d["lat"] + " / " + d["lng"] + " / " + d["alt"]);
+          let lon = d.lon != undefined ? d.lon : d.lng;
+          $("#table_mf_lla_" + idx).text(d["lat"] + " / " + lon + " / " + d["alt"]);
           $("#table_mf_version_" + idx).text(d["mf_version"]);
           $("#mf_uat_" + idx).prop('disabled', d["uat_capable"] == false);
           $("#mf_brofm_" + idx).prop('disabled', d["brofm_capable"] == false);
