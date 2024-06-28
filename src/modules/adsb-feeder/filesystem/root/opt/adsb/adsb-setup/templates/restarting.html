@@ -3,64 +3,66 @@
 {% block content %}
 <h1 class="mt-3 text-center text-danger">{% block title %} Restarting the ADS-B Feeder system {% endblock %}</h1>
 
-<script>
-  // wait_restart python fucntion waits 5 seconds, so make this a bit longer than that
-  const httpTimeout = 6000;
-  const restartingSince = new Date().getTime();
-  function checkSoon() {
-    setTimeout(checkRestartStatus, 2000);
-  }
+<body>
+  <script>
+    // wait_restart python fucntion waits 5 seconds, so make this a bit longer than that
+    const httpTimeout = 6000;
+    const restartingSince = new Date().getTime();
+    function checkSoon() {
+      setTimeout(checkRestartStatus, 2000);
+    }
 
-  function checkRestartStatus() {
-    var request = new XMLHttpRequest();
-    request.open("GET", "/restart");
-    request.onload = function () {
-      if (request.status === 200 && request.responseText === "done") {
-        // restarting the ADS-B infra completed, redirect user
-        console.log('redirecting')
-        window.location.replace("/");
-        return;
-      } else if (request.status === 200 && request.responseText === "restarting") {
-        if (new Date().getTime() - restartingSince > 9 * 1000) {
-          // been waiting for more than 10 seconds, let's show the log scroller so the user has something to look at
-          window.location.replace("/waiting");
+    function checkRestartStatus() {
+      var request = new XMLHttpRequest();
+      request.open("GET", "/restart");
+      request.onload = function () {
+        if (request.status === 200 && request.responseText === "done") {
+          // restarting the ADS-B infra completed, redirect user
+          console.log('redirecting')
+          window.location.replace("/");
+          return;
+        } else if (request.status === 200 && request.responseText === "restarting") {
+          if (new Date().getTime() - restartingSince > 9 * 1000) {
+            // been waiting for more than 10 seconds, let's show the log scroller so the user has something to look at
+            window.location.replace("/waiting");
+            return;
+          }
+          // restart is still in progress, check again immediately
+          // the server does the delaying during the request processing
+          // if the server is done with the restart, the request will return immediately
+          checkRestartStatus();
+        } else if (request.status === 200 && request.responseText === "stream-log") {
+          // the waiting-app has been detective active, switch to it
+          console.log('redirecting for stream log')
+          window.location.replace("/");
+          return;
+        } else {
+          // ops, we got an error from the server - could be it is briefly turned off for
+          // an update or something
+          console.log("request to GET /restart returned unexpected responseText: ", request.respsoneText);
+          checkSoon();
           return;
         }
-        // restart is still in progress, check again immediately
-        // the server does the delaying during the request processing
-        // if the server is done with the restart, the request will return immediately
-        checkRestartStatus();
-      } else if (request.status === 200 && request.responseText === "stream-log") {
-        // the waiting-app has been detective active, switch to it
-        console.log('redirecting for stream log')
-        window.location.replace("/");
-        return;
-      } else {
-        // ops, we got an error from the server - could be it is briefly turned off for
-        // an update or something
-        console.log("request to GET /restart returned unexpected responseText: ", request.respsoneText);
+      };
+
+      request.timeout = httpTimeout;
+      request.ontimeout = function () {
+        console.log("GET /restart timeout");
         checkSoon();
-        return;
-      }
-    };
+      };
 
-    request.timeout = httpTimeout;
-    request.ontimeout = function () {
-      console.log("GET /restart timeout");
-      checkSoon();
-    };
+      request.onerror = function () {
+        // ops, we got an error trying to talk to the server - could be it is briefly turned off for
+        // an update or something
+        console.log("request to GET /restart resulted in an error: ", request.status);
+        checkSoon();
+      };
+      request.send();
+    }
 
-    request.onerror = function () {
-      // ops, we got an error trying to talk to the server - could be it is briefly turned off for
-      // an update or something
-      console.log("request to GET /restart resulted in an error: ", request.status);
-      checkSoon();
-    };
-    request.send();
-  }
+    show_spinner();
+    checkRestartStatus();
 
-  show_spinner();
-  checkRestartStatus();
-
-</script>
+  </script>
+</body>
 {% endblock %}
