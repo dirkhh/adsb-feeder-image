@@ -30,52 +30,6 @@
   <div class="container pt-5 mt-3">
     <h1 class="mt-3 text-center text-danger">{% block title %} Trying to connect to WiFi {% endblock %}</h1>
 
-    <script>
-      function after60() {
-        // hide spinner after 60 seconds and change the overlay text
-        document.getElementById("loader").style.display = "none";
-        document.getElementById("overlaytext").innerHTML = "Device has probably joined the configured network!";
-      }
-      document.addEventListener("readystatechange", (event) => {
-        if (event.target.readyState === "complete") {
-          show_spinner();
-          checkRestartStatus();
-
-          setTimeout(after60, 60 * 1000);
-        }
-      });
-
-      function checkRestartStatus() {
-        var request = new XMLHttpRequest();
-        request.open("GET", "/restart");
-        request.onload = function () {
-          if (request.status === 200 && request.responseText === "done") {
-            // that means we tested the wifi credentials and are back in Hotspot mode
-            window.location.replace("/");
-          } else if (request.status === 200 && request.responseText === "restarting") {
-            // restart is still in progress, show progress and check again after a delay
-            setTimeout(checkRestartStatus, 2000);
-          } else {
-            // ops, we got an error from the server - could be it is briefly turned off for
-            // an update or something
-            console.log("request to GET /restart resulted in ", request.status);
-            setTimeout(checkRestartStatus, 2000);
-          }
-        };
-        request.timeout = 2000;
-        request.ontimeout = function () {
-          checkRestartStatus();
-        };
-        request.onerror = function () {
-          // ops, we got an error trying to talk to the server - could be it is briefly turned off for
-          // an update or something
-          console.log("request to GET /restart resulted in an error: ", request.status);
-          setTimeout(checkRestartStatus, 2000);
-        };
-        request.send();
-      }
-    </script>
-
     <footer class="text-center text-lg-start bg-light text-muted">
       <hr class="mt-5" />
       <section class="d-flex justify-content-center justify-content-lg-between border-bottom small">
@@ -92,7 +46,49 @@
     function show_spinner() {
       document.getElementById("loader").style.display = "block";
       document.getElementById("overlay").style.display = "block";
-    }</script>
+    }
+
+    function after60() {
+      // hide spinner after 60 seconds and change the overlay text
+      document.getElementById("loader").style.display = "none";
+      document.getElementById("overlaytext").innerHTML = "Device has probably joined the configured network!";
+    }
+
+    function checkRestartStatus() {
+      var request = new XMLHttpRequest();
+      request.open("GET", "/restart");
+      request.onload = function () {
+        if (request.status === 200 && request.responseText === "done") {
+          // that means we tested the wifi credentials and are back in Hotspot mode
+          window.location.replace("/");
+        } else if (request.status === 200 && request.responseText === "restarting") {
+          // restart is still in progress, show progress and check again after a delay
+          setTimeout(checkRestartStatus, 2000);
+        } else {
+          // ops, we got an error from the server - could be it is briefly turned off for
+          // an update or something
+          console.log("request to GET /restart resulted in ", request.status);
+          setTimeout(checkRestartStatus, 2000);
+        }
+      };
+      request.timeout = 2000;
+      request.ontimeout = function () {
+        checkRestartStatus();
+      };
+      request.onerror = function () {
+        // ops, we got an error trying to talk to the server - could be it is briefly turned off for
+        // an update or something
+        console.log("request to GET /restart resulted in an error: ", request.status);
+        setTimeout(checkRestartStatus, 2000);
+      };
+      request.send();
+    }
+
+    show_spinner();
+    checkRestartStatus();
+
+    setTimeout(after60, 60 * 1000);
+  </script>
 </body>
 
 </html>
