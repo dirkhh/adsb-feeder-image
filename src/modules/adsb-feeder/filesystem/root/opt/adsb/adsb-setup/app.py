@@ -1030,7 +1030,7 @@ class AdsbIm:
         status = self._agg_status_instances.get(f"{agg}-{idx}")
         if status is None:
             status = self._agg_status_instances[f"{agg}-{idx}"] = AggStatus(
-                agg, idx, self._d, request.host_url.rstrip("/ ")
+                agg, idx, self._d, f"http://127.0.0.1:{self._d.env_by_tags('webport').value}",
             )
 
         if agg == "adsbx":
