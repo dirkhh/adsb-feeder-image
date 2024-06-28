@@ -412,8 +412,7 @@ class AdsbIm:
         # in no_server mode we want to exit right after the housekeeping, so no
         # point in running this in the background
         if not no_server:
-            self.update_dns_state()
-            self._dns_watch = Background(3600, self.update_dns_state)
+            self._every_minute = Background(60, self.every_minute)
             if self._d.is_enabled("stage2"):
                 # let's make sure we tell the micro feeders every ten minutes that
                 # the stage2 is around, looking at them
@@ -1522,7 +1521,6 @@ class AdsbIm:
             self._d.env_by_tags("978piaware").list_set(sitenum, "")
 
     def handle_implied_settings(self):
-
         for sitenum in [0] + self.micro_indices():
 
             # make sure use_route_api is populated with the default:
@@ -2227,7 +2225,6 @@ class AdsbIm:
         # If we have more than one SDR, or one of them is an airspy,
         # we need to go to advanced - unless we have at least one of the serials set up
         # for 978 or 1090 reporting
-        self._sdrdevices._ensure_populated()
 
         # do we have duplicate SDR serials?
         if len(self._sdrdevices.duplicates) > 0:
@@ -2254,10 +2251,11 @@ class AdsbIm:
         print_err("director redirecting to aggregators: to be configured")
         return self.aggregators()
 
-    @check_restart_lock
-    def index(self):
+    def every_minute(self):
         # make sure DNS works
         self.update_dns_state()
+
+        self._sdrdevices._ensure_populated()
 
         try:
             result = subprocess.run(
@@ -2271,9 +2269,9 @@ class AdsbIm:
         else:
             result = result.decode().strip()
         if result:
-            local_address = result
+            self.local_address = result
         else:
-            local_address = request.host.split(":")[0]
+            self.local_address = request.host.split(":")[0]
 
         if self._d.env_by_tags("tailscale_name").value:
             try:
@@ -2287,9 +2285,9 @@ class AdsbIm:
                 result = ""
             else:
                 result = result.decode().strip()
-            tailscale_address = result
+            self.tailscale_address = result
         else:
-            tailscale_address = ""
+            self.tailscale_address = ""
         zt_network = self._d.env_by_tags("zerotierid").value
         if zt_network:
             try:
@@ -2303,9 +2301,9 @@ class AdsbIm:
                 result = ""
             else:
                 result = result.decode().strip()
-            zerotier_address = result
+            self.zerotier_address = result
         else:
-            zerotier_address = ""
+            self.zerotier_address = ""
         # next check if there were under-voltage events (this is likely only relevant on an RPi)
         self._d.env_by_tags("under_voltage").value = False
         board = self._d.env_by_tags("board_name").value
@@ -2327,6 +2325,10 @@ class AdsbIm:
         # now let's check for disk space
         self._d.env_by_tags("low_disk").value = shutil.disk_usage("/").free < 1024 * 1024 * 1024
 
+
+    @check_restart_lock
+    def index(self):
+        print_err("index...")
         # if we get to show the feeder homepage, the user should have everything figured out
         # and we can remove the pre-installed ssh-keys and password
         if os.path.exists("/opt/adsb/adsb.im.passwd.and.keys"):
@@ -2376,12 +2378,13 @@ class AdsbIm:
         stage2_suggestion = board.startswith("Raspberry") and not (
             board.startswith("Raspberry Pi 4") or board.startswith("Raspberry Pi 5")
         )
+        print_err("index...done")
         return render_template(
             "index.html",
             aggregators=aggregators,
-            local_address=local_address,
-            tailscale_address=tailscale_address,
-            zerotier_address=zerotier_address,
+            local_address=self.local_address,
+            tailscale_address=self.tailscale_address,
+            zerotier_address=self.zerotier_address,
             stage2_suggestion=stage2_suggestion,
             matrix=matrix,
         )
