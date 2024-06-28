@@ -20,7 +20,7 @@
         console.log('redirecting')
         window.location.replace("/");
       } else if (request.status === 200 && request.responseText === "restarting") {
-        if (new Date().getTime() - restartingSince > 10 * 1000) {
+        if (new Date().getTime() - restartingSince > 9 * 1000) {
           // been waiting for more than 10 seconds, let's show the log scroller so the user has something to look at
           window.location.replace("/waiting");
           return;
