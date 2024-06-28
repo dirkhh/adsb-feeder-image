@@ -297,32 +297,28 @@
     else f.style.display = "none";
   }
 
-  document.addEventListener("readystatechange", (event) => {
-    if (event.target.readyState === "complete") {
-      const box_fields = [
-        ["flightradar--is_enabled", "FR_FIELDS", ["flightradar--key"]],
-        ["planewatch--is_enabled", "PW_FIELDS", ["planewatch--key"]],
-        ["flightaware--is_enabled", "FA_FIELDS", []],
-        ["radarbox--is_enabled", "RB_FIELDS", []],
-        ["planefinder--is_enabled", "PF_FIELDS", ["planefinder--key"]],
-        ["adsbhub--is_enabled", "AH_FIELDS", ["adsbhub--key"]],
-        ["opensky--is_enabled", "OS_FIELDS", ["opensky--user"]],
-        ["radarvirtuel--is_enabled", "RV_FIELDS", ["radarvirtuel--key"]],
-        ["1090uk--is_enabled", "TNUK_FIELDS", ["1090uk--key"]],
-      ];
-      for (const ids of box_fields) {
-        let box = document.getElementById(ids[0]);
-        let fields = document.getElementById(ids[1]);
-        box.addEventListener("click", function () {
-          show_or_hide(box, fields);
-          for (const input_field of ids[2]) {
-            elem = document.getElementById(input_field);
-            if (elem) elem.required = box.checked;
-          }
-        });
-        show_or_hide(box, fields);
+  const box_fields = [
+    ["flightradar--is_enabled", "FR_FIELDS", ["flightradar--key"]],
+    ["planewatch--is_enabled", "PW_FIELDS", ["planewatch--key"]],
+    ["flightaware--is_enabled", "FA_FIELDS", []],
+    ["radarbox--is_enabled", "RB_FIELDS", []],
+    ["planefinder--is_enabled", "PF_FIELDS", ["planefinder--key"]],
+    ["adsbhub--is_enabled", "AH_FIELDS", ["adsbhub--key"]],
+    ["opensky--is_enabled", "OS_FIELDS", ["opensky--user"]],
+    ["radarvirtuel--is_enabled", "RV_FIELDS", ["radarvirtuel--key"]],
+    ["1090uk--is_enabled", "TNUK_FIELDS", ["1090uk--key"]],
+  ];
+  for (const ids of box_fields) {
+    let box = document.getElementById(ids[0]);
+    let fields = document.getElementById(ids[1]);
+    box.addEventListener("click", function () {
+      show_or_hide(box, fields);
+      for (const input_field of ids[2]) {
+        elem = document.getElementById(input_field);
+        if (elem) elem.required = box.checked;
       }
-    }
-  });
+    });
+    show_or_hide(box, fields);
+  }
 </script>
 {% endblock %}
