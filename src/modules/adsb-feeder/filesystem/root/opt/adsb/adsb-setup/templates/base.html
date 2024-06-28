@@ -116,6 +116,7 @@
   </nav>
   <script src="/static/js/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8="
           crossorigin="anonymous"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/mdb.min.js') }}"></script>
   <script>
     function check_mf_status() {
       let n = parseInt("{{ env_value_by_tag('num_micro_sites') }}")
@@ -146,6 +147,43 @@
           setTimeout(check_mf_status, 15000);
         });
     };
+
+    function show_spinner() {
+      document.getElementById("loader").style.display = "block";
+      document.getElementById("overlay").style.display = "block";
+      console.log('show_spinner');
+    }
+    function hide_spinner() {
+      document.getElementById("loader").style.display = "none";
+      document.getElementById("overlay").style.display = "none";
+      console.log('hide_spinner');
+    }
+    $(document).ready(function () {
+      $('[data-toggle="tooltip"]').tooltip();
+
+      $(document).find('form').each((key, value) => {
+        //console.log(value)
+        value.addEventListener("submit", (event) => { show_spinner(); });
+      });
+    });
+
+    $("form").submit(function () {
+      // stupid hack to get checkboxes that are unchecked into Flask
+      // first hide the form (so the checkboxes don't visibly turn back on)
+      // then artificially check them all, but give them values of 0/1 to represent
+      // whether they were checked or not
+      var this_master = $(this);
+      this_master.hide();
+      this_master.find('input[type="checkbox"]').each(function () {
+        var checkbox_this = $(this);
+        if (checkbox_this.is(":checked") == true) {
+          checkbox_this.attr("value", "1");
+        } else {
+          checkbox_this.prop("checked", true);
+          checkbox_this.attr("value", "0");
+        }
+      });
+    });
   </script>
 </head>
 
@@ -188,45 +226,6 @@
       </section>
     </footer>
   </div>
-  <script type="text/javascript" src="{{ url_for('static', filename='js/mdb.min.js') }}"></script>
-  <script>
-    function show_spinner() {
-      document.getElementById("loader").style.display = "block";
-      document.getElementById("overlay").style.display = "block";
-      console.log('show_spinner');
-    }
-    function hide_spinner() {
-      document.getElementById("loader").style.display = "none";
-      document.getElementById("overlay").style.display = "none";
-      console.log('hide_spinner');
-    }
-    $(document).ready(function () {
-      $('[data-toggle="tooltip"]').tooltip();
-
-      $(document).find('form').each((key, value) => {
-        //console.log(value)
-        value.addEventListener("submit", (event) => { show_spinner(); });
-      });
-    });
-
-    $("form").submit(function () {
-      // stupid hack to get checkboxes that are unchecked into Flask
-      // first hide the form (so the checkboxes don't visibly turn back on)
-      // then artificially check them all, but give them values of 0/1 to represent
-      // whether they were checked or not
-      var this_master = $(this);
-      this_master.hide();
-      this_master.find('input[type="checkbox"]').each(function () {
-        var checkbox_this = $(this);
-        if (checkbox_this.is(":checked") == true) {
-          checkbox_this.attr("value", "1");
-        } else {
-          checkbox_this.prop("checked", true);
-          checkbox_this.attr("value", "0");
-        }
-      });
-    });
-  </script>
 </body>
 
 </html>

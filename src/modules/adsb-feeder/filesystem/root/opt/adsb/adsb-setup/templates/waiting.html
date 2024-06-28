@@ -42,17 +42,11 @@
           crossorigin="anonymous"></script>
 
   <script>
-    document.addEventListener('readystatechange', event => {
-      if (event.target.readyState === "complete") {
-        console.log("starting stream");
-        stream();
-      }
-    });
     function stream() {
       var streamlog = new EventSource("/stream-log");
       console.log("created EventSource" + streamlog)
       streamlog.onerror = function (e) {
-        setTimeout(checkStatus, 1);
+        checkStatus();
       }
       streamlog.onmessage = function (e) {
         $('#log').append(e.data + "\n");
@@ -98,6 +92,9 @@
       };
       request.send();
     };
+
+    console.log("starting stream");
+    stream();
   </script>
 </body>
 

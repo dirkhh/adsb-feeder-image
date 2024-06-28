@@ -19,6 +19,7 @@
         // restarting the ADS-B infra completed, redirect user
         console.log('redirecting')
         window.location.replace("/");
+        return;
       } else if (request.status === 200 && request.responseText === "restarting") {
         if (new Date().getTime() - restartingSince > 9 * 1000) {
           // been waiting for more than 10 seconds, let's show the log scroller so the user has something to look at
@@ -33,11 +34,13 @@
         // the waiting-app has been detective active, switch to it
         console.log('redirecting for stream log')
         window.location.replace("/");
+        return;
       } else {
         // ops, we got an error from the server - could be it is briefly turned off for
         // an update or something
         console.log("request to GET /restart returned unexpected responseText: ", request.respsoneText);
         checkSoon();
+        return;
       }
     };
 
@@ -56,12 +59,8 @@
     request.send();
   }
 
-  document.addEventListener("readystatechange", (event) => {
-    if (event.target.readyState === "complete") {
-      show_spinner();
-      checkRestartStatus();
-    }
-  });
+  show_spinner();
+  checkRestartStatus();
 
 </script>
 {% endblock %}
