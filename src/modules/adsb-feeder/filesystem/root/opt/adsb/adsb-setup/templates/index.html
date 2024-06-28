@@ -363,18 +363,32 @@
   </div>
 </div>
 <script>
+  let browser_ip = null;
+  let feeder_ip = null;
+  function compareIps() {
+    if (feeder_ip == null || browser_ip == null) {
+      return;
+    }
+    if (browser_ip != feeder_ip) {
+      console.log("IP check: browser got", browser_ip, "feeder has", feeder_ip);
+      $("#ip-mismatch").show()
+    } else {
+      $("#ip-mismatch").hide()
+    }
+  }
   function startPageIndex() {
     if ("{{ env_value_by_tags(['aggregators']) }}" != 'micro') {
       fetch("https://api.ipify.org?format=json")
         .then(response => response.json())
         .then(data => {
-          let feeder_ip = "{{ env_value_by_tags(['feeder_ip']) }}"
-          if (data["ip"] != feeder_ip) {
-            console.log("IP check: browser got", data, "feeder has", feeder_ip);
-            $("#ip-mismatch").show()
-          } else {
-            $("#ip-mismatch").hide()
-          }
+          browser_ip = data["ip"];
+          compareIps();
+        });
+      fetch("/api/ip_info")
+        .then(response => response.json())
+        .then(data => {
+          feeder_ip = data["feeder_ip"];
+          compareIps();
         });
     } else {
       get_stage2_connection_status()

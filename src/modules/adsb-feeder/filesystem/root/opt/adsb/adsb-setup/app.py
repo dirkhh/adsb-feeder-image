@@ -232,6 +232,7 @@ class AdsbIm:
         self.app.add_url_rule("/stage2", "stage2", self.stage2, methods=["GET", "POST"])
         self.app.add_url_rule("/update", "update", self.update, methods=["POST"])
         self.app.add_url_rule("/sdplay_license", "sdrplay_license", self.sdrplay_license, methods=["GET", "POST"])
+        self.app.add_url_rule("/api/ip_info", "ip_info", self.ip_info)
         self.app.add_url_rule("/api/sdr_info", "sdr_info", self.sdr_info)
         self.app.add_url_rule("/api/base_info", "base_info", self.base_info)
         self.app.add_url_rule("/api/stage2_stats", "stage2_stats", self.stage2_stats)
@@ -829,6 +830,19 @@ class AdsbIm:
                 return True
 
         return False
+
+    def ip_info(self):
+        ip, status = self._system.check_ip()
+        if status == 200:
+            self._d.env_by_tags(["feeder_ip"]).value = ip
+            self._d.env_by_tags(["mf_ip"]).list_set(0, ip)
+        jsonString = json.dumps(
+            {
+                "feeder_ip": ip,
+            },
+            indent=2,
+        )
+        return Response(jsonString, mimetype="application/json")
 
     def sdr_info(self):
         # get our guess for the right SDR to frequency mapping
@@ -2244,10 +2258,7 @@ class AdsbIm:
     def index(self):
         # make sure DNS works
         self.update_dns_state()
-        ip, status = self._system.check_ip()
-        if status == 200:
-            self._d.env_by_tags(["feeder_ip"]).value = ip
-            self._d.env_by_tags(["mf_ip"]).list_set(0, ip)
+
         try:
             result = subprocess.run(
                 "ip route get 1 | head -1  | cut -d' ' -f7",
