@@ -158,14 +158,6 @@
       document.getElementById("overlay").style.display = "none";
       console.log('hide_spinner');
     }
-    $(document).ready(function () {
-      $('[data-toggle="tooltip"]').tooltip();
-
-      $(document).find('form').each((key, value) => {
-        //console.log(value)
-        value.addEventListener("submit", (event) => { show_spinner(); });
-      });
-    });
 
     $("form").submit(function () {
       // stupid hack to get checkboxes that are unchecked into Flask
@@ -183,6 +175,14 @@
           checkbox_this.attr("value", "0");
         }
       });
+    });
+
+    $(document).find('form').each((key, value) => {
+      //console.log(value)
+      value.addEventListener("submit", (event) => { show_spinner(); });
+    });
+    $(document).ready(function () {
+      $('[data-toggle="tooltip"]').tooltip();
     });
   </script>
 </head>

@@ -125,19 +125,6 @@
           value="go">I'm done here - take me to the feeder homepage</button>
 </form>
 <script>
-  $(document).ready(function () {
-    sdr_info();
-    $("input[type=radio]").click(function () {
-      myid = this.id;
-      let components = myid.split("-");
-      for (const usage of ["1090", "978", "other"]) {
-        otherid = usage + "-" + components[1];
-        if (otherid != myid) {
-          document.getElementById(otherid).checked = false;
-        }
-      }
-    });
-  })
 
   function sdr_info() {
     fetch("/api/sdr_info")
@@ -181,17 +168,20 @@
           document.getElementById("duptext").style.display = 'none';
           document.getElementById("noduptext").style.display = 'block';
         }
+
+        $("input[type=radio]").click(function () {
+          myid = this.id;
+          let components = myid.split("-");
+          for (const usage of ["1090", "978", "other"]) {
+            otherid = usage + "-" + components[1];
+            if (otherid != myid) {
+              document.getElementById(otherid).checked = false;
+            }
+          }
+        });
       });
   }
 
-  function show_or_hide(b, f) {
-    if (b.checked) f.style.display = "block";
-    else f.style.display = "none";
-  }
-  const hwt = document.getElementById('heywhatsthat--is_enabled');
-  const hwttext = document.getElementById('hwt-text');
-  hwt.addEventListener("change", function () {
-    show_or_hide(hwt, hwttext);
-  });
+  sdr_info();
 </script>
 {% endblock %}

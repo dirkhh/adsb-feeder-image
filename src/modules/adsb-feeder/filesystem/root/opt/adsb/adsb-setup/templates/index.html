@@ -363,7 +363,7 @@
   </div>
 </div>
 <script>
-  $(document).ready(function () {
+  function startPageIndex() {
     if ("{{ env_value_by_tags(['aggregators']) }}" != 'micro') {
       fetch("https://api.ipify.org?format=json")
         .then(response => response.json())
@@ -413,7 +413,7 @@
   {% endif %}
   {% endfor %}
   {% endfor %}
-  });
+  }
 
   function get_status(agg, ip, idx) {
     fetch(`/api/status/${agg}/${idx}`)
@@ -472,5 +472,7 @@
         setTimeout(get_stage2_connection_status, 600000);
       });
   }
+
+  startPageIndex();
 </script>
 {% endblock %}
