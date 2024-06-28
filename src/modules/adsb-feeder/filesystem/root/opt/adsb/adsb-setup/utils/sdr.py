@@ -2,6 +2,7 @@ import io
 import re
 import subprocess
 import sys
+import time
 from typing import List, Set
 from .util import print_err
 
@@ -61,6 +62,7 @@ class SDRDevices:
         self.sdrs: List[SDR] = []
         self.duplicates: Set[str] = set()
         self.lsusb_output = ""
+        self.last_probe = 0
 
     def __len__(self):
         return len(self.sdrs)
@@ -132,6 +134,9 @@ class SDRDevices:
             print_err("get_sdr_info() could not find any SDRs")
 
     def _ensure_populated(self):
+        if time.time() - self.last_probe < 1:
+            return
+        self.last_probe = time.time()
         self.get_sdr_info()
 
     def _get_address_for_pid_vid(self, pidvid: str, line: str):
