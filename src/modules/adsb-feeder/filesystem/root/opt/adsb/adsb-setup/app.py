@@ -2328,7 +2328,6 @@ class AdsbIm:
 
     @check_restart_lock
     def index(self):
-        print_err("index...")
         # if we get to show the feeder homepage, the user should have everything figured out
         # and we can remove the pre-installed ssh-keys and password
         if os.path.exists("/opt/adsb/adsb.im.passwd.and.keys"):
@@ -2378,7 +2377,6 @@ class AdsbIm:
         stage2_suggestion = board.startswith("Raspberry") and not (
             board.startswith("Raspberry Pi 4") or board.startswith("Raspberry Pi 5")
         )
-        print_err("index...done")
         return render_template(
             "index.html",
             aggregators=aggregators,
