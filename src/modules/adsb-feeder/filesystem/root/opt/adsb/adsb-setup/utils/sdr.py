@@ -63,6 +63,7 @@ class SDRDevices:
         self.duplicates: Set[str] = set()
         self.lsusb_output = ""
         self.last_probe = 0
+        self.last_debug_out = ""
 
     def __len__(self):
         return len(self.sdrs)
@@ -81,6 +82,7 @@ class SDRDevices:
         )
 
     def get_sdr_info(self):
+        self.debug_out = "get_sdr_info() found:\n"
         try:
             result = subprocess.run("lsusb", shell=True, capture_output=True)
         except subprocess.SubprocessError:
@@ -103,7 +105,7 @@ class SDRDevices:
                     if address:
                         new_sdr = SDR(sdr_type, address)
                         self.sdrs.append(new_sdr)
-                        print_err(f"get_sdr_info() found SDR: type: {sdr_type} serial: {new_sdr._serial} address: {address} pidvid: {pidvid}")
+                        self.debug_out += f"sdr_info: type: {sdr_type} serial: {new_sdr._serial} address: {address} pidvid: {pidvid}\n"
 
         check_pidvid(pv_list=["0bda:2838", "0bda:2832"], sdr_type="rtlsdr")
         check_pidvid(pv_list=["0403:7028"], sdr_type="stratuxv3")
@@ -131,7 +133,12 @@ class SDRDevices:
                 found_serials.add(sdr._serial)
 
         if len(self.sdrs) == 0:
-            print_err("get_sdr_info() could not find any SDRs")
+            self.debug_out = "get_sdr_info() could not find any SDRs"
+
+        if self.last_debug_out != self.debug_out:
+            self.last_debug_out = self.debug_out
+            print_err(self.debug_out.rstrip("\n"))
+
 
     def _ensure_populated(self):
         if time.time() - self.last_probe < 1:
