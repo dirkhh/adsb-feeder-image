@@ -1,4 +1,6 @@
 Changes since v2.1.2 include:
+- index page: improve load time
+- restarting / logstreamer pages: avoid using readystatechange listener to make sure functions don't run unexpectedly
 - if a feeder has working GPS/gpsd that is accessible for the Ultrafeeder container, add option to derive location from the GPS data
 - fix zerotier bring up after restore
 - make network checks more robust, trying to deal with corner cases where ICMP may be blocked or have extremely high latency
