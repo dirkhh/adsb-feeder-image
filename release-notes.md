@@ -1,4 +1,5 @@
 Changes since v2.1.2 include:
+- avoid potential race condition when writing config.json (which was hit quite reliably when doing an app install)
 - fixup form value issue with last beta (checkbox value must be 1)
 - index page: improve load time
 - restarting / logstreamer pages: avoid using readystatechange listener to make sure functions don't run unexpectedly
