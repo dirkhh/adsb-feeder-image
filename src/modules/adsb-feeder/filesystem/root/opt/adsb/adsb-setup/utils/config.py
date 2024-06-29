@@ -2,12 +2,15 @@ import json
 import os
 import os.path
 import tempfile
+import threading
 from .util import print_err
 
 CONF_DIR = "/opt/adsb/config"
 ENV_FILE_PATH = CONF_DIR + "/.env"
 USER_ENV_FILE_PATH = CONF_DIR + "/.env.user"
 JSON_FILE_PATH = CONF_DIR + "/config.json"
+
+config_lock = threading.Lock()
 
 
 def read_values_from_config_json():

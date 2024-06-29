@@ -1,5 +1,5 @@
 from typing import List, Union
-from utils.config import read_values_from_config_json, write_values_to_config_json
+from utils.config import read_values_from_config_json, write_values_to_config_json, config_lock
 from utils.util import is_true, print_err, stack_info, make_int
 
 
@@ -37,47 +37,48 @@ class Env:
         self._reconcile(value=None, pull=True)
 
     def _reconcile(self, value, pull: bool = False):
-        file_values = read_values_from_config_json()
-        value_in_file = file_values.get(self._name, None)
+        with config_lock:
+            file_values = read_values_from_config_json()
+            value_in_file = file_values.get(self._name, None)
 
-        if pull and value_in_file != None:
-            if self._default != None and type(value_in_file) != type(self._default):
-                if type(self._default) == bool:
-                    self._value = is_true(value_in_file)
-                    return
-                if type(self._default) == list and len(self._default) > 0:
-                    if type(self._default[0]) == type(value_in_file):
-                        self._value = [value_in_file]
-                        stack_info(f"converting {self._name} to list {self._value}")
+            if pull and value_in_file != None:
+                if self._default != None and type(value_in_file) != type(self._default):
+                    if type(self._default) == bool:
+                        self._value = is_true(value_in_file)
                         return
-                    if type(self._default[0]) == bool and (value_in_file.lower() in ["true", "false", "0", "1"]):
-                        self._value = [is_true(value_in_file)]
-                        stack_info(f"converting {self._name} to list {self._value}")
+                    if type(self._default) == list and len(self._default) > 0:
+                        if type(self._default[0]) == type(value_in_file):
+                            self._value = [value_in_file]
+                            stack_info(f"converting {self._name} to list {self._value}")
+                            return
+                        if type(self._default[0]) == bool and (value_in_file.lower() in ["true", "false", "0", "1"]):
+                            self._value = [is_true(value_in_file)]
+                            stack_info(f"converting {self._name} to list {self._value}")
+                            return
+                    if type(self._default) == int and type(value_in_file) == str:
+                        try:
+                            self._value = int(value_in_file)
+                            return
+                        except Exception as e:
+                            print_err(f"cannot convert {value_in_file} to int - {e}")
+                    print_err(
+                        f"got value {value_in_file} of type {type(value_in_file)} from file - discarding as type of {self._name} should be {type(self._default)}"
+                    )
+                else:
+                    if type(value_in_file) == list and self.is_bool:
+                        self._value = [is_true(v) for v in value_in_file]
                         return
-                if type(self._default) == int and type(value_in_file) == str:
-                    try:
-                        self._value = int(value_in_file)
-                        return
-                    except Exception as e:
-                        print_err(f"cannot convert {value_in_file} to int - {e}")
-                print_err(
-                    f"got value {value_in_file} of type {type(value_in_file)} from file - discarding as type of {self._name} should be {type(self._default)}"
-                )
-            else:
-                if type(value_in_file) == list and self.is_bool:
-                    self._value = [is_true(v) for v in value_in_file]
-                    return
-                self._value = value_in_file
+                    self._value = value_in_file
 
-            return
+                return
 
-        if value == value_in_file:
-            return  # do not write to file if value is the same
-        if value == None or value == "None":
-            value = ""
+            if value == value_in_file:
+                return  # do not write to file if value is the same
+            if value == None or value == "None":
+                value = ""
 
-        file_values[self._name] = value
-        write_values_to_config_json(file_values, reason=f"{self._name} = {value}")
+            file_values[self._name] = value
+            write_values_to_config_json(file_values, reason=f"{self._name} = {value}")
 
     def __str__(self):
         return f"Env({self._name}, {self._value})"

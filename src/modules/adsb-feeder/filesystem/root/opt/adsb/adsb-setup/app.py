@@ -30,6 +30,7 @@ from zlib import compress
 from copy import deepcopy
 
 from utils.config import (
+    config_lock,
     read_values_from_config_json,
     read_values_from_env_file,
     write_values_to_config_json,
@@ -249,7 +250,8 @@ class AdsbIm:
         # now all the envs are loaded and reconciled with the data on file - which means we should
         # actually write out the potentially updated values (e.g. when plain values were converted
         # to lists)
-        write_values_to_config_json(self._d.envs, reason="Startup")
+        with config_lock:
+            write_values_to_config_json(self._d.envs, reason="Startup")
 
     def update_boardname(self):
         board = ""
@@ -753,23 +755,28 @@ class AdsbIm:
                 elif dest.is_dir():
                     shutil.rmtree(dest, ignore_errors=True)
 
-                shutil.move(restore_path / name, dest)
+                if name != "config.json" and name != ".env":
+                    shutil.move(restore_path / name, dest)
+                    continue
 
-                if name == ".env":
-                    if "config.json" in form.keys():
-                        # if we are restoring the config.json file, we don't need to restore the .env
-                        # this should never happen, but better safe than sorry
-                        continue
-                    # so this is a backup from an older system, let's try to make this work
-                    # read them in, replace the ones that match a norestore tag with the current value
-                    # and then write this all back out as config.json
-                    values = read_values_from_env_file()
-                    for e in self._d._env:
-                        if "norestore" in e.tags:
-                            # this overwrites the value in the file we just restored with the current value of the running image,
-                            # iow it doesn't restore that value from the backup
-                            values[e.name] = e.value
-                    write_values_to_config_json(values, reason="execute_restore from .env")
+                with config_lock:
+                    shutil.move(restore_path / name, dest)
+
+                    if name == ".env":
+                        if "config.json" in form.keys():
+                            # if we are restoring the config.json file, we don't need to restore the .env
+                            # this should never happen, but better safe than sorry
+                            continue
+                        # so this is a backup from an older system, let's try to make this work
+                        # read them in, replace the ones that match a norestore tag with the current value
+                        # and then write this all back out as config.json
+                        values = read_values_from_env_file()
+                        for e in self._d._env:
+                            if "norestore" in e.tags:
+                                # this overwrites the value in the file we just restored with the current value of the running image,
+                                # iow it doesn't restore that value from the backup
+                                values[e.name] = e.value
+                        write_values_to_config_json(values, reason="execute_restore from .env")
 
         # clean up the restore path
         restore_path = pathlib.Path("/opt/adsb/config/restore")
