@@ -37,7 +37,9 @@ class Env:
         self._reconcile(value=None, pull=True)
 
     def _reconcile(self, value, pull: bool = False):
-        value_in_file = self._get_value_from_file()
+        file_values = read_values_from_config_json()
+        value_in_file = file_values.get(self._name, None)
+
         if pull and value_in_file != None:
             if self._default != None and type(value_in_file) != type(self._default):
                 if type(self._default) == bool:
@@ -68,20 +70,14 @@ class Env:
                 self._value = value_in_file
 
             return
+
         if value == value_in_file:
             return  # do not write to file if value is the same
         if value == None or value == "None":
-            self._write_value_to_file("")
-        else:
-            self._write_value_to_file(value)
+            value = ""
 
-    def _get_value_from_file(self):
-        return read_values_from_config_json().get(self._name, None)
-
-    def _write_value_to_file(self, new_value):
-        values = read_values_from_config_json()
-        values[self._name] = new_value
-        write_values_to_config_json(values, reason=f"{self._name} = {new_value}")
+        file_values[self._name] = value
+        write_values_to_config_json(file_values, reason=f"{self._name} = {value}")
 
     def __str__(self):
         return f"Env({self._name}, {self._value})"
