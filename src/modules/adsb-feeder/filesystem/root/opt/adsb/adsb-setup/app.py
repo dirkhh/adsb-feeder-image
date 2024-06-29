@@ -409,14 +409,6 @@ class AdsbIm:
 
     def run(self, no_server=False):
         debug = os.environ.get("ADSBIM_DEBUG") is not None
-        # in no_server mode we want to exit right after the housekeeping, so no
-        # point in running this in the background
-        if not no_server:
-            self._every_minute = Background(60, self.every_minute)
-            if self._d.is_enabled("stage2"):
-                # let's make sure we tell the micro feeders every ten minutes that
-                # the stage2 is around, looking at them
-                self._stage2_checks = Background(600, self.stage2_checks)
         # prepare for app use (vs ADS-B Feeder Image use)
         # newer images will include a flag file that indicates that this is indeed
         # a full image - but in case of upgrades from older version, this heuristic
@@ -475,6 +467,12 @@ class AdsbIm:
         # if using gpsd, try to update the location
         if self._d.is_enabled("use_gpsd"):
             self.get_lat_lon_alt()
+
+        self._every_minute = Background(60, self.every_minute)
+        if self._d.is_enabled("stage2"):
+            # let's make sure we tell the micro feeders every ten minutes that
+            # the stage2 is around, looking at them
+            self._stage2_checks = Background(600, self.stage2_checks)
 
         self.app.run(
             host="0.0.0.0",
@@ -1043,7 +1041,10 @@ class AdsbIm:
         status = self._agg_status_instances.get(f"{agg}-{idx}")
         if status is None:
             status = self._agg_status_instances[f"{agg}-{idx}"] = AggStatus(
-                agg, idx, self._d, f"http://127.0.0.1:{self._d.env_by_tags('webport').value}",
+                agg,
+                idx,
+                self._d,
+                f"http://127.0.0.1:{self._d.env_by_tags('webport').value}",
             )
 
         if agg == "adsbx":
@@ -2324,7 +2325,6 @@ class AdsbIm:
 
         # now let's check for disk space
         self._d.env_by_tags("low_disk").value = shutil.disk_usage("/").free < 1024 * 1024 * 1024
-
 
     @check_restart_lock
     def index(self):
