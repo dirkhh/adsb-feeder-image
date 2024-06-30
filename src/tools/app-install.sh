@@ -191,3 +191,6 @@ systemd-run -u adsb-docker-pull bash /opt/adsb/docker-pull.sh
 echo "done installing"
 echo "you can uninstall this software by running"
 echo "sudo bash /opt/adsb/app-uninstall"
+echo ""
+local_ip=$(ip route get 1 | grep -oP 'src \K\S+')
+echo "you can access the web interface at http://localhost:1099 or http://${local_ip}:1099"
