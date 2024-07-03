@@ -20,6 +20,16 @@
     <div class="container-fluid">
       <a class="navbar-brand" href="{{ url_for("director") }}">ADS-B Feeder</a>
       <a class="btn btn-primary mx-3" href="/map{{ env_value_by_tag('tar1090_query_params') }}">Live Map</a>
+      <div id="temperature_block" style="width: 4em; height:auto;">
+        <span id="cpu" class="d-none"
+              style="float:left;width:45%;height:1em;font-size:0.6em;margin-left: 1px;">CPU</span>
+        <span id="ext" class=" d-none"
+              style="float:left;width:45%;height:1em;font-size:0.6em;margin-left: 1px;">EXT</span>
+        <span id="cpu_temp" class=" d-none"
+              style="float:left;width:45%;height:1em;font-size:0.6em;margin-left: 1px;"></span>
+        <span id="ext_temp" class="d-none"
+              style="float:left;width:45%;height:1em;font-size:0.6em;margin-left: 1px;"></span>
+      </div>
       <button class="navbar-toggler" type="button" data-mdb-toggle="collapse" data-mdb-target="#navbarNav"
               aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <svg viewBox="-5 0 10 8" width="1.5em">
@@ -147,6 +157,68 @@
           setTimeout(check_mf_status, 15000);
         });
     };
+
+    function get_temperatures() {
+      let url = "/api/get_temperatures.json";
+      fetch(url, {
+        method: "GET", cors: "no-cors"
+      })
+        .then(response => { return response.json() })
+        .then(data => {
+          update_temp_block(data["cpu"], data["ext"], data["age"]);
+        })
+        .catch((err) => {
+          console.log("requested temperatures and got error: " + err);
+        })
+        .finally(() => {
+          setTimeout(get_temperatures, 15000);
+        });
+    }
+
+    function update_temp_block(cpu, ext, age) {
+      if (cpu == null && ext == null) {
+        $("#temperature_block").addClass('d-none');
+        return;
+      }
+      if (isNaN(age - 0)) {
+        age = 1
+      }
+      opacity = Math.min(1, 30 / (1 + age));
+      $("#temperature_block").css('opacity', opacity);
+      $("#temperature_block").removeClass('d-none');
+      if (cpu != null) {
+        $("#cpu").removeClass('d-none');
+        $("#cpu_temp").removeClass('d-none');
+        $("#cpu_temp").text(cpu + "°C");
+        if (cpu < 50) {
+          $("#cpu_temp").css('color', 'green');
+        } else if (cpu < 80) {
+          $("#cpu_temp").css('color', 'orange');
+        } else {
+          $("#cpu_temp").css('color', 'red');
+        }
+      } else {
+        $("#cpu").addClass('d-none');
+        $("#cpu_temp").addClass('d-none');
+      }
+      if (ext != null) {
+        $("#ext").removeClass('d-none');
+        $("#ext_temp").removeClass('d-none');
+        $("#ext_temp").text(ext + "°C");
+        if (ext < -10) {
+          $("#ext_temp").css('color', 'orange');
+        } else if (ext < 40) {
+          $("#ext_temp").css('color', 'green');
+        } else if (ext < 50) {
+          $("#ext_temp").css('color', 'orange');
+        } else {
+          $("#ext_temp").css('color', 'red');
+        }
+      } else {
+        $("#ext").addClass('d-none');
+        $("#ext_temp").addClass('d-none');
+      }
+    }
 
     function show_spinner() {
       document.getElementById("loader").style.display = "block";
