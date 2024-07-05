@@ -105,6 +105,11 @@ for VAR in $SANITIZE_VARS; do
     fi
   else
     echo "removing all references to ${VAR}"
+    case "$MY_VAR" in
+        None | True | False )
+            continue
+            ;;
+    esac
     MY_VAR_ESCAPED="$(sed 's#/#\\/#' <<< "${MY_VAR}")"
     SANITIZED_LOG="$(sed -e "s/${MY_VAR_ESCAPED}/MY_REAL_${VAR}/" <<< "${SANITIZED_LOG}")"
     # Otherwise we just strip it out, and put it back into SANITIZED_LOG
