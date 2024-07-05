@@ -112,7 +112,9 @@ for VAR in $SANITIZE_VARS; do
             continue
             ;;
     esac
-    MY_VAR_ESCAPED="$(sed 's#/#\\/#' <<< "${MY_VAR}")"
+    MY_VAR_ESCAPED="$(sed 's#\\#\\\\#g' <<< "${MY_VAR}")"
+    MY_VAR_ESCAPED="$(sed 's#[]/$*.^[]#\\&#g' <<< "${MY_VAR_ESCAPED}")"
+    #echo "$MY_VAR_ESCAPED" 1>&2
     replace_args+=(-e "s/${MY_VAR_ESCAPED}/MY_REAL_${VAR}/")
     # Otherwise we just strip it out, and put it back into SANITIZED_LOG
   fi
