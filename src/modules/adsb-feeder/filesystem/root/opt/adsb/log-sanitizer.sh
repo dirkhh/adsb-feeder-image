@@ -93,6 +93,8 @@ for i in $(seq $NUM_MICRO_SITES); do
     done
 done
 
+replace_args=()
+
 # For each
 for VAR in $SANITIZE_VARS; do
   # We get the value of the variable
@@ -111,10 +113,13 @@ for VAR in $SANITIZE_VARS; do
             ;;
     esac
     MY_VAR_ESCAPED="$(sed 's#/#\\/#' <<< "${MY_VAR}")"
-    SANITIZED_LOG="$(sed -e "s/${MY_VAR_ESCAPED}/MY_REAL_${VAR}/" <<< "${SANITIZED_LOG}")"
+    replace_args+=(-e "s/${MY_VAR_ESCAPED}/MY_REAL_${VAR}/")
     # Otherwise we just strip it out, and put it back into SANITIZED_LOG
   fi
 done
+
+SANITIZED_LOG="$(sed "${replace_args[@]}" <<< "${SANITIZED_LOG}")"
+
 # print a new line do delineate our debug output above
 echo
 # now get rid of anything that looks like an IP address
