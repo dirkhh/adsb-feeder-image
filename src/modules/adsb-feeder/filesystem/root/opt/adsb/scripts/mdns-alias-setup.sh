@@ -16,6 +16,10 @@ if [ "$1" = "" ] ; then
     exit 1
 else
     host_name="$1"
+    # ensure that the local hosts file includes the hostname
+    if ! grep -q "$host_name" /etc/hosts ; then
+        echo "127.0.2.1 $host_name" >> /etc/hosts
+    fi
     echo "set up mDNS alias for $host_name"
     if systemctl is-active --quiet "adsb-avahi-alias@${host_name}.local.service" ; then
         systemctl restart "adsb-avahi-alias@${host_name}.local.service"
