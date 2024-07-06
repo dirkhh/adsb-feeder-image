@@ -1,4 +1,5 @@
 Changes since v2.1.3 include:
+- download Odroid base images from our server (this way our builds no longer randomly break)
 - make sure adsb-feeder.local continues to work on the network and allow '-' in hostname
 - make sure the updated hostname is included in /etc/hosts
 - more careful quoting of strings when sanitizing the log before upload

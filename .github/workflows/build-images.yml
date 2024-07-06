@@ -51,12 +51,12 @@ jobs:
         - name: odroidc4
           base_arch: arm64
           variant: armbian
-          url: https://github.com/armbian/community/releases/download/24.5.0-trunk.563/Armbian_community_24.5.0-trunk.563_Odroidc4_bookworm_current_6.6.30_minimal.img.xz
+          url: https://test.adsb.im/downloads/Armbian_community_24.8.0-trunk.314_Odroidc4_bookworm_current_6.6.36_minimal.img.xz
           magic_path: "repository/src/image-armbian/odroidc4.img.xz"
         - name: odroidxu4
           base_arch: armv7l
           variant: armbian
-          url: https://dl.armbian.com/odroidxu4/archive/Armbian_24.5.1_Odroidxu4_bookworm_current_6.6.31_minimal.img.xz
+          url: https://test.adsb.im/downloads/Armbian_24.5.3_Odroidxu4_bookworm_current_6.6.36_minimal.img.xz
           magic_path: "repository/src/image-armbian/odroidxu4.img.xz"
         - name: nanopi-neo3-dietpi
           variant: dietpi-fat-2
