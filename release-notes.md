@@ -1,17 +1,7 @@
-Changes since v2.1.2 include:
-- avoid potential race condition when writing config.json (which was hit quite reliably when doing an app install)
-- fixup form value issue with last beta (checkbox value must be 1)
-- index page: improve load time
-- restarting / logstreamer pages: avoid using readystatechange listener to make sure functions don't run unexpectedly
-- if a feeder has working GPS/gpsd that is accessible for the Ultrafeeder container, add option to derive location from the GPS data
-- fix zerotier bring up after restore
-- make network checks more robust, trying to deal with corner cases where ICMP may be blocked or have extremely high latency
-- reduce image sizes some more by removing unnecessary components that were being bundled
-- update SDR-E containers
-- address security issues around user input potentially being executed
-- new experimental Raspbian based Le Potato image that supports WiFi with many USB-WiFi adapters
-- many small improvements to logging and debuggability
-- set station name as hostname as well
+Changes since v2.1.3 include:
+- make sure adsb-feeder.local continues to work on the network and allow '-' in hostname
+- make sure the updated hostname is included in /etc/hosts
+- more careful quoting of strings when sanitizing the log before upload
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)

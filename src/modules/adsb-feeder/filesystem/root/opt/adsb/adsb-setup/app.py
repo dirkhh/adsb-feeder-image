@@ -392,8 +392,8 @@ class AdsbIm:
 
             self._d.env_by_tags("app_init_done").value = True
 
-    def onlyAlphaNum(self, name):
-        new_name = "".join(c for c in name if c.isalnum())
+    def onlyAlphaNumDash(self, name):
+        new_name = "".join(c for c in name if c.isalnum() or c == "-")
         new_name = new_name.strip("-")[:63]
         return new_name
 
@@ -402,9 +402,9 @@ class AdsbIm:
         if not os_flag_file.exists():
             return
         # create a valid hostname from the site name and set it up as mDNS alias
-        # while a '-' is allowed in a hostname, the avahi service can't deal with that it seems,
-        # so let's go alphanumeric only
-        host_name = self.onlyAlphaNum(site_name)
+        # initially we only allowed alpha-numeric characters, but after fixing an
+        # error in the service file, we now can allow dash (or hyphen) as well.
+        host_name = self.onlyAlphaNumDash(site_name)
         if host_name:
             subprocess.run(["/usr/bin/bash", "/opt/adsb/scripts/mdns-alias-setup.sh", f"{host_name}"])
             subprocess.run(["/usr/bin/hostnamectl", "hostname", f"{host_name}"])
@@ -1877,7 +1877,7 @@ class AdsbIm:
                         )
                         cmd = ["/usr/bin/tailscale", "up"]
 
-                        name = self.onlyAlphaNum(self._d.env_by_tags("site_name").list_get(0))
+                        name = self.onlyAlphaNumDash(self._d.env_by_tags("site_name").list_get(0))
                         cmd += [f"--hostname={name}"]
 
                         if ts_args:
