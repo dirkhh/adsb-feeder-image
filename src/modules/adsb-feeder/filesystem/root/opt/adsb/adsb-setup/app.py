@@ -242,6 +242,7 @@ class AdsbIm:
         self.app.add_url_rule(f"/api/status/<agg>", "beast", self.agg_status)
         self.app.add_url_rule(f"/api/status/<agg>/<idx>", "beast", self.agg_status)
         self.app.add_url_rule("/api/stage2_connection", "stage2_connection", self.stage2_connection)
+        self.app.add_url_rule("/api/get_temperatures.json", "temperatures", self.temperatures)
         # fmt: on
         self.update_boardname()
         self.update_version()
@@ -2422,6 +2423,18 @@ class AdsbIm:
         if request.method == "POST":
             return self.update()
         return render_template("stage2.html")
+
+    def temperatures(self):
+        temperature_json = {}
+        try:
+            with open("/opt/adsb/extras/temperature.json", "r") as temperature_file:
+                temperature_json = json.load(temperature_file)
+                now = int(time.time())
+                age = now - int(temperature_json.get("now", "0"))
+                temperature_json["age"] = age
+        except:
+            pass
+        return temperature_json
 
     def support(self):
         url = ""
