@@ -8,6 +8,8 @@ if [ -f /opt/adsb/verbose ] ; then
     mv /opt/adsb/verbose /opt/adsb/config/verbose
 fi
 
+echo "$(date -u +"%FT%T.%3NZ") adsb-setup: pre-start.sh"
+
 kill_wait_app() {
     PORT=$(grep AF_WEBPORT /opt/adsb/config/.env | cut -d= -f2)
     PORTHEX=$(printf "%04x" "$PORT")
@@ -34,7 +36,10 @@ if [[ -f "/opt/adsb/finish-update.done" ]]; then
     # so we have completed one of the 'post 0.15' updates already.
     # let's see if the version changed (i.e. if this is another new update)
     # if not, then we ran this script already and can exit
-    cmp /opt/adsb/finish-update.done /opt/adsb/adsb.im.version > /dev/null 2>&1 && exit 0
+    if cmp /opt/adsb/finish-update.done /opt/adsb/adsb.im.version > /dev/null 2>&1; then
+        echo "$(date -u +"%FT%T.%3NZ") adsb-setup: pre-start.sh done"
+        exit 0
+    fi
 else
     ACTION="initial install of"
 fi
@@ -74,3 +79,6 @@ fi
 
 # remember that we handled the housekeeping for this version
 cp /opt/adsb/adsb.im.version /opt/adsb/finish-update.done
+
+
+echo "$(date -u +"%FT%T.%3NZ") adsb-setup: pre-start.sh done"
