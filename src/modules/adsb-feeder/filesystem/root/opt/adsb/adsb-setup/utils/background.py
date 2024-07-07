@@ -7,9 +7,8 @@ class Background:
         self._function = function
         self._running = False
 
-        # time first run with no delay
-        self._timer = Timer(0, self._run)
-        self._timer.start()
+        self._timer = None
+        self.schedule()
 
     def schedule(self):
         if not self._running:
