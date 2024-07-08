@@ -60,8 +60,8 @@ an indoor or (much better) outdoor antenna is all you need. More detail on the [
 - if doing this with the RPi image, only use the 'wifi setup' option to make sure the image can connect to your wifi - everything else should be
 - using a DietPi or non-Raspberry image, WiFi is either unsupported (non-Raspberry boards) or needs to be setup using a text editor making changes to two files on the mountable partifion of the feeder image. There's a README file with instructions in the same folder.
 - boot from the image
-- wait a couple of minutes for the initial boot to complete (on the install-on-boot _iob_ images that can mean 20+ minutes if your internet is slow), then connect to the [ADSB-PI Setup Page](http://adsb-feeder.local) -- this link
-_should_ work to find the freshly booted system on your local network - assuming you have a reasonably standard setup with mDNS enabled. If this fails. got to the [adsb.im redirector](http://my.adsb.im) - which should forward you to the right local address on your network. In the rare case where this fails as well you'll need to manually find the board's IP address - either using a connected keyboard / monitor, or via your router or other source of local IP addresses.
+- wait a couple of minutes for the initial boot to complete (with the DietPi based images that can mean quite a while, sometimes up to 20+ minutes if your internet is slow), then connect to the [ADSB-PI Setup Page](http://adsb-feeder.local) -- this link _should_ work to find the freshly booted system on your local network - assuming you have a reasonably standard setup with mDNS enabled. If this fails. got to the [adsb.im redirector](http://my.adsb.im) - which should forward you to the right local address on your network. In the rare case where this fails as well you'll need to manually find the board's IP address - either using a connected keyboard / monitor, or via your router or other source of local IP addresses.
+Please note: if you have more than one ADSB.im feeder on the same network, they will be assigned names like `adsb-feeder-2.local`, etc. So please pay attention which of the different systems you are connecting to in that case.
 - on the setup website enter the latitude, longitude, and elevation of your receiver as well as a name.
 - there's a convenient button to get the correct time zone from your browser
 - finally there's a quick selection of the 'semi anonymous' aggregators to submit data to - the ones where you need accounts are on a separate config page
@@ -73,7 +73,7 @@ _should_ work to find the freshly booted system on your local network - assuming
 
 ### for VirtualBox or VMware Workstation / Fusion
 
-Download the `adsb-im-iob-x86-64-vm-*.ova` for the latest release. Double click on the OVA (which should open your virtualization software). Finish the import (under VMware you'll get a warning about a compatibility issue, simply clicking retry should get you past that). Before you start the VM, pass your SDR (which should be connected to a USB port of your PC or Mac) through to that VM. How this is done varries by product and the OS you are running on (Windows, macOS, Linux), but basically in all cases there is an option to pass a USB device to a VM - select your SDR in that list.
+Download the `adsb-im-x86-64-vm-*.ova.xz` for the latest release. Double click on the OVA (which should open your virtualization software). Finish the import (under VMware you'll get a warning about a compatibility issue, simply clicking retry should get you past that). Before you start the VM, pass your SDR (which should be connected to a USB port of your PC or Mac) through to that VM. How this is done varries by product and the OS you are running on (Windows, macOS, Linux), but basically in all cases there is an option to pass a USB device to a VM - select your SDR in that list.
 
 Now boot the image and wait a brief while until the console screen stops scrolling and shows a DietPi startup screen that below the two yellow lines presents you with an IP address. Connect to this IP address from your browser and you'll be able to set up the feeder and start sending data to the aggregators of your choice.
 
@@ -83,8 +83,8 @@ As mentioned above, there are known issues with USB timing when accessing an SDR
 
 You need to be able to ssh into your Proxmox system with the root account.
 - download the x86-64-vm proxmox image
-- copy it to the proxmox server: `scp adsb-im-iob-x86-64-vm*.tar.xz root@<proxmox-ip or name>`
-- unpack the image on the server and create a fresh VM: `ssh root@<proxmox-ip or name> "tar xJf adsb-im-iob-x86-64-vm*.tar.xz && bash ./pve-vmcreate.sh -s 16G"`
+- copy it to the proxmox server: `scp adsb-im-x86-64-vm*.tar.xz root@<proxmox-ip or name>`
+- unpack the image on the server and create a fresh VM: `ssh root@<proxmox-ip or name> "tar xJf adsb-im-x86-64-vm*.tar.xz && bash ./pve-vmcreate.sh -s 16G"`
 - after this process completes, you should see the new VM in the Proxmox web UI
 - start the VM, wait for the first boot to complete, and then connect to it's web interface as usual
 - remember to pass through the SDR USB device to the VM before trying to configure the feeder

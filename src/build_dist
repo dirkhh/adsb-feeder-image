@@ -13,8 +13,7 @@ export PATH=$PATH:$CUSTOM_PI_OS_PATH
 # becomes a no-op at first boot. That increases consistency without adding
 # significant overhead
 VARIANT="$1"
-[[ "$VARIANT" == "dietpi"* ]] && VARIANT="iob-${VARIANT}"
-if [[ "$VARIANT" == "iob-dietpi"* ]] ; then
+if [[ "$VARIANT" == "dietpi"* ]] ; then
     VERSION="$DIST_VERSION"
     GIT_COMMIT_SHA=$(git rev-parse HEAD)     # this means that this image WILL FAIL if the code wasn't pushed to GitHub
 
@@ -30,7 +29,7 @@ if [[ "$VARIANT" == "iob-dietpi"* ]] ; then
     fi
     echo "$BASE_IMG"
     MNT_DIR=$(mktemp -d)
-    if [[ "$VARIANT" == "iob-dietpi-fat-2" ]] ; then
+    if [[ "$VARIANT" == "dietpi-fat-2" ]] ; then
         # what we want to do is this:
         # mount_image "$BASE_IMG" 1 "$MNT_DIR" "media" 2
         # but that unfortunately doesn't work if the fat partition is after the root partition
@@ -64,7 +63,7 @@ if [[ "$VARIANT" == "iob-dietpi"* ]] ; then
         sudo mount -o bind /dev/pts "$mount_path/dev/pts"
         sudo mount -o bind /proc "$mount_path/proc"
         CONFIG_DIR="media"
-    elif [[ "$VARIANT" == "iob-dietpi-root-only" ]] ; then
+    elif [[ "$VARIANT" == "dietpi-root-only" ]] ; then
         # I think that's only the VM image, but let's keep it generic in the descriptor
         # here we don't need to mount a second partition at all; instead we just modify the files in /boot on the root partition
         # we do, however, need to make sure that the image is big enough - the VM disks come only with about a gig of storage which
@@ -138,13 +137,13 @@ EOF
     # reduce default networking timeout from 300 to 120 seconds for dietpi
     echo WAIT_ONLINE_TIMEOUT=120 >> "$MNT_DIR"/etc/default/networking
 
-    sed -i "s/ADSB_RANDOM_PASSWORD/$ROOT_PWD/" "${DIR}/variants/iob-dietpi/dietpi.txt"
-    echo "AUTO_SETUP_SSH_PUBKEY=$SSH_PUB_KEY" >> "${DIR}/variants/iob-dietpi/dietpi.txt"
-    cp "${DIR}/variants/iob-dietpi/dietpi.txt" "$MNT_DIR"/"$CONFIG_DIR"
-    cp "${DIR}/variants/iob-dietpi/Automation_Custom_Script.sh" "$MNT_DIR"/"$CONFIG_DIR"
+    sed -i "s/ADSB_RANDOM_PASSWORD/$ROOT_PWD/" "${DIR}/variants/dietpi/dietpi.txt"
+    echo "AUTO_SETUP_SSH_PUBKEY=$SSH_PUB_KEY" >> "${DIR}/variants/dietpi/dietpi.txt"
+    cp "${DIR}/variants/dietpi/dietpi.txt" "$MNT_DIR"/"$CONFIG_DIR"
+    cp "${DIR}/variants/dietpi/Automation_Custom_Script.sh" "$MNT_DIR"/"$CONFIG_DIR"
     cp "${DIR}/modules/adsb-feeder/filesystem/root/boot/ADSB-README.txt" "$MNT_DIR"/"$CONFIG_DIR"
     unmount_image "$MNT_DIR"
-    if [[ "$VARIANT" == "iob-dietpi-root-only" && "$BASE_IMG" == *"VM"* ]] ; then
+    if [[ "$VARIANT" == "dietpi-root-only" && "$BASE_IMG" == *"VM"* ]] ; then
         # now let's create all of the different VM images that DietPi knows about
         if [[ ! -d "${DIR}/../../DietPi" ]] ; then
             echo "DietPi not found in \${DIR}/../../"
@@ -156,7 +155,7 @@ EOF
         pwd
         ls -l
     fi
-    if [[ "$VARIANT" == "iob-dietpi-root-only" && "$BASE_IMG" == *"NativePC"* ]] ; then
+    if [[ "$VARIANT" == "dietpi-root-only" && "$BASE_IMG" == *"NativePC"* ]] ; then
         # now let's create the installer iso image
         if [[ ! -d "${DIR}/../../DietPi" ]] ; then
             echo "DietPi not found in \${DIR}/../../"
