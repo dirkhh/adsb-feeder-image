@@ -206,15 +206,11 @@ jobs:
         fi
         sudo modprobe loop
         cd repository/src
-        if [ "${DIETPI_NATIVE}" = "1" ] ; then
-          cp config.diet config
-        fi
         # if BASE_ARCH is set, add it to config
         if [ -n "${BASE_ARCH}" ]; then
           echo "export BASE_ARCH=${BASE_ARCH}" >> config
         fi
-        if [[ "${VARIANT}" =~ ^iob ]] ; then fnprefix="adsb-im-iob" ; else fnprefix="adsb-im" ; fi
-        feeder_image_name="${fnprefix}-${IMG_NAME}-${{ steps.tag.outputs.tag }}.img"
+        feeder_image_name="adsb-im-${IMG_NAME}-${{ steps.tag.outputs.tag }}.img"
         echo "export BASE_USER_PASSWORD=${{ secrets.USER_PASSWORD }}" >> config
         echo "export ROOT_PWD=${{ secrets.ROOT_PASSWORD }}" >> config
         echo "export SSH_PUB_KEY='${{ secrets.SSH_KEY }}'" >> config
@@ -283,14 +279,12 @@ jobs:
         *-x86-64-vm*)
           NAME=${IMAGE%.img}
           echo "name: ${NAME}"
-          if [ "${DIETPI_NATIVE}" != "1" ] ; then
-            cp ../repository/src/tools/pve-vmcreate.sh .
-            qemu-img convert -f raw ${IMAGE} -O qcow2 ${NAME}.qcow2
-            XZ_OPT="-T0 --fast" tar cJf ${NAME}-proxmox.tar.xz ${NAME}.qcow2 pve-vmcreate.sh
-            echo "created tar file ${NAME}-proxmox.tar.xz"
-            ls -l ${NAME}-proxmox.tar.xz
-            sudo rm -f ${NAME}.qcow2 pve-vmcreate.sh
-          fi
+          cp ../repository/src/tools/pve-vmcreate.sh .
+          qemu-img convert -f raw ${IMAGE} -O qcow2 ${NAME}.qcow2
+          XZ_OPT="-T0 --fast" tar cJf ${NAME}-proxmox.tar.xz ${NAME}.qcow2 pve-vmcreate.sh
+          echo "created tar file ${NAME}-proxmox.tar.xz"
+          ls -l ${NAME}-proxmox.tar.xz
+          sudo rm -f ${NAME}.qcow2 pve-vmcreate.sh
           qemu-img convert -f raw "${IMAGE}" -O vmdk ${NAME}.vmdk
           lz4 --fast --favor-decSpeed ${NAME}.vmdk ${NAME}.vmdk.lz4
           rm -f ${NAME}.vmdk
