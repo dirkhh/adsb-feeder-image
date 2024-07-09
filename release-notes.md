@@ -1,8 +1,7 @@
-Changes since v2.1.3 include:
-- download Odroid base images from our server (this way our builds no longer randomly break)
-- make sure adsb-feeder.local continues to work on the network and allow '-' in hostname
-- make sure the updated hostname is included in /etc/hosts
-- more careful quoting of strings when sanitizing the log before upload
+Changes since v2.1.4 include:
+- remove obsolete GitHub Action, references to iob images, and the remainders of the initial attempts to build DietPi images with CustomPiOS
+- add several stubs for additional services that aren't fully integrated, but allow managing a pingfail service and integrating CPU/external temperature sensor in the UI template
+- fix potential 501 error on startup by avoiding a delayed start of some maintenance tasks
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)
