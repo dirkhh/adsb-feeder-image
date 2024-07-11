@@ -5,10 +5,22 @@
 <h1 class="mt-3 text-center text-danger">{% block title %} Support Info {% endblock %}</h1>
 <p>Please cut and paste (or provide a screenshot of) this data when asking for help.</p>
 <ul>
-  <li><span style="display: inline-block; width: 6em;"><strong>Current:</strong></span>{{ current }}</li>
-  <li><span style="display: inline-block; width: 6em;"><strong>Board:</strong></span>{{ board }}</li>
-  <li><span style="display: inline-block; width: 6em;"><strong>Base:</strong></span>{{ base }}</li>
-  <li><span style="display: inline-block; width: 6em;"><strong>Kernel:</strong></span>{{ kernel }}</li>
+  <li><span style="display: inline-block; width: 6em;"><strong>Current:</strong></span> {{ current }}</li>
+  <li><span style="display: inline-block; width: 6em;"><strong>Board:</strong></span> {{ board }}</li>
+  <li><span style="display: inline-block; width: 6em;"><strong>Base:</strong></span> {{ base }}</li>
+  <li><span style="display: inline-block; width: 6em;"><strong>Kernel:</strong></span> {{ kernel }}</li>
+  <li><span style="display: inline-block; width: 6em;"><strong>Power:</strong></span> Undervoltage
+    {% if not env_value_by_tag('under_voltage') %}not{% endif %} reported</li>
+  <li><span style="display: inline-block; width: 6em;"><strong>DNS:</strong></span>
+    {% if env_value_by_tag('dns_state') %} DNS appears to be working{% else %} The feeder cannot resolve DNS queries
+    {% endif %}
+  </li>
+  <li id="ip-mismatch" class="d-none"><span style="display: inline-block; width: 6em;"><strong>IP:</strong></span>
+    Your browser and the feeder have different external IP addresses.
+  </li>
+  <li id="ip-match" class="d-none"><span style="display: inline-block; width: 6em;"><strong>Network/IP:</strong></span>
+    Your browser and the feeder have the same external IP address.
+  </li>
   <li><strong>Containers:</strong>
     <ul>{% for container in containers %}<li>{{ container }}</li>{% endfor %}</ul>
   </li>
@@ -30,4 +42,31 @@
     <pre>{{ storage }}</pre>
   </li>
 </ul>
+<script>
+  let browser_ip = null;
+  let feeder_ip = null;
+  function compareIps() {
+    if (feeder_ip == null || browser_ip == null) {
+      return;
+    }
+    if (browser_ip != feeder_ip) {
+      console.log("IP check: browser got", browser_ip, "feeder has", feeder_ip);
+      $("#ip-mismatch").removeClass("d-none")
+    } else {
+      $("#ip-match").removeClass("d-none")
+    }
+  }
+  fetch("https://api.ipify.org?format=json")
+    .then(response => response.json())
+    .then(data => {
+      browser_ip = data["ip"];
+      compareIps();
+    });
+  fetch("/api/ip_info")
+    .then(response => response.json())
+    .then(data => {
+      feeder_ip = data["feeder_ip"];
+      compareIps();
+    });
+</script>
 {% endblock %}
