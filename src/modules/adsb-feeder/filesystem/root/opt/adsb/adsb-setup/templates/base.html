@@ -255,7 +255,9 @@
           }
         });
       });
-
+      {% if is_enabled('temperature_block') %}
+      get_temperatures();
+      {% endif %}
     });
   </script>
 </head>
