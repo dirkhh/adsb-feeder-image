@@ -13,6 +13,9 @@ ${SEPARATOR}
 uname -a:
 $(uname -a)
 ${SEPARATOR}
+dmesg | grep -iE under.?voltage:
+$(dmesg | grep -iE under.?voltage)
+${SEPARATOR}
 df:
 $(df -h | grep -v overlay)
 ${SEPARATOR}
