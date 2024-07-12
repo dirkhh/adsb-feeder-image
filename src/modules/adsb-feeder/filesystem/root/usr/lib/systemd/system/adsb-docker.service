@@ -6,7 +6,7 @@ PartOf=docker.service
 [Service]
 SyslogIdentifier=adsb-docker
 WorkingDirectory=/opt/adsb
-ExecStartPre=-mount -o remount,exec /run
+ExecStartPre=-/usr/bin/bash -c "mount -o remount,exec,size=$(( $(cat /proc/meminfo | grep -i 'memtotal' | grep -o '[[:digit:]]*') / 2 ))k /run"
 ExecStart=/opt/adsb/docker-compose-start
 RemainAfterExit=yes
 ExecStop=/opt/adsb/docker-compose-adsb stop -t 30
