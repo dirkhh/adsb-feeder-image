@@ -1,4 +1,5 @@
 Changes since v2.1.4 include:
+- increase size of /run to make sure we don't run out of space for the containers
 - add undervoltage and networking issues to the Support Info page
 - remove obsolete GitHub Action, references to iob images, and the remainders of the initial attempts to build DietPi images with CustomPiOS
 - add several stubs for additional services that aren't fully integrated, but allow managing a pingfail service and integrating CPU/external temperature sensor in the UI template
