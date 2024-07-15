@@ -1211,7 +1211,7 @@ class AdsbIm:
             if do_import or not self._d.env_by_tags("site_name").list_get(n):
                 # only accept the remote name if this is our initial import
                 # after that the user may have overwritten it
-                self._d.env_by_tags("site_name").list_set(n, self.unique_site_name(base_info["name"]))
+                self._d.env_by_tags("site_name").list_set(n, self.unique_site_name(base_info["name"], n))
             self._d.env_by_tags("lat").list_set(n, base_info["lat"])
             # deal with backwards compatibility
             lon = base_info.get("lon", None)
