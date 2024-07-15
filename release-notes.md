@@ -1,4 +1,5 @@
 Changes since v2.1.4 include:
+- deal with another random change in the airplanes.live status json; at least this change makes things more logical, so I guess I shouldn't complain
 - don't unnecessarily add a '_' to the end of a micro feeder site name
 - increase size of /run to make sure we don't run out of space for the containers
 - add undervoltage and networking issues to the Support Info page

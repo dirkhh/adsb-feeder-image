@@ -243,7 +243,11 @@ class AggStatus:
                 if mlat_clients:
                     self._mlat = (
                         T.Yes
-                        if any(isinstance(mc.get("uuid"), list) and mc.get("uuid")[0] == uuid for mc in mlat_clients)
+                        if any(
+                            (isinstance(mc.get("uuid"), list) and mc.get("uuid")[0] == uuid)
+                            or (isinstance(mc.get("uuid"), str) and mc.get("uuid") == uuid)
+                            for mc in mlat_clients
+                        )
                         else T.No
                     )
                 self._last_check = datetime.now()
