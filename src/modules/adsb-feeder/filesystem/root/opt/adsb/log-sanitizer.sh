@@ -23,25 +23,25 @@ free -h:
 $(free -h)
 ${SEPARATOR}
 docker ps:
-$(docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Image}}")
+$(timeout 4 docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Image}}")
 ${SEPARATOR}
 docker images:
-$(docker images -a --format "{{.Repository}}:{{.Tag}}")
+$(timeout 4 docker images -a --format "{{.Repository}}:{{.Tag}}")
 ${SEPARATOR}
 docker network ls:
-$(docker network ls)
+$(timeout 4 docker network ls)
 ${SEPARATOR}
 docker system df:
-$(docker system df)
+$(timeout 4 docker system df)
 ${SEPARATOR}
 lsusb -vt:
-$(lsusb -vt)
+$(timeout 4 lsusb -vt)
 ${SEPARATOR}
 grep -e sdr_info /opt/adsb/adsb-setup.log:
 $(grep -e sdr_info /opt/adsb/adsb-setup.log)
 ${SEPARATOR}
 lsusb -v:
-$(lsusb -v)
+$(timeout 4 lsusb -v)
 ${SEPARATOR}
 config.json:
 $(</opt/adsb/config/config.json)
