@@ -220,7 +220,7 @@ class AdsbIm:
         self.app.add_url_rule("/backupexecuteconfig", "backupexecuteconfig", self.backup_execute_config)
         self.app.add_url_rule("/restore", "restore", self.restore, methods=["GET", "POST"])
         self.app.add_url_rule("/executerestore", "executerestore", self.executerestore, methods=["GET", "POST"])
-        self.app.add_url_rule("/advanced", "advanced", self.advanced, methods=["GET", "POST"])
+        self.app.add_url_rule("/sdr_setup", "sdr_setup", self.sdr_setup, methods=["GET", "POST"])
         self.app.add_url_rule("/visualization", "visualization", self.visualization, methods=["GET", "POST"])
         self.app.add_url_rule("/expert", "expert", self.expert, methods=["GET", "POST"])
         self.app.add_url_rule("/systemmgmt", "systemmgmt", self.systemmgmt, methods=["GET", "POST"])
@@ -1079,12 +1079,12 @@ class AdsbIm:
         return json.dumps({"beast": status.beast, "mlat": status.mlat})
 
     @check_restart_lock
-    def advanced(self):
+    def sdr_setup(self):
         if request.method == "POST":
             return self.update()
         if self._d.is_enabled("stage2"):
             return self.visualization()
-        return render_template("advanced.html")
+        return render_template("sdr_setup.html")
 
     def visualization(self):
         if request.method == "POST":
@@ -2237,13 +2237,13 @@ class AdsbIm:
                         pass
             return redirect(url)
         # If we have more than one SDR, or one of them is an airspy,
-        # we need to go to advanced - unless we have at least one of the serials set up
+        # we need to go to sdr_setup - unless we have at least one of the serials set up
         # for 978 or 1090 reporting
 
         # do we have duplicate SDR serials?
         if len(self._sdrdevices.duplicates) > 0:
-            print_err("director redirecting to advanced: duplicate SDR serials")
-            return self.advanced()
+            print_err("director redirecting to sdr_setup: duplicate SDR serials")
+            return self.sdr_setup()
 
         # check that "something" is configured as input
         if (
@@ -2255,8 +2255,8 @@ class AdsbIm:
             )
             and not self._d.is_enabled("stage2")
         ):
-            print_err("director redirecting to advanced: devices present but not configured")
-            return self.advanced()
+            print_err("director redirecting to sdr_setup: devices present but not configured")
+            return self.sdr_setup()
 
         # if the user chose to individually pick aggregators but hasn't done so,
         # they need to go to the aggregator page
