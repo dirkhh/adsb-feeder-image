@@ -236,6 +236,7 @@ class AdsbIm:
         self.app.add_url_rule("/api/ip_info", "ip_info", self.ip_info)
         self.app.add_url_rule("/api/sdr_info", "sdr_info", self.sdr_info)
         self.app.add_url_rule("/api/base_info", "base_info", self.base_info)
+        self.app.add_url_rule("/api/stage2_info", "stage2_info", self.stage2_info)
         self.app.add_url_rule("/api/stage2_stats", "stage2_stats", self.stage2_stats)
         self.app.add_url_rule("/api/micro_settings", "micro_settings", self.micro_settings)
         self.app.add_url_rule("/api/check_remote_feeder/<ip>", "check_remote_feeder", self.check_remote_feeder)
@@ -875,9 +876,10 @@ class AdsbIm:
         )
         return Response(jsonString, mimetype="application/json")
 
-    def base_info(self):
+    def stage2_info(self):
         if not self._d.is_enabled("stage2"):
-            return self.my_base_info()
+            print_err("/api/stage2_info called but stage2 is not enabled")
+            return self.base_info()
         # for a stage2 we return the base info for each of the micro feeders
         info_array = []
         for i in self.micro_indices():
@@ -928,7 +930,7 @@ class AdsbIm:
                     self._d.env_by_tags("alt").list_set(0, alt)
         return lat, lon, alt
 
-    def my_base_info(self):
+    def base_info(self):
         listener = request.remote_addr
         tm = int(time.time())
         print_err(f"access to base_info from {listener}")

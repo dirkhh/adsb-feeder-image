@@ -397,11 +397,11 @@
   };
   // start the micro feeder check if needed
   check_mf_status();
-  function get_base_info() {
+  function get_stage2_info() {
     let n = parseInt("{{ env_value_by_tag('num_micro_sites') }}")
     if (isNaN(n)) n = 0;
     if (n == 0) return;
-    let url = "/api/base_info";
+    let url = "/api/stage2_info";
     fetch(url, {
       method: "GET", cors: "no-cors"
     })
@@ -418,10 +418,10 @@
         })
       })
       .finally(() => {
-        setTimeout(get_base_info, 300000);
+        setTimeout(get_stage2_info, 300000);
       });
   }
-  get_base_info();
+  get_stage2_info();
 
   $(".accept_edit").on('keypress', function (e) {
     if ((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13)) {
