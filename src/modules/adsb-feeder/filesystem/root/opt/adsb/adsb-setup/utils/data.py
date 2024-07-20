@@ -315,7 +315,7 @@ class Data:
             tags=["1090uk", "key"],
         ),
         # ADSB.im specific
-        Env("_ADSBIM_AGGREGATORS_SELECTION", tags=["aggregators"]),
+        Env("_ADSBIM_AGGREGATORS_SELECTION", tags=["aggregator_choice"]),
         Env(
             "_ADSBIM_BASE_VERSION",
             default="",

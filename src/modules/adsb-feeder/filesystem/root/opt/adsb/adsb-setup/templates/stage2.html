@@ -265,17 +265,17 @@
         </label>
         <br />
         <div>
-          <input type="radio" name="aggregators" id="all" value="all" required {% if env_value_by_tag("aggregators")=="all"
+          <input type="radio" name="aggregator_choice" id="all" value="all" required {% if env_value_by_tag("aggregator_choice")=="all"
       %} checked {% endif %}>
           <label class="form-check-label mr-3" for="all">All</label>
-          <input type="radio" name="aggregators" id="privacy" value="privacy" {% if
-      env_value_by_tag("aggregators")=="privacy" %} checked {% endif %}>
+          <input type="radio" name="aggregator_choice" id="privacy" value="privacy" {% if
+      env_value_by_tag("aggregator_choice")=="privacy" %} checked {% endif %}>
           <label class="form-check-label mr-3" for="privacy">Aggregators with privacy policy</label>
-          <input type="radio" name="aggregators" id="individual" value="individual" {% if
-      env_value_by_tag("aggregators")=="individual" %} checked {% endif %}>
+          <input type="radio" name="aggregator_choice" id="individual" value="individual" {% if
+      env_value_by_tag("aggregator_choice")=="individual" %} checked {% endif %}>
           <label class="form-check-label" for="individual">Pick individually</label>
         </div>
-        <div id="explain-all" style="display: {% if env_value_by_tag('aggregators')=='all' %} block {% else %} none {%
+        <div id="explain-all" style="display: {% if env_value_by_tag('aggregator_choice')=='all' %} block {% else %} none {%
             endif %}; font-size: smaller;">
           With this option you will feed data to
           <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
@@ -290,7 +290,7 @@
           <a href="https://globe.airplanes.live/privacy">airplanes.live</a>,
           <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
         </div>
-        <div id="explain-privacy" style="display: {% if env_value_by_tag('aggregators')=='priv' %} block {% else %}
+        <div id="explain-privacy" style="display: {% if env_value_by_tag('aggregator_choice')=='priv' %} block {% else %}
             none {% endif %}; font-size: smaller;">
           With this option you will feed data to
           <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
@@ -303,7 +303,7 @@
           <a href="https://globe.airplanes.live/privacy">airplanes.live</a>,
           <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
         </div>
-        <div id="explain-individual" style="display: {% if env_value_by_tag('aggregators')=='ind' %} block {% else %}
+        <div id="explain-individual" style="display: {% if env_value_by_tag('aggregator_choice')=='ind' %} block {% else %}
                 none {% endif %}; font-size: smaller;">
           With this option you can make detailed selections on the Aggregator page.
         </div>
@@ -340,7 +340,7 @@
       explainInd.style.display = "block";
     }
   }
-  const aggregatorBtns = document.querySelectorAll('input[name="aggregators"]');
+  const aggregatorBtns = document.querySelectorAll('input[name="aggregator_choice"]');
   aggregatorBtns.forEach((radio) => {
     radio.addEventListener("click", aggregatorClick);
   });

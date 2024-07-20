@@ -86,26 +86,26 @@
     </label>
     <br />
     <div>
-      <input type="radio" name="aggregators" id="all" value="all" required {% if env_value_by_tag("aggregators")=="all"
+      <input type="radio" name="aggregator_choice" id="all" value="all" required {% if env_value_by_tag("aggregator_choice")=="all"
       %} checked {% endif %}>
       <label class="form-check-label mr-3" for="all">All</label>
-      <input type="radio" name="aggregators" id="privacy" value="privacy" {% if
-      env_value_by_tag("aggregators")=="privacy" %} checked {% endif %}>
+      <input type="radio" name="aggregator_choice" id="privacy" value="privacy" {% if
+      env_value_by_tag("aggregator_choice")=="privacy" %} checked {% endif %}>
       <label class="form-check-label mr-3" for="privacy">Aggregators with privacy policy</label>
-      <input type="radio" name="aggregators" id="individual" value="individual" {% if
-      env_value_by_tag("aggregators")=="individual" %} checked {% endif %}>
+      <input type="radio" name="aggregator_choice" id="individual" value="individual" {% if
+      env_value_by_tag("aggregator_choice")=="individual" %} checked {% endif %}>
       <label class="form-check-label" for="individual">Pick individually</label>
-      <input type="radio" name="aggregators" id="micro" value="micro" {% if env_value_by_tag("aggregators")=="micro" %}
-             checked {% endif %}>
+      <input type="radio" name="aggregator_choice" id="micro" value="micro"
+             {% if env_value_by_tag("aggregator_choice")=="micro" %} checked {% endif %}>
       <label class="form-check-label mr-3" for="micro">None (micro feeder)</label>
-      <input type="radio" name="aggregators" id="nano" value="nano" {% if env_value_by_tag("aggregators")=="nano" %}
-             checked {% endif %}>
+      <input type="radio" name="aggregator_choice" id="nano" value="nano"
+             {% if env_value_by_tag("aggregator_choice")=="nano" %} checked {% endif %}>
       <label class="form-check-label mr-3" for="nano">None (nano feeder)</label>
-      <input type="radio" name="aggregators" id="stage2" value="stage2" {% if mem <= 1800000 %}disabled{% endif %}
-             {% if env_value_by_tag("aggregators")=="stage2" %} checked {% endif %}>
+      <input type="radio" name="aggregator_choice" id="stage2" value="stage2" {% if mem <= 1800000 %}disabled{% endif %}
+             {% if env_value_by_tag("aggregator_choice")=="stage2" %} checked {% endif %}>
       <label class="form-check-label mr-3" for="stage2">Stage 2 setup (select these later)</label>
     </div>
-    <div id="explain-all" style="display: {% if env_value_by_tag('aggregators')=='all' %} block {% else %} none {%
+    <div id="explain-all" style="display: {% if env_value_by_tag('aggregator_choice')=='all' %} block {% else %} none {%
             endif %}; font-size: smaller;">
       With this option you will feed data to
       <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
@@ -120,7 +120,7 @@
       <a href="https://globe.airplanes.live/privacy">airplanes.live</a>,
       <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
     </div>
-    <div id="explain-privacy" style="display: {% if env_value_by_tag('aggregators')=='priv' %} block {% else %}
+    <div id="explain-privacy" style="display: {% if env_value_by_tag('aggregator_choice')=='priv' %} block {% else %}
             none {% endif %}; font-size: smaller;">
       With this option you will feed data to
       <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
@@ -133,17 +133,17 @@
       <a href="https://globe.airplanes.live/privacy">airplanes.live</a>,
       <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
     </div>
-    <div id="explain-individual" style="display: {% if env_value_by_tag('aggregators')=='ind' %} block {% else %}
+    <div id="explain-individual" style="display: {% if env_value_by_tag('aggregator_choice')=='ind' %} block {% else %}
                 none {% endif %}; font-size: smaller;">
       With this option you can make detailed selections on the Aggregator page.
     </div>
-    <div id="explain-micro" style="display: {% if env_value_by_tag('aggregators')=='micro' %} block {% else %}
-                none {% endif %}; font-size: smaller;">
+    <div id="explain-micro" style="display: {% if env_value_by_tag('aggregator_choice')=='micro' %} block {% else %}
+                    none {% endif %}; font-size: smaller;">
       With this option the image will be set up as a micro feeder, minimizing memory use and disabling many features.
       This is designed to work with a second stage image that uses this feeder as its input and creates the map, feeds
       the aggregators, etc.
     </div>
-    <div id="explain-nano" style="display: {% if env_value_by_tag('aggregators')=='nano' %} block {% else %}
+    <div id="explain-nano" style="display: {% if env_value_by_tag('aggregator_choice')=='nano' %} block {% else %}
                 none {% endif %}; font-size: smaller;">
       With this option the image will be set up as a nano feeder, even more minimizing memory use and disabling many
       features, including local map and graphs running on the nano feeder.
@@ -151,7 +151,7 @@
       the aggregators, etc. Compared to the micro feeder option this removes more local features and is additionally
       optimized to reduce disk IO.
     </div>
-    <div id="explain-stage2" style="display: {% if env_value_by_tag('aggregators')=='stage2' %} block {% else %}
+    <div id="explain-stage2" style="display: {% if env_value_by_tag('aggregator_choice')=='stage2' %} block {% else %}
                     none {% endif %}; font-size: smaller;">
       With this option the image will be set up as a stage 2 system, designed to connect to one or more micro feeder(s).
       You can select for each of them individually which aggregators you want to feed, and you get a combined map of all
@@ -237,7 +237,7 @@
       explainStage2.style.display = "block";
     }
   }
-  const aggregatorBtns = document.querySelectorAll('input[name="aggregators"]');
+  const aggregatorBtns = document.querySelectorAll('input[name="aggregator_choice"]');
   aggregatorBtns.forEach((radio) => {
     radio.addEventListener("click", aggregatorClick);
   });

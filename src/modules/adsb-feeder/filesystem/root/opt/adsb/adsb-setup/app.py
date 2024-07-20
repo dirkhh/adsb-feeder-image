@@ -957,7 +957,7 @@ class AdsbIm:
                     "dump978_at_port": (
                         self._d.env_by_tags("uatport").value if self._d.list_is_enabled(["uat978"], 0) else 0
                     ),
-                    "brofm_capable": (self._d.env_by_tags("aggregators").value == "micro"),
+                    "brofm_capable": (self._d.env_by_tags("aggregator_choice").value in ["micro", "nano"]),
                 }
             )
         )
@@ -995,7 +995,7 @@ class AdsbIm:
 
     def stage2_connection(self):
         if (
-            not self._d.env_by_tags("aggregators").value == "micro"
+            not self._d.env_by_tags("aggregator_choice").value in ["micro", "nano"]
             or len(self._d.env_by_tags("last_stage2_contact").value) != 2
         ):
             return Response(json.dumps({"stage2_connected": "never"}), mimetype="application/json")
@@ -1556,7 +1556,7 @@ class AdsbIm:
                         print_err(f"empty key, disabling: agg: {agg}, sitenum: {sitenum}")
                         self._d.env_by_tags([agg, "is_enabled"]).list_set(sitenum, False)
 
-        if self._d.env_by_tags("aggregators").value == "micro":
+        if self._d.env_by_tags("aggregator_choice").value in ["micro", "nano"]:
             self._d.env_by_tags("beast-reduce-optimize-for-mlat").value = True
         else:
             self._d.env_by_tags("beast-reduce-optimize-for-mlat").value = False
@@ -1803,7 +1803,7 @@ class AdsbIm:
                         self._multi_outline_bg = None
                         self._d.env_by_tags("tar1090_configjs_append").value = ""
                     self._d.env_by_tags("aggregators_chosen").value = False
-                    self._d.env_by_tags("aggregators").value = ""
+                    self._d.env_by_tags("aggregator_choice").value = ""
                 if key == "aggregators":
                     # user has clicked Submit on Aggregator page
                     self._d.env_by_tags("aggregators_chosen").value = True
@@ -2023,7 +2023,7 @@ class AdsbIm:
                         value = "autogain"
                     self._d.env_by_tags(["gain_airspy"]).value = "auto" if value == "autogain" else value
                 # deal with the micro feeder and stage2 initial setup
-                if key == "aggregators" and value == "micro":
+                if key == "aggregator_choice" and value in ["micro", "nano"]:
                     self._d.env_by_tags(["tar1090_ac_db"]).value = False
                     self._d.env_by_tags(["mlathub_disable"]).value = True
                     self._d.env_by_tags("aggregators_chosen").value = True
@@ -2035,7 +2035,7 @@ class AdsbIm:
                 else:
                     self._d.env_by_tags(["tar1090_ac_db"]).value = True
                     self._d.env_by_tags(["mlathub_disable"]).value = False
-                if key == "aggregators" and value == "stage2":
+                if key == "aggregator_choice" and value == "stage2":
                     next_url = url_for("stage2")
                     self._d.env_by_tags("stage2").value = True
                     if not self._multi_outline_bg:
@@ -2049,10 +2049,10 @@ class AdsbIm:
                 # (either in initial setup or when coming back to that setting later), show them
                 # the aggregator selection page next
                 if (
-                    key == "aggregators"
+                    key == "aggregator_choice"
                     and not self._d.is_enabled("stage2")
                     and value == "individual"
-                    and self._d.env_by_tags("aggregators").value != "individual"
+                    and self._d.env_by_tags("aggregator_choice").value != "individual"
                 ):
                     # show the aggregator selection
                     next_url = url_for("aggregators")
