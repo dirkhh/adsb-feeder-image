@@ -1,7 +1,7 @@
 # assemble the docker compose files we want to use
 # this needs to be extended for each new aggregator
 
-COMPOSE_FILES=( "-f" "/opt/adsb/config/docker-compose.yml" "-f" "/opt/adsb/config/dozzle.yml" )
+COMPOSE_FILES=( "-f" "/opt/adsb/config/dozzle.yml" )
 
 if [ -f /opt/adsb/config/.env ] ; then
     if grep "AF_IS_AIRSPY_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
@@ -13,6 +13,11 @@ if [ -f /opt/adsb/config/.env ] ; then
     fi
     if grep "FEEDER_ENABLE_UAT978=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
         COMPOSE_FILES+=( "-f" "/opt/adsb/config/uat978.yml" )
+    fi
+    if grep "_ADSBIM_AGGREGATORS_SELECTION=nano" /opt/adsb/config/.env > /dev/null 2>&1 ; then
+        COMPOSE_FILES+=( "-f" "/opt/adsb/config/nanofeeder.yml" )
+    else
+        COMPOSE_FILES+=( "-f" "/opt/adsb/config/docker-compose.yml" )
     fi
     if ! grep "_ADSBIM_AGGREGATORS_SELECTION=micro" /opt/adsb/config/.env > /dev/null 2>&1 ; then
         # for each of the yml snippets check if this aggregator is enabled
