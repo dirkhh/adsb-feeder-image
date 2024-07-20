@@ -1178,18 +1178,22 @@ class AdsbIm:
 
     def get_base_info(self, n, do_import=False):
         ip = self._d.env_by_tags("mf_ip").list_get(n)
+        port = self._d.env_by_tags("mf_port").list_get(n)
+        if not port:
+            port = "80"
         ip, triplet = mf_get_ip_and_triplet(ip)
 
-        print_err(f"getting info from {ip} with do_import={do_import}")
+        print_err(f"getting info from {ip}:{port} with do_import={do_import}")
         timeout = 2.0
         # try:
         if do_import:
-            micro_settings, status = generic_get_json(f"http://{ip}/api/micro_settings", timeout=timeout)
-            print_err(f"micro_settings API on {ip}: {status}, {micro_settings}")
+            micro_settings, status = generic_get_json(f"http://{ip}:{port}/api/micro_settings", timeout=timeout)
+            print_err(f"micro_settings API on {ip}:{port}: {status}, {micro_settings}")
             if status != 200 or micro_settings == None:
                 # maybe we're running on 1099?
-                micro_settings, status = generic_get_json(f"http://{ip}:1099/api/micro_settings", timeout=timeout)
-                print_err(f"micro_settings API on {ip}:1099: {status}, {micro_settings}")
+                port = "1099"
+                micro_settings, status = generic_get_json(f"http://{ip}:{port}/api/micro_settings", timeout=timeout)
+                print_err(f"micro_settings API on {ip}:{port}: {status}, {micro_settings}")
 
             if status == 200 and micro_settings != None:
                 for key, value in micro_settings.items():
@@ -1204,10 +1208,11 @@ class AdsbIm:
                     if e:
                         e.list_set(n, value)
 
-        base_info, status = generic_get_json(f"http://{ip}/api/base_info", timeout=timeout)
-        if status != 200 or base_info == None:
+        base_info, status = generic_get_json(f"http://{ip}:{port}/api/base_info", timeout=timeout)
+        if (status != 200 or base_info == None) and port == "80":
             # maybe we're running on 1099?
-            base_info, status = generic_get_json(f"http://{ip}:1099/api/base_info", timeout=timeout)
+            port = "1099"
+            base_info, status = generic_get_json(f"http://{ip}:{port}/api/base_info", timeout=timeout)
         if status == 200 and base_info != None:
             print_err(f"got {base_info} for {ip}")
             if do_import or not self._d.env_by_tags("site_name").list_get(n):
@@ -1223,6 +1228,7 @@ class AdsbIm:
             self._d.env_by_tags("alt").list_set(n, base_info["alt"])
             self._d.env_by_tags("tz").list_set(n, base_info["tz"])
             self._d.env_by_tags("mf_version").list_set(n, base_info["version"])
+            self._d.env_by_tags("mf_port").list_set(n, port)
 
             aap = base_info.get("airspy_at_port")
             rap = base_info.get("rtlsdr_at_port")
@@ -1253,39 +1259,40 @@ class AdsbIm:
     def check_remote_feeder(self, ip):
         print_err(f"check_remote_feeder({ip})")
         ip, triplet = mf_get_ip_and_triplet(ip)
-
-        url = f"http://{ip}/api/base_info"
-        print_err(f"checking remote feeder {url}")
-        try:
-            response = requests.get(url, timeout=5.0)
-            print_err(f"response code: {response.status_code}")
-            json_dict = response.json()
-            print_err(f"json_dict: {type(json_dict)} {json_dict}")
-        except:
-            print_err(f"failed to check base_info from remote feeder {ip}")
-        else:
-            if response.status_code == 200:
-                # yay, this is an adsb.im feeder
-                # is it new enough to have the setting transfer?
-                url = f"http://{ip}/api/micro_settings"
-                print_err(f"checking remote feeder {url}")
-                try:
-                    response = requests.get(url, timeout=5.0)
-                except:
-                    print_err(f"failed to check micro_settings from remote feeder {ip}")
-                    json_dict["micro_settings"] = False
-                else:
-                    if response.status_code == 200:
-                        # ok, we have a recent adsb.im version
-                        json_dict["micro_settings"] = True
-                    else:
+        json_dict = {}
+        for port in ["80", "1099"]:
+            url = f"http://{ip}:{port}/api/base_info"
+            print_err(f"checking remote feeder {url}")
+            try:
+                response = requests.get(url, timeout=5.0)
+                print_err(f"response code: {response.status_code}")
+                json_dict = response.json()
+                print_err(f"json_dict: {type(json_dict)} {json_dict}")
+            except:
+                print_err(f"failed to check base_info from remote feeder {ip}:{port}")
+            else:
+                if response.status_code == 200:
+                    # yay, this is an adsb.im feeder
+                    # is it new enough to have the setting transfer?
+                    url = f"http://{ip}:{port}/api/micro_settings"
+                    print_err(f"checking remote feeder {url}")
+                    try:
+                        response = requests.get(url, timeout=5.0)
+                    except:
+                        print_err(f"failed to check micro_settings from remote feeder {ip}")
                         json_dict["micro_settings"] = False
-                # does it support beast reduce optimized for mlat (brofm)?
-                json_dict["brofm_capable"] = bool(json_dict.get("brofm_capable"))
+                    else:
+                        if response.status_code == 200:
+                            # ok, we have a recent adsb.im version
+                            json_dict["micro_settings"] = True
+                        else:
+                            json_dict["micro_settings"] = False
+                    # does it support beast reduce optimized for mlat (brofm)?
+                    json_dict["brofm_capable"] = bool(json_dict.get("brofm_capable"))
 
-            # now return the json_dict which will give the caller all the relevant data
-            # including whether this is a v2 or not
-            return make_response(json.dumps(json_dict), 200)
+                # now return the json_dict which will give the caller all the relevant data
+                # including whether this is a v2 or not
+                return make_response(json.dumps(json_dict), 200)
 
         # ok, it's not a recent adsb.im version, it could still be a feeder
         uf = self._d.env_by_tags(["ultrafeeder", "container"]).value
@@ -1318,7 +1325,7 @@ class AdsbIm:
             return make_response(json.dumps({"status": "fail"}), 200)
         return make_response(json.dumps({"status": "ok"}), 200)
 
-    def import_graphs_and_history_from_remote(self, ip):
+    def import_graphs_and_history_from_remote(self, ip, port):
         print_err(f"importing graphs and history from {ip}")
         # first make sure that there isn't any old data that needs to be moved
         # out of the way
@@ -1328,7 +1335,8 @@ class AdsbIm:
                 self._d.config_path / "ultrafeeder" / ip,
                 self._d.config_path / "ultrafeeder" / f"{ip}-{now}",
             )
-        url = f"http://{ip}/backupexecutefull"
+
+        url = f"http://{ip}:{port}/backupexecutefull"
         # make tmpfile
         fd, tmpfile = tempfile.mkstemp(dir=self._d.config_path / "ultrafeeder")
         os.close(fd)
@@ -1377,8 +1385,9 @@ class AdsbIm:
         n = self._d.env_by_tags("num_micro_sites").value
 
         # store the IP address so that get_base_info works
+        # and assume port is 80 (get_base_info will fix that if it's wrong)
         self._d.env_by_tags("mf_ip").list_set(n + 1, key)
-
+        self._d.env_by_tags("mf_port").list_set(n + 1, "80")
         self._d.env_by_tags("mf_brofm").list_set(n + 1, brofm)
 
         if not is_adsbim:
@@ -1402,8 +1411,9 @@ class AdsbIm:
             n += 1
             self._d.env_by_tags("num_micro_sites").value = n
             if do_restore:
-                print_err(f"attempting to restore graphs and history from {key}")
-                self.import_graphs_and_history_from_remote(key)
+                port = self._d.env_by_tags("mf_port").list_get(n)
+                print_err(f"attempting to restore graphs and history from {key}:{port}")
+                self.import_graphs_and_history_from_remote(key, port)
         else:
             # oh well, remove the IP address
             self._d.env_by_tags("mf_ip").list_remove()

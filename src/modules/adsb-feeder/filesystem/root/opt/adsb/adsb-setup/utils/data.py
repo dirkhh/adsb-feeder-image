@@ -574,6 +574,7 @@ class Data:
             tags=["last_stage2_contact"],
         ),
         Env("AF_MICRO_IP", default=[""], tags=["mf_ip"]),
+        Env("AF_MICRO_PORT", default=[""], tags=["mf_port"]),
         Env("AF_MICRO_BROFM", default=[False], tags=["mf_brofm", "is_enabled"]),
         Env(
             "AF_MICRO_BROFM_CAPABLE",
