@@ -98,6 +98,9 @@
       <input type="radio" name="aggregators" id="micro" value="micro" {% if env_value_by_tag("aggregators")=="micro" %}
              checked {% endif %}>
       <label class="form-check-label mr-3" for="micro">None (micro feeder)</label>
+      <input type="radio" name="aggregators" id="nano" value="nano" {% if env_value_by_tag("aggregators")=="nano" %}
+             checked {% endif %}>
+      <label class="form-check-label mr-3" for="nano">None (nano feeder)</label>
       <input type="radio" name="aggregators" id="stage2" value="stage2" {% if mem <= 1800000 %}disabled{% endif %}
              {% if env_value_by_tag("aggregators")=="stage2" %} checked {% endif %}>
       <label class="form-check-label mr-3" for="stage2">Stage 2 setup (select these later)</label>
@@ -140,6 +143,14 @@
       This is designed to work with a second stage image that uses this feeder as its input and creates the map, feeds
       the aggregators, etc.
     </div>
+    <div id="explain-nano" style="display: {% if env_value_by_tag('aggregators')=='nano' %} block {% else %}
+                none {% endif %}; font-size: smaller;">
+      With this option the image will be set up as a nano feeder, even more minimizing memory use and disabling many
+      features, including local map and graphs running on the nano feeder.
+      This is designed to work with a second stage image that uses this feeder as its input and creates the map, feeds
+      the aggregators, etc. Compared to the micro feeder option this removes more local features and is additionally
+      optimized to reduce disk IO.
+    </div>
     <div id="explain-stage2" style="display: {% if env_value_by_tag('aggregators')=='stage2' %} block {% else %}
                     none {% endif %}; font-size: smaller;">
       With this option the image will be set up as a stage 2 system, designed to connect to one or more micro feeder(s).
@@ -179,6 +190,7 @@
   const explainPriv = document.getElementById("explain-privacy");
   const explainInd = document.getElementById("explain-individual");
   const explainMicro = document.getElementById("explain-micro");
+  const explainNano = document.getElementById("explain-nano");
   const explainStage2 = document.getElementById("explain-stage2");
   function aggregatorClick() {
     if (document.getElementById("all").checked) {
@@ -186,30 +198,42 @@
       explainPriv.style.display = "none";
       explainInd.style.display = "none";
       explainMicro.style.display = "none";
+      explainNano.style.display = "none";
       explainStage2.style.display = "none";
     } else if (document.getElementById("privacy").checked) {
       explainAll.style.display = "none";
       explainPriv.style.display = "block";
       explainInd.style.display = "none";
       explainMicro.style.display = "none";
+      explainNano.style.display = "none";
       explainStage2.style.display = "none";
     } else if (document.getElementById("individual").checked) {
       explainAll.style.display = "none";
       explainPriv.style.display = "none";
       explainInd.style.display = "block";
       explainMicro.style.display = "none";
+      explainNano.style.display = "none";
       explainStage2.style.display = "none";
     } else if (document.getElementById("micro").checked) {
       explainAll.style.display = "none";
       explainPriv.style.display = "none";
       explainInd.style.display = "none";
       explainMicro.style.display = "block";
+      explainNano.style.display = "none";
+      explainStage2.style.display = "none";
+    } else if (document.getElementById("nano").checked) {
+      explainAll.style.display = "none";
+      explainPriv.style.display = "none";
+      explainInd.style.display = "none";
+      explainMicro.style.display = "none";
+      explainNano.style.display = "block";
       explainStage2.style.display = "none";
     } else if (document.getElementById("stage2").checked) {
       explainAll.style.display = "none";
       explainPriv.style.display = "none";
       explainInd.style.display = "none";
       explainMicro.style.display = "none";
+      explainNano.style.display = "none";
       explainStage2.style.display = "block";
     }
   }
