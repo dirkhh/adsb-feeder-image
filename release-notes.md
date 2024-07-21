@@ -1,4 +1,7 @@
 Changes since v2.1.4 include:
+- made micro/nano feeder as an app work again - it seems weird to run this as an app (on port 1099), but maybe there are people who end up doing this reusing an existing DietPi install or something
+- add nano feeder mode that tries to even more reduce disk IO and footprint by turning of maps, stats, and graphs
+- various code cleanups that resulted in more logical api names, among other things 
 - add script to more easily build our images locally - this should allow us to work around the weird GitHub Action issues with Odroid images
 - deal with another random change in the airplanes.live status json; at least this change makes things more logical, so I guess I shouldn't complain
 - don't unnecessarily add a '_' to the end of a micro feeder site name
