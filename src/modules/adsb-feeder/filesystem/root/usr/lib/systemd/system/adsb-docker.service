@@ -14,8 +14,6 @@ RestartSec=30
 TimeoutStartSec=10min
 TimeoutStopSec=2min
 Restart=always
-StandardOutput=append:/opt/adsb/adsb-setup.log
-StandardError=append:/opt/adsb/adsb-setup.log
 
 
 [Install]
