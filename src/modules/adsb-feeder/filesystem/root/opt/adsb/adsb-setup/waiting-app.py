@@ -7,7 +7,7 @@ import math
 import sys
 
 app = Flask(__name__)
-logfile = "/opt/adsb/adsb-setup.log"
+logfile = "/run/adsb-feeder-image.log"
 title = "Restarting the ADS-B Feeder System"
 
 

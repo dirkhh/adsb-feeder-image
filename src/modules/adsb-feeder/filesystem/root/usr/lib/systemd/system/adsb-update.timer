@@ -5,7 +5,7 @@ Description=Run Nightly ADS-B Feeder Image Updates
 
 [Timer]
 Unit=adsb-update.service
-OnCalendar=*-*-* */1:30:00
+OnCalendar=*-*-* *:30:00
 
 [Install]
 WantedBy=timers.target

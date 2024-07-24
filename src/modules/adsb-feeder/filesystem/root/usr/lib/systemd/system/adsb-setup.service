@@ -12,8 +12,8 @@ Type=simple
 RestartSec=5
 StartLimitInterval=1
 StartLimitBurst=100
-StandardOutput=append:/opt/adsb/adsb-setup.log
-StandardError=append:/opt/adsb/adsb-setup.log
+StandardOutput=append:/run/adsb-feeder-image.log
+StandardError=append:/run/adsb-feeder-image.log
 
 [Install]
 WantedBy=multi-user.target

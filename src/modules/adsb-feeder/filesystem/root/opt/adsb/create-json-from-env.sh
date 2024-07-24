@@ -17,10 +17,10 @@ if kill -0 "$PARENTPID" &> /dev/null ; then
 else
     PARENTPROC="process $PARENTPID (appears already gone)"
 fi
-echo "$PARENTPROC called $0" "$@" >> /opt/adsb/adsb-setup.log
+echo "$PARENTPROC called $0" "$@" >> /run/adsb-feeder-image.log
 
 if [ ! -f /opt/adsb/config/config.json ] ; then
-    echo "create config.json file from scratch" >> /opt/adsb/adsb-setup.log
+    echo "create config.json file from scratch" >> /run/adsb-feeder-image.log
     source /opt/adsb/docker.image.versions
     _ADSBIM_BASE_VERSION=$(cat /opt/adsb/adsb.im.version)
     _ADSBIM_CONTAINER_VERSION=$(cat /opt/adsb/adsb.im.version)

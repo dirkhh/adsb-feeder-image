@@ -11,8 +11,18 @@ if [ "$(id -u)" != "0" ] ; then
     exit 1
 fi
 
+# if this gets downloaded to update an existing feeder from a version logging to /opt/adsb
+# to a version logging to /run/adsb-feeder-image.log, we need to initially continue to log to
+# the old target in order for the upgrade logic to work
+# the test with -f will fail both if there's no such file or if it is a symlink to /run/adsb-feeder-image.log
+if [ ! -f /opt/adsb/adsb-setup.log ]
+    LOGFILE="/run/adsb-feeder-image.log"
+else
+    LOGFILE="/opt/adsb/adsb-setup.log"
+fi
+
 start_wait_app() {
-    python3 /opt/adsb/adsb-setup/waiting-app.py "$@" &>> /opt/adsb/adsb-setup.log
+    python3 /opt/adsb/adsb-setup/waiting-app.py "$@" &>> "$LOGFILE"
 }
 kill_wait_app() {
     PORT=$(grep AF_WEBPORT /opt/adsb/config/.env | cut -d= -f2)
@@ -51,15 +61,10 @@ waiting_placeholder() {
 
     # finally start the waiting-app
     PORT=$(grep AF_WEBPORT /opt/adsb/config/.env | cut -d= -f2)
-    start_wait_app "$PORT" /opt/adsb/adsb-setup.log "Updating the" &
+    start_wait_app "$PORT" "$LOGFILE" "Updating the" &
 }
-
-# if this is an update where the previous version of the image used /var/log/adsb-setup.log
-# and this is the first time we use the new location, copy the existing log over
-[ ! -f /opt/adsb/adsb-setup.log ] && [ -f /var/log/adsb-setup.log ] && cp /var/log/adsb-setup.log /opt/adsb/adsb-setup.log
-
 exec 3>&1
-exec &>>/opt/adsb/adsb-setup.log
+exec &>>"$LOGFILE"
 
 # identify the calling process for better log messages
 PARENTPID=$(ps -cp $$ -o ppid="")
@@ -154,11 +159,28 @@ fi
 
 # now we know that we are running the right script in the right place
 DIR=$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")
-echo "running ${DIR}/feeder-update from $TARGET"
+TIMESTAMP=$(date +%Y-%m-%d+%H:%M)
+echo "${TIMESTAMP}: running ${DIR}/feeder-update from $TARGET"
+
+# if this is an update where the previous version of the image used /opt/adsb/adsb-setup.log
+# and this is the first time we use the new location, move the log to /run
+if [ ! -L /opt/adsb/adsb-setup.log ]; then
+    /opt/adsb/docker-compose-adsb stop adsb-setup-proxy
+    # move the log file and create a symlink to tmpfs log
+    # any running process will continue to log to the file in /opt/adsb/logs
+    # after a restart things will log into /run
+    if [ -f /run/adsb-feeder-image.log ]
+    then
+        cp /run/adsb-feeder-image.log /opt/adsb/logs/adsb-setup.log.run."$TIMESTAMP"
+    fi
+    truncate -s 0 /run/adsb-feeder-image.log
+    mv /opt/adsb/adsb-setup.log /opt/adsb/logs/adsb-setup.log."$TIMESTAMP"
+    ln -sf /run/adsb-feeder-image.log /opt/adsb/adsb-setup.log
+    /opt/adsb/docker-compose-adsb start adsb-setup-proxy
+fi
 
 # we know that the adsb-setup app has been shut down so, let's do a quick backup of the config data
 mkdir -p /opt/adsb/config/backups
-TIMESTAMP=$(date +%Y-%m-%d+%H:%M)
 cp /opt/adsb/config/.env /opt/adsb/config/backups/env."$TIMESTAMP" &> /dev/null
 cp /opt/adsb/config/config.json /opt/adsb/config/backups/config.json."$TIMESTAMP" &> /dev/null
 

@@ -37,8 +37,8 @@ ${SEPARATOR}
 lsusb -vt:
 $(timeout 4 lsusb -vt)
 ${SEPARATOR}
-grep -e sdr_info /opt/adsb/adsb-setup.log:
-$(grep -e sdr_info /opt/adsb/adsb-setup.log)
+grep -e sdr_info /run/adsb-feeder-image.log:
+$(grep -e sdr_info /run/adsb-feeder-image.log)
 ${SEPARATOR}
 lsusb -v:
 $(timeout 4 lsusb -v)
@@ -54,7 +54,7 @@ $(journalctl -e -n3000)
 ${SEPARATOR}
 "
 
-oldlog=$(find /opt/adsb -name adsb-setup.log.\* | sort -r | head -n1)
+oldlog=$(find /opt/adsb/logs -name adsb-setup.log.\* | sort -r | head -n1)
 if [[ -n "$oldlog" ]]; then
 
 SANITIZED_LOG+="
@@ -67,7 +67,7 @@ fi
 
 SANITIZED_LOG+="
 adsb-setup.log:
-$(</opt/adsb/adsb-setup.log)
+$(</run/adsb-feeder-image.log)
 ${SEPARATOR}
 "
 

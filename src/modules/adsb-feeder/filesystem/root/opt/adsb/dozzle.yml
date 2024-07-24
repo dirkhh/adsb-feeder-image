@@ -22,4 +22,4 @@ services:
     stop_signal: SIGKILL
     command: tail -n0 -f /opt/adsb-setup.log
     volumes:
-      - /opt/adsb/adsb-setup.log:/opt/adsb-setup.log
+      - /run/adsb-feeder-image.log:/opt/adsb-setup.log

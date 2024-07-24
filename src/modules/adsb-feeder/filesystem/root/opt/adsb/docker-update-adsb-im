@@ -12,7 +12,7 @@ TIME=$(date -Iseconds)
 # this shell script no longer changes or downloads docker.image.versions, this only happens during feeder-update
 # it now merely pulls the container versions as set in config.json / .env
 
-echo "$(date -Iseconds): pulling new container images and restarting docker" >> /opt/adsb/adsb-setup.log
+echo "$(date -Iseconds): pulling new container images and restarting docker" >> /run/adsb-feeder-image.log
 bash ./docker-pull.sh
 bash /opt/adsb/docker-compose-start
 
