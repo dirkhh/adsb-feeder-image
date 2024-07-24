@@ -7,4 +7,4 @@ systemctl restart docker docker.socket adsb-docker
 
 echo "Done."
 echo "If you want to view the progress of container recreation, use this command:"
-echo "tail -f /opt/adsb/adsb-setup.log"
+echo "journalctl -f -n100 -u adsb*"

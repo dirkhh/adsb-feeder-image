@@ -18,7 +18,7 @@ else
     exit
 fi
 
-systemd-run -u adsb-docker-pull bash /opt/adsb/docker-pull.sh
+systemd-run -u adsb-log bash /opt/adsb/docker-pull.sh
 
 # the code below enables the redirection from the my.adsb.im service to the
 # local feeder. this only needs to run if things aren't configured, yet

@@ -8,6 +8,7 @@ import pathlib
 import pickle
 import platform
 import re
+import select
 import shlex
 import requests
 import secrets
@@ -2115,7 +2116,7 @@ class AdsbIm:
                 return redirect(url_for("sdrplay_license"))
 
             # adsb-system-restart mainly does a compose up
-            self._system._restart.bg_run(cmdline="bash /opt/adsb/adsb-system-restart.sh", silent=True)
+            self._system._restart.bg_run(cmdline="systemd_run -u adsb-log /opt/adsb/adsb-system-restart.sh", silent=False)
             return render_template("/restarting.html")
         print_err("base config not completed", level=2)
         return redirect(url_for("director"))
@@ -2509,15 +2510,25 @@ class AdsbIm:
         return render_template("waiting.html", title="ADS-B Feeder performing requested actions")
 
     def stream_log(self):
-        logfile = "/opt/adsb/adsb-setup.log"
+        journalctl = subprocess.Popen(
+            ["/usr/bin/journalctl",
+            "--unit=adsb-setup.service",
+            "--unit=adsb-docker.service",
+            "--unit=adsb-update.service",
+            "--unit=adsb-log.service",
+            "--follow",
+            "--lines=500"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
 
         def tail():
-            with open(logfile, "r") as file:
-                ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
-                tmp = file.read()[-16 * 1024 :]
-                # discard anything but the last 16 kB
-                while self._system._restart.state == "restarting":
-                    tmp += file.read(16 * 1024)
+            poll_obj = select.poll()
+            poll_obj.register(journalctl.stdout)
+            ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
+            while self._system._restart.state == "restarting":
+                if poll_obj.poll(100):
+                    tmp += journalctl.stdout.readline()
                     if tmp and tmp.find("\n") != -1:
                         block, tmp = tmp.rsplit("\n", 1)
                         block = ansi_escape.sub("", block)

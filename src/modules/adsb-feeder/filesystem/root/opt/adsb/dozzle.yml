@@ -20,6 +20,7 @@ services:
     healthcheck:
       disable: true
     stop_signal: SIGKILL
-    command: tail -n0 -f /opt/adsb-setup.log
+    command: /usr/bin/journalctl --unit=adsb-setup.service --unit=adsb-docker.service --unit=adsb-log.service --follow
     volumes:
-      - /opt/adsb/adsb-setup.log:/opt/adsb-setup.log
+      - /etc/machine-id:/etc/machine-id:ro
+      - /run/log/journal:/run/log/journal

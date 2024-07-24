@@ -1,7 +1,5 @@
 #!/bin/bash
 
-exec &>>/opt/adsb/adsb-setup.log
-
 echo "tearing down the docker containers"
 /opt/adsb/docker-compose-adsb down
 echo "bringing up the docker containers"

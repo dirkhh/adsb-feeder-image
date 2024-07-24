@@ -17,4 +17,4 @@ fi
     fi
     echo "adsb-system-restart: trigger docker compose up"
     /opt/adsb/docker-compose-start
-) 2>&1 | tee -a /opt/adsb/adsb-setup.log
+)

@@ -4,10 +4,11 @@ import os
 from sys import argv
 import time
 import math
+import select
+import subprocess
 import sys
 
 app = Flask(__name__)
-logfile = "/opt/adsb/adsb-setup.log"
 title = "Restarting the ADS-B Feeder System"
 
 
@@ -23,14 +24,25 @@ def print_err(*args, **kwargs):
 
 @app.route("/stream-log")
 def stream_log():
+    journalctl = subprocess.Popen(
+        ["/usr/bin/journalctl",
+         "--unit=adsb-setup.service",
+         "--unit=adsb-docker.service",
+         "--unit=adsb-update.service",
+         "--unit=adsb-log.service",
+         "--follow",
+         "--lines=500"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
 
     def tail():
-        with open(logfile, "r") as file:
-            ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
-            tmp = file.read()[-16 * 1024 :]
-            # discard anything but the last 16 kB
-            while True:
-                tmp += file.read(16 * 1024)
+        poll_obj = select.poll()
+        poll_obj.register(journalctl.stdout)
+        ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
+        while True:
+            if poll_obj.poll(100):
+                tmp += journalctl.stdout.readline()
                 if tmp and tmp.find("\n") != -1:
                     block, tmp = tmp.rsplit("\n", 1)
                     block = ansi_escape.sub("", block)
@@ -59,10 +71,8 @@ if __name__ == "__main__":
     if len(argv) >= 2:
         port = int(argv[1])
     if len(argv) >= 3:
-        logfile = argv[2]
-    if len(argv) >= 4:
-        title = argv[3] + " the ADS-B Feeder System"
+        title = argv[2] + " the ADS-B Feeder System"
 
-    print_err(f'Starting waiting-app.py on port {port} with title "{title}" streaming logfile {logfile}')
+    print_err(f'Starting waiting-app.py on port {port} with title "{title}" streaming the journal')
 
     app.run(host="0.0.0.0", port=port)

@@ -9,4 +9,4 @@ if [ $(id -u) != "0" ] ; then
 fi
 
 # docker compose pull on all activated containers (and ultrafeeder even if not configured yet)
-bash /opt/adsb/docker-compose-adsb pull &>>/opt/adsb/adsb-setup.log
+bash /opt/adsb/docker-compose-adsb pull &>>/opt/adsb/adsb.log

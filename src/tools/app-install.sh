@@ -186,7 +186,7 @@ systemctl enable --now adsb-setup
 
 # while the user is getting ready, let's try to pull the key docker
 # containers in the background -- that way startup will feel quicker
-systemd-run -u adsb-docker-pull bash /opt/adsb/docker-pull.sh
+systemd-run -u adsb-log bash /opt/adsb/docker-pull.sh
 
 echo "done installing"
 echo "you can uninstall this software by running"
