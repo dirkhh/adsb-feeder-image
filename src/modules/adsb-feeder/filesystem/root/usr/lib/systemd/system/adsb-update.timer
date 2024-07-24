@@ -1,12 +1,11 @@
-# Timer service that triggers the nightly updates daily at 1:30am
-# for now that's UTC
+# Timer service that triggers the update script every hour at the half hour
 
 [Unit]
 Description=Run Nightly ADS-B Feeder Image Updates
 
 [Timer]
 Unit=adsb-update.service
-OnCalendar=*-*-* 01:30:00
+OnCalendar=*-*-* */1:30:00
 
 [Install]
 WantedBy=timers.target
