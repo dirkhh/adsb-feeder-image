@@ -602,6 +602,7 @@ class Data:
         "RV_CONTAINER": "radarvirtuel",
         "PW_CONTAINER": "planewatch",
         "TNUK_CONTAINER": "1090uk",
+        "DOZZLE_CONTAINER": "dozzle",
     }
     with open(data_path / "docker.image.versions", "r") as file:
         for line in file:

@@ -1,7 +1,7 @@
 services:
   dozzle:
     container_name: dozzle
-    image: amir20/dozzle:latest
+    image: ${DOZZLE_CONTAINER}
     healthcheck:
       disable: true
     restart: always
