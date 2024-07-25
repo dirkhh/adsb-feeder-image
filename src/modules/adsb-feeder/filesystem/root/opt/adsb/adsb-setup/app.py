@@ -2295,7 +2295,7 @@ class AdsbIm:
         if result:
             self.local_address = result
         else:
-            self.local_address = request.host.split(":")[0]
+            self.local_address = ""
 
         if self._d.env_by_tags("tailscale_name").value:
             try:
@@ -2400,10 +2400,15 @@ class AdsbIm:
         stage2_suggestion = board.startswith("Raspberry") and not (
             board.startswith("Raspberry Pi 4") or board.startswith("Raspberry Pi 5")
         )
+        if self.local_address:
+            local_address = self.local_address
+        else:
+            local_address = request.host.split(":")[0]
+
         return render_template(
             "index.html",
             aggregators=aggregators,
-            local_address=self.local_address,
+            local_address=local_address,
             tailscale_address=self.tailscale_address,
             zerotier_address=self.zerotier_address,
             stage2_suggestion=stage2_suggestion,
