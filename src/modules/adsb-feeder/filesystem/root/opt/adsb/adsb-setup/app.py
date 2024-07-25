@@ -133,6 +133,8 @@ class AdsbIm:
 
         self._agg_status_instances = dict()
         self._next_url_from_director = ""
+        self._last_stage2_contact = ""
+        self._last_stage2_contact_time = 0
 
         self._multi_outline_bg = None
 
@@ -934,9 +936,8 @@ class AdsbIm:
         listener = request.remote_addr
         tm = int(time.time())
         print_err(f"access to base_info from {listener}")
-        l_env = self._d.env_by_tags("last_stage2_contact")
-        l_env.list_set(0, listener)
-        l_env.list_set(1, tm)
+        self._last_stage2_contact = listener
+        self._last_stage2_contact_time = tm
         lat, lon, alt = self.get_lat_lon_alt()
         response = make_response(
             json.dumps(
@@ -994,13 +995,10 @@ class AdsbIm:
         return Response(json.dumps(ret), mimetype="application/json")
 
     def stage2_connection(self):
-        if (
-            not self._d.env_by_tags("aggregator_choice").value in ["micro", "nano"]
-            or len(self._d.env_by_tags("last_stage2_contact").value) != 2
-        ):
+        if not self._d.env_by_tags("aggregator_choice").value in ["micro", "nano"] or self._last_stage2_contact == "":
             return Response(json.dumps({"stage2_connected": "never"}), mimetype="application/json")
         now = int(time.time())
-        last = make_int(self._d.env_by_tags("last_stage2_contact").list_get(1))
+        last = self._last_stage2_contact_time
         since = now - last
         hrs, min = divmod(since // 60, 60)
         if hrs > 0:
@@ -1013,7 +1011,7 @@ class AdsbIm:
             json.dumps(
                 {
                     "stage2_connected": time_since,
-                    "address": self._d.env_by_tags("last_stage2_contact").list_get(0),
+                    "address": self._last_stage2_contact,
                 }
             ),
             mimetype="application/json",

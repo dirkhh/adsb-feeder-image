@@ -568,11 +568,6 @@ class Data:
             default=0,
             tags=["num_micro_sites"],
         ),
-        Env(  # list with two elements, first is the IP, second the tm it was last accessed
-            "_ADSBIM_STATE_LAST_STAGE2_CONTACT",
-            default=[""],
-            tags=["last_stage2_contact"],
-        ),
         Env("AF_MICRO_IP", default=[""], tags=["mf_ip"]),
         Env("AF_MICRO_PORT", default=[""], tags=["mf_port"]),
         Env("AF_MICRO_BROFM", default=[False], tags=["mf_brofm", "is_enabled"]),
