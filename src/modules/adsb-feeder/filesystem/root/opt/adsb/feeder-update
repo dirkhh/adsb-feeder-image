@@ -169,12 +169,11 @@ if [ ! -L /opt/adsb/adsb-setup.log ]; then
     # move the log file and create a symlink to tmpfs log
     # any running process will continue to log to the file in /opt/adsb/logs
     # after a restart things will log into /run
-    if [ -f /run/adsb-feeder-image.log ]
+    if [ -f /opt/adsb/adsb-setup.log ]
     then
-        cp /run/adsb-feeder-image.log /opt/adsb/logs/adsb-setup.log.run."$TIMESTAMP"
+        mv /opt/adsb/adsb-setup.log /opt/adsb/logs/adsb-setup.log."$TIMESTAMP"
+        mv /opt/adsb/adsb-setup.log.* /opt/adsb/logs
     fi
-    truncate -s 0 /run/adsb-feeder-image.log
-    mv /opt/adsb/adsb-setup.log /opt/adsb/logs/adsb-setup.log."$TIMESTAMP"
     ln -sf /run/adsb-feeder-image.log /opt/adsb/adsb-setup.log
     /opt/adsb/docker-compose-adsb start adsb-setup-proxy
 fi
