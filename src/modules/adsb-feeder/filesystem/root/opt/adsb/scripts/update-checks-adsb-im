@@ -16,7 +16,7 @@ if [[ -f /run/adsb-feeder-image.log ]] && (( $(wc -l < /run/adsb-feeder-image.lo
     mkdir -p /opt/adsb/logs
     zstd /run/adsb-feeder-image.log -o /opt/adsb/logs/adsb-setup.log."$TIMESTAMP".zst
     truncate -s 0 /run/adsb-feeder-image.log
-    find . -name /opt/adsb/logs/adsb-setup.log.\* -ctime +7 | xargs rm -f
+    find /opt/adsb/logs -name adsb-setup.log.\* -ctime +7 | xargs rm -f
 fi
 
 # if this is the update check at 1:30am, do the updates if configured
