@@ -2042,6 +2042,13 @@ class AdsbIm:
                         if "is_enabled" in ev.tags:
                             if "other_aggregator" in ev.tags or "ultrafeeder" in ev.tags:
                                 ev.list_set(0, False)
+                    if value == "nano" and self._d.is_feeder_image:
+                        # make sure we don't log to disk at all
+                        try:
+                            subprocess.call("bash /opt/adsb/scripts/journal-set-volatile.sh", shell=True)
+                            print_err("switched to volatile journal")
+                        except:
+                            print_err("exception trying to switch to volatile journal - ignoring")
                 else:
                     self._d.env_by_tags(["tar1090_ac_db"]).value = True
                     self._d.env_by_tags(["mlathub_disable"]).value = False
