@@ -1,4 +1,7 @@
 Changes since v2.1.4 include:
+- add option to move keep all logs in memory only to further reduce disk IO - this prevents logs after a crash
+- pin Dozzle and alpine images to reduce unnecessary updates
+- fix potential crash if the scripts cannot find a local route
 - made micro/nano feeder as an app work again - it seems weird to run this as an app (on port 1099), but maybe there are people who end up doing this reusing an existing DietPi install or something
 - add nano feeder mode that tries to even more reduce disk IO and footprint by turning of maps, stats, and graphs
 - various code cleanups that resulted in more logical api names, among other things 
