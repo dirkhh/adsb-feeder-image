@@ -15,7 +15,7 @@ fi
 # to a version logging to /run/adsb-feeder-image.log, we need to initially continue to log to
 # the old target in order for the upgrade logic to work
 # the test with -f will fail both if there's no such file or if it is a symlink to /run/adsb-feeder-image.log
-if [ ! -f /opt/adsb/adsb-setup.log ]
+if [ ! -f /opt/adsb/adsb-setup.log ]; then
     LOGFILE="/run/adsb-feeder-image.log"
 else
     LOGFILE="/opt/adsb/adsb-setup.log"
