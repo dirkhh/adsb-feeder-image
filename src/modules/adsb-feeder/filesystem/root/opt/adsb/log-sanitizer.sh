@@ -59,7 +59,7 @@ if [[ -n "$oldlog" ]]; then
 
 SANITIZED_LOG+="
 ${oldlog}:
-$(eval "<$oldlog")
+$(zstdcat $oldlog || cat $oldlog)
 ${SEPARATOR}
 "
 
