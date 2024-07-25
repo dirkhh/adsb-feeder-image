@@ -16,7 +16,7 @@ services:
 
   adsb-setup-proxy:
     container_name: adsb-setup-proxy
-    image: alpine
+    image: ${ALPINE_CONTAINER}
     healthcheck:
       disable: true
     stop_signal: SIGKILL
