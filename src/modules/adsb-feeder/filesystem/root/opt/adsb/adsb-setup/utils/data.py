@@ -539,6 +539,11 @@ class Data:
             tags=["mlathub_disable", "is_enabled"],
         ),
         Env(
+            "FEEDER_MLATHUB_ENABLE",
+            default=True,
+            tags=["mlathub_enable", "is_enabled"],
+        ),
+        Env(
             "_ADSBIM_STATE_REMOTE_SDR",
             tags=["remote_sdr"],
         ),

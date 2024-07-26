@@ -37,6 +37,8 @@ services:
       # reduce delay starting up various mlat-clients, default is 15 seconds
       - MLAT_STARTUP_STAGGER=1
       #
+      # always enable mlathub so we can push in mlat results
+      - MLATHUB_ENABLE=true
       # --------------------------------------------------
       # TAR1090 (Map Web Page) parameters:
       - UPDATE_TAR1090=${UPDATE_TAR1090:-true}

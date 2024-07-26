@@ -1564,6 +1564,9 @@ class AdsbIm:
                         print_err(f"empty key, disabling: agg: {agg}, sitenum: {sitenum}")
                         self._d.env_by_tags([agg, "is_enabled"]).list_set(sitenum, False)
 
+        # explicitely enable mlathub unless disabled
+        self._d.env_by_tags(["mlathub_enable"]).value = not self._d.env_by_tags(["mlathub_disable"]).value
+
         if self._d.env_by_tags("aggregator_choice").value in ["micro", "nano"]:
             self._d.env_by_tags("beast-reduce-optimize-for-mlat").value = True
         else:
