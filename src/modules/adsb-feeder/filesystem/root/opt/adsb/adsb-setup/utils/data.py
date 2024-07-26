@@ -582,6 +582,7 @@ class Data:
             tags=["mf_brofm_capable", "is_enabled"],
         ),
         Env("AF_FEEDER_VERSION", default=[""], tags=["mf_version"]),
+        Env("AF_FEEDER_INITIAL_VERSION", default="", tags=["initial_version"]),
     }
 
     # Container images

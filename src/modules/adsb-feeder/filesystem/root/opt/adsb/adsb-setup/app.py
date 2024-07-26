@@ -348,6 +348,11 @@ class AdsbIm:
             "bv": self._d.env_by_tags("base_version").value,
             "cv": self._d.settings,
         }
+        if self._d.env_by_tags("initial_version").value == "":
+            if pathlib.Path("/opt/adsb/initial_install").exists():
+                pathlib.Path("/opt/adsb/initial_install").unlink()
+                image["iv"] = "1"
+            self._d.env_by_tags("initial_version").value == self._d.env_by_tags("base_version").value
         return b64encode(compress(pickle.dumps(image))).decode("utf-8")
 
     def check_secure_image(self):

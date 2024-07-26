@@ -42,6 +42,7 @@ if [[ -f "/opt/adsb/finish-update.done" ]]; then
     fi
 else
     ACTION="initial install of"
+    touch /opt/adsb/initial_install
 fi
 
 # if we updated from a fairly old version, the feeder-update script will have written
