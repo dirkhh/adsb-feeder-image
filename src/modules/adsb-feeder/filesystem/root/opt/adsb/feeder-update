@@ -258,6 +258,10 @@ for service in "${services[@]}"; do
     rm -vf "/etc/systemd/system/$service"
 done
 
+if grep -qs -i -e "AF_IS_STAGE2=True" /opt/adsb/config/.env && ! diff -q /opt/adsb/webproxy/locations.conf ./opt/adsb/webproxy/locations.conf; then
+    restart_webproxy=true
+fi
+
 services_enable=()
 
 # if this an app and not the full image, prune some of the files that aren't wanted for the app
@@ -313,6 +317,11 @@ python3 /opt/adsb/adsb-setup/app.py --update-config || true # this always exits 
 
 echo "$(date -u +"%FT%T.%3NZ") finally, trigger a container upgrade so that they match the new image"
 /opt/adsb/docker-update-adsb-im
+
+if [[ "$restart_webproxy" == "true" ]]; then
+    echo "docker restart webproxy"
+    docker restart webproxy
+fi
 
 echo "$(date -u +"%FT%T.%3NZ") restart the service"
 trap - EXIT
