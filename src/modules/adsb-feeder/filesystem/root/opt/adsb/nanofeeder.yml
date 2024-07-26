@@ -47,7 +47,7 @@ services:
       - UPDATE_TAR1090=false
       - TAR1090_DISABLE=false
       # reduce history for nanofeeder
-      - HISTORY_SIZE=100
+      - HISTORY_SIZE=225
       - INTERVAL=15
       # disable heatmap data
       - READSB_ENABLE_HEATMAP=false
