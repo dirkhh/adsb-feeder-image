@@ -44,6 +44,7 @@ services:
       # TAR1090 (Map Web Page) parameters:
       - UPDATE_TAR1090=false
       - TAR1090_DISABLE=true
+      - READSB_ENABLE_HEATMAP=false
       # options for the µImage:
       - MLATHUB_DISABLE=true
       - READSB_NET_BR_OPTIMIZE_FOR_MLAT=${READSB_NET_BR_OPTIMIZE_FOR_MLAT}
