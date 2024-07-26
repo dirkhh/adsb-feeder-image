@@ -10,6 +10,7 @@ services:
     device_cgroup_rules:
       - 'c 189:* rwm'
     ports:
+      - ${AF_TAR1090_PORT_ADJUSTED:-8080}:80 # to expose the web interface
       - 30005:30005 # Beast output
       - 30006:30006 # Beast reduce output
     environment:
@@ -44,7 +45,11 @@ services:
       # --------------------------------------------------
       # TAR1090 (Map Web Page) parameters:
       - UPDATE_TAR1090=false
-      - TAR1090_DISABLE=true
+      - TAR1090_DISABLE=false
+      # reduce history for nanofeeder
+      - HISTORY_SIZE=100
+      - INTERVAL=15
+      # disable heatmap data
       - READSB_ENABLE_HEATMAP=false
       # options for the µImage:
       - MLATHUB_DISABLE=true
