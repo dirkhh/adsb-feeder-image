@@ -11,6 +11,7 @@ services:
       - 'c 189:* rwm'
     ports:
       - 30005:30005 # Beast output
+      - 30006:30006 # Beast reduce output
     environment:
       # --------------------------------------------------
       # general parameters:
