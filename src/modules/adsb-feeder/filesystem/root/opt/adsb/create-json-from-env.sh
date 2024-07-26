@@ -3,21 +3,14 @@
 # if there is no config.json file in /opt/adsb/config, then we need to
 # piece one together...
 
-# this needs to run as root
-if [ "$(id -u)" != "0" ] ; then
-    echo "this command requires superuser privileges - please run as sudo bash $0"
-    exit 1
-fi
-
-# identify the calling process for better log messages
-PARENTPID=$(ps -cp $$ -o ppid="")
-if kill -0 "$PARENTPID" &> /dev/null ; then
-    # shellcheck disable=SC2086 # the ps -q call fails with quotes around the variable
-    PARENTPROC=$(ps -q$PARENTPID -o args=)
+if [ ! -f /opt/adsb/scripts/common.sh ]
+then
+    echo "missing /opt/adsb/scripts/common.sh -- that's generally a bad sign"
 else
-    PARENTPROC="process $PARENTPID (appears already gone)"
+    . /opt/adsb/scripts/common.sh
+    rootcheck
+    logparent
 fi
-echo "$PARENTPROC called $0" "$@" >> /run/adsb-feeder-image.log
 
 if [ ! -f /opt/adsb/config/config.json ] ; then
     echo "create config.json file from scratch" >> /run/adsb-feeder-image.log
