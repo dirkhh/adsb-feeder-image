@@ -127,7 +127,8 @@ class UltrafeederConfig:
         if self._micro > 0:
             # this is one of the proxies - so it also should feed the aggregate map
             ret.add("adsb,ultrafeeder,30004,beast_out")
-            ret.add("mlathub,ultrafeeder,30004,beast_out")
+            # push mlat results into central mlathub (possibly useful to separately process / forward mlat data)
+            ret.add("mlathub,ultrafeeder,31004,beast_out")
         if self._d.is_enabled("use_gpsd"):
             ret.add("gpsd,host.docker.internal,2947")
 
