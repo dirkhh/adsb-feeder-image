@@ -577,7 +577,7 @@ class AdsbIm:
                 if microIndex == 0:
                     uf_container = "ultrafeeder"
                 else:
-                    uf_container = f"ultrafeeder_stage2_{microIndex}"
+                    uf_container = f"uf_{microIndex}"
                 subprocess.call(
                     f"docker exec {uf_container} pkill collectd",
                     timeout=5.0,
@@ -1133,7 +1133,7 @@ class AdsbIm:
             return
 
         # try to stop the Ultrafeeder container, then remove the range outline, then restart everything
-        container = "ultrafeeder" if idx == 0 else f"ultrafeeder_stage2_{idx}"
+        container = "ultrafeeder" if idx == 0 else f"uf_{idx}"
         try:
             subprocess.call(
                 f"/opt/adsb/docker-compose-adsb down {container}",
@@ -1468,7 +1468,7 @@ class AdsbIm:
                         )
                     try:
                         subprocess.run(
-                            f"/opt/adsb/docker-compose-adsb down ultrafeeder_stage2_{num} -t 20",
+                            f"/opt/adsb/docker-compose-adsb down uf_{num} -t 20",
                             shell=True,
                         )
                     except:
@@ -1533,7 +1533,7 @@ class AdsbIm:
         if self._d.list_is_enabled(["uat978"], sitenum):
             # always get UAT from the readsb uat_replay
             self._d.env_by_tags("replay978").list_set(sitenum, "--net-uat-replay-port 30978")
-            self._d.env_by_tags("978host").list_set(sitenum, f"ultrafeeder_{sitenum}")
+            self._d.env_by_tags("978host").list_set(sitenum, f"uf_{sitenum}")
             self._d.env_by_tags("rb978host").list_set(sitenum, self._d.env_by_tags("mf_ip").list_get(sitenum))
             self._d.env_by_tags("978piaware").list_set(sitenum, "relay")
         else:

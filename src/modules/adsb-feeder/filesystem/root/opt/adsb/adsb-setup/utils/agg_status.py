@@ -258,7 +258,7 @@ class AggStatus:
             if not feeder_id or len(feeder_id) != 12:
                 # get the adsbexchange feeder id for the anywhere map / status things
                 print_err(f"don't have the adsbX Feeder ID for {self._idx}, yet")
-                container_name = "ultrafeeder" if self._idx == 0 else f"ultrafeeder_stage2_{self._idx}"
+                container_name = "ultrafeeder" if self._idx == 0 else f"uf_{self._idx}"
                 try:
                     result = subprocess.run(
                         f"docker logs {container_name} | grep 'www.adsbexchange.com/api/feeders' | tail -1",
@@ -302,7 +302,7 @@ class AggStatus:
 
             # now check mlat - which we can't really get easily from their status page
             # but can get from our docker logs again
-            container_name = "ultrafeeder" if self._idx == 0 else f"ultrafeeder_stage2_{self._idx}"
+            container_name = "ultrafeeder" if self._idx == 0 else f"uf_{self._idx}"
             try:
                 result = subprocess.run(
                     f"docker logs --since=20m {container_name} | grep '\[mlat-client]\[feed.adsbexchange.com] peer_count' | tail -n1",

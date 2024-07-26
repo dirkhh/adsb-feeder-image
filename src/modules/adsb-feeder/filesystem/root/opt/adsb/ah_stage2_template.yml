@@ -10,7 +10,7 @@ services:
     cpu_quota: 7500
     environment:
       - TZ=${FEEDER_TZ_STAGE2NUM}
-      - SBSHOST=ultrafeeder_STAGE2NUM
+      - SBSHOST=uf_STAGE2NUM
       - CLIENTKEY=${FEEDER_ADSBHUB_STATION_KEY_STAGE2NUM}
       - S6_KILL_GRACETIME=1000
       # USER_PROVIDED_ENV_START

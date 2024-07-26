@@ -9,7 +9,7 @@ services:
     cpu_period: 50000
     cpu_quota: 7500
     environment:
-      - BEASTHOST=ultrafeeder_STAGE2NUM
+      - BEASTHOST=uf_STAGE2NUM
       - LAT=${FEEDER_LAT_STAGE2NUM}
       - LONG=${FEEDER_LONG_STAGE2NUM}
       - ALT=${FEEDER_ALT_M_STAGE2NUM}m

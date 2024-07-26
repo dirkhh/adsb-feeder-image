@@ -11,11 +11,11 @@ services:
     cpu_quota: 7500
     environment:
       - FEEDER_KEY=${FEEDER_RV_FEEDER_KEY_STAGE2NUM}
-      - SOURCE_HOST=ultrafeeder_STAGE2NUM:30002
+      - SOURCE_HOST=uf_STAGE2NUM:30002
       - RV_SERVER=mg22.adsbnetwork.com:50050
       - VERBOSE=OFF
       - MLAT_SERVER=mlat.adsbnetwork.com:50000
-      - MLAT_HOST=ultrafeeder_STAGE2NUM:30005
+      - MLAT_HOST=uf_STAGE2NUM:30005
       - LAT=${FEEDER_LAT_STAGE2NUM}
       - LON=${FEEDER_LONG_STAGE2NUM}
       - ALT=${FEEDER_ALT_M_STAGE2NUM}

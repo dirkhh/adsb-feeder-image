@@ -43,7 +43,7 @@ class MultiOutline:
             ):
                 try:
                     subprocess.run(
-                        f"docker cp  ultrafeeder_stage2_{i}:/usr/local/share/tar1090/html-webroot/upintheair.json /opt/adsb/data/heywhatsthat_{i}.json",
+                        f"docker cp  uf_{i}:/usr/local/share/tar1090/html-webroot/upintheair.json /opt/adsb/data/heywhatsthat_{i}.json",
                         shell=True,
                         check=True,
                     )

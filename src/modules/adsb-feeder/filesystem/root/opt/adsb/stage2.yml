@@ -1,11 +1,11 @@
 services:
-  ultrafeeder_stage2_STAGE2NUM:
+  uf_STAGE2NUM:
     image: ${ULTRAFEEDER_CONTAINER}
     healthcheck:
       disable: true
     tty: true
-    container_name: ultrafeeder_stage2_STAGE2NUM
-    hostname: ultrafeeder_STAGE2NUM
+    container_name: uf_STAGE2NUM
+    hostname: uf_STAGE2NUM
     restart: always
     ports:
       - ${AF_TAR1090_PORT_STAGE2NUM}:80 # to expose the web interface
