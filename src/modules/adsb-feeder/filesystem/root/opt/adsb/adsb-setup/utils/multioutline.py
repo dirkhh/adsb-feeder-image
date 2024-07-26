@@ -19,7 +19,7 @@ class MultiOutline:
         data = []
         for i in range(1, num + 1):
             try:
-                outline = json.load(open(f"/run/adsb-feeder-ultrafeeder_{i}/readsb/outline.json"))
+                outline = json.load(open(f"/run/adsb-feeder-uf_{i}/readsb/outline.json"))
             except:
                 pass
             else:

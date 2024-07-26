@@ -85,7 +85,7 @@ services:
       - /opt/adsb/config/ultrafeeder/STAGE2IP/graphs1090:/var/lib/collectd
       - /proc/diskstats:/proc/diskstats:ro
       - /dev:/dev:ro
-      - /run/adsb-feeder-ultrafeeder_STAGE2NUM:/run
+      - /run/adsb-feeder-uf_STAGE2NUM:/run
       - thermal_fix:${FEEDER_RB_THERMAL_HACK:-/tmp/rbt}:ro
     tmpfs:
       - /var/log:size=32M
