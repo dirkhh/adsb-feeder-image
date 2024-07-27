@@ -603,8 +603,6 @@ class Data:
         "RV_CONTAINER": "radarvirtuel",
         "PW_CONTAINER": "planewatch",
         "TNUK_CONTAINER": "1090uk",
-        "DOZZLE_CONTAINER": "dozzle",
-        "ALPINE_CONTAINER": "alpine",
     }
     with open(data_path / "docker.image.versions", "r") as file:
         for line in file:
@@ -616,7 +614,11 @@ class Data:
                 continue
             key = items[0]
             value = items[1]
-            entry = Env(key, tags=[tag_for_name.get(key, key), "container", "norestore"])
+            # .get(key, key) defaults to key for key DOZZLE_CONTAINER / ALPINE_CONTAINER, that's fine as we never need
+            # to check if they are enabled as they are always enabled
+            # this also defaults to key for the airspy and sdrplay container
+            tag = tag_for_name.get(key, key)
+            entry = Env(key, tags=[tag, "container", "norestore"])
             entry.value = value  # always use value from docker.image.versions as definitive source
             _env.add(entry)  # add to _env set
 
