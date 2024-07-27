@@ -414,9 +414,14 @@ class AdsbIm:
         # initially we only allowed alpha-numeric characters, but after fixing an
         # error in the service file, we now can allow dash (or hyphen) as well.
         host_name = self.onlyAlphaNumDash(site_name)
-        if host_name:
+
+        def start_mdns():
             subprocess.run(["/usr/bin/bash", "/opt/adsb/scripts/mdns-alias-setup.sh", f"{host_name}"])
             subprocess.run(["/usr/bin/hostnamectl", "hostname", f"{host_name}"])
+
+        if host_name:
+            thread = threading.Thread(target=start_mdns)
+            thread.start()
 
     def run(self, no_server=False):
         debug = os.environ.get("ADSBIM_DEBUG") is not None
