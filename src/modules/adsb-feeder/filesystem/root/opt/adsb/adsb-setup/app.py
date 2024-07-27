@@ -1661,6 +1661,25 @@ class AdsbIm:
                 env1090.value = ""
             self._d.env_by_tags("readsb_device_type").value = "rtlsdr" if rtlsdr else ""
 
+            if rtlsdr:
+                # set rtl-sdr 1090 gain, bit hacky but means we don't have to restart the bulky ultrafeeder for gain changes
+                self.setRtlGain()
+
+            if airspy:
+                # make sure airspy gain is within bounds
+                gain = self._d.env_by_tags(["gain"]).value
+                if gain == "autogain":
+                    self._d.env_by_tags(["gain_airspy"]).value = "auto"
+                elif make_int(gain) > 21:
+                    self._d.env_by_tags(["gain_airspy"]).value = "21"
+                    self._d.env_by_tags(["gain"]).value = "21"
+                elif make_int(gain) < 0:
+                    self._d.env_by_tags(["gain_airspy"]).value = "0"
+                    self._d.env_by_tags(["gain"]).value = "0"
+                else:
+                    self._d.env_by_tags(["gain_airspy"]).value = gain
+
+
             if verbose & 1:
                 print_err(f"in the end we have")
                 print_err(f"1090serial {env1090.value}")
@@ -1671,10 +1690,6 @@ class AdsbIm:
 
         # set all of the ultrafeeder config data up
         self.setup_ultrafeeder_args()
-
-        # set rtl-sdr 1090 gain, bit hacky but means we don't have to restart the bulky ultrafeeder for gain changes
-        if not self._d.is_enabled("stage2") and rtlsdr:
-            self.setRtlGain()
 
         # finally, check if this has given us enough configuration info to
         # start the containers
@@ -2032,12 +2047,11 @@ class AdsbIm:
                     # remove decimals as well
                     value = str(int(float(value)))
                 if key == "uatgain":
-                    if value == "":
+                    if value == "" or value == "auto":
                         value = "autogain"
                 if key == "gain":
-                    if value == "":
+                    if value == "" or value == "auto":
                         value = "autogain"
-                    self._d.env_by_tags(["gain_airspy"]).value = "auto" if value == "autogain" else value
                 # deal with the micro feeder and stage2 initial setup
                 if key == "aggregator_choice" and value in ["micro", "nano"]:
                     self._d.env_by_tags(["tar1090_ac_db"]).value = False
