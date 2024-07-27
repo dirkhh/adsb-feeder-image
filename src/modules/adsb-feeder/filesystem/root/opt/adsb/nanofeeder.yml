@@ -42,6 +42,8 @@ services:
       # docker stop ultrafeeder will result in proper readsb exit which writes the state anyhow
       - READSB_WRITE_STATE_ONLY_ON_EXIT=true
       #
+      # get data from sdrplay / airspy_adsb / dump978
+      - ULTRAFEEDER_CONFIG=${FEEDER_ULTRAFEEDER_CONFIG}
       # --------------------------------------------------
       # TAR1090 (Map Web Page) parameters:
       - UPDATE_TAR1090=false
