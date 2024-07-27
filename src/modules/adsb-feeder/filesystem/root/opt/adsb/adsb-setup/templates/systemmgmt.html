@@ -94,12 +94,12 @@
       <div class="row align-items-center">
         <div class="col-8">
           <div class="row align-items-center ms-1">
-            <input type="checkbox" class="mb-3 col-1" name="nightly_base_update--is_enabled"
+            <input type="checkbox" class="col-1" name="nightly_base_update--is_enabled"
                    id="nightly_base_update--is_enabled" {% if is_enabled("nightly_base_update") %} checked {%
                             endif %}>
             <label for="nightly_base_update--is_enabled" class="col-11">Update base OS every
               night</label>
-            <input type="checkbox" class="mb-3 col-1" name="nightly_feeder_update--is_enabled"
+            <input type="checkbox" class="col-1" name="nightly_feeder_update--is_enabled"
                    id="nightly_feeder_update--is_enabled" {% if is_enabled("nightly_feeder_update") %} checked
                    {% endif %}>
             <label for="nightly_feeder_update--is_enabled" class="col-11">Update Feeder software every
@@ -107,7 +107,7 @@
           </div>
         </div>
         <div class="col-4">
-          <button type="submit" class="btn btn-primary mx-auto w-100" name="nightly_update" value="go">Update
+          <button type="submit" class="mb-3 btn btn-primary mx-auto w-100" name="nightly_update" value="go">Update
             Settings</button>
         </div>
         <div class="col-8">

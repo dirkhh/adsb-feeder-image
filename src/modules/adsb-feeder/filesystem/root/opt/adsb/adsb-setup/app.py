@@ -1684,7 +1684,6 @@ class AdsbIm:
                 else:
                     self._d.env_by_tags(["gain_airspy"]).value = gain
 
-
             if verbose & 1:
                 print_err(f"in the end we have")
                 print_err(f"1090serial {env1090.value}")
