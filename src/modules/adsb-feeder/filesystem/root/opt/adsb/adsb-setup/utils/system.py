@@ -177,3 +177,34 @@ class System:
             finally:
                 s.close()
         return False
+
+    def list_containers(self):
+        containers = []
+        try:
+            result = subprocess.run(
+                ["/opt/adsb/docker-compose-adsb", "ps", "--format='{{json .Names}}'"],
+                capture_output=True,
+            )
+            output = result.stdout.decode("utf-8")
+            for line in output.split("\n"):
+                if line and line[1] == '"' and line[-2] == '"':
+                    # the names show up as '"ultrafeeder"'
+                    containers.append(line[2:-2])
+        except subprocess.SubprocessError() as e:
+            print_err(f"docker compose ps failed {e}")
+        return containers
+
+    def restart_containers(self, containers):
+        print_err(f"restarting {containers}")
+        try:
+            subprocess.run(["/opt/adsb/docker-compose-adsb", "restart"] + containers)
+        except:
+            print_err("docker compose restart failed")
+
+    def recreate_containers(self, containers):
+        print_err(f"recreating {containers}")
+        try:
+            subprocess.run(["/opt/adsb/docker-compose-adsb", "down"] + containers)
+            subprocess.run(["/opt/adsb/docker-compose-adsb", "up", "-d"] + containers)
+        except:
+            print_err("docker compose recreate failed")

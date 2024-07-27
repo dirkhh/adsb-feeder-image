@@ -1854,10 +1854,19 @@ class AdsbIm:
                     # initiate reboot
                     self._system.reboot()
                     return render_template("/restarting.html")
-                if key == "restart_containers":
+                if key == "restart_containers" or key == "recreate_containers":
+                    containers = self._system.list_containers()
+                    containers_to_restart = []
+                    for container in containers:
+                        # only restart the ones that have been checked
+                        user_selection = form.get(f"restart-{container}", "0")
+                        if user_selection == "1":
+                            containers_to_restart.append(container)
                     self.write_envfile()
-                    # almost certainly overkill, but...
-                    self._system._restart.bg_run(cmdline="bash /opt/adsb/docker-compose-restart-all")
+                    if key == "restart_containers":
+                        self._system.restart_containers(containers_to_restart)
+                    else:
+                        self._system.recreate_containers(containers_to_restart)
                     self._next_url_from_director = request.url
                     return render_template("/restarting.html")
                 if key == "secure_image":
@@ -2193,6 +2202,7 @@ class AdsbIm:
             "systemmgmt.html",
             rpw=self.rpw,
             channel=self.extract_channel(),
+            containers=self._system.list_containers(),
         )
 
     @check_restart_lock

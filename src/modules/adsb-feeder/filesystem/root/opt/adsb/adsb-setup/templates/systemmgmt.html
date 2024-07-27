@@ -152,17 +152,30 @@
     </form>
   </div>
   <div class="col-12 col-lg-6">
-    <h5 class="mt-3">Restart all containers</h5>
+    <h5 class="mt-3">Restart / recreate containers</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
       <div class="row align-items-center">
-        <div class="col-8">
+        <div class="col-12">
           <label for="restart_containers">Typically this shouldn't be necessary, but occasionally it
-            seems that for whatever reason a container doesn't pick up a setting or gets otherwise stuck. While this may
-            be overkill, it at least allows you to restart all of them at once when needed.</label>
+            seems that for whatever reason a container doesn't pick up a setting or gets otherwise stuck.</label>
         </div>
-        <div class="col-4">
-          <button type="submit" class="btn btn-primary mx-auto w-100" name="restart_containers" value="go">Restart
-            Containers</button>
+        <div class="row align-items-center">
+          <div class="col-8">
+            <div class="row align-items-center ms-1">
+              {% for container in containers %}
+              <input type="checkbox" class="col-1" name="restart-{{ container }}" id="restart-{{ container }}">
+              <label for="restart-{{ container }}" class="col-11">{{ container }}</label>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="row align-items-center">
+              <button type="submit" class="mb-3 btn btn-primary mx-auto w-100" name="restart_containers"
+                      value="go">Restart Containers</button>
+              <button type="submit" class="mb-3 btn btn-primary mx-auto w-100" name="recreate_containers"
+                      value="go">Recreate Containers</button>
+            </div>
+          </div>
         </div>
       </div>
     </form>

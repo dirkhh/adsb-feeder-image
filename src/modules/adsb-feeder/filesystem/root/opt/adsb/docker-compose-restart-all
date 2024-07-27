@@ -1,9 +1,0 @@
-#!/bin/bash
-
-exec &>>/run/adsb-feeder-image.log
-
-echo "tearing down the docker containers"
-/opt/adsb/docker-compose-adsb down
-echo "bringing up the docker containers"
-/opt/adsb/docker-compose-start
-echo "done restarting the containers"
