@@ -1,4 +1,8 @@
 Changes since v2.1.4 include:
+- always use mlathub for all mlat results, also for collecting them in stage2
+- fix nanofeeder data input from airspy / sdrplay / dump978
+- restrict manual airspy gain to valid values
+- use rbfeeder mlatresults if there are any
 - pin Dozzle and alpine images to reduce unnecessary updates
 - fix potential crash if the scripts cannot find a local route
 - made micro/nano feeder as an app work again - it seems weird to run this as an app (on port 1099), but maybe there are people who end up doing this reusing an existing DietPi install or something
