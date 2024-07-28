@@ -137,9 +137,23 @@ class FlightRadar24(Aggregator):
             print_err("failed to download the FR24 docker image")
             return None
 
+        lat = float(self.lat)
+        lon = float(self.lon)
+
+        if abs(lat) < 0.5 and abs(lon) < 0.5:
+            # this is at null island, just fail for this
+            return None
+
+        # so this signup doesn't work for latitude / longitude <0.1, work around that by just setting longitude 0.11 in that case
+        # we don't do FR24 mlat anyhow ... if people want to fix it they can do so on the fr24 homepage
+        if abs(lat) < 0.11:
+            lat = 0.11
+        if abs(lon) < 0.11:
+            lon = 0.11
+
         adsb_signup_command = (
             f"docker run --entrypoint /bin/bash --rm "
-            f'-e FEEDER_LAT="{self.lat}" -e FEEDER_LONG="{self.lon}" -e FEEDER_ALT_FT="{self.alt_ft}" '
+            f'-e FEEDER_LAT="{lat}" -e FEEDER_LONG="{lon}" -e FEEDER_ALT_FT="{self.alt_ft}" '
             f'-e FR24_EMAIL="{email}" {self.container} '
             f'-c "apt update && apt install -y expect && $(cat handsoff_signup_expect.sh)"'
         )
@@ -153,8 +167,13 @@ class FlightRadar24(Aggregator):
                 text=True,
                 capture_output=True,
             ).stdout
-        except subprocess.TimeoutExpired:
-            print_err("timeout running the adsb signup script")
+        except subprocess.TimeoutExpired as exc:
+            output = ""
+            if exc.stdout:
+                output += exc.stdout.decode()
+            if exc.stderr:
+                output += exc.stderr.decode()
+            print_err(f"timeout running the FR24 signup script, output: {output}")
             return None
 
         sharing_key_match = re.search("Your sharing key \\(([a-zA-Z0-9]*)\\) has been", output)
@@ -186,8 +205,13 @@ class FlightRadar24(Aggregator):
                 text=True,
                 capture_output=True,
             ).stdout
-        except subprocess.TimeoutExpired:
-            print_err("timeout running the adsb uat signup script")
+        except subprocess.TimeoutExpired as exc:
+            output = ""
+            if exc.stdout:
+                output += exc.stdout.decode()
+            if exc.stderr:
+                output += exc.stderr.decode()
+            print_err(f"timeout running the FR24 UAT signup script, output: {output}")
             return None
         sharing_key_match = re.search("Your sharing key \\(([a-zA-Z0-9]*)\\) has been", output)
         if not sharing_key_match:
