@@ -237,25 +237,33 @@ class FlightRadar24(Aggregator):
             return False
         self._idx = make_int(idx)  # this way the properties work correctly
         print_err(f"FR_activate adsb |{adsb_sharing_key}| uat |{uat_sharing_key}| idx |{idx}|")
+
         if is_email(adsb_sharing_key):
             # that's an email address, so we are looking to get a sharing key
             adsb_sharing_key = self._request_fr24_sharing_key(adsb_sharing_key)
             print_err(f"got back sharing_key |{adsb_sharing_key}|")
-        if not re.match("[0-9a-zA-Z]+", adsb_sharing_key):
+        if adsb_sharing_key and not re.match("[0-9a-zA-Z]+", adsb_sharing_key):
             adsb_sharing_key = None
+
         if is_email(uat_sharing_key):
             # that's an email address, so we are looking to get a sharing key
             uat_sharing_key = self._request_fr24_uat_sharing_key(uat_sharing_key)
             print_err(f"got back uat_sharing_key |{uat_sharing_key}|")
-        if not re.match("[0-9a-zA-Z]+", uat_sharing_key):
+        if uat_sharing_key and not re.match("[0-9a-zA-Z]+", uat_sharing_key):
             uat_sharing_key = None
+
+        # overwrite email in config so that the container is not started with the email as sharing key if failed
+        # otherwise just set sharing key as appropriate
+        self._d.env_by_tags(["flightradar", "key"]).list_set(idx, adsb_sharing_key or "")
+        self._d.env_by_tags(["flightradar_uat", "key"]).list_set(idx, uat_sharing_key or "")
+
         if adsb_sharing_key or uat_sharing_key:
             # we have at least one sharing key, let's just enable the container
-            self._d.env_by_tags(["flightradar", "key"]).list_set(idx, adsb_sharing_key)
-            self._d.env_by_tags(["flightradar_uat", "key"]).list_set(idx, uat_sharing_key)
             self._d.env_by_tags(self._enabled_tags).list_set(idx, True)
-
-        return True
+            return True
+        else:
+            self._d.env_by_tags(self._enabled_tags).list_set(idx, False)
+            return False
 
 
 class PlaneWatch(Aggregator):

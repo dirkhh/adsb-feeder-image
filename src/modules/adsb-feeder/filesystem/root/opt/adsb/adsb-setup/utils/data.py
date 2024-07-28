@@ -671,6 +671,11 @@ class Data:
                     value = actual_value[i]
                     envKey = e._name + suffix
                     newValue = adjust_bool(e, value) if type(value) == bool or "is_enabled" in e.tags else value
+
+                    # the env vars have no concept of None, convert to empty string
+                    if newValue == None or newValue == "None":
+                        newValue = ""
+
                     ret[envKey] = newValue
 
                     oldValue = old_values.get(envKey)
@@ -679,6 +684,11 @@ class Data:
             else:
                 envKey = e._name
                 newValue = adjust_bool(e, e._value) if type(e._value) == bool else e._value
+
+                # the env vars have no concept of None, convert to empty string
+                if newValue == None or newValue == "None":
+                    newValue = ""
+
                 ret[envKey] = newValue
 
                 oldValue = old_values.get(envKey)
