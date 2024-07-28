@@ -284,9 +284,9 @@ class AggStatus:
             self._last_check = datetime.now()
             # let's check the ultrafeeder net connector status to see if there is a TCP beast connection to adsbexchange
             try:
-                suffix = "" if self._idx == 0 else f"_{self._idx}"
+                suffix = "ultrafeeder" if self._idx == 0 else f"uf_{self._idx}"
                 result = subprocess.run(
-                    f"grep -F -e adsbexchange.com /run/adsb-feeder-ultrafeeder{suffix}/readsb/stats.prom | cut -d' ' -f2",
+                    f"grep -F -e adsbexchange.com /run/adsb-feeder-{suffix}/readsb/stats.prom | cut -d' ' -f2",
                     shell=True,
                     capture_output=True,
                     text=True,
