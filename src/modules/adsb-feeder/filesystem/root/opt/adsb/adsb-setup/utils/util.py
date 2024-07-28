@@ -75,6 +75,8 @@ def make_int(value):
 
 def generic_get_json(url: str, data=None, timeout=5.0):
     requests.packages.urllib3.util.connection.HAS_IPV6 = False
+    if "host.docker.internal" in url:
+        url = url.replace("host.docker.internal", "localhost")
     # use image specific but random value for user agent to distinguish
     # between requests from the same IP but different feeders
     agent = f"ADS-B Image-{idhash[:8]}"

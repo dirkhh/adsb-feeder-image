@@ -87,6 +87,8 @@ services:
       - /dev:/dev:ro
       - /run/adsb-feeder-uf_STAGE2NUM:/run
       - thermal_fix:${FEEDER_RB_THERMAL_HACK:-/tmp/rbt}:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     tmpfs:
       - /var/log:size=32M
 
