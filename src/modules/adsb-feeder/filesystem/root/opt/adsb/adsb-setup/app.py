@@ -949,6 +949,12 @@ class AdsbIm:
         self._last_stage2_contact = listener
         self._last_stage2_contact_time = tm
         lat, lon, alt = self.get_lat_lon_alt()
+        rtlsdr_at_port = 0
+        if self._d.env_by_tags("readsb_device_type").value == "rtlsdr":
+            if self._d.is_enabled("stage2_nano"):
+                rtlsdr_at_port = self._d.env_by_tags("nanotar1090portadjusted").value
+            else:
+                rtlsdr_at_port = self._d.env_by_tags("tar1090port").value
         response = make_response(
             json.dumps(
                 {
@@ -960,11 +966,7 @@ class AdsbIm:
                     "tz": self._d.env_by_tags("tz").list_get(0),
                     "version": self._d.env_by_tags("base_version").value,
                     "airspy_at_port": (self._d.env_by_tags("airspyport").value if self._d.is_enabled("airspy") else 0),
-                    "rtlsdr_at_port": (
-                        self._d.env_by_tags("tar1090port").value
-                        if self._d.env_by_tags("readsb_device_type").value == "rtlsdr"
-                        else 0
-                    ),
+                    "rtlsdr_at_port": rtlsdr_at_port,
                     "dump978_at_port": (
                         self._d.env_by_tags("uatport").value if self._d.list_is_enabled(["uat978"], 0) else 0
                     ),
