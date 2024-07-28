@@ -1710,7 +1710,6 @@ class AdsbIm:
         # the extra check for > 1.8G is really for the off chance that someone set up
         # a stage to one a < 1.8G system prior to that requirement being added
         if self._d.is_enabled("stage2") and self._memtotal > 1800000:
-            self._d.env_by_tags("tar1090_configjs_append").value = "multiOutline=true;"
             if not self._multi_outline_bg:
                 self.push_multi_outline()
                 self._multi_outline_bg = Background(60, self.push_multi_outline)
@@ -1837,7 +1836,6 @@ class AdsbIm:
                     if self._multi_outline_bg:
                         self._multi_outline_bg.cancel()
                         self._multi_outline_bg = None
-                        self._d.env_by_tags("tar1090_configjs_append").value = ""
                     self._d.env_by_tags("aggregators_chosen").value = False
                     self._d.env_by_tags("aggregator_choice").value = ""
                 if key == "sdr_setup" and self._d.is_enabled("stage2"):
@@ -2105,7 +2103,6 @@ class AdsbIm:
                     next_url = url_for("stage2")
                     self._d.env_by_tags("stage2").value = True
                     if not self._multi_outline_bg:
-                        self._d.env_by_tags("tar1090_configjs_append").value = "multiOutline=true;"
                         self.push_multi_outline()
                         self._multi_outline_bg = Background(60, self.push_multi_outline)
                     unique_name = self.unique_site_name(form.get("site_name"), 0)
