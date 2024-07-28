@@ -1,0 +1,124 @@
+services:
+  ultrafeeder:
+    image: ${ULTRAFEEDER_CONTAINER}
+    healthcheck:
+      disable: true
+    tty: true
+    container_name: ultrafeeder
+    hostname: ultrafeeder
+    restart: always
+    ports:
+      - ${AF_TAR1090_PORT_ADJUSTED:-8080}:80 # to expose the web interface
+      - 30001:30001 # Raw input
+      - 30002:30002 # Raw output
+      - 30003:30003 # SBS output
+      - 32006:32006 # SBS input
+      - 30004:30004 # Beast input
+      - 30104:30104 # Beast input
+      - 30005:30005 # Beast output
+      - 30006:30006 # Beast reduce output
+      - 30047:30047 # JSON position output
+      - 30152:30152 # to expose re-api
+      - 31003:31003 # MLATHUB SBS output
+      - 31004:31004 # MLATHUB Beast input
+      - 31005:31005 # MLATHUB Beast output
+      - 31006:31006 # MLATHUB Beast reduce output
+    environment:
+      # --------------------------------------------------
+      # general parameters:
+      - LOGLEVEL=error
+      - TZ=${FEEDER_TZ}
+      # --------------------------------------------------
+      # SDR related parameters:
+      - READSB_DEVICE_TYPE=
+      - READSB_RTLSDR_DEVICE=
+      - READSB_RTLSDR_PPM=
+      - READSB_ENABLE_BIASTEE=false
+      - READSB_AUTOGAIN_INITIAL_GAIN=40.2
+      - READSB_AUTOGAIN_INITIAL_INTERVAL=60
+      - READSB_GAIN=autogain
+      #
+      # --------------------------------------------------
+      # readsb/decoder parameters:
+      - READSB_LAT=${FEEDER_LAT}
+      - READSB_LON=${FEEDER_LONG}
+      - READSB_ALT=${FEEDER_ALT_M}
+      - READSB_MODEAC=false
+      - READSB_RX_LOCATION_ACCURACY=2
+      - READSB_STATS_RANGE=true
+      - READSB_MAX_RANGE=${FEEDER_MAX_RANGE:-0}
+      # --write-state-only-on-exit only affects the heatmap/replay data and traces
+      # this configuration has no traces and the heatmap/replay data are written every 30 min anyhow
+      # docker stop ultrafeeder will result in proper readsb exit which writes the state anyhow
+      - READSB_WRITE_STATE_ONLY_ON_EXIT=true
+      # Sources and Aggregator connections:
+      # (Note - remove the ones you are not using / feeding)
+      - ULTRAFEEDER_CONFIG=${FEEDER_ULTRAFEEDER_CONFIG}
+      - MLAT_USER=${MLAT_SITE_NAME}
+      - UUID=${ULTRAFEEDER_UUID}
+      # reduce delay starting up various mlat-clients, default is 15 seconds
+      - MLAT_STARTUP_STAGGER=1
+      #
+      # --------------------------------------------------
+      # TAR1090 (Map Web Page) parameters:
+      - UPDATE_TAR1090=${UPDATE_TAR1090:-true}
+      - TAR1090_MESSAGERATEINTITLE=true
+      - TAR1090_PAGETITLE=${MLAT_SITE_NAME}
+      - TAR1090_SITENAME=${MLAT_SITE_NAME}
+      - TAR1090_PLANECOUNTINTITLE=true
+      - TAR1090_FLIGHTAWARELINKS=true
+      - TAR1090_CONFIGJS_APPEND=${FEEDER_TAR1090_CONFIGJS_APPEND}
+      - HEYWHATSTHAT_PANORAMA_ID=${FEEDER_HEYWHATSTHAT_ID:-}
+      - HEYWHATSTHAT_ALTS=${FEEDER_HEYWHATSTHAT_ALTS:-1000ft,5000ft,10000ft,20000ft,30000ft,40000ft}
+      - TAR1090_SITESHOW=true
+      - TAR1090_RANGE_OUTLINE_COLORED_BY_ALTITUDE=true
+      - TAR1090_RANGE_OUTLINE_WIDTH=1.5
+      - TAR1090_RANGE_OUTLINE_DASH=${TAR1090_RANGE_OUTLINE_DASH}
+      - TAR1090_RANGERINGSDISTANCES=${TAR1090_RANGERINGSDISTANCES:-50,100,150,200}
+      - TAR1090_RANGERINGSCOLORS='#1A237E','#0D47A1','#42A5F5','#64B5F6'
+      - TAR1090_USEROUTEAPI=${FEEDER_TAR1090_USEROUTEAPI}
+      - TAR1090_ROUTEAPIURL="https://adsb.im/api/0/routeset"
+      - TAR1090_IMAGE_CONFIG_LINK="${FEEDER_TAR1090_IMAGE_CONFIG_LINK}"
+      - TAR1090_IMAGE_CONFIG_TEXT="ADS-B Feeder Image Configuration"
+      - GZIP_LVL=1 # minor CPU reduction from default of 3
+      # options for the µImage:
+      - TAR1090_ENABLE_AC_DB=${FEEDER_TAR1090_ENABLE_AC_DB}
+      - MLATHUB_DISABLE=${FEEDER_MLATHUB_DISABLE}
+      - READSB_NET_BR_OPTIMIZE_FOR_MLAT=${READSB_NET_BR_OPTIMIZE_FOR_MLAT}
+      # explicitely enable mlathub if not uImage
+      - MLATHUB_ENABLE=${FEEDER_MLATHUB_ENABLE}
+      # --------------------------------------------------
+      # GRAPHS1090 (Decoder and System Status Web Page) parameters:
+      # The two 978 related parameters should only be included if you are running dump978 for UAT reception (USA only)
+      - GRAPHS1090_REDUCE_IO=true
+      # How often the statistics data the graphs are generated from are written to disk (in seconds)
+      - GRAPHS1090_REDUCE_IO_FLUSH_IVAL=21600
+      - GRAPHS1090_DARKMODE=true
+      - ENABLE_978=${FEEDER_ENABLE_UAT978}
+      - URL_978=${FEEDER_URL_978}
+      - URL_AIRSPY=${FEEDER_URL_AIRSPY:-}
+      - URL_1090_SIGNAL=${FEEDER_URL_1090_SIGNAL:-}
+      - S6_KILL_GRACETIME=1000
+      #
+      # USER_PROVIDED_ENV_START
+      # USER_PROVIDED_ENV_END
+    volumes:
+      - /opt/adsb/config/ultrafeeder/globe_history:/var/globe_history
+      - /opt/adsb/config/ultrafeeder/graphs1090:/var/lib/collectd
+      - /proc/diskstats:/proc/diskstats:ro
+      - /dev:/dev:ro
+      - /run/adsb-feeder-stage2-main:/run
+      - thermal_fix:${FEEDER_RB_THERMAL_HACK:-/tmp/rbt}:ro
+    tmpfs:
+      - /var/log:size=32M
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  thermal_fix:
+    driver: local
+    driver_opts:
+      type: none
+      device: /opt/adsb/rb
+      o: bind
+

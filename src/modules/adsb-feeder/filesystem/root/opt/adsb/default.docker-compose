@@ -17,7 +17,9 @@ if [ -f /opt/adsb/config/.env ] ; then
     if grep "_ADSBIM_AGGREGATORS_SELECTION=nano" /opt/adsb/config/.env > /dev/null 2>&1 ; then
         COMPOSE_FILES+=( "-f" "/opt/adsb/config/nanofeeder.yml" )
     else
-        COMPOSE_FILES+=( "-f" "/opt/adsb/config/docker-compose.yml" )
+        if grep "AF_IS_STAGE2=False" /opt/adsb/config/.env > /dev/null 2>&1 ; then
+            COMPOSE_FILES+=( "-f" "/opt/adsb/config/docker-compose.yml" )
+        fi
     fi
     if ! grep "_ADSBIM_AGGREGATORS_SELECTION=micro" /opt/adsb/config/.env > /dev/null 2>&1 ; then
         # for each of the yml snippets check if this aggregator is enabled
@@ -52,8 +54,12 @@ if [ -f /opt/adsb/config/.env ] ; then
         # finally, check if this is a stage 2 setup and enable all of the ultrafeeders
         if grep "AF_IS_STAGE2=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
 
-            COMPOSE_FILES+=( "-f" "/opt/adsb/config/webproxy.yml" )
+            COMPOSE_FILES+=( "-f" "/opt/adsb/config/webproxy.yml" "-f" "/opt/adsb/config/stage2-main.yml" )
 
+            # do we have a local SDR -- if yes, start the nanofeeder container for it
+            if grep "AF_STAGE2_NANOFEEDER=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
+                COMPOSE_FILES+=( "-f" "/opt/adsb/config/nanofeeder.yml" )
+            fi
             # stage 2 feeder, look through the various containers
             NUM=$(grep AF_NUM_MICRO_SITES= /opt/adsb/config/.env | sed -n 's/.*=\([0-9]\+\).*/\1/p')
             for ((i = 1; i <= NUM; i++)); do

@@ -330,6 +330,7 @@ class Data:
         Env("AF_DAZZLE_PORT", default=9999, tags=["dazzleport", "norestore"]),
         Env("AF_TAR1090_PORT", default=8080, tags=["tar1090port", "norestore"]),
         Env("AF_TAR1090_PORT_ADJUSTED", default=8080, tags=["tar1090portadjusted"]),
+        Env("AF_NANO_TAR1090_PORT_ADJUSTED", default=8080, tags=["nanotar1090portadjusted"]),
         Env("AF_UAT978_PORT", default=9780, tags=["uatport", "norestore"]),
         Env("AF_PIAWAREMAP_PORT", default=8081, tags=["piamapport", "norestore"]),
         Env("AF_PIAWARESTAT_PORT", default=8082, tags=["piastatport", "norestore"]),
@@ -568,6 +569,9 @@ class Data:
             default=False,
             tags=["stage2", "is_enabled"],
         ),
+        Env("AF_STAGE2_NANOFEEDER", default=False, tags=["stage2_nano", "is_enabled"]),
+        Env("AF_NANO_BEAST_PORT", default="30005", tags=["nano_beast_port"]),
+        Env("AF_NANO_BEASTREDUCE_PORT", default="30006", tags=["nano_beastreduce_port"]),
         Env(
             "AF_NUM_MICRO_SITES",
             default=0,

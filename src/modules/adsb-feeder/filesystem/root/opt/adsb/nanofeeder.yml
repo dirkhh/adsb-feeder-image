@@ -10,9 +10,9 @@ services:
     device_cgroup_rules:
       - 'c 189:* rwm'
     ports:
-      - ${AF_TAR1090_PORT_ADJUSTED:-8080}:80 # to expose the web interface
-      - 30005:30005 # Beast output
-      - 30006:30006 # Beast reduce output
+      - ${AF_NANO_TAR1090_PORT_ADJUSTED:-8080}:80 # to expose the web interface
+      - ${AF_NANO_BEAST_PORT:-30005}:30005 # Beast output
+      - ${AF_NANO_BEASTREDUCE_PORT:-30006}:30006 # Beast reduce output
     environment:
       # --------------------------------------------------
       # general parameters:

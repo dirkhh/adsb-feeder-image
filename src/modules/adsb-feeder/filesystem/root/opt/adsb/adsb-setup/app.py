@@ -1090,8 +1090,6 @@ class AdsbIm:
     def sdr_setup(self):
         if request.method == "POST":
             return self.update()
-        if self._d.is_enabled("stage2"):
-            return self.visualization()
         return render_template("sdr_setup.html")
 
     def visualization(self):
@@ -1540,7 +1538,7 @@ class AdsbIm:
             tryWriteFile("/run/adsb-feeder-ultrafeeder/readsb/setGain", f"{gain}\n")
 
     def setup_or_disable_uat(self, sitenum):
-        if self._d.list_is_enabled(["uat978"], sitenum):
+        if sitenum and self._d.list_is_enabled(["uat978"], sitenum):
             # always get UAT from the readsb uat_replay
             self._d.env_by_tags("replay978").list_set(sitenum, "--net-uat-replay-port 30978")
             self._d.env_by_tags("978host").list_set(sitenum, f"uf_{sitenum}")
@@ -1586,10 +1584,8 @@ class AdsbIm:
             # for stage2 tar1090port is used for the webproxy
             # move the exposed port for the combined ultrafeeder to 8078 to avoid a port conflict
             self._d.env_by_tags("tar1090portadjusted").value = 8078
-
-            # disable 1090 / 978 for stage2:
-            self._d.env_by_tags("readsb_device_type").value = ""
-            self._d.env_by_tags(["uat978", "is_enabled"]).list_set(0, False)
+            # similarly, move the exposed port for a local nanofeeder to 8076 to avoid another port conflict
+            self._d.env_by_tags("nanotar1090portadjusted").value = 8076
 
             # set unlimited range for the stage2 tar1090
             self._d.env_by_tags("max_range").list_set(0, 0)
@@ -1599,10 +1595,13 @@ class AdsbIm:
 
         else:
             self._d.env_by_tags("tar1090portadjusted").value = self._d.env_by_tags("tar1090port").value
+            self._d.env_by_tags("nanotar1090portadjusted").value = self._d.env_by_tags("tar1090port").value
 
             # for regular feeders or micro feeders a max range of 300nm seem reasonable
             self._d.env_by_tags("max_range").list_set(0, 300)
 
+        # make all the smart choices for plugged in SDRs - unless we are a stage2 that hasn't explicitly requested SDR support
+        if not self._d.is_enabled("stage2") or self._d.is_enabled("stage2_nano"):
             # first grab the SDRs plugged in and check if we have one identified for UAT
             self._sdrdevices._ensure_populated()
             env978 = self._d.env_by_tags("978serial")
@@ -1839,6 +1838,21 @@ class AdsbIm:
                         self._d.env_by_tags("tar1090_configjs_append").value = ""
                     self._d.env_by_tags("aggregators_chosen").value = False
                     self._d.env_by_tags("aggregator_choice").value = ""
+                if key == "sdr_setup" and self._d.is_enabled("stage2"):
+                    # this is special - the user has declared this a stage2 feeder, yet
+                    # appears to be setting up an SDR - let's force this to be treated as
+                    # nanofeeder
+                    self._d.env_by_tags("stage2_nano").value = True
+                    self._d.env_by_tags("nano_beast_port").value = "30035"
+                    self._d.env_by_tags("nano_beastreduce_port").value = "30036"
+                    self.setup_new_micro_site(
+                        "local",
+                        uat=False,
+                        is_adsbim=True,
+                        brofm=False,
+                        do_import=True,
+                        do_restore=False,
+                    )
                 if key == "aggregators":
                     # user has clicked Submit on Aggregator page
                     self._d.env_by_tags("aggregators_chosen").value = True
