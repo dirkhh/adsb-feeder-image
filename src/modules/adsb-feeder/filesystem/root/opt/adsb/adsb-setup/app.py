@@ -2059,7 +2059,10 @@ class AdsbIm:
                 continue
             if key == "resetgain" and value == "1":
                 # tell the ultrafeeder container to restart the autogain processing
-                cmdline = "docker exec ultrafeeder /usr/local/bin/autogain1090 reset"
+                if self._d.is_enabled("stage2_nano"):
+                    cmdline = "docker exec nanofeeder /usr/local/bin/autogain1090 reset"
+                else:
+                    cmdline = "docker exec ultrafeeder /usr/local/bin/autogain1090 reset"
                 try:
                     subprocess.run(cmdline, timeout=5.0, shell=True)
                 except:
