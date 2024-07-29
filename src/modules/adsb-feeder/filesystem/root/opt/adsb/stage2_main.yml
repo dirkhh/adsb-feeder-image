@@ -103,7 +103,7 @@ services:
       - /opt/adsb/config/ultrafeeder/graphs1090:/var/lib/collectd
       - /proc/diskstats:/proc/diskstats:ro
       - /dev:/dev:ro
-      - /run/adsb-feeder-s2_main:/run
+      - /run/adsb-feeder-ultrafeeder:/run
       - thermal_fix:${FEEDER_RB_THERMAL_HACK:-/tmp/rbt}:ro
     tmpfs:
       - /var/log:size=32M

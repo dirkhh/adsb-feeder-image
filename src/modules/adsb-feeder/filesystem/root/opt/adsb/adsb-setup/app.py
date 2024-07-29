@@ -983,7 +983,7 @@ class AdsbIm:
             for i in [0] + self.micro_indices():
                 ip = self._d.env_by_tags("mf_ip").list_get(i)
                 ip, triplet = mf_get_ip_and_triplet(ip)
-                suffix = f"uf_{i}" if i != 0 else "s2_main"
+                suffix = f"uf_{i}" if i != 0 else "ultrafeeder"
                 try:
                     with open(f"/run/adsb-feeder-{suffix}/readsb/stats.prom") as f:
                         pct = 0
