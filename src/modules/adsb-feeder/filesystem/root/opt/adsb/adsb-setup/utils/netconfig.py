@@ -98,6 +98,12 @@ class UltrafeederConfig:
                 ret.add(f"adsb,{ip},30006,beast_in")
             else:
                 ret.add(f"adsb,{triplet}")
+            # this is required for the UAT replay
+            # the stage2 will be getting the UAT data twice
+            # once via the normal beast connection to the microfeeder and via this uat_in
+            # but that shouldn't cause issues besides double 978 message rate in the graphs
+            # a possible fix would be not to ingest the 978 into ultrafeeder on the microfeeder
+            # but that would mean the local microfeeder display / graphs will be lacking 978
             if self._d.list_is_enabled("uat978", self._micro):
                 # or the UAT port on the micro feeder
                 ret.add(f"adsb,{ip},30978,uat_in")
