@@ -137,12 +137,18 @@ class UltrafeederConfig:
         # finally, add user provided things
         ultrafeeder_extra_args = self._d.env_by_tags("ultrafeeder_extra_args").value
         if ultrafeeder_extra_args:
-            ret.add(ultrafeeder_extra_args)
+            if not is_stage2:
+                ret.add(ultrafeeder_extra_args)
+            # for stage2 add extra args only to the main uf instance
+            if is_stage2 and self._micro == 0:
+                ret.add(ultrafeeder_extra_args)
+
         if self._micro > 0:
             # this is one of the proxies - so it also should feed the aggregate map
             ret.add("adsb,ultrafeeder,30004,beast_out")
             # push mlat results into central mlathub (possibly useful to separately process / forward mlat data)
             ret.add("mlathub,ultrafeeder,31004,beast_out")
+
         if self._d.is_enabled("use_gpsd"):
             ret.add("gpsd,host.docker.internal,2947")
 
