@@ -1517,7 +1517,10 @@ class AdsbIm:
             except:
                 print_err(f'error writing "{string}" to {path}')
 
-        gaindir = pathlib.Path("/opt/adsb/config/ultrafeeder/globe_history/autogain")
+        if self._d.is_enabled("stage2_nano"):
+            gaindir = pathlib.Path("/opt/adsb/config/nanofeeder/globe_history/autogain")
+        else:
+            gaindir = pathlib.Path("/opt/adsb/config/ultrafeeder/globe_history/autogain")
         try:
             gaindir.mkdir(exist_ok=True, parents=True)
         except:
