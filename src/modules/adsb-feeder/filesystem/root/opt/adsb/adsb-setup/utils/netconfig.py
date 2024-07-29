@@ -126,6 +126,14 @@ class UltrafeederConfig:
                     remote_sdr += ",30005"
                 ret.add(f"adsb,{remote_sdr.replace(' ', '')},beast_in")
 
+        # bypass nanofeeder for stage2_nano, ingest airspy / sdrplay data directly into the local microsite
+        # 978 is ingested as per usual for the stage2 microsite (and not doubled as in the usual stage2 setup)
+        if is_stage2 and self._micro > 0 and self._d.env_by_tags("mf_ip").list_get(self._micro) == "local":
+            if self._d.is_enabled("airspy"):
+                ret.add("adsb,airspy_adsb,30005,beast_in")
+            elif self._d.is_enabled("sdrplay"):
+                ret.add("adsb,sdrplay-beast1090,30005,beast_in")
+
         # finally, add user provided things
         ultrafeeder_extra_args = self._d.env_by_tags("ultrafeeder_extra_args").value
         if ultrafeeder_extra_args:
