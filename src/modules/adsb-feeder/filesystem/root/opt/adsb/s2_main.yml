@@ -94,10 +94,6 @@ services:
       # How often the statistics data the graphs are generated from are written to disk (in seconds)
       - GRAPHS1090_REDUCE_IO_FLUSH_IVAL=21600
       - GRAPHS1090_DARKMODE=true
-      - ENABLE_978=${FEEDER_ENABLE_UAT978}
-      - URL_978=${FEEDER_URL_978}
-      - URL_AIRSPY=${FEEDER_URL_AIRSPY:-}
-      - URL_1090_SIGNAL=${FEEDER_URL_1090_SIGNAL:-}
       - S6_KILL_GRACETIME=1000
       #
       # USER_PROVIDED_ENV_START
