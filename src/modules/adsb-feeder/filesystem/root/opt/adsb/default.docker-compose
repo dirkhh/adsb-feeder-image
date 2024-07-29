@@ -54,7 +54,7 @@ if [ -f /opt/adsb/config/.env ] ; then
         # finally, check if this is a stage 2 setup and enable all of the ultrafeeders
         if grep "AF_IS_STAGE2=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
 
-            COMPOSE_FILES+=( "-f" "/opt/adsb/config/webproxy.yml" "-f" "/opt/adsb/config/stage2-main.yml" )
+            COMPOSE_FILES+=( "-f" "/opt/adsb/config/webproxy.yml" "-f" "/opt/adsb/config/s2_main.yml" )
 
             # do we have a local SDR -- if yes, start the nanofeeder container for it
             if grep "AF_STAGE2_NANOFEEDER=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
