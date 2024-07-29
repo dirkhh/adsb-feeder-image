@@ -1,5 +1,7 @@
 Changes since v2.1.4 include:
 - add support for local SDRs on a stage2 system. This reduces the need for an additional system in situations where a user wants to have two or maybe three SDRs and wants to simply reuse one of the systems as stage2 (ideally that's an RPi4 or OPi5 or some other reasonably beefy SBC)
+- fix small fr24 issues, including a workaround for an FR24 bug when lon < 0.1
+- allow restart and recreate for individual containers
 - always use mlathub for all mlat results, also for collecting them in stage2
 - fix nanofeeder data input from airspy / sdrplay / dump978
 - restrict manual airspy gain to valid values
