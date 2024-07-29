@@ -1838,21 +1838,33 @@ class AdsbIm:
                         self._multi_outline_bg = None
                     self._d.env_by_tags("aggregators_chosen").value = False
                     self._d.env_by_tags("aggregator_choice").value = ""
-                if key == "sdr_setup" and self._d.is_enabled("stage2"):
+                if key == "sdr_setup" and self._d.is_enabled("stage2") and (
+                        self._d.env_by_tags("1090serial").value
+                        or self._d.env_by_tags("978serial").value
+                    ):
                     # this is special - the user has declared this a stage2 feeder, yet
                     # appears to be setting up an SDR - let's force this to be treated as
                     # nanofeeder
+
+                    do978 = bool(self._d.env_by_tags("978serial").value)
+
                     self._d.env_by_tags("stage2_nano").value = True
                     self._d.env_by_tags("nano_beast_port").value = "30035"
                     self._d.env_by_tags("nano_beastreduce_port").value = "30036"
-                    self.setup_new_micro_site(
+                    success, msg = self.setup_new_micro_site(
                         "local",
-                        uat=False,
+                        uat=do978,
                         is_adsbim=True,
                         brofm=False,
                         do_import=True,
                         do_restore=False,
                     )
+                    # adjust if 978 is to be done
+                    if not success:
+                        for i in self.micro_indices():
+                            if self._d.env_by_tags("mf_ip").list_get(i) == "local":
+                                self._d.env_by_tags(["uat978", "is_enabled"]).list_set(i, do978)
+
                 if key == "aggregators":
                     # user has clicked Submit on Aggregator page
                     self._d.env_by_tags("aggregators_chosen").value = True
