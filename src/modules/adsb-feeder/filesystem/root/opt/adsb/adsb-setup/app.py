@@ -1719,6 +1719,8 @@ class AdsbIm:
         if self._d.env_by_tags("stage2_nano").value:
             do978 = bool(self._d.env_by_tags("978serial").value)
 
+            # this code is here and not further up so get_base_info knows
+            # about the various URLs for 978 / airspy / 1090
             self.setup_new_micro_site(
                 "local",
                 uat=do978,
