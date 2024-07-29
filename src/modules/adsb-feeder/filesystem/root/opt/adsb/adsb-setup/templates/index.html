@@ -244,8 +244,8 @@
           {% for idx in ns.site_indices %}
           {% if list_is_enabled("uat978", idx) %}
           <li>
-            {% if idx == 0 %}
-            <a href="/dump978">Dump978 map</a>
+            {% if idx == 0 or list_value_by_tag('mf_ip', idx) == 'local' %}
+            <a href="/dump978">{% if idx != 0 %}{{ list_value_by_tag('site_name', idx) }}{% endif %} Dump978 map</a>
             {% else %}
             <a href="http://{{ list_value_by_tag('mf_ip', idx) }}/dump978">{{ list_value_by_tag('site_name', idx) }}
               Dump978 map</a>
