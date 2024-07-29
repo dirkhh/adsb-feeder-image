@@ -1566,23 +1566,14 @@ class AdsbIm:
             # appears to be setting up an SDR - let's force this to be treated as
             # nanofeeder
 
-            stage2_nano = True
-
-            do978 = bool(self._d.env_by_tags("978serial").value)
-
             self._d.env_by_tags("stage2_nano").value = True
-            self.setup_new_micro_site(
-                "local",
-                uat=do978,
-                is_adsbim=True,
-                brofm=False,
-                do_import=True,
-                do_restore=False,
-            )
-            # adjust 978
-            for i in self.micro_indices():
-                if self._d.env_by_tags("mf_ip").list_get(i) == "local":
-                    self._d.env_by_tags(["uat978", "is_enabled"]).list_set(i, do978)
+            self._d.env_by_tags("nano_beast_port").value = "30035"
+            self._d.env_by_tags("nano_beastreduce_port").value = "30036"
+        else:
+            self._d.env_by_tags("stage2_nano").value = False
+            self._d.env_by_tags("nano_beast_port").value = "30005"
+            self._d.env_by_tags("nano_beastreduce_port").value = "30006"
+
 
         for sitenum in [0] + self.micro_indices():
 
@@ -1604,15 +1595,6 @@ class AdsbIm:
                     if self._d.env_by_tags([agg, "key"]).list_get(sitenum) == "":
                         print_err(f"empty key, disabling: agg: {agg}, sitenum: {sitenum}")
                         self._d.env_by_tags([agg, "is_enabled"]).list_set(sitenum, False)
-
-        if stage2_nano:
-            self._d.env_by_tags("stage2_nano").value = True
-            self._d.env_by_tags("nano_beast_port").value = "30035"
-            self._d.env_by_tags("nano_beastreduce_port").value = "30036"
-        else:
-            self._d.env_by_tags("stage2_nano").value = False
-            self._d.env_by_tags("nano_beast_port").value = "30005"
-            self._d.env_by_tags("nano_beastreduce_port").value = "30006"
 
         # explicitely enable mlathub unless disabled
         self._d.env_by_tags(["mlathub_enable"]).value = not self._d.env_by_tags(["mlathub_disable"]).value
@@ -1732,6 +1714,23 @@ class AdsbIm:
                 print_err(f"airspy container is {self._d.is_enabled(['airspy'])}")
                 print_err(f"SDRplay container is {self._d.is_enabled(['sdrplay'])}")
                 print_err(f"dump978 container {self._d.list_is_enabled(['uat978'], 0)}")
+
+
+        if self._d.env_by_tags("stage2_nano").value:
+            do978 = bool(self._d.env_by_tags("978serial").value)
+
+            self.setup_new_micro_site(
+                "local",
+                uat=do978,
+                is_adsbim=True,
+                brofm=False,
+                do_import=True,
+                do_restore=False,
+            )
+            # adjust 978
+            for i in self.micro_indices():
+                if self._d.env_by_tags("mf_ip").list_get(i) == "local":
+                    self._d.env_by_tags(["uat978", "is_enabled"]).list_set(i, do978)
 
         # set all of the ultrafeeder config data up
         self.setup_ultrafeeder_args()
