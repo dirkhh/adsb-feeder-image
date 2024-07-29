@@ -1427,9 +1427,6 @@ class AdsbIm:
             self._d.env_by_tags("mf_ip").list_remove()
             return (False, "unable to get base info from micro feeder")
 
-        if key == "local":
-            self._d.env_by_tags("site_name").list_set(n, self.unique_site_name("local"))
-
         self._d.env_by_tags(["uat978", "is_enabled"]).list_set(n, uat)
         return (True, "")
 
