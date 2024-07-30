@@ -444,10 +444,6 @@ class Data:
             tags=["nightly_feeder_update", "is_enabled"],
         ),
         Env(
-            "AF_IS_NIGHTLY_CONTAINER_UPDATE_ENABLED",
-            tags=["nightly_container_update", "is_enabled"],
-        ),
-        Env(
             "_ADSBIM_STATE_ZEROTIER_KEY",
             tags=["zerotierid", "key"],
         ),
