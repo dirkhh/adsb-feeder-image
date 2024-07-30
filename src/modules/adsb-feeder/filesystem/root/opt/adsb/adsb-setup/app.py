@@ -1556,6 +1556,19 @@ class AdsbIm:
             self._d.env_by_tags("978piaware").list_set(sitenum, "")
 
     def handle_implied_settings(self):
+        if self._d.env_by_tags("aggregator_choice").value in ["micro", "nano"]:
+            ac_db = False
+            self._d.env_by_tags(["mlathub_disable"]).value = True
+        else:
+            ac_db = True
+            self._d.env_by_tags(["mlathub_disable"]).value = False
+
+        if self._memtotal < 900000:
+            ac_db = False
+            # save 100 MB of memory for low memory setups
+
+        self._d.env_by_tags(["tar1090_ac_db"]).value = ac_db
+
         stage2_nano = False
 
         if self._d.is_enabled("stage2") and (
@@ -2111,8 +2124,6 @@ class AdsbIm:
                         value = "autogain"
                 # deal with the micro feeder and stage2 initial setup
                 if key == "aggregator_choice" and value in ["micro", "nano"]:
-                    self._d.env_by_tags(["tar1090_ac_db"]).value = False
-                    self._d.env_by_tags(["mlathub_disable"]).value = True
                     self._d.env_by_tags("aggregators_chosen").value = True
                     # disable all the aggregators in micro mode
                     for ev in self._d._env:
@@ -2126,9 +2137,6 @@ class AdsbIm:
                             print_err("switched to volatile journal")
                         except:
                             print_err("exception trying to switch to volatile journal - ignoring")
-                else:
-                    self._d.env_by_tags(["tar1090_ac_db"]).value = True
-                    self._d.env_by_tags(["mlathub_disable"]).value = False
                 if key == "aggregator_choice" and value == "stage2":
                     next_url = url_for("stage2")
                     self._d.env_by_tags("stage2").value = True
