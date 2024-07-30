@@ -651,6 +651,24 @@ class Data:
                 new_value.append(value[i] if enabled[i] else "")
             return new_value
 
+        def value_for_env(e, value):
+            if type(value) == bool or "is_enabled" in e.tags:
+                value = adjust_bool(e, value)
+
+            # the env vars have no concept of None, convert to empty string
+            if value == None or value == "None":
+                value = ""
+
+            if type(value) == str:
+                # remove spaces
+                value = value.strip()
+
+                # docker compose does weird stuff if there are $ in the env vars
+                # escape them using $$
+                value = value.replace("$", "$$")
+
+            return value
+
         ret = {}
         for e in self._env:
 
@@ -670,33 +688,22 @@ class Data:
                     actual_value = adjust_heywhatsthat(e._value)
                 else:
                     actual_value = e._value
+
                 for i in range(len(actual_value)):
                     suffix = "" if i == 0 else f"_{i}"
                     value = actual_value[i]
                     envKey = e._name + suffix
-                    newValue = adjust_bool(e, value) if type(value) == bool or "is_enabled" in e.tags else value
 
-                    # the env vars have no concept of None, convert to empty string
-                    if newValue == None or newValue == "None":
-                        newValue = ""
+                    ret[envKey] = value_for_env(e, value)
 
-                    ret[envKey] = newValue
-
-                    oldValue = old_values.get(envKey)
-                    printChanged("ENV_FILE LIST", envKey, newValue, oldValue)
+                    printChanged("ENV_FILE LIST", envKey, ret[envKey], old_values.get(envKey))
 
             else:
                 envKey = e._name
-                newValue = adjust_bool(e, e._value) if type(e._value) == bool else e._value
 
-                # the env vars have no concept of None, convert to empty string
-                if newValue == None or newValue == "None":
-                    newValue = ""
+                ret[envKey] = value_for_env(e, e._value)
 
-                ret[envKey] = newValue
-
-                oldValue = old_values.get(envKey)
-                printChanged("ENV_FILE OTHR", envKey, newValue, oldValue)
+                printChanged("ENV_FILE OTHR", envKey, ret[envKey], old_values.get(envKey))
 
         # add convenience values
         # fmt: off

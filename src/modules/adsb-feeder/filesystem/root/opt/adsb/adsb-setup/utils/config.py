@@ -58,12 +58,6 @@ def read_values_from_env_file():
     return ret
 
 
-def escape_env(line):
-    # docker compose does weird stuff if there are $ in the env vars
-    # escape them using $$
-    return line.replace("$", "$$")
-
-
 def write_values_to_env_file(values):
     # print_err("writing .env file")
 
@@ -79,14 +73,12 @@ def write_values_to_env_file(values):
                 for i in range(len(value)):
                     suffix = "" if i == 0 else f"_{i}"
                     env_line = f"{key}{suffix}={value[i]}\n"
-                    env_line = escape_env(env_line)
                     f.write(env_line)
-                    print_err(f"wrote {env_line.strip()} to .env", level=8)
+                    print_err(f"wrote {env_line} to .env", level=8)
             else:
-                env_line = f"{key}={value.strip() if type(value) == str else value}\n"
-                env_line = escape_env(env_line)
+                env_line = f"{key}={value}\n"
                 f.write(env_line)
-                print_err(f"wrote {env_line.strip()} to .env", level=8)
+                print_err(f"wrote {env_line} to .env", level=8)
 
     os.rename(tmp, ENV_FILE_PATH)
 
