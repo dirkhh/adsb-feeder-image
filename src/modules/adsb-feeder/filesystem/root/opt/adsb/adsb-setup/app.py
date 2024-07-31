@@ -487,12 +487,13 @@ class AdsbIm:
             self.get_lat_lon_alt()
 
         self._every_minute = Background(60, self.every_minute)
+        # every_minute stuff is required to initialize some values, run it synchronously
         self.every_minute()
 
         if self._d.is_enabled("stage2"):
             # let's make sure we tell the micro feeders every ten minutes that
             # the stage2 is around, looking at them
-            # this doesn't need to run immediately on startup
+            threading.Thread(target=self.stage2_checks).start()
             self._stage2_checks = Background(600, self.stage2_checks)
 
         self.app.run(
