@@ -92,8 +92,13 @@ from flask.logging import logging as flask_logging
 # don't log static assets
 class NoStatic(flask_logging.Filter):
     def filter(record):
-        return "GET /static/" not in record.getMessage()
+        msg = record.getMessage()
+        if "GET /static/" in msg:
+            return False
+        if not (verbose & 8) and "GET /api/" in msg:
+            return False
 
+        return True
 
 flask_logging.getLogger("werkzeug").addFilter(NoStatic)
 
@@ -948,7 +953,7 @@ class AdsbIm:
     def base_info(self):
         listener = request.remote_addr
         tm = int(time.time())
-        print_err(f"access to base_info from {listener}")
+        print_err(f"access to base_info from {listener}", level=8)
         self._last_stage2_contact = listener
         self._last_stage2_contact_time = tm
         lat, lon, alt = self.get_lat_lon_alt()
@@ -1194,7 +1199,7 @@ class AdsbIm:
             port = "80"
         ip, triplet = mf_get_ip_and_triplet(ip)
 
-        print_err(f"getting info from {ip}:{port} with do_import={do_import}")
+        print_err(f"getting info from {ip}:{port} with do_import={do_import}", level=8)
         timeout = 2.0
         # try:
         if do_import:
