@@ -136,6 +136,8 @@ class AdsbIm:
         self._last_stage2_contact = ""
         self._last_stage2_contact_time = 0
 
+        self._last_base_info = dict()
+
         self._multi_outline_bg = None
 
         # no one should share a CPU serial with RadarBox, so always create fake cpuinfo;
@@ -1222,7 +1224,13 @@ class AdsbIm:
             port = "1099"
             base_info, status = generic_get_json(f"http://{ip}:{port}/api/base_info", timeout=timeout)
         if status == 200 and base_info != None:
-            print_err(f"got {base_info} for {ip}")
+
+            base_info_string = json.dumps(base_info)
+
+            if self._last_base_info.get(ip) != base_info_string:
+                self._last_base_info[ip] = base_info_string
+                print_err(f"got {base_info} for {ip}")
+
             if do_import or not self._d.env_by_tags("site_name").list_get(n):
                 # only accept the remote name if this is our initial import
                 # after that the user may have overwritten it
