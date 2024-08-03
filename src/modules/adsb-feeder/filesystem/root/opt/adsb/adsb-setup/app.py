@@ -1459,6 +1459,9 @@ class AdsbIm:
             "mf_brofm_capable",
             "ultrafeeder_config",
             "rb978host",
+            "airspyurl",
+            "rtlsdrurl",
+            "978url",
         ):
             tags = t.split("--")
             e = self._d.env_by_tags(tags)
