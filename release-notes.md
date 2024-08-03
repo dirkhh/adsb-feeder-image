@@ -1,4 +1,5 @@
 Changes since v2.1.4 include:
+- make the required 'apply' button on stage2 setup page more obvious
 - don't fail DietPi image first boot on certain IPv6 failures
 - switch out DietPi images to be DietPi 9.6 based
 - switch to newer Raspbian base image for Raspberry Pi
