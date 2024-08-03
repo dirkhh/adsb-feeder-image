@@ -3,7 +3,6 @@ Changes since v2.1.4 include:
 - don't fail DietPi image first boot on certain IPv6 failures
 - switch out DietPi images to be DietPi 9.6 based
 - switch to newer Raspbian base image for Raspberry Pi
-- reduce memory consumption for integrated feeders running with less than 1G of memory
 - automatically reduce memory usage for systems < 900 MB memory (no effect on micro / nano feeder)
 - add support for local SDRs on a stage2 system. This reduces the need for an additional system in situations where a user wants to have two or maybe three SDRs and wants to simply reuse one of the systems as stage2 (ideally that's an RPi4 or OPi5 or some other reasonably beefy SBC)
 - fix small fr24 issues, including a workaround for an FR24 bug when lon < 0.1
