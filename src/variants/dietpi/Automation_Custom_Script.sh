@@ -95,3 +95,8 @@ systemctl enable adsb-docker
 # make sure the VPN services are stopped and disabled
 systemctl disable --now zerotier-one.service tailscaled.service
 
+# Disable telemetry for tailscale
+# but only if it's not already there
+if ! grep -q -- "^FLAGS=\"--no-logs-no-support" /etc/default/tailscaled ; then
+   sed -i 's/FLAGS=\"/FLAGS=\"--no-logs-no-support /' /etc/default/tailscaled
+fi
