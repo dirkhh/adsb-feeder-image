@@ -82,6 +82,12 @@ apt-get install -y zerotier-one tailscale
 systemctl disable tailscaled
 systemctl disable zerotier-one
 
+# Disable telemetry for tailscale
+# but only if it's not already there
+if ! grep -q -- "^FLAGS=\"--no-logs-no-support" /etc/default/tailscaled ; then
+	sed -i 's/FLAGS=\"/FLAGS=\"--no-logs-no-support /' /etc/default/tailscaled
+fi
+
 # If we are armbian, we do something with networking
 if [ "$BASE_DISTRO" = "armbian" ] ; then
 	apt-get install -y network-manager net-tools
