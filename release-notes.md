@@ -1,29 +1,5 @@
-Changes since v2.1.4 include:
-- make the required 'apply' button on stage2 setup page more obvious
-- don't fail DietPi image first boot on certain IPv6 failures
-- switch out DietPi images to be DietPi 9.6 based
-- switch to newer Raspbian base image for Raspberry Pi
-- automatically reduce memory usage for systems < 900 MB memory (no effect on micro / nano feeder)
-- add support for local SDRs on a stage2 system. This reduces the need for an additional system in situations where a user wants to have two or maybe three SDRs and wants to simply reuse one of the systems as stage2 (ideally that's an RPi4 or OPi5 or some other reasonably beefy SBC)
-- fix small fr24 issues, including a workaround for an FR24 bug when lon < 0.1
-- allow restart and recreate for individual containers
-- always use mlathub for all mlat results, also for collecting them in stage2
-- fix nanofeeder data input from airspy / sdrplay / dump978
-- restrict manual airspy gain to valid values
-- use rbfeeder mlatresults if there are any
-- pin Dozzle and alpine images to reduce unnecessary updates
-- fix potential crash if the scripts cannot find a local route
-- made micro/nano feeder as an app work again - it seems weird to run this as an app (on port 1099), but maybe there are people who end up doing this reusing an existing DietPi install or something
-- add nano feeder mode that tries to even more reduce disk IO and footprint by turning off heatmap, replay, and graphs, as well as moving all logging to memory only (which prevents looking at logs after a crash)
-- various code cleanups that resulted in more logical api names, among other things 
-- add script to more easily build our images locally - this should allow us to work around the weird GitHub Action issues with Odroid images
-- deal with another random change in the airplanes.live status json; at least this change makes things more logical, so I guess I shouldn't complain
-- don't unnecessarily add a '_' to the end of a micro feeder site name
-- increase size of /run to make sure we don't run out of space for the containers
-- add undervoltage and networking issues to the Support Info page
-- remove obsolete GitHub Action, references to iob images, and the remainders of the initial attempts to build DietPi images with CustomPiOS
-- add several stubs for additional services that aren't fully integrated, but allow managing a pingfail service and integrating CPU/external temperature sensor in the UI template
-- fix potential 501 error on startup by avoiding a delayed start of some maintenance tasks
+Changes since v2.1.5 include:
+- disable tailscaled telemetry
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)
