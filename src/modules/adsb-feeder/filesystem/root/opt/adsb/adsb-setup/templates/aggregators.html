@@ -12,7 +12,7 @@
 <form class="row gy-2 gx-3 mx-1 mx-lg-3 mx-xl-5 align-items-center" method="post"
       onsubmit="show_spinner(); return true;">
   <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="aggregators"
-          value={{go}}>I'm done here - take me to the website</button>
+          value={{go}}>apply settings - take me to the website</button>
   <div class="col-12 form-check {% if env_value_by_tag('aggregator_choice') in ['micro', 'nano'] %}d-none{% endif %}">
     <input class="form-check-input me-1" type="checkbox" name="mlat_privacy--is_enabled" id="mlat_privacy--is_enabled"
            {% if list_is_enabled("mlat_privacy", m) %}checked{% endif %} />
@@ -289,7 +289,7 @@
     </label>
   </div>
   <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="aggregators"
-          value={{go}}>I'm done here - take me to the website</button>
+          value={{go}}>apply settings - take me to the website</button>
 </form>
 <script>
   function show_or_hide(b, f) {
