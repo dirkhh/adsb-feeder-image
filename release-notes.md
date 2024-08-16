@@ -1,4 +1,5 @@
 Changes since v2.1.5 include:
+- fix not being able to disable aggregators when the "All" setting was selected during basic setup
 - disable tailscaled telemetry
 
 > [!NOTE]
