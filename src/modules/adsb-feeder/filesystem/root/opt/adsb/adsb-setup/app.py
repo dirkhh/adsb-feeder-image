@@ -1913,6 +1913,9 @@ class AdsbIm:
                 if key == "aggregators":
                     # user has clicked Submit on Aggregator page
                     self._d.env_by_tags("aggregators_chosen").value = True
+                    # set this to individual so if people have set "all" before can still deselect individual aggregators
+                    self._d.env_by_tags("aggregator_choice").value = "individual"
+
                 if allow_insecure and key == "shutdown":
                     # do shutdown
                     def do_halt():
