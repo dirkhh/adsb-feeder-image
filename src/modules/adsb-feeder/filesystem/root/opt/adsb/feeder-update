@@ -245,7 +245,7 @@ fi
 
 echo "prepare the files that we need to replace"
 mkdir -p "${DIR}/root"
-cp -r src/modules/adsb-feeder/filesystem/root "${DIR}"
+cp -a src/modules/adsb-feeder/filesystem/root "${DIR}"
 
 echo "copy the updated files in place"
 # shellcheck disable=SC2164
@@ -269,11 +269,11 @@ services_enable=()
 if [ ! -f /opt/adsb/os.adsb.feeder.image ] ; then
     rm -f ./usr/lib/systemd/system/adsb-hotspot.service
     rm -f ./usr/lib/systemd/system/adsb-bootstrap.service
-    cp -v -a ./usr/lib/systemd/system/* /usr/lib/systemd/system/
-    cp -v -a ./opt/adsb/* /opt/adsb
+    cp -v -f -a ./usr/lib/systemd/system/* /usr/lib/systemd/system/
+    cp -v -f -a ./opt/adsb/* /opt/adsb
 else
     # copy the complete tree into the / filesystem
-    cp -v -a -r . /
+    cp -v -f -a ./* /
 
     services_enable+=("adsb-hotspot.service")
 fi
