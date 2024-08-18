@@ -100,6 +100,7 @@ class NoStatic(flask_logging.Filter):
 
         return True
 
+
 flask_logging.getLogger("werkzeug").addFilter(NoStatic)
 
 
@@ -1589,9 +1590,8 @@ class AdsbIm:
         stage2_nano = False
 
         if self._d.is_enabled("stage2") and (
-                self._d.env_by_tags("1090serial").value
-                or self._d.env_by_tags("978serial").value
-            ):
+            self._d.env_by_tags("1090serial").value or self._d.env_by_tags("978serial").value
+        ):
             # this is special - the user has declared this a stage2 feeder, yet
             # appears to be setting up an SDR - let's force this to be treated as
             # nanofeeder
@@ -1603,7 +1603,6 @@ class AdsbIm:
             self._d.env_by_tags("stage2_nano").value = False
             self._d.env_by_tags("nano_beast_port").value = "30005"
             self._d.env_by_tags("nano_beastreduce_port").value = "30006"
-
 
         for sitenum in [0] + self.micro_indices():
 
@@ -1744,7 +1743,6 @@ class AdsbIm:
                 print_err(f"airspy container is {self._d.is_enabled(['airspy'])}")
                 print_err(f"SDRplay container is {self._d.is_enabled(['sdrplay'])}")
                 print_err(f"dump978 container {self._d.list_is_enabled(['uat978'], 0)}")
-
 
         if self._d.env_by_tags("stage2_nano").value:
             do978 = bool(self._d.env_by_tags("978serial").value)
