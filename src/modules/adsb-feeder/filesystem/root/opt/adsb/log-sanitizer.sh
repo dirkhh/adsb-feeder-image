@@ -22,6 +22,9 @@ ${SEPARATOR}
 free -h:
 $(free -h)
 ${SEPARATOR}
+journal storage:
+$( ( systemd-analyze cat-config systemd/journald.conf | grep ^Storage ; echo 'Storage=auto' ) | head -1 | cut -d= -f2)
+${SEPARATOR}
 docker ps:
 $(timeout 4 docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Image}}")
 ${SEPARATOR}

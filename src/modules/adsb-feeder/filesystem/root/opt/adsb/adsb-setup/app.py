@@ -258,6 +258,7 @@ class AdsbIm:
         self.update_boardname()
         self.update_version()
         self.update_meminfo()
+        self.update_journal_state()
 
         # now all the envs are loaded and reconciled with the data on file - which means we should
         # actually write out the potentially updated values (e.g. when plain values were converted
@@ -348,6 +349,22 @@ class AdsbIm:
                         break
         except:
             pass
+
+    def update_journal_state(self):
+        # with no config setting or an 'auto' setting, the journal is persistent IFF /var/log/journal exists
+        self._persistant_journal = pathlib.Path("/var/log/journal").exists()
+        # read journald.conf line by line and check if we override the default
+        try:
+            result = subprocess.run(
+                "systemd-analyze cat-config systemd/journald.conf", shell=True, capture_output=True, timeout=2.0
+            )
+            config = result.stdout.decode("utf-8")
+        except:
+            config = "Storage=auto"
+        for line in config:
+            if line.startswith("Storage=volatile"):
+                self._persistant_journal = False
+                break
 
     def pack_im(self) -> str:
         image = {
@@ -2600,6 +2617,7 @@ class AdsbIm:
         storage = simple_cmd_result("df -h | grep -v overlay")
         kernel = simple_cmd_result("uname -a")
         memory = simple_cmd_result("free -h")
+        journal = "persistent on disk" if self._persistant_journal else "in memory"
 
         containers = [
             self._d.env_by_tags(["container", container]).value
@@ -2613,6 +2631,7 @@ class AdsbIm:
             storage=storage,
             base=base,
             kernel=kernel,
+            journal=journal,
             current=current,
             containers=containers,
             sdrs=sdrs,
