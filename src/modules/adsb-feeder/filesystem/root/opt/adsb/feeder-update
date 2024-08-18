@@ -63,8 +63,11 @@ waiting_placeholder() {
     PORT=$(grep AF_WEBPORT /opt/adsb/config/.env | cut -d= -f2)
     start_wait_app "$PORT" "$LOGFILE" "Updating the" &
 }
-exec 3>&1
-exec &>>"$LOGFILE"
+LAST_ARG=${!#}
+if [[ $LAST_ARG != "-go" ]]; then
+    exec 3>&1
+    exec &>>"$LOGFILE"
+fi
 
 # identify the calling process for better log messages
 PARENTPID=$(ps -cp $$ -o ppid="")
@@ -79,7 +82,6 @@ echo "$(date -u +"%FT%T.%3NZ") $PARENTPROC called feeder-update" "$@" >&3
 
 trap cleanup EXIT
 
-LAST_ARG=${!#}
 if [[ $LAST_ARG == "-go" ]]; then
     # that means we just refreshed the git tree and the first argument is the target
     TARGET="$1"
@@ -149,12 +151,11 @@ else
     if [ -f /opt/adsb-feeder-update/feeder-update ] ; then
         # the cleanup trap will be re-initialized in the child script, so disable it here
         trap - EXIT
-        bash $XTRACE /opt/adsb-feeder-update/feeder-update "$TARGET" "$BRANCH" "$@" -go
-        echo "$(date -u +"%FT%T.%3NZ") update complete" >&3
+        exec bash $XTRACE /opt/adsb-feeder-update/feeder-update "$TARGET" "$BRANCH" "$@" -go
     else
         echo "can't find /opt/adsb-feeder-update/feeder-update after update to $TARGET"
+        exit 1
     fi
-    exit "$?"
 fi
 
 # now we know that we are running the right script in the right place
@@ -331,3 +332,4 @@ kill_wait_app
 systemctl restart adsb-setup.service
 
 echo "$(date -u +"%FT%T.%3NZ") update to ${VERSION} complete"
+echo "$(date -u +"%FT%T.%3NZ") update to ${VERSION} complete" >&3
