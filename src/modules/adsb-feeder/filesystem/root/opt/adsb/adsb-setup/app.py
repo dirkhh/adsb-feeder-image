@@ -1958,6 +1958,17 @@ class AdsbIm:
                         self._system.recreate_containers(containers_to_restart)
                     self._next_url_from_director = request.url
                     return render_template("/restarting.html")
+                if key == "log_persistence_toggle":
+                    if self._persistant_journal:
+                        cmd = "/opt/adsb/scripts/journal-set-volatile.sh"
+                    else:
+                        cmd = "/opt/adsb/scripts/journal-set-persist.sh"
+                    try:
+                        subprocess.run(cmd, shell=True, timeout=2.0)
+                        self.update_journal_state()
+                    except:
+                        pass
+                    self._next_url_from_director = request.url
                 if key == "secure_image":
                     self.set_secure_image()
                 if key == "no_config_link":
@@ -2289,6 +2300,7 @@ class AdsbIm:
             rpw=self.rpw,
             channel=self.extract_channel(),
             containers=self._system.list_containers(),
+            persistent_journal=self._persistant_journal,
         )
 
     @check_restart_lock
