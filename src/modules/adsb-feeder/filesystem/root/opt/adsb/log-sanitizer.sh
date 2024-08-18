@@ -54,8 +54,7 @@ $(journalctl -e -n3000)
 ${SEPARATOR}
 "
 
-oldlog=$(find /opt/adsb/logs -name adsb-setup.log.\* | sort -r | head -n1)
-if [[ -n "$oldlog" ]]; then
+for oldlog in $(find /opt/adsb/logs -name adsb-setup.log.\* | sort | tail -n2); do
 
 SANITIZED_LOG+="
 ${oldlog}:
@@ -63,7 +62,7 @@ $(zstdcat $oldlog || cat $oldlog)
 ${SEPARATOR}
 "
 
-fi
+done
 
 SANITIZED_LOG+="
 adsb-setup.log:

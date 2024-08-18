@@ -9,9 +9,9 @@ else
     logparent
 fi
 
-# we rotate hourly to reduce the risk of overflowing /run - but we only rotate log if longer than 3000 lines
+# we rotate hourly to reduce the risk of overflowing /run - but we only rotate log if longer than 2000 lines
 # at that point we copy the log to the on disk log directory
-if [[ -f /run/adsb-feeder-image.log ]] && (( $(wc -l < /run/adsb-feeder-image.log) > 3000 )); then
+if [[ -f /run/adsb-feeder-image.log ]] && (( $(wc -l < /run/adsb-feeder-image.log) > 2000 )); then
     bash /opt/adsb/scripts/log2disk.sh
 fi
 
