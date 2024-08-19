@@ -352,7 +352,7 @@ class AdsbIm:
 
     def update_journal_state(self):
         # with no config setting or an 'auto' setting, the journal is persistent IFF /var/log/journal exists
-        self._persistant_journal = pathlib.Path("/var/log/journal").exists()
+        self._persistent_journal = pathlib.Path("/var/log/journal").exists()
         # read journald.conf line by line and check if we override the default
         try:
             result = subprocess.run(
@@ -363,7 +363,7 @@ class AdsbIm:
             config = "Storage=auto"
         for line in config:
             if line.startswith("Storage=volatile"):
-                self._persistant_journal = False
+                self._persistent_journal = False
                 break
 
     def pack_im(self) -> str:
@@ -1959,7 +1959,7 @@ class AdsbIm:
                     self._next_url_from_director = request.url
                     return render_template("/restarting.html")
                 if key == "log_persistence_toggle":
-                    if self._persistant_journal:
+                    if self._persistent_journal:
                         cmd = "/opt/adsb/scripts/journal-set-volatile.sh"
                     else:
                         cmd = "/opt/adsb/scripts/journal-set-persist.sh"
@@ -2300,7 +2300,7 @@ class AdsbIm:
             rpw=self.rpw,
             channel=self.extract_channel(),
             containers=self._system.list_containers(),
-            persistent_journal=self._persistant_journal,
+            persistent_journal=self._persistent_journal,
         )
 
     @check_restart_lock
@@ -2629,7 +2629,7 @@ class AdsbIm:
         storage = simple_cmd_result("df -h | grep -v overlay")
         kernel = simple_cmd_result("uname -a")
         memory = simple_cmd_result("free -h")
-        journal = "persistent on disk" if self._persistant_journal else "in memory"
+        journal = "persistent on disk" if self._persistent_journal else "in memory"
 
         containers = [
             self._d.env_by_tags(["container", container]).value
