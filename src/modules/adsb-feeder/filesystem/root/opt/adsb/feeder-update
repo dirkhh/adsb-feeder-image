@@ -192,55 +192,50 @@ SHA_COMPONENT=${DESCRIBE//$TAG_COMPONENT/}
 VERSION="${TAG_COMPONENT}(${BRANCH})${SHA_COMPONENT}"
 echo "starting the actual upgrade to ${VERSION}"
 
-# we now need the Python3 requests module and that may not have been installed originally
+# we now need some software that may not have been installed originally
+
+function check_missing() {
+    if ! python3 -c "import requests" &>/dev/null ; then
+        missing+=("python3-requests")
+    fi
+    if [ -f /opt/adsb/os.adsb.feeder.image ] ; then
+        # get hostapd / isc-dhcpd-server if necessary
+        if ! command -v hostapd &>/dev/null || ! dhcpd --version 2>&1 | grep -qs -e isc-dhcpd; then
+            missing+=("hostapd" "isc-dhcp-server")
+            # make sure they are never enabled by masking the services
+            systemctl mask hostapd
+            systemctl mask isc-dhcp-server
+        fi
+        # get avahi-utils if necessary
+        if ! command -v avahi-publish &>/dev/null || ! command -v avahi-resolve &>/dev/null; then
+            missing+=("avahi-utils")
+        fi
+    fi
+    if ! command -v jq &>/dev/null; then
+        missing+=("jq")
+    fi
+    if ! command -v zstd &>/dev/null; then
+        missing+=("zstd")
+    fi
+}
+
 missing=()
-if ! python3 -c "import requests" &>/dev/null ; then
-    missing+=("python3-requests")
-fi
-# get hostapd / isc-dhcpd-server if necessary
-if ! command -v hostapd &>/dev/null || ! dhcpd --version 2>&1 | grep -qs -e isc-dhcpd; then
-    missing+=("hostapd" "isc-dhcp-server")
-    # make sure they are never enabled by masking the services
-    systemctl mask hostapd
-    systemctl mask isc-dhcp-server
-fi
-# get avahi-utils if necessary
-if ! command -v avahi-publish &>/dev/null || ! command -v avahi-resolve &>/dev/null; then
-    missing+=("avahi-utils")
-fi
-if ! command -v jq &>/dev/null; then
-    missing+=("jq")
-fi
-if ! command -v zstd &>/dev/null; then
-    missing+=("zstd")
-fi
+check_missing
+
 if [[ ${#missing[@]} -gt 0 ]] ; then
     # let's try to install it
-    echo "newer versions of the adsb.im ADS-B Feeder Image require the Python3 ${missing[@]} package(s) - trying to install"
+    echo "newer versions of the adsb.im ADS-B Feeder Image require these packages: ${missing[@]} - trying to install"
     grep -i fedora /etc/os-release &> /dev/null && dnf install -y "${missing[@]}"
     grep -i centos /etc/os-release &> /dev/null && dnf install -y "${missing[@]}"
     grep -i suse /etc/os-release &> /dev/null && zypper install -y "${missing[@]}"
     grep -i debian /etc/os-release &> /dev/null && apt-get update && apt-get install -y "${missing[@]}"
-    # now let's check again
-    if ! python3 -c "import requests" &>/dev/null ; then
-        echo "cannot install Python3 requests package - please contact the adsb.im maintainer"
-        exit 1
-    fi
-fi
 
-if [ -f /opt/adsb/os.adsb.feeder.image ] ; then
-    # if this is a full image, we also need avahi-publish, which may not be available in older images
-    if ! which avahi-publish &>/dev/null ; then
-        echo "newer versions of the adsb.im ADS-B Feeder Image require the avahi-utils package - trying to install"
-        grep -i fedora /etc/os-release &> /dev/null && dnf install -y avahi-tools
-        grep -i centos /etc/os-release &> /dev/null && dnf install -y avahi-tools
-        grep -i suse /etc/os-release &> /dev/null && zypper install -y avahi-tools
-        grep -i debian /etc/os-release &> /dev/null && apt-get install -y avahi-utils
-        # now let's check again
-        if ! which avahi-publish &>/dev/null ; then
-            echo "cannot install avahi-utils package - please contact the adsb.im maintainer"
-            exit 1
-        fi
+    # now let's check again
+    missing=()
+    check_missing
+    if [[ ${#missing[@]} -gt 0 ]] ; then
+        echo "cannot install these packages: "${missing[@]}" - please contact the adsb.im maintainer"
+        exit 1
     fi
 fi
 
