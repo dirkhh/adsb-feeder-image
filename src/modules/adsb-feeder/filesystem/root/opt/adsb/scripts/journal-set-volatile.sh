@@ -12,7 +12,8 @@ if [[ $(du -s "/var/log/journal/$(cat /etc/machine-id)" | cut -f1) < 20000 ]]; t
 fi
 
 sed -i -e 's/.*Storage=.*/Storage=volatile/' "/etc/systemd/journald.conf"
-sed -i -e 's/.*RuntimeMaxUse=.*/RuntimeMaxUse=10M/' "/etc/systemd/journald.conf"
+# use 1/50th of memory for journal, that's 20 MB per Gigabyte of memory
+sed -i -e "s/.*RuntimeMaxUse=.*/RuntimeMaxUse=$(( $(cat /proc/meminfo | grep -i 'memtotal' | grep -o '[[:digit:]]*') / 50 ))K/" "/etc/systemd/journald.conf"
 
 systemctl restart systemd-journald
 
