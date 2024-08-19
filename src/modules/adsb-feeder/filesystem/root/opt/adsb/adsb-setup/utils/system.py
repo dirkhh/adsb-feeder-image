@@ -182,8 +182,9 @@ class System:
         containers = []
         try:
             result = subprocess.run(
-                ["/opt/adsb/docker-compose-adsb", "ps", "--format='{{json .Names}}'"],
+                ["docker", "ps", "--format='{{json .Names}}'"],
                 capture_output=True,
+                timeout=5,
             )
             output = result.stdout.decode("utf-8")
             for line in output.split("\n"):
@@ -191,7 +192,7 @@ class System:
                     # the names show up as '"ultrafeeder"'
                     containers.append(line[2:-2])
         except subprocess.SubprocessError() as e:
-            print_err(f"docker compose ps failed {e}")
+            print_err(f"docker ps failed {e}")
         return containers
 
     def restart_containers(self, containers):
