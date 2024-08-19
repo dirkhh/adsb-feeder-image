@@ -1793,7 +1793,7 @@ class AdsbIm:
                 try:
                     cmd = "/opt/adsb/scripts/journal-set-volatile.sh"
                     print_err(cmd)
-                    subprocess.run(cmd, shell=True, timeout=2.0)
+                    subprocess.run(cmd, shell=True, timeout=5.0)
                     self.update_journal_state()
                     self._d.env_by_tags("journal_configured").value = True
                 except:
@@ -1975,7 +1975,7 @@ class AdsbIm:
                         cmd = "/opt/adsb/scripts/journal-set-persist.sh"
                     try:
                         print_err(cmd)
-                        subprocess.run(cmd, shell=True, timeout=2.0)
+                        subprocess.run(cmd, shell=True, timeout=5.0)
                         self.update_journal_state()
                     except:
                         pass
@@ -2190,7 +2190,7 @@ class AdsbIm:
                     if value == "nano" and self._d.is_feeder_image:
                         # make sure we don't log to disk at all
                         try:
-                            subprocess.call("bash /opt/adsb/scripts/journal-set-volatile.sh", shell=True)
+                            subprocess.call("bash /opt/adsb/scripts/journal-set-volatile.sh", shell=True, timeout=5)
                             print_err("switched to volatile journal")
                         except:
                             print_err("exception trying to switch to volatile journal - ignoring")
