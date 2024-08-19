@@ -10,6 +10,7 @@ mkdir -p /var/log/journal
 cp -f -a "/run/log/journal/$(cat /etc/machine-id)" /var/log/journal/
 
 sed -i -e 's/.*Storage=.*/Storage=persistent/' "/etc/systemd/journald.conf"
+sed -i -e 's/.*SystemMaxUse=.*/SystemMaxUse=128M/' /etc/systemd/journald.conf
 
 systemctl restart systemd-journald
 

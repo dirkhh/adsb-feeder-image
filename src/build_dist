@@ -113,6 +113,8 @@ if [[ "$VARIANT" == "dietpi"* ]] ; then
 
     # make systemd journal persistent for dietpi
     sed -i -e 's/.*Storage=.*/Storage=persistent/' "$MNT_DIR/etc/systemd/journald.conf"
+    sed -i -e 's/.*RuntimeMaxUse=.*/RuntimeMaxUse=10M/' /etc/systemd/journald.conf
+    sed -i -e 's/.*SystemMaxUse=.*/SystemMaxUse=128M/' /etc/systemd/journald.conf
     # this requires that ramlog never starts on first boot, disable it and let dietpi know it's disabled
     # in dietpi.txt this is expected: AUTO_SETUP_LOGGING_INDEX=0
     rm -f "$MNT_DIR/etc/systemd/system/multi-user.target.wants/dietpi-ramlog.service"
