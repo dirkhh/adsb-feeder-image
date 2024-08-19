@@ -418,6 +418,11 @@ class Data:
             tags=["sdrplay_license_accepted", "is_enabled"],
         ),
         Env(
+            "_ADSBIM_STATE_JOURNAL_CONFIGURED",
+            default=False,
+            tags=["journal_configured", "is_enabled", "norestore"],
+        ),
+        Env(
             "_ADSBIM_STATE_IS_SSH_CONFIGURED",
             tags=["ssh_configured", "is_enabled", "norestore"],
         ),

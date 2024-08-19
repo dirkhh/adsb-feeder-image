@@ -1,4 +1,5 @@
 Changes since v2.1.5 include:
+- image install: default to volatile journal to reduce disk writes
 - add option to make journal persistent or volatile from the system management page
 - write log to disk on shutdown for better debugging after reboots
 - fix not being able to disable aggregators when the "All" setting was selected during basic setup

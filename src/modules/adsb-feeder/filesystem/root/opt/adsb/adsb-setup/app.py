@@ -1789,6 +1789,15 @@ class AdsbIm:
             if self.at_least_one_aggregator():
                 self._d.env_by_tags("aggregators_chosen").value = True
 
+            if self._d.is_feeder_image and not self._d.env_by_tags("journal_configured").value:
+                try:
+                    cmd = "/opt/adsb/scripts/journal-set-volatile.sh"
+                    subprocess.run(cmd, shell=True, timeout=2.0)
+                    self.update_journal_state()
+                    self._d.env_by_tags("journal_configured").value = True
+                except:
+                    pass
+
         for i in self.micro_indices():
             create_stage2_yml_files(i, self._d.env_by_tags("mf_ip").list_get(i))
 
