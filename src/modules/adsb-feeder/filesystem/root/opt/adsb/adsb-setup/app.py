@@ -1792,6 +1792,7 @@ class AdsbIm:
             if self._d.is_feeder_image and not self._d.env_by_tags("journal_configured").value:
                 try:
                     cmd = "/opt/adsb/scripts/journal-set-volatile.sh"
+                    print_err(cmd)
                     subprocess.run(cmd, shell=True, timeout=2.0)
                     self.update_journal_state()
                     self._d.env_by_tags("journal_configured").value = True
@@ -1973,6 +1974,7 @@ class AdsbIm:
                     else:
                         cmd = "/opt/adsb/scripts/journal-set-persist.sh"
                     try:
+                        print_err(cmd)
                         subprocess.run(cmd, shell=True, timeout=2.0)
                         self.update_journal_state()
                     except:
