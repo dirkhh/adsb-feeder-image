@@ -6,9 +6,12 @@ if grep -qs -e '^Storage=volatile' /etc/systemd/journald.conf; then
 fi
 
 # move over the existing log, if it doesn't work so be it
-mkdir -p /run/log/journal
-if [[ $(du -s "/var/log/journal/$(cat /etc/machine-id)" | cut -f1) < 20000 ]]; then
-    cp -f -a "/var/log/journal/$(cat /etc/machine-id)" /run/log/journal/
+RUNDIR="/run/log/journal/$(cat /etc/machine-id)"
+mkdir -p "$RUNDIR"
+JOURNAL="/var/log/journal/$(cat /etc/machine-id)/system.journal"
+if (( $(du "$JOURNAL" | cut -f1) < 20000 )); then
+    systemctl stop systemd-journald
+    cp -v -f -a "$JOURNAL" "$RUNDIR"
 fi
 
 sed -i -e 's/.*Storage=.*/Storage=volatile/' "/etc/systemd/journald.conf"

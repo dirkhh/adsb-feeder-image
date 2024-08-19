@@ -6,8 +6,10 @@ if grep -qs -e '^Storage=persistent' /etc/systemd/journald.conf; then
 fi
 
 # move over the existing log, if it doesn't work so be it
-mkdir -p /var/log/journal
-cp -f -a "/run/log/journal/$(cat /etc/machine-id)" /var/log/journal/
+VARDIR="/var/log/journal/$(cat /etc/machine-id)"
+mkdir -p "$VARDIR"
+systemctl stop systemd-journald
+cp -v -f -a "/run/log/journal/$(cat /etc/machine-id)"/system.journal "$VARDIR"
 
 sed -i -e 's/.*Storage=.*/Storage=persistent/' "/etc/systemd/journald.conf"
 sed -i -e 's/.*SystemMaxUse=.*/SystemMaxUse=128M/' /etc/systemd/journald.conf
