@@ -538,7 +538,7 @@ class AdsbIm:
         except subprocess.SubprocessError:
             print_err("failed to set up timezone")
 
-        return render_template("setup.html")
+        return redirect(url_for("setup"))
 
     def push_multi_outline(self) -> None:
         if not self._d.is_enabled("stage2"):
