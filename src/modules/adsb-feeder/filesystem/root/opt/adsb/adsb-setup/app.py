@@ -525,18 +525,23 @@ class AdsbIm:
             debug=debug,
         )
 
+    def set_tz(self, timezone):
+        # Add to .env
+        self._d.env("FEEDER_TZ").list_set(0, timezone)
+        # Set it as datetimectl too
+        try:
+            print_err(f"calling timedatectl set-timezone {timezone}")
+            subprocess.run(["timedatectl", "set-timezone", f"{timezone}"], check=True)
+        except subprocess.SubprocessError:
+            print_err(f"failed to set up timezone ({timezone})")
+
     def get_tz(self):
         browser_timezone = request.args.get("tz")
         # Some basic check that it looks something like Europe/Rome
         if not re.match(r"^[A-Z][a-z]+/[A-Z][a-z]+$", browser_timezone):
             return "invalid"
-        # Add to .env
-        self._d.env("FEEDER_TZ").value = browser_timezone
-        # Set it as datetimectl too
-        try:
-            subprocess.run(["timedatectl", "set-timezone", f"{browser_timezone}"], check=True)
-        except subprocess.SubprocessError:
-            print_err("failed to set up timezone")
+
+        self.set_tz(browser_timezone)
 
         return redirect(url_for("setup"))
 
@@ -2173,6 +2178,8 @@ class AdsbIm:
                 if key == "alt":
                     # remove decimals as well
                     value = str(int(float(value)))
+                if key == "tz":
+                    self.set_tz(value)
                 if key == "uatgain":
                     if value == "" or value == "auto":
                         value = "autogain"
