@@ -190,6 +190,10 @@
   function updateTimezone() {
     $("#tz").val(browserTZ());
   }
+  // set timezone field to browser tz on load if not set already
+  if (!$("#tz").val()) {
+    $("#tz").val(browserTZ());
+  }
   const explainAll = document.getElementById("explain-all");
   const explainPriv = document.getElementById("explain-privacy");
   const explainInd = document.getElementById("explain-individual");
