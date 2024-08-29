@@ -67,7 +67,7 @@
   <div class="form-group row align-items-center mb-1">
     <span class="col-md">
       <label for="tz">Timezone</label>
-      <button class="pb-1 btn btn-secondary" onclick="sendTimeToServer()">update timezone</button>
+      <button class="pb-1 btn btn-secondary" onclick="updateTimezone(); return false; // return false inhibits the form to be submitted">update timezone</button>
     </span>
     <span class="col-md">
       <input type="text" name="tz" id="tz" required
@@ -180,11 +180,15 @@
     if (new_alt.toString() == "NaN") new_alt = "";
     $("#alt").val(new_alt);
   });
-  function sendTimeToServer() {
-    const dateTimeFormat = new Intl.DateTimeFormat("en-US", {});
-    const i = document.createElement("img");
-    i.src = "/propagateTZ?tz=" + dateTimeFormat.resolvedOptions()["timeZone"];
-    document.getElementById("tz").value = dateTimeFormat.resolvedOptions()["timeZone"];
+  function browserTZ() {
+    let timezone = Intl.DateTimeFormat("en-US").resolvedOptions().timeZone;
+    if (!timezone.match(/^[A-Z][a-z]+\/[A-Z][a-z]+$/)) {
+      timezone = "";
+    }
+    return timezone;
+  }
+  function updateTimezone() {
+    $("#tz").val(browserTZ());
   }
   const explainAll = document.getElementById("explain-all");
   const explainPriv = document.getElementById("explain-privacy");

@@ -217,7 +217,6 @@ class AdsbIm:
         )
 
         self._routemanager.add_proxy_routes(self._d.proxy_routes)
-        self.app.add_url_rule("/propagateTZ", "propagateTZ", self.get_tz)
         self.app.add_url_rule("/hotspot_test", "hotspot_test", self.hotspot_test)
         self.app.add_url_rule("/restarting", "restarting", self.restarting)
         self.app.add_url_rule("/restart", "restart", self.restart, methods=["GET", "POST"])
@@ -534,16 +533,6 @@ class AdsbIm:
             subprocess.run(["timedatectl", "set-timezone", f"{timezone}"], check=True)
         except subprocess.SubprocessError:
             print_err(f"failed to set up timezone ({timezone})")
-
-    def get_tz(self):
-        browser_timezone = request.args.get("tz")
-        # Some basic check that it looks something like Europe/Rome
-        if not re.match(r"^[A-Z][a-z]+/[A-Z][a-z]+$", browser_timezone):
-            return "invalid"
-
-        self.set_tz(browser_timezone)
-
-        return redirect(url_for("setup"))
 
     def push_multi_outline(self) -> None:
         if not self._d.is_enabled("stage2"):
