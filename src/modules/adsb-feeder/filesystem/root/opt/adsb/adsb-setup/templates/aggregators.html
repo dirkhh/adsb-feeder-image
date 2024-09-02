@@ -204,8 +204,9 @@
       <a href="https://planefinder.net/">PlaneFinder</a>
       <div class="form-group" id="PF_FIELDS">
         <label for="planefinder--key">
-          You need a PlaneFinder sharecode. If you already have one, please enter it below. The setup for a new
-          feeder is fairly complicated - we are trying to add this for a future release.
+          You need a PlaneFinder sharecode. If you already have one, please enter it below. Otherwise, request a
+          sharecode from their <a href="https://planefinder.net/sharing/create-sharecode">sharing portal</a>. Make sure
+          you enter the exact same location data in that form.
         </label>
         <input type="text" id="planefinder--key" name="planefinder--key" class="form-control w-75"
                {{ others_enabled("planefinder", m) | replace("checked", "required" ) }}

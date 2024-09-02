@@ -1,4 +1,5 @@
 Changes since v2.1.5 include:
+- update sharing information for PlaneFinder with a link to their new sharing portal
 - image install: default to volatile journal to reduce disk writes
 - add option to make journal persistent or volatile from the system management page
 - write log to disk on shutdown for better debugging after reboots
