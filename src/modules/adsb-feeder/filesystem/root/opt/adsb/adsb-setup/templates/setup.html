@@ -182,9 +182,7 @@
   });
   function browserTZ() {
     let timezone = Intl.DateTimeFormat("en-US").resolvedOptions().timeZone;
-    if (!timezone.match(/^[A-Z][a-z]+\/[A-Z][a-z]+$/)) {
-      timezone = "";
-    }
+    console.log("browser timezone: " + timezone);
     return timezone;
   }
   function updateTimezone() {
