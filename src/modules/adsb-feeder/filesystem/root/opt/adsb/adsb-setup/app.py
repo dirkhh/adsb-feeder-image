@@ -532,7 +532,11 @@ class AdsbIm:
             # Add to .env only if timedatectl has succeeded
             self._d.env("FEEDER_TZ").list_set(0, timezone)
         except subprocess.SubprocessError:
-            print_err(f"failed to set up timezone ({timezone})")
+            print_err(f"failed to set up timezone ({timezone}), defaulting to UTC")
+            timezone = "UTC"
+            print_err(f"calling timedatectl set-timezone {timezone}")
+            subprocess.run(["timedatectl", "set-timezone", f"{timezone}"])
+            self._d.env("FEEDER_TZ").list_set(0, timezone)
 
     def push_multi_outline(self) -> None:
         if not self._d.is_enabled("stage2"):

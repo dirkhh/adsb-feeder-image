@@ -181,7 +181,12 @@
     $("#alt").val(new_alt);
   });
   function browserTZ() {
-    let timezone = Intl.DateTimeFormat("en-US").resolvedOptions().timeZone;
+    let timezone = "";
+    try {
+      timezone = Intl.DateTimeFormat("en-US").resolvedOptions().timeZone;
+    } catch (error) {
+      console.error(error);
+    }
     console.log("browser timezone: " + timezone);
     return timezone;
   }
