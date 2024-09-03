@@ -1,4 +1,5 @@
 Changes since v2.1.5 include:
+- add interface dark mode setting
 - small fix for update timezone button
 - update sharing information for PlaneFinder with a link to their new sharing portal
 - image install: default to volatile journal to reduce disk writes

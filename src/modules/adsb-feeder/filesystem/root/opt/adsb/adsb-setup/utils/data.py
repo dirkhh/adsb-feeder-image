@@ -214,6 +214,7 @@ class Data:
             default="[2,3]",
             tags=["range_outline_dash"],
         ),
+        Env("_ASDBIM_CSS_THEME", default="light", tags=["css_theme"]),
         Env("_ASDBIM_TAR1090_QUERY_PARAMS", default="", tags=["tar1090_query_params"]),
         # 978
         # start the container (integrated / micro) or the replay

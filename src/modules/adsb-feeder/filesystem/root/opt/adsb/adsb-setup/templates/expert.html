@@ -152,5 +152,24 @@
     </form>
   </div>
   {% endif %}
+  <div class="col-12 col-lg-6">
+    <h5 class="mt-3">CSS Theme</h5>
+    <form method="POST" onsubmit="show_spinner(); return true;">
+      <div class="row align-items-center">
+        <div class="col-8">
+          <input type="radio" name="css_theme" id="css_light" value="light" {% if
+          env_value_by_tag("css_theme")=="light" %} checked {% endif %}>
+          <label class="form-check-label mr-3" for="css_light">Light Theme</label>
+          <input type="radio" name="css_theme" id="css_dark" value="dark" {% if
+          env_value_by_tag("css_theme")=="dark" %} checked {% endif %}>
+          <label class="form-check-label mr-3" for="css_dark">Dark Theme</label>
+        </div>
+        <div class="col-4">
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="css_theme--submit"
+                  value="go">Submit</button>
+        </div>
+      </div>
+    </form>
+  </div>
 </div>
 {% endblock %}

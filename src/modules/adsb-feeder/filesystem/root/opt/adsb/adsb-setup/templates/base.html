@@ -8,7 +8,11 @@
   <!-- Google Fonts Roboto. Copyright 2011 Google Inc. All Rights Reserved. See {{ url_for('static', filename='fonts/LICENSE.txt') }} -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts.css') }}" />
   <!-- MDB -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/mdb.min.css') }}" />
+  {% if env_value_by_tag("css_theme") == 'dark' %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mdb.dark.min.css') }}" />
+  {% else %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mdb.min.css') }}" />
+  {% endif %}
   <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" />
   <!-- Spinner -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
@@ -16,7 +20,7 @@
     {{ list_value_by_tag("site_name", 0) }}{% if list_value_by_tag("site_name", 0) != "" %}:
     {% endif %}{% block title %}{% endblock %}
   </title>
-  <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
+  <nav class="navbar fixed-top navbar-expand-lg bg-body">
     <div class="container-fluid">
       <a class="navbar-brand" href="{{ url_for("director") }}">ADS-B Feeder</a>
       <a class="btn btn-primary mx-3" href="/map{{ env_value_by_tag('tar1090_query_params') }}">Live Map</a>
@@ -278,7 +282,7 @@
   </div>
   <div class="container pt-5 mt-3">
     {% block content %}{% endblock %}
-    <footer class="text-center text-lg-start bg-light text-muted">
+    <footer class="text-center text-lg-start text-muted bg-body">
       <hr class="mt-5" />
       <section class="d-flex justify-content-center justify-content-lg-between border-bottom small">
         <div class="me-5 d-lg-block">
