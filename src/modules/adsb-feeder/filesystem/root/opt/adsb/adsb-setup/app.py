@@ -525,12 +525,12 @@ class AdsbIm:
         )
 
     def set_tz(self, timezone):
-        # Add to .env
-        self._d.env("FEEDER_TZ").list_set(0, timezone)
         # Set it as datetimectl too
         try:
             print_err(f"calling timedatectl set-timezone {timezone}")
             subprocess.run(["timedatectl", "set-timezone", f"{timezone}"], check=True)
+            # Add to .env only if timedatectl has succeeded
+            self._d.env("FEEDER_TZ").list_set(0, timezone)
         except subprocess.SubprocessError:
             print_err(f"failed to set up timezone ({timezone})")
 
@@ -2169,6 +2169,7 @@ class AdsbIm:
                     value = str(int(float(value)))
                 if key == "tz":
                     self.set_tz(value)
+                    continue
                 if key == "uatgain":
                     if value == "" or value == "auto":
                         value = "autogain"
