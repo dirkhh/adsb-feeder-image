@@ -9,6 +9,7 @@ import secrets
 import requests
 import sys
 import time
+import subprocess
 
 verbose = (
     0 if not os.path.exists("/opt/adsb/config/verbose") else int(open("/opt/adsb/config/verbose", "r").read().strip())
@@ -151,3 +152,25 @@ def mf_get_ip_and_triplet(ip):
             triplet = f"{ip},30005,beast_in"
 
     return (ip, triplet)
+
+
+def run_shell_captured(command="", timeout=1800):
+    try:
+        result = subprocess.run(
+            command,
+            shell=True,
+            capture_output=True,
+            check=True,
+            timeout=timeout,
+        )
+    except subprocess.SubprocessError as e:
+        # something went wrong
+        output = ""
+        if e.stdout:
+            output += e.stdout.decode()
+        if e.stderr:
+            output += e.stderr.decode()
+        return (False, output)
+
+    output = result.stdout.decode()
+    return (True, output)

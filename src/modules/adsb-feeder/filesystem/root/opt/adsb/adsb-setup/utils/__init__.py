@@ -30,5 +30,6 @@ from .util import (
     stack_info,
     verbose,
     make_int,
+    run_shell_captured,
 )
 from .background import Background

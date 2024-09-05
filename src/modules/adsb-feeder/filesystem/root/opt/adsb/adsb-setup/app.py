@@ -75,6 +75,7 @@ from utils import (
     UltrafeederConfig,
     cleanup_str,
     print_err,
+    run_shell_captured,
     stack_info,
     generic_get_json,
     is_true,
@@ -2605,23 +2606,80 @@ class AdsbIm:
         return temperature_json
 
     def support(self):
-        url = ""
         print_err(f"support request, {request.form}")
-        if request.method == "POST":
-            if request.form.get("upload") == "stay":
-                print_err("trying to upload the logs")
-                try:
-                    result = subprocess.run(
-                        "bash /opt/adsb/log-sanitizer.sh | curl -F'expires=168' -F'file=@-'  https://0x0.st",
-                        shell=True,
-                        capture_output=True,
-                    )
-                except:
-                    print_err("failed to upload logs")
-                else:
-                    url = result.stdout.decode("utf-8").strip()
-                    print_err(f"uploaded logs to {url}")
-        return render_template("support.html", url=url)
+        if request.method != "POST":
+            return render_template("support.html", url="")
+
+        url = "Internal Error uploading logs"
+
+        target = request.form.get("upload")
+        print_err(f"trying to upload the logs with target: \"{target}\"")
+
+        if not target:
+            print_err(f"ERROR: support POST request without target")
+            return render_template("support.html", url="Error, unspecified upload target!")
+
+        if target == "0x0.st":
+            success, output = run_shell_captured(
+                command="bash /opt/adsb/log-sanitizer.sh | curl -F'expires=168' -F'file=@-'  https://0x0.st",
+                timeout=60,
+            )
+            url = output.strip()
+            if success:
+                print_err(f"uploaded logs to {url}")
+            else:
+                print_err(f"failed to upload logs, output: {output}")
+            return render_template("support.html", url=url)
+
+        if target == "termbin.com":
+            success, output = run_shell_captured(
+                command="bash /opt/adsb/log-sanitizer.sh | nc termbin.com 9999",
+                timeout=60,
+            )
+            # strip extra chars for termbin
+            url = output.strip("\0\n").strip()
+            if success:
+                print_err(f"uploaded logs to {url}")
+            else:
+                print_err(f"failed to upload logs, output: {output}")
+            return render_template("support.html", url=url)
+
+
+        if target == "local_view" or target == "local_download":
+
+            as_attachment = (target == "local_download")
+
+            fdOut, fdIn = os.pipe()
+            pipeOut = os.fdopen(fdOut, "rb")
+            pipeIn = os.fdopen(fdIn, "wb")
+
+            def get_log(fobj):
+                subprocess.run(
+                    "bash /opt/adsb/log-sanitizer.sh",
+                    shell=True,
+                    stdout=fobj,
+                    stderr=subprocess.STDOUT,
+                    timeout=30,
+                )
+
+            thread = threading.Thread(
+                target=get_log,
+                kwargs={
+                    "fobj": pipeIn,
+                },
+            )
+            thread.start()
+
+            site_name = self._d.env_by_tags("site_name").list_get(0)
+            now = datetime.now().replace(microsecond=0).isoformat().replace(":", "-")
+            download_name = f"adsb-feeder-config-{site_name}-{now}.txt"
+            return send_file(
+                pipeOut,
+                as_attachment=as_attachment,
+                download_name=download_name,
+            )
+
+        return render_template("support.html", url="upload logs: unexpected code path")
 
     def info(self):
         board = self._d.env_by_tags("board_name").value
