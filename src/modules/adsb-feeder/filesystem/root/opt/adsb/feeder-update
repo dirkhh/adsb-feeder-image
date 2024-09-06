@@ -239,6 +239,18 @@ if [[ ${#missing[@]} -gt 0 ]] ; then
     fi
 fi
 
+if [ -f /opt/adsb/os.adsb.feeder.image ] ; then
+    # in case a past feeder-update installed but didn't mask hostapd / isc-dhcp-server, fix that up
+    for service in hostapd.service isc-dhcp-server.service; do
+        if systemctl is-enabled "$service" &>/dev/null || ! [[ -L /etc/systemd/system/hostapd.service ]]; then
+            echo "stopping / disabling / masking $service"
+            systemctl stop "$service"
+            systemctl disable "$service"
+            systemctl mask "$service"
+        fi
+    done
+fi
+
 echo "prepare the files that we need to replace"
 mkdir -p "${DIR}/root"
 cp -a src/modules/adsb-feeder/filesystem/root "${DIR}"

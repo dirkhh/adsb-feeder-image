@@ -1,4 +1,5 @@
 Changes since v2.1.5 include:
+- some corner cases had hostapd starting unintentionally, prevent this by making sure it's masked
 - add more options to upload diagnostic logs
 - add interface dark mode setting
 - small fix for update timezone button

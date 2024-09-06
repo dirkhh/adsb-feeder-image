@@ -55,7 +55,8 @@ if check_network; then
     echo "network reachable, no need to start an access point"
     # out of an abundance of caution make sure these services are not enabled:
     for service in hostapd.service isc-dhcp-server.service; do
-        if systemctl is-enabled "$service" &>/dev/null; then
+        if systemctl is-enabled "$service" &>/dev/null || ! [[ -L /etc/systemd/system/hostapd.service ]]; then
+            echo "stopping / disabling / masking $service"
             systemctl stop "$service"
             systemctl disable "$service"
             systemctl mask "$service"
