@@ -53,6 +53,14 @@ function check_network() {
 
 if check_network; then
     echo "network reachable, no need to start an access point"
+    # out of an abundance of caution make sure these services are not enabled:
+    for service in hostapd.service isc-dhcp-server.service; do
+        if systemctl is-enabled "$service" &>/dev/null; then
+            systemctl stop "$service"
+            systemctl disable "$service"
+            systemctl mask "$service"
+        fi
+    done
     exit 0
 fi
 
