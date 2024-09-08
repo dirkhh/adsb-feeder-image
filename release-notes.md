@@ -1,8 +1,7 @@
 Changes since v2.1.5 include:
-- adjust dark mode css for feed status legibility
+- add interface dark mode setting
 - some corner cases had hostapd starting unintentionally, prevent this by making sure it's masked
 - add more options to upload diagnostic logs
-- add interface dark mode setting
 - small fix for update timezone button
 - update sharing information for PlaneFinder with a link to their new sharing portal
 - image install: default to volatile journal to reduce disk writes
