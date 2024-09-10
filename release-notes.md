@@ -1,14 +1,5 @@
-Changes since v2.1.5 include:
-- add interface dark mode setting
-- some corner cases had hostapd starting unintentionally, prevent this by making sure it's masked
-- add more options to upload diagnostic logs
-- small fix for update timezone button
-- update sharing information for PlaneFinder with a link to their new sharing portal
-- image install: default to volatile journal to reduce disk writes
-- add option to make journal persistent or volatile from the system management page
-- write log to disk on shutdown for better debugging after reboots
-- fix not being able to disable aggregators when the "All" setting was selected during basic setup
-- disable tailscaled telemetry
+Changes since v2.1.6 include:
+- fix tar1090 config link port when restoring app install <-> image
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)

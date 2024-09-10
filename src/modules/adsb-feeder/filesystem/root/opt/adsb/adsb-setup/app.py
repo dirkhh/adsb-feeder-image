@@ -415,9 +415,6 @@ class AdsbIm:
             # ok, we don't have them explicitly set, so let's set them up
             # with the app defaults
             self._d.env_by_tags("webport").value = 1099
-            self._d.env_by_tags("tar1090_image_config_link").value = (
-                f"http://HOSTNAME:{self._d.env_by_tags('webport').value}/"
-            )
             self._d.env_by_tags("tar1090port").value = 1090
             self._d.env_by_tags("uatport").value = 1091
             self._d.env_by_tags("piamapport").value = 1092
@@ -1649,6 +1646,11 @@ class AdsbIm:
         else:
             self._d.env_by_tags("beast-reduce-optimize-for-mlat").value = False
 
+        if self._d.env_by_tags("tar1090_image_config_link").value != "":
+            self._d.env_by_tags("tar1090_image_config_link").value = (
+                f"http://HOSTNAME:{self._d.env_by_tags('webport').value}/"
+            )
+
         if self._d.is_enabled("stage2"):
             # for stage2 tar1090port is used for the webproxy
             # move the exposed port for the combined ultrafeeder to 8078 to avoid a port conflict
@@ -1985,7 +1987,7 @@ class AdsbIm:
                     self._d.env_by_tags("tar1090_image_config_link").value = ""
                 if key == "allow_config_link":
                     self._d.env_by_tags("tar1090_image_config_link").value = (
-                        f"http://HOSTNAME:{self._d.env_by_tags('webport').value}/"
+                        f"WILL_BE_SET_IN_IMPLIED_SETTINGS"
                     )
                 if key == "turn_on_gpsd":
                     self._d.env_by_tags(["use_gpsd", "is_enabled"]).value = True
