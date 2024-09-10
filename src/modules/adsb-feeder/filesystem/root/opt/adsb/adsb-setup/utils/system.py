@@ -157,17 +157,18 @@ class System:
 
     def check_gpsd(self):
         # find host address on the docker network
-
+        command = "docker exec adsb-setup-proxy ip route | mawk '/default/{ print($3) }'"
         success, output = run_shell_captured(
-            command="docker exec adsb-setup-proxy ip route | mawk '/default/{ print($3) }'",
+            command=command,
             timeout=5,
         )
         if success:
             gateway_ips = [output.strip()]
-            print_err(f"gpsd check: checking ips: {gateway_ips}")
         else:
             gateway_ips = ["172.17.0.1", "172.18.0.1"]
-            print_err(f"gpsd check: using default ips: {gateway_ips}")
+            print_err(f"ERROR: command: {command} failed with output: {output}")
+
+        print_err(f"gpsd check: checking ips: {gateway_ips}")
 
         for ip in gateway_ips:
             # Create a TCP socket
