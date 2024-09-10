@@ -7,7 +7,7 @@ import time
 from time import sleep
 
 from .data import Data
-from .util import print_err
+from .util import print_err,run_shell_captured
 
 
 class Lock:
@@ -157,23 +157,29 @@ class System:
 
     def check_gpsd(self):
         # find host address on the docker network
-        try:
-            result = subprocess.call(
-                "docker exec adsb-setup-proxy ip route | mawk '/default/{ print($3) }'", shell=True
-            )
-            gateway_ips = [result.decode("utf-8").strip()]
-        except:
-            # that sucks, try the two most common addresses
+
+        success, output = run_shell_captured(
+            command="docker exec adsb-setup-proxy ip route | mawk '/default/{ print($3) }'",
+            timeout=5,
+        )
+        if success:
+            gateway_ips = [output.strip()]
+            print_err(f"gpsd check: checking ips: {gateway_ips}")
+        else:
             gateway_ips = ["172.17.0.1", "172.18.0.1"]
+            print_err(f"gpsd check: using default ips: {gateway_ips}")
+
         for ip in gateway_ips:
             # Create a TCP socket
+            # print_err(f"Checking for gpsd: {ip}:2947")
             s = socket.socket()
+            s.settimeout(2)
             try:
                 s.connect((ip, 2947))
-                print(f"Connected to gpsd on {ip}:2947")
+                print_err(f"Connected to gpsd on {ip}:2947")
                 return True
             except socket.error as e:
-                print(f"No gpsd on {ip}:2947 detected")
+                print_err(f"No gpsd on {ip}:2947 detected")
             finally:
                 s.close()
         return False
