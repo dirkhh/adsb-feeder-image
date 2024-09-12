@@ -682,12 +682,21 @@ class AdsbIm:
             site_name = f"stage2-{site_name}"
         now = datetime.now().replace(microsecond=0).isoformat().replace(":", "-")
         download_name = f"adsb-feeder-config-{site_name}-{now}.backup"
-        return send_file(
-            pipeOut,
-            mimetype="application/zip",
-            as_attachment=True,
-            download_name=download_name,
-        )
+        try:
+            return send_file(
+                pipeOut,
+                mimetype="application/zip",
+                as_attachment=True,
+                download_name=download_name,
+            )
+        except TypeError:
+            return send_file(
+                pipeOut,
+                mimetype="application/zip",
+                as_attachment=True,
+                attachment_filename=download_name,
+            )
+
 
     def restore(self):
         if request.method == "POST":
