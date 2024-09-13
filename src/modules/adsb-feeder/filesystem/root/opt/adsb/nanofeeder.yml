@@ -70,6 +70,7 @@ services:
       # USER_PROVIDED_ENV_END
     volumes:
       - /opt/adsb/config/nanofeeder/globe_history:/var/globe_history
+      - /usr/local/share/osm_tiles_offline:/usr/local/share/osm_tiles_offline
       - /proc/diskstats:/proc/diskstats:ro
       - /dev:/dev:ro
       - /run/adsb-feeder-nanofeeder:/run
