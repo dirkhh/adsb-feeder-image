@@ -1,4 +1,5 @@
 Changes since v2.1.6 include:
+- update container versions
 - fix long load for expert page for rare circumstances
 - fix tar1090 config link port when restoring app install <-> image
 
