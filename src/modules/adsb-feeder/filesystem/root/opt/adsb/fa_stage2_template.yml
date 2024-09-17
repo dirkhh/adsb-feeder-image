@@ -28,4 +28,5 @@ services:
       - /dev/null:/var/log/piaware/current
     tmpfs:
       - /run:exec,size=64M
-      - /var/log
+      - /tmp:size=16M
+      - /var/log:size=16M
