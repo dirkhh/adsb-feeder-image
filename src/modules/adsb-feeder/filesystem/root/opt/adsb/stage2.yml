@@ -6,7 +6,7 @@ services:
     tty: true
     container_name: uf_STAGE2NUM
     hostname: uf_STAGE2NUM
-    restart: always
+    restart: unless-stopped
     ports:
       - ${AF_TAR1090_PORT_STAGE2NUM}:80 # to expose the web interface
     environment:

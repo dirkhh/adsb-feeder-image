@@ -5,7 +5,7 @@ services:
     image: ${WEBPROXY_CONTAINER}
     healthcheck:
       disable: true
-    restart: always
+    restart: unless-stopped
     ports:
       - ${AF_TAR1090_PORT:-8080}:80 # to expose the web interface
     environment:

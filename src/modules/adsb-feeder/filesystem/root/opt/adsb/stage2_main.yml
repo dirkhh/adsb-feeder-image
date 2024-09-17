@@ -6,7 +6,7 @@ services:
     tty: true
     container_name: ultrafeeder
     hostname: ultrafeeder
-    restart: always
+    restart: unless-stopped
     ports:
       - ${AF_TAR1090_PORT_ADJUSTED:-8080}:80 # to expose the web interface
       - 30001:30001 # Raw input

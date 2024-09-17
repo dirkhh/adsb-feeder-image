@@ -6,7 +6,7 @@ services:
     tty: true
     container_name: airspy_adsb
     hostname: airspy_adsb
-    restart: always
+    restart: unless-stopped
     devices:
       - /dev/bus/usb:/dev/bus/usb
     ports:

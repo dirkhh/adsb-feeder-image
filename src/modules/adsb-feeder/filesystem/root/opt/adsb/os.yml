@@ -5,7 +5,7 @@ services:
       disable: true
     tty: true
     container_name: opensky
-    restart: always
+    restart: unless-stopped
     cpu_period: 50000
     cpu_quota: 7500
     environment:

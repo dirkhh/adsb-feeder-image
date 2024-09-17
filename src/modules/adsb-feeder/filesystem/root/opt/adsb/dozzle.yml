@@ -4,7 +4,7 @@ services:
     image: ${DOZZLE_CONTAINER}
     healthcheck:
       disable: true
-    restart: always
+    restart: unless-stopped
     environment:
       - DOZZLE_NO_ANALYTICS=1
       # USER_PROVIDED_ENV_START
