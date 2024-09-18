@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# override daemon.json with the options we want
+cat > /etc/docker/daemon.json <<EOF
+{
+  "log-driver": "journald",
+  "log-level": "warn",
+  "userland-proxy": false,
+  "debug": false
+}
+EOF
+
 # dietpi deletes and creates a new /etc/machine-id after systemd-journald starts up
 # thus systemd-journald is writing to /var/log/journal/<old-machine-id>
 # journalctl on the other hand tries to read from /var/log/journal/<new-machine-id>

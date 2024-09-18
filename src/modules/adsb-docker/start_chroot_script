@@ -35,6 +35,7 @@ export DEBIAN_FRONTEND=noninteractive
 {
   "log-driver": "journald",
   "log-level": "warn",
+  "userland-proxy": false,
   "debug": false
 }
 EOF
