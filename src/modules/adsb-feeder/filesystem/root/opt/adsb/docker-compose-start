@@ -1,5 +1,12 @@
 #!/bin/bash
-#
-# yes, this is a bit lazy - but this all really started with the -start script...
+
+if [[ ! -f /opt/adsb/init-complete ]]; then
+    if [[ -f /opt/adsb/os.adsb.feeder.image ]] ; then
+        echo "feeder image first time adsb-system-restart: stop bootstrap"
+        systemctl disable adsb-bootstrap
+        systemctl stop adsb-bootstrap
+    fi
+    touch /opt/adsb/init-complete
+fi
 
 /opt/adsb/docker-compose-adsb up -d -t 30 --remove-orphans
