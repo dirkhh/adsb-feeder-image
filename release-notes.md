@@ -1,4 +1,5 @@
 Changes since v2.1.6 include:
+- image: enable swap via zram
 - eliminate minor disk writes by fa / fr24 containers
 - update container versions
 - fix long load for expert page for rare circumstances
