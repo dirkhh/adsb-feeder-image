@@ -164,29 +164,33 @@ class Hotspot:
         return ssids
 
     def scan_ssids(self):
-        if self._baseos == "raspbian":
-            try:
-                output = subprocess.run(
-                    "nmcli --terse --fields SSID dev wifi",
-                    shell=True,
-                    capture_output=True,
-                )
-            except subprocess.CalledProcessError as e:
-                print_err(f"error scanning for SSIDs: {e}")
-                return
+        try:
+            if self._baseos == "raspbian":
+                try:
+                    output = subprocess.run(
+                        "nmcli --terse --fields SSID dev wifi",
+                        shell=True,
+                        capture_output=True,
+                    )
+                except subprocess.CalledProcessError as e:
+                    print_err(f"error scanning for SSIDs: {e}")
+                    return
 
-            ssids = []
-            for line in output.stdout.decode().split("\n"):
-                if line and line != "--" and line not in ssids:
-                    ssids.append(line)
-        else:
-            ssids = self.wpa_cli_scan()
+                ssids = []
+                for line in output.stdout.decode().split("\n"):
+                    if line and line != "--" and line not in ssids:
+                        ssids.append(line)
+            else:
+                ssids = self.wpa_cli_scan()
 
-        if len(ssids) > 0:
-            print_err(f"found SSIDs: {ssids}")
-            self.ssids = ssids
-        else:
-            print_err("no SSIDs found")
+            if len(ssids) > 0:
+                print_err(f"found SSIDs: {ssids}")
+                self.ssids = ssids
+            else:
+                print_err("no SSIDs found")
+
+        except Exception as e:
+            print_err(f"ERROR in scan_ssids(): {e}")
 
     def restart(self):
         return self.restart_state
