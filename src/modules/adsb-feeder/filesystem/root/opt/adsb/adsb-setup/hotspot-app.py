@@ -200,7 +200,7 @@ class Hotspot:
             return redirect("/restarting")
 
         if request.method == "POST":
-            self.lastUserInput = time.time()
+            self.lastUserInput = time.monotonic()
             self.restart_state = "restarting"
 
             self.ssid = request.form.get("ssid")
@@ -219,11 +219,11 @@ class Hotspot:
     def run(self):
         self.setup_hotspot()
 
-        self.lastUserInput = time.time()
+        self.lastUserInput = time.monotonic()
 
         def idle_exit():
             while True:
-                idleTime = time.time() - self.lastUserInput
+                idleTime = time.monotonic() - self.lastUserInput
                 if idleTime > 300:
                     break
 
