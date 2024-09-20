@@ -19,6 +19,12 @@ ${SEPARATOR}
 df:
 $(df -h | grep -v overlay)
 ${SEPARATOR}
+top -b -n1 | head -n20:
+$(top -b -n1 | head -n20)
+${SEPARATOR}
+zramctl:
+$(zramctl)
+${SEPARATOR}
 free -h:
 $(free -h)
 ${SEPARATOR}
