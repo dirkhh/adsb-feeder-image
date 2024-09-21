@@ -843,6 +843,8 @@ class AdsbIm:
         self.update_boardname()
         self.update_version()
 
+        self.set_tz(self._d.env("FEEDER_TZ").list_get(0))
+
         # make sure we are connected to the right Zerotier network
         zt_network = self._d.env_by_tags("zerotierid").value
         if zt_network and len(zt_network) == 16:  # that's the length of a valid network id
