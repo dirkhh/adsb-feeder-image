@@ -1813,9 +1813,7 @@ class AdsbIm:
             create_stage2_yml_files(i, self._d.env_by_tags("mf_ip").list_get(i))
 
         # check if we need the stage2 multiOutline job
-        # the extra check for > 1.8G is really for the off chance that someone set up
-        # a stage to one a < 1.8G system prior to that requirement being added
-        if self._d.is_enabled("stage2") and self._memtotal > 1800000:
+        if self._d.is_enabled("stage2"):
             if not self._multi_outline_bg:
                 self.push_multi_outline()
                 self._multi_outline_bg = Background(60, self.push_multi_outline)

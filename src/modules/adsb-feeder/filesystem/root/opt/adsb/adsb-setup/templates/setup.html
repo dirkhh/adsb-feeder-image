@@ -81,8 +81,7 @@
       <a href="#"
          title="aggregators that don't require you to create an account or provide an email address">semi-anonymous
       </a>
-      aggregators do you want to feed? {% if mem > 1800000 %}Or is this a stage 2 setup?{% else %}(Stage 2 setup
-      unsupported with {{ (mem / 1024) | int }} MB of memory (1800 MB required){% endif %}
+      aggregators do you want to feed?
     </label>
     <br />
     <div>
@@ -101,12 +100,13 @@
       <input type="radio" name="aggregator_choice" id="nano" value="nano"
              {% if env_value_by_tag("aggregator_choice")=="nano" %} checked {% endif %}>
       <label class="form-check-label mr-3" for="nano">None (nano feeder)</label>
-      <input type="radio" name="aggregator_choice" id="stage2" value="stage2" {% if mem <= 1800000 %}disabled{% endif %}
+      <input type="radio" name="aggregator_choice" id="stage2" value="stage2"
              {% if env_value_by_tag("aggregator_choice")=="stage2" %} checked {% endif %}>
       <label class="form-check-label mr-3" for="stage2">Stage 2 setup (select these later)</label>
     </div>
+    <br>
     <div id="explain-all" style="display: {% if env_value_by_tag('aggregator_choice')=='all' %} block {% else %} none {%
-            endif %}; font-size: smaller;">
+            endif %}; font-size: normal;">
       With this option you will feed data to
       <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
       <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/">Fly Italy ADSB</a>,
@@ -121,7 +121,7 @@
       <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
     </div>
     <div id="explain-privacy" style="display: {% if env_value_by_tag('aggregator_choice')=='priv' %} block {% else %}
-            none {% endif %}; font-size: smaller;">
+            none {% endif %}; font-size: normal;">
       With this option you will feed data to
       <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
       <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/">Fly Italy ADSB</a>,
@@ -134,17 +134,17 @@
       <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
     </div>
     <div id="explain-individual" style="display: {% if env_value_by_tag('aggregator_choice')=='ind' %} block {% else %}
-                none {% endif %}; font-size: smaller;">
+                none {% endif %}; font-size: normal;">
       With this option you can make detailed selections on the Aggregator page.
     </div>
     <div id="explain-micro" style="display: {% if env_value_by_tag('aggregator_choice')=='micro' %} block {% else %}
-                    none {% endif %}; font-size: smaller;">
+                    none {% endif %}; font-size: normal;">
       With this option the image will be set up as a micro feeder, minimizing memory use and disabling many features.
       This is designed to work with a second stage image that uses this feeder as its input and creates the map, feeds
       the aggregators, etc.
     </div>
     <div id="explain-nano" style="display: {% if env_value_by_tag('aggregator_choice')=='nano' %} block {% else %}
-                none {% endif %}; font-size: smaller;">
+                none {% endif %}; font-size: normal;">
       With this option the image will be set up as a nano feeder, even more minimizing memory use and disabling many
       features, including local map and graphs running on the nano feeder.
       This is designed to work with a second stage image that uses this feeder as its input and creates the map, feeds
@@ -152,12 +152,16 @@
       optimized to reduce disk IO.
     </div>
     <div id="explain-stage2" style="display: {% if env_value_by_tag('aggregator_choice')=='stage2' %} block {% else %}
-                    none {% endif %}; font-size: smaller;">
+                    none {% endif %}; font-size: normal;">
       With this option the image will be set up as a stage 2 system, designed to connect to one or more micro feeder(s).
       You can select for each of them individually which aggregators you want to feed, and you get a combined map of all
       the planes that the micro feeder(s) see.
+      <br>
+      {% if mem < 1800000 %} WARNING: Stage 2 setup with only {{ (mem / 1024) | int }} MB of memory
+      (400 to 600MB per microsite recommended){% endif %}
     </div>
   </div>
+  <br>
   <div class="form-group">
     <button type="submit" name="submit" value="go" class="btn btn-primary">Submit</button>
   </div>
