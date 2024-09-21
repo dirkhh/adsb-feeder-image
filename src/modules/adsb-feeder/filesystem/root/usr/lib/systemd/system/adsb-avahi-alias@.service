@@ -7,7 +7,7 @@ After=avahi-daemon.service
 Type=simple
 ExecStart=/bin/bash -c "/usr/bin/avahi-publish -a -R %i $(avahi-resolve -4 -n %H.local > /dev/null && ip route get 1 | awk '{print $7;exit}')"
 Restart=always
-RestartSec=30
+RestartSec=90
 SyslogIdentifier=adsb-avahi-alias
 
 [Install]
