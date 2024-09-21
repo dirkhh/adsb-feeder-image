@@ -138,6 +138,7 @@ class AdsbIm:
         for i in [0] + self.micro_indices():
             self._d.ultrafeeder.append(UltrafeederConfig(data=self._d, micro=i))
 
+        self._current_site_name = None
         self._agg_status_instances = dict()
         self._next_url_from_director = ""
         self._last_stage2_contact = ""
@@ -430,7 +431,7 @@ class AdsbIm:
 
     def set_hostname(self, site_name: str):
         os_flag_file = self._d.data_path / "os.adsb.feeder.image"
-        if not os_flag_file.exists():
+        if not os_flag_file.exists() or not site_name:
             return
         # create a valid hostname from the site name and set it up as mDNS alias
         # initially we only allowed alpha-numeric characters, but after fixing an
@@ -441,9 +442,14 @@ class AdsbIm:
             subprocess.run(["/usr/bin/bash", "/opt/adsb/scripts/mdns-alias-setup.sh", f"{host_name}"])
             subprocess.run(["/usr/bin/hostnamectl", "hostname", f"{host_name}"])
 
-        if host_name:
-            thread = threading.Thread(target=start_mdns)
-            thread.start()
+        if not host_name or self._current_site_name == site_name:
+            return
+
+        self._current_site_name = site_name
+        #print_err(f"set_hostname {site_name} {self._current_site_name}")
+
+        thread = threading.Thread(target=start_mdns)
+        thread.start()
 
     def run(self, no_server=False):
         debug = os.environ.get("ADSBIM_DEBUG") is not None
@@ -496,11 +502,6 @@ class AdsbIm:
         if no_server:
             signal.raise_signal(signal.SIGTERM)
             return
-
-        # make sure the avahi alias service runs on an adsb.im image
-        site_name = self._d.env_by_tags("site_name").list_get(0)
-        if site_name and os_flag_file.exists():
-            self.set_hostname(site_name)
 
         # if using gpsd, try to update the location
         if self._d.is_enabled("use_gpsd"):
@@ -1609,6 +1610,9 @@ class AdsbIm:
 
         self._d.env_by_tags(["tar1090_ac_db"]).value = ac_db
 
+        # make sure the avahi alias service runs on an adsb.im image
+        self.set_hostname(self._d.env_by_tags("site_name").list_get(0))
+
         stage2_nano = False
 
         if self._d.is_enabled("stage2") and (
@@ -2213,7 +2217,6 @@ class AdsbIm:
                         self._multi_outline_bg = Background(60, self.push_multi_outline)
                     unique_name = self.unique_site_name(form.get("site_name"), 0)
                     self._d.env_by_tags("site_name").list_set(0, unique_name)
-                    self.set_hostname(unique_name)
                 # if this is a regular feeder and the user is changing to 'individual' selection
                 # (either in initial setup or when coming back to that setting later), show them
                 # the aggregator selection page next
@@ -2250,8 +2253,6 @@ class AdsbIm:
                 if key == "site_name":
                     unique_name = self.unique_site_name(value, sitenum)
                     self._d.env_by_tags("site_name").list_set(sitenum, unique_name)
-                    if sitenum == 0:
-                        self.set_hostname(unique_name)
         # done handling the input data
         # what implied settings do we have (and could we simplify them?)
 
