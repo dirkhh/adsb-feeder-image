@@ -26,6 +26,10 @@ echo 1 > "/sys/block/$NAME/reset"
 # Compressor            Ratio   Compression Decompression
 # LZ4 default (v1.9.0)  2.101   780 MB/s    4970 MB/s
 # Zstandard 1.4.0 -1    2.883   515 MB/s    1380 MB/s
+#
+# on a pi4, lz4 in compression has even higher relative speed over zstd
+# use zstd for now even though it's slower
+#echo lz4 > "/sys/block/$NAME/comp_algorithm"
 echo zstd > "/sys/block/$NAME/comp_algorithm"
 
 # use 1/4 of memory
