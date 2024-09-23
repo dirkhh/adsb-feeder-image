@@ -2,6 +2,7 @@ Changes since v2.1.6 include:
 - don't require 1.8G of memory for stage2, only warn about recommended memory per microsite
 - image: enable swap via zram
 - eliminate minor disk writes by fa / fr24 containers
+- disable userland proxy in the docker config for new images
 - update container versions
 - fix long load for expert page for rare circumstances
 - fix tar1090 config link port when restoring app install <-> image
