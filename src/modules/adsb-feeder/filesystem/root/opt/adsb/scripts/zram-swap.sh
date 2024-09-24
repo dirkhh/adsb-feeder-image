@@ -62,6 +62,9 @@ fi
 
 if ! grep </proc/swaps -qs -F -v -e zram -e Filename; then
 
+    # for more info on the following tweaks, see this kernel reference:
+    # https://www.kernel.org/doc/html/latest/admin-guide/sysctl/vm.html
+
     # for zram swap, most guides reommend the following:
     # swappiness 200, watermark_scale_factor 125, watermark_boost_factor 0
     #
@@ -83,4 +86,11 @@ if ! grep </proc/swaps -qs -F -v -e zram -e Filename; then
 
     # disable readahead for reading from swap (default is 3 which means 2^3 = 8 pages)
     echo 0 > /proc/sys/vm/page-cluster
+
+    # test vfs_cache_pressure, default 100
+    echo 200 > /proc/sys/vm/vfs_cache_pressure
+
+    # test dirty ratio modifications
+    echo 2 > /proc/sys/vm/dirty_background_ratio
+    echo 10 > /proc/sys/vm/dirty_ratio
 fi
