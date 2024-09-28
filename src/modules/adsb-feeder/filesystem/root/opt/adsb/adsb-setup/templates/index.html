@@ -148,9 +148,10 @@
         <span class="text-warning">&#10003;</span> MLAT is down,
         <span class="text-dark">&#10003;</span> feed state is not supported
         <br />
-        '+': aggregator indicates feed is connected; '-': aggregator indicates feed is not connected
+        '+': feed/mlat is connected; '&#x2612;': feed/mlat is not connected; '&#x2639;': mlat errors; '&#x26a0;': mlat
+        warning
         <br />
-        '.': status information is not supported by the aggregator
+        '.': status information is not available at this time
       </div>
     </div>
   </div>
@@ -436,11 +437,11 @@
         // right now this is broken and just overwrites things
         $("#" + agg + "beast" + idx).text(data["beast"]);
         $("#" + agg + "mlat" + idx).text(data["mlat"]);
-        if (data["beast"] == "+" && data["mlat"] != "-") {
+        if (data["beast"] == "+" && (data["mlat"] == "+" || data["mlat"] == ".")) {
           $("#" + agg + "span" + idx).addClass('text-success')
-        } else if (data["beast"] == "+" && data["mlat"] == "-") {
+        } else if (data["beast"] == "+" && data["mlat"] != "+" && data["mlat"] != ".") {
           $("#" + agg + "span" + idx).addClass('text-warning')
-        } else if (data["beast"] == "-" && data["mlat"] == "-") {
+        } else if (data["beast"] != "+" && data["beast"] != "." && data["mlat"] != "+" && data["mlat"] != ".") {
           $("#" + agg + "span" + idx).addClass('text-danger')
         } else {
           $("#" + agg + "span" + idx).addClass('text-dark')

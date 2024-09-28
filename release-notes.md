@@ -1,4 +1,5 @@
 Changes since v2.1.6 include:
+- reimplement beast and mlat status for Ultrafeeder based aggregators; this adds more status details
 - don't require 1.8G of memory for stage2, only warn about recommended memory per microsite
 - image: enable swap via zram
 - eliminate minor disk writes by fa / fr24 containers
