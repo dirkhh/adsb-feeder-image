@@ -94,6 +94,8 @@ class System:
         self._restart = Restart(self._restart_lock)
         self._d = data
 
+        self.gateway_ips = None
+
     @property
     def restart(self):
         return self._restart
@@ -156,17 +158,21 @@ class System:
         return None, status
 
     def check_gpsd(self):
-        # find host address on the docker network
-        command = "docker exec adsb-setup-proxy ip route | mawk '/default/{ print($3) }'"
-        success, output = run_shell_captured(
-            command=command,
-            timeout=5,
-        )
-        if success:
-            gateway_ips = [output.strip()]
+        # gateway IP shouldn't change on a system, buffer it for the duration the program runs
+        if self.gateway_ips:
+            gateway_ips = self.gateway_ips
         else:
-            gateway_ips = ["172.17.0.1", "172.18.0.1"]
-            print_err(f"ERROR: command: {command} failed with output: {output}")
+            # find host address on the docker network
+            command = "docker exec adsb-setup-proxy ip route | mawk '/default/{ print($3) }'"
+            success, output = run_shell_captured(
+                command=command,
+                timeout=5,
+            )
+            if success and len(output.strip()) > 4:
+                self.gateway_ips = gateway_ips = [output.strip()]
+            else:
+                gateway_ips = ["172.17.0.1", "172.18.0.1"]
+                print_err(f"ERROR: command: {command} failed with output: {output}")
 
         print_err(f"gpsd check: checking ips: {gateway_ips}")
 
