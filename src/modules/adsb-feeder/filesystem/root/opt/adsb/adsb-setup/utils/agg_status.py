@@ -149,22 +149,26 @@ class AggStatus:
         pattern = (
             f"readsb_net_connector_status{{host=\"{bconf.split(',')[1]}\",port=\"{bconf.split(',')[2]}\"}} (\\d+)"
         )
-        print(f"checking beast for {pattern}")
+        #print_err(f"checking beast for {pattern}")
+        filename = f"{self.uf_path()}/readsb/stats.prom"
         try:
-            readsb_status = json.reads(open(f"{self.uf_path()}/readsb/stats.prom", "r").read())
+            readsb_status = open(filename, "r").read()
         except:
             self._beast = T.Unknown
+
+            print_err(f"get_beast_status failed to read file: {filename}")
             return
         match = re.search(pattern, readsb_status)
         if match:
             status = int(match.group(1))
             # this status is the time in seconds the connection has been established
-            if status <= "0":
+            if status <= 0:
                 self._beast = T.Disconnected
-            elif status > "10":
+            elif status > 10:
                 self._beast = T.Good
             else:
                 self._beast = T.Unknown
+        print_err(f"beast check result: {self._beast} for {pattern}")
 
     def check(self):
         # look up readsb / mlat_client view of the status
@@ -481,6 +485,7 @@ class AggStatus:
                 self._last_check = datetime.now()
             else:
                 print_err(f"planewatch returned {status}")
+
         if api_mlat != self._mlat:
             print_err(f"{self._agg}: api_mlat: {api_mlat} != self._mlat: {self._mlat}")
             if self._mlat == T.Unknown:
