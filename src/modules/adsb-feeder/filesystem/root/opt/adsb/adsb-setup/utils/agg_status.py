@@ -2,6 +2,7 @@ import json
 import re
 import subprocess
 import requests
+import threading
 from datetime import datetime, timedelta
 from enum import Enum
 from .util import generic_get_json, print_err, make_int
@@ -31,6 +32,7 @@ ultrafeeder_aggs = [
 
 class AggStatus:
     def __init__(self, agg: str, idx, data: Data, url: str):
+        self.lock = threading.Lock()
         self._agg = agg
         self._idx = make_int(idx)
         self._last_check = datetime.fromtimestamp(0.0)
@@ -40,24 +42,15 @@ class AggStatus:
         self._url = url
         self.check()
 
-    def use_cached(self, now):
-        return now - self._last_check < timedelta(seconds=10.0)
-
     @property
     def beast(self) -> str:
-        now = datetime.now()
-        if not self.use_cached(now):
-            self.check()
-        if self.use_cached(now):
+        if self.check():
             return status_symbol.get(self._beast, ".")
         return "."
 
     @property
     def mlat(self) -> str:
-        now = datetime.now()
-        if not self.use_cached(now):
-            self.check()
-        if self.use_cached(now):
+        if self.check():
             return status_symbol.get(self._mlat, ".")
         return "."
 
@@ -104,7 +97,7 @@ class AggStatus:
     def get_mlat_status(self):
         if self._agg not in ultrafeeder_aggs:
             self._mlat = T.Unknown
-            return
+            return False
         mconf = None
         netconfig = self._d.netconfigs.get(self._agg)
         if netconfig:
@@ -112,7 +105,7 @@ class AggStatus:
             mconf = netconfig.mlat_config
         if not mconf:
             self._mlat = T.Unknown
-            return
+            return False
         filename = f"{mconf.split(',')[1]}:{mconf.split(',')[2]}.json"
         try:
             mlat_json = json.load(open(f"{self.uf_path()}/mlat-client/{filename}", "r"))
@@ -123,7 +116,7 @@ class AggStatus:
         except:
             print_err(f"checking {self.uf_path()}/mlat-client/{filename} failed")
             self._mlat = T.Unknown
-            return
+            return False
         if now - int(datetime.now().timestamp()) > 60:
             # that's more than a minute old... probably not connected
             self._mlat = T.Disconnected
@@ -134,10 +127,12 @@ class AggStatus:
         else:
             self._mlat = T.Warning
 
+        return True
+
     def get_beast_status(self):
         self._beast = T.Unknown
         if self._agg not in ultrafeeder_aggs:
-            return
+            return False
         bconf = None
         netconfig = self._d.netconfigs.get(self._agg)
         if netconfig:
@@ -145,11 +140,10 @@ class AggStatus:
             bconf = netconfig.adsb_config
         if not bconf:
             self._beast = T.Unknown
-            return
+            return False
         pattern = (
             f"readsb_net_connector_status{{host=\"{bconf.split(',')[1]}\",port=\"{bconf.split(',')[2]}\"}} (\\d+)"
         )
-        #print_err(f"checking beast for {pattern}")
         filename = f"{self.uf_path()}/readsb/stats.prom"
         try:
             readsb_status = open(filename, "r").read()
@@ -157,7 +151,7 @@ class AggStatus:
             self._beast = T.Unknown
 
             print_err(f"get_beast_status failed to read file: {filename}")
-            return
+            return False
         match = re.search(pattern, readsb_status)
         if match:
             status = int(match.group(1))
@@ -168,15 +162,39 @@ class AggStatus:
                 self._beast = T.Good
             else:
                 self._beast = T.Unknown
-        print_err(f"beast check result: {self._beast} for {pattern}")
+
+            if self._beast != T.Good:
+                print_err(f"beast check {self._agg :{' '}<{20}}: {self._beast} status: {status}")
+        else:
+            print_err(f"ERROR: no match checking beast for {pattern}")
+
+
+
+        return True
 
     def check(self):
+        with self.lock:
+            if datetime.now() - self._last_check < timedelta(seconds=10.0):
+                return True
+
+            self.check_impl()
+
+            # if check_impl has updated last_check the status is available
+            if datetime.now() - self._last_check < timedelta(seconds=10.0):
+                return True
+
+            return False
+
+    def check_impl(self):
         # look up readsb / mlat_client view of the status
         self.get_mlat_status()
-        self.get_beast_status()
+        if self.get_beast_status():
+            # set last check, when the API check doesn't work, we just use the ultrafeeder status
+            self._last_check = datetime.now()
+
         # override this if we do get api results from that aggregator
         # for beast status we prefer the aggregator results
-        # for mlat status we prefer the api results
+        # for mlat status we prefer the local mlat-client results
         api_mlat = T.Unknown
         if self._agg == "adsblol":
             uuid = self._d.env_by_tags("adsblol_uuid").list_get(self._idx)
