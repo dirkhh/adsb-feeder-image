@@ -283,9 +283,16 @@ class AggStatus:
                     if fa_dict.get("adept") and fa_dict.get("adept").get("status") == "green"
                     else T.Disconnected
                 )
-                api_mlat = (
-                    T.Good if fa_dict.get("mlat") and fa_dict.get("mlat").get("status") == "green" else T.Disconnected
-                )
+
+                api_mlat = T.Disconnected
+                if fa_dict.get("mlat"):
+                    if fa_dict.get("mlat").get("status") == "green":
+                        api_mlat = T.Good
+                    elif fa_dict.get("mlat").get("status") == "amber":
+                        api_mlat = T.Bad
+                    else:
+                        api_mlat = T.Disconnected
+
                 self._last_check = datetime.now()
             else:
                 print_err(f"flightaware at {json_url} returned {status}")
