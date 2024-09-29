@@ -440,11 +440,12 @@
         // right now this is broken and just overwrites things
         $("#" + agg + "beast" + idx).text(data["beast"]);
         $("#" + agg + "mlat" + idx).text(data["mlat"]);
-        if (data["beast"] == "+" && (data["mlat"] == "+" || data["mlat"] == ".")) {
+        const mlat_broken = ! (data["mlat"] == "+" || data["mlat"] == "." || data["mlat"] == " ")
+        if (data["beast"] == "+" && ! mlat_broken) {
           $("#" + agg + "span" + idx).addClass('text-success')
-        } else if (data["beast"] == "+" && data["mlat"] != "+" && data["mlat"] != ".") {
+        } else if (data["beast"] == "+" && mlat_broken) {
           $("#" + agg + "span" + idx).addClass('text-warning')
-        } else if (data["beast"] != "+" && data["beast"] != "." && data["mlat"] != "+" && data["mlat"] != ".") {
+        } else if (data["beast"] != "+" && data["beast"] != ".") {
           $("#" + agg + "span" + idx).addClass('text-danger')
         } else {
           $("#" + agg + "span" + idx).addClass('text-dark')

@@ -8,13 +8,14 @@ from enum import Enum
 from .util import generic_get_json, print_err, make_int
 from .data import Data
 
-T = Enum("T", ["Disconnected", "Unknown", "Good", "Bad", "Warning"])
+T = Enum("T", ["Disconnected", "Unknown", "Good", "Bad", "Warning", "Unsupported"])
 status_symbol = {
     T.Disconnected: "\u2612",
     T.Unknown: ".",
     T.Good: "+",
     T.Bad: "\u2639",
     T.Warning: "\u26A0",
+    T.Unsupported: " ",
 }
 ultrafeeder_aggs = [
     "adsblol",
@@ -104,7 +105,7 @@ class AggStatus:
             # example mlat config: "mlat,dati.flyitalyadsb.com,30100,39002",
             mconf = netconfig.mlat_config
         if not mconf:
-            self._mlat = T.Unknown
+            self._mlat = T.Unsupported
             return False
         filename = f"{mconf.split(',')[1]}:{mconf.split(',')[2]}.json"
         try:
@@ -297,6 +298,7 @@ class AggStatus:
             else:
                 print_err(f"flightaware at {json_url} returned {status}")
         elif self._agg == "flightradar":
+            self._mlat = T.Unsupported
             suffix = "" if self._idx == 0 else f"_{self._idx}"
             json_url = f"{self._url}/fr24-monitor.json{suffix}"
             fr_dict, status = self.get_json(json_url)
@@ -357,7 +359,24 @@ class AggStatus:
             if tn_dict and status == 200:
                 online = tn_dict.get("online", False)
                 self._beast = T.Good if online else T.Disconnected
-                self._last_check = datetime.now()
+            else:
+                self._beast = T.Unknown
+
+            self._last_check = datetime.now()
+            self._mlat = T.Unsupported
+
+        elif self._agg == "planefinder":
+            self._beast = T.Unknown
+            self._mlat = T.Unsupported
+            self._last_check = datetime.now()
+        elif self._agg == "adsbhub":
+            self._beast = T.Unknown
+            self._mlat = T.Unsupported
+            self._last_check = datetime.now()
+        elif self._agg == "opensky":
+            self._beast = T.Unknown
+            self._mlat = T.Unsupported
+            self._last_check = datetime.now()
         elif self._agg == "alive":
             json_url = "https://api.airplanes.live/feed-status"
             a_dict, status = self.get_json(json_url)
