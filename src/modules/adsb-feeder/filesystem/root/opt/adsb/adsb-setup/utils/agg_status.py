@@ -120,9 +120,9 @@ class AggStatus:
         if now - int(datetime.now().timestamp()) > 60:
             # that's more than a minute old... probably not connected
             self._mlat = T.Disconnected
-        elif percent_good > 10 and percent_bad <= 2:
+        elif percent_good > 10 and percent_bad <= 5:
             self._mlat = T.Good
-        elif percent_bad > 5:
+        elif percent_bad > 15:
             self._mlat = T.Bad
         else:
             self._mlat = T.Warning
