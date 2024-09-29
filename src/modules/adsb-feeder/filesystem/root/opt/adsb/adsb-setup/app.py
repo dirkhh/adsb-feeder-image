@@ -446,7 +446,7 @@ class AdsbIm:
             return
 
         self._current_site_name = site_name
-        #print_err(f"set_hostname {site_name} {self._current_site_name}")
+        # print_err(f"set_hostname {site_name} {self._current_site_name}")
 
         thread = threading.Thread(target=start_mdns)
         thread.start()
@@ -697,7 +697,6 @@ class AdsbIm:
                 as_attachment=True,
                 attachment_filename=download_name,
             )
-
 
     def restore(self):
         if request.method == "POST":
@@ -1999,9 +1998,7 @@ class AdsbIm:
                 if key == "no_config_link":
                     self._d.env_by_tags("tar1090_image_config_link").value = ""
                 if key == "allow_config_link":
-                    self._d.env_by_tags("tar1090_image_config_link").value = (
-                        f"WILL_BE_SET_IN_IMPLIED_SETTINGS"
-                    )
+                    self._d.env_by_tags("tar1090_image_config_link").value = f"WILL_BE_SET_IN_IMPLIED_SETTINGS"
                 if key == "turn_on_gpsd":
                     self._d.env_by_tags(["use_gpsd", "is_enabled"]).value = True
                     # this updates the lat/lon/alt env variables as side effect, if there is a GPS fix
@@ -2624,7 +2621,7 @@ class AdsbIm:
         url = "Internal Error uploading logs"
 
         target = request.form.get("upload")
-        print_err(f"trying to upload the logs with target: \"{target}\"")
+        print_err(f'trying to upload the logs with target: "{target}"')
 
         if not target:
             print_err(f"ERROR: support POST request without target")
@@ -2655,10 +2652,9 @@ class AdsbIm:
                 print_err(f"failed to upload logs, output: {output}")
             return render_template("support.html", url=url)
 
-
         if target == "local_view" or target == "local_download":
 
-            as_attachment = (target == "local_download")
+            as_attachment = target == "local_download"
 
             fdOut, fdIn = os.pipe()
             pipeOut = os.fdopen(fdOut, "rb")
