@@ -125,16 +125,14 @@ class AggStatus:
             self._mlat = T.Unknown
             return
         if now - int(datetime.now().timestamp()) > 60:
-            # that's more than a minute old... let's go with dunno
-            self._mlat = T.Unknown
-        elif peer_count == 0:
+            # that's more than a minute old... probably not connected
             self._mlat = T.Disconnected
         elif percent_good > 10 and percent_bad <= 2:
             self._mlat = T.Good
-        elif percent_good == 0 or (percent_bad > 2 and percent_bad <= 10):
-            self._mlat = T.Warning
-        else:
+        elif percent_bad > 5:
             self._mlat = T.Bad
+        else:
+            self._mlat = T.Warning
 
     def get_beast_status(self):
         self._beast = T.Unknown
@@ -160,10 +158,13 @@ class AggStatus:
         match = re.search(pattern, readsb_status)
         if match:
             status = int(match.group(1))
-            if status == "-1":
+            # this status is the time in seconds the connection has been established
+            if status <= "0":
                 self._beast = T.Disconnected
-            elif status >= "0":
+            elif status > "10":
                 self._beast = T.Good
+            else:
+                self._beast = T.Unknown
 
     def check(self):
         # look up readsb / mlat_client view of the status
