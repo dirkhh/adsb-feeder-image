@@ -8,11 +8,53 @@ if ! [[ -f /opt/adsb/os.adsb.feeder.image ]]; then
     exit 0
 fi
 
+function vm_tweaks () {
+
+    if grep </proc/swaps -qs -F -v -e zram -e Filename; then
+        echo "$(date -u +"%FT%T.%3NZ") zram-swap.sh: unexpected non zram swap found, not tweaking kernel vm settings"
+        return
+    fi
+
+    # for more info on the following tweaks, see this kernel reference:
+    # https://www.kernel.org/doc/html/latest/admin-guide/sysctl/vm.html
+
+    # for zram swap, most guides reommend the following:
+    # swappiness 200, watermark_scale_factor 125, watermark_boost_factor 0
+    #
+    # swappiness
+    # if zram is the only swap, increase swappiness (default swappiness 60)
+    # zram guides propose 200 but that seems excessive
+    echo 100 > /proc/sys/vm/swappiness
+
+    # watermark_scale_factor
+    # This factor controls the aggressiveness of kswapd. It defines the amount
+    # of memory left in a node/system before kswapd is woken up and how much
+    # memory needs to be free before kswapd goes back to sleep.
+    # 60: 0.6 percent free memory (default 10 / 0.1%)
+    echo 60 > /proc/sys/vm/watermark_scale_factor
+
+    # watermark_boost_factor
+    # this has to do with reclaiming on fragmentation, swap on zram guides seem to disable this but don't give a reason
+    echo 0 > /proc/sys/vm/watermark_boost_factor
+
+    # disable readahead for reading from swap (default is 3 which means 2^3 = 8 pages)
+    echo 0 > /proc/sys/vm/page-cluster
+
+    # raise vfs_cache_pressure a bit, default 100
+    echo 200 > /proc/sys/vm/vfs_cache_pressure
+
+    # tweak dirty ratio
+    echo 2 > /proc/sys/vm/dirty_background_ratio
+    echo 10 > /proc/sys/vm/dirty_ratio
+
+}
+
 NAME=zram0
 DEV=/dev/$NAME
 
 if { mount; cat /proc/swaps; } | grep -qs "$DEV"; then
-    echo "zram-swap.sh: $DEV is already mounted or used as swap, no actions performed."
+    vm_tweaks
+    echo "zram-swap.sh: $DEV is already mounted or used as swap, only applied virtual memory tweaks."
     exit 0
 fi
 
@@ -67,41 +109,6 @@ if [[ -n $TURNOFF ]]; then
     swapoff $TURNOFF || true
 fi
 
-if grep </proc/swaps -qs -F -v -e zram -e Filename; then
-    echo "$(date -u +"%FT%T.%3NZ") zram-swap.sh: unexpected non zram swap found, not tweaking kernel vm settings"
-    exit 0
-fi
-
-# for more info on the following tweaks, see this kernel reference:
-# https://www.kernel.org/doc/html/latest/admin-guide/sysctl/vm.html
-
-# for zram swap, most guides reommend the following:
-# swappiness 200, watermark_scale_factor 125, watermark_boost_factor 0
-#
-# swappiness
-# if zram is the only swap, increase swappiness (default swappiness 60)
-# zram guides propose 200 but that seems excessive
-echo 100 > /proc/sys/vm/swappiness
-
-# watermark_scale_factor
-# This factor controls the aggressiveness of kswapd. It defines the amount
-# of memory left in a node/system before kswapd is woken up and how much
-# memory needs to be free before kswapd goes back to sleep.
-# 60: 0.6 percent free memory (default 10 / 0.1%)
-echo 60 > /proc/sys/vm/watermark_scale_factor
-
-# watermark_boost_factor
-# this has to do with reclaiming on fragmentation, swap on zram guides seem to disable this but don't give a reason
-echo 0 > /proc/sys/vm/watermark_boost_factor
-
-# disable readahead for reading from swap (default is 3 which means 2^3 = 8 pages)
-echo 0 > /proc/sys/vm/page-cluster
-
-# test vfs_cache_pressure, default 100
-echo 200 > /proc/sys/vm/vfs_cache_pressure
-
-# test dirty ratio modifications
-echo 2 > /proc/sys/vm/dirty_background_ratio
-echo 10 > /proc/sys/vm/dirty_ratio
+vm_tweaks
 
 echo "$(date -u +"%FT%T.%3NZ") zram-swap.sh setting up swap on zram ... done"
