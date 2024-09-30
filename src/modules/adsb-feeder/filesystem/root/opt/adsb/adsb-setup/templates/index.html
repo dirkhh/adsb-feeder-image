@@ -234,6 +234,9 @@
     {% if list_is_enabled("flightradar", idx) %}
     {% set ns.flightradar = true %}
     {% endif %}
+    {% if list_is_enabled("flightaware", idx) %}
+    {% set ns.flightaware = true %}
+    {% endif %}
     {% if list_is_enabled("planefinder", idx) %}
     {% set ns.planefinder = true %}
     {% endif %}
@@ -259,7 +262,7 @@
         </ul>
       </div>
     </div>
-    <div class="row mt-3 {% if not (ns.adsblol or ns.flightradar or ns.planefinder or ns.adsbx) %}d-none{% endif %}">
+    <div class="row mt-3 {% if not (ns.adsblol or ns.flightradar or ns.planefinder or ns.adsbx or ns.flightaware) %}d-none{% endif %}">
       <div class="col-12">
         <h5>Additional aggregator links</h5>
       </div>
@@ -316,6 +319,23 @@
             <tr>
               <th>{{ list_value_by_tag('site_name', idx) }}</th>
               <td><a href="/fr24{{ suffix }}">FR24 status</a></td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="col-12 {% if not ns.flightaware %}d-none{% endif %}">
+        <div class="lead">FlightAware</div>
+        <table class="table table-sm table-borderless lh-1 w-auto mt-0 mb-0 ms-2">
+          <tbody>
+            {% for idx in ns.site_indices %}
+            {% if list_is_enabled("flightaware", idx) %}
+            {% if idx != 0 %}{% set suffix = '_'~idx %}{% else %}{% set suffix = '' %}{% endif %}
+            <tr>
+              <th>{{ list_value_by_tag('site_name', idx) }}</th>
+              <td><a href="/fa-status{{ suffix }}">FlightAware status</a></td>
+              <td><a href="/flightaware{{ suffix }}">FlightAware map</a></td>
             </tr>
             {% endif %}
             {% endfor %}

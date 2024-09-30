@@ -63,10 +63,11 @@ class Data:
             ret.append([endpoint, port, path])
             if endpoint in [
                 "/fr24-monitor.json",
-                "/fa-status.json/",
-                "/planefinder-stat/",
+                "/flightaware/",
                 "/fa-status/",
+                "/fa-status.json/",
                 "/fr24/",
+                "/planefinder-stat/",
             ]:
                 # inc_port is the id of the stage2 microfeeder
                 # example endpoint: '/fa-status.json_<int:inc_port>/'
