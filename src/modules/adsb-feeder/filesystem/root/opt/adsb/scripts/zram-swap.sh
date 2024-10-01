@@ -34,8 +34,23 @@ function vm_tweaks () {
     echo 60 > /proc/sys/vm/watermark_scale_factor
 
     # watermark_boost_factor
-    # this has to do with reclaiming on fragmentation, swap on zram guides seem to disable this but don't give a reason
+    # this has to do with reclaiming on fragmentation, but with almost no memory available it can lead to kswapd thrashing
+    # so it needs to be disabled
     echo 0 > /proc/sys/vm/watermark_boost_factor
+    # some more explanation from this post:
+    # https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1861359/comments/56
+    # > What watermark boosting does is try to preemptively fire up kswapd to
+    # > free memory when there hasn't been an allocation failure. It does this by
+    # > increasing kswapd's high watermark goal and then firing up kswapd. The
+    # > reason why this causes freezes is because, with the increased high
+    # > watermark goal, kswapd will steal memory from processes that need it in
+    # > order to make forward progress. These processes will, in turn, try to
+    # > allocate memory again, which will cause kswapd to steal necessary pages
+    # > from those processes again, in a positive feedback loop known as page
+    # > thrashing. When page thrashing occurs, your system is essentially
+    # > livelocked until the necessary forward progress can be made to stop
+    # > processes from trying to continuously allocate memory and trigger kswapd
+    # > to steal it back.
 
     # disable readahead for reading from swap (default is 3 which means 2^3 = 8 pages)
     echo 0 > /proc/sys/vm/page-cluster
@@ -43,8 +58,12 @@ function vm_tweaks () {
     # raise vfs_cache_pressure a bit, default 100
     echo 200 > /proc/sys/vm/vfs_cache_pressure
 
-    # tweak dirty ratio
+    # write cache is less important with non-spinning disks
+    # reduce the defaults to reduce write cache memory use just in case we're mem limited
+    # ratio of available memory
+    # dirty_background_ratio: start writing out data as soon as ratio pages are dirty (used for write cache)
     echo 2 > /proc/sys/vm/dirty_background_ratio
+    # dirty_bytes_ratio: processes start writing out themselves (block) as soon as ratio pages are dirty
     echo 10 > /proc/sys/vm/dirty_ratio
 
     # raspbian sets min_free_kbytes at 16384 which wastes a lot of memory
