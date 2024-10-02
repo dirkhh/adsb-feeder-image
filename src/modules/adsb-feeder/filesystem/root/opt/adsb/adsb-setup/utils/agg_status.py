@@ -398,6 +398,11 @@ class AggStatus:
                         )
                         else T.Disconnected
                     )
+                map_link = a_dict.get("map_link")
+                # seems to currently only have one map link per IP, we save it
+                # per microsite nonetheless in case this changes in the future
+                if map_link:
+                    self._d.env_by_tags("alivemaplink").list_set(self._idx, map_link)
                 self._last_check = datetime.now()
             else:
                 print_err(f"airplanes.james returned {status}")

@@ -494,6 +494,11 @@ class Data:
             tags="adsbxfeederid",
         ),
         Env(
+            "_ADSBIM_STATE_ALIVE_MAP_LINK",
+            default=[""],
+            tags="alivemaplink",
+        ),
+        Env(
             "_ADSBIM_STATE_IS_ULTRAFEEDER_TAT_ENABLED",
             default=[False],
             tags=["tat", "ultrafeeder", "is_enabled"],

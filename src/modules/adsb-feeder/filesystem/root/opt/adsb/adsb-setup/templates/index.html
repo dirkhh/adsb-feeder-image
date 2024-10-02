@@ -231,6 +231,9 @@
     {% if list_is_enabled("adsbx", idx) %}
     {% set ns.adsbx = true %}
     {% endif %}
+    {% if list_is_enabled("alive", idx) %}
+    {% set ns.alive = true %}
+    {% endif %}
     {% if list_is_enabled("flightradar", idx) %}
     {% set ns.flightradar = true %}
     {% endif %}
@@ -262,7 +265,7 @@
         </ul>
       </div>
     </div>
-    <div class="row mt-3 {% if not (ns.adsblol or ns.flightradar or ns.planefinder or ns.adsbx or ns.flightaware) %}d-none{% endif %}">
+    <div class="row mt-3 {% if not (ns.adsblol or ns.flightradar or ns.planefinder or ns.adsbx or ns.alive or ns.flightaware) %}d-none{% endif %}">
       <div class="col-12">
         <h5>Additional aggregator links</h5>
       </div>
@@ -376,6 +379,23 @@
           </tbody>
         </table>
       </div>
+      <div class="col-12 {% if not ns.alive %}d-none{% endif %}">
+        <div class="lead">airplanes.live</div>
+        <table class="table table-sm table-borderless lh-1 w-auto mt-0 mb-0 ms-2">
+          <tbody>
+            {% for idx in ns.site_indices %}
+            {% if list_is_enabled("alive", idx) %}
+            {% set suffix = '_'~idx %}
+            <tr>
+              <th>{{ list_value_by_tag('site_name', idx) }}</th>
+              <td><a id="alivestatus{{suffix}}" href="https://airplanes.live/myfeed/">{{s}}Status</a></td>
+              <td><a id="alivemaplink{{suffix}}" href="">{{s}}Map</a></td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
   <div class="col-12 {% if not stage2_suggestion %} d-none {% endif %}">
@@ -476,6 +496,9 @@
             console.log("set adsblol-link" + idx + " to " + data["adsblollink"])
             $("#adsblol-link-" + idx).attr("href", data["adsblollink"])
           }
+        }
+        if (agg == "alive") {
+            $("#alivemaplink_" + idx).attr("href", data["alivemaplink"])
         }
         if (agg == "adsbx") {
           if (idx == 0) {

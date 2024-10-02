@@ -1103,23 +1103,21 @@ class AdsbIm:
                 f"http://127.0.0.1:{self._d.env_by_tags('webport').value}",
             )
 
+        res = (
+            {
+                "beast": status.beast,
+                "mlat": status.mlat,
+            }
+        )
+
         if agg == "adsbx":
-            return json.dumps(
-                {
-                    "beast": status.beast,
-                    "mlat": status.mlat,
-                    "adsbxfeederid": self._d.env_by_tags("adsbxfeederid").list_get(idx),
-                }
-            )
+            res["adsbxfeederid"] = self._d.env_by_tags("adsbxfeederid").list_get(idx)
         elif agg == "adsblol":
-            return json.dumps(
-                {
-                    "beast": status.beast,
-                    "mlat": status.mlat,
-                    "adsblollink": self._d.env_by_tags("adsblol_link").list_get(idx),
-                }
-            )
-        return json.dumps({"beast": status.beast, "mlat": status.mlat})
+            res["adsblollink"] = self._d.env_by_tags("adsblol_link").list_get(idx),
+        elif agg == "alive":
+            res["alivemaplink"] = self._d.env_by_tags("alivemaplink").list_get(idx),
+
+        return json.dumps(res)
 
     @check_restart_lock
     def sdr_setup(self):
