@@ -1,4 +1,5 @@
 Changes since v2.1.6 include:
+- airspy container: avoid need for restart after hotplug
 - further memory tweaks mainly for systems with only 512 MB memory
 - additional aggregator links: add FlightAware and airplanes.live links
 - reimplement beast and mlat status for Ultrafeeder based aggregators; this adds more status details

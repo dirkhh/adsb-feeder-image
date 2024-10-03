@@ -7,8 +7,8 @@ services:
     container_name: airspy_adsb
     hostname: airspy_adsb
     restart: unless-stopped
-    devices:
-      - /dev/bus/usb:/dev/bus/usb
+    device_cgroup_rules:
+      - 'c 189:* rwm'
     ports:
       - ${FEEDER_AIRSPY_PORT:-8070}:80
     environment:
@@ -27,6 +27,7 @@ services:
       # USER_PROVIDED_ENV_START
       # USER_PROVIDED_ENV_END
     volumes:
+      - /dev/bus/usb:/dev/bus/usb:ro
       - /run/adsb-feeder-airspy:/run
     tmpfs:
       - /tmp:size=128M
