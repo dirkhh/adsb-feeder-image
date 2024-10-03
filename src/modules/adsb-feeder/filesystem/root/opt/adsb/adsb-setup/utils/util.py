@@ -146,7 +146,9 @@ def mf_get_ip_and_triplet(ip):
         # the fucntion was passed an IP, port 30005 and protocol beast_in are implied
         # unless we are a stage2 getting data from a nanofeeder on localhost
         if ip == "local":
-            triplet = f"host.docker.internal,30035,beast_in"
+            # container to container connections we do directly, use nanofeeder
+            triplet = f"nanofeeder,30005,beast_in"
+            # this ip is used to talk to the python running on the host, use host.docker.internal
             ip = "host.docker.internal"
         else:
             triplet = f"{ip},30005,beast_in"
