@@ -1,4 +1,6 @@
 Changes since v2.1.6 include:
+- app install first run: fix wrong redirects
+- fix stage2 local receiver with userland proxy disabled
 - airspy container: avoid need for restart after hotplug
 - further memory tweaks mainly for systems with only 512 MB memory
 - additional aggregator links: add FlightAware and airplanes.live links
