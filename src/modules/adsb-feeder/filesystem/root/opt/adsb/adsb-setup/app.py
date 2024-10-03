@@ -134,6 +134,40 @@ class AdsbIm:
         self._routemanager = RouteManager(self.app)
         self._d = Data()
         self._system = System(data=self._d)
+
+        # prepare for app use (vs ADS-B Feeder Image use)
+        # newer images will include a flag file that indicates that this is indeed
+        # a full image - but in case of upgrades from older version, this heuristic
+        # should be sufficient to guess if this is an image or an app
+        os_flag_file = self._d.data_path / "os.adsb.feeder.image"
+        if not os_flag_file.exists():
+            # so this could be a pre-0.15 image, or it could indeed be the app
+            app_flag_file = adsb_dir / "app.adsb.feeder.image"
+            if not app_flag_file.exists():
+                # there should be no app without the app flag file, so assume that
+                # this is an older image that was upgraded and hence didn't get the
+                # os flag file at install time
+                open(os_flag_file, "w").close()
+
+        if not os_flag_file.exists():
+            # we are running as an app under DietPi or some other OS
+            self._d.is_feeder_image = False
+            with open(self._d.data_path / "adsb-setup/templates/systemmgmt.html", "r+") as systemmgmt_file:
+                systemmgmt_html = systemmgmt_file.read()
+                systemmgmt_file.seek(0)
+                systemmgmt_file.write(
+                    re.sub(
+                        "FULL_IMAGE_ONLY_START.*? FULL_IMAGE_ONLY_END",
+                        "",
+                        systemmgmt_html,
+                        flags=re.DOTALL,
+                    )
+                )
+                systemmgmt_file.truncate()
+            # v1.3.4 ended up not installing the correct port definitions - if that's
+            # the case, then insert them into the settings
+            self.setup_app_ports()
+
         self._sdrdevices = SDRDevices()
         for i in [0] + self.micro_indices():
             self._d.ultrafeeder.append(UltrafeederConfig(data=self._d, micro=i))
@@ -453,38 +487,6 @@ class AdsbIm:
 
     def run(self, no_server=False):
         debug = os.environ.get("ADSBIM_DEBUG") is not None
-        # prepare for app use (vs ADS-B Feeder Image use)
-        # newer images will include a flag file that indicates that this is indeed
-        # a full image - but in case of upgrades from older version, this heuristic
-        # should be sufficient to guess if this is an image or an app
-        os_flag_file = self._d.data_path / "os.adsb.feeder.image"
-        if not os_flag_file.exists():
-            # so this could be a pre-0.15 image, or it could indeed be the app
-            app_flag_file = adsb_dir / "app.adsb.feeder.image"
-            if not app_flag_file.exists():
-                # there should be no app without the app flag file, so assume that
-                # this is an older image that was upgraded and hence didn't get the
-                # os flag file at install time
-                open(os_flag_file, "w").close()
-
-        if not os_flag_file.exists():
-            # we are running as an app under DietPi or some other OS
-            self._d.is_feeder_image = False
-            with open(self._d.data_path / "adsb-setup/templates/systemmgmt.html", "r+") as systemmgmt_file:
-                systemmgmt_html = systemmgmt_file.read()
-                systemmgmt_file.seek(0)
-                systemmgmt_file.write(
-                    re.sub(
-                        "FULL_IMAGE_ONLY_START.*? FULL_IMAGE_ONLY_END",
-                        "",
-                        systemmgmt_html,
-                        flags=re.DOTALL,
-                    )
-                )
-                systemmgmt_file.truncate()
-            # v1.3.4 ended up not installing the correct port definitions - if that's
-            # the case, then insert them into the settings
-            self.setup_app_ports()
 
         # hopefully very temporary hack to deal with a broken container that
         # doesn't run on Raspberry Pi 5 boards
