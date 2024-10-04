@@ -536,7 +536,7 @@ class AggStatus:
                 print_err(f"planewatch returned {status}")
 
         if api_mlat != self._mlat:
-            print_err(f"{self._agg}: api_mlat: {api_mlat} != self._mlat: {self._mlat}")
+            #print_err(f"{self._agg}: api_mlat: {api_mlat} != self._mlat: {self._mlat}")
             if self._mlat == T.Unknown:
                 self._mlat = api_mlat
 
