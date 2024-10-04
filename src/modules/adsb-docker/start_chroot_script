@@ -92,5 +92,13 @@ then
   sed -i 's/^\(127.0.0.1\s*localhost\)\(.*\)/\1\2 localunixsocket localunixsocket.local localunixsocket.home/g' /etc/hosts
 fi
 
+if [[ -f /boot/firmware/config.txt ]]; then
+    # for raspbian, reduce GPU memory to gain 48M of memory (very significant on 512 M systems)
+    # this image does not plan to use the video output ever (and it apparently still works with limited feature set with 16M of gpu mem)
+    echo "gpu_mem=16" >> /boot/firmware/config.txt
+    # disabling bluetooth saves yet some more memory
+    echo "dtoverlay=pi3-disable-bt" >> /boot/firmware/config.txt
+fi
+
 #cleanup
 apt-get clean
