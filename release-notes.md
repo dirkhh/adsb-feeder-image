@@ -1,4 +1,8 @@
 Changes since v2.1.6 include:
+- up ultrafeeder version for some minor fixes
+- further memory tweaks so raspbian systems with 1G/2G memory have more available
+- agg status: remove api_mlat debug pring
+- raspbian image build: reduce gpu memory / disable bluetooth
 - app install first run: fix wrong redirects
 - fix stage2 local receiver with userland proxy disabled
 - airspy container: avoid need for restart after hotplug
