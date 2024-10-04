@@ -69,11 +69,11 @@ function vm_tweaks () {
     # raspbian sets min_free_kbytes at 16384 which wastes a lot of memory
     # the kernel default is a bit small though for weird networking quirks on the raspberry pi and possibly other SBCs
     # thus 8192 should be a good compromise for a stable system without wasting too much memory
-    # only lower this setting if it's large and we have less than 750 MB of memory
+    # lower this setting if it's very large and we have 2 GB or less memory
     # increase the setting if it's less than 8192
     min_free_kbytes=$(cat /proc/sys/vm/min_free_kbytes)
     total_mem_kbytes=$(grep -e MemTotal /proc/meminfo | tr -s ' ' | cut -d' ' -f2)
-    if (( min_free_kbytes > 8192 )) && (( total_mem_kbytes < 750 * 1024 )) || (( min_free_kbytes < 8192 )); then
+    if (( min_free_kbytes > 8192 )) && (( total_mem_kbytes < 2048 * 1024 )) || (( min_free_kbytes < 8192 )); then
         echo 8192 > /proc/sys/vm/min_free_kbytes
     fi
 
