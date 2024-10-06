@@ -1,19 +1,16 @@
 Changes since v2.1.6 include:
-- up ultrafeeder version for some minor fixes
-- further memory tweaks so raspbian systems with 1G/2G memory have more available
-- agg status: remove api_mlat debug pring
+- almost all docker images have been updated since v2.1.6 (but not since the last beta). Expect a relatively slow update if coming from 2.1.7-beta.1 or earlier.
+- many memory tweaks so raspbian systems with less than 4G of memory have more available
 - raspbian image build: reduce gpu memory / disable bluetooth
 - app install first run: fix wrong redirects
 - fix stage2 local receiver with userland proxy disabled
 - airspy container: avoid need for restart after hotplug
-- further memory tweaks mainly for systems with only 512 MB memory
 - additional aggregator links: add FlightAware and airplanes.live links
 - reimplement beast and mlat status for Ultrafeeder based aggregators; this adds more status details
 - don't require 1.8G of memory for stage2, only warn about recommended memory per microsite
 - image: enable swap via zram
 - eliminate minor disk writes by fa / fr24 containers
 - disable userland proxy in the docker config for new images
-- update container versions
 - fix long load for expert page for rare circumstances
 - fix tar1090 config link port when restoring app install <-> image
 
