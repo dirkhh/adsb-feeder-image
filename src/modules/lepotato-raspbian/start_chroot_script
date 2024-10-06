@@ -12,7 +12,7 @@ source /common.sh
 install_cleanup_trap
 
 # what to remove
-[ -n "$PKGS_TO_REMOVE" ] || PKGS_TO_REMPOVE=( \
+[ -n "$PKGS_TO_REMOVE" ] || PKGS_TO_REMOVE=( \
 "apt-file" \
 "bluez-obexd" \
 "bluez-tools" \
@@ -115,8 +115,8 @@ install_cleanup_trap
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update --allow-releaseinfo-change
-if (( "${#PKGS_TO_REMPOVE}" > 0 )); then
-  apt-get purge -y "${PKGS_TO_REMPOVE[@]}"
+if (( "${#PKGS_TO_REMOVE}" > 0 )); then
+  apt-get purge -y "${PKGS_TO_REMOVE[@]}"
 else
   echo_red "No packages configured to be removed. [SKIPPED]"
 fi
