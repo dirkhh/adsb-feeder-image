@@ -270,10 +270,18 @@ class Data:
             default=[""],
             tags=["radarbox", "key"],
         ),
+        # radarbox station number used for status link
         Env(
             "FEEDER_RADARBOX_SN",
             default=[""],
             tags=["radarbox", "sn"],
+        ),
+        # radarbox key that was set when the station number was determined
+        # if it doesn't match the currently set share key, determine new station number
+        Env(
+            "_ADSBIM_STATE_FEEDER_RADARBOX_SN_KEY",
+            default=[""],
+            tags=["radarbox", "snkey"],
         ),
         Env(
             "FEEDER_RB_THERMAL_HACK",

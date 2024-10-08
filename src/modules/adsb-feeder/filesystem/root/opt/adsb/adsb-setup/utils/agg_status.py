@@ -319,6 +319,12 @@ class AggStatus:
             else:
                 print_err(f"radarplane returned {status}")
         elif self._agg == "radarbox":
+
+            rbkey = self._d.env_by_tags(["radarbox", "key"]).list_get(self._idx)
+            # reset station number if the key has changed
+            if rbkey != self._d.env_by_tags(["radarbox", "snkey"]).list_get(self._idx):
+                station_serial = self._d.env_by_tags(["radarbox", "sn"]).list_set(self._idx, "")
+
             station_serial = self._d.env_by_tags(["radarbox", "sn"]).list_get(self._idx)
             if not station_serial:
                 # dang, I hate this part
@@ -338,6 +344,7 @@ class AggStatus:
                 if match:
                     station_serial = match.group(1)
                     self._d.env_by_tags(["radarbox", "sn"]).list_set(self._idx, station_serial)
+                    self._d.env_by_tags(["radarbox", "snkey"]).list_set(self._idx, rbkey)
             if station_serial:
                 html_url = f"https://www.radarbox.com/stations/{station_serial}"
                 rb_page, status = self.get_plain(html_url)
