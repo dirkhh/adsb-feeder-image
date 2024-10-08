@@ -20,3 +20,4 @@ services:
       - /run:exec,size=256M
       - /tmp:size=128M
       - /var/log:size=32M
+      - /var/lib/logrotate
