@@ -680,7 +680,7 @@ class AdsbIm:
         )
         thread.start()
 
-        site_name = self._d.env_by_tags("site_name").list_get(0)
+        site_name = self._d.env_by_tags("site_name_sanitized").list_get(0)
         if self._d.is_enabled("stage2"):
             site_name = f"stage2-{site_name}"
         now = datetime.now().replace(microsecond=0).isoformat().replace(":", "-")
@@ -1632,6 +1632,9 @@ class AdsbIm:
             self._d.env_by_tags("nano_beastreduce_port").value = "30006"
 
         for sitenum in [0] + self.micro_indices():
+            site_name = self._d.env_by_tags("site_name").list_get(sitenum)
+            sanitized = "".join(c if c.isalnum() or c in "-_." else "_" for c in site_name)
+            self._d.env_by_tags("site_name_sanitized").list_set(sitenum, sanitized)
 
             # make sure use_route_api is populated with the default:
             self._d.env_by_tags("route_api").list_get(sitenum)
