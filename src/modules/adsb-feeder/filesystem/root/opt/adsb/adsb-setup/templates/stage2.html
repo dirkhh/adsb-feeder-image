@@ -70,6 +70,7 @@
             <tr class="align-middle">
               <td>
                 <input type="text" name="site_name_{{ loop.index0 }}" value="{{ site }}"
+                       pattern="[\-_.a-zA-Z0-9 ]+" title="Letters, numbers, -, _, ."
                        class="form-control-sm accept_edit" />
               </td>
               <td class="text-center">
@@ -218,7 +219,7 @@
             </span>
             <span class="col-md">
               <input type="text" id="micro_site_name" name="micro_site_name" placeholder="my-awesome-antenna"
-                     class="form-control" pattern="[\-_.a-zA-Z0-9]+" title="Letters, numbers, -, _, ." value="" />
+                     class="form-control" pattern="[\-_.a-zA-Z0-9 ]+" title="Letters, numbers, -, _, ." value="" />
             </span>
           </div>
           <div class="form-group row align-items-center mb-1">

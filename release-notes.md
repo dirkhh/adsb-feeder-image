@@ -1,4 +1,5 @@
 Changes since v2.2.1 include:
+- consistently allow spaces in sitenames (spaces replaced with underscore for MLAT name)
 - radarbox: update station number when share key changes
 - eliminate some minor writes from radarvirtuel, adsbhub, radar1090uk containers
 

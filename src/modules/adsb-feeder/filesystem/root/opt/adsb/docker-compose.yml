@@ -56,7 +56,7 @@ services:
       # Sources and Aggregator connections:
       # (Note - remove the ones you are not using / feeding)
       - ULTRAFEEDER_CONFIG=${FEEDER_ULTRAFEEDER_CONFIG}
-      - MLAT_USER=${MLAT_SITE_NAME}
+      - MLAT_USER=${MLAT_SITE_NAME_SANITIZED}
       - UUID=${ULTRAFEEDER_UUID}
       # reduce delay starting up various mlat-clients, default is 15 seconds
       - MLAT_STARTUP_STAGGER=1

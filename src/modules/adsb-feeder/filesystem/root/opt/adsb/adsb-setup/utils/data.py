@@ -159,6 +159,7 @@ class Data:
         Env("FEEDER_ALT_M", default=[""], is_mandatory=True, tags=["alt"]),
         Env("FEEDER_TZ", default=[""], tags=["tz"]),
         Env("MLAT_SITE_NAME", default=[""], is_mandatory=True, tags=["site_name"]),
+        Env("MLAT_SITE_NAME_SANITIZED", default=[""], is_mandatory=True, tags=["site_name_sanitized"]),
         #
         # SDR settings are only valid on an integrated feeder or a micro feeder, not on stage2
         # misnomer, FEEDER_RTL_SDR is used as follows: READSB_DEVICE_TYPE=${FEEDER_RTL_SDR}

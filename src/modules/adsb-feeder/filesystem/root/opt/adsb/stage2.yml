@@ -32,7 +32,7 @@ services:
       # Sources and Aggregator connections:
       # (Note - remove the ones you are not using / feeding)
       - ULTRAFEEDER_CONFIG=${FEEDER_ULTRAFEEDER_CONFIG_STAGE2NUM}
-      - MLAT_USER=${MLAT_SITE_NAME_STAGE2NUM}
+      - MLAT_USER=${MLAT_SITE_NAME_SANITIZED_STAGE2NUM}
       - UUID=${ULTRAFEEDER_UUID_STAGE2NUM}
       # reduce delay starting up various mlat-clients, default is 15 seconds
       - MLAT_STARTUP_STAGGER=1
