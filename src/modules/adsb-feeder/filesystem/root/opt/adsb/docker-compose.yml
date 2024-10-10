@@ -8,6 +8,9 @@ services:
     hostname: ultrafeeder
     restart: unless-stopped
     device_cgroup_rules:
+      # serial devices
+      - 'c 188:* rwm'
+      # USB devices
       - 'c 189:* rwm'
     ports:
       - ${AF_TAR1090_PORT_ADJUSTED:-8080}:80 # to expose the web interface
