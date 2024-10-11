@@ -1,18 +1,5 @@
-Changes since v2.1.6 include:
-- almost all docker images have been updated since v2.1.6 (but not since the last beta). Expect a relatively slow update if coming from 2.1.7-beta.1 or earlier.
-- many memory tweaks so raspbian systems with less than 4G of memory have more available
-- raspbian image build: reduce gpu memory / disable bluetooth
-- app install first run: fix wrong redirects
-- fix stage2 local receiver with userland proxy disabled
-- airspy container: avoid need for restart after hotplug
-- additional aggregator links: add FlightAware and airplanes.live links
-- reimplement beast and mlat status for Ultrafeeder based aggregators; this adds more status details
-- don't require 1.8G of memory for stage2, only warn about recommended memory per microsite
-- image: enable swap via zram
-- eliminate minor disk writes by fa / fr24 containers
-- disable userland proxy in the docker config for new images
-- fix long load for expert page for rare circumstances
-- fix tar1090 config link port when restoring app install <-> image
+Changes since v2.2.0 include:
+- raspbian image build: don't disable bluetooth via config.txt as this somehow interacts badly with pi3 mlat
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)
