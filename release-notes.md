@@ -1,6 +1,5 @@
-Changes since v2.2.0 include:
-- raspbian image build: don't disable bluetooth via config.txt as this somehow interacts badly with pi3 mlat
-- fix a couple of typos
+Changes since v2.2.1 include:
+- ensure remote tags are always updated - this avoids odd version number issues
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)

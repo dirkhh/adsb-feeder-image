@@ -122,7 +122,7 @@ else
     mkdir -p /opt/adsb-feeder-update
     # make sure the git dir is up to date
     # don't hide the output as that could be useful in the logs
-    if ! cd /opt/adsb-feeder-update/adsb-feeder-image || ! git fetch; then
+    if ! cd /opt/adsb-feeder-update/adsb-feeder-image || ! git fetch --force --tags --prune --prune-tags ; then
         cd /opt/adsb-feeder-update || exit_with_message "can't cd /opt/adsb-feeder-update"
         rm -rf /opt/adsb-feeder-update/adsb-feeder-image
         git clone https://github.com/dirkhh/adsb-feeder-image || exit_with_message "git clone failed, giving up"
@@ -186,7 +186,7 @@ cd "${DIR}/adsb-feeder-image" || exit_with_message "can't cd to ${DIR}/adsb-feed
 
 # grab the most recent version tag. Forcing '--long' always adds the -<num>-g<sha> trailer to the result - which we then can remove
 TAG_COMPONENT=$(git describe --match "v[0-9]*" --long | sed "s/-[0-9]*-g[0-9a-f]*//")
-# now comare this to a regular call to git describe so we get the SHA that we'll add at the end
+# now compare this to a regular call to git describe so we get the SHA that we'll add at the end
 DESCRIBE=$(git describe --match "v[0-9]*")
 SHA_COMPONENT=${DESCRIBE//$TAG_COMPONENT/}
 VERSION="${TAG_COMPONENT}(${BRANCH})${SHA_COMPONENT}"
