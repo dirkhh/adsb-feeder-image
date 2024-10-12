@@ -122,7 +122,7 @@ else
     mkdir -p /opt/adsb-feeder-update
     # make sure the git dir is up to date
     # don't hide the output as that could be useful in the logs
-    if ! cd /opt/adsb-feeder-update/adsb-feeder-image || ! git fetch; then
+    if ! cd /opt/adsb-feeder-update/adsb-feeder-image || ! git fetch --force --tags --prune --prune-tags ; then
         cd /opt/adsb-feeder-update || exit_with_message "can't cd /opt/adsb-feeder-update"
         rm -rf /opt/adsb-feeder-update/adsb-feeder-image
         git clone https://github.com/dirkhh/adsb-feeder-image || exit_with_message "git clone failed, giving up"
