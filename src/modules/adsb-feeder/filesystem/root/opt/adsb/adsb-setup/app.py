@@ -613,13 +613,14 @@ class AdsbIm:
                     uf_container = "ultrafeeder"
                 else:
                     uf_container = f"uf_{microIndex}"
-                subprocess.call(
+                subprocess.run(
                     f"docker exec {uf_container} pkill collectd",
-                    timeout=5.0,
+                    timeout=10.0,
                     shell=True,
+                    check=True,
                 )
             except:
-                print_err("failed to kill collectd - just using the localhost.tar.gz that's already there")
+                print_err(f"{context}: docker exec failed - backed up graph data might miss up to 6h")
                 pass
             else:
                 count = 0
@@ -630,7 +631,9 @@ class AdsbIm:
                     sleep(increment)
                     if timeSinceWrite(rrd_file) < 120:
                         print_err(f"{context}: success")
-                        break
+                        return
+
+                print_err(f"{context}: writeback timed out - backed up graph data might miss up to 6h")
 
         fdOut, fdIn = os.pipe()
         pipeOut = os.fdopen(fdOut, "rb")
