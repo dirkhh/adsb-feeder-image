@@ -14,27 +14,38 @@ fi
 if [ "$1" = "" ] ; then
     echo "usage: $0 <hostname>"
     exit 1
-else
-    host_name="$1"
-    host_name_no_dash="${host_name//-/}"
-    # ensure that the local hosts file includes the hostname
-    if ! grep -q "$host_name" /etc/hosts ; then
-        echo "127.0.2.1 $host_name" >> /etc/hosts
-    fi
-    echo "set up mDNS aliases for ${host_name}.local and adsb-feeder.local"
-    if systemctl is-active --quiet "adsb-avahi-alias@${host_name}.local.service" ; then
-        systemctl restart "adsb-avahi-alias@${host_name}.local.service"
-    else
-        systemctl enable --now "adsb-avahi-alias@${host_name}.local.service"
-    fi
-    if systemctl is-active --quiet "adsb-avahi-alias@${host_name_no_dash}.local.service" ; then
-        systemctl restart "adsb-avahi-alias@${host_name_no_dash}.local.service"
-    else
-        systemctl enable --now "adsb-avahi-alias@${host_name_no_dash}.local.service"
-    fi
-    if systemctl is-active --quiet "adsb-avahi-alias@adsb-feeder.local.service" ; then
-        systemctl restart "adsb-avahi-alias@adsb-feeder.local.service"
-    else
-        systemctl enable --now "adsb-avahi-alias@adsb-feeder.local.service"
-    fi
 fi
+
+host_name="$1"
+host_name_no_dash="${host_name//-/}"
+# ensure that the local hosts file includes the hostname
+if ! grep -q "$host_name" /etc/hosts ; then
+    echo "127.0.2.1 $host_name" >> /etc/hosts
+fi
+
+names=("${host_name}.local" "${host_name_no_dash}.local" "adsb-feeder.local")
+echo "set up mDNS aliases: ${names[@]}"
+service_names=()
+for name in "${names[@]}"; do
+    service_name="adsb-avahi-alias@${name}.service"
+    service_names+=("${service_name}")
+    # is-active returns true when the service is started, in that case we don't need to do anything
+    if ! systemctl is-active --quiet "${service_name}" ; then
+        systemctl enable "${service_name}"
+        systemctl restart "${service_name}"
+    fi
+done
+
+systemctl list-units | grep '^\s*adsb-avahi-alias@' | awk '{print $1}' | \
+    while read -r unit; do
+        wanted="no"
+        for service_name in "${service_names[@]}"; do
+            if [[ "${service_name}" == "${unit}" ]]; then
+                wanted="yes"
+            fi
+        done
+        if [[ "${wanted}" == "no" ]]; then
+            # unit no longer needed, disable it
+            systemctl disable --now "${unit}"
+        fi
+    done
