@@ -94,7 +94,11 @@ which git &> /dev/null || missing+="git "
 if which docker &> /dev/null ; then
 	 ! docker compose version &> /dev/null && ! docker-compose version &> /dev/null && missing+="docker-compose "
 else
-	missing+="docker docker-compose "
+    if [ "$distro" == "debian" ]; then
+        missing+="docker.io docker-compose "
+    else
+        missing+="docker docker-compose "
+    fi
 fi
 
 if [[ $missing != "" ]] ; then
