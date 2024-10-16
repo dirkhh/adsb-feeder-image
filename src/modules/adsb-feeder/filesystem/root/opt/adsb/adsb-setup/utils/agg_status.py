@@ -317,6 +317,11 @@ class AggStatus:
             uuid = self._d.env_by_tags("ultrafeeder_uuid").list_get(self._idx)
             name = self._d.env_by_tags("site_name").list_get(self._idx)
             json_uuid_url = f"https://api.adsb.fi/v1/feeder?id={uuid}"
+
+            '''
+            # the following should no longer be true, probably was caused my a
+            # bug in mlat-client when passing uuid on the command line
+
             # we are having an easier time finding mlat data via the myip api
             # as apparently mlathub doesn't always send the right uuid
             json_ip_url = "https://api.adsb.fi/v1/myip"
@@ -327,11 +332,20 @@ class AggStatus:
                 self._last_check = datetime.now()
             else:
                 print_err(f"adsbfi v1/myip returned {status}")
+            '''
+
             adsbfi_dict, status = self.get_json(json_uuid_url)
             if adsbfi_dict and status == 200:
+                beast_array = adsbfi_dict.get("beast", [])
                 self._beast = (
                     T.Good
-                    if len(adsbfi_dict.get("beast", [])) > 0 and adsbfi_dict.get("beast")[0].get("receiverId") == uuid
+                    if len(beast_array) > 0 and beast_array[0].get("receiverId") == uuid
+                    else T.Disconnected
+                )
+                mlat_array = adsbfi_dict.get("mlat", [])
+                api_mlat = (
+                    T.Good
+                    if len(mlat_array) > 0 and mlat_array[0].get("receiverId") == uuid
                     else T.Disconnected
                 )
                 self._last_check = datetime.now()
