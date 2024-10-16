@@ -3,12 +3,13 @@ import re
 import subprocess
 import requests
 import threading
+import time
 from datetime import datetime, timedelta
 from enum import Enum
-from .util import generic_get_json, print_err, make_int
+from .util import generic_get_json, print_err, make_int, run_shell_captured
 from .data import Data
 
-T = Enum("T", ["Disconnected", "Unknown", "Good", "Bad", "Warning", "Unsupported"])
+T = Enum("T", ["Disconnected", "Unknown", "Good", "Bad", "Warning", "Unsupported", "Starting", "ContainerDown"])
 status_symbol = {
     T.Disconnected: "\u2612",
     T.Unknown: ".",
@@ -16,6 +17,8 @@ status_symbol = {
     T.Bad: "\u2639",
     T.Warning: "\u26A0",
     T.Unsupported: " ",
+    T.Starting: "\u27F3",
+    T.ContainerDown: "\u2608",
 }
 ultrafeeder_aggs = [
     "adsblol",
@@ -30,6 +33,47 @@ ultrafeeder_aggs = [
     "alive",
 ]
 
+containerCheckLock = threading.Lock()
+lastContainerCheck = 0
+dockerPsCache = dict()
+
+def refreshDockerPs():
+    global dockerPsCache
+    dockerPsCache = dict()
+    cmdline = "docker ps --filter status=running --format '{{.Names}};{{.Status}}'"
+    success, output = run_shell_captured(cmdline)
+    if not success:
+        print_err(f"Error: cmdline: {cmdline} output: {output}")
+        return
+
+    for line in output.split("\n"):
+        if ";" in line:
+            name, status = line.split(";")
+            dockerPsCache[name] = status
+
+
+def getContainerStatus(name):
+    global lastContainerCheck
+    global dockerPsCache
+    with containerCheckLock:
+        now = time.time()
+        if now - lastContainerCheck > 10:
+            refreshDockerPs()
+            lastContainerCheck = now
+
+        status = dockerPsCache.get(name)
+        #print_err(f"{name}: {status}")
+        if not status:
+            # assume down
+            return "down"
+
+        if not status.startswith("Up"):
+            return "down"
+
+        if 'seconds' in status:
+            return "starting"
+
+        return "up"
 
 class AggStatus:
     def __init__(self, agg: str, idx, data: Data, url: str):
@@ -187,6 +231,37 @@ class AggStatus:
             return False
 
     def check_impl(self):
+        if self._agg in ultrafeeder_aggs:
+            container_name = "ultrafeeder" if self._idx == 0 else f"uf_{self._idx}"
+        else:
+            container_for_agg = {
+                    "radarbox": "rbfeeder",
+                    "planefinder": "pfclient",
+                    "flightaware": "piaware",
+                    "radarvirtuel": "radarvirtuel",
+                    "1090uk": "radar1090uk",
+                    "flightradar": "fr24feed",
+                    "opensky": "opensky",
+                    "adsbhub": "adsbhub",
+                    "planewatch": "planewatch",
+            }
+            container_name = container_for_agg.get(self._agg)
+            if self._idx != 0:
+                container_name += f"_{self._idx}"
+
+        if container_name:
+            container_status = getContainerStatus(container_name)
+            if container_status == "down":
+                self._beast = T.ContainerDown
+                self._mlat = T.Unsupported
+                self._last_check = datetime.now()
+                return
+            if container_status == "starting":
+                self._beast = T.Starting
+                self._mlat = T.Unsupported
+                self._last_check = datetime.now()
+                return
+
         # look up readsb / mlat_client view of the status
         self.get_mlat_status()
         if self.get_beast_status():
