@@ -517,6 +517,8 @@ class AggStatus:
                     print_err(f"failed to find adsbx ID in response {output}")
 
             self._last_check = datetime.now()
+            # the checks below are no longer needed due to the generalized ultrafeeder status checks
+            """
             # let's check the ultrafeeder net connector status to see if there is a TCP beast connection to adsbexchange
             try:
                 suffix = "ultrafeeder" if self._idx == 0 else f"uf_{self._idx}"
@@ -534,7 +536,6 @@ class AggStatus:
             except:
                 self._beast = T.Disconnected
                 pass
-            """
             # now check mlat - which we can't really get easily from their status page
             # but can get from our docker logs again
             container_name = "ultrafeeder" if self._idx == 0 else f"uf_{self._idx}"
