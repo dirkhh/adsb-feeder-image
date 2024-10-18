@@ -1,6 +1,8 @@
-Changes since v2.2.1 include:
+Changes since v2.2.2 include:
+- fix timezone configuration for dietpi app installs
+- aggregator status check: report if container down / recently started
 - consistently allow spaces in sitenames (spaces replaced with underscore for MLAT name)
-- radarbox: update station number when share key changes
+- radarbox: update station number when share key changes / up container version
 - eliminate some minor writes from radarvirtuel, adsbhub, radar1090uk containers
 
 > [!NOTE]
