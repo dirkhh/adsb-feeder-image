@@ -526,6 +526,10 @@ class AdsbIm:
         )
 
     def set_tz(self, timezone):
+        # timezones don't have spaces, only underscores
+        # replace spaces with underscores to correct this common error
+        timezone = timezone.replace(" ", "_")
+
         success = self.set_system_tz(timezone)
         if success:
             self._d.env("FEEDER_TZ").list_set(0, timezone)
