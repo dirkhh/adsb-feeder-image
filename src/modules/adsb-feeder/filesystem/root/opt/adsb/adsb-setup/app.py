@@ -526,18 +526,34 @@ class AdsbIm:
         )
 
     def set_tz(self, timezone):
-        # Set it as datetimectl too
+        success = self.set_system_tz(timezone)
+        if success:
+            self._d.env("FEEDER_TZ").list_set(0, timezone)
+        else:
+            print_err(f"timezone {timezone} probably invalid, defaulting to UTC")
+            self._d.env("FEEDER_TZ").list_set(0, "UTC")
+            self.set_system_tz("UTC")
+
+    def set_system_tz(self, timezone):
+        # timedatectl can fail on dietpi installs (Failed to connect to bus: No such file or directory)
+        # thus don't rely on timedatectl and just set environment for containers regardless of timedatectl working
         try:
             print_err(f"calling timedatectl set-timezone {timezone}")
             subprocess.run(["timedatectl", "set-timezone", f"{timezone}"], check=True)
-            # Add to .env only if timedatectl has succeeded
-            self._d.env("FEEDER_TZ").list_set(0, timezone)
         except subprocess.SubprocessError:
-            print_err(f"failed to set up timezone ({timezone}), defaulting to UTC")
-            timezone = "UTC"
-            print_err(f"calling timedatectl set-timezone {timezone}")
-            subprocess.run(["timedatectl", "set-timezone", f"{timezone}"])
-            self._d.env("FEEDER_TZ").list_set(0, timezone)
+            print_err(f"failed to set up timezone ({timezone}) using timedatectl, try dpkg-reconfigure instead")
+            try:
+                subprocess.run(["test", "-f", f"/usr/share/zoneinfo/{timezone}"], check=True)
+            except:
+                print_err(f"setting timezone: /usr/share/zoneinfo/{timezone} doesn't exist")
+                return False
+            try:
+                subprocess.run(["ln", "-sf", f"/usr/share/zoneinfo/{timezone}", "/etc/localtime"])
+                subprocess.run("dpkg-reconfigure --frontend noninteractive tzdata", shell=True)
+            except:
+                pass
+
+        return True
 
     def push_multi_outline(self) -> None:
         if not self._d.is_enabled("stage2"):
