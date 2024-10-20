@@ -30,8 +30,8 @@ function vm_tweaks () {
     # This factor controls the aggressiveness of kswapd. It defines the amount
     # of memory left in a node/system before kswapd is woken up and how much
     # memory needs to be free before kswapd goes back to sleep.
-    # 60: 0.6 percent free memory (default 10 / 0.1%)
-    echo 60 > /proc/sys/vm/watermark_scale_factor
+    # 80: 0.8% of free memory (default 10 / 0.1%)
+    echo 80 > /proc/sys/vm/watermark_scale_factor
 
     # watermark_boost_factor
     # this has to do with reclaiming on fragmentation, but with almost no memory available it can lead to kswapd thrashing
