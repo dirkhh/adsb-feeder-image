@@ -1,4 +1,5 @@
 Changes since v2.2.2 include:
+- update Piaware container: watchdog added for very rare TLS piaware hang; show location in FA map; faster startup of data flow in container
 - fix timezone configuration for dietpi app installs
 - aggregator status check: report if container down / recently started
 - consistently allow spaces in sitenames (spaces replaced with underscore for MLAT name)
