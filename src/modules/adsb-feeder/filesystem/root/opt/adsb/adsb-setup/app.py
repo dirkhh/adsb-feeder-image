@@ -432,6 +432,12 @@ class AdsbIm:
             if not dns_state:
                 print_err("we appear to have lost DNS")
 
+
+            ipv6_broken = self._system.is_ipv6_broken()
+            if ipv6_broken:
+                print_err("ERROR: broken IPv6 state")
+            self._d.env_by_tags("ipv6_broken").value = ipv6_broken
+
         threading.Thread(target=update_dns).start()
 
     def write_envfile(self):
