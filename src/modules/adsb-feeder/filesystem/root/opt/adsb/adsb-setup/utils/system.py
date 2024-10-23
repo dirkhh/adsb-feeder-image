@@ -133,6 +133,21 @@ class System:
             return False
         return responses != list()
 
+    def is_ipv6_broken(self):
+        success, output = run_shell_captured("ip -6 addr show scope global | grep inet6")
+        if not success:
+            # no global ipv6 addresses assigned, this means we don't have ipv6 so it can't be broken
+            return False
+        # we have at least one global ipv6 address, check if it works:
+        success, output = run_shell_captured("curl -o /dev/null -6 https://google.com")
+
+        if success:
+            # it's working, so it's not broken
+            return False
+
+        # we have an ipv6 address but curl -6 isn't working
+        return True
+
     def check_ip(self):
         requests.packages.urllib3.util.connection.HAS_IPV6 = False
         status = -1

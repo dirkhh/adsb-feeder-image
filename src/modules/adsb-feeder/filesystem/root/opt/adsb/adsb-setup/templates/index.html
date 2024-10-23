@@ -20,6 +20,9 @@
 <div class="alert alert-danger" role="alert" {% if env_value_by_tag('dns_state') %} style="display: none;" {% endif %}>
   The feeder cannot resolve DNS queries. This will most likely prevent it from working at all.
 </div>
+<div class="alert alert-danger" role="alert" {% if not env_value_by_tag('ipv6_broken') %} style="display: none;" {% endif %}>
+  The feeder has an IPv6 address but IPv6 isn't working. This will most likely prevent it from working at all.
+</div>
 <div class="alert alert-danger" role="alert" {% if not env_value_by_tag('under_voltage') %} style="display: none;"
      {% endif %}>
   The feeder system kernel detected under-voltage. This can lead to random crashes and various issues with clock

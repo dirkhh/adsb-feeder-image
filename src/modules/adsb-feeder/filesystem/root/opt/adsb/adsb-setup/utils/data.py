@@ -570,6 +570,10 @@ class Data:
             tags=["dns_state", "norestore"],
         ),
         Env(
+            "_ADSBIM_STATE_IPV6_BROKEN",
+            tags=["ipv6_broken", "norestore"],
+        ),
+        Env(
             "_ADSBIM_STATE_FEEDER_IP",
             tags=["feeder_ip", "norestore"],
         ),
