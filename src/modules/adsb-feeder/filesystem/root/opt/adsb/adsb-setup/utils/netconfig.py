@@ -8,7 +8,7 @@ class NetConfig:
         self.mlat_config = mlat_config
         self._has_policy = has_policy
 
-    def generate(self, mlat_privacy: bool = True, uuid: str = None):
+    def generate(self, mlat_privacy: bool = True, uuid: str = None, mlat_enable: bool = True):
         adsb_line = self.adsb_config
         mlat_line = self.mlat_config
 
@@ -18,7 +18,10 @@ class NetConfig:
                 mlat_line += f",uuid={uuid}"
         if mlat_line and mlat_privacy:
             mlat_line += ",--privacy"
-        return f"{adsb_line};{mlat_line}"
+        if mlat_enable:
+            return f"{adsb_line};{mlat_line}"
+        else:
+            return f"{adsb_line}"
 
     @property
     def has_policy(self):
@@ -77,6 +80,7 @@ class UltrafeederConfig:
             return ""
         print_err(f"generating netconfigs for {f'micro site {self._micro}' if self._micro > 0 else 'Ultrafeeder'}")
         mlat_privacy = self._d.list_is_enabled("mlat_privacy", self._micro)
+        mlat_enable = self._d.list_is_enabled("mlat_enable", self._micro)
         ret = set()
         # let's grab the values, depending on the mode
         for name, netconfig in self.enabled_aggregators.items():
@@ -85,7 +89,7 @@ class UltrafeederConfig:
             if not uuid:
                 uuid = str(uuid4())
                 self._d.env_by_tags(uuid_tag).list_set(self._micro, uuid)
-            ret.add(netconfig.generate(mlat_privacy=mlat_privacy, uuid=uuid))
+            ret.add(netconfig.generate(mlat_privacy=mlat_privacy, uuid=uuid, mlat_enable=mlat_enable))
         ret.discard("")
 
         # now we need to add the inbound links (if needed)

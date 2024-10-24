@@ -637,6 +637,10 @@ class AggStatus:
             if self._mlat == T.Unknown:
                 self._mlat = api_mlat
 
+        # if mlat isn't enabled ignore status check results
+        if not self._d.list_is_enabled("mlat_enable", self._idx):
+            self._mlat = T.Unsupported
+
     def __repr__(self):
         return f"Aggregator({self._agg} last_check: {str(self._last_check)}, beast: {self._beast} mlat: {self._mlat})"
 

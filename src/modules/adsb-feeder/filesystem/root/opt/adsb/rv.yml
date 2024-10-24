@@ -15,7 +15,7 @@ services:
       - RV_SERVER=mg22.adsbnetwork.com:50050
       - VERBOSE=OFF
       - MLAT_SERVER=mlat.adsbnetwork.com:50000
-      - MLAT_HOST=ultrafeeder:30005
+      - MLAT_HOST={$RV_MLAT_HOST}
       - LAT=${FEEDER_LAT}
       - LON=${FEEDER_LONG}
       - ALT=${FEEDER_ALT_M}

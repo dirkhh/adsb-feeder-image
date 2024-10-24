@@ -15,7 +15,7 @@ services:
       - RV_SERVER=mg22.adsbnetwork.com:50050
       - VERBOSE=OFF
       - MLAT_SERVER=mlat.adsbnetwork.com:50000
-      - MLAT_HOST=uf_STAGE2NUM:30005
+      - MLAT_HOST={$RV_MLAT_HOST_STAGE2NUM}
       - LAT=${FEEDER_LAT_STAGE2NUM}
       - LON=${FEEDER_LONG_STAGE2NUM}
       - ALT=${FEEDER_ALT_M_STAGE2NUM}
