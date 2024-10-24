@@ -74,6 +74,19 @@ class Aggregator:
         return True
 
     def _docker_run_with_timeout(self, cmdline: str, timeout: float) -> str:
+        def force_remove_container(name):
+            try:
+                result2 = subprocess.run(
+                    f"docker rm -f {name}",
+                    timeout=15,
+                    shell=True,
+                    capture_output=True,
+                )
+            except subprocess.TimeoutExpired as exc2:
+                print_err(f"failed to remove the container {name} stderr: {str(exc2.stdout)} / stdout: {str(exc2.stderr)}")
+
+        # let's make sure the container isn't still there, if it is the docker run won't work
+        force_remove_container("temp_container")
         try:
             result = subprocess.run(
                 f"docker run --name temp_container {cmdline}",
@@ -87,15 +100,8 @@ class Aggregator:
             # they don't stop on their own. So just grab the output and kill the container
             print_err(f"docker run {cmdline} received a timeout error after {timeout} with output {exc.stdout}")
             output = exc.stdout.decode()
-            try:
-                result = subprocess.run(
-                    "docker rm -f temp_container",
-                    timeout=10.0,
-                    shell=True,
-                    capture_output=True,
-                )
-            except subprocess.TimeoutExpired:
-                print_err(f"failed to remove the temp container {str(result.stdout)} / {str(result.stderr)}")
+
+            force_remove_container("temp_container")
         except subprocess.SubprocessError as exc:
             print_err(f"docker run {cmdline} ended with an exception {exc}")
         else:
