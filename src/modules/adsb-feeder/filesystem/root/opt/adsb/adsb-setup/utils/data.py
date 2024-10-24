@@ -211,11 +211,6 @@ class Data:
             default="http://HOSTNAME:80/",
             tags=["tar1090_image_config_link"],
         ),
-        Env(  # this has no UI component, but we want to enable the advanced user to modify it in .env
-            "TAR1090_RANGE_OUTLINE_DASH",
-            default="[2,3]",
-            tags=["range_outline_dash"],
-        ),
         Env("_ASDBIM_CSS_THEME", default="light", tags=["css_theme"]),
         Env("_ASDBIM_TAR1090_QUERY_PARAMS", default="", tags=["tar1090_query_params"]),
         # 978
