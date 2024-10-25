@@ -1,4 +1,5 @@
 Changes since v2.2.2 include:
+- add note about SkyAware map not working by default
 - add improved alert for non-working ipv6
 - change heywhatsthat outline to non-dashed to improve map performance when zoomed in
 - fix esoteric error during key request process
