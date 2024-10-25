@@ -1,5 +1,5 @@
 Changes since v2.2.2 include:
-- add alert for non-working ipv6
+- add improved alert for non-working ipv6
 - change heywhatsthat outline to non-dashed to improve map performance when zoomed in
 - fix esoteric error during key request process
 - Piaware: reduce memory footprint - this disables the Piaware map (but then... we have the much better tar1090 map)
