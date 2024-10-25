@@ -22,6 +22,13 @@
         aggregator maps</a> -- OFF = your site will be visible at an approximate location.)
     </label>
   </div>
+  <div class="col-12 form-check">
+    <input class="form-check-input me-1" type="checkbox" name="mlat_enable--is_enabled" id="mlat_enable--is_enabled"
+           {% if list_is_enabled("mlat_enable", m) %}checked{% endif %} />
+    <label for="mlat_enable--is_enabled">
+      Enable MLAT (for selected aggregators supporting MLAT)
+    </label>
+  </div>
 
   <div class="col-12 h5 mt-3">Select the semi-anonymous ADS-B aggregators you want to feed:</div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">

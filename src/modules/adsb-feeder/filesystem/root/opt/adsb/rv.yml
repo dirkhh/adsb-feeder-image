@@ -17,6 +17,7 @@ services:
       - VERBOSE=OFF
       - MLAT_SERVER=mlat.adsbnetwork.com:50000
       - MLAT_HOST=ultrafeeder:30005
+      - ENABLE_MLAT=${MLAT_ENABLE}
       - LAT=${FEEDER_LAT}
       - LON=${FEEDER_LONG}
       - ALT=${FEEDER_ALT_M}

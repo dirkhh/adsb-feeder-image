@@ -196,6 +196,7 @@ class Data:
         Env("ADSBLOL_LINK", default=[""], tags=["adsblol_link"]),
         Env("ULTRAFEEDER_UUID", default=[""], tags=["ultrafeeder_uuid"]),
         Env("MLAT_PRIVACY", default=[False], tags=["mlat_privacy", "is_enabled"]),
+        Env("MLAT_ENABLE", default=[True], tags=["mlat_enable", "is_enabled"]),
         Env(
             "FEEDER_TAR1090_USEROUTEAPI",
             default=[True],
