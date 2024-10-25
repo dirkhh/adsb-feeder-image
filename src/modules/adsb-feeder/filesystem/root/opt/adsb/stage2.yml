@@ -10,6 +10,7 @@ services:
     ports:
       - ${AF_TAR1090_PORT_STAGE2NUM}:80 # to expose the web interface
     environment:
+      - S6_KILL_GRACETIME=1000
       # --------------------------------------------------
       # general parameters:
       - LOGLEVEL=error

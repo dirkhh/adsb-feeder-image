@@ -8,6 +8,7 @@ services:
     restart: unless-stopped
     cpu_period: 50000
     cpu_quota: 7500
+    stop_grace_period: 3s
     environment:
       - TZ=${FEEDER_TZ_STAGE2NUM}
       - SBSHOST=uf_STAGE2NUM

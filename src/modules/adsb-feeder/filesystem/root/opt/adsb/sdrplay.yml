@@ -17,6 +17,7 @@ services:
       - /tmp:size=128M
       - /var/log:size=32M
     environment:
+      - S6_KILL_GRACETIME=1000
       - I_AGREE_TO_THE_SDRPLAY_LICENSE=${AF_IS_SDRPLAY_LICENSE_ACCEPTED}
       - DUMP1090_EXTRA_ARGS=--fix --max-range 500 --phase-enhance --lat ${FEEDER_LAT} --lon ${FEEDER_LONG} --adsbMode 1
       # USER_PROVIDED_ENV_START
