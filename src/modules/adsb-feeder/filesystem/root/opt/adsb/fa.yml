@@ -24,6 +24,7 @@ services:
       - FEEDER_ID=${FEEDER_PIAWARE_FEEDER_ID}
       - ALLOW_MLAT=${MLAT_ENABLE}
       - S6_KILL_GRACETIME=1000
+      - PIAWARE_MINIMAL=true
       # USER_PROVIDED_ENV_START
       # USER_PROVIDED_ENV_END
     volumes:
