@@ -343,10 +343,11 @@
         </table>
       </div>
       <div class="col-12 {% if not ns.flightaware %}d-none{% endif %}">
-        <div class="lead">FlightAware
-          <span class="small"
-                title="You can re-enable that map (at the cost of increased memory consumption) by adding `PIAWARE_MINIMAL=false` to the environment variables on the expert page">(note:
-            the link to the SkyAware map on the status page does not work)</span>
+        <div class="lead">FlightAware</div>
+        <div class="small text-muted">
+          Note: The SkyAware map on the status page does not work, it's not needed to supply data to FA<br>
+          (You can re-enable that map at the cost of increased cpu / memory consumption by adding PIAWARE_MINIMAL=false
+          to the environment variables on the expert page)
         </div>
         <table class="table table-sm table-borderless lh-1 w-auto mt-0 mb-0 ms-2">
           <tbody>
