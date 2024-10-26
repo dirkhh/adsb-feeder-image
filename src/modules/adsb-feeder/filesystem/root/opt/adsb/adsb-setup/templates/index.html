@@ -20,7 +20,8 @@
 <div class="alert alert-danger" role="alert" {% if env_value_by_tag('dns_state') %} style="display: none;" {% endif %}>
   The feeder cannot resolve DNS queries. This will most likely prevent it from working at all.
 </div>
-<div class="alert alert-danger" role="alert" {% if not env_value_by_tag('ipv6_broken') %} style="display: none;" {% endif %}>
+<div class="alert alert-danger" role="alert" {% if not env_value_by_tag('ipv6_broken') %} style="display: none;"
+     {% endif %}>
   The feeder has an IPv6 address but IPv6 isn't working. This will most likely prevent it from working at all.
 </div>
 <div class="alert alert-danger" role="alert" {% if not env_value_by_tag('under_voltage') %} style="display: none;"
@@ -151,17 +152,22 @@
         <span class="text-warning">&#10003;</span> MLAT is down,
         <span class="text-dark">&#10003;</span> feed state is not supported
         <br />
-        '+': feed/mlat is connected; '&#x2612;': feed/mlat is not connected
-        <br />
-        '&#x2639;': mlat sync errors (if this persists for hours, check <a href="https://github.com/wiedehopf/adsb-wiki/wiki/mlat-check">this page</a>)
-        <br />
-        '&#x26a0;': mlat sync warning (intermittent sync issue / lack of traffic / no other receivers in the area)
-        <br />
-        '&#x27f3;': Container is up for less than a minute, not checking status
-        <br />
-        '&#x2608;': Container is down
-        <br />
-        '.': status information is not available at this time
+        <span onclick="$('#extra_legend').toggleClass('d-none'); return false;" class="small">Toggle detailed
+          legend<br /></span>
+        <span class="small d-none" id="extra_legend">
+          '+': feed/mlat is connected; '&#x2612;': feed/mlat is not connected
+          <br />
+          '&#x2639;': mlat sync errors (if this persists for hours, check <a
+             href="https://github.com/wiedehopf/adsb-wiki/wiki/mlat-check">this page</a>)
+          <br />
+          '&#x26a0;': mlat sync warning (intermittent sync issue / lack of traffic / no other receivers in the area)
+          <br />
+          '&#x27f3;': Container is up for less than a minute, not checking status
+          <br />
+          '&#x2608;': Container is down
+          <br />
+          '.': status information is not available at this time
+        </span>
       </div>
     </div>
   </div>
@@ -272,7 +278,8 @@
         </ul>
       </div>
     </div>
-    <div class="row mt-3 {% if not (ns.adsblol or ns.flightradar or ns.planefinder or ns.adsbx or ns.alive or ns.flightaware) %}d-none{% endif %}">
+    <div
+         class="row mt-3 {% if not (ns.adsblol or ns.flightradar or ns.planefinder or ns.adsbx or ns.alive or ns.flightaware) %}d-none{% endif %}">
       <div class="col-12">
         <h5>Additional aggregator links</h5>
       </div>
@@ -492,8 +499,8 @@
         // right now this is broken and just overwrites things
         $("#" + agg + "beast" + idx).text(data["beast"]);
         $("#" + agg + "mlat" + idx).text(data["mlat"]);
-        const mlat_broken = ! (data["mlat"] == "+" || data["mlat"] == "." || data["mlat"] == " ")
-        if (data["beast"] == "+" && ! mlat_broken) {
+        const mlat_broken = !(data["mlat"] == "+" || data["mlat"] == "." || data["mlat"] == " ")
+        if (data["beast"] == "+" && !mlat_broken) {
           $("#" + agg + "span" + idx).addClass('text-success')
         } else if (data["beast"] == "+" && mlat_broken) {
           $("#" + agg + "span" + idx).addClass('text-warning')
@@ -509,7 +516,7 @@
           }
         }
         if (agg == "alive") {
-            $("#alivemaplink_" + idx).attr("href", data["alivemaplink"])
+          $("#alivemaplink_" + idx).attr("href", data["alivemaplink"])
         }
         if (agg == "adsbx") {
           if (idx == 0) {

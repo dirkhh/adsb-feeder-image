@@ -1,4 +1,5 @@
 Changes since v2.2.2 include:
+- hide some of the feeder homepage connectivity matrix legends by default
 - add note about SkyAware map not working by default
 - add improved alert for non-working ipv6
 - change heywhatsthat outline to non-dashed to improve map performance when zoomed in
