@@ -3,9 +3,11 @@
 
 {% block content %}
 <h1 class="mt-3 text-center text-danger">{% block title %} Create a backup of your configuration {% endblock %}</h1>
-<p>The Config Backup creates a zip file with your configuration settings,
-  the Config + Graphs Backup additionally includes the data used to generate the statistical graphs (roughly +15MB),
-  the Full Backup adds on top of all that the replay / heatmap data.</p>
+<p>
+  Config Backup: creates a zip file with your configuration settings<br>
+  Config + Graphs Backup: adds the data used to generate the statistical graphs (roughly +15MB)<br>
+  Full Backup: adds on top of all that the replay / heatmap data
+</p>
 <p>
   Depending on the amount of historic replay / heatmap data you have, a Full Backup can take a signficant amount of time
   and result in a very large archive to be downloaded. If you want to limit the data retained on disk, you can use
