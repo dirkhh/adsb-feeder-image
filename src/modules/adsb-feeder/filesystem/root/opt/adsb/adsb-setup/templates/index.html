@@ -463,12 +463,12 @@
         $("#advice").html(data["advice"] + "&nbsp;");
         if (data["show_update"] == "1") {
           $("#update_buttons").removeClass("text-secondary");
-          if (data["beta_changelog"] != "") {
+          if (data["beta_changelog"]) {
             $("#update_feeder_aps_beta").attr("disabled", false);
             $("#update_feeder_aps_beta").attr("title", data["beta_changelog"]);
             $("#advice").attr("title", data["beta_changelog"]);
           }
-          if (data["main_changelog"] != "") {
+          if (data["main_changelog"]) {
             $("#update_feeder_aps_stable").attr("disabled", false);
             $("#update_feeder_aps_stable").attr("title", data["main_changelog"]);
             $("#latest_tag").attr("title", data["main_changelog"]);
