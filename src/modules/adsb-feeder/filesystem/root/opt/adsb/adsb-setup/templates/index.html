@@ -146,15 +146,16 @@
         </table>
       </div>
       {% endfor %}
-      <div class="col-12 small mb-4">
+      <div class="col-12 mb-4">
         Enabled indicates feeding the aggregator. <span class="text-success">&#10003;</span> feed is in good state,
         <span class="text-danger">&#10003;</span> feed is down,
         <span class="text-warning">&#10003;</span> MLAT is down,
         <span class="text-dark">&#10003;</span> feed state is not supported
         <br />
-        <span onclick="$('#extra_legend').toggleClass('d-none'); return false;" class="small">Toggle detailed
-          legend<br /></span>
-        <span class="small d-none" id="extra_legend">
+        <span onclick="$('#extra_legend').toggleClass('d-none'); return false;">
+          <a href="">Toggle detailed legend</a><br />
+        </span>
+        <span class="d-none" id="extra_legend">
           '+': feed/mlat is connected; '&#x2612;': feed/mlat is not connected
           <br />
           '&#x2639;': mlat sync errors (if this persists for hours, check <a
