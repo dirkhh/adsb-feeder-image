@@ -513,7 +513,7 @@
         }
         if (agg == "adsblol") {
           if (idx > 0) {
-            console.log("set adsblol-link" + idx + " to " + data["adsblollink"])
+            // console.log("set adsblol-link" + idx + " to " + data["adsblollink"])
             $("#adsblol-link-" + idx).attr("href", data["adsblollink"])
           }
         }
@@ -525,7 +525,7 @@
             $("#adsbxstatlink").attr("href", "https://www.adsbexchange.com/api/feeders/?feed=" + data["adsbxfeederid"])
             $("#adsbxmaplink").attr("href", "https://globe.adsbexchange.com/?feed=" + data["adsbxfeederid"])
           } else {
-            console.log("set adsbxstatlink" + idx)
+            // console.log("set adsbxstatlink" + idx)
             $("#adsbxstatlink_" + idx).attr("href", "https://www.adsbexchange.com/api/feeders/?feed=" + data["adsbxfeederid"])
             $("#adsbxmaplink_" + idx).attr("href", "https://globe.adsbexchange.com/?feed=" + data["adsbxfeederid"])
           }
