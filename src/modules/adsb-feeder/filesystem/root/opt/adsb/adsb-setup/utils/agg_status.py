@@ -37,6 +37,7 @@ containerCheckLock = threading.Lock()
 lastContainerCheck = 0
 dockerPsCache = dict()
 
+
 def refreshDockerPs():
     global dockerPsCache
     dockerPsCache = dict()
@@ -62,7 +63,7 @@ def getContainerStatus(name):
             lastContainerCheck = now
 
         status = dockerPsCache.get(name)
-        #print_err(f"{name}: {status}")
+        # print_err(f"{name}: {status}")
         if not status:
             # assume down
             return "down"
@@ -70,10 +71,11 @@ def getContainerStatus(name):
         if not status.startswith("Up"):
             return "down"
 
-        if 'seconds' in status:
+        if "seconds" in status:
             return "starting"
 
         return "up"
+
 
 class AggStatus:
     def __init__(self, agg: str, idx, data: Data, url: str):
@@ -213,8 +215,6 @@ class AggStatus:
         else:
             print_err(f"ERROR: no match checking beast for {pattern}")
 
-
-
         return True
 
     def check(self):
@@ -235,15 +235,15 @@ class AggStatus:
             container_name = "ultrafeeder" if self._idx == 0 else f"uf_{self._idx}"
         else:
             container_for_agg = {
-                    "radarbox": "rbfeeder",
-                    "planefinder": "pfclient",
-                    "flightaware": "piaware",
-                    "radarvirtuel": "radarvirtuel",
-                    "1090uk": "radar1090uk",
-                    "flightradar": "fr24feed",
-                    "opensky": "opensky",
-                    "adsbhub": "adsbhub",
-                    "planewatch": "planewatch",
+                "radarbox": "rbfeeder",
+                "planefinder": "pfclient",
+                "flightaware": "piaware",
+                "radarvirtuel": "radarvirtuel",
+                "1090uk": "radar1090uk",
+                "flightradar": "fr24feed",
+                "opensky": "opensky",
+                "adsbhub": "adsbhub",
+                "planewatch": "planewatch",
             }
             container_name = container_for_agg.get(self._agg)
             if self._idx != 0:
@@ -318,7 +318,7 @@ class AggStatus:
             name = self._d.env_by_tags("site_name").list_get(self._idx)
             json_uuid_url = f"https://api.adsb.fi/v1/feeder?id={uuid}"
 
-            '''
+            """
             # the following should no longer be true, probably was caused my a
             # bug in mlat-client when passing uuid on the command line
 
@@ -332,21 +332,17 @@ class AggStatus:
                 self._last_check = datetime.now()
             else:
                 print_err(f"adsbfi v1/myip returned {status}")
-            '''
+            """
 
             adsbfi_dict, status = self.get_json(json_uuid_url)
             if adsbfi_dict and status == 200:
                 beast_array = adsbfi_dict.get("beast", [])
                 self._beast = (
-                    T.Good
-                    if len(beast_array) > 0 and beast_array[0].get("receiverId") == uuid
-                    else T.Disconnected
+                    T.Good if len(beast_array) > 0 and beast_array[0].get("receiverId") == uuid else T.Disconnected
                 )
                 mlat_array = adsbfi_dict.get("mlat", [])
                 api_mlat = (
-                    T.Good
-                    if len(mlat_array) > 0 and mlat_array[0].get("receiverId") == uuid
-                    else T.Disconnected
+                    T.Good if len(mlat_array) > 0 and mlat_array[0].get("receiverId") == uuid else T.Disconnected
                 )
                 self._last_check = datetime.now()
             else:
@@ -633,7 +629,7 @@ class AggStatus:
                 print_err(f"planewatch returned {status}")
 
         if api_mlat != self._mlat:
-            #print_err(f"{self._agg}: api_mlat: {api_mlat} != self._mlat: {self._mlat}")
+            # print_err(f"{self._agg}: api_mlat: {api_mlat} != self._mlat: {self._mlat}")
             if self._mlat == T.Unknown:
                 self._mlat = api_mlat
 
