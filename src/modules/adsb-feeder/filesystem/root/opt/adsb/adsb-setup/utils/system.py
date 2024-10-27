@@ -7,7 +7,7 @@ import time
 from time import sleep
 
 from .data import Data
-from .util import print_err,run_shell_captured
+from .util import print_err, run_shell_captured
 
 
 class Lock:
@@ -134,7 +134,9 @@ class System:
         return responses != list()
 
     def is_ipv6_broken(self):
-        success, output = run_shell_captured("ip -6 addr show scope global $(ip -j route get 1.2.3.4 | jq '.[0].dev' -r) | grep inet6")
+        success, output = run_shell_captured(
+            "ip -6 addr show scope global $(ip -j route get 1.2.3.4 | jq '.[0].dev' -r) | grep inet6 | grep -v 'inet6 f'"
+        )
         if not success:
             # no global ipv6 addresses assigned, this means we don't have ipv6 so it can't be broken
             return False

@@ -1,4 +1,5 @@
 Changes since v2.2.2 include:
+- don't check IPv6 addresses with non-global scope
 - automatically refresh the aggregator status on feeder home page
 - several stylistic changes and better explanations for feeder home page and backup page
 - hide some of the feeder homepage connectivity matrix legends by default
