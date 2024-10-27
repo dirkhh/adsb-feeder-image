@@ -268,6 +268,13 @@ class AggStatus:
             # set last check, when the API check doesn't work, we just use the ultrafeeder status
             self._last_check = datetime.now()
 
+        # for the Ultrafeeder based aggregators, let's not bother with talking to their API
+        # that's of course bogus as hell - simply remove all the code for thsoe aggregators
+        # below - but for now I'm not sure I want to do this because I'm not sure it's the
+        # right thing to do
+        if self._agg in ultrafeeder_aggs:
+            return
+
         # override this if we do get api results from that aggregator
         # for beast status we prefer the aggregator results
         # for mlat status we prefer the local mlat-client results
@@ -298,7 +305,7 @@ class AggStatus:
                     self._last_check = datetime.now()
                 else:
                     print_err(f"adsblol returned status {status}")
-        if self._agg == "flyitaly":
+        elif self._agg == "flyitaly":
             # get the data from json
             json_url = "https://my.flyitalyadsb.com/am_i_feeding"
             response_dict, status = self.get_json(json_url)
