@@ -169,7 +169,7 @@
           <br />
           '&#x2608;': Container is down
           <br />
-          '.': status information is not available at this time
+          '.': status information is not available at this time or not supported
         </span>
       </div>
     </div>
@@ -507,12 +507,18 @@
     {% for idx in ns.site_indices if matrix[idx] > 0 %}
     // idx {{ idx }}
     {% if list_is_enabled(agg, idx) %}
+    reset_status("{{ agg }}", "{{ list_value_by_tag('mf_ip', idx)}}", {{ idx }});
     get_status("{{ agg }}", "{{ list_value_by_tag('mf_ip', idx)}}", {{ idx }});
     {% endif %}
     {% endfor %}
     {% endfor %}
   }
 
+  function reset_status(agg, ip, idx) {
+    $("#" + agg + "beast" + idx).text(".");
+    $("#" + agg + "mlat" + idx).text(".");
+    $("#" + agg + "span" + idx).attr("class", 'text-dark');
+  }
   function get_status(agg, ip, idx) {
     fetch(`/api/status/${agg}/${idx}`)
       .then(response => response.json())
