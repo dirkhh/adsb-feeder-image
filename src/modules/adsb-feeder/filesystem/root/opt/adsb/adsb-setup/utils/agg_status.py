@@ -168,7 +168,7 @@ class AggStatus:
             #print_err(f"checking {self.uf_path()}/mlat-client/{filename} failed")
             self._mlat = T.Disconnected
             return
-        if now - int(datetime.now().timestamp()) > 60:
+        if time.time() - now > 60:
             # that's more than a minute old... probably not connected
             self._mlat = T.Disconnected
         elif percent_good > 10 and percent_bad <= 5:
