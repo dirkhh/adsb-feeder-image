@@ -71,8 +71,13 @@ def getContainerStatus(name):
         if not status.startswith("Up"):
             return "down"
 
-        if "seconds" in status:
-            return "starting"
+        try:
+            up, number, unit = status.split(" ")
+            if unit == "seconds" and int(number) < 30:
+                # container up for less than 30 seconds, show 'starting'
+                return "starting"
+        except:
+            pass
 
         return "up"
 
@@ -475,6 +480,10 @@ class AggStatus:
         elif self._agg == "opensky":
             self._beast = T.Unknown
             self._mlat = T.Unsupported
+            self._last_check = datetime.now()
+        elif self._agg == "radarvirtuel":
+            self._beast = T.Unknown
+            self._mlat = T.Unknown
             self._last_check = datetime.now()
         elif self._agg == "alive":
             json_url = "https://api.airplanes.live/feed-status"
