@@ -498,9 +498,9 @@
     // idx {{ idx }}
     {% if list_is_enabled(agg, idx) %}
     get_status("{{ agg }}", "{{ list_value_by_tag('mf_ip', idx)}}", {{ idx }});
-  {% endif %}
-  {% endfor %}
-  {% endfor %}
+    {% endif %}
+    {% endfor %}
+    {% endfor %}
   }
 
   function get_status(agg, ip, idx) {
@@ -513,13 +513,13 @@
         $("#" + agg + "mlat" + idx).text(data["mlat"]);
         const mlat_broken = !(data["mlat"] == "+" || data["mlat"] == "." || data["mlat"] == " ")
         if (data["beast"] == "+" && !mlat_broken) {
-          $("#" + agg + "span" + idx).addClass('text-success')
+          $("#" + agg + "span" + idx).attr("class", 'text-success')
         } else if (data["beast"] == "+" && mlat_broken) {
-          $("#" + agg + "span" + idx).addClass('text-warning')
+          $("#" + agg + "span" + idx).attr("class", 'text-warning')
         } else if (data["beast"] != "+" && data["beast"] != ".") {
-          $("#" + agg + "span" + idx).addClass('text-danger')
+          $("#" + agg + "span" + idx).attr("class", 'text-danger')
         } else {
-          $("#" + agg + "span" + idx).addClass('text-dark')
+          $("#" + agg + "span" + idx).attr("class", 'text-dark')
         }
         if (agg == "adsblol") {
           if (idx > 0) {
