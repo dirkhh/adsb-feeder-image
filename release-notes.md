@@ -1,4 +1,7 @@
 Changes since v2.2.2 include:
+- aggregator status: various tweaks / polishing
+- aggregator status: autorefresh fix
+- fix collectd messages when running in VM (missing temp sensor)
 - don't check IPv6 addresses with non-global scope
 - automatically refresh the aggregator status on feeder home page
 - several stylistic changes and better explanations for feeder home page and backup page
