@@ -376,7 +376,15 @@ class AggStatus:
                     if fa_dict.get("mlat").get("status") == "green":
                         self._mlat = T.Good
                     elif fa_dict.get("mlat").get("status") == "amber":
-                        self._mlat = T.Bad
+                        message = fa_dict.get("mlat").get("message").lower()
+                        if "unstable" in message:
+                            self._mlat = T.Bad
+                        elif "initializing" in message:
+                            self._mlat = T.Unknown
+                        elif "no clock sync" in message:
+                            self._mlat = T.Warning
+                        else:
+                            self._mlat = T.Unknown
                     else:
                         self._mlat = T.Disconnected
 
