@@ -153,8 +153,10 @@
         <span class="text-dark">&#10003;</span> feed state is not supported
         <br />
         <span onclick="$('#extra_legend').toggleClass('d-none'); return false;">
-          <a href="">Toggle detailed legend</a><br />
+          <a href="">Toggle detailed legend</a>
         </span>
+        <span>| Last status update: <span id=last_status_update></span></span>
+        <br />
         <span class="d-none" id="extra_legend">
           '+': feed/mlat is connected; '&#x2612;': feed/mlat is not connected
           <br />
@@ -457,6 +459,8 @@
     }
     verbose && console.log(new Date().toLocaleTimeString() + " refreshing status, next check in " + refreshDelay / 1000);
     refreshTimer = setTimeout(startPageIndex, refreshDelay);
+    $("#last_status_update").html(new Date().toLocaleTimeString());
+
     if (!['micro', 'nano'].includes("{{ env_value_by_tags(['aggregator_choice']) }}")) {
       fetch("https://api.ipify.org?format=json")
         .then(response => response.json())
