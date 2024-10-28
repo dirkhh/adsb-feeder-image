@@ -162,9 +162,7 @@
             $("#mf_status_" + i).text(d["pps"] + " pos / " + d["mps"] + " msg per sec");
           })
         })
-        .finally(() => {
-          setTimeout(check_mf_status, 15000);
-        });
+        return setTimeout(check_mf_status, 15000);
     };
 
     function get_temperatures() {

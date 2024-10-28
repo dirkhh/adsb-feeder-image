@@ -440,7 +440,17 @@
       $("#ip-mismatch").hide()
     }
   }
-  function startPageIndex() {
+  let timersActive = false;
+  let refreshDelay = 35 * 1000;
+  let refreshTimer = null;
+  let mfTimer = null;
+  function startPageIndex(opt) {
+    clearTimeout(refreshTimer); // abundance of caution to avoid multiple timers
+    if (opt != "noModifyDelay") {
+      refreshDelay = Math.min(300 * 1000, refreshDelay * 1.5);
+    }
+    console.log(new Date().toLocaleTimeString() + " refreshing status, next check in " + refreshDelay / 1000);
+    refreshTimer = setTimeout(startPageIndex, refreshDelay);
     if (!['micro', 'nano'].includes("{{ env_value_by_tags(['aggregator_choice']) }}")) {
       fetch("https://api.ipify.org?format=json")
         .then(response => response.json())
@@ -532,8 +542,6 @@
         }
       });
   }
-  // start the micro feeder check if needed
-  check_mf_status();
   function get_stage2_connection_status() {
     fetch("/api/stage2_connection")
       .then(response => response.json())
@@ -550,12 +558,31 @@
           $("#stage2_no_recent_contact").removeClass("d-none");
         }
       })
-      .finally(() => {
-        setTimeout(get_stage2_connection_status, 600000);
-      });
   }
 
-  startPageIndex();
-  setTimeout(startPageIndex, 120000);
+  function handleVisibilityChange() {
+    if (document.hidden && timersActive) {
+      console.log(new Date().toLocaleTimeString() + " visibility change: stopping timers");
+      clearTimeout(refreshTimer);
+      clearTimeout(mfTimer);
+      timersActive = false;
+    }
+    if (!document.hidden && !timersActive) {
+      console.log(new Date().toLocaleTimeString() + " visibility change: starting timers");
+      startPageIndex("noModifyDelay");
+      // start the micro feeder check
+      mfTimer = check_mf_status();
+      timersActive = true;
+    }
+  }
+
+  // Warn if the browser doesn't support addEventListener or the Page Visibility API
+  if (typeof document.addEventListener === "undefined" || document.hidden === undefined) {
+    console.log("hidden tab handler requires a browser that supports the Page Visibility API.");
+  } else {
+    document.addEventListener("visibilitychange", handleVisibilityChange, false);
+  }
+
+  handleVisibilityChange();
 </script>
 {% endblock %}
