@@ -273,10 +273,6 @@ class AggStatus:
             self._last_check = datetime.now()
             return
 
-        # override this if we do get api results from that aggregator
-        # for beast status we prefer the aggregator results
-        # for mlat status we prefer the local mlat-client results
-        api_mlat = T.Unknown
         if self._agg == "adsblol":
             uuid = self._d.env_by_tags("adsblol_uuid").list_get(self._idx)
             name = self._d.env_by_tags("site_name").list_get(self._idx)
@@ -294,7 +290,7 @@ class AggStatus:
                                 self._beast = T.Good
                                 self._d.env_by_tags("adsblol_link").list_set(self._idx, entry.get("adsblol_my_url"))
                                 break
-                    api_mlat = (
+                    self._mlat = (
                         T.Good
                         if isinstance(lolmlat, list)
                         and any(b.get("uuid", "xxxxxxxx-xxxx-")[:14] == uuid[:14] for b in lolmlat)
@@ -311,7 +307,7 @@ class AggStatus:
                 feeding = response_dict["feeding"]
                 if feeding:
                     self._beast = T.Good if feeding.get("beast") else T.Disconnected
-                    api_mlat = T.Good if feeding.get("mlat") else T.Disconnected
+                    self._mlat = T.Good if feeding.get("mlat") else T.Disconnected
                     self._last_check = datetime.now()
             else:
                 print_err(f"flyitaly returned {status}")
@@ -333,7 +329,7 @@ class AggStatus:
             adsbfi_dict, status = self.get_json(json_ip_url)
             if adsbfi_dict and status == 200:
                 mlat_array = adsbfi_dict.get("mlat", [])
-                api_mlat = T.Good if any(m.get("user", "") == name for m in mlat_array) else T.Disconnected
+                self._mlat = T.Good if any(m.get("user", "") == name for m in mlat_array) else T.Disconnected
                 self._last_check = datetime.now()
             else:
                 print_err(f"adsbfi v1/myip returned {status}")
@@ -346,7 +342,7 @@ class AggStatus:
                     T.Good if len(beast_array) > 0 and beast_array[0].get("receiverId") == uuid else T.Disconnected
                 )
                 mlat_array = adsbfi_dict.get("mlat", [])
-                api_mlat = (
+                self._mlat = (
                     T.Good if len(mlat_array) > 0 and mlat_array[0].get("receiverId") == uuid else T.Disconnected
                 )
                 self._last_check = datetime.now()
@@ -359,7 +355,7 @@ class AggStatus:
                 rdata = radarplane_dict.get("data")
                 if rdata:
                     self._beast = T.Good if rdata.get("beast") else T.Disconnected
-                    api_mlat = T.Good if rdata.get("mlat") else T.Disconnected
+                    self._mlat = T.Good if rdata.get("mlat") else T.Disconnected
                     self._last_check = datetime.now()
             else:
                 print_err(f"radarplane returned {status}")
@@ -375,14 +371,14 @@ class AggStatus:
                     else T.Disconnected
                 )
 
-                api_mlat = T.Disconnected
+                self._mlat = T.Disconnected
                 if fa_dict.get("mlat"):
                     if fa_dict.get("mlat").get("status") == "green":
-                        api_mlat = T.Good
+                        self._mlat = T.Good
                     elif fa_dict.get("mlat").get("status") == "amber":
-                        api_mlat = T.Bad
+                        self._mlat = T.Bad
                     else:
-                        api_mlat = T.Disconnected
+                        self._mlat = T.Disconnected
 
                 self._last_check = datetime.now()
             else:
@@ -404,7 +400,7 @@ class AggStatus:
             rp_dict, status = self.get_json(json_url)
             if rp_dict and rp_dict.get("data") and status == 200:
                 self._beast = T.Good if rp_dict["data"].get("beast") else T.Disconnected
-                api_mlat = T.Good if rp_dict["data"].get("mlat") else T.Disconnected
+                self._mlat = T.Good if rp_dict["data"].get("mlat") else T.Disconnected
                 self._last_check = datetime.now()
             else:
                 print_err(f"radarplane returned {status}")
@@ -447,7 +443,7 @@ class AggStatus:
                         online = station.get("online")
                         mlat_online = station.get("mlat_online")
                         self._beast = T.Good if online else T.Disconnected
-                        api_mlat = T.Good if mlat_online else T.Disconnected
+                        self._mlat = T.Good if mlat_online else T.Disconnected
                         self._last_check = datetime.now()
         elif self._agg == "1090uk":
             key = self._d.env_by_tags(["1090uk", "key"]).list_get(self._idx)
@@ -490,7 +486,7 @@ class AggStatus:
                 mlat_clients = a_dict.get("mlat_clients")
                 # print_err(f"alife returned {mlat_clients}")
                 if mlat_clients:
-                    api_mlat = (
+                    self._mlat = (
                         T.Good
                         if any(
                             (isinstance(mc.get("uuid"), list) and mc.get("uuid")[0] == uuid)
@@ -594,12 +590,12 @@ class AggStatus:
                     print_err(f"can't parse beast part of tat response")
                     return
                 if re.search(r" No MLAT feed", tat_text):
-                    api_mlat = T.Disconnected
+                    self._mlat = T.Disconnected
                 elif re.search(r"  MLAT feed", tat_text):
-                    api_mlat = T.Good
+                    self._mlat = T.Good
                 else:
                     print_err(f"can't parse mlat part of tat response")
-                    api_mlat = T.Unknown
+                    self._mlat = T.Unknown
                     # but since we got someting we could parse for beast above, let's keep going
 
                 self._last_check = datetime.now()
@@ -632,15 +628,10 @@ class AggStatus:
                     print_err(f"can't parse planewatch status {pw_dict}")
                     return
                 self._beast = T.Good if adsb.get("connected") else T.Disconnected
-                api_mlat = T.Good if mlat.get("connected") else T.Disconnected
+                self._mlat = T.Good if mlat.get("connected") else T.Disconnected
                 self._last_check = datetime.now()
             else:
                 print_err(f"planewatch returned {status}")
-
-        if api_mlat != self._mlat:
-            # print_err(f"{self._agg}: api_mlat: {api_mlat} != self._mlat: {self._mlat}")
-            if self._mlat == T.Unknown:
-                self._mlat = api_mlat
 
         # if mlat isn't enabled ignore status check results
         if not self._d.list_is_enabled("mlat_enable", self._idx):
