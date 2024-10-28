@@ -147,17 +147,16 @@ class AggStatus:
         return uf_dir
 
     def get_mlat_status(self):
-        if self._agg not in ultrafeeder_aggs:
-            self._mlat = T.Unknown
-            return False
         mconf = None
         netconfig = self._d.netconfigs.get(self._agg)
-        if netconfig:
-            # example mlat config: "mlat,dati.flyitalyadsb.com,30100,39002",
-            mconf = netconfig.mlat_config
+        if not netconfig:
+            print_err(f"ERROR: get_mlat_status called on {self._agg} not found in netconfigs: {self._d.netconfigs}")
+            return
+        mconf = netconfig.mlat_config
+        # example mlat_config: "mlat,dati.flyitalyadsb.com,30100,39002",
         if not mconf:
             self._mlat = T.Unsupported
-            return False
+            return
         filename = f"{mconf.split(',')[1]}:{mconf.split(',')[2]}.json"
         try:
             mlat_json = json.load(open(f"{self.uf_path()}/mlat-client/{filename}", "r"))
@@ -166,9 +165,9 @@ class AggStatus:
             peer_count = mlat_json.get("peer_count", 0)
             now = mlat_json.get("now")
         except:
-            print_err(f"checking {self.uf_path()}/mlat-client/{filename} failed")
-            self._mlat = T.Unknown
-            return False
+            #print_err(f"checking {self.uf_path()}/mlat-client/{filename} failed")
+            self._mlat = T.Disconnected
+            return
         if now - int(datetime.now().timestamp()) > 60:
             # that's more than a minute old... probably not connected
             self._mlat = T.Disconnected
@@ -179,20 +178,19 @@ class AggStatus:
         else:
             self._mlat = T.Warning
 
-        return True
+        return
 
     def get_beast_status(self):
-        self._beast = T.Unknown
-        if self._agg not in ultrafeeder_aggs:
-            return False
         bconf = None
         netconfig = self._d.netconfigs.get(self._agg)
-        if netconfig:
-            # example adsb config: "adsb,dati.flyitalyadsb.com,4905,beast_reduce_plus_out",
-            bconf = netconfig.adsb_config
+        if not netconfig:
+            print_err(f"ERROR: get_mlat_status called on {self._agg} not found in netconfigs: {self._d.netconfigs}")
+            return
+        bconf = netconfig.adsb_config
+        # example adsb_config: "adsb,dati.flyitalyadsb.com,4905,beast_reduce_plus_out",
         if not bconf:
-            self._beast = T.Unknown
-            return False
+            print_err(f"ERROR: get_beast_status no netconfig for {self._agg}")
+            return
         pattern = (
             f"readsb_net_connector_status{{host=\"{bconf.split(',')[1]}\",port=\"{bconf.split(',')[2]}\"}} (\\d+)"
         )
@@ -200,10 +198,8 @@ class AggStatus:
         try:
             readsb_status = open(filename, "r").read()
         except:
-            self._beast = T.Unknown
-
-            print_err(f"get_beast_status failed to read file: {filename}")
-            return False
+            self._beast = T.Disconnected
+            return
         match = re.search(pattern, readsb_status)
         if match:
             status = int(match.group(1))
@@ -220,7 +216,7 @@ class AggStatus:
         else:
             print_err(f"ERROR: no match checking beast for {pattern}")
 
-        return True
+        return
 
     def check(self):
         with self.lock:
@@ -267,17 +263,14 @@ class AggStatus:
                 self._last_check = datetime.now()
                 return
 
-        # look up readsb / mlat_client view of the status
-        self.get_mlat_status()
-        if self.get_beast_status():
-            # set last check, when the API check doesn't work, we just use the ultrafeeder status
-            self._last_check = datetime.now()
-
         # for the Ultrafeeder based aggregators, let's not bother with talking to their API
         # that's of course bogus as hell - simply remove all the code for thsoe aggregators
         # below - but for now I'm not sure I want to do this because I'm not sure it's the
         # right thing to do
         if self._agg in ultrafeeder_aggs:
+            self.get_mlat_status()
+            self.get_beast_status()
+            self._last_check = datetime.now()
             return
 
         # override this if we do get api results from that aggregator
