@@ -131,7 +131,7 @@ def create_fake_info():
             ci_out.write(f"Serial\t\t: {random_hex_string}\n")
     if not pathlib.Path("/opt/adsb/rb/thermal_zone0/temp").exists():
         with open("/opt/adsb/rb/thermal_zone0/temp", "w") as fake_temp:
-            print("12345\n", file=fake_temp)
+            fake_temp.write("12345\n")
     return not pathlib.Path("/sys/class/thermal/thermal_zone0/temp").exists()
 
 
