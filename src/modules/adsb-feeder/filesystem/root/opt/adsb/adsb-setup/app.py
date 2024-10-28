@@ -172,6 +172,8 @@ class AdsbIm:
         for i in [0] + self.micro_indices():
             self._d.ultrafeeder.append(UltrafeederConfig(data=self._d, micro=i))
 
+        self.last_dns_check = 0
+
         self._current_site_name = None
         self._agg_status_instances = dict()
         self._next_url_from_director = ""
@@ -430,7 +432,7 @@ class AdsbIm:
             dns_state = self._system.check_dns()
             self._d.env_by_tags("dns_state").value = dns_state
             if not dns_state:
-                print_err("we appear to have lost DNS")
+                print_err("ERROR: we appear to have lost DNS")
 
 
             ipv6_broken = self._system.is_ipv6_broken()
@@ -438,6 +440,7 @@ class AdsbIm:
                 print_err("ERROR: broken IPv6 state")
             self._d.env_by_tags("ipv6_broken").value = ipv6_broken
 
+        self.last_dns_check = time.time()
         threading.Thread(target=update_dns).start()
 
     def write_envfile(self):
@@ -2468,8 +2471,9 @@ class AdsbIm:
         return self.aggregators()
 
     def every_minute(self):
-        # make sure DNS works
-        self.update_dns_state()
+        # make sure DNS works, every 5 minutes is sufficient
+        if time.time() - self.last_dns_check > 300:
+            self.update_dns_state()
 
         self._sdrdevices._ensure_populated()
 
