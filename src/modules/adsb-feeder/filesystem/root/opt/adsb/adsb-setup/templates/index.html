@@ -149,7 +149,7 @@
       <div class="col-12 mb-4">
         Enabled indicates feeding the aggregator. <span class="text-success">&#10003;</span> feed is in good state,
         <span class="text-danger">&#10003;</span> feed is down,
-        <span class="text-warning">&#10003;</span> MLAT is down,
+        <span class="text-warning">&#10003;</span> feed is degraded,
         <span class="text-dark">&#10003;</span> feed state is not supported
         <br />
         <span onclick="$('#extra_legend').toggleClass('d-none'); return false;">
@@ -163,11 +163,13 @@
           '&#x2639;': mlat sync errors (if this persists for hours, check <a
              href="https://github.com/wiedehopf/adsb-wiki/wiki/mlat-check">this page</a>)
           <br />
+          '&#x26a0;': feed is intermittent / degraded
+          <br />
           '&#x26a0;': mlat sync warning (intermittent sync issue / lack of traffic / no other receivers in the area)
           <br />
-          '&#x27f3;': Container is up for less than a 30 seconds, not checking status
+          '&#x27f3;': container is up for less than a 30 seconds, not checking status
           <br />
-          '&#x2608;': Container is down
+          '&#x2608;': container is down
           <br />
           '.': status information is not available at this time or not supported
         </span>
@@ -528,12 +530,13 @@
         $("#" + agg + "beast" + idx).text(data["beast"]);
         $("#" + agg + "mlat" + idx).text(data["mlat"]);
         const mlat_broken = !(data["mlat"] == "+" || data["mlat"] == "." || data["mlat"] == " ")
+        const beast_broken = !(data["beast"] == "+" || data["beast"] == "." || data["beast"] == " ")
         if (data["beast"] == "+" && !mlat_broken) {
           $("#" + agg + "span" + idx).attr("class", 'text-success')
-        } else if (data["beast"] == "+" && mlat_broken) {
-          $("#" + agg + "span" + idx).attr("class", 'text-warning')
-        } else if (data["beast"] != "+" && data["beast"] != ".") {
+        } else if (data["beast"] == "☒") {
           $("#" + agg + "span" + idx).attr("class", 'text-danger')
+        } else if (beast_broken || mlat_broken) {
+          $("#" + agg + "span" + idx).attr("class", 'text-warning')
         } else {
           $("#" + agg + "span" + idx).attr("class", 'text-dark')
         }

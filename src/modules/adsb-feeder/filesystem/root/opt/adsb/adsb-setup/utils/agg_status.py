@@ -206,13 +206,13 @@ class AggStatus:
             # this status is the time in seconds the connection has been established
             if status <= 0:
                 self._beast = T.Disconnected
-            elif status > 10:
+            elif status > 20:
                 self._beast = T.Good
             else:
-                self._beast = T.Unknown
+                self._beast = T.Warning
 
-            if self._beast != T.Good:
-                print_err(f"beast check {self._agg :{' '}<{20}}: {self._beast} status: {status}")
+            #if self._beast != T.Good:
+            #    print_err(f"beast check {self._agg :{' '}<{20}}: {self._beast} status: {status}")
         else:
             print_err(f"ERROR: no match checking beast for {pattern}")
 
