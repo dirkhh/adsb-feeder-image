@@ -17,7 +17,7 @@ fi
 
 # if this is the update check at 1:30am, do the updates if configured
 currenttime=$(TZ=$(grep TZ /opt/adsb/config/.env | cut -d= -f2) date '+%H:%M')
-if [[ "$currenttime" > "01:20" ]] || [[ "$currenttime" < "01:40" ]]; then
+if [[ "$currenttime" > "01:20" ]] && [[ "$currenttime" < "01:40" ]]; then
     # check in the .env file what we should do
     if grep -q "^AF_IS_NIGHTLY_BASE_UPDATE_ENABLED=True" config/.env ; then
         # do an OS update - either using the DietPi update tool or by just using apt
