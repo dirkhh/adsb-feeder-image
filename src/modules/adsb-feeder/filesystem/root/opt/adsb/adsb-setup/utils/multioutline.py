@@ -5,6 +5,7 @@ import subprocess
 import time
 from shapely.geometry import LinearRing, Polygon
 from shapely.ops import unary_union
+from utils.util import make_int, print_err, get_plain_url
 
 use_is_valid_reason = True
 try:
@@ -30,30 +31,26 @@ class MultiOutline:
         data = []
         hwt_feeders = []
         now = time.time()
-        os.makedirs("/opt/adsb/data", exist_ok=True)
+        tar1090port=8080
         with open("/opt/adsb/config/.env", "r") as env:
             for line in env:
+                match = re.search(r"AF_TAR1090_PORT=(\d+)", line)
+                if match:
+                    tar1090port = match.group(1)
                 match = re.search(r"_ADSBIM_HEYWHATSTHAT_ENABLED_(\d+)=True", line)
                 if match:
                     hwt_feeders.append(int(match.group(1)))
         for i in hwt_feeders:
-            if (
-                not os.path.exists(f"/opt/adsb/data/heywhatsthat_{i}.json")
-                or os.path.getmtime(f"/opt/adsb/data/heywhatsthat_{i}.json") < now - 3600
-            ):
-                try:
-                    subprocess.run(
-                        f"docker cp  uf_{i}:/usr/local/share/tar1090/html-webroot/upintheair.json /opt/adsb/data/heywhatsthat_{i}.json",
-                        shell=True,
-                        check=True,
-                    )
-                except:
-                    # likely that simply means that there is no upintheair.json
-                    pass
+
+            hwt_url = f"http://127.0.0.1:{tar1090port}/{i}/upintheair.json"
+            response, status = get_plain_url(hwt_url)
+            if status != 200:
+                print_err(f"_get_heywhatsthat: http status {status} for {hwt_url}")
+                continue
             try:
-                hwt = json.load(open(f"/opt/adsb/data/heywhatsthat_{i}.json"))
+                hwt = json.loads(response)
             except:
-                pass
+                print_err(f"_get_heywhatsthat: json.loads failed on response: {response}")
             else:
                 data.append(hwt)
         return data
