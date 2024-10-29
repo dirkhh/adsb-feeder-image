@@ -8,6 +8,8 @@ from utils.util import make_int, print_err
 
 
 n = make_int(sys.argv[1] if len(sys.argv) > 1 else 1)
+
+# multioutline
 try:
     mo_data = MultiOutline().create_outline(n)
     with open(f"/run/adsb-feeder-ultrafeeder/readsb/multiOutline.json", "w") as f:
@@ -16,30 +18,22 @@ except:
     print_err(traceback.format_exc())
     print_err("failed to push multiOutline.json")
 
-hwt_data = None
+
+# heywhatsthat
+
+tmpfile = "/run/stage2_upintheair.json"
 try:
     hwt_data = MultiOutline().create_heywhatsthat(n)
-except:
-    print_err(traceback.format_exc())
-
-# now we need to inject this into the stage2 tar1090
-datadir = "/opt/adsb/data"
-try:
     if hwt_data is not None:
-        with open(f"{datadir}/upintheair.json", "w") as f:
+        with open(tmpfile, "w") as f:
             json.dump(hwt_data, f)
-except:
-    print_err(traceback.format_exc())
-    print_err("failed to write heywhatsthat.json")
-else:
-    if hwt_data is not None:
         cmd = [
             "docker",
             "cp",
-            f"{datadir}/upintheair.json",
+            tmpfile,
             "ultrafeeder:/usr/local/share/tar1090/html-webroot/upintheair.json",
         ]
-        try:
-            subprocess.run(cmd, check=True)
-        except subprocess.SubprocessError:
-            print_err("failed to push multiOutline.json")
+        subprocess.run(cmd, check=True)
+except:
+    print_err(traceback.format_exc())
+    print_err("failed to push heywhatsthat.json")
