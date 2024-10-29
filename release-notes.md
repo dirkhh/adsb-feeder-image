@@ -1,4 +1,7 @@
 Changes since v2.2.2 include:
+- update DietPi images to be 9.8 based
+- update Raspberry Raspbian base image to 2024-10-22 image
+- fix nightly updates to actually be nightly instead of hourly
 - aggregator status: various tweaks / polishing
 - aggregator status: autorefresh fix
 - fix collectd messages when running in VM (missing temp sensor)
