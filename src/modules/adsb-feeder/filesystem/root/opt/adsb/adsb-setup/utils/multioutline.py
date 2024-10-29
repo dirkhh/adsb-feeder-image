@@ -61,6 +61,8 @@ class MultiOutline:
 
     def create_heywhatsthat(self, num):
         data = self._get_heywhatsthat(num)
+        if len(data) == 0:
+            return None
         result = {
             "id": "combined",
             "lat": data[0]["lat"],
@@ -142,6 +144,6 @@ class MultiOutline:
                     points = [[x, y] for x, y in coords]
                 result["multiRange"].append(points)
             except Exception as e:
-                print(f"can't get points from polygon #{i} exterior coords: {e}")
+                print_err(f"can't get points from polygon #{i} exterior coords: {e}")
                 pass
         return result
