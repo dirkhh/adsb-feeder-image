@@ -10,6 +10,7 @@ import requests
 import sys
 import time
 import subprocess
+import traceback
 
 verbose = (
     0 if not os.path.exists("/opt/adsb/config/verbose") else int(open("/opt/adsb/config/verbose", "r").read().strip())
@@ -203,7 +204,7 @@ def get_plain_url(plain_url):
         print_err(f"checking {plain_url} failed: {err}")
         status = err.errno
     except:
-        print_err("checking {plain_url} failed: reason unknown")
+        print_err("checking {plain_url} failed: {traceback.format_exc()}")
     else:
         return response.text, response.status_code
     return None, status
