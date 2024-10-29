@@ -20,6 +20,7 @@ currenttime=$(TZ=$(grep TZ /opt/adsb/config/.env | cut -d= -f2) date '+%H:%M')
 if [[ "$currenttime" > "01:20" ]] && [[ "$currenttime" < "01:40" ]]; then
     # check in the .env file what we should do
     if grep -q "^AF_IS_NIGHTLY_BASE_UPDATE_ENABLED=True" config/.env ; then
+        echo "$(date -u +"%FT%T.%3NZ") Nightly OS update:"
         # do an OS update - either using the DietPi update tool or by just using apt
         if [ -x /boot/dietpi/dietpi-update ] ; then
             G_INTERACTIVE=0 CONFIG_CHECK_APT_UPDATES=2 dietpi-update 1 >> /run/adsb-feeder-image.log 2>&1
@@ -27,8 +28,11 @@ if [[ "$currenttime" > "01:20" ]] && [[ "$currenttime" < "01:40" ]]; then
             apt update >> /run/adsb-feeder-image.log 2>&1
             apt upgrade -y >> /run/adsb-feeder-image.log 2>&1
         fi
+        echo "$(date -u +"%FT%T.%3NZ") Nightly OS update: done"
     fi
     if grep "^AF_IS_NIGHTLY_FEEDER_UPDATE_ENABLED=True" config/.env ; then
+        echo "$(date -u +"%FT%T.%3NZ") Nightly feeder update:"
         bash /opt/adsb/feeder-update
+        echo "$(date -u +"%FT%T.%3NZ") Nightly feeder update: done"
     fi
 fi
