@@ -6,7 +6,7 @@ import threading
 import time
 from datetime import datetime, timedelta
 from enum import Enum
-from .util import generic_get_json, print_err, make_int, run_shell_captured
+from .util import generic_get_json, print_err, make_int, run_shell_captured, get_plain_url
 from .data import Data
 
 T = Enum("T", ["Disconnected", "Unknown", "Good", "Bad", "Warning", "Unsupported", "Starting", "ContainerDown"])
@@ -108,38 +108,6 @@ class AggStatus:
 
     def get_json(self, json_url):
         return generic_get_json(json_url, None)
-
-    def get_plain(self, plain_url):
-        requests.packages.urllib3.util.connection.HAS_IPV6 = False
-        status = -1
-        try:
-            response = requests.get(
-                plain_url,
-                headers={
-                    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/117.0",
-                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-                    "Accept-Language": "en-US,en;q=0.5",
-                    "Upgrade-Insecure-Requests": "1",
-                    "Sec-Fetch-Dest": "document",
-                    "Sec-Fetch-Mode": "navigate",
-                    "Sec-Fetch-Site": "none",
-                    "Sec-Fetch-User": "?1",
-                },
-            )
-        except (
-            requests.HTTPError,
-            requests.ConnectionError,
-            requests.Timeout,
-            requests.RequestException,
-        ) as err:
-            print_err(f"checking {plain_url} failed: {err}")
-            status = err.errno
-        except:
-            # for some reason this didn't work
-            print_err("checking {plain_url} failed: reason unknown")
-        else:
-            return response.text, response.status_code
-        return None, status
 
     def uf_path(self):
         uf_dir = "/run/adsb-feeder-"
@@ -441,7 +409,7 @@ class AggStatus:
                     self._d.env_by_tags(["radarbox", "snkey"]).list_set(self._idx, rbkey)
             if station_serial:
                 html_url = f"https://www.radarbox.com/stations/{station_serial}"
-                rb_page, status = self.get_plain(html_url)
+                rb_page, status = get_plain_url(html_url)
                 match = re.search(r"window.init\((.*)\)", rb_page)
                 if match:
                     rb_json = match.group(1)
@@ -588,7 +556,7 @@ class AggStatus:
         elif self._agg == "tat":
             # get the data from the status text site
             text_url = "https://theairtraffic.com/iapi/feeder_status"
-            tat_text, status = self.get_plain(text_url)
+            tat_text, status = get_plain_url(text_url)
             if text_url and status == 200:
                 if re.search(r" No ADS-B feed", tat_text):
                     self._beast = T.Disconnected
@@ -612,7 +580,7 @@ class AggStatus:
         elif self._agg == "planespotters":
             uf_uuid = self._d.env_by_tags("ultrafeeder_uuid").list_get(self._idx)
             html_url = f"https://www.planespotters.net/feed/status/{uf_uuid}"
-            ps_text, status = self.get_plain(html_url)
+            ps_text, status = get_plain_url(html_url)
             if ps_text and status == 200:
                 self._beast = T.Disconnected if re.search("Feeder client not connected", ps_text) else T.Good
                 self._last_check = datetime.now()
