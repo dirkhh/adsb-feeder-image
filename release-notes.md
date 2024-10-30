@@ -1,4 +1,6 @@
 Changes since v2.2.2 include:
+- move swap on zram script to its own service
+- fixup stage2 combined stats (broken in beta.7)
 - added position / message rate to non-stage2 setups status page
 - fix missing log for docker compose up
 - inform users of docker compose up failure and offer retry button
