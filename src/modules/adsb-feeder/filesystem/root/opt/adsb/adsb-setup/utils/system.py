@@ -96,6 +96,10 @@ class System:
 
         self.gateway_ips = None
 
+        self.containerCheckLock = threading.Lock()
+        self.lastContainerCheck = 0
+        self.dockerPsCache = dict()
+
     @property
     def restart(self):
         return self._restart
@@ -239,3 +243,42 @@ class System:
             subprocess.run(["/opt/adsb/docker-compose-adsb", "up", "-d"] + containers)
         except:
             print_err("docker compose recreate failed")
+
+    def refreshDockerPs(self):
+        self.dockerPsCache = dict()
+        cmdline = "docker ps --filter status=running --format '{{.Names}};{{.Status}}'"
+        success, output = run_shell_captured(cmdline)
+        if not success:
+            print_err(f"Error: cmdline: {cmdline} output: {output}")
+            return
+
+        for line in output.split("\n"):
+            if ";" in line:
+                name, status = line.split(";")
+                self.dockerPsCache[name] = status
+
+    def getContainerStatus(self, name):
+        with self.containerCheckLock:
+            now = time.time()
+            if now - self.lastContainerCheck > 10:
+                self.refreshDockerPs()
+                self.lastContainerCheck = now
+
+            status = self.dockerPsCache.get(name)
+            # print_err(f"{name}: {status}")
+            if not status:
+                # assume down
+                return "down"
+
+            if not status.startswith("Up"):
+                return "down"
+
+            try:
+                up, number, unit = status.split(" ")
+                if unit == "seconds" and int(number) < 30:
+                    # container up for less than 30 seconds, show 'starting'
+                    return "starting"
+            except:
+                pass
+
+            return "up"

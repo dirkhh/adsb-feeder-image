@@ -33,57 +33,8 @@ ultrafeeder_aggs = [
     "alive",
 ]
 
-containerCheckLock = threading.Lock()
-lastContainerCheck = 0
-dockerPsCache = dict()
-
-
-def refreshDockerPs():
-    global dockerPsCache
-    dockerPsCache = dict()
-    cmdline = "docker ps --filter status=running --format '{{.Names}};{{.Status}}'"
-    success, output = run_shell_captured(cmdline)
-    if not success:
-        print_err(f"Error: cmdline: {cmdline} output: {output}")
-        return
-
-    for line in output.split("\n"):
-        if ";" in line:
-            name, status = line.split(";")
-            dockerPsCache[name] = status
-
-
-def getContainerStatus(name):
-    global lastContainerCheck
-    global dockerPsCache
-    with containerCheckLock:
-        now = time.time()
-        if now - lastContainerCheck > 10:
-            refreshDockerPs()
-            lastContainerCheck = now
-
-        status = dockerPsCache.get(name)
-        # print_err(f"{name}: {status}")
-        if not status:
-            # assume down
-            return "down"
-
-        if not status.startswith("Up"):
-            return "down"
-
-        try:
-            up, number, unit = status.split(" ")
-            if unit == "seconds" and int(number) < 30:
-                # container up for less than 30 seconds, show 'starting'
-                return "starting"
-        except:
-            pass
-
-        return "up"
-
-
 class AggStatus:
-    def __init__(self, agg: str, idx, data: Data, url: str):
+    def __init__(self, agg: str, idx, data: Data, url: str, system):
         self.lock = threading.Lock()
         self._agg = agg
         self._idx = make_int(idx)
@@ -92,6 +43,7 @@ class AggStatus:
         self._mlat = T.Unknown
         self._d = data
         self._url = url
+        self._system = system
         self.check()
 
     @property
@@ -219,7 +171,7 @@ class AggStatus:
                 container_name += f"_{self._idx}"
 
         if container_name:
-            container_status = getContainerStatus(container_name)
+            container_status = self._system.getContainerStatus(container_name)
             if container_status == "down":
                 self._beast = T.ContainerDown
                 self._mlat = T.Unsupported
