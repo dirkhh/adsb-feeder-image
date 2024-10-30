@@ -1,4 +1,10 @@
 Changes since v2.2.2 include:
+- added position / message rate to non-stage2 setups status page
+- fix missing log for docker compose up
+- inform users of docker compose up failure and offer retry button
+- only notify of ipv6 issues when docker compose fails
+- add ipv6 issue to support info page and log upload
+- multioutline: hopefully user invisble changes under the hood
 - update DietPi images to be 9.8 based
 - update Raspberry Raspbian base image to 2024-10-22 image
 - fix nightly updates to actually be nightly instead of hourly
