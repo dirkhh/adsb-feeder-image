@@ -1040,11 +1040,13 @@ class AdsbIm:
 
     def stage2_stats(self):
         ret = []
-        if self._d.is_enabled("stage2"):
+        if True:
             for i in [0] + self.micro_indices():
                 ip = self._d.env_by_tags("mf_ip").list_get(i)
                 ip, triplet = mf_get_ip_and_triplet(ip)
                 suffix = f"uf_{i}" if i != 0 else "ultrafeeder"
+                if self._d.env_by_tags("aggregator_choice").value == "nano":
+                    suffix = "nanofeeder"
                 try:
                     with open(f"/run/adsb-feeder-{suffix}/readsb/stats.prom") as f:
                         pct = 0

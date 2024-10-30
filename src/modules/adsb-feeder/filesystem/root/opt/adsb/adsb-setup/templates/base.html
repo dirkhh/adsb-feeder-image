@@ -138,9 +138,6 @@
   <script type="text/javascript" src="{{ url_for('static', filename='js/mdb.min.js') }}"></script>
   <script>
     function check_mf_status() {
-      let n = parseInt("{{ env_value_by_tag('num_micro_sites') }}")
-      if (isNaN(n)) n = 0;
-      if (n == 0) return;
       let url = "/api/stage2_stats";
       fetch(url, {
         method: "GET", cors: "no-cors"

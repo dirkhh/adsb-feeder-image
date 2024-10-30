@@ -60,6 +60,9 @@
       {{ zerotier_address}}{% endif %} will work as the IP address for this micro feeder.
     </div>
   </div>
+  <div class="col-12 mb-3 {% if is_enabled('stage2') %} d-none {% endif %}">
+      Position / Message rate: <a id="mf_status_0" href="/stats_0/"></a>
+  </div>
   <div class="col-12 mb-3 {% if not is_enabled('stage2') %} d-none {% endif %}">
     <h5>You are running as stage 2 feeder</h5>
     <div class="col-12 mb-3">{% if env_value_by_tag('num_micro_sites') == 0 %}No micro feeder sites configured, yet.
