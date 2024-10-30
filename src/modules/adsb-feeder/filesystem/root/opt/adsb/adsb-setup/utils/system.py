@@ -96,7 +96,7 @@ class System:
 
         self.gateway_ips = None
 
-        self.containerCheckLock = threading.Lock()
+        self.containerCheckLock = threading.RLock()
         self.lastContainerCheck = 0
         self.dockerPsCache = dict()
 
@@ -245,17 +245,18 @@ class System:
             print_err("docker compose recreate failed")
 
     def refreshDockerPs(self):
-        self.dockerPsCache = dict()
-        cmdline = "docker ps --filter status=running --format '{{.Names}};{{.Status}}'"
-        success, output = run_shell_captured(cmdline)
-        if not success:
-            print_err(f"Error: cmdline: {cmdline} output: {output}")
-            return
+        with self.containerCheckLock:
+            self.dockerPsCache = dict()
+            cmdline = "docker ps --filter status=running --format '{{.Names}};{{.Status}}'"
+            success, output = run_shell_captured(cmdline)
+            if not success:
+                print_err(f"Error: cmdline: {cmdline} output: {output}")
+                return
 
-        for line in output.split("\n"):
-            if ";" in line:
-                name, status = line.split(";")
-                self.dockerPsCache[name] = status
+            for line in output.split("\n"):
+                if ";" in line:
+                    name, status = line.split(";")
+                    self.dockerPsCache[name] = status
 
     def getContainerStatus(self, name):
         with self.containerCheckLock:
@@ -279,6 +280,8 @@ class System:
                     # container up for less than 30 seconds, show 'starting'
                     return "starting"
             except:
-                pass
+                if "second" in status:
+                    # handle status "Up Less than a second"
+                    return "starting"
 
             return "up"

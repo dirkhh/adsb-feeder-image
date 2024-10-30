@@ -2607,6 +2607,10 @@ class AdsbIm:
             if ipv6_broken:
                 print_err("ERROR: broken IPv6 state detected")
 
+
+        # refresh docker ps cache so the aggregator status is nicely up to date
+        threading.Thread(target=self._system.refreshDockerPs).start()
+
         return render_template(
             "index.html",
             aggregators=aggregators,
