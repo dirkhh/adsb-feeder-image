@@ -16,6 +16,7 @@
     {% if env_value_by_tag('dns_state') %} DNS appears to be working{% else %} The feeder cannot resolve DNS queries
     {% endif %}
   </li>
+  <li><span style="display: inline-block; width: 6em;"><strong>IPv6:</strong></span> {{ ipv6 }}</li>
   <li id="ip-mismatch" class="d-none"><span style="display: inline-block; width: 6em;"><strong>IP:</strong></span>
     Your browser and the feeder have different external IP addresses.
   </li>

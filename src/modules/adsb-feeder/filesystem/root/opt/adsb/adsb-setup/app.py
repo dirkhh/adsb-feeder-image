@@ -2745,6 +2745,11 @@ class AdsbIm:
         top = simple_cmd_result("top -b -n1 | head -n5")
         journal = "persistent on disk" if self._persistent_journal else "in memory"
 
+        if self._system.is_ipv6_broken():
+            ipv6 = "IPv6 is broken (IPv6 address assigned but can't connect to IPv6 hosts)"
+        else:
+            ipv6 = "IPv6 is working or disabled"
+
         containers = [
             self._d.env_by_tags(["container", container]).value
             for container in self._d.tag_for_name.values()
@@ -2759,6 +2764,7 @@ class AdsbIm:
             base=base,
             kernel=kernel,
             journal=journal,
+            ipv6=ipv6,
             current=current,
             containers=containers,
             sdrs=sdrs,
