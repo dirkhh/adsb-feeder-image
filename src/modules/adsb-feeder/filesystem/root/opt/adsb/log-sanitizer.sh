@@ -18,7 +18,6 @@ if ip -6 addr show scope global $(ip -j route get 1.2.3.4 | jq '.[0].dev' -r) | 
 SANITIZED_LOG+="
 !!! IPV6 IS BROKEN !!!
 ${SEPARATOR}"
-"
 fi
 
 SANITIZED_LOG+="
