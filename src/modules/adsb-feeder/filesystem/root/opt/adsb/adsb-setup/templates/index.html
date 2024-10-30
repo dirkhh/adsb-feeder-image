@@ -20,9 +20,14 @@
 <div class="alert alert-danger" role="alert" {% if env_value_by_tag('dns_state') %} style="display: none;" {% endif %}>
   The feeder cannot resolve DNS queries. This will most likely prevent it from working at all.
 </div>
-<div class="alert alert-danger" role="alert" {% if not env_value_by_tag('ipv6_broken') %} style="display: none;"
-     {% endif %}>
-  The feeder has an IPv6 address but IPv6 isn't working. This will most likely prevent it from working at all.
+<div class="alert alert-danger" role="alert" {% if not ipv6_broken %} style="display: none;" {% endif %}>
+  The feeder has an IPv6 address but IPv6 isn't working. This can cause docker and other issues.
+</div>
+<div class="alert alert-danger" role="alert" {% if not compose_up_failed %} style="display: none;" {% endif %}>
+  docker compose up has failed. This means that something is wrong.
+  <form method="POST">
+  <button type="submit" name="submit" value="go" class="btn btn-primary">Retry</button>
+  </form>
 </div>
 <div class="alert alert-danger" role="alert" {% if not env_value_by_tag('under_voltage') %} style="display: none;"
      {% endif %}>

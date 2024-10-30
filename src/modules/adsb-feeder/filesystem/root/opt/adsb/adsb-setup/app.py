@@ -273,7 +273,7 @@ class AdsbIm:
         self.app.add_url_rule("/systemmgmt", "systemmgmt", self.systemmgmt, methods=["GET", "POST"])
         self.app.add_url_rule("/aggregators", "aggregators", self.aggregators, methods=["GET", "POST"])
         self.app.add_url_rule("/", "director", self.director, methods=["GET", "POST"])
-        self.app.add_url_rule("/index", "index", self.index)
+        self.app.add_url_rule("/index", "index", self.index, methods=["GET", "POST"])
         self.app.add_url_rule("/info", "info", self.info)
         self.app.add_url_rule("/support", "support", self.support, methods=["GET", "POST"])
         self.app.add_url_rule("/setup", "setup", self.setup, methods=["GET", "POST"])
@@ -433,12 +433,6 @@ class AdsbIm:
             self._d.env_by_tags("dns_state").value = dns_state
             if not dns_state:
                 print_err("ERROR: we appear to have lost DNS")
-
-
-            ipv6_broken = self._system.is_ipv6_broken()
-            if ipv6_broken:
-                print_err("ERROR: broken IPv6 state")
-            self._d.env_by_tags("ipv6_broken").value = ipv6_broken
 
         self.last_dns_check = time.time()
         threading.Thread(target=update_dns).start()
@@ -2601,6 +2595,15 @@ class AdsbIm:
         else:
             local_address = request.host.split(":")[0]
 
+        # this indicates that the last docker-compose-adsb up call failed
+        compose_up_failed = os.path.exists("/opt/adsb/state/compose_up_failed")
+
+        ipv6_broken = False
+        if compose_up_failed:
+            ipv6_broken = self._system.is_ipv6_broken()
+            if ipv6_broken:
+                print_err("ERROR: broken IPv6 state detected")
+
         return render_template(
             "index.html",
             aggregators=aggregators,
@@ -2609,6 +2612,7 @@ class AdsbIm:
             zerotier_address=self.zerotier_address,
             stage2_suggestion=stage2_suggestion,
             matrix=matrix,
+            compose_up_failed=compose_up_failed,
         )
 
     @check_restart_lock
