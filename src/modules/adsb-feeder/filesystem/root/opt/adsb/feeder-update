@@ -261,7 +261,7 @@ cd "${DIR}/root"
 
 
 # remove adsb.im services from /etc/systemd/system that were previously placed there
-services=(adsb-bootstrap.service  adsb-docker.service  adsb-feeder-update.service  adsb-hotspot.service  adsb-nonimage.service  adsb-setup.service  adsb-update.service  adsb-update.timer)
+services=(adsb-bootstrap.service adsb-docker.service adsb-feeder-update.service adsb-hotspot.service adsb-zram.service adsb-nonimage.service adsb-setup.service adsb-update.service adsb-update.timer)
 for service in "${services[@]}"; do
     rm -vf "/etc/systemd/system/$service"
 done
@@ -284,6 +284,7 @@ else
     cp -v -f -a ./* /
 
     services_enable+=("adsb-hotspot.service")
+    services_enable+=("adsb-zram.service")
 fi
 
 echo "$(date -u +"%FT%T.%3NZ") updating systemd services ..."

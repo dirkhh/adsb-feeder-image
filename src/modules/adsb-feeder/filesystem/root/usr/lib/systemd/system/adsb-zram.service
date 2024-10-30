@@ -1,0 +1,13 @@
+[Unit]
+Description=ADS-B Feeder Zram Service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/adsb
+ExecStart=/usr/bin/bash /opt/adsb/scripts/zram-swap.sh
+TimeoutStartSec=0
+SyslogIdentifier=adsb-zram
+
+[Install]
+WantedBy=default.target
