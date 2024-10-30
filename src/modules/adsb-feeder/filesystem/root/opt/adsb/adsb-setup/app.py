@@ -2308,7 +2308,7 @@ class AdsbIm:
             if self._d.is_enabled("sdrplay") and not self._d.is_enabled("sdrplay_license_accepted"):
                 return redirect(url_for("sdrplay_license"))
 
-            self._system._restart.bg_run(cmdline="/opt/adsb/docker-compose-start", silent=True)
+            self._system._restart.bg_run(cmdline="/opt/adsb/docker-compose-start", silent=False)
             return render_template("/restarting.html")
         print_err("base config not completed", level=2)
         return redirect(url_for("director"))
