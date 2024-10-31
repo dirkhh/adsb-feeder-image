@@ -26,7 +26,15 @@ if [[ "$currenttime" > "01:20" ]] && [[ "$currenttime" < "01:40" ]]; then
     fi
     if grep "^AF_IS_NIGHTLY_FEEDER_UPDATE_ENABLED=True" config/.env ; then
         echo "$(date -u +"%FT%T.%3NZ") Nightly feeder update:"
-        bash /opt/adsb/feeder-update
-        echo "$(date -u +"%FT%T.%3NZ") Nightly feeder update: done"
+        # just running feeder-update is unnecessary disk thrashing.
+        # check instead if there is an update available
+        PORT=$(grep AF_WEBPORT /opt/adsb/config/.env | cut -d= -f2)
+        # if the advice is empty, we don't need to update:
+        if curl -sS "http://127.0.0.1:${PORT}/api/status/im" | jq -e '.advice == ""' >/dev/null; then
+            echo "$(date -u +"%FT%T.%3NZ") Nightly feeder update: no new version availabe"
+        else
+            bash /opt/adsb/feeder-update
+            echo "$(date -u +"%FT%T.%3NZ") Nightly feeder update: done"
+        fi
     fi
 fi
