@@ -2,7 +2,7 @@
 # do an OS update - either using the DietPi update tool or by just using apt
 
 if [ -x /boot/dietpi/dietpi-update ] ; then
-    G_INTERACTIVE=0 CONFIG_CHECK_APT_UPDATES=2 dietpi-update 1
+    G_INTERACTIVE=0 CONFIG_CHECK_APT_UPDATES=2 /boot/dietpi/dietpi-update 1
 else
     apt update
     apt upgrade -y
