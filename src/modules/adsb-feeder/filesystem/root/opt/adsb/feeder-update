@@ -307,6 +307,14 @@ echo "$(date -u +"%FT%T.%3NZ") updating systemd services ... done"
 # enable zram so no reboot is required (script exits for non image installs or when already enabled)
 bash /opt/adsb/scripts/zram-swap.sh
 
+if [ -f /opt/adsb/os.adsb.feeder.image ] ; then
+    # try turning off dphys-swapfile on raspbian
+    if systemctl is-enabled dphys-swapfile; then
+        systemctl disable --now dphys-swapfile || true
+        rm -f /var/swap
+    fi
+fi
+
 # shellcheck disable=SC2164
 cd /opt/adsb
 
