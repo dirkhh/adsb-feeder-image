@@ -1,4 +1,12 @@
 Changes since v2.2.2 include:
+- make sure we don't have disk based swap around when using swap on zram due to race condition
+- cache adsb.im status query
+- don't run nightly apt update, this runs with the nightly OS update when enabled
+- nightly adsb.im update: only run the updater if new version is available
+- stage2 add microfeeder: honor bandwidth reduce checkbox
+- fix dietpi OS update
+- OS update consistency button / nightly
+- message / position rate status page changes / fix for micro / nano feeders
 - move swap on zram script to its own service
 - fixup stage2 combined stats (broken in beta.7)
 - added position / message rate to non-stage2 setups status page
