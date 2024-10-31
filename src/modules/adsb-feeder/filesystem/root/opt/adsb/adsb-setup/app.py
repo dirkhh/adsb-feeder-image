@@ -1049,8 +1049,7 @@ class AdsbIm:
                     suffix = "nanofeeder"
                 try:
                     with open(f"/run/adsb-feeder-{suffix}/readsb/stats.prom") as f:
-                        pct = 0
-                        secs = 0
+                        uptime = 0
                         found = 0
                         for line in f:
                             if "position_count_total" in line:
@@ -1060,16 +1059,16 @@ class AdsbIm:
                                 mps = int(int(line.split()[1]) / 60)
                                 found |= 4
                             if i != 0 and f"readsb_net_connector_status{{host=\"{ip}\"" in line:
-                                secs = int(line.split()[1])
+                                uptime = int(line.split()[1])
                                 found |= 2
                             if i == 0 and "readsb_uptime" in line:
-                                secs = int(int(line.split()[1]) / 1000)
+                                uptime = int(int(line.split()[1]) / 1000)
                                 found |= 2
                             if found == 7:
                                 break
-                        ret.append({"pps": pps, "mps": mps, "secs": secs})
+                        ret.append({"pps": pps, "mps": mps, "uptime": uptime})
                 except:
-                    ret.append({"pps": 0, "mps": 0, "secs": 0})
+                    ret.append({"pps": 0, "mps": 0, "uptime": 0})
         return Response(json.dumps(ret), mimetype="application/json")
 
     def stage2_connection(self):

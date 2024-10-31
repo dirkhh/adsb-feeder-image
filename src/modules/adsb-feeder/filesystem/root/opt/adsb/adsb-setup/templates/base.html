@@ -150,7 +150,7 @@
             if (d["pps"] > 2) {
               color_class = "text-success";
               tooltip = "receiving data"
-            } else if (d["pct"] > 0 || d["secs"] > 60) {
+            } else if (d["uptime"] > 60) {
               color_class = "text-warning";
               tooltip = "receiving unusually little data"
             }
