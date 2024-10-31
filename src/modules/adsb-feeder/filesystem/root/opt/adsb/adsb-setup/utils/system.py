@@ -123,7 +123,7 @@ class System:
         threading.Thread(target=do_reboot).start()
 
     def os_update(self) -> None:
-        subprocess.call("apt-get update && apt-get upgrade -y", shell=True)
+        subprocess.call("/opt/adsb/scripts/update-os", shell=True)
 
     def check_dns(self):
         try:
