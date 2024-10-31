@@ -49,7 +49,7 @@ AUTO_SETUP_BOOT_WAIT_FOR_NETWORK=0
 
 ##### Misc options #####
 # Swap space size to generate: 0 => disable | 1 => auto | 2 and up => size in MiB
-AUTO_SETUP_SWAPFILE_SIZE=1
+AUTO_SETUP_SWAPFILE_SIZE=0
 # Swap space location: "zram" => swap space on /dev/zram0 (auto-size = 50% of RAM size) | /path/to/file => swap file at location (auto-size = 2 GiB minus RAM size)
 AUTO_SETUP_SWAPFILE_LOCATION=/var/swap
 
