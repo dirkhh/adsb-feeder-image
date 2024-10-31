@@ -1059,8 +1059,11 @@ class AdsbIm:
                             if "readsb_messages_valid" in line:
                                 mps = int(int(line.split()[1]) / 60)
                                 found |= 4
-                            if ip in line:
+                            if i != 0 and f"readsb_net_connector_status{{host=\"{ip}\"" in line:
                                 secs = int(line.split()[1])
+                                found |= 2
+                            if i == 0 and "readsb_uptime" in line:
+                                secs = int(int(line.split()[1]) / 1000)
                                 found |= 2
                             if found == 7:
                                 break
