@@ -18,6 +18,7 @@ import subprocess
 import threading
 import time
 import tempfile
+import traceback
 from uuid import uuid4
 import sys
 import zipfile
@@ -1069,7 +1070,10 @@ class AdsbIm:
                             if found == 7:
                                 break
                         ret.append({"pps": pps, "mps": mps, "uptime": uptime})
+                except FileNotFoundError:
+                    ret.append({"pps": 0, "mps": 0, "uptime": 0})
                 except:
+                    print_err(traceback.format_exc())
                     ret.append({"pps": 0, "mps": 0, "uptime": 0})
         return Response(json.dumps(ret), mimetype="application/json")
 
