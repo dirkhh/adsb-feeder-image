@@ -177,6 +177,7 @@ class AdsbIm:
 
         self._current_site_name = None
         self._agg_status_instances = dict()
+        self._im_status = ImStatus(self._d)
         self._next_url_from_director = ""
         self._last_stage2_contact = ""
         self._last_stage2_contact_time = 0
@@ -1121,16 +1122,7 @@ class AdsbIm:
     def agg_status(self, agg, idx=0):
         # print_err(f'agg_status(agg={agg}, idx={idx})')
         if agg == "im":
-            im_json, status = ImStatus(self._d).check()
-            if status == 200:
-                return json.dumps(im_json)
-            else:
-                print_err(f"adsb.im returned {status}")
-                return {
-                    "latest_tag": "unknown",
-                    "latest_commit": "",
-                    "advice": "there was an error obtaining the latest version information",
-                }
+            return json.dumps(self._im_status.check())
 
         status = self._agg_status_instances.get(f"{agg}-{idx}")
         if status is None:

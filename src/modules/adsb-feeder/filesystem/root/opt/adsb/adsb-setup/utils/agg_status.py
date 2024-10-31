@@ -572,7 +572,26 @@ class AggStatus:
 class ImStatus:
     def __init__(self, data: Data):
         self._d = data
+        self._lock = threading.Lock()
+        self._next_check = 0
+        self._cached = None
 
     def check(self):
-        json_url = f"https://adsb.im/api/status"
-        return generic_get_json(json_url, self._d.env_by_tags("pack").value)
+        with self._lock:
+            if not self._cached or time.time() > self._next_check:
+                json_url = f"https://adsb.im/api/status"
+                self._cached, status = generic_get_json(json_url, self._d.env_by_tags("pack").value)
+                if status == 200:
+                    # good result, no need to update this sooner than in a minute
+                    self._next_check = time.time() + 60
+                else:
+                    # check again no earlier than 10 seconds from now
+                    self._next_check = time.time() + 10
+                    print_err(f"adsb.im returned {status}")
+                    self._cached = {
+                        "latest_tag": "unknown",
+                        "latest_commit": "",
+                        "advice": "there was an error obtaining the latest version information",
+                    }
+
+            return self._cached
