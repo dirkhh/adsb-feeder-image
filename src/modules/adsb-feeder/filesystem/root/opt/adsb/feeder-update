@@ -309,7 +309,7 @@ bash /opt/adsb/scripts/zram-swap.sh
 
 if [ -f /opt/adsb/os.adsb.feeder.image ] ; then
     # try turning off dphys-swapfile on raspbian
-    if systemctl is-enabled dphys-swapfile; then
+    if systemctl is-enabled dphys-swapfile &>/dev/null; then
         systemctl disable --now dphys-swapfile || true
         rm -f /var/swap
     fi
