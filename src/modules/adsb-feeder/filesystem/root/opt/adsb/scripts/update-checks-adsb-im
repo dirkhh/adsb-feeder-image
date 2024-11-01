@@ -16,7 +16,7 @@ if [[ -f /run/adsb-feeder-image.log ]] && (( $(wc -l < /run/adsb-feeder-image.lo
 fi
 
 # if this is the update check at 1:30am, do the updates if configured
-currenttime=$(TZ=$(grep TZ /opt/adsb/config/.env | cut -d= -f2) date '+%H:%M')
+currenttime=$(TZ=$(grep -e "FEEDER_TZ=" /opt/adsb/config/.env | cut -d= -f2) date '+%H:%M')
 if [[ "$currenttime" > "01:20" ]] && [[ "$currenttime" < "01:40" ]]; then
     # check in the .env file what we should do
     if grep -q "^AF_IS_NIGHTLY_BASE_UPDATE_ENABLED=True" config/.env ; then
@@ -40,6 +40,8 @@ if [[ "$currenttime" > "01:20" ]] && [[ "$currenttime" < "01:40" ]]; then
 
     if [ -f /opt/adsb/os.adsb.feeder.image ] ; then
         # as we handle OS updates above, disable the daily apt update if enabled, unnecessary disk writes
-        systemctl is-enabled apt-daily.timer &>/dev/null && systemctl disable --now apt-daily.timer
+        if systemctl is-enabled apt-daily.timer &>/dev/null; then
+            systemctl disable --now apt-daily.timer
+        fi
     fi
 fi
