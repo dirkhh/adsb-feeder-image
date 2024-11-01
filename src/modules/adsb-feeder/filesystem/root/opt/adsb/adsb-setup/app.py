@@ -693,7 +693,10 @@ class AdsbIm:
                         if include_graphs:
                             graphs1090_writeback(uf_path, microIndex)
                             graphs_path = uf_path / "graphs1090/rrd/localhost.tar.gz"
-                            backup_zip.write(graphs_path, arcname=graphs_path.relative_to(adsb_path))
+                            if graphs_path.exists():
+                                backup_zip.write(graphs_path, arcname=graphs_path.relative_to(adsb_path))
+                            else:
+                                print_err(f"graphs1090 backup failed, file not found: {graphs_path}")
 
             except BrokenPipeError:
                 print_err(f"warning: backup download aborted mid-stream")
