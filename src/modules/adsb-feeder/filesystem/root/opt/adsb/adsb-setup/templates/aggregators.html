@@ -57,8 +57,7 @@
            title="please note that this site is missing a clear data/privacy policy" name="is_enabled--ultrafeeder--tat"
            id="is_enabled--tat" {{ uf_enabled("tat", m) }} />
     <label for="is_enabled--tat">
-      <a href="https://theairtraffic.com/privacy-license/" data-mdb-toggle="tooltip"
-         title="please note that this site is missing a clear data/privacy policy">TheAirTraffic.com</a>
+      <a href="https://theairtraffic.com/privacy/">TheAirTraffic.com</a>
     </label>
   </div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
@@ -72,7 +71,7 @@
     <input type="checkbox" class="form-check-input me-1" name="is_enabled--ultrafeeder--adsbfi" id="is_enabled--adsbfi"
            {{ uf_enabled("adsbfi", m) }} />
     <label for="is_enabled--adsbfi">
-      <a href="https://adsb.fi/">adsb.fi</a>
+      <a href="https://adsb.fi/privacy">adsb.fi</a>
     </label>
   </div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
@@ -95,7 +94,8 @@
     <input type="checkbox" class="form-check-input me-1" name="is_enabled--ultrafeeder--adsbx" id="is_enabled--adsbx"
            {{ uf_enabled("adsbx", m) }} />
     <label for="is_enabled--adsbx">
-      <a href="https://adsbexchange.com/legal-and-privacy/">ADSBExchange</a>
+      <a href="https://www.adsbexchange.com/privacy-policy/" data-mdb-toggle="tooltip"
+         title="please note that this site is missing a clear data/privacy policy">ADSBExchange</a>
     </label>
   </div>
   <div class="col-12 small fw-light text-muted text-end">
@@ -141,7 +141,8 @@
     <input type="checkbox" class="form-check-input me-1" name="planewatch--is_enabled" id="planewatch--is_enabled"
            {{ others_enabled("planewatch", m) }} />
     <label class="mx-1 w-auto" for="planewatch--is_enabled">
-      <a href="https://plane.watch">Plane.watch</a>
+      <a href="https://plane.watch" data-mdb-toggle="tooltip"
+         title="please note that this site is missing a clear data/privacy policy">Plane.watch</a>
       <div class="form-group" id="PW_FIELDS">
         <label for="planewatch--key">
           To sign up for an API key go to <a href="https://atc.plane.watch/">atc.plane.watch</a>, sign up for an
@@ -158,7 +159,7 @@
     <input type="checkbox" class="form-check-input me-1" name="flightaware--is_enabled" id="flightaware--is_enabled"
            {{ others_enabled("flightaware", m) }} />
     <label class="mx-1 w-auto" for="FA">
-      <a href="https://flightaware.com/">FlightAware</a>
+      <a href="https://www.flightaware.com/about/privacy/">FlightAware</a>
       <div class="form-group" id="FA_FIELDS">
         <label for="flightaware--key">
           You need a FlightAware / Piaware feeder ID. If you already have one, please enter it below. Otherwise, leave
@@ -182,7 +183,8 @@
     <input type="checkbox" class="form-check-input me-1" name="radarbox--is_enabled" id="radarbox--is_enabled"
            {{ others_enabled("radarbox", m) }} />
     <label for="radarbox--is_enabled">
-      <a href="https://www.radarbox.com/">RadarBox</a>
+      <a href="https://www.radarbox.com/terms-of-use" data-mdb-toggle="tooltip"
+         title="please note that this site is missing a clear data/privacy policy">RadarBox</a>
       <div class="form-group" id="RB_FIELDS">
         <label for="radarbox--key">
           You need a RadarBox sharing key. If you already have one, please enter it below. Otherwise, leave the field
@@ -201,7 +203,8 @@
     <input type="checkbox" class="form-check-input me-1" name="planefinder--is_enabled" id="planefinder--is_enabled"
            {{ others_enabled("planefinder", m) }} />
     <label for="planefinder--is_enabled">
-      <a href="https://planefinder.net/">PlaneFinder</a>
+      <a href="https://planefinder.net/legal/privacy-information-notice" data-mdb-toggle="tooltip"
+         title="please note that this site is missing a clear data/privacy policy">PlaneFinder</a>
       <div class="form-group" id="PF_FIELDS">
         <label for="planefinder--key">
           You need a PlaneFinder sharecode. If you already have one, please enter it below. Otherwise, request a
@@ -218,7 +221,7 @@
     <input type="checkbox" class="form-check-input me-1" name="adsbhub--is_enabled" id="adsbhub--is_enabled"
            {{ others_enabled("adsbhub", m) }} />
     <label for="adsbhub--is_enabled">
-      <a href="https://adsbhub.org">ADSBHub</a>
+      <a href="https://www.adsbhub.org/privacy-policy.php">ADSBHub</a>
       <div class="form-group" id="AH_FIELDS">
         <label for="adsbhub--key">
           To sign up for an ADSBHub station key go to
@@ -236,7 +239,7 @@
     <input type="checkbox" class="form-check-input me-1" name="opensky--is_enabled" id="opensky--is_enabled"
            {{ others_enabled("opensky", m) }} />
     <label for="opensky--is_enabled">
-      <a href="https://opensky-network.org/">OpenSky Network</a>
+      <a href="https://opensky-network.org/about/privacy-policy">OpenSky Network</a>
       <!-- this one needs automation set up with a docker container again -- and it needs two fields -->
       <div class="form-group" id="OS_FIELDS">
         <label for="opensky--key">
@@ -258,7 +261,8 @@
     <input type="checkbox" class="form-check-input me-1" name="radarvirtuel--is_enabled" id="radarvirtuel--is_enabled"
            {{ others_enabled("radarvirtuel", m) }} />
     <label for="radarvirtuel--is_enabled">
-      <a href="https://www.radarvirtuel.com/">RadarVirtuel</a>
+      <a href="https://www.radarvirtuel.com/" data-mdb-toggle="tooltip"
+         title="please note that this site is missing a clear data/privacy policy">RadarVirtuel</a>
       <div class="form-group" id="RV_FIELDS">
         <label for="radarvirtuel--key">
           To sign up for a feeder key send email to
@@ -276,7 +280,7 @@
     <input type="checkbox" class="form-check-input me-1" name="1090uk--is_enabled" id="1090uk--is_enabled"
            {{ others_enabled("1090uk", m) }} />
     <label for="1090uk--is_enabled">
-      <a href="https://1090mhz.uk/">1090MHz UK</a>
+      <a href="https://1090mhz.uk/legal.html#privacy">1090MHz UK</a>
       <div class="form-group" id="TNUK_FIELDS">
         <label for="1090uk--key">
           1090MHz UK is only interested in the UK and surrounding countries out to 1000nm including Ireland, Jersey,
