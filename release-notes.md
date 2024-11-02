@@ -1,4 +1,5 @@
 Changes since v2.2.2 include:
+- reduce some verbosity / log export fix ipv6
 - make sure we don't have disk based swap around when using swap on zram due to race condition
 - cache adsb.im status query
 - don't run nightly apt update, this runs with the nightly OS update when enabled
