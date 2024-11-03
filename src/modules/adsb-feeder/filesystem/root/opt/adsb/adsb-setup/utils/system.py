@@ -7,7 +7,7 @@ import time
 from time import sleep
 
 from .data import Data
-from .util import print_err,run_shell_captured
+from .util import print_err, run_shell_captured
 
 
 class Lock:
@@ -96,6 +96,10 @@ class System:
 
         self.gateway_ips = None
 
+        self.containerCheckLock = threading.RLock()
+        self.lastContainerCheck = 0
+        self.dockerPsCache = dict()
+
     @property
     def restart(self):
         return self._restart
@@ -119,7 +123,7 @@ class System:
         threading.Thread(target=do_reboot).start()
 
     def os_update(self) -> None:
-        subprocess.call("apt-get update && apt-get upgrade -y", shell=True)
+        subprocess.call("/opt/adsb/scripts/update-os", shell=True)
 
     def check_dns(self):
         try:
@@ -132,6 +136,23 @@ class System:
         except:
             return False
         return responses != list()
+
+    def is_ipv6_broken(self):
+        success, output = run_shell_captured(
+            "ip -6 addr show scope global $(ip -j route get 1.2.3.4 | jq '.[0].dev' -r) | grep inet6 | grep -v 'inet6 f'"
+        )
+        if not success:
+            # no global ipv6 addresses assigned, this means we don't have ipv6 so it can't be broken
+            return False
+        # we have at least one global ipv6 address, check if it works:
+        success, output = run_shell_captured("curl -o /dev/null -6 https://google.com")
+
+        if success:
+            # it's working, so it's not broken
+            return False
+
+        # we have an ipv6 address but curl -6 isn't working
+        return True
 
     def check_ip(self):
         requests.packages.urllib3.util.connection.HAS_IPV6 = False
@@ -222,3 +243,45 @@ class System:
             subprocess.run(["/opt/adsb/docker-compose-adsb", "up", "-d"] + containers)
         except:
             print_err("docker compose recreate failed")
+
+    def refreshDockerPs(self):
+        with self.containerCheckLock:
+            self.dockerPsCache = dict()
+            cmdline = "docker ps --filter status=running --format '{{.Names}};{{.Status}}'"
+            success, output = run_shell_captured(cmdline)
+            if not success:
+                print_err(f"Error: cmdline: {cmdline} output: {output}")
+                return
+
+            for line in output.split("\n"):
+                if ";" in line:
+                    name, status = line.split(";")
+                    self.dockerPsCache[name] = status
+
+    def getContainerStatus(self, name):
+        with self.containerCheckLock:
+            now = time.time()
+            if now - self.lastContainerCheck > 10:
+                self.refreshDockerPs()
+                self.lastContainerCheck = now
+
+            status = self.dockerPsCache.get(name)
+            # print_err(f"{name}: {status}")
+            if not status:
+                # assume down
+                return "down"
+
+            if not status.startswith("Up"):
+                return "down"
+
+            try:
+                up, number, unit = status.split(" ")
+                if unit == "seconds" and int(number) < 30:
+                    # container up for less than 30 seconds, show 'starting'
+                    return "starting"
+            except:
+                if "second" in status:
+                    # handle status "Up Less than a second"
+                    return "starting"
+
+            return "up"

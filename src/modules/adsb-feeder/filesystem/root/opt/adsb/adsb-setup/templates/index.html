@@ -20,6 +20,15 @@
 <div class="alert alert-danger" role="alert" {% if env_value_by_tag('dns_state') %} style="display: none;" {% endif %}>
   The feeder cannot resolve DNS queries. This will most likely prevent it from working at all.
 </div>
+<div class="alert alert-danger" role="alert" {% if not ipv6_broken %} style="display: none;" {% endif %}>
+  The feeder has an IPv6 address but IPv6 isn't working. This can cause docker and other issues.
+</div>
+<div class="alert alert-danger" role="alert" {% if not compose_up_failed %} style="display: none;" {% endif %}>
+  docker compose up has failed. This means that something is wrong.
+  <form method="POST">
+  <button type="submit" name="submit" value="go" class="btn btn-primary">Retry</button>
+  </form>
+</div>
 <div class="alert alert-danger" role="alert" {% if not env_value_by_tag('under_voltage') %} style="display: none;"
      {% endif %}>
   The feeder system kernel detected under-voltage. This can lead to random crashes and various issues with clock
@@ -50,6 +59,9 @@
       {% if tailscale_address != "" %}, {{ tailscale_address}}{% endif %}{% if zerotier_address != "" %},
       {{ zerotier_address}}{% endif %} will work as the IP address for this micro feeder.
     </div>
+  </div>
+  <div class="col-12 mb-3 {% if is_enabled('stage2') %} d-none {% endif %}">
+      Position / Message rate: <a id="{% if not is_enabled('stage2') %}mf_status_0{% endif %}" href="/stats_0/"></a>
   </div>
   <div class="col-12 mb-3 {% if not is_enabled('stage2') %} d-none {% endif %}">
     <h5>You are running as stage 2 feeder</h5>
@@ -142,19 +154,33 @@
         </table>
       </div>
       {% endfor %}
-      <div class="col-12 small mb-4">
+      <div class="col-12 mb-4">
         Enabled indicates feeding the aggregator. <span class="text-success">&#10003;</span> feed is in good state,
         <span class="text-danger">&#10003;</span> feed is down,
-        <span class="text-warning">&#10003;</span> MLAT is down,
+        <span class="text-warning">&#10003;</span> feed is degraded,
         <span class="text-dark">&#10003;</span> feed state is not supported
         <br />
-        '+': feed/mlat is connected; '&#x2612;': feed/mlat is not connected
+        <span onclick="$('#extra_legend').toggleClass('d-none'); return false;">
+          <a href="">Toggle detailed legend</a>
+        </span>
+        <span>| Last status update: <span id=last_status_update></span></span>
         <br />
-        '&#x2639;': mlat sync errors (if this persists for hours, check <a href="https://github.com/wiedehopf/adsb-wiki/wiki/mlat-check">this page</a>)
-        <br />
-        '&#x26a0;': mlat sync warning (intermittent sync issue / lack of traffic / no other receivers in the area)
-        <br />
-        '.': status information is not available at this time
+        <span class="d-none" id="extra_legend">
+          '+': feed/mlat is connected; '&#x2612;': feed/mlat is not connected
+          <br />
+          '&#x2639;': mlat sync errors (if this persists for hours, check <a
+             href="https://github.com/wiedehopf/adsb-wiki/wiki/mlat-check">this page</a>)
+          <br />
+          '&#x26a0;': feed is intermittent / degraded
+          <br />
+          '&#x26a0;': mlat sync warning (intermittent sync issue / lack of traffic / no other receivers in the area)
+          <br />
+          '&#x27f3;': container is up for less than a 30 seconds, not checking status
+          <br />
+          '&#x2608;': container is down
+          <br />
+          '.': status information is not available at this time or not supported
+        </span>
       </div>
     </div>
   </div>
@@ -265,7 +291,8 @@
         </ul>
       </div>
     </div>
-    <div class="row mt-3 {% if not (ns.adsblol or ns.flightradar or ns.planefinder or ns.adsbx or ns.alive or ns.flightaware) %}d-none{% endif %}">
+    <div
+         class="row mt-3 {% if not (ns.adsblol or ns.flightradar or ns.planefinder or ns.adsbx or ns.alive or ns.flightaware) %}d-none{% endif %}">
       <div class="col-12">
         <h5>Additional aggregator links</h5>
       </div>
@@ -330,6 +357,11 @@
       </div>
       <div class="col-12 {% if not ns.flightaware %}d-none{% endif %}">
         <div class="lead">FlightAware</div>
+        <div class="small text-muted">
+          Note: The SkyAware map on the status page does not work, it's not needed to supply data to FA<br>
+          (You can re-enable that map at the cost of increased cpu / memory consumption by adding PIAWARE_MINIMAL=false
+          to the environment variables on the expert page)
+        </div>
         <table class="table table-sm table-borderless lh-1 w-auto mt-0 mb-0 ms-2">
           <tbody>
             {% for idx in ns.site_indices %}
@@ -338,7 +370,7 @@
             <tr>
               <th>{{ list_value_by_tag('site_name', idx) }}</th>
               <td><a href="/fa-status{{ suffix }}">FlightAware status</a></td>
-              <td><a href="/flightaware{{ suffix }}">FlightAware map</a></td>
+              <td class="d-none"><a href="/flightaware{{ suffix }}">FlightAware map</a></td>
             </tr>
             {% endif %}
             {% endfor %}
@@ -398,7 +430,7 @@
       </div>
     </div>
   </div>
-  <div class="col-12 {% if not stage2_suggestion %} d-none {% endif %}">
+  <div class="col-12 {% if not stage2_suggestion or env_value_by_tag('aggregator_choice') in ['micro', 'nano'] %} d-none {% endif %}">
     <br>
     Running the containers for the commercial aggregators on systems with 1GB of RAM or less can cause problems - it
     certainly is possible, but many users have observed random issues like MLAT errors or generally issues reliably
@@ -407,20 +439,38 @@
   </div>
 </div>
 <script>
+  let verbose = false;
   let browser_ip = null;
   let feeder_ip = null;
+  let ip_message = "";
   function compareIps() {
     if (feeder_ip == null || browser_ip == null) {
       return;
     }
     if (browser_ip != feeder_ip) {
-      console.log("IP check: browser got", browser_ip, "feeder has", feeder_ip);
+      let new_ip_message = ["IP check: browser got", browser_ip, "feeder has", feeder_ip].join(" ");
+      if (new_ip_message != ip_message) {
+        ip_message = new_ip_message;
+        console.log(ip_message);
+      }
       $("#ip-mismatch").show()
     } else {
       $("#ip-mismatch").hide()
     }
   }
-  function startPageIndex() {
+  let timersActive = false;
+  let refreshDelay = 35 * 1000;
+  let refreshTimer = null;
+  let mfTimer = null;
+  function startPageIndex(opt) {
+    clearTimeout(refreshTimer); // abundance of caution to avoid multiple timers
+    if (opt != "noModifyDelay") {
+      refreshDelay = Math.min(300 * 1000, refreshDelay * 1.5);
+    }
+    verbose && console.log(new Date().toLocaleTimeString() + " refreshing status, next check in " + refreshDelay / 1000);
+    refreshTimer = setTimeout(startPageIndex, refreshDelay);
+    $("#last_status_update").html(new Date().toLocaleTimeString());
+
     if (!['micro', 'nano'].includes("{{ env_value_by_tags(['aggregator_choice']) }}")) {
       fetch("https://api.ipify.org?format=json")
         .then(response => response.json())
@@ -445,12 +495,13 @@
         $("#advice").html(data["advice"] + "&nbsp;");
         if (data["show_update"] == "1") {
           $("#update_buttons").removeClass("text-secondary");
-          if (data["beta_changelog"] != "") {
+          const show_both = data["advice"] && data["advice"].startsWith("you are running a development version");
+          if (show_both || data["beta_changelog"]) {
             $("#update_feeder_aps_beta").attr("disabled", false);
             $("#update_feeder_aps_beta").attr("title", data["beta_changelog"]);
             $("#advice").attr("title", data["beta_changelog"]);
           }
-          if (data["main_changelog"] != "") {
+          if (show_both || data["main_changelog"]) {
             $("#update_feeder_aps_stable").attr("disabled", false);
             $("#update_feeder_aps_stable").attr("title", data["main_changelog"]);
             $("#latest_tag").attr("title", data["main_changelog"]);
@@ -467,12 +518,18 @@
     {% for idx in ns.site_indices if matrix[idx] > 0 %}
     // idx {{ idx }}
     {% if list_is_enabled(agg, idx) %}
+    reset_status("{{ agg }}", "{{ list_value_by_tag('mf_ip', idx)}}", {{ idx }});
     get_status("{{ agg }}", "{{ list_value_by_tag('mf_ip', idx)}}", {{ idx }});
-  {% endif %}
-  {% endfor %}
-  {% endfor %}
+    {% endif %}
+    {% endfor %}
+    {% endfor %}
   }
 
+  function reset_status(agg, ip, idx) {
+    $("#" + agg + "beast" + idx).text(".");
+    $("#" + agg + "mlat" + idx).text(".");
+    $("#" + agg + "span" + idx).attr("class", 'text-dark');
+  }
   function get_status(agg, ip, idx) {
     fetch(`/api/status/${agg}/${idx}`)
       .then(response => response.json())
@@ -481,39 +538,38 @@
         // right now this is broken and just overwrites things
         $("#" + agg + "beast" + idx).text(data["beast"]);
         $("#" + agg + "mlat" + idx).text(data["mlat"]);
-        const mlat_broken = ! (data["mlat"] == "+" || data["mlat"] == "." || data["mlat"] == " ")
-        if (data["beast"] == "+" && ! mlat_broken) {
-          $("#" + agg + "span" + idx).addClass('text-success')
-        } else if (data["beast"] == "+" && mlat_broken) {
-          $("#" + agg + "span" + idx).addClass('text-warning')
-        } else if (data["beast"] != "+" && data["beast"] != ".") {
-          $("#" + agg + "span" + idx).addClass('text-danger')
+        const mlat_broken = !(data["mlat"] == "+" || data["mlat"] == "." || data["mlat"] == " ")
+        const beast_broken = !(data["beast"] == "+" || data["beast"] == "." || data["beast"] == " ")
+        if (data["beast"] == "+" && !mlat_broken) {
+          $("#" + agg + "span" + idx).attr("class", 'text-success')
+        } else if (data["beast"] == "☒") {
+          $("#" + agg + "span" + idx).attr("class", 'text-danger')
+        } else if (beast_broken || mlat_broken) {
+          $("#" + agg + "span" + idx).attr("class", 'text-warning')
         } else {
-          $("#" + agg + "span" + idx).addClass('text-dark')
+          $("#" + agg + "span" + idx).attr("class", 'text-dark')
         }
         if (agg == "adsblol") {
           if (idx > 0) {
-            console.log("set adsblol-link" + idx + " to " + data["adsblollink"])
+            // console.log("set adsblol-link" + idx + " to " + data["adsblollink"])
             $("#adsblol-link-" + idx).attr("href", data["adsblollink"])
           }
         }
         if (agg == "alive") {
-            $("#alivemaplink_" + idx).attr("href", data["alivemaplink"])
+          $("#alivemaplink_" + idx).attr("href", data["alivemaplink"])
         }
         if (agg == "adsbx") {
           if (idx == 0) {
             $("#adsbxstatlink").attr("href", "https://www.adsbexchange.com/api/feeders/?feed=" + data["adsbxfeederid"])
             $("#adsbxmaplink").attr("href", "https://globe.adsbexchange.com/?feed=" + data["adsbxfeederid"])
           } else {
-            console.log("set adsbxstatlink" + idx)
+            // console.log("set adsbxstatlink" + idx)
             $("#adsbxstatlink_" + idx).attr("href", "https://www.adsbexchange.com/api/feeders/?feed=" + data["adsbxfeederid"])
             $("#adsbxmaplink_" + idx).attr("href", "https://globe.adsbexchange.com/?feed=" + data["adsbxfeederid"])
           }
         }
       });
   }
-  // start the micro feeder check if needed
-  check_mf_status();
   function get_stage2_connection_status() {
     fetch("/api/stage2_connection")
       .then(response => response.json())
@@ -530,11 +586,31 @@
           $("#stage2_no_recent_contact").removeClass("d-none");
         }
       })
-      .finally(() => {
-        setTimeout(get_stage2_connection_status, 600000);
-      });
   }
 
-  startPageIndex();
+  function handleVisibilityChange() {
+    if (document.hidden && timersActive) {
+      verbose && console.log(new Date().toLocaleTimeString() + " visibility change: stopping timers");
+      clearTimeout(refreshTimer);
+      clearTimeout(mfTimer);
+      timersActive = false;
+    }
+    if (!document.hidden && !timersActive) {
+      verbose && console.log(new Date().toLocaleTimeString() + " visibility change: starting timers");
+      startPageIndex("noModifyDelay");
+      // start the micro feeder check
+      mfTimer = check_mf_status();
+      timersActive = true;
+    }
+  }
+
+  // Warn if the browser doesn't support addEventListener or the Page Visibility API
+  if (typeof document.addEventListener === "undefined" || document.hidden === undefined) {
+    console.error("hidden tab handler requires a browser that supports the Page Visibility API.");
+  } else {
+    document.addEventListener("visibilitychange", handleVisibilityChange, false);
+  }
+
+  handleVisibilityChange();
 </script>
 {% endblock %}

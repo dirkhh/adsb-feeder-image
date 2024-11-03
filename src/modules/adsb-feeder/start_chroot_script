@@ -82,6 +82,9 @@ apt-get install -y zerotier-one tailscale
 systemctl disable tailscaled
 systemctl disable zerotier-one
 
+# disable swapfile, we have swap on zram
+systemctl disable dphys-swapfile || true
+
 # Disable telemetry for tailscale
 # but only if it's not already there
 if ! grep -q -- "^FLAGS=\"--no-logs-no-support" /etc/default/tailscaled ; then
@@ -107,6 +110,7 @@ systemctl enable adsb-setup.service
 systemctl enable adsb-docker.service
 systemctl enable adsb-bootstrap.service
 systemctl enable adsb-hotspot.service
+systemctl enable adsb-zram.service
 systemctl enable adsb-update.timer
 
 # Disable some things we don't need and that only eat memory (assuming they exist)

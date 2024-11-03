@@ -18,6 +18,7 @@ import subprocess
 import threading
 import time
 import tempfile
+import traceback
 from uuid import uuid4
 import sys
 import zipfile
@@ -172,8 +173,11 @@ class AdsbIm:
         for i in [0] + self.micro_indices():
             self._d.ultrafeeder.append(UltrafeederConfig(data=self._d, micro=i))
 
+        self.last_dns_check = 0
+
         self._current_site_name = None
         self._agg_status_instances = dict()
+        self._im_status = ImStatus(self._d)
         self._next_url_from_director = ""
         self._last_stage2_contact = ""
         self._last_stage2_contact_time = 0
@@ -271,7 +275,7 @@ class AdsbIm:
         self.app.add_url_rule("/systemmgmt", "systemmgmt", self.systemmgmt, methods=["GET", "POST"])
         self.app.add_url_rule("/aggregators", "aggregators", self.aggregators, methods=["GET", "POST"])
         self.app.add_url_rule("/", "director", self.director, methods=["GET", "POST"])
-        self.app.add_url_rule("/index", "index", self.index)
+        self.app.add_url_rule("/index", "index", self.index, methods=["GET", "POST"])
         self.app.add_url_rule("/info", "info", self.info)
         self.app.add_url_rule("/support", "support", self.support, methods=["GET", "POST"])
         self.app.add_url_rule("/setup", "setup", self.setup, methods=["GET", "POST"])
@@ -430,8 +434,9 @@ class AdsbIm:
             dns_state = self._system.check_dns()
             self._d.env_by_tags("dns_state").value = dns_state
             if not dns_state:
-                print_err("we appear to have lost DNS")
+                print_err("ERROR: we appear to have lost DNS")
 
+        self.last_dns_check = time.time()
         threading.Thread(target=update_dns).start()
 
     def write_envfile(self):
@@ -526,18 +531,38 @@ class AdsbIm:
         )
 
     def set_tz(self, timezone):
-        # Set it as datetimectl too
+        # timezones don't have spaces, only underscores
+        # replace spaces with underscores to correct this common error
+        timezone = timezone.replace(" ", "_")
+
+        success = self.set_system_tz(timezone)
+        if success:
+            self._d.env("FEEDER_TZ").list_set(0, timezone)
+        else:
+            print_err(f"timezone {timezone} probably invalid, defaulting to UTC")
+            self._d.env("FEEDER_TZ").list_set(0, "UTC")
+            self.set_system_tz("UTC")
+
+    def set_system_tz(self, timezone):
+        # timedatectl can fail on dietpi installs (Failed to connect to bus: No such file or directory)
+        # thus don't rely on timedatectl and just set environment for containers regardless of timedatectl working
         try:
             print_err(f"calling timedatectl set-timezone {timezone}")
             subprocess.run(["timedatectl", "set-timezone", f"{timezone}"], check=True)
-            # Add to .env only if timedatectl has succeeded
-            self._d.env("FEEDER_TZ").list_set(0, timezone)
         except subprocess.SubprocessError:
-            print_err(f"failed to set up timezone ({timezone}), defaulting to UTC")
-            timezone = "UTC"
-            print_err(f"calling timedatectl set-timezone {timezone}")
-            subprocess.run(["timedatectl", "set-timezone", f"{timezone}"])
-            self._d.env("FEEDER_TZ").list_set(0, timezone)
+            print_err(f"failed to set up timezone ({timezone}) using timedatectl, try dpkg-reconfigure instead")
+            try:
+                subprocess.run(["test", "-f", f"/usr/share/zoneinfo/{timezone}"], check=True)
+            except:
+                print_err(f"setting timezone: /usr/share/zoneinfo/{timezone} doesn't exist")
+                return False
+            try:
+                subprocess.run(["ln", "-sf", f"/usr/share/zoneinfo/{timezone}", "/etc/localtime"])
+                subprocess.run("dpkg-reconfigure --frontend noninteractive tzdata", shell=True)
+            except:
+                pass
+
+        return True
 
     def push_multi_outline(self) -> None:
         if not self._d.is_enabled("stage2"):
@@ -613,13 +638,14 @@ class AdsbIm:
                     uf_container = "ultrafeeder"
                 else:
                     uf_container = f"uf_{microIndex}"
-                subprocess.call(
+                subprocess.run(
                     f"docker exec {uf_container} pkill collectd",
-                    timeout=5.0,
+                    timeout=10.0,
                     shell=True,
+                    check=True,
                 )
             except:
-                print_err("failed to kill collectd - just using the localhost.tar.gz that's already there")
+                print_err(f"{context}: docker exec failed - backed up graph data might miss up to 6h")
                 pass
             else:
                 count = 0
@@ -630,7 +656,9 @@ class AdsbIm:
                     sleep(increment)
                     if timeSinceWrite(rrd_file) < 120:
                         print_err(f"{context}: success")
-                        break
+                        return
+
+                print_err(f"{context}: writeback timed out - backed up graph data might miss up to 6h")
 
         fdOut, fdIn = os.pipe()
         pipeOut = os.fdopen(fdOut, "rb")
@@ -665,7 +693,10 @@ class AdsbIm:
                         if include_graphs:
                             graphs1090_writeback(uf_path, microIndex)
                             graphs_path = uf_path / "graphs1090/rrd/localhost.tar.gz"
-                            backup_zip.write(graphs_path, arcname=graphs_path.relative_to(adsb_path))
+                            if graphs_path.exists():
+                                backup_zip.write(graphs_path, arcname=graphs_path.relative_to(adsb_path))
+                            else:
+                                print_err(f"graphs1090 backup failed, file not found: {graphs_path}")
 
             except BrokenPipeError:
                 print_err(f"warning: backup download aborted mid-stream")
@@ -680,7 +711,7 @@ class AdsbIm:
         )
         thread.start()
 
-        site_name = self._d.env_by_tags("site_name").list_get(0)
+        site_name = self._d.env_by_tags("site_name_sanitized").list_get(0)
         if self._d.is_enabled("stage2"):
             site_name = f"stage2-{site_name}"
         now = datetime.now().replace(microsecond=0).isoformat().replace(":", "-")
@@ -1014,31 +1045,40 @@ class AdsbIm:
 
     def stage2_stats(self):
         ret = []
-        if self._d.is_enabled("stage2"):
+        if True:
             for i in [0] + self.micro_indices():
                 ip = self._d.env_by_tags("mf_ip").list_get(i)
                 ip, triplet = mf_get_ip_and_triplet(ip)
                 suffix = f"uf_{i}" if i != 0 else "ultrafeeder"
+                if self._d.env_by_tags("aggregator_choice").value == "nano":
+                    suffix = "nanofeeder"
                 try:
                     with open(f"/run/adsb-feeder-{suffix}/readsb/stats.prom") as f:
-                        pct = 0
-                        secs = 0
+                        uptime = 0
                         found = 0
                         for line in f:
                             if "position_count_total" in line:
-                                pps = int(int(line.split()[1]) / 60)
+                                pps = int(line.split()[1]) / 60
+                                # show precise position rate if less than 1
+                                pps = round(pps, 1) if pps < 1 else round(pps)
                                 found |= 1
                             if "readsb_messages_valid" in line:
-                                mps = int(int(line.split()[1]) / 60)
+                                mps = round(int(line.split()[1]) / 60)
                                 found |= 4
-                            if ip in line:
-                                secs = int(line.split()[1])
+                            if i != 0 and f"readsb_net_connector_status{{host=\"{ip}\"" in line:
+                                uptime = int(line.split()[1])
+                                found |= 2
+                            if i == 0 and "readsb_uptime" in line:
+                                uptime = int(int(line.split()[1]) / 1000)
                                 found |= 2
                             if found == 7:
                                 break
-                        ret.append({"pps": pps, "mps": mps, "secs": secs})
+                        ret.append({"pps": pps, "mps": mps, "uptime": uptime})
+                except FileNotFoundError:
+                    ret.append({"pps": 0, "mps": 0, "uptime": 0})
                 except:
-                    ret.append({"pps": 0, "mps": 0, "secs": 0})
+                    print_err(traceback.format_exc())
+                    ret.append({"pps": 0, "mps": 0, "uptime": 0})
         return Response(json.dumps(ret), mimetype="application/json")
 
     def stage2_connection(self):
@@ -1085,16 +1125,7 @@ class AdsbIm:
     def agg_status(self, agg, idx=0):
         # print_err(f'agg_status(agg={agg}, idx={idx})')
         if agg == "im":
-            im_json, status = ImStatus(self._d).check()
-            if status == 200:
-                return json.dumps(im_json)
-            else:
-                print_err(f"adsb.im returned {status}")
-                return {
-                    "latest_tag": "unknown",
-                    "latest_commit": "",
-                    "advice": "there was an error obtaining the latest version information",
-                }
+            return json.dumps(self._im_status.check())
 
         status = self._agg_status_instances.get(f"{agg}-{idx}")
         if status is None:
@@ -1103,6 +1134,7 @@ class AdsbIm:
                 idx,
                 self._d,
                 f"http://127.0.0.1:{self._d.env_by_tags('webport').value}",
+                self._system,
             )
 
         res = (
@@ -1632,6 +1664,9 @@ class AdsbIm:
             self._d.env_by_tags("nano_beastreduce_port").value = "30006"
 
         for sitenum in [0] + self.micro_indices():
+            site_name = self._d.env_by_tags("site_name").list_get(sitenum)
+            sanitized = "".join(c if c.isalnum() or c in "-_." else "_" for c in site_name)
+            self._d.env_by_tags("site_name_sanitized").list_set(sitenum, sanitized)
 
             # make sure use_route_api is populated with the default:
             self._d.env_by_tags("route_api").list_get(sitenum)
@@ -1872,7 +1907,7 @@ class AdsbIm:
                     # grab the IP that we know the user has provided
                     ip = form.get("add_micro_feeder_ip")
                     uat = form.get("micro_uat")
-                    brofm = is_true(form.get("micro_reduce")) and key == "add_micro"
+                    brofm = is_true(form.get("micro_reduce")) and key != "add_other"
                     is_adsbim = key != "add_other"
                     micro_data = {}
                     if not is_adsbim:
@@ -2273,7 +2308,7 @@ class AdsbIm:
             if self._d.is_enabled("sdrplay") and not self._d.is_enabled("sdrplay_license_accepted"):
                 return redirect(url_for("sdrplay_license"))
 
-            self._system._restart.bg_run(cmdline="/opt/adsb/docker-compose-start", silent=True)
+            self._system._restart.bg_run(cmdline="/opt/adsb/docker-compose-start", silent=False)
             return render_template("/restarting.html")
         print_err("base config not completed", level=2)
         return redirect(url_for("director"))
@@ -2436,8 +2471,9 @@ class AdsbIm:
         return self.aggregators()
 
     def every_minute(self):
-        # make sure DNS works
-        self.update_dns_state()
+        # make sure DNS works, every 5 minutes is sufficient
+        if time.time() - self.last_dns_check > 300:
+            self.update_dns_state()
 
         self._sdrdevices._ensure_populated()
 
@@ -2565,6 +2601,19 @@ class AdsbIm:
         else:
             local_address = request.host.split(":")[0]
 
+        # this indicates that the last docker-compose-adsb up call failed
+        compose_up_failed = os.path.exists("/opt/adsb/state/compose_up_failed")
+
+        ipv6_broken = False
+        if compose_up_failed:
+            ipv6_broken = self._system.is_ipv6_broken()
+            if ipv6_broken:
+                print_err("ERROR: broken IPv6 state detected")
+
+
+        # refresh docker ps cache so the aggregator status is nicely up to date
+        threading.Thread(target=self._system.refreshDockerPs).start()
+
         return render_template(
             "index.html",
             aggregators=aggregators,
@@ -2573,6 +2622,7 @@ class AdsbIm:
             zerotier_address=self.zerotier_address,
             stage2_suggestion=stage2_suggestion,
             matrix=matrix,
+            compose_up_failed=compose_up_failed,
         )
 
     @check_restart_lock
@@ -2709,6 +2759,11 @@ class AdsbIm:
         top = simple_cmd_result("top -b -n1 | head -n5")
         journal = "persistent on disk" if self._persistent_journal else "in memory"
 
+        if self._system.is_ipv6_broken():
+            ipv6 = "IPv6 is broken (IPv6 address assigned but can't connect to IPv6 hosts)"
+        else:
+            ipv6 = "IPv6 is working or disabled"
+
         containers = [
             self._d.env_by_tags(["container", container]).value
             for container in self._d.tag_for_name.values()
@@ -2723,6 +2778,7 @@ class AdsbIm:
             base=base,
             kernel=kernel,
             journal=journal,
+            ipv6=ipv6,
             current=current,
             containers=containers,
             sdrs=sdrs,

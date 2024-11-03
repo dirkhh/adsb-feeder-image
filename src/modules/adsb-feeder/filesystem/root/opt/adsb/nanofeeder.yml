@@ -7,7 +7,12 @@ services:
     container_name: nanofeeder
     hostname: nanofeeder
     restart: unless-stopped
+    cap_add:
+      - SYS_NICE
     device_cgroup_rules:
+      # serial devices
+      - 'c 188:* rwm'
+      # USB devices
       - 'c 189:* rwm'
     ports:
       - ${AF_NANO_TAR1090_PORT_ADJUSTED:-8080}:80 # to expose the web interface

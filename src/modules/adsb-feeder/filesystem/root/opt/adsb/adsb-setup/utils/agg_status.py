@@ -3,12 +3,13 @@ import re
 import subprocess
 import requests
 import threading
+import time
 from datetime import datetime, timedelta
 from enum import Enum
-from .util import generic_get_json, print_err, make_int
+from .util import generic_get_json, print_err, make_int, run_shell_captured, get_plain_url
 from .data import Data
 
-T = Enum("T", ["Disconnected", "Unknown", "Good", "Bad", "Warning", "Unsupported"])
+T = Enum("T", ["Disconnected", "Unknown", "Good", "Bad", "Warning", "Unsupported", "Starting", "ContainerDown"])
 status_symbol = {
     T.Disconnected: "\u2612",
     T.Unknown: ".",
@@ -16,6 +17,8 @@ status_symbol = {
     T.Bad: "\u2639",
     T.Warning: "\u26A0",
     T.Unsupported: " ",
+    T.Starting: "\u27F3",
+    T.ContainerDown: "\u2608",
 }
 ultrafeeder_aggs = [
     "adsblol",
@@ -30,9 +33,8 @@ ultrafeeder_aggs = [
     "alive",
 ]
 
-
 class AggStatus:
-    def __init__(self, agg: str, idx, data: Data, url: str):
+    def __init__(self, agg: str, idx, data: Data, url: str, system):
         self.lock = threading.Lock()
         self._agg = agg
         self._idx = make_int(idx)
@@ -41,6 +43,7 @@ class AggStatus:
         self._mlat = T.Unknown
         self._d = data
         self._url = url
+        self._system = system
         self.check()
 
     @property
@@ -58,55 +61,22 @@ class AggStatus:
     def get_json(self, json_url):
         return generic_get_json(json_url, None)
 
-    def get_plain(self, plain_url):
-        requests.packages.urllib3.util.connection.HAS_IPV6 = False
-        status = -1
-        try:
-            response = requests.get(
-                plain_url,
-                headers={
-                    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/117.0",
-                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-                    "Accept-Language": "en-US,en;q=0.5",
-                    "Upgrade-Insecure-Requests": "1",
-                    "Sec-Fetch-Dest": "document",
-                    "Sec-Fetch-Mode": "navigate",
-                    "Sec-Fetch-Site": "none",
-                    "Sec-Fetch-User": "?1",
-                },
-            )
-        except (
-            requests.HTTPError,
-            requests.ConnectionError,
-            requests.Timeout,
-            requests.RequestException,
-        ) as err:
-            print_err(f"checking {plain_url} failed: {err}")
-            status = err.errno
-        except:
-            # for some reason this didn't work
-            print_err("checking {plain_url} failed: reason unknown")
-        else:
-            return response.text, response.status_code
-        return None, status
-
     def uf_path(self):
         uf_dir = "/run/adsb-feeder-"
         uf_dir += f"uf_{self._idx}" if self._idx != 0 else "ultrafeeder"
         return uf_dir
 
     def get_mlat_status(self):
-        if self._agg not in ultrafeeder_aggs:
-            self._mlat = T.Unknown
-            return False
         mconf = None
         netconfig = self._d.netconfigs.get(self._agg)
-        if netconfig:
-            # example mlat config: "mlat,dati.flyitalyadsb.com,30100,39002",
-            mconf = netconfig.mlat_config
+        if not netconfig:
+            print_err(f"ERROR: get_mlat_status called on {self._agg} not found in netconfigs: {self._d.netconfigs}")
+            return
+        mconf = netconfig.mlat_config
+        # example mlat_config: "mlat,dati.flyitalyadsb.com,30100,39002",
         if not mconf:
             self._mlat = T.Unsupported
-            return False
+            return
         filename = f"{mconf.split(',')[1]}:{mconf.split(',')[2]}.json"
         try:
             mlat_json = json.load(open(f"{self.uf_path()}/mlat-client/{filename}", "r"))
@@ -115,10 +85,10 @@ class AggStatus:
             peer_count = mlat_json.get("peer_count", 0)
             now = mlat_json.get("now")
         except:
-            print_err(f"checking {self.uf_path()}/mlat-client/{filename} failed")
-            self._mlat = T.Unknown
-            return False
-        if now - int(datetime.now().timestamp()) > 60:
+            #print_err(f"checking {self.uf_path()}/mlat-client/{filename} failed")
+            self._mlat = T.Disconnected
+            return
+        if time.time() - now > 60:
             # that's more than a minute old... probably not connected
             self._mlat = T.Disconnected
         elif percent_good > 10 and percent_bad <= 5:
@@ -128,20 +98,19 @@ class AggStatus:
         else:
             self._mlat = T.Warning
 
-        return True
+        return
 
     def get_beast_status(self):
-        self._beast = T.Unknown
-        if self._agg not in ultrafeeder_aggs:
-            return False
         bconf = None
         netconfig = self._d.netconfigs.get(self._agg)
-        if netconfig:
-            # example adsb config: "adsb,dati.flyitalyadsb.com,4905,beast_reduce_plus_out",
-            bconf = netconfig.adsb_config
+        if not netconfig:
+            print_err(f"ERROR: get_mlat_status called on {self._agg} not found in netconfigs: {self._d.netconfigs}")
+            return
+        bconf = netconfig.adsb_config
+        # example adsb_config: "adsb,dati.flyitalyadsb.com,4905,beast_reduce_plus_out",
         if not bconf:
-            self._beast = T.Unknown
-            return False
+            print_err(f"ERROR: get_beast_status no netconfig for {self._agg}")
+            return
         pattern = (
             f"readsb_net_connector_status{{host=\"{bconf.split(',')[1]}\",port=\"{bconf.split(',')[2]}\"}} (\\d+)"
         )
@@ -149,29 +118,25 @@ class AggStatus:
         try:
             readsb_status = open(filename, "r").read()
         except:
-            self._beast = T.Unknown
-
-            print_err(f"get_beast_status failed to read file: {filename}")
-            return False
+            self._beast = T.Disconnected
+            return
         match = re.search(pattern, readsb_status)
         if match:
             status = int(match.group(1))
             # this status is the time in seconds the connection has been established
             if status <= 0:
                 self._beast = T.Disconnected
-            elif status > 10:
+            elif status > 20:
                 self._beast = T.Good
             else:
-                self._beast = T.Unknown
+                self._beast = T.Warning
 
-            if self._beast != T.Good:
-                print_err(f"beast check {self._agg :{' '}<{20}}: {self._beast} status: {status}")
+            #if self._beast != T.Good:
+            #    print_err(f"beast check {self._agg :{' '}<{20}}: {self._beast} status: {status}")
         else:
             print_err(f"ERROR: no match checking beast for {pattern}")
 
-
-
-        return True
+        return
 
     def check(self):
         with self.lock:
@@ -187,16 +152,47 @@ class AggStatus:
             return False
 
     def check_impl(self):
-        # look up readsb / mlat_client view of the status
-        self.get_mlat_status()
-        if self.get_beast_status():
-            # set last check, when the API check doesn't work, we just use the ultrafeeder status
-            self._last_check = datetime.now()
+        if self._agg in ultrafeeder_aggs:
+            container_name = "ultrafeeder" if self._idx == 0 else f"uf_{self._idx}"
+        else:
+            container_for_agg = {
+                "radarbox": "rbfeeder",
+                "planefinder": "pfclient",
+                "flightaware": "piaware",
+                "radarvirtuel": "radarvirtuel",
+                "1090uk": "radar1090uk",
+                "flightradar": "fr24feed",
+                "opensky": "opensky",
+                "adsbhub": "adsbhub",
+                "planewatch": "planewatch",
+            }
+            container_name = container_for_agg.get(self._agg)
+            if self._idx != 0:
+                container_name += f"_{self._idx}"
 
-        # override this if we do get api results from that aggregator
-        # for beast status we prefer the aggregator results
-        # for mlat status we prefer the local mlat-client results
-        api_mlat = T.Unknown
+        if container_name:
+            container_status = self._system.getContainerStatus(container_name)
+            if container_status == "down":
+                self._beast = T.ContainerDown
+                self._mlat = T.Unsupported
+                self._last_check = datetime.now()
+                return
+            if container_status == "starting":
+                self._beast = T.Starting
+                self._mlat = T.Unsupported
+                self._last_check = datetime.now()
+                return
+
+        # for the Ultrafeeder based aggregators, let's not bother with talking to their API
+        # that's of course bogus as hell - simply remove all the code for thsoe aggregators
+        # below - but for now I'm not sure I want to do this because I'm not sure it's the
+        # right thing to do
+        if self._agg in ultrafeeder_aggs:
+            self.get_mlat_status()
+            self.get_beast_status()
+            self._last_check = datetime.now()
+            return
+
         if self._agg == "adsblol":
             uuid = self._d.env_by_tags("adsblol_uuid").list_get(self._idx)
             name = self._d.env_by_tags("site_name").list_get(self._idx)
@@ -214,7 +210,7 @@ class AggStatus:
                                 self._beast = T.Good
                                 self._d.env_by_tags("adsblol_link").list_set(self._idx, entry.get("adsblol_my_url"))
                                 break
-                    api_mlat = (
+                    self._mlat = (
                         T.Good
                         if isinstance(lolmlat, list)
                         and any(b.get("uuid", "xxxxxxxx-xxxx-")[:14] == uuid[:14] for b in lolmlat)
@@ -223,7 +219,7 @@ class AggStatus:
                     self._last_check = datetime.now()
                 else:
                     print_err(f"adsblol returned status {status}")
-        if self._agg == "flyitaly":
+        elif self._agg == "flyitaly":
             # get the data from json
             json_url = "https://my.flyitalyadsb.com/am_i_feeding"
             response_dict, status = self.get_json(json_url)
@@ -231,7 +227,7 @@ class AggStatus:
                 feeding = response_dict["feeding"]
                 if feeding:
                     self._beast = T.Good if feeding.get("beast") else T.Disconnected
-                    api_mlat = T.Good if feeding.get("mlat") else T.Disconnected
+                    self._mlat = T.Good if feeding.get("mlat") else T.Disconnected
                     self._last_check = datetime.now()
             else:
                 print_err(f"flyitaly returned {status}")
@@ -242,22 +238,32 @@ class AggStatus:
             uuid = self._d.env_by_tags("ultrafeeder_uuid").list_get(self._idx)
             name = self._d.env_by_tags("site_name").list_get(self._idx)
             json_uuid_url = f"https://api.adsb.fi/v1/feeder?id={uuid}"
+
+            """
+            # the following should no longer be true, probably was caused my a
+            # bug in mlat-client when passing uuid on the command line
+
             # we are having an easier time finding mlat data via the myip api
             # as apparently mlathub doesn't always send the right uuid
             json_ip_url = "https://api.adsb.fi/v1/myip"
             adsbfi_dict, status = self.get_json(json_ip_url)
             if adsbfi_dict and status == 200:
                 mlat_array = adsbfi_dict.get("mlat", [])
-                api_mlat = T.Good if any(m.get("user", "") == name for m in mlat_array) else T.Disconnected
+                self._mlat = T.Good if any(m.get("user", "") == name for m in mlat_array) else T.Disconnected
                 self._last_check = datetime.now()
             else:
                 print_err(f"adsbfi v1/myip returned {status}")
+            """
+
             adsbfi_dict, status = self.get_json(json_uuid_url)
             if adsbfi_dict and status == 200:
+                beast_array = adsbfi_dict.get("beast", [])
                 self._beast = (
-                    T.Good
-                    if len(adsbfi_dict.get("beast", [])) > 0 and adsbfi_dict.get("beast")[0].get("receiverId") == uuid
-                    else T.Disconnected
+                    T.Good if len(beast_array) > 0 and beast_array[0].get("receiverId") == uuid else T.Disconnected
+                )
+                mlat_array = adsbfi_dict.get("mlat", [])
+                self._mlat = (
+                    T.Good if len(mlat_array) > 0 and mlat_array[0].get("receiverId") == uuid else T.Disconnected
                 )
                 self._last_check = datetime.now()
             else:
@@ -269,7 +275,7 @@ class AggStatus:
                 rdata = radarplane_dict.get("data")
                 if rdata:
                     self._beast = T.Good if rdata.get("beast") else T.Disconnected
-                    api_mlat = T.Good if rdata.get("mlat") else T.Disconnected
+                    self._mlat = T.Good if rdata.get("mlat") else T.Disconnected
                     self._last_check = datetime.now()
             else:
                 print_err(f"radarplane returned {status}")
@@ -285,14 +291,22 @@ class AggStatus:
                     else T.Disconnected
                 )
 
-                api_mlat = T.Disconnected
+                self._mlat = T.Disconnected
                 if fa_dict.get("mlat"):
                     if fa_dict.get("mlat").get("status") == "green":
-                        api_mlat = T.Good
+                        self._mlat = T.Good
                     elif fa_dict.get("mlat").get("status") == "amber":
-                        api_mlat = T.Bad
+                        message = fa_dict.get("mlat").get("message").lower()
+                        if "unstable" in message:
+                            self._mlat = T.Bad
+                        elif "initializing" in message:
+                            self._mlat = T.Unknown
+                        elif "no clock sync" in message:
+                            self._mlat = T.Warning
+                        else:
+                            self._mlat = T.Unknown
                     else:
-                        api_mlat = T.Disconnected
+                        self._mlat = T.Disconnected
 
                 self._last_check = datetime.now()
             else:
@@ -314,11 +328,17 @@ class AggStatus:
             rp_dict, status = self.get_json(json_url)
             if rp_dict and rp_dict.get("data") and status == 200:
                 self._beast = T.Good if rp_dict["data"].get("beast") else T.Disconnected
-                api_mlat = T.Good if rp_dict["data"].get("mlat") else T.Disconnected
+                self._mlat = T.Good if rp_dict["data"].get("mlat") else T.Disconnected
                 self._last_check = datetime.now()
             else:
                 print_err(f"radarplane returned {status}")
         elif self._agg == "radarbox":
+
+            rbkey = self._d.env_by_tags(["radarbox", "key"]).list_get(self._idx)
+            # reset station number if the key has changed
+            if rbkey != self._d.env_by_tags(["radarbox", "snkey"]).list_get(self._idx):
+                station_serial = self._d.env_by_tags(["radarbox", "sn"]).list_set(self._idx, "")
+
             station_serial = self._d.env_by_tags(["radarbox", "sn"]).list_get(self._idx)
             if not station_serial:
                 # dang, I hate this part
@@ -338,9 +358,10 @@ class AggStatus:
                 if match:
                     station_serial = match.group(1)
                     self._d.env_by_tags(["radarbox", "sn"]).list_set(self._idx, station_serial)
+                    self._d.env_by_tags(["radarbox", "snkey"]).list_set(self._idx, rbkey)
             if station_serial:
                 html_url = f"https://www.radarbox.com/stations/{station_serial}"
-                rb_page, status = self.get_plain(html_url)
+                rb_page, status = get_plain_url(html_url)
                 match = re.search(r"window.init\((.*)\)", rb_page)
                 if match:
                     rb_json = match.group(1)
@@ -350,7 +371,7 @@ class AggStatus:
                         online = station.get("online")
                         mlat_online = station.get("mlat_online")
                         self._beast = T.Good if online else T.Disconnected
-                        api_mlat = T.Good if mlat_online else T.Disconnected
+                        self._mlat = T.Good if mlat_online else T.Disconnected
                         self._last_check = datetime.now()
         elif self._agg == "1090uk":
             key = self._d.env_by_tags(["1090uk", "key"]).list_get(self._idx)
@@ -377,6 +398,10 @@ class AggStatus:
             self._beast = T.Unknown
             self._mlat = T.Unsupported
             self._last_check = datetime.now()
+        elif self._agg == "radarvirtuel":
+            self._beast = T.Unknown
+            self._mlat = T.Unknown
+            self._last_check = datetime.now()
         elif self._agg == "alive":
             json_url = "https://api.airplanes.live/feed-status"
             a_dict, status = self.get_json(json_url)
@@ -389,7 +414,7 @@ class AggStatus:
                 mlat_clients = a_dict.get("mlat_clients")
                 # print_err(f"alife returned {mlat_clients}")
                 if mlat_clients:
-                    api_mlat = (
+                    self._mlat = (
                         T.Good
                         if any(
                             (isinstance(mc.get("uuid"), list) and mc.get("uuid")[0] == uuid)
@@ -435,6 +460,8 @@ class AggStatus:
                     print_err(f"failed to find adsbx ID in response {output}")
 
             self._last_check = datetime.now()
+            # the checks below are no longer needed due to the generalized ultrafeeder status checks
+            """
             # let's check the ultrafeeder net connector status to see if there is a TCP beast connection to adsbexchange
             try:
                 suffix = "ultrafeeder" if self._idx == 0 else f"uf_{self._idx}"
@@ -452,7 +479,6 @@ class AggStatus:
             except:
                 self._beast = T.Disconnected
                 pass
-            """
             # now check mlat - which we can't really get easily from their status page
             # but can get from our docker logs again
             container_name = "ultrafeeder" if self._idx == 0 else f"uf_{self._idx}"
@@ -482,7 +508,7 @@ class AggStatus:
         elif self._agg == "tat":
             # get the data from the status text site
             text_url = "https://theairtraffic.com/iapi/feeder_status"
-            tat_text, status = self.get_plain(text_url)
+            tat_text, status = get_plain_url(text_url)
             if text_url and status == 200:
                 if re.search(r" No ADS-B feed", tat_text):
                     self._beast = T.Disconnected
@@ -492,12 +518,12 @@ class AggStatus:
                     print_err(f"can't parse beast part of tat response")
                     return
                 if re.search(r" No MLAT feed", tat_text):
-                    api_mlat = T.Disconnected
+                    self._mlat = T.Disconnected
                 elif re.search(r"  MLAT feed", tat_text):
-                    api_mlat = T.Good
+                    self._mlat = T.Good
                 else:
                     print_err(f"can't parse mlat part of tat response")
-                    api_mlat = T.Unknown
+                    self._mlat = T.Unknown
                     # but since we got someting we could parse for beast above, let's keep going
 
                 self._last_check = datetime.now()
@@ -506,7 +532,7 @@ class AggStatus:
         elif self._agg == "planespotters":
             uf_uuid = self._d.env_by_tags("ultrafeeder_uuid").list_get(self._idx)
             html_url = f"https://www.planespotters.net/feed/status/{uf_uuid}"
-            ps_text, status = self.get_plain(html_url)
+            ps_text, status = get_plain_url(html_url)
             if ps_text and status == 200:
                 self._beast = T.Disconnected if re.search("Feeder client not connected", ps_text) else T.Good
                 self._last_check = datetime.now()
@@ -530,15 +556,14 @@ class AggStatus:
                     print_err(f"can't parse planewatch status {pw_dict}")
                     return
                 self._beast = T.Good if adsb.get("connected") else T.Disconnected
-                api_mlat = T.Good if mlat.get("connected") else T.Disconnected
+                self._mlat = T.Good if mlat.get("connected") else T.Disconnected
                 self._last_check = datetime.now()
             else:
                 print_err(f"planewatch returned {status}")
 
-        if api_mlat != self._mlat:
-            #print_err(f"{self._agg}: api_mlat: {api_mlat} != self._mlat: {self._mlat}")
-            if self._mlat == T.Unknown:
-                self._mlat = api_mlat
+        # if mlat isn't enabled ignore status check results
+        if not self._d.list_is_enabled("mlat_enable", self._idx):
+            self._mlat = T.Unsupported
 
     def __repr__(self):
         return f"Aggregator({self._agg} last_check: {str(self._last_check)}, beast: {self._beast} mlat: {self._mlat})"
@@ -547,7 +572,26 @@ class AggStatus:
 class ImStatus:
     def __init__(self, data: Data):
         self._d = data
+        self._lock = threading.Lock()
+        self._next_check = 0
+        self._cached = None
 
     def check(self):
-        json_url = f"https://adsb.im/api/status"
-        return generic_get_json(json_url, self._d.env_by_tags("pack").value)
+        with self._lock:
+            if not self._cached or time.time() > self._next_check:
+                json_url = f"https://adsb.im/api/status"
+                self._cached, status = generic_get_json(json_url, self._d.env_by_tags("pack").value)
+                if status == 200:
+                    # good result, no need to update this sooner than in a minute
+                    self._next_check = time.time() + 60
+                else:
+                    # check again no earlier than 10 seconds from now
+                    self._next_check = time.time() + 10
+                    print_err(f"adsb.im returned {status}")
+                    self._cached = {
+                        "latest_tag": "unknown",
+                        "latest_commit": "",
+                        "advice": "there was an error obtaining the latest version information",
+                    }
+
+            return self._cached

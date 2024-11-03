@@ -42,7 +42,7 @@ class RouteManager:
         # work around oddity in tar1090 and dump978
         if url.endswith("graphs1090") or url.endswith("skyaware978"):
             url += "/"
-        print_err(f"redirecting {orig} to {url}")
+        print_err(f"redirecting {orig} to {url}", level=16)
         return redirect(url)
 
 

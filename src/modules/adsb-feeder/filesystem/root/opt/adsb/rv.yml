@@ -9,6 +9,7 @@ services:
     restart: unless-stopped
     cpu_period: 50000
     cpu_quota: 7500
+    stop_grace_period: 3s
     environment:
       - FEEDER_KEY=${FEEDER_RV_FEEDER_KEY}
       - SOURCE_HOST=ultrafeeder:30002
@@ -16,6 +17,7 @@ services:
       - VERBOSE=OFF
       - MLAT_SERVER=mlat.adsbnetwork.com:50000
       - MLAT_HOST=ultrafeeder:30005
+      - ENABLE_MLAT=${MLAT_ENABLE}
       - LAT=${FEEDER_LAT}
       - LON=${FEEDER_LONG}
       - ALT=${FEEDER_ALT_M}
@@ -24,6 +26,7 @@ services:
       # USER_PROVIDED_ENV_END
     tmpfs:
       - /tmp:rw,nosuid,nodev,noexec,relatime,size=128M
+      - /run:exec,size=64M
     volumes:
       - "/etc/localtime:/etc/localtime:ro"
       - "/etc/timezone:/etc/timezone:ro"

@@ -30,8 +30,8 @@ function vm_tweaks () {
     # This factor controls the aggressiveness of kswapd. It defines the amount
     # of memory left in a node/system before kswapd is woken up and how much
     # memory needs to be free before kswapd goes back to sleep.
-    # 60: 0.6 percent free memory (default 10 / 0.1%)
-    echo 60 > /proc/sys/vm/watermark_scale_factor
+    # 80: 0.8% of free memory (default 10 / 0.1%)
+    echo 80 > /proc/sys/vm/watermark_scale_factor
 
     # watermark_boost_factor
     # this has to do with reclaiming on fragmentation, but with almost no memory available it can lead to kswapd thrashing
@@ -70,11 +70,16 @@ function vm_tweaks () {
     # the kernel default is a bit small though for weird networking quirks on the raspberry pi and possibly other SBCs
     # thus 8192 should be a good compromise for a stable system without wasting too much memory
     # lower this setting if it's very large and we have 2 GB or less memory
-    # increase the setting if it's less than 8192
+    # use 4096 for systems with less than 700 MB (as running out of memory becomes a real priority)
+    # otherwise increase the setting if it's less than 8192
     min_free_kbytes=$(cat /proc/sys/vm/min_free_kbytes)
     total_mem_kbytes=$(grep -e MemTotal /proc/meminfo | tr -s ' ' | cut -d' ' -f2)
     if (( min_free_kbytes > 8192 )) && (( total_mem_kbytes < 2048 * 1024 )) || (( min_free_kbytes < 8192 )); then
-        echo 8192 > /proc/sys/vm/min_free_kbytes
+        if (( total_mem_kbytes < 700 * 1024 )); then
+            echo 4096 > /proc/sys/vm/min_free_kbytes
+        else
+            echo 8192 > /proc/sys/vm/min_free_kbytes
+        fi
     fi
 
     # min_free_kbytes kernel defaults:

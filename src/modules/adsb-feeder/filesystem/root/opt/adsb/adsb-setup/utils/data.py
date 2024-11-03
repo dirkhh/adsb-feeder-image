@@ -159,6 +159,7 @@ class Data:
         Env("FEEDER_ALT_M", default=[""], is_mandatory=True, tags=["alt"]),
         Env("FEEDER_TZ", default=[""], tags=["tz"]),
         Env("MLAT_SITE_NAME", default=[""], is_mandatory=True, tags=["site_name"]),
+        Env("MLAT_SITE_NAME_SANITIZED", default=[""], is_mandatory=True, tags=["site_name_sanitized"]),
         #
         # SDR settings are only valid on an integrated feeder or a micro feeder, not on stage2
         # misnomer, FEEDER_RTL_SDR is used as follows: READSB_DEVICE_TYPE=${FEEDER_RTL_SDR}
@@ -195,6 +196,7 @@ class Data:
         Env("ADSBLOL_LINK", default=[""], tags=["adsblol_link"]),
         Env("ULTRAFEEDER_UUID", default=[""], tags=["ultrafeeder_uuid"]),
         Env("MLAT_PRIVACY", default=[False], tags=["mlat_privacy", "is_enabled"]),
+        Env("MLAT_ENABLE", default=[True], tags=["mlat_enable", "is_enabled"]),
         Env(
             "FEEDER_TAR1090_USEROUTEAPI",
             default=[True],
@@ -209,11 +211,6 @@ class Data:
             "FEEDER_TAR1090_IMAGE_CONFIG_LINK",
             default="http://HOSTNAME:80/",
             tags=["tar1090_image_config_link"],
-        ),
-        Env(  # this has no UI component, but we want to enable the advanced user to modify it in .env
-            "TAR1090_RANGE_OUTLINE_DASH",
-            default="[2,3]",
-            tags=["range_outline_dash"],
         ),
         Env("_ASDBIM_CSS_THEME", default="light", tags=["css_theme"]),
         Env("_ASDBIM_TAR1090_QUERY_PARAMS", default="", tags=["tar1090_query_params"]),
@@ -270,10 +267,18 @@ class Data:
             default=[""],
             tags=["radarbox", "key"],
         ),
+        # radarbox station number used for status link
         Env(
             "FEEDER_RADARBOX_SN",
             default=[""],
             tags=["radarbox", "sn"],
+        ),
+        # radarbox key that was set when the station number was determined
+        # if it doesn't match the currently set share key, determine new station number
+        Env(
+            "_ADSBIM_STATE_FEEDER_RADARBOX_SN_KEY",
+            default=[""],
+            tags=["radarbox", "snkey"],
         ),
         Env(
             "FEEDER_RB_THERMAL_HACK",

@@ -56,28 +56,26 @@ if grep -q "_IS_BASE_CONFIG_FINISHED=True" /opt/adsb/config/.env 2> /dev/null ; 
         echo "$(date -u +"%FT%T.%3NZ") inject user env"
         python3 /opt/adsb/scripts/inject-env.py .env.user *.yml
     fi
-    echo "$(date -u +"%FT%T.%3NZ") sync"
-    sync # graphs1090 writeback calls sync, to avoid timeouts during compose call sync now to empty the write cache
     echo "$(date -u +"%FT%T.%3NZ") $docker_compose ${COMPOSE_FILES[@]} $@"
+    success="false"
     # third time's a charm
     for i in {1..3}; do
-        $docker_compose "${COMPOSE_FILES[@]}" "$@" && break
+        $docker_compose "${COMPOSE_FILES[@]}" "$@" && success="true" && break
     done
     if [ "$1" = "up" ] ; then
-        # try to figure out if this was successful
-        echo "$(date -u +"%FT%T.%3NZ") finished attempting to bring up the containers" >&2
-        tempfile=$(mktemp)
-        $docker_compose "${COMPOSE_FILES[@]}" ps > "$tempfile"
-        if ! grep -q ultrafeeder "$tempfile" ; then
+        if [[ $success == true ]]; then
+            rm -f /opt/adsb/state/compose_up_failed
+            echo "$(date -u +"%FT%T.%3NZ") finished docker compose up" >&2
+        else
+            touch /opt/adsb/state/compose_up_failed
+            echo "$(date -u +"%FT%T.%3NZ") docker compose up failed 3x" >&2
             (
-                echo "it looks like ultrafeeder didn't come up"
                 echo "docker thinks these containers are running:"
-                cat "$tempfile"
+                docker ps
                 echo "docker thinks these networks are defined:"
                 docker network ls
             ) >&2
         fi
-        rm -f "$tempfile"
     fi
 else
     echo "$(date -u +"%FT%T.%3NZ") things aren't configured, yet, only starting Dozzle and the logger container"

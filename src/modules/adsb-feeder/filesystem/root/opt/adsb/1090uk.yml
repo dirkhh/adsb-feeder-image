@@ -8,6 +8,7 @@ services:
     restart: unless-stopped
     cpu_period: 50000
     cpu_quota: 7500
+    stop_grace_period: 3s
     environment:
       - TZ=${FEEDER_TZ}
       - RADAR1090_KEY=${FEEDER_1090UK_API_KEY}
@@ -20,3 +21,4 @@ services:
       - /run:exec,size=256M
       - /tmp:size=128M
       - /var/log:size=32M
+      - /var/lib/logrotate

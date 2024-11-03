@@ -13,6 +13,20 @@ ${SEPARATOR}
 uname -a:
 $(uname -a)
 ${SEPARATOR}
+"
+
+if ip -6 addr show scope global $(ip -j route get 1.2.3.4 | jq '.[0].dev' -r) | grep -v 'inet6 f' | grep -qs inet6; then
+  if curl -sS -o /dev/null -6 https://google.com; then
+    SANITIZED_LOG+="IPv6 is enabled and working."
+  else
+    SANITIZED_LOG+="IPv6 is enabled and BROKEN."
+  fi
+else
+  SANITIZED_LOG+="IPv6 is disabled."
+fi
+
+SANITIZED_LOG+="
+${SEPARATOR}
 dmesg | grep -iE under.?voltage:
 $(dmesg | grep -iE under.?voltage)
 ${SEPARATOR}

@@ -10,6 +10,7 @@ import requests
 import sys
 import time
 import subprocess
+import traceback
 
 verbose = (
     0 if not os.path.exists("/opt/adsb/config/verbose") else int(open("/opt/adsb/config/verbose", "r").read().strip())
@@ -131,7 +132,7 @@ def create_fake_info():
             ci_out.write(f"Serial\t\t: {random_hex_string}\n")
     if not pathlib.Path("/opt/adsb/rb/thermal_zone0/temp").exists():
         with open("/opt/adsb/rb/thermal_zone0/temp", "w") as fake_temp:
-            print("12345\n", file=fake_temp)
+            fake_temp.write("12345\n")
     return not pathlib.Path("/sys/class/thermal/thermal_zone0/temp").exists()
 
 
@@ -176,3 +177,34 @@ def run_shell_captured(command="", timeout=1800):
 
     output = result.stdout.decode()
     return (True, output)
+
+def get_plain_url(plain_url):
+    requests.packages.urllib3.util.connection.HAS_IPV6 = False
+    status = -1
+    try:
+        response = requests.get(
+                plain_url,
+                headers={
+                    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/117.0",
+                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+                    "Accept-Language": "en-US,en;q=0.5",
+                    "Upgrade-Insecure-Requests": "1",
+                    "Sec-Fetch-Dest": "document",
+                    "Sec-Fetch-Mode": "navigate",
+                    "Sec-Fetch-Site": "none",
+                    "Sec-Fetch-User": "?1",
+                    },
+                )
+    except (
+            requests.HTTPError,
+            requests.ConnectionError,
+            requests.Timeout,
+            requests.RequestException,
+            ) as err:
+        print_err(f"checking {plain_url} failed: {err}")
+        status = err.errno
+    except:
+        print_err("checking {plain_url} failed: {traceback.format_exc()}")
+    else:
+        return response.text, response.status_code
+    return None, status

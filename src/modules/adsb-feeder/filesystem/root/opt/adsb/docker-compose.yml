@@ -7,7 +7,12 @@ services:
     container_name: ultrafeeder
     hostname: ultrafeeder
     restart: unless-stopped
+    cap_add:
+      - SYS_NICE
     device_cgroup_rules:
+      # serial devices
+      - 'c 188:* rwm'
+      # USB devices
       - 'c 189:* rwm'
     ports:
       - ${AF_TAR1090_PORT_ADJUSTED:-8080}:80 # to expose the web interface
@@ -56,7 +61,7 @@ services:
       # Sources and Aggregator connections:
       # (Note - remove the ones you are not using / feeding)
       - ULTRAFEEDER_CONFIG=${FEEDER_ULTRAFEEDER_CONFIG}
-      - MLAT_USER=${MLAT_SITE_NAME}
+      - MLAT_USER=${MLAT_SITE_NAME_SANITIZED}
       - UUID=${ULTRAFEEDER_UUID}
       # reduce delay starting up various mlat-clients, default is 15 seconds
       - MLAT_STARTUP_STAGGER=1
@@ -74,8 +79,7 @@ services:
       - HEYWHATSTHAT_ALTS=${FEEDER_HEYWHATSTHAT_ALTS:-1000ft,5000ft,10000ft,20000ft,30000ft,40000ft}
       - TAR1090_SITESHOW=true
       - TAR1090_RANGE_OUTLINE_COLORED_BY_ALTITUDE=true
-      - TAR1090_RANGE_OUTLINE_WIDTH=1.5
-      - TAR1090_RANGE_OUTLINE_DASH=${TAR1090_RANGE_OUTLINE_DASH}
+      - TAR1090_RANGE_OUTLINE_WIDTH=0.7
       - TAR1090_RANGERINGSDISTANCES=${TAR1090_RANGERINGSDISTANCES:-50,100,150,200}
       - TAR1090_RANGERINGSCOLORS='#1A237E','#0D47A1','#42A5F5','#64B5F6'
       - TAR1090_USEROUTEAPI=${FEEDER_TAR1090_USEROUTEAPI}

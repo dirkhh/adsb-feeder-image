@@ -138,9 +138,6 @@
   <script type="text/javascript" src="{{ url_for('static', filename='js/mdb.min.js') }}"></script>
   <script>
     function check_mf_status() {
-      let n = parseInt("{{ env_value_by_tag('num_micro_sites') }}")
-      if (isNaN(n)) n = 0;
-      if (n == 0) return;
       let url = "/api/stage2_stats";
       fetch(url, {
         method: "GET", cors: "no-cors"
@@ -150,10 +147,10 @@
           data.forEach((d, i) => {
             let color_class = "text-danger";
             let tooltip = "not receiving any data"
-            if (d["pps"] > 2) {
+            if (d["pps"] > 0) {
               color_class = "text-success";
               tooltip = "receiving data"
-            } else if (d["pct"] > 0 || d["secs"] > 60) {
+            } else if (d["uptime"] > 60) {
               color_class = "text-warning";
               tooltip = "receiving unusually little data"
             }
@@ -162,9 +159,7 @@
             $("#mf_status_" + i).text(d["pps"] + " pos / " + d["mps"] + " msg per sec");
           })
         })
-        .finally(() => {
-          setTimeout(check_mf_status, 15000);
-        });
+        return setTimeout(check_mf_status, 15000);
     };
 
     function get_temperatures() {

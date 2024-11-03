@@ -6,7 +6,6 @@ PartOf=docker.service
 [Service]
 SyslogIdentifier=adsb-docker
 WorkingDirectory=/opt/adsb
-ExecStartPre=-/usr/bin/bash /opt/adsb/scripts/zram-swap.sh
 ExecStartPre=-/usr/bin/bash -c "mount -o remount,exec,size=$(( $(cat /proc/meminfo | grep -i 'memtotal' | grep -o '[[:digit:]]*') / 2 ))k /run"
 ExecStart=/opt/adsb/docker-compose-start
 RemainAfterExit=yes
