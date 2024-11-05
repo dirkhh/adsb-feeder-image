@@ -1607,7 +1607,12 @@ class AdsbIm:
         # so we can change gain on the fly without changing env vars
         # for manual gain the autogain script in the container can be asked to do nothing
         # by touching the suspend file
-        if gain == "autogain":
+
+        # the container based autogain script is never used now but the env var
+        # READSB_GAIN=autogain must remain set so we can change the gain
+        # without recreating the container, be it a change to a number or to
+        # 'auto' gain built into readsb
+        if False:
             (gaindir / "suspend").unlink(missing_ok=True)
         else:
             (gaindir / "suspend").touch(exist_ok=True)
@@ -1794,7 +1799,7 @@ class AdsbIm:
             if airspy:
                 # make sure airspy gain is within bounds
                 gain = self._d.env_by_tags(["gain"]).value
-                if gain == "autogain":
+                if gain.startswith("auto"):
                     self._d.env_by_tags(["gain_airspy"]).value = "auto"
                 elif make_int(gain) > 21:
                     self._d.env_by_tags(["gain_airspy"]).value = "21"
@@ -2228,8 +2233,8 @@ class AdsbIm:
                     if value == "" or value == "auto":
                         value = "autogain"
                 if key == "gain":
-                    if value == "" or value == "auto":
-                        value = "autogain"
+                    if value == "":
+                        value = "auto"
                 # deal with the micro feeder and stage2 initial setup
                 if key == "aggregator_choice" and value in ["micro", "nano"]:
                     self._d.env_by_tags("aggregators_chosen").value = True
