@@ -12,10 +12,8 @@
   <link rel="stylesheet" id="css-theme" />
   <script>
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      //  document.write("<link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/mdb.dark.min.css') }}\" />");
       document.getElementById("css-theme").href = "{{ url_for('static', filename='css/mdb.dark.min.css') }}";
     } else {
-      //  document.write("<link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/mdb.min.css') }}\" />");
       document.getElementById("css-theme").href = "{{ url_for('static', filename='css/mdb.min.css') }}";
     }
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
