@@ -163,6 +163,9 @@
           <input type="radio" name="css_theme" id="css_dark" value="dark" {% if
           env_value_by_tag("css_theme")=="dark" %} checked {% endif %}>
           <label class="form-check-label mr-3" for="css_dark">Dark Theme</label>
+          <input type="radio" name="css_theme" id="css_auto" value="auto" {% if
+          env_value_by_tag("css_theme")=="auto" %} checked {% endif %}>
+          <label class="form-check-label mr-3" for="css_auto">Auto</label>
         </div>
         <div class="col-4">
           <button type="submit" class="btn btn-primary mx-auto w-100" name="css_theme--submit"
