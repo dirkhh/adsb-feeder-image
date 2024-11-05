@@ -8,8 +8,8 @@
   <!-- Google Fonts Roboto. Copyright 2011 Google Inc. All Rights Reserved. See {{ url_for('static', filename='fonts/LICENSE.txt') }} -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts.css') }}" />
   <!-- MDB -->
-  <link rel="stylesheet" id="css-theme" />
   {% if env_value_by_tag("css_theme") == 'auto' %}
+  <link rel="stylesheet" id="css-theme" />
   <script>
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
       //  document.write("<link rel=\"stylesheet\" href=\"{{ url_for('static', filename='css/mdb.dark.min.css') }}\" />");
