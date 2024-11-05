@@ -32,22 +32,18 @@ jobs:
         message: "latest commit"
   # next run all the board builds
   build:
+    needs: prepare
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
-        name: [lepotato, lepotato-raspbian, nanopi-neo3-dietpi, orangepi-3lts-dietpi, orangepi-5plus-dietpi, orangepi-zero3-dietpi, raspberrypi64-pi-2-3-4-5, raspberrypi64-dietpi-pi-2-3-4, raspberrypi64-dietpi-pi-5, x86-64-native, x86-64-vm]
+        name: [lepotato, nanopi-neo3-dietpi, orangepi-3lts-dietpi, orangepi-5plus-dietpi, orangepi-zero3-dietpi, raspberrypi64-pi-2-3-4-5, raspberrypi64-dietpi-pi-2-3-4, raspberrypi64-dietpi-pi-5, x86-64-native, x86-64-vm]
         include:
         - name: lepotato
           base_arch: arm64
           variant: armbian
           url: https://test.adsb.im/downloads/Armbian-unofficial_23.11.0-trunk_Lepotato_bookworm_current_6.1.63_minimal.img.xz
           magic_path: "repository/src/image-armbian/le-potato.img.xz"
-        - name: lepotato-raspbian
-          base_arch: arm64
-          variant: default
-          url: https://test.adsb.im/downloads/raspbian-bookworm-lepotato.img.xz
-          magic_path: "repository/src/image/le-potato-raspbian.img.xz"
         - name: nanopi-neo3-dietpi
           variant: dietpi-fat-2
           base_arch: arm64
