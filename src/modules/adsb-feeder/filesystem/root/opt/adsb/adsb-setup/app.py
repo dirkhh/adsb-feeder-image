@@ -1591,10 +1591,12 @@ class AdsbIm:
             except:
                 print_err(f'error writing "{string}" to {path}')
 
-        if self._d.is_enabled("stage2_nano"):
+        if self._d.is_enabled("stage2_nano") or self._d.env_by_tags("aggregator_choice").value == "nano":
             gaindir = pathlib.Path("/opt/adsb/config/nanofeeder/globe_history/autogain")
+            setGainPath = pathlib.Path("/run/adsb-feeder-nanofeeder/readsb/setGain")
         else:
             gaindir = pathlib.Path("/opt/adsb/config/ultrafeeder/globe_history/autogain")
+            setGainPath = pathlib.Path("/run/adsb-feeder-ultrafeeder/readsb/setGain")
         try:
             gaindir.mkdir(exist_ok=True, parents=True)
         except:
@@ -1614,7 +1616,7 @@ class AdsbIm:
             tryWriteFile(gaindir / "gain", f"{gain}\n")
 
             # this adjusts the gain while readsb is running
-            tryWriteFile("/run/adsb-feeder-ultrafeeder/readsb/setGain", f"{gain}\n")
+            tryWriteFile(setGainPath, f"{gain}\n")
 
     def setup_or_disable_uat(self, sitenum):
         if sitenum and self._d.list_is_enabled(["uat978"], sitenum):
