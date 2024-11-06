@@ -28,6 +28,13 @@ echo "$SSH_PUB_KEY" >> ~root/.ssh/authorized_keys
 echo "$SSH_PUB_KEY" > ~root/.ssh/adsb.im.installkey
 touch /opt/adsb/adsb.im.passwd.and.keys
 
+# zerotier and tailscale repos
+
+DEBIAN_DISTRO=$(head -1 /etc/apt/sources.list | cut -d\  -f 3)
+echo "deb http://download.zerotier.com/debian/${DEBIAN_DISTRO} ${DEBIAN_DISTRO} main" > /etc/apt/sources.list.d/zerotier.list
+curl -fsSL "https://pkgs.tailscale.com/stable/debian/${DEBIAN_DISTRO}.noarmor.gpg" | sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
+curl -fsSL "https://pkgs.tailscale.com/stable/debian/${DEBIAN_DISTRO}.tailscale-keyring.list" | sudo tee /etc/apt/sources.list.d/tailscale.list
+
 # setup Python/Flask
 apt-get update --allow-releaseinfo-change
 
@@ -66,21 +73,13 @@ echo "_ADSBIM_CONTAINER_VERSION=$(cat /opt/adsb/adsb.im.version)" >> "$ENV_FILE"
 rm -f /boot/ADSB-README.txt
 
 # Install dependencies
-apt-get update
 apt-get install -y gnupg hostapd isc-dhcp-server avahi-utils
 systemctl mask hostapd.service
 systemctl mask isc-dhcp-server.service
 
 # install zerotier and tailscale, first get their repo
+# don't enable
 
-DEBIAN_DISTRO=$(head -1 /etc/apt/sources.list | cut -d\  -f 3)
-echo "deb http://download.zerotier.com/debian/${DEBIAN_DISTRO} ${DEBIAN_DISTRO} main" > /etc/apt/sources.list.d/zerotier.list
-curl -fsSL "https://pkgs.tailscale.com/stable/debian/${DEBIAN_DISTRO}.noarmor.gpg" | sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
-curl -fsSL "https://pkgs.tailscale.com/stable/debian/${DEBIAN_DISTRO}.tailscale-keyring.list" | sudo tee /etc/apt/sources.list.d/tailscale.list
-
-# Update and install - but don't enable
-
-apt-get update
 apt-get install -y zerotier-one tailscale
 systemctl disable tailscaled
 systemctl disable zerotier-one
