@@ -4,7 +4,6 @@
 
 ### Cleanup
 apt-get clean -y
-apt-get autoclean -y
 find  /var/lib/apt/lists | grep -v InRelease | xargs rm -rf
 rm -rf /tmp/* /var/log/* /var/cache/debconf/templates.dat* /var/lib/dpkg/status-old
 
