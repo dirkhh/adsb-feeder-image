@@ -195,6 +195,13 @@ jobs:
         echo "export SSH_PUB_KEY='${{ secrets.SSH_KEY }}'" >> config
         echo "export FEEDER_IMAGE_NAME=${feeder_image_name}" >> config
         echo "feeder_image_name=${feeder_image_name}" >> $GITHUB_OUTPUT
+
+        # make raspberry pi image as small as we can
+        if [[ ${IMG_NAME} == raspberrypi64-pi-2-3-4-5 ]] ; then
+            echo "export BASE_IMAGE_ENLARGEROOT=0" >> config
+            echo "export BASE_IMAGE_RESIZEROOT=10" >> config
+        fi
+
         # finally, try one more time to have ALL the tags - to avoid weird errors in the code
         # creating the version name - and also update `latest` in case that was wrong as well
         git fetch --tags --force
