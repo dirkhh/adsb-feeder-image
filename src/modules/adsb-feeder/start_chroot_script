@@ -14,6 +14,12 @@ install_cleanup_trap
 
 unpack /filesystem/root /
 
+# free up space
+apt-get remove -y gcc g++ gdb || true
+apt-get remove -y libraspberrypi-doc || true
+apt-get autoremove -y
+
+
 echo "building on $(hostname) - available disk space inside the image:"
 df -h
 mount

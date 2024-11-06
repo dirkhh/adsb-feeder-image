@@ -14,9 +14,6 @@ sed -i -e 's/.*SystemMaxUse=.*/SystemMaxUse=128M/' /etc/systemd/journald.conf
 
 
 # free up space
-apt-get remove -y gcc g++ gdb || true
-apt-get remove -y libraspberrypi-doc || true
-apt-get autoremove -y
 apt clean
 find  /var/lib/apt/lists | grep -v InRelease | xargs rm -rf
 rm -rf /tmp/* /var/log/* /var/cache/debconf/templates.dat* /var/lib/dpkg/status-old
