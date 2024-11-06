@@ -14,9 +14,12 @@ sed -i -e 's/.*SystemMaxUse=.*/SystemMaxUse=128M/' /etc/systemd/journald.conf
 
 
 # free up space
-apt clean
+apt-get clean -y
 find  /var/lib/apt/lists | grep -v InRelease | xargs rm -rf
 rm -rf /tmp/* /var/log/* /var/cache/debconf/templates.dat* /var/lib/dpkg/status-old
+
+# not sure where this binary comes from, remove it!
+rm -f /usr/bin/qemu-aarch64-static
 
 dd if=/dev/zero of=/zeroes bs=1M || true
 rm -f /zeroes
