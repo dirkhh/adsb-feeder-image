@@ -20,17 +20,15 @@ export DEBIAN_FRONTEND=noninteractive
 
     echo "Installing docker, each step may take a while:"
     echo -n "Updating repositories... "
-    apt-get update -qq -y >/dev/null
+    apt-get update -y
     echo -n "Ensuring dependencies are installed... "
-    apt-get install -qq -y git rtl-sdr apt-transport-https ca-certificates curl gnupg2 slirp4netns uidmap jq zstd netcat-openbsd >/dev/null
+    apt-get install -y git rtl-sdr apt-transport-https ca-certificates curl gnupg2 slirp4netns uidmap jq zstd netcat-openbsd
     echo -n "Getting docker..."
     curl -fsSL https://get.docker.com -o get-docker.sh
     echo "Installing Docker... "
     sh get-docker.sh
     echo "Docker installed -- configuring docker..."
-    usermod -aG docker "${BASE_USER}"
     mkdir -p /etc/docker
-    chmod a+rwx /etc/docker
     cat > /etc/docker/daemon.json <<EOF
 {
   "log-driver": "journald",
@@ -100,6 +98,3 @@ fi
 
 # remove unnecessary docker components
 apt autoremove -y docker-ce-rootless-extras docker-buildx-plugin
-
-#cleanup
-apt-get clean
