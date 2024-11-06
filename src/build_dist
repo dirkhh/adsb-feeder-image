@@ -111,6 +111,9 @@ if [[ "$VARIANT" == "dietpi"* ]] ; then
     touch "$MNT_DIR"/opt/adsb/os.adsb.feeder.image
     touch "$MNT_DIR"/opt/adsb/adsb.im.passwd.and.keys
 
+    # speed up apt-get operations by not rebuilding the man-db cache:
+    rm -f "$MNT_DIR"/var/lib/man-db/auto-update
+
     # make systemd journal persistent for dietpi
     sed -i -e 's/.*Storage=.*/Storage=persistent/' "$MNT_DIR/etc/systemd/journald.conf"
     sed -i -e 's/.*RuntimeMaxUse=.*/RuntimeMaxUse=10M/' /etc/systemd/journald.conf

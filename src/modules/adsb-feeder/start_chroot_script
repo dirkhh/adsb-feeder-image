@@ -14,6 +14,9 @@ install_cleanup_trap
 
 unpack /filesystem/root /
 
+# speed up apt-get operations by not rebuilding the man-db cache:
+rm -f /var/lib/man-db/auto-update
+
 # free up space
 apt-get autoremove -y gcc-12 dpkg-dev gdb build-essential mkvtoolnix iso-codes shared-mime-info rpicam-apps-lite\* || true
 

@@ -123,6 +123,7 @@ jobs:
 
     - name: Install Dependencies
       run: |
+        sudo rm -f /var/lib/man-db/auto-update
         sudo apt update
         sudo apt-get install -y coreutils p7zip-full qemu-user-static qemu-utils lz4
 
@@ -179,6 +180,7 @@ jobs:
           sudo rm -rf /usr/local/share/boost
           sudo rm -rf "$AGENT_TOOLSDIRECTORY"
           sudo rm -rf /usr/local/lib/android
+          sudo rm -f /var/lib/man-db/auto-update
           sudo apt-get autoremove -y >/dev/null 2>&1 || true
           sudo apt-get autoclean -y >/dev/null 2>&1 || true
           echo "remaining space now $(df -h .)"
