@@ -15,10 +15,7 @@ install_cleanup_trap
 unpack /filesystem/root /
 
 # free up space
-apt-get remove -y gcc g++ gdb || true
-apt-get remove -y libraspberrypi-doc || true
-apt-get autoremove -y
-
+apt-get autoremove -y gcc-12 dpkg-dev gdb build-essential mkvtoolnix iso-codes shared-mime-info rpicam-apps-lite\* || true
 
 echo "building on $(hostname) - available disk space inside the image:"
 df -h
