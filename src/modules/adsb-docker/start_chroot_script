@@ -19,10 +19,6 @@ install_cleanup_trap
 export DEBIAN_FRONTEND=noninteractive
 
     echo "Installing docker, each step may take a while:"
-    echo -n "Updating repositories... "
-    apt-get update -y
-    echo -n "Ensuring dependencies are installed... "
-    apt-get install -y git rtl-sdr apt-transport-https ca-certificates curl gnupg2 slirp4netns uidmap jq zstd netcat-openbsd
     echo -n "Getting docker..."
     curl -fsSL https://get.docker.com -o get-docker.sh
     echo "Installing Docker... "
