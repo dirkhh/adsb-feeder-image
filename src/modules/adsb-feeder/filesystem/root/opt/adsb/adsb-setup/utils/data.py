@@ -212,7 +212,7 @@ class Data:
             default="http://HOSTNAME:80/",
             tags=["tar1090_image_config_link"],
         ),
-        Env("_ASDBIM_CSS_THEME", default="light", tags=["css_theme"]),
+        Env("_ASDBIM_CSS_THEME", default="auto", tags=["css_theme"]),
         Env("_ASDBIM_TAR1090_QUERY_PARAMS", default="", tags=["tar1090_query_params"]),
         # 978
         # start the container (integrated / micro) or the replay
