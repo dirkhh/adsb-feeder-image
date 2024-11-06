@@ -76,7 +76,12 @@ echo "_ADSBIM_CONTAINER_VERSION=$(cat /opt/adsb/adsb.im.version)" >> "$ENV_FILE"
 rm -f /boot/ADSB-README.txt
 
 # Install dependencies
-apt-get install -y gnupg hostapd isc-dhcp-server avahi-utils
+apt-get install -y \
+    gnupg hostapd isc-dhcp-server avahi-utils \
+    git rtl-sdr \
+    apt-transport-https ca-certificates curl gnupg2 \
+    slirp4netns uidmap jq zstd netcat-openbsd
+
 systemctl mask hostapd.service
 systemctl mask isc-dhcp-server.service
 
