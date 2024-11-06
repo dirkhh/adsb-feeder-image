@@ -98,5 +98,8 @@ if [[ -f /boot/firmware/config.txt ]]; then
     echo "gpu_mem=16" >> /boot/firmware/config.txt
 fi
 
+# remove unnecessary docker components
+apt autoremove -y docker-ce-rootless-extras docker-buildx-plugin
+
 #cleanup
 apt-get clean
