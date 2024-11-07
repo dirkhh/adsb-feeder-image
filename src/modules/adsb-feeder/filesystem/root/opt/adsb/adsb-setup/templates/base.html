@@ -1,6 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
-
+{% if env_value_by_tag("css_theme") == 'auto' %}
+<html lang="en" data-mdb-theme="auto">
+{% elif env_value_by_tag("css_theme") == 'dark' %}
+<html lang="en" data-mdb-theme="dark">
+{% else %}
+<html lang="en" data-mdb-theme="light">
+{% endif %}
 <head>
   <!-- Required meta tags -->
   <meta charset="utf-8" />
@@ -8,10 +13,21 @@
   <!-- Google Fonts Roboto. Copyright 2011 Google Inc. All Rights Reserved. See {{ url_for('static', filename='fonts/LICENSE.txt') }} -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts.css') }}" />
   <!-- MDB -->
-  {% if env_value_by_tag("css_theme") == 'dark' %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/mdb.dark.min.css') }}" />
-  {% else %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/mdb.min.css') }}" />
+  <link rel="stylesheet" id="css-theme" href="{{ url_for('static', filename='css/mdb.min.css') }}" />
+  {% if env_value_by_tag("css_theme") == 'auto' %}
+  <script>
+    ;(function () {
+      const htmlElement = document.querySelector("html")
+      if(htmlElement.getAttribute("data-mdb-theme") === 'auto') {
+        function updateTheme() {
+          document.querySelector("html").setAttribute("data-mdb-theme",
+          window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateTheme)
+        updateTheme()
+      }
+    })()
+  </script>
   {% endif %}
   <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" />
   <!-- Spinner -->
