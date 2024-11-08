@@ -40,7 +40,7 @@
     <div class="container-fluid">
       <a class="navbar-brand" href="{{ url_for("director") }}">ADS-B Feeder</a>
       <a class="btn btn-primary mx-3" href="/map{{ env_value_by_tag('tar1090_query_params') }}">Live Map</a>
-      <div id="temperature_block" style="width: 4em; height:auto;">
+      <div id="temperature_block" style="width: 4em; height:auto;" class="d-none d-sm-block">
         <span id="cpu" class="d-none"
               style="float:left;width:45%;height:1em;font-size:0.6em;margin-left: 1px;">CPU</span>
         <span id="ext" class=" d-none"
