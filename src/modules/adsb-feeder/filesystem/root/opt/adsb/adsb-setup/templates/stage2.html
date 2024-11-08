@@ -92,7 +92,8 @@
                        {% if list_is_enabled('mf_brofm', loop.index0) %}checked="checked" {% endif %} /></td>
               <td class="text-center">
                 <button type="submit" name="save_edit_micro_{{ loop.index0 }}" value="go" title="Save changes"
-                        id="save_edit" class="btn btn-danger btn-floating btn-sm">&#x2714;</button>
+                        id="save_edit" class="btn btn-danger btn-floating btn-sm"
+                        onclick="show_spinner(); return true;">&#x2714;</button>
                 <button type="submit" name="cancel_edit_micro_{{ loop.index0 }}" value="go" title="Cancel"
                         class="btn btn-info btn-floating btn-sm">&#x2716;</button>
               </td>
@@ -124,7 +125,7 @@
 
               <td class="text-center">
                 <button type="submit" name="remove_micro_{{ loop.index0 }}" value="go" title="Remove this micro feeder"
-                        class="btn btn-danger btn-floating btn-sm">&#x232B;</button>
+                        class="btn btn-danger btn-floating btn-sm" onclick="show_spinner(); return true;">&#x232B;</button>
                 <button type="submit" name="edit_micro_{{ loop.index0 }}" value="go" title="Edit this micro feeder"
                         class="btn btn-info btn-floating btn-sm">&#x270e;</button>
               </td>
