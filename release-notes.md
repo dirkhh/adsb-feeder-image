@@ -1,4 +1,5 @@
 Changes since v2.2.3 include:
+- status page: only show aggregators when enabled
 - Update UI library and improve overall UI experience (especially on smaller screens) as well as auto theme handling
 - More streamlining of images to reduce size, install- and boot-time
 - Switch autogain algorithm to readsb builtin (this brings a new Ultrafeeder image)
