@@ -519,9 +519,9 @@
     // idx {{ idx }}
     {% if list_is_enabled(agg, idx) %}
     reset_status("{{ agg }}", {{ idx }});
-    get_status("{{ agg }}", {{ idx }});
     {% endif %}
     {% endfor %}
+    get_status("{{ agg }}");
     {% endfor %}
   }
 
@@ -530,44 +530,47 @@
     $("#" + agg + "mlat" + idx).text(".");
     $("#" + agg + "span" + idx).attr("class", 'text-dark');
   }
-  function get_status(agg, idx) {
-    fetch(`/api/status/${agg}/${idx}`)
+  function get_status(agg) {
+    fetch(`/api/status/${agg}`)
       .then(response => response.json())
-      .then(data => {
-        // now use the idx to do something clever about what is shown there...
-        // right now this is broken and just overwrites things
-        $("#" + agg + "beast" + idx).text(data["beast"]);
-        $("#" + agg + "mlat" + idx).text(data["mlat"]);
-        const mlat_broken = !(data["mlat"] == "+" || data["mlat"] == "." || data["mlat"] == " ")
-        const beast_broken = !(data["beast"] == "+" || data["beast"] == "." || data["beast"] == " ")
-        if (data["beast"] == "+" && !mlat_broken) {
-          $("#" + agg + "span" + idx).attr("class", 'text-success')
-        } else if (data["beast"] == "☒") {
-          $("#" + agg + "span" + idx).attr("class", 'text-danger')
-        } else if (beast_broken || mlat_broken) {
-          $("#" + agg + "span" + idx).attr("class", 'text-warning')
-        } else {
-          $("#" + agg + "span" + idx).attr("class", 'text-dark')
-        }
-        if (agg == "adsblol") {
-          if (idx > 0) {
-            // console.log("set adsblol-link" + idx + " to " + data["adsblollink"])
-            $("#adsblol-link-" + idx).attr("href", data["adsblollink"])
-          }
-        }
-        if (agg == "alive") {
-          $("#alivemaplink_" + idx).attr("href", data["alivemaplink"])
-        }
-        if (agg == "adsbx") {
-          if (idx == 0) {
-            $("#adsbxstatlink").attr("href", "https://www.adsbexchange.com/api/feeders/?feed=" + data["adsbxfeederid"])
-            $("#adsbxmaplink").attr("href", "https://globe.adsbexchange.com/?feed=" + data["adsbxfeederid"])
+      .then(dict => {
+        Object.keys(dict).forEach(idx => {
+          const data = dict[idx];
+          // now use the idx to do something clever about what is shown there...
+          // right now this is broken and just overwrites things
+          $("#" + agg + "beast" + idx).text(data["beast"]);
+          $("#" + agg + "mlat" + idx).text(data["mlat"]);
+          const mlat_broken = !(data["mlat"] == "+" || data["mlat"] == "." || data["mlat"] == " ")
+          const beast_broken = !(data["beast"] == "+" || data["beast"] == "." || data["beast"] == " ")
+          if (data["beast"] == "+" && !mlat_broken) {
+            $("#" + agg + "span" + idx).attr("class", 'text-success')
+          } else if (data["beast"] == "☒") {
+            $("#" + agg + "span" + idx).attr("class", 'text-danger')
+          } else if (beast_broken || mlat_broken) {
+            $("#" + agg + "span" + idx).attr("class", 'text-warning')
           } else {
-            // console.log("set adsbxstatlink" + idx)
-            $("#adsbxstatlink_" + idx).attr("href", "https://www.adsbexchange.com/api/feeders/?feed=" + data["adsbxfeederid"])
-            $("#adsbxmaplink_" + idx).attr("href", "https://globe.adsbexchange.com/?feed=" + data["adsbxfeederid"])
+            $("#" + agg + "span" + idx).attr("class", 'text-dark')
           }
-        }
+          if (agg == "adsblol") {
+            if (idx > 0) {
+              // console.log("set adsblol-link" + idx + " to " + data["adsblollink"])
+              $("#adsblol-link-" + idx).attr("href", data["adsblollink"])
+            }
+          }
+          if (agg == "alive") {
+            $("#alivemaplink_" + idx).attr("href", data["alivemaplink"])
+          }
+          if (agg == "adsbx") {
+            if (idx == 0) {
+              $("#adsbxstatlink").attr("href", "https://www.adsbexchange.com/api/feeders/?feed=" + data["adsbxfeederid"])
+              $("#adsbxmaplink").attr("href", "https://globe.adsbexchange.com/?feed=" + data["adsbxfeederid"])
+            } else {
+              // console.log("set adsbxstatlink" + idx)
+              $("#adsbxstatlink_" + idx).attr("href", "https://www.adsbexchange.com/api/feeders/?feed=" + data["adsbxfeederid"])
+              $("#adsbxmaplink_" + idx).attr("href", "https://globe.adsbexchange.com/?feed=" + data["adsbxfeederid"])
+            }
+          }
+        });
       });
   }
   function get_stage2_connection_status() {

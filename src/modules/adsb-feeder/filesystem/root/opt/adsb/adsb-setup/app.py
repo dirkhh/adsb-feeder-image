@@ -292,7 +292,6 @@ class AdsbIm:
         self.app.add_url_rule("/api/micro_settings", "micro_settings", self.micro_settings)
         self.app.add_url_rule("/api/check_remote_feeder/<ip>", "check_remote_feeder", self.check_remote_feeder)
         self.app.add_url_rule(f"/api/status/<agg>", "beast", self.agg_status)
-        self.app.add_url_rule(f"/api/status/<agg>/<idx>", "beast", self.agg_status)
         self.app.add_url_rule("/api/stage2_connection", "stage2_connection", self.stage2_connection)
         self.app.add_url_rule("/api/get_temperatures.json", "temperatures", self.temperatures)
         # fmt: on
@@ -1160,11 +1159,7 @@ class AdsbIm:
         self.agg_matrix = matrix
         self.agg_structure = active_aggregators
 
-    def agg_status(self, agg, idx=0):
-        # print_err(f'agg_status(agg={agg}, idx={idx})')
-        if agg == "im":
-            return json.dumps(self._im_status.check())
-
+    def get_agg_status(self, agg, idx):
         status = self._agg_status_instances.get(f"{agg}-{idx}")
         if status is None:
             status = self._agg_status_instances[f"{agg}-{idx}"] = AggStatus(
@@ -1188,6 +1183,19 @@ class AdsbIm:
             res["adsblollink"] = self._d.env_by_tags("adsblol_link").list_get(idx),
         elif agg == "alive":
             res["alivemaplink"] = self._d.env_by_tags("alivemaplink").list_get(idx),
+
+        return res
+
+    def agg_status(self, agg):
+        # print_err(f'agg_status(agg={agg})')
+        if agg == "im":
+            return json.dumps(self._im_status.check())
+
+        n = self._d.env_by_tags("num_micro_sites").value + 1
+        res = dict()
+        for idx in range(n):
+            if self._d.list_is_enabled(agg, idx):
+                res[idx] = self.get_agg_status(agg, idx)
 
         return json.dumps(res)
 
