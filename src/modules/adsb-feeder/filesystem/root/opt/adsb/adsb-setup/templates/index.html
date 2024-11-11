@@ -462,11 +462,17 @@
   let refreshDelay = 35 * 1000;
   let refreshTimer = null;
   let mfTimer = null;
+  let lastStartPage = 0;
   function startPageIndex(opt) {
     clearTimeout(refreshTimer); // abundance of caution to avoid multiple timers
     if (opt != "noModifyDelay") {
       refreshDelay = Math.min(300 * 1000, refreshDelay * 1.5);
     }
+    let now = Date.now() / 1000;
+    if (now - lastStartPage < 10) {
+      return;
+    }
+    lastStartPage = now;
     verbose && console.log(new Date().toLocaleTimeString() + " refreshing status, next check in " + refreshDelay / 1000);
     refreshTimer = setTimeout(startPageIndex, refreshDelay);
     $("#last_status_update").html(new Date().toLocaleTimeString());
