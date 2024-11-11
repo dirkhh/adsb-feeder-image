@@ -32,12 +32,7 @@ class Data:
         ["/graphs1090/", "TAR1090", "/graphs1090/"],
         ["/graphs/", "TAR1090", "/graphs1090/"],
         ["/stats/", "TAR1090", "/graphs1090/"],
-        ["/piaware/", "PIAWAREMAP", "/"],
         ["/fa/", "PIAWAREMAP", "/"],
-        ["/flightaware/", "PIAWAREMAP", "/"],
-        ["/piaware-stats/", "PIAWARESTAT", "/"],
-        ["/pa-stats/", "PIAWARESTAT", "/"],
-        ["/fa-stats/", "PIAWARESTAT", "/"],
         ["/fa-status/", "PIAWARESTAT", "/"],
         ["/fa-status.json/", "PIAWARESTAT", "/status.json"],
         ["/fr-status/", "FLIGHTRADAR", "/"],
@@ -63,7 +58,7 @@ class Data:
             ret.append([endpoint, port, path])
             if endpoint in [
                 "/fr24-monitor.json",
-                "/flightaware/",
+                "/fa/",
                 "/fa-status/",
                 "/fa-status.json/",
                 "/fr24/",
