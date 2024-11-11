@@ -207,26 +207,26 @@ class AdsbIm:
         }
         # fmt: off
         self.all_aggregators = [
-            # tag, name, map link, status link
-            ["adsblol", "adsb.lol", "https://adsb.lol/", ["https://api.adsb.lol/0/me"]],
-            ["flyitaly", "Fly Italy ADSB", "https://mappa.flyitalyadsb.com/", ["https://my.flyitalyadsb.com/am_i_feeding"]],
-            ["avdelphi", "AVDelphi", "https://www.avdelphi.com/coverage.html", [""]],
-            ["planespotters", "Planespotters", "https://radar.planespotters.net/", ["https://www.planespotters.net/feed/status"]],
-            ["tat", "TheAirTraffic", "https://globe.theairtraffic.com/", ["https://theairtraffic.com/feed/myip/"]],
-            ["radarplane", "RadarPlane", "https://radarplane.com/", ["https://radarplane.com/feed"]],
-            ["adsbfi", "adsb.fi", "https://globe.adsb.fi/", ["https://api.adsb.fi/v1/myip"]],
-            ["adsbx", "ADSBExchange", "https://globe.adsbexchange.com/", ["https://www.adsbexchange.com/myip/"]],
-            ["hpradar", "HPRadar", "https://skylink.hpradar.com/", [""]],
-            ["alive", "airplanes.live", "https://globe.airplanes.live/", ["https://airplanes.live/myfeed/"]],
-            ["flightradar", "flightradar24", "https://www.flightradar24.com/", ["/fr24STG2IDX"]],
-            ["planewatch", "Plane.watch", "https:/plane.watch/desktop.html", [""]],
-            ["flightaware", "FlightAware", "https://www.flightaware.com/live/map", ["/fa-statusSTG2IDX/"]],
-            ["radarbox", "RadarBox", "https://www.radarbox.com/coverage-map", ["https://www.radarbox.com/stations/<FEEDER_RADARBOX_SN>"]],
-            ["planefinder", "PlaneFinder", "https://planefinder.net/", ["/planefinder-statSTG2IDX"]],
-            ["adsbhub", "ADSBHub", "https://www.adsbhub.org/coverage.php", [""]],
-            ["opensky", "OpenSky", "https://opensky-network.org/network/explorer", ["https://opensky-network.org/receiver-profile?s=<FEEDER_OPENSKY_SERIAL>"]],
-            ["radarvirtuel", "RadarVirtuel", "https://www.radarvirtuel.com/", [""]],
-            ["1090uk", "1090MHz UK", "https://1090mhz.uk", ["https://www.1090mhz.uk/mystatus.php?key=<FEEDER_1090UK_API_KEY>"]],
+            # tag, name, map link, status link, table number
+            ["adsblol", "adsb.lol", "https://adsb.lol/", ["https://api.adsb.lol/0/me"], 0],
+            ["flyitaly", "Fly Italy ADSB", "https://mappa.flyitalyadsb.com/", ["https://my.flyitalyadsb.com/am_i_feeding"], 0],
+            ["avdelphi", "AVDelphi", "https://www.avdelphi.com/coverage.html", [""], 0],
+            ["planespotters", "Planespotters", "https://radar.planespotters.net/", ["https://www.planespotters.net/feed/status"], 0],
+            ["tat", "TheAirTraffic", "https://globe.theairtraffic.com/", ["https://theairtraffic.com/feed/myip/"], 0],
+            ["radarplane", "RadarPlane", "https://radarplane.com/", ["https://radarplane.com/feed"], 0],
+            ["adsbfi", "adsb.fi", "https://globe.adsb.fi/", ["https://api.adsb.fi/v1/myip"], 0],
+            ["adsbx", "ADSBExchange", "https://globe.adsbexchange.com/", ["https://www.adsbexchange.com/myip/"], 0],
+            ["hpradar", "HPRadar", "https://skylink.hpradar.com/", [""], 0],
+            ["alive", "airplanes.live", "https://globe.airplanes.live/", ["https://airplanes.live/myfeed/"], 0],
+            ["flightradar", "flightradar24", "https://www.flightradar24.com/", ["/fr24STG2IDX"], 1],
+            ["planewatch", "Plane.watch", "https:/plane.watch/desktop.html", [""], 1],
+            ["flightaware", "FlightAware", "https://www.flightaware.com/live/map", ["/fa-statusSTG2IDX/"], 1],
+            ["radarbox", "RadarBox", "https://www.radarbox.com/coverage-map", ["https://www.radarbox.com/stations/<FEEDER_RADARBOX_SN>"], 1],
+            ["planefinder", "PlaneFinder", "https://planefinder.net/", ["/planefinder-statSTG2IDX"], 1],
+            ["adsbhub", "ADSBHub", "https://www.adsbhub.org/coverage.php", [""], 1],
+            ["opensky", "OpenSky", "https://opensky-network.org/network/explorer", ["https://opensky-network.org/receiver-profile?s=<FEEDER_OPENSKY_SERIAL>"], 1],
+            ["radarvirtuel", "RadarVirtuel", "https://www.radarvirtuel.com/", [""], 1],
+            ["1090uk", "1090MHz UK", "https://1090mhz.uk", ["https://www.1090mhz.uk/mystatus.php?key=<FEEDER_1090UK_API_KEY>"], 1],
         ]
         self.agg_matrix = None
         self.agg_structure = None

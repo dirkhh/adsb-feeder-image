@@ -118,9 +118,8 @@
               {% endfor %}
             </tr>
             {% endif %}
-            {% for agg, name, map, status in aggregators %}
-            {% set is_first = ((loop.length + 1) / 2 >= loop.index) %}
-            {% if (tc==0 and is_first) or (tc==1 and not is_first) %}
+            {% for agg, name, map, status, table in aggregators %}
+            {% if (tc == table) %}
             <tr>
               <td>
                 <a href="{{ map }}">{{ name }}</a>
@@ -514,7 +513,7 @@
           $("#update_feeder_aps_stable").attr("disabled", true);
         }
       });
-    {% for agg, name, m, s in aggregators %}
+    {% for agg, name, m, s, table in aggregators %}
     // agg {{ agg }}
     {% for idx in ns.site_indices if matrix[idx] > 0 %}
     // idx {{ idx }}
