@@ -58,6 +58,7 @@ class Data:
                 "/fa/",
                 "/fa-status/",
                 "/fa-status.json/",
+                "/planefinder/",
                 "/planefinder-stat/",
             ]:
                 # inc_port is the id of the stage2 microfeeder

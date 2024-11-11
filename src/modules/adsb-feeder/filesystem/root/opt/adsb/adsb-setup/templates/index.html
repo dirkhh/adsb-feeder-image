@@ -386,7 +386,8 @@
             {% if idx != 0 %}{% set suffix = '_'~idx %}{% else %}{% set suffix = '' %}{% endif %}
             <tr>
               <th>{{ list_value_by_tag('site_name', idx) }}</th>
-              <td><a href="/planefinder-stat{{ suffix }}">Planefinder map</a>
+              <td><a href="/planefinder{{suffix}}">Planefinder map</a>
+              <td><a href="/planefinder-stat{{ suffix }}">Planefinder stats</a>
               </td>
             </tr>
             {% endif %}
