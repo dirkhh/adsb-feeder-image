@@ -2575,12 +2575,15 @@ class AdsbIm:
         aggregators = copy.deepcopy(self.all_aggregators)
         n = self._d.env_by_tags("num_micro_sites").value + 1
         matrix = [0] * n
+        active_aggregators = []
         for idx in range(len(aggregators)):
             agg = aggregators[idx][0]
             status_link_list = aggregators[idx][3]
             template_link = status_link_list[0]
             final_link = template_link
+            agg_enabled = False
             for i in range(n):
+                agg_enabled |= self._d.list_is_enabled(agg, i)
                 matrix[i] |= 1 << idx if self._d.list_is_enabled(agg, i) else 0
                 if template_link.startswith("/"):
                     final_link = template_link.replace("STG2IDX", "" if i == 0 else f"_{i}")
@@ -2592,7 +2595,11 @@ class AdsbIm:
                     status_link_list[0] = final_link
                 else:
                     status_link_list.append(final_link)
-        agg_debug_print = f"final aggregator structure: {aggregators}"
+
+            if agg_enabled:
+                active_aggregators.append(aggregators[idx])
+
+        agg_debug_print = f"final aggregator structure: {active_aggregators}"
         if agg_debug_print != self.last_aggregator_debug_print:
             self.last_aggregator_debug_print = agg_debug_print
             print_err(agg_debug_print)
@@ -2622,7 +2629,7 @@ class AdsbIm:
 
         return render_template(
             "index.html",
-            aggregators=aggregators,
+            aggregators=active_aggregators,
             local_address=local_address,
             tailscale_address=self.tailscale_address,
             zerotier_address=self.zerotier_address,
