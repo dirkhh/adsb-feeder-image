@@ -597,9 +597,9 @@
     }
     if (!document.hidden && !timersActive) {
       verbose && console.log(new Date().toLocaleTimeString() + " visibility change: starting timers");
-      startPageIndex("noModifyDelay");
       // start the micro feeder check
       mfTimer = check_mf_status();
+      startPageIndex("noModifyDelay");
       timersActive = true;
     }
   }
