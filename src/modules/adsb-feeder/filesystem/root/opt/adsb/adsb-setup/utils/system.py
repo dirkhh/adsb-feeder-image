@@ -246,6 +246,12 @@ class System:
 
     def refreshDockerPs(self):
         with self.containerCheckLock:
+            now = time.time()
+            if now - self.lastContainerCheck < 10:
+                # still fresh, do nothing
+                return
+
+            self.lastContainerCheck = now
             self.dockerPsCache = dict()
             cmdline = "docker ps --filter status=running --format '{{.Names}};{{.Status}}'"
             success, output = run_shell_captured(cmdline)
@@ -260,10 +266,8 @@ class System:
 
     def getContainerStatus(self, name):
         with self.containerCheckLock:
-            now = time.time()
-            if now - self.lastContainerCheck > 10:
-                self.refreshDockerPs()
-                self.lastContainerCheck = now
+
+            self.refreshDockerPs()
 
             status = self.dockerPsCache.get(name)
             # print_err(f"{name}: {status}")
