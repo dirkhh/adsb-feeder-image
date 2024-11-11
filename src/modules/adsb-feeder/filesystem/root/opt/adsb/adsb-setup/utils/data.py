@@ -35,12 +35,8 @@ class Data:
         ["/fa/", "PIAWAREMAP", "/"],
         ["/fa-status/", "PIAWARESTAT", "/"],
         ["/fa-status.json/", "PIAWARESTAT", "/status.json"],
-        ["/fr-status/", "FLIGHTRADAR", "/"],
-        ["/fr/", "FLIGHTRADAR", "/"],
         ["/fr24/", "FLIGHTRADAR", "/"],
         ["/fr24-monitor.json", "FLIGHTRADAR", "/monitor.json"],
-        ["/flightradar/", "FLIGHTRADAR", "/"],
-        ["/flightradar24/", "FLIGHTRADAR", "/"],
         ["/planefinder/", "PLANEFINDER", "/"],
         ["/planefinder-stat/", "PLANEFINDER", "/stats.html"],
         ["/dump978/", "UAT978", "/skyaware978/"],
@@ -57,11 +53,11 @@ class Data:
             port = self.env(env).value
             ret.append([endpoint, port, path])
             if endpoint in [
+                "/fr24/",
                 "/fr24-monitor.json",
                 "/fa/",
                 "/fa-status/",
                 "/fa-status.json/",
-                "/fr24/",
                 "/planefinder-stat/",
             ]:
                 # inc_port is the id of the stage2 microfeeder
