@@ -44,10 +44,6 @@ class UltrafeederConfig:
             f"enabled_aggregators for {self._micro} with agg_sel {aggregator_selection} and stage2 {self._d.is_enabled('stage2')}",
             level=4,
         )
-        if aggregator_selection in ["micro", "nano"]:
-            return {}
-        if self._d.is_enabled("stage2") and self._micro == 0:
-            return {}
         # be careful to set the correct values for the individual aggregators;
         # these values are used in the main landing page for the feeder to provide
         # additional links for the enabled aggregators
@@ -57,7 +53,9 @@ class UltrafeederConfig:
             if not aggregator_env:
                 print_err(f"netconfigs references tag {name} with no associated env")
                 continue
-            if aggregator_selection == "all":
+            if aggregator_selection in ["micro", "nano"] or (self._d.is_enabled("stage2") and self._micro == 0):
+                aggregator_env.list_set(self._micro, False)
+            elif aggregator_selection == "all":
                 aggregator_env.list_set(self._micro, True)
             elif aggregator_selection == "privacy":
                 aggregator_env.list_set(
