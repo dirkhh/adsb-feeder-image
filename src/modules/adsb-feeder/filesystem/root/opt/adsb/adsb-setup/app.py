@@ -2674,6 +2674,7 @@ class AdsbIm:
         return render_template(
             "index.html",
             aggregators=self.agg_structure,
+            agg_tables=list({ entry[4] for entry in self.agg_structure }),
             local_address=local_address,
             tailscale_address=self.tailscale_address,
             zerotier_address=self.zerotier_address,
