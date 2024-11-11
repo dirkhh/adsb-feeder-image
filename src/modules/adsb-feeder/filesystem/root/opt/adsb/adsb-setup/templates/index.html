@@ -518,19 +518,19 @@
     {% for idx in ns.site_indices if matrix[idx] > 0 %}
     // idx {{ idx }}
     {% if list_is_enabled(agg, idx) %}
-    reset_status("{{ agg }}", "{{ list_value_by_tag('mf_ip', idx)}}", {{ idx }});
-    get_status("{{ agg }}", "{{ list_value_by_tag('mf_ip', idx)}}", {{ idx }});
+    reset_status("{{ agg }}", {{ idx }});
+    get_status("{{ agg }}", {{ idx }});
     {% endif %}
     {% endfor %}
     {% endfor %}
   }
 
-  function reset_status(agg, ip, idx) {
+  function reset_status(agg, idx) {
     $("#" + agg + "beast" + idx).text(".");
     $("#" + agg + "mlat" + idx).text(".");
     $("#" + agg + "span" + idx).attr("class", 'text-dark');
   }
-  function get_status(agg, ip, idx) {
+  function get_status(agg, idx) {
     fetch(`/api/status/${agg}/${idx}`)
       .then(response => response.json())
       .then(data => {
