@@ -374,17 +374,19 @@ class AggStatus:
                         self._mlat = T.Good if mlat_online else T.Disconnected
                         self._last_check = datetime.now()
         elif self._agg == "1090uk":
-            key = self._d.env_by_tags(["1090uk", "key"]).list_get(self._idx)
-            json_url = f"https://www.1090mhz.uk/mystatus.php?key={key}"
-            tn_dict, status = self.get_json(json_url)
-            if tn_dict and status == 200:
-                online = tn_dict.get("online", False)
-                self._beast = T.Good if online else T.Disconnected
-            else:
-                self._beast = T.Unknown
+            self._beast = T.Unknown
+            self._mlat = T.Unsupported
+            if False:
+                key = self._d.env_by_tags(["1090uk", "key"]).list_get(self._idx)
+                json_url = f"https://www.1090mhz.uk/mystatus.php?key={key}"
+                tn_dict, status = self.get_json(json_url)
+                if tn_dict and status == 200:
+                    online = tn_dict.get("online", False)
+                    self._beast = T.Good if online else T.Disconnected
+                else:
+                    self._beast = T.Unknown
 
             self._last_check = datetime.now()
-            self._mlat = T.Unsupported
 
         elif self._agg == "planefinder":
             self._beast = T.Unknown
