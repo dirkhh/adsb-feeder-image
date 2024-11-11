@@ -2573,7 +2573,6 @@ class AdsbIm:
             self.set_rpw()
             os.remove("/opt/adsb/adsb.im.passwd.and.keys")
         aggregators = copy.deepcopy(self.all_aggregators)
-        url_start = request.host_url.rstrip("/ ")
         n = self._d.env_by_tags("num_micro_sites").value + 1
         matrix = [0] * n
         for idx in range(len(aggregators)):
@@ -2584,7 +2583,7 @@ class AdsbIm:
             for i in range(n):
                 matrix[i] |= 1 << idx if self._d.list_is_enabled(agg, i) else 0
                 if template_link.startswith("/"):
-                    final_link = url_start + template_link.replace("STG2IDX", "" if i == 0 else f"_{i}")
+                    final_link = template_link.replace("STG2IDX", "" if i == 0 else f"_{i}")
                 else:
                     match = re.search("<([^>]*)>", template_link)
                     if match:
