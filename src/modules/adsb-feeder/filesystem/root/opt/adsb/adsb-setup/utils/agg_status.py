@@ -44,7 +44,6 @@ class AggStatus:
         self._d = data
         self._url = url
         self._system = system
-        self.check()
 
     @property
     def beast(self) -> str:
@@ -152,6 +151,7 @@ class AggStatus:
             return False
 
     def check_impl(self):
+        #print_err(f"agg_status check_impl for {self._agg}-{self._idx}")
         if self._agg in ultrafeeder_aggs:
             container_name = "ultrafeeder" if self._idx == 0 else f"uf_{self._idx}"
         else:

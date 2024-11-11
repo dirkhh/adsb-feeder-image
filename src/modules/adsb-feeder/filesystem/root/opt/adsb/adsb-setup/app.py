@@ -230,6 +230,8 @@ class AdsbIm:
         ]
         self.agg_matrix = None
         self.agg_structure = None
+        self.last_cache_agg_status = 0
+        self.cache_agg_status_lock = threading.Lock()
         self.last_aggregator_debug_print = None
         self.microfeeder_setting_tags = (
             "site_name", "lat", "lon", "alt", "tz", "mf_version",
@@ -1159,7 +1161,26 @@ class AdsbIm:
         self.agg_matrix = matrix
         self.agg_structure = active_aggregators
 
+    def cache_agg_status(self):
+        with self.cache_agg_status_lock:
+            now = time.time()
+            if now < self.last_cache_agg_status + 5:
+                return
+            self.last_cache_agg_status = now
+
+        #print_err("caching agg status")
+
+        # launch all the status checks there are in separate threads
+        # they will be requested by the index page soon
+        n = self._d.env_by_tags("num_micro_sites").value + 1
+        for entry in self.agg_structure:
+            agg = entry[0]
+            for idx in range(n):
+                if self._d.list_is_enabled(agg, idx):
+                    threading.Thread(target=self.get_agg_status, args=(agg, idx)).start()
+
     def get_agg_status(self, agg, idx):
+
         status = self._agg_status_instances.get(f"{agg}-{idx}")
         if status is None:
             status = self._agg_status_instances[f"{agg}-{idx}"] = AggStatus(
@@ -1191,8 +1212,12 @@ class AdsbIm:
         if agg == "im":
             return json.dumps(self._im_status.check())
 
+        self.cache_agg_status()
+
         n = self._d.env_by_tags("num_micro_sites").value + 1
         res = dict()
+
+        # collect the data retrieved in the threads, this works due do each agg status object having a lock
         for idx in range(n):
             if self._d.list_is_enabled(agg, idx):
                 res[idx] = self.get_agg_status(agg, idx)
@@ -2643,6 +2668,8 @@ class AdsbIm:
 
         # refresh docker ps cache so the aggregator status is nicely up to date
         threading.Thread(target=self._system.refreshDockerPs).start()
+
+        self.cache_agg_status()
 
         return render_template(
             "index.html",
