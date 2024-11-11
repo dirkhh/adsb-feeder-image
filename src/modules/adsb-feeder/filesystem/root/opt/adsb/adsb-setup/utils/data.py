@@ -21,7 +21,6 @@ class Data:
     version_file = data_path / "adsb.im.version"
     secure_image_path = data_path / "adsb.im.secure_image"
     is_feeder_image = True
-    settings = None
     _env_by_tags_dict = dict()
     ultrafeeder = []
 

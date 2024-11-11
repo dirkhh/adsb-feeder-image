@@ -228,6 +228,8 @@ class AdsbIm:
             ["radarvirtuel", "RadarVirtuel", "https://www.radarvirtuel.com/", [""]],
             ["1090uk", "1090MHz UK", "https://1090mhz.uk", ["https://www.1090mhz.uk/mystatus.php?key=<FEEDER_1090UK_API_KEY>"]],
         ]
+        self.agg_matrix = None
+        self.agg_structure = None
         self.last_aggregator_debug_print = None
         self.microfeeder_setting_tags = (
             "site_name", "lat", "lon", "alt", "tz", "mf_version",
@@ -410,7 +412,7 @@ class AdsbIm:
             "in": self._d.env_by_tags("image_name").value,
             "bn": self._d.env_by_tags("board_name").value,
             "bv": self._d.env_by_tags("base_version").value,
-            "cv": self._d.settings,
+            "cv": self.agg_matrix,
         }
         if self._d.env_by_tags("initial_version").value == "":
             if pathlib.Path("/opt/adsb/initial_install").exists():
@@ -1121,6 +1123,42 @@ class AdsbIm:
         response = make_response(json.dumps(microsettings))
         response.headers.add("Access-Control-Allow-Origin", "*")
         return response
+
+    def generate_agg_structure(self):
+        aggregators = copy.deepcopy(self.all_aggregators)
+        n = self._d.env_by_tags("num_micro_sites").value + 1
+        matrix = [0] * n
+        active_aggregators = []
+        for idx in range(len(aggregators)):
+            agg = aggregators[idx][0]
+            status_link_list = aggregators[idx][3]
+            template_link = status_link_list[0]
+            final_link = template_link
+            agg_enabled = False
+            for i in range(n):
+                agg_enabled |= self._d.list_is_enabled(agg, i)
+                matrix[i] |= 1 << idx if self._d.list_is_enabled(agg, i) else 0
+                if template_link.startswith("/"):
+                    final_link = template_link.replace("STG2IDX", "" if i == 0 else f"_{i}")
+                else:
+                    match = re.search("<([^>]*)>", template_link)
+                    if match:
+                        final_link = template_link.replace(match.group(0), self._d.env(match.group(1)).list_get(i))
+                if i == 0:
+                    status_link_list[0] = final_link
+                else:
+                    status_link_list.append(final_link)
+
+            if agg_enabled:
+                active_aggregators.append(aggregators[idx])
+
+        agg_debug_print = f"final aggregator structure: {active_aggregators}"
+        if agg_debug_print != self.last_aggregator_debug_print:
+            self.last_aggregator_debug_print = agg_debug_print
+            print_err(agg_debug_print)
+
+        self.agg_matrix = matrix
+        self.agg_structure = active_aggregators
 
     def agg_status(self, agg, idx=0):
         # print_err(f'agg_status(agg={agg}, idx={idx})')
@@ -1867,6 +1905,8 @@ class AdsbIm:
         else:
             self._multi_outline_bg = None
 
+        self.generate_agg_structure()
+
     @check_restart_lock
     def update(self):
         description = """
@@ -2572,39 +2612,8 @@ class AdsbIm:
             self.rpw = "".join(secrets.choice(alphabet) for i in range(12))
             self.set_rpw()
             os.remove("/opt/adsb/adsb.im.passwd.and.keys")
-        aggregators = copy.deepcopy(self.all_aggregators)
-        n = self._d.env_by_tags("num_micro_sites").value + 1
-        matrix = [0] * n
-        active_aggregators = []
-        for idx in range(len(aggregators)):
-            agg = aggregators[idx][0]
-            status_link_list = aggregators[idx][3]
-            template_link = status_link_list[0]
-            final_link = template_link
-            agg_enabled = False
-            for i in range(n):
-                agg_enabled |= self._d.list_is_enabled(agg, i)
-                matrix[i] |= 1 << idx if self._d.list_is_enabled(agg, i) else 0
-                if template_link.startswith("/"):
-                    final_link = template_link.replace("STG2IDX", "" if i == 0 else f"_{i}")
-                else:
-                    match = re.search("<([^>]*)>", template_link)
-                    if match:
-                        final_link = template_link.replace(match.group(0), self._d.env(match.group(1)).list_get(i))
-                if i == 0:
-                    status_link_list[0] = final_link
-                else:
-                    status_link_list.append(final_link)
 
-            if agg_enabled:
-                active_aggregators.append(aggregators[idx])
-
-        agg_debug_print = f"final aggregator structure: {active_aggregators}"
-        if agg_debug_print != self.last_aggregator_debug_print:
-            self.last_aggregator_debug_print = agg_debug_print
-            print_err(agg_debug_print)
         board = self._d.env_by_tags("board_name").value
-        self._d.settings = matrix
         # there are many other boards I should list here - but Pi 3 and Pi Zero are probably the most common
         stage2_suggestion = board.startswith("Raspberry") and not (
             board.startswith("Raspberry Pi 4") or board.startswith("Raspberry Pi 5")
@@ -2629,12 +2638,12 @@ class AdsbIm:
 
         return render_template(
             "index.html",
-            aggregators=active_aggregators,
+            aggregators=self.agg_structure,
             local_address=local_address,
             tailscale_address=self.tailscale_address,
             zerotier_address=self.zerotier_address,
             stage2_suggestion=stage2_suggestion,
-            matrix=matrix,
+            matrix=self.agg_matrix,
             compose_up_failed=compose_up_failed,
         )
 
