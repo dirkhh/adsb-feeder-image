@@ -1282,7 +1282,7 @@ class AdsbIm:
         container = "ultrafeeder" if idx == 0 else f"uf_{idx}"
         try:
             subprocess.call(
-                f"/opt/adsb/docker-compose-adsb down {container}",
+                f"/opt/adsb/docker-compose-adsb stop {container}",
                 timeout=40.0,
                 shell=True,
             )
@@ -1623,7 +1623,7 @@ class AdsbIm:
                         )
                     try:
                         subprocess.run(
-                            f"/opt/adsb/docker-compose-adsb down uf_{num} -t 20",
+                            f"/opt/adsb/docker-compose-adsb rm --force --stop uf_{num} -t 20",
                             shell=True,
                         )
                     except:
