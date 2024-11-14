@@ -115,17 +115,8 @@ services:
       - /proc/diskstats:/proc/diskstats:ro
       - /dev:/dev:ro
       - /run/adsb-feeder-ultrafeeder:/run
-      - thermal_fix:${FEEDER_RB_THERMAL_HACK:-/tmp/rbt}:ro
+      - /opt/adsb/rb:${FEEDER_RB_THERMAL_HACK:-/tmp/rbt}:ro
     tmpfs:
       - /var/log:size=32M
     extra_hosts:
       - "host.docker.internal:host-gateway"
-
-volumes:
-  thermal_fix:
-    driver: local
-    driver_opts:
-      type: none
-      device: /opt/adsb/rb
-      o: bind
-

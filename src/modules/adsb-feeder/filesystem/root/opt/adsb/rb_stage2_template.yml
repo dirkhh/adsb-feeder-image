@@ -1,11 +1,3 @@
-volumes:
-  radarbox_segfault_fix:
-    driver: local
-    driver_opts:
-      type: none
-      device: /opt/adsb/rb
-      o: bind
-
 services:
   rbfeeder_STAGE2NUM:
     image: ${RB_CONTAINER}
@@ -35,5 +27,5 @@ services:
       - /run:exec,size=64M
       - /var/log
     volumes:
-      - radarbox_segfault_fix:${FEEDER_RB_THERMAL_HACK:-/tmp/rbt}:ro
+      - /opt/adsb/rb:${FEEDER_RB_THERMAL_HACK:-/tmp/rbt}:ro
       - /opt/adsb/rb/cpuinfo:/proc/cpuinfo:ro
