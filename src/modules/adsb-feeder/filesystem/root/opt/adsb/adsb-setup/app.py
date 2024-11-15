@@ -1265,33 +1265,18 @@ class AdsbIm:
         return channel
 
     def clear_range_outline(self, idx=0):
-        # is the file where we expect it?
-        if idx == 0:
-            globe_history = "globe_history"
-        else:
-            globe_history = f"{self._d.env_by_tags('mf_ip').list_get(idx)}/globe_history"
-
-        rangedirs = self._d.config_path / "ultrafeeder" / globe_history / "internal_state" / "rangeDirs.gz"
-        if not rangedirs.exists() and rangedirs.is_file():
-            print_err(f"can't seem to find the range outline file {rangedirs}")
-            return
-
-        # try to stop the Ultrafeeder container, then remove the range outline, then restart everything
-        container = "ultrafeeder" if idx == 0 else f"uf_{idx}"
-        try:
-            subprocess.call(
-                f"/opt/adsb/docker-compose-adsb stop {container}",
-                timeout=40.0,
-                shell=True,
-            )
-        except subprocess.TimeoutExpired:
-            print_err("timeout expired stopping ultrafeeder... trying to continue anyway...")
-        rangedirs.unlink(missing_ok=True)
-        print_err(f"removed the range outline at path {rangedirs}")
-        try:
-            subprocess.call("/opt/adsb/docker-compose-start", timeout=180.0, shell=True)
-        except subprocess.TimeoutExpired:
-            print_err("timeout expired re-starting docker... trying to continue...")
+        def tryWriteFile(path, string):
+            try:
+                with open(path, "w") as file:
+                    file.write(string)
+            except:
+                print_err(f'error writing "{string}" to {path}')
+        suffix = f"uf_{idx}" if idx != 0 else "ultrafeeder"
+        if self._d.env_by_tags("aggregator_choice").value == "nano":
+            suffix = "nanofeeder"
+        print_err(f"resetting range outline for {suffix}")
+        setGainPath = pathlib.Path(f"/run/adsb-feeder-{suffix}/readsb/setGain")
+        tryWriteFile(setGainPath, f"resetRangeOutline\n")
 
     def set_rpw(self):
         try:
