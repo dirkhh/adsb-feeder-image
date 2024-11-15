@@ -239,22 +239,6 @@ class AggStatus:
             name = self._d.env_by_tags("site_name").list_get(self._idx)
             json_uuid_url = f"https://api.adsb.fi/v1/feeder?id={uuid}"
 
-            """
-            # the following should no longer be true, probably was caused my a
-            # bug in mlat-client when passing uuid on the command line
-
-            # we are having an easier time finding mlat data via the myip api
-            # as apparently mlathub doesn't always send the right uuid
-            json_ip_url = "https://api.adsb.fi/v1/myip"
-            adsbfi_dict, status = self.get_json(json_ip_url)
-            if adsbfi_dict and status == 200:
-                mlat_array = adsbfi_dict.get("mlat", [])
-                self._mlat = T.Good if any(m.get("user", "") == name for m in mlat_array) else T.Disconnected
-                self._last_check = datetime.now()
-            else:
-                print_err(f"adsbfi v1/myip returned {status}")
-            """
-
             adsbfi_dict, status = self.get_json(json_uuid_url)
             if adsbfi_dict and status == 200:
                 beast_array = adsbfi_dict.get("beast", [])
@@ -462,50 +446,6 @@ class AggStatus:
                     print_err(f"failed to find adsbx ID in response {output}")
 
             self._last_check = datetime.now()
-            # the checks below are no longer needed due to the generalized ultrafeeder status checks
-            """
-            # let's check the ultrafeeder net connector status to see if there is a TCP beast connection to adsbexchange
-            try:
-                suffix = "ultrafeeder" if self._idx == 0 else f"uf_{self._idx}"
-                result = subprocess.run(
-                    f"grep -F -e adsbexchange.com /run/adsb-feeder-{suffix}/readsb/stats.prom | cut -d' ' -f2",
-                    shell=True,
-                    capture_output=True,
-                    text=True,
-                )
-                try:
-                    tcp_uptime = int(result.stdout)
-                except:
-                    print_err(f"WARNING: adsbx tcp uptime check returned: {result.stdout}")
-                self._beast = T.Good if tcp_uptime > 5 else T.Disconnected
-            except:
-                self._beast = T.Disconnected
-                pass
-            # now check mlat - which we can't really get easily from their status page
-            # but can get from our docker logs again
-            container_name = "ultrafeeder" if self._idx == 0 else f"uf_{self._idx}"
-            try:
-                result = subprocess.run(
-                    f"docker logs --since=20m {container_name} | grep '\[mlat-client]\[feed.adsbexchange.com] peer_count' | tail -n1",
-                    shell=True,
-                    capture_output=True,
-                    text=True,
-                )
-            except:
-                print_err(f"got exception trying to look at the adsbx docker logs from {container_name}")
-                return
-            match = re.search(
-                r".mlat-client..feed.adsbexchange.com. peer_count:\s*([0-9.]*)\s*outlier_percent:\s*([0-9.]*)\s*bad_sync_timeout:\s*([0-9.]*)",
-                result.stdout,
-            )
-            if match:
-                peer_count = make_int(match.group(1))
-                bad_sync_timeout = make_int(match.group(3))
-                # print_err(f"peer_count: {peer_count} bad_sync: {bad_sync_timeout}")
-                self._mlat = T.Good if peer_count > 0 and bad_sync_timeout == 0 else T.Disconnected
-            else:
-                self._mlat = T.Unknown
-            """
 
         elif self._agg == "tat":
             # get the data from the status text site
