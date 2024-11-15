@@ -1127,7 +1127,7 @@ class AdsbIm:
 
     def generate_agg_structure(self):
         aggregators = copy.deepcopy(self.all_aggregators)
-        n = self._d.env_by_tags("num_micro_sites").value + 1
+        n = len(self.micro_indices()) + 1
         matrix = [0] * n
         active_aggregators = []
         for idx in range(len(aggregators)):
@@ -1172,10 +1172,9 @@ class AdsbIm:
 
         # launch all the status checks there are in separate threads
         # they will be requested by the index page soon
-        n = self._d.env_by_tags("num_micro_sites").value + 1
         for entry in self.agg_structure:
             agg = entry[0]
-            for idx in range(n):
+            for idx in [0] + self.micro_indices():
                 if self._d.list_is_enabled(agg, idx):
                     threading.Thread(target=self.get_agg_status, args=(agg, idx)).start()
 
@@ -1214,11 +1213,10 @@ class AdsbIm:
 
         self.cache_agg_status()
 
-        n = self._d.env_by_tags("num_micro_sites").value + 1
         res = dict()
 
         # collect the data retrieved in the threads, this works due do each agg status object having a lock
-        for idx in range(n):
+        for idx in [0] + self.micro_indices():
             if self._d.list_is_enabled(agg, idx):
                 res[idx] = self.get_agg_status(agg, idx)
 
