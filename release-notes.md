@@ -1,4 +1,7 @@
 Changes since v2.2.3 include:
+- fast range outline reset without restarting container using new readsb feature (new ultrafeeder image)
+- fixup range outline reset and container recreate for old docker-compose (app-install)
+- feed status loading: speed up especially for stage2 and using the interface via high latency connections
 - status page: only show aggregators when enabled
 - Update UI library and improve overall UI experience (especially on smaller screens) as well as auto theme handling
 - More streamlining of images to reduce size, install- and boot-time
