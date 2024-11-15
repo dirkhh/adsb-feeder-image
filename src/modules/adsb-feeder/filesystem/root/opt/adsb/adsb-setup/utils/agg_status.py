@@ -3,6 +3,7 @@ import re
 import subprocess
 import requests
 import threading
+import traceback
 import time
 from datetime import datetime, timedelta
 from enum import Enum
@@ -191,6 +192,7 @@ class AggStatus:
             self.get_mlat_status()
             self.get_beast_status()
             self._last_check = datetime.now()
+            self.get_maplink()
             return
 
         if self._agg == "adsblol":
@@ -506,6 +508,58 @@ class AggStatus:
         # if mlat isn't enabled ignore status check results
         if not self._d.list_is_enabled("mlat_enable", self._idx):
             self._mlat = T.Unsupported
+
+    def get_maplink(self):
+        if self._agg == "alive" and not self._d.env_by_tags("alivemaplink").list_get(self._idx):
+            json_url = "https://api.airplanes.live/feed-status"
+            a_dict, status = self.get_json(json_url)
+            if a_dict and status == 200:
+                map_link = a_dict.get("map_link")
+                # seems to currently only have one map link per IP, we save it
+                # per microsite nonetheless in case this changes in the future
+                if map_link:
+                    self._d.env_by_tags("alivemaplink").list_set(self._idx, map_link)
+
+        if self._agg == "adsblol" and not self._d.env_by_tags("adsblol_link").list_get(self._idx):
+            uuid = self._d.env_by_tags("adsblol_uuid").list_get(self._idx)
+            json_url = "https://api.adsb.lol/0/me"
+            response_dict, status = self.get_json(json_url)
+            if response_dict and status == 200:
+                try:
+                    for entry in response_dict.get("clients").get("beast"):
+                        if entry.get("uuid", "xxxxxxxx-xxxx-")[:14] == uuid[:14]:
+                            self._d.env_by_tags("adsblol_link").list_set(self._idx, entry.get("adsblol_my_url"))
+                except:
+                    print_err(traceback.format_exc())
+
+        if self._agg == "adsbx":
+            feeder_id = self._d.env_by_tags("adsbxfeederid").list_get(self._idx)
+            if not feeder_id or len(feeder_id) != 12:
+                # get the adsbexchange feeder id for the anywhere map / status things
+                print_err(f"don't have the adsbX Feeder ID for {self._idx}, yet")
+                container_name = "ultrafeeder" if self._idx == 0 else f"uf_{self._idx}"
+                try:
+                    result = subprocess.run(
+                        f"docker logs {container_name} | grep 'www.adsbexchange.com/api/feeders' | tail -1",
+                        shell=True,
+                        capture_output=True,
+                        text=True,
+                    )
+                    output = result.stdout
+                except:
+                    print_err("got exception trying to look at the adsbx logs")
+                    return
+                match = re.search(
+                    r"www.adsbexchange.com/api/feeders/\?feed=([^&\s]*)",
+                    output,
+                )
+                if match:
+                    adsbx_id = match.group(1)
+                    self._d.env_by_tags("adsbxfeederid").list_set(self._idx, adsbx_id)
+                else:
+                    print_err(f"ran: docker logs {container_name} | grep 'www.adsbexchange.com/api/feeders' | tail -1")
+                    print_err(f"failed to find adsbx ID in response {output}")
+
 
     def __repr__(self):
         return f"Aggregator({self._agg} last_check: {str(self._last_check)}, beast: {self._beast} mlat: {self._mlat})"
