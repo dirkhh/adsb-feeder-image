@@ -3,7 +3,6 @@ services:
     image: ${AIRSPY_CONTAINER}
     healthcheck:
       disable: true
-    tty: true
     container_name: airspy_adsb
     hostname: airspy_adsb
     restart: unless-stopped

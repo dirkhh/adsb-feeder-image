@@ -3,7 +3,6 @@ services:
     image: ${SDRPLAY_CONTAINER}
     healthcheck:
       disable: true
-    tty: true
     container_name: sdrplay-beast1090
     hostname: sdrplay-beast1090
     restart: unless-stopped

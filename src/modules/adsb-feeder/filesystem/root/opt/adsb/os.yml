@@ -3,7 +3,6 @@ services:
     image: ${OS_CONTAINER}
     healthcheck:
       disable: true
-    tty: true
     container_name: opensky
     restart: unless-stopped
     cpu_period: 50000

@@ -3,7 +3,6 @@ services:
     image: ${FA_CONTAINER}
     healthcheck:
       disable: true
-    tty: true
     container_name: piaware_STAGE2NUM
     restart: unless-stopped
     cpu_period: 50000

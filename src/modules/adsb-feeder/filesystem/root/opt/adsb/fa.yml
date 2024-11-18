@@ -3,7 +3,6 @@ services:
     image: ${FA_CONTAINER}
     healthcheck:
       disable: true
-    tty: true
     container_name: piaware
     restart: unless-stopped
     cpu_period: 50000

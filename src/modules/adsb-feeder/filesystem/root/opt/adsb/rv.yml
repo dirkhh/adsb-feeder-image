@@ -3,7 +3,6 @@ services:
     image: ${RV_CONTAINER}
     healthcheck:
       disable: true
-    tty: true
     container_name: radarvirtuel
     hostname: radarvirtuel
     restart: unless-stopped

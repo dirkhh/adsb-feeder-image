@@ -3,7 +3,6 @@ services:
     image: ${ULTRAFEEDER_CONTAINER}
     healthcheck:
       disable: true
-    tty: true
     container_name: uf_STAGE2NUM
     hostname: uf_STAGE2NUM
     restart: unless-stopped
