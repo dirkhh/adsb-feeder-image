@@ -28,16 +28,6 @@ services:
       - LOGLEVEL=error
       - TZ=${FEEDER_TZ}
       # --------------------------------------------------
-      # SDR related parameters:
-      - READSB_DEVICE_TYPE=
-      - READSB_RTLSDR_DEVICE=
-      - READSB_RTLSDR_PPM=
-      - READSB_ENABLE_BIASTEE=false
-      - READSB_AUTOGAIN_INITIAL_GAIN=40.2
-      - READSB_AUTOGAIN_INITIAL_INTERVAL=60
-      - READSB_GAIN=autogain
-      #
-      # --------------------------------------------------
       # readsb/decoder parameters:
       - READSB_LAT=${FEEDER_LAT}
       - READSB_LON=${FEEDER_LONG}
@@ -101,7 +91,6 @@ services:
       - /opt/adsb/config/ultrafeeder/graphs1090:/var/lib/collectd
       - /usr/local/share/osm_tiles_offline:/usr/local/share/osm_tiles_offline
       - /proc/diskstats:/proc/diskstats:ro
-      - /dev:/dev:ro
       - /run/adsb-feeder-ultrafeeder:/run
       - /opt/adsb/rb:${FEEDER_RB_THERMAL_HACK:-/tmp/rbt}:ro
     tmpfs:
