@@ -1,4 +1,6 @@
 Changes since v2.2.3 include:
+- update all container images
+- alleviate performance issue with stage2 and docker version 20 (app install with distro docker, nested mounts grow /proc/mounts)
 - fast range outline reset without restarting container using new readsb feature (new ultrafeeder image)
 - fixup range outline reset and container recreate for old docker-compose (app-install)
 - feed status loading: speed up especially for stage2 and using the interface via high latency connections
