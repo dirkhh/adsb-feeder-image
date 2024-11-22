@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# make sure the VPN services are stopped and disabled
+systemctl disable --now zerotier-one.service tailscaled.service
+systemctl mask zerotier-one tailscaled
+
 # override daemon.json with the options we want
 cat > /etc/docker/daemon.json <<EOF
 {
@@ -101,9 +105,6 @@ systemctl enable --now adsb-bootstrap.service adsb-setup.service adsb-update.tim
 # adsb-docker is restart by dietpi after this script and it's not that important to get started anyhow
 # rely on dietpi to start adsb-docker but make sure it's enabled
 systemctl enable adsb-docker
-
-# make sure the VPN services are stopped and disabled
-systemctl disable --now zerotier-one.service tailscaled.service
 
 # Disable telemetry for tailscale
 # but only if it's not already there

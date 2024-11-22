@@ -91,6 +91,8 @@ systemctl mask isc-dhcp-server.service
 apt-get install -y zerotier-one tailscale
 systemctl disable tailscaled
 systemctl disable zerotier-one
+systemctl mask tailscaled
+systemctl mask zerotier-one
 
 # disable swapfile, we have swap on zram
 systemctl disable dphys-swapfile || true

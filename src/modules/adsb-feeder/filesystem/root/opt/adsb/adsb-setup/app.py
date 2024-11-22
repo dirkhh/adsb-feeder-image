@@ -2142,6 +2142,10 @@ class AdsbIm:
                     print_err(f"starting tailscale (args='{ts_args}')")
                     try:
                         subprocess.run(
+                            ["/usr/bin/systemctl", "unmask", "tailscaled"],
+                            timeout=20.0,
+                        )
+                        subprocess.run(
                             ["/usr/bin/systemctl", "enable", "--now", "tailscaled"],
                             timeout=20.0,
                         )
@@ -2269,6 +2273,7 @@ class AdsbIm:
                     self._d.env_by_tags("ssh_configured").value = True
                 if allow_insecure and key == "zerotierid":
                     try:
+                        subprocess.call("/usr/bin/systemctl unmask zerotier-one", shell=True)
                         subprocess.call("/usr/bin/systemctl enable --now zerotier-one", shell=True)
                         sleep(5.0)  # this gives the service enough time to get ready
                         subprocess.call(
