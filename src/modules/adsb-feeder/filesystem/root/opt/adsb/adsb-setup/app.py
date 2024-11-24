@@ -2118,6 +2118,9 @@ class AdsbIm:
                     self._system._restart.bg_run(func=self._system.os_update)
                     self._next_url_from_director = request.url
                     return render_template("/restarting.html")
+                if allow_insecure and key == "tailscale_disable_go" and form.get("tailscale_disable") == "disable":
+                    success, output = run_shell_captured("systemctl disable --now tailscaled && systemctl mask tailscaled", timeout=30)
+                    continue
                 if allow_insecure and key == "tailscale":
                     # grab extra arguments if given
                     ts_args = form.get("tailscale_extras", "")
@@ -2272,6 +2275,10 @@ class AdsbIm:
                         authorized_keys.write(f"{value}\n")
                     self._d.env_by_tags("ssh_configured").value = True
                 if allow_insecure and key == "zerotierid":
+                    if value == "disable":
+                        self._d.env_by_tags("zerotierid").value = ""
+                        success, output = run_shell_captured("systemctl disable --now zerotier-one && systemctl mask zerotier-one", timeout=30)
+                        continue
                     try:
                         subprocess.call("/usr/bin/systemctl unmask zerotier-one", shell=True)
                         subprocess.call("/usr/bin/systemctl enable --now zerotier-one", shell=True)
@@ -2393,7 +2400,11 @@ class AdsbIm:
     def systemmgmt(self):
         if request.method == "POST":
             return self.update()
+        tailscale_running = False
+        zerotier_running = False
         if self._d.is_feeder_image:
+            zerotier_running, output = run_shell_captured("pgrep zerotier-one", timeout=2)
+            tailscale_running, output = run_shell_captured("pgrep tailscaled", timeout=2)
             # is tailscale set up?
             try:
                 result = subprocess.run(
@@ -2421,6 +2432,8 @@ class AdsbIm:
         # so that a third update button will be shown
         return render_template(
             "systemmgmt.html",
+            tailscale_running=tailscale_running,
+            zerotier_running=zerotier_running,
             rpw=self.rpw,
             channel=self.extract_channel(),
             containers=self._system.list_containers(),

@@ -219,6 +219,11 @@
           <button type="submit" class="btn btn-primary mx-auto w-100" name="zerotier" value="go">Submit</button>
         </div>
       </div>
+      {% if zerotier_running %}
+      <div class="col-4">
+        Enter "disable" and press submit to disable zerotier.
+      </div>
+      {% endif %}
     </form>
   </div>
   <div class="col-12 col-lg-6 {% if is_enabled('secure_image') %} d-none {% endif %}">
@@ -256,6 +261,15 @@
                     env_value_by_tag("tailscale_name") !="" or env_value_by_tag("tailscale_ll") !=""
                     %}style="display: none;" {% endif %}>Submit</button>
         </div>
+        {% if tailscale_running %}
+        <div class="col-8">
+          Enter "disable" and press submit to disable Tailscale.
+          <input class="mx-auto w-100" id="tailscale_disable" name="tailscale_disable" type="text">
+        </div>
+        <div class="col-4">
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="tailscale_disable_go" value="go">Submit</button>
+        </div>
+        {% endif %}
       </div>
     </form>
   </div>
