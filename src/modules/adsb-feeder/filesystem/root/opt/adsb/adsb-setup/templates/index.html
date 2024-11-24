@@ -17,29 +17,27 @@
 <h1 class="mt-3 text-center text-danger">
   {% block title %}ADS-B Feeder Homepage for {{ list_value_by_tag("site_name", 0) }}{% endblock %}
 </h1>
-<div class="alert alert-danger" role="alert" {% if env_value_by_tag('dns_state') %} style="display: none;" {% endif %}>
+<div class="alert alert-danger {% if env_value_by_tag('dns_state') %}d-none{% endif %}" role="alert">
   The feeder cannot resolve DNS queries. This will most likely prevent it from working at all.
 </div>
-<div class="alert alert-danger" role="alert" {% if not ipv6_broken %} style="display: none;" {% endif %}>
+<div class="alert alert-danger {% if not ipv6_broken %}d-none{% endif %}" role="alert">
   The feeder has an IPv6 address but IPv6 isn't working. This can cause docker and other issues.
 </div>
-<div class="alert alert-danger" role="alert" {% if not compose_up_failed %} style="display: none;" {% endif %}>
+<div class="alert alert-danger {% if not compose_up_failed %}d-none{% endif %}" role="alert">
   docker compose up has failed. This means that something is wrong.
   <form method="POST">
     <button type="submit" name="submit" value="go" class="btn btn-primary">Retry</button>
   </form>
 </div>
-<div class="alert alert-danger" role="alert" {% if not env_value_by_tag('under_voltage') %} style="display: none;"
-     {% endif %}>
+<div class="alert alert-danger {% if not env_value_by_tag('under_voltage') %}d-none{% endif %}" role="alert">
   The feeder system kernel detected under-voltage. This can lead to random crashes and various issues with clock
   stability, reduced reception, failing SDRs, etc. Please check and likely replace your power supply.
 </div>
-<div id="ip-mismatch" class="alert alert-info" role="alert" style="display: none;">
+<div id="ip-mismatch" class="alert alert-info d-none" role="alert">
   The external IP of your browser and the feeder are different. The information in the status links for some of the
   aggregators below may be incorrect.
 </div>
-<div id="low-disk" class="alert alert-info" role="alert" {% if not env_value_by_tag('low_disk') %}
-     style="display: none;" {% endif %}>
+<div id="low-disk" class="alert alert-info {% if not env_value_by_tag('low_disk') %}d-none{% endif %}" role="alert">
   You are running low on disk space on the your feeder. This can lead to odd problems and even crashes. Consider
   upgrading to a larger storage device.
 </div>
