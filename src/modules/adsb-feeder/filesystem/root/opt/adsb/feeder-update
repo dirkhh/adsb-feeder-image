@@ -317,6 +317,8 @@ if [ -f /opt/adsb/os.adsb.feeder.image ] ; then
         systemctl disable --now dphys-swapfile || true
         rm -f /var/swap
     fi
+    # avoid unnecessary diskwrites by zerotier
+    ln -sf /dev/null /var/lib/zerotier-one/metrics.prom
 fi
 
 # shellcheck disable=SC2164

@@ -4,6 +4,9 @@
 systemctl disable --now zerotier-one.service tailscaled.service
 systemctl mask zerotier-one tailscaled
 
+# avoid unnecessary diskwrites by zerotier
+ln -sf /dev/null /var/lib/zerotier-one/metrics.prom
+
 # override daemon.json with the options we want
 cat > /etc/docker/daemon.json <<EOF
 {

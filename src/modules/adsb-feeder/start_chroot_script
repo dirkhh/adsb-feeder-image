@@ -94,6 +94,9 @@ systemctl disable zerotier-one
 systemctl mask tailscaled
 systemctl mask zerotier-one
 
+# avoid unnecessary diskwrites by zerotier
+ln -sf /dev/null /var/lib/zerotier-one/metrics.prom
+
 # disable swapfile, we have swap on zram
 systemctl disable dphys-swapfile || true
 
