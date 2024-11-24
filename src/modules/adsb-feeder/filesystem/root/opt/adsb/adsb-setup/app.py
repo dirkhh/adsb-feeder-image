@@ -2122,6 +2122,12 @@ class AdsbIm:
                         "systemctl disable --now tailscaled && systemctl mask tailscaled", timeout=30
                     )
                     continue
+                if allow_insecure and key == "zerotier" and form.get("zerotier_disable") == "disable":
+                    self._d.env_by_tags("zerotierid").value = ""
+                    success, output = run_shell_captured(
+                        "systemctl disable --now zerotier-one && systemctl mask zerotier-one", timeout=30
+                    )
+                    continue
                 if allow_insecure and key == "tailscale":
                     # grab extra arguments if given
                     ts_args = form.get("tailscale_extras", "")
@@ -2276,10 +2282,6 @@ class AdsbIm:
                         authorized_keys.write(f"{value}\n")
                     self._d.env_by_tags("ssh_configured").value = True
                 if allow_insecure and key == "zerotierid":
-                    if value == "disable":
-                        self._d.env_by_tags("zerotierid").value = ""
-                        success, output = run_shell_captured("systemctl disable --now zerotier-one && systemctl mask zerotier-one", timeout=30)
-                        continue
                     try:
                         subprocess.call("/usr/bin/systemctl unmask zerotier-one", shell=True)
                         subprocess.call("/usr/bin/systemctl enable --now zerotier-one", shell=True)

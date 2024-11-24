@@ -205,25 +205,28 @@
       <div class="row align-items-center">
         <div class="col-12 mb-2">
           <label for="zerotierid">
-            Zerotier support allows to connect your ADS-B Feeder to your own global area network. Please add
+            Zerotier support allows to connect your ADS-B Feeder to your own global area
+            network.{% if not zerotier_running %} Please add
             your Zerotier Network ID below.<br />
             Once this process has completed, you need to accept the new device into the network on the Zerotier
-            website.
+            website.{% else %}<br />This device should now be on your Zerotier network.{% endif %}
           </label>
         </div>
+        {% if not zerotier_running %}
         <div class="col-8">
           <input class="mx-auto w-100" id="zerotierid" name="zerotierid" type="text"
                  value="{{ env_value_by_tag('zerotierid') }}" placeholder=" Enter your Zerotier Network ID" required>
         </div>
+        {% else %}
+        <div class="col-8">
+          <input class="mx-auto w-100" id="zerotier_disable" name="zerotier_disable" type="text">
+          To <strong>disable</strong> Zerotier, enter "disable" and press Submit.
+        </div>
+        {% endif %}
         <div class="col-4">
           <button type="submit" class="btn btn-primary mx-auto w-100" name="zerotier" value="go">Submit</button>
         </div>
       </div>
-      {% if zerotier_running %}
-      <div class="col-4">
-        Enter "disable" and press submit to disable zerotier.
-      </div>
-      {% endif %}
     </form>
   </div>
   <div class="col-12 col-lg-6 {% if is_enabled('secure_image') %} d-none {% endif %}">
@@ -232,8 +235,8 @@
       <div class="row align-items-center">
         <div class="col-12 mb-2">
           <label for="tailscale">
-            Tailscale support allows to connect your ADS-B Feeder to your own tailnet. <br />
-            {% if env_value_by_tag("tailscale_name") == "" %}In order to do this, we will start
+            Tailscale support allows to connect your ADS-B Feeder to your own tailnet.
+            {% if env_value_by_tag("tailscale_name") == "" %}<br />In order to do this, we will start
             the <code>tailscale</code> client on the feeder SBC and then redirect you back here and add a link
             to the
             login page so you can authenticate the device on your tailnet.{% endif %}<br />
@@ -263,11 +266,12 @@
         </div>
         {% if tailscale_running %}
         <div class="col-8">
-          Enter "disable" and press submit to disable Tailscale.
           <input class="mx-auto w-100" id="tailscale_disable" name="tailscale_disable" type="text">
+          To <strong>disable</strong> Tailscale, enter "disable" and press Submit.
         </div>
         <div class="col-4">
-          <button type="submit" class="btn btn-primary mx-auto w-100" name="tailscale_disable_go" value="go">Submit</button>
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="tailscale_disable_go"
+                  value="go">Submit</button>
         </div>
         {% endif %}
       </div>
