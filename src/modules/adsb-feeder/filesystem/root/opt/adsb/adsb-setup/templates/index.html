@@ -184,9 +184,10 @@
     </div>
   </div>
   <div class="col-12 mb-4">
-      <div class "small{% if env_value_by_tag('aggregator_choice') in ['micro', 'nano'] %} d-none {% endif %}">
-          To add or remove aggregators click Data Sharing at the top of the page</a>
-      </div>
+    <div class "small{% if env_value_by_tag('aggregator_choice') in ['micro', 'nano'] %} d-none {% endif %}">
+      To add or remove aggregators click {% if is_enabled('stage2') %}Data Sharing at the top of the page{% else %}<a
+         href="/aggregators">Data Sharing</a>{% endif %}
+    </div>
   </div>
   <div class="col-12 mb-4">
     <h5>
