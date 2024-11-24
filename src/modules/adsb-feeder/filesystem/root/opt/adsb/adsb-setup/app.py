@@ -1068,7 +1068,7 @@ class AdsbIm:
                             if "readsb_messages_valid" in line:
                                 mps = round(int(line.split()[1]) / 60)
                                 found |= 4
-                            if i != 0 and f"readsb_net_connector_status{{host=\"{ip}\"" in line:
+                            if i != 0 and f'readsb_net_connector_status{{host="{ip}"' in line:
                                 uptime = int(line.split()[1])
                                 found |= 2
                             if i == 0 and "readsb_uptime" in line:
@@ -1168,7 +1168,7 @@ class AdsbIm:
                 return
             self.last_cache_agg_status = now
 
-        #print_err("caching agg status")
+        # print_err("caching agg status")
 
         # launch all the status checks there are in separate threads
         # they will be requested by the index page soon
@@ -1190,19 +1190,17 @@ class AdsbIm:
                 self._system,
             )
 
-        res = (
-            {
-                "beast": status.beast,
-                "mlat": status.mlat,
-            }
-        )
+        res = {
+            "beast": status.beast,
+            "mlat": status.mlat,
+        }
 
         if agg == "adsbx":
             res["adsbxfeederid"] = self._d.env_by_tags("adsbxfeederid").list_get(idx)
         elif agg == "adsblol":
-            res["adsblollink"] = self._d.env_by_tags("adsblol_link").list_get(idx),
+            res["adsblollink"] = (self._d.env_by_tags("adsblol_link").list_get(idx),)
         elif agg == "alive":
-            res["alivemaplink"] = self._d.env_by_tags("alivemaplink").list_get(idx),
+            res["alivemaplink"] = (self._d.env_by_tags("alivemaplink").list_get(idx),)
 
         return res
 
@@ -1271,6 +1269,7 @@ class AdsbIm:
                     file.write(string)
             except:
                 print_err(f'error writing "{string}" to {path}')
+
         suffix = f"uf_{idx}" if idx != 0 else "ultrafeeder"
         if self._d.env_by_tags("aggregator_choice").value == "nano":
             suffix = "nanofeeder"
@@ -2119,7 +2118,9 @@ class AdsbIm:
                     self._next_url_from_director = request.url
                     return render_template("/restarting.html")
                 if allow_insecure and key == "tailscale_disable_go" and form.get("tailscale_disable") == "disable":
-                    success, output = run_shell_captured("systemctl disable --now tailscaled && systemctl mask tailscaled", timeout=30)
+                    success, output = run_shell_captured(
+                        "systemctl disable --now tailscaled && systemctl mask tailscaled", timeout=30
+                    )
                     continue
                 if allow_insecure and key == "tailscale":
                     # grab extra arguments if given
@@ -2666,7 +2667,6 @@ class AdsbIm:
             if ipv6_broken:
                 print_err("ERROR: broken IPv6 state detected")
 
-
         # refresh docker ps cache so the aggregator status is nicely up to date
         threading.Thread(target=self._system.refreshDockerPs).start()
 
@@ -2675,7 +2675,7 @@ class AdsbIm:
         return render_template(
             "index.html",
             aggregators=self.agg_structure,
-            agg_tables=list({ entry[4] for entry in self.agg_structure }),
+            agg_tables=list({entry[4] for entry in self.agg_structure}),
             local_address=local_address,
             tailscale_address=self.tailscale_address,
             zerotier_address=self.zerotier_address,
