@@ -69,9 +69,8 @@
             {% if loop.index0 == edit_index %}<!-- edit mode -->
             <tr class="align-middle">
               <td>
-                <input type="text" name="site_name_{{ loop.index0 }}" value="{{ site }}"
-                       pattern="[\-_.a-zA-Z0-9 ]+" title="Letters, numbers, -, _, ."
-                       class="form-control-sm accept_edit" />
+                <input type="text" name="site_name_{{ loop.index0 }}" value="{{ site }}" pattern="[\-_.a-zA-Z0-9 ]+"
+                       title="Letters, numbers, -, _, ." class="form-control-sm accept_edit" />
               </td>
               <td class="text-center">
                 <input type="text" name="mf_ip_{{ loop.index0 }}" class="form-control-sm accept_edit"
@@ -125,7 +124,8 @@
 
               <td class="text-center">
                 <button type="submit" name="remove_micro_{{ loop.index0 }}" value="go" title="Remove this micro feeder"
-                        class="btn btn-danger btn-floating btn-sm" onclick="show_spinner(); return true;">&#x232B;</button>
+                        class="btn btn-danger btn-floating btn-sm"
+                        onclick="show_spinner(); return true;">&#x232B;</button>
                 <button type="submit" name="edit_micro_{{ loop.index0 }}" value="go" title="Edit this micro feeder"
                         class="btn btn-info btn-floating btn-sm">&#x270e;</button>
               </td>

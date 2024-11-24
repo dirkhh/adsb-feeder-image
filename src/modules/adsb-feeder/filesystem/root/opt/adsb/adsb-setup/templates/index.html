@@ -26,7 +26,7 @@
 <div class="alert alert-danger" role="alert" {% if not compose_up_failed %} style="display: none;" {% endif %}>
   docker compose up has failed. This means that something is wrong.
   <form method="POST">
-  <button type="submit" name="submit" value="go" class="btn btn-primary">Retry</button>
+    <button type="submit" name="submit" value="go" class="btn btn-primary">Retry</button>
   </form>
 </div>
 <div class="alert alert-danger" role="alert" {% if not env_value_by_tag('under_voltage') %} style="display: none;"
@@ -61,7 +61,7 @@
     </div>
   </div>
   <div class="col-12 mb-3 {% if is_enabled('stage2') %} d-none {% endif %}">
-      Position / Message rate: <a id="{% if not is_enabled('stage2') %}mf_status_0{% endif %}" href="/stats_0/"></a>
+    Position / Message rate: <a id="{% if not is_enabled('stage2') %}mf_status_0{% endif %}" href="/stats_0/"></a>
   </div>
   <div class="col-12 mb-3 {% if not is_enabled('stage2') %} d-none {% endif %}">
     <h5>You are running as stage 2 feeder</h5>
@@ -311,7 +311,8 @@
             <a href="https://www.adsb.lol/docs/feeders-only/introduction/">ADSB.lol feeder introduction</a>
           </li>
           {% if num_micro_sites == 1 %}
-          <li><a id="adsblol-link-0" href="https://my.adsb.lol/">personal ADSB.lol URL with the planes you are sending</a></li>
+          <li><a id="adsblol-link-0" href="https://my.adsb.lol/">personal ADSB.lol URL with the planes you are
+              sending</a></li>
           <li><a
                href="https://mlat.adsb.lol/syncmap/#lat={{ list_value_by_tag('lat', 0) }}#lon={{ list_value_by_tag('lon', 0) }}#zoom=10">ADSB.lol
               MLAT feeder map for the area around {{ list_value_by_tag('site_name', 0) }}</a></li>
@@ -436,7 +437,8 @@
       </div>
     </div>
   </div>
-  <div class="col-12 {% if not stage2_suggestion or env_value_by_tag('aggregator_choice') in ['micro', 'nano'] %} d-none {% endif %}">
+  <div
+       class="col-12 {% if not stage2_suggestion or env_value_by_tag('aggregator_choice') in ['micro', 'nano'] %} d-none {% endif %}">
     <br>
     Running the containers for the commercial aggregators on systems with 1GB of RAM or less can cause problems - it
     certainly is possible, but many users have observed random issues like MLAT errors or generally issues reliably
@@ -531,10 +533,10 @@
     // idx {{ idx }}
     {% if list_is_enabled(agg, idx) %}
     reset_status("{{ agg }}", {{ idx }});
-    {% endif %}
-    {% endfor %}
-    get_status("{{ agg }}");
-    {% endfor %}
+  {% endif %}
+  {% endfor %}
+  get_status("{{ agg }}");
+  {% endfor %}
   }
 
   function reset_status(agg, idx) {
