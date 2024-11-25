@@ -1,4 +1,5 @@
 Changes since v2.2.3 include:
+- add option to disable Tailscale and Zerotier
 - avoid unnecessary disk writes by zerotier when enabled
 - update all container images
 - alleviate performance issue with stage2 and docker version 20 (app install with distro docker, nested mounts grow /proc/mounts)

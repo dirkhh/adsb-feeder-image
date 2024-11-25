@@ -226,6 +226,11 @@
         <div class="col-4">
           <button type="submit" class="btn btn-primary mx-auto w-100" name="zerotier" value="go">Submit</button>
         </div>
+        {% if zerotier_running %}
+        <div class="col-12 text-danger">
+          This will prevent you from accessing this feeder if you use a Zerotier network to connect to it.
+        </div>
+        {% endif %}
       </div>
     </form>
   </div>
@@ -272,6 +277,9 @@
         <div class="col-4">
           <button type="submit" class="btn btn-primary mx-auto w-100" name="tailscale_disable_go"
                   value="go">Submit</button>
+        </div>
+        <div class="col-12 text-danger">
+          This will prevent you from accessing this feeder if you use a Tailscale network to connect to it.
         </div>
         {% endif %}
       </div>
