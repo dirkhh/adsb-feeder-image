@@ -9,6 +9,7 @@ services:
     cpu_quota: 7500
     stop_grace_period: 3s
     environment:
+      - GOMAXPROCS=1
       - BEASTHOST=uf_STAGE2NUM
       - LAT=${FEEDER_LAT_STAGE2NUM}
       - LONG=${FEEDER_LONG_STAGE2NUM}

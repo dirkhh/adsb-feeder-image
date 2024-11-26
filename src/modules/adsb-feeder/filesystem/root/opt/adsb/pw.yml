@@ -9,6 +9,7 @@ services:
     cpu_quota: 7500
     stop_grace_period: 3s
     environment:
+      - GOMAXPROCS=1
       - BEASTHOST=ultrafeeder
       - LAT=${FEEDER_LAT}
       - LONG=${FEEDER_LONG}
