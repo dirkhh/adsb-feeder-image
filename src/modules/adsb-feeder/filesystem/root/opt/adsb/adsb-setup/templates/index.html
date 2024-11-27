@@ -59,7 +59,8 @@
     </div>
   </div>
   <div class="col-12 mb-3 {% if is_enabled('stage2') %} d-none {% endif %}">
-    Position / Message rate: <a id="{% if not is_enabled('stage2') %}mf_status_0{% endif %}" href="/stats_0/"></a>
+    Position / Message rate: <a id="{% if not is_enabled('stage2') %}mf_status_0{% endif %}"
+    {% if env_value_by_tag('aggregator_choice') != 'nano' %} href="/stats_0/" {% endif %}></a>
   </div>
   <div class="col-12 mb-3 {% if not is_enabled('stage2') %} d-none {% endif %}">
     <h5>You are running as stage 2 feeder</h5>
@@ -181,8 +182,8 @@
       </div>
     </div>
   </div>
-  <div class="col-12 mb-4">
-    <div class "small{% if env_value_by_tag('aggregator_choice') in ['micro', 'nano'] %} d-none {% endif %}">
+  <div class="col-12 mb-4 {% if env_value_by_tag('aggregator_choice') in ['micro', 'nano'] %} d-none {% endif %}">
+    <div class "small">
       {% if (aggregators | length) == 0 %}
         No aggregators configured. Add aggregators:
       {%else%}
