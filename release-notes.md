@@ -1,4 +1,5 @@
 Changes since v2.2.3 include:
+- minor webinterface improvements
 - add option to disable Tailscale and Zerotier
 - avoid unnecessary disk writes by zerotier when enabled
 - update all container images
