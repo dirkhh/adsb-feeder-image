@@ -453,7 +453,6 @@
   </div>
 </div>
 <script>
-  let verbose = false;
   let browser_ip = null;
   let feeder_ip = null;
   let ip_message = "";
@@ -475,7 +474,6 @@
   let timersActive = false;
   let refreshDelay = 35 * 1000;
   let refreshTimer = null;
-  let mfTimer = null;
   let lastStartPage = 0;
   function startPageIndex(opt) {
     clearTimeout(refreshTimer); // abundance of caution to avoid multiple timers
@@ -613,13 +611,13 @@
     if (document.hidden && timersActive) {
       verbose && console.log(new Date().toLocaleTimeString() + " visibility change: stopping timers");
       clearTimeout(refreshTimer);
-      clearTimeout(mfTimer);
+      clearTimeout(check_mf_timer);
       timersActive = false;
     }
     if (!document.hidden && !timersActive) {
       verbose && console.log(new Date().toLocaleTimeString() + " visibility change: starting timers");
       // start the micro feeder check
-      mfTimer = check_mf_status();
+      check_mf_status();
       startPageIndex("noModifyDelay");
       timersActive = true;
     }

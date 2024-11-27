@@ -154,7 +154,10 @@
           crossorigin="anonymous"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/mdb.min.js') }}"></script>
   <script>
+    let verbose = false;
+    let check_mf_timer = null;
     function check_mf_status() {
+      verbose && console.log(`check_mf ${new Date()}`);
       let url = "/api/stage2_stats";
       fetch(url, {
         method: "GET", cors: "no-cors"
@@ -176,7 +179,8 @@
             $("#mf_status_" + i).text(d["pps"] + " pos / " + d["mps"] + " msg per sec");
           })
         })
-      return setTimeout(check_mf_status, 15000);
+      clearTimeout(check_mf_timer); // abundance of caution to avoid multiple timers
+      check_mf_timer = setTimeout(check_mf_status, 15000);
     };
 
     function get_temperatures() {
