@@ -38,9 +38,6 @@ class RouteManager:
         if request.query_string:
             q = f"?{request.query_string.decode()}"
         url = f"{host_url}:{new_port}{new_path}{q}"
-        # work around oddity in tar1090 and dump978
-        if url.endswith("graphs1090") or url.endswith("skyaware978"):
-            url += "/"
         print_err(f"redirecting {orig} to {url}", level=16)
         return redirect(url)
 
