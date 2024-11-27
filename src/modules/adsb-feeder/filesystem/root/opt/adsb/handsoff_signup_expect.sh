@@ -14,20 +14,15 @@ TMPFILE_FR24SIGNUP_EXPECT="$TMPDIR_FR24SIGNUP/TMPFILE_FR24SIGNUP_EXPECT"
 TMPFILE_FR24SIGNUP_LOG="$TMPDIR_FR24SIGNUP/TMPFILE_FR24SIGNUP_LOG"
 
 
-wget https://repo-feed.flightradar24.com/rpi_binaries/fr24feed_1.0.46-1_armhf.tgz -O fr24feed.tgz
-tar xf fr24feed.tgz
-cp fr24feed_armhf/fr24feed /usr/local/bin/fr24feed
+#wget https://repo-feed.flightradar24.com/rpi_binaries/fr24feed_1.0.46-1_armhf.tgz -O fr24feed.tgz
+#tar xf fr24feed.tgz
+#cp fr24feed_armhf/fr24feed /usr/local/bin/fr24feed
+# just use the containers binary and hope that works
+# if we go back to using a pinned version it will need to be the correct
+# architecture as the container doesn't bring qemu anymore
 
 COMMAND="/usr/local/bin/fr24feed --signup --configfile=/tmp/config.txt"
-# Check if fr24feed can be run natively
-# Test fr24feed can run natively (without qemu)
-if /usr/local/bin/fr24feed --version > /dev/null 2>&1; then
-  # fr24feed can be run natively
-  SPAWN_CMD="spawn $COMMAND"
-else
-  # fr24feed needs qemu
-  SPAWN_CMD="spawn qemu-arm-static $COMMAND"
-fi
+SPAWN_CMD="spawn $COMMAND"
 
 
 function write_fr24_expectscript() {
