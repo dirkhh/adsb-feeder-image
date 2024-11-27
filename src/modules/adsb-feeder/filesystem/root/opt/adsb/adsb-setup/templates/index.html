@@ -232,10 +232,10 @@
       <div class="col col-md-4 col-lg-3">
         <ul>
           <li>
-            <a href="/map{{ env_value_by_tag('tar1090_query_params') }}">map</a>
+            <a href="/map/{{ env_value_by_tag('tar1090_query_params') }}">map</a>
           </li>
           <li>
-            <a href="/stats">statistics and graphs</a>
+            <a href="/stats/">statistics and graphs</a>
           </li>
         </ul>
       </div>
@@ -291,9 +291,9 @@
           {% if list_is_enabled("uat978", idx) %}
           <li>
             {% if idx == 0 or list_value_by_tag('mf_ip', idx) == 'local' %}
-            <a href="/dump978">{% if idx != 0 %}{{ list_value_by_tag('site_name', idx) }}{% endif %} Dump978 map</a>
+            <a href="/dump978/">{% if idx != 0 %}{{ list_value_by_tag('site_name', idx) }}{% endif %} Dump978 map</a>
             {% else %}
-            <a href="http://{{ list_value_by_tag('mf_ip', idx) }}/dump978">{{ list_value_by_tag('site_name', idx) }}
+            <a href="http://{{ list_value_by_tag('mf_ip', idx) }}/dump978/">{{ list_value_by_tag('site_name', idx) }}
               Dump978 map</a>
             {% endif %}
           </li>
@@ -360,7 +360,7 @@
             {% if idx != 0 %}{% set suffix = '_'~idx %}{% else %}{% set suffix = '' %}{% endif %}
             <tr>
               <th>{{ list_value_by_tag('site_name', idx) }}</th>
-              <td><a href="/fr24{{ suffix }}">FR24 status</a></td>
+              <td><a href="/fr24{{ suffix }}/">FR24 status</a></td>
             </tr>
             {% endif %}
             {% endfor %}
@@ -381,8 +381,8 @@
             {% if idx != 0 %}{% set suffix = '_'~idx %}{% else %}{% set suffix = '' %}{% endif %}
             <tr>
               <th>{{ list_value_by_tag('site_name', idx) }}</th>
-              <td><a href="/fa-status{{ suffix }}">FlightAware status</a></td>
-              <td class="d-none"><a href="/fa{{ suffix }}">FlightAware map</a></td>
+              <td><a href="/fa-status{{ suffix }}/">FlightAware status</a></td>
+              <td class="d-none"><a href="/fa{{ suffix }}/">FlightAware map</a></td>
             </tr>
             {% endif %}
             {% endfor %}
@@ -398,8 +398,8 @@
             {% if idx != 0 %}{% set suffix = '_'~idx %}{% else %}{% set suffix = '' %}{% endif %}
             <tr>
               <th>{{ list_value_by_tag('site_name', idx) }}</th>
-              <td><a href="/planefinder{{suffix}}">Planefinder map</a>
-              <td><a href="/planefinder-stat{{ suffix }}">Planefinder stats</a>
+              <td><a href="/planefinder{{suffix}}/">Planefinder map</a>
+              <td><a href="/planefinder-stat{{ suffix }}/">Planefinder stats</a>
               </td>
             </tr>
             {% endif %}

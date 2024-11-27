@@ -40,7 +40,7 @@
   <nav class="navbar fixed-top navbar-expand-lg bg-body">
     <div class="container-fluid">
       <a class="navbar-brand" href="{{ url_for("director") }}">ADS-B Feeder</a>
-      <a class="btn btn-primary mx-3" href="/map{{ env_value_by_tag('tar1090_query_params') }}">Live Map</a>
+      <a class="btn btn-primary mx-3" href="/map/{{ env_value_by_tag('tar1090_query_params') }}">Live Map</a>
       <div id="temperature_block" style="width: 4em; height:auto;" class="d-none d-sm-block">
         <span id="cpu" class="d-none"
               style="float:left;width:45%;height:1em;font-size:0.6em;margin-left: 1px;">CPU</span>
@@ -64,7 +64,7 @@
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMaps" role="button"
                data-mdb-toggle="dropdown" aria-expanded="false">Maps</a>
             <ul class="dropdown-menu" aria-labelledby="navbarDropdownMaps">
-              <li><a class="dropdown-item" href="/map{{ env_value_by_tag('tar1090_query_params') }}">Live Traffic</a>
+              <li><a class="dropdown-item" href="/map/{{ env_value_by_tag('tar1090_query_params') }}">Live Traffic</a>
               </li>
               {% if env_value_by_tag("aggregator_choice") != 'nano' %}
               <li><a class="dropdown-item" href="/map/?heatmap">Heatmap</a></li>
@@ -137,7 +137,7 @@
               <li><a class="dropdown-item" href="/backup">Backup</a></li>
               <li><a class="dropdown-item" href="/restore">Restore</a></li>
               {% if env_value_by_tag("aggregator_choice") != 'nano' %}
-              <li><a class="dropdown-item" href="/stats">{%if is_enabled('stage2')%}Combined {%endif%}Stats</a></li>
+              <li><a class="dropdown-item" href="/stats/">{%if is_enabled('stage2')%}Combined {%endif%}Stats</a></li>
               {% for site in env_value_by_tag('site_name') %}
               {% if loop.index0 != 0 %}
               <li><a class="dropdown-item" href="/stats_{{loop.index0}}/">{{site}} Stats</a></li>

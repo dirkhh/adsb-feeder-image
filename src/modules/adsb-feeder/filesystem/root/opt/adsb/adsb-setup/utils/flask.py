@@ -32,7 +32,6 @@ class RouteManager:
         host_url = request.host_url.rstrip("/ ")
         host_url = re.sub(":\\d+$", "", host_url)
         new_path += sub_path
-        new_path = new_path.rstrip("/ ")
         if idx > 0:
             new_path = f"/{idx}{new_path}"
         q: str = ""

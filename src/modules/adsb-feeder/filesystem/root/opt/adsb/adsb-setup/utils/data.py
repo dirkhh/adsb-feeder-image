@@ -35,7 +35,7 @@ class Data:
         ["/fa-status/", "PIAWARESTAT", "/"],
         ["/fa-status.json/", "PIAWARESTAT", "/status.json"],
         ["/fr24/", "FLIGHTRADAR", "/"],
-        ["/fr24-monitor.json", "FLIGHTRADAR", "/monitor.json"],
+        ["/fr24-monitor.json/", "FLIGHTRADAR", "/monitor.json"],
         ["/planefinder/", "PLANEFINDER", "/"],
         ["/planefinder-stat/", "PLANEFINDER", "/stats.html"],
         ["/dump978/", "UAT978", "/skyaware978/"],
@@ -53,7 +53,7 @@ class Data:
             ret.append([endpoint, port, path])
             if endpoint in [
                 "/fr24/",
-                "/fr24-monitor.json",
+                "/fr24-monitor.json/",
                 "/fa/",
                 "/fa-status/",
                 "/fa-status.json/",

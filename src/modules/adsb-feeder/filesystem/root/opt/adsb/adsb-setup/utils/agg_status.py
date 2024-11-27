@@ -300,7 +300,7 @@ class AggStatus:
         elif self._agg == "flightradar":
             self._mlat = T.Unsupported
             suffix = "" if self._idx == 0 else f"_{self._idx}"
-            json_url = f"{self._url}/fr24-monitor.json{suffix}"
+            json_url = f"{self._url}/fr24-monitor.json{suffix}/"
             fr_dict, status = self.get_json(json_url)
             if fr_dict and status == 200:
                 # print_err(f"fr monitor.json returned {fr_dict}")
