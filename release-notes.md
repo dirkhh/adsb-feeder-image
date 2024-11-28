@@ -1,4 +1,6 @@
 Changes since v2.2.3 include:
+- update ultrafeeder container
+- use new piaware container so it shows "map disabled" when the map is not available
 - minor webinterface improvements
 - add option to disable Tailscale and Zerotier
 - avoid unnecessary disk writes by zerotier when enabled
