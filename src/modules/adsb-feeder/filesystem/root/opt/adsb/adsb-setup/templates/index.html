@@ -156,7 +156,7 @@
         Enabled indicates feeding the aggregator. <span class="text-success">&#10003;</span> feed is in good state,
         <span class="text-danger">&#10003;</span> feed is down,
         <span class="text-warning">&#10003;</span> feed is degraded,
-        <span class="text-dark">&#10003;</span> feed state is not supported
+        <span class="text-muted">&#10003;</span> feed state is not supported
         <br />
         <span onclick="$('#extra_legend').toggleClass('d-none'); return false;">
           <a href="">Toggle detailed legend</a>
@@ -547,7 +547,7 @@
   function reset_status(agg, idx) {
     $("#" + agg + "beast" + idx).text(".");
     $("#" + agg + "mlat" + idx).text(".");
-    $("#" + agg + "span" + idx).attr("class", 'text-dark');
+    $("#" + agg + "span" + idx).attr("class", 'text-muted');
   }
   function get_status(agg) {
     fetch(`/api/status/${agg}`)
@@ -568,7 +568,7 @@
           } else if (beast_broken || mlat_broken) {
             $("#" + agg + "span" + idx).attr("class", 'text-warning')
           } else {
-            $("#" + agg + "span" + idx).attr("class", 'text-dark')
+            $("#" + agg + "span" + idx).attr("class", 'text-muted')
           }
           if (agg == "adsblol") {
             // console.log("set adsblol-link" + idx + " to " + data["adsblollink"])
