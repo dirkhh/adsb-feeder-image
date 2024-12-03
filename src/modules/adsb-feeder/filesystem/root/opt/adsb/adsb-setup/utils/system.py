@@ -239,7 +239,8 @@ class System:
     def recreate_containers(self, containers):
         print_err(f"recreating {containers}")
         try:
-            subprocess.run(["/opt/adsb/docker-compose-adsb", "up", "-d", "--force-recreate"] + containers)
+            subprocess.run(["/opt/adsb/docker-compose-adsb", "down", "--remove-orphans"] + containers)
+            subprocess.run(["/opt/adsb/docker-compose-adsb", "up", "-d", "--force-recreate", "--remove-orphans"] + containers)
         except:
             print_err("docker compose recreate failed")
 
