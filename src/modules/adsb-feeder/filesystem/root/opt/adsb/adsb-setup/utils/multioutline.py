@@ -104,7 +104,11 @@ class MultiOutline:
                                 print_err(f"multioutline: can't create polygon from outline #{i} - {r}")
                         else:
                             try:
-                                polygons.append(p)
+                                r = explain_validity(p)
+                                if r == "Valid Geometry":
+                                    polygons.append(p)
+                                else:
+                                    print_err(f"multioutline: can't create polygon from outline #{i} - {r}")
                             except:
                                 print_err(traceback.format_exc())
                                 print_err(f"multioutline: can't create polygon from outline #{i}")
