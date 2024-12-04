@@ -6,6 +6,7 @@ services:
     container_name: dump978
     hostname: dump978
     restart: unless-stopped
+    tty: false # work-around for /dev read-only mount + /dev/console error
     device_cgroup_rules:
       - 'c 189:* rwm'
       - 'c 188:* rwm'

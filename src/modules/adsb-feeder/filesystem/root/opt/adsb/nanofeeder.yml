@@ -8,6 +8,7 @@ services:
     restart: unless-stopped
     cap_add:
       - SYS_NICE
+    tty: false # work-around for /dev read-only mount + /dev/console error
     device_cgroup_rules:
       # serial devices
       - 'c 188:* rwm'
