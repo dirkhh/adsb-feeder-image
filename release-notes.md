@@ -1,4 +1,5 @@
 Changes since v2.2.3 include:
+- explicitely set tty: false for containers mounting /dev read-only (dietpi appinstall docker defaults + docker version issue)
 - update ultrafeeder container
 - use new piaware container so it shows "map disabled" when the map is not available
 - minor webinterface improvements
