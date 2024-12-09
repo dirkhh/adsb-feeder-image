@@ -1781,7 +1781,8 @@ class AdsbIm:
             self._d.env_by_tags("max_range").list_set(0, 300)
 
         # make all the smart choices for plugged in SDRs - unless we are a stage2 that hasn't explicitly requested SDR support
-        if not self._d.is_enabled("stage2") or self._d.is_enabled("stage2_nano"):
+        # only run this for initial setup or when the SDR setup is requested via the interface
+        if (not self._d.is_enabled("stage2") or self._d.is_enabled("stage2_nano")) and not self._d.env_by_tags("sdrs_locked").value:
             # first grab the SDRs plugged in and check if we have one identified for UAT
             self._sdrdevices._ensure_populated()
             env978 = self._d.env_by_tags("978serial")
@@ -1870,6 +1871,12 @@ class AdsbIm:
                 print_err(f"airspy container is {self._d.is_enabled(['airspy'])}")
                 print_err(f"SDRplay container is {self._d.is_enabled(['sdrplay'])}")
                 print_err(f"dump978 container {self._d.list_is_enabled(['uat978'], 0)}")
+
+            # if we have at least one SDR configured and the base config is
+            # completed, lock down further SDR changes so they only happen on
+            # user request
+            if (env1090.value or env978.value) and self.base_is_configured():
+                self._d.env_by_tags("sdrs_locked").value = True
 
         if self._d.env_by_tags("stage2_nano").value:
             do978 = bool(self._d.env_by_tags("978serial").value)
@@ -2050,6 +2057,9 @@ class AdsbIm:
                     self._d.env_by_tags("aggregators_chosen").value = True
                     # set this to individual so if people have set "all" before can still deselect individual aggregators
                     self._d.env_by_tags("aggregator_choice").value = "individual"
+
+                if key == "sdr_setup" and value == "go":
+                    self._d.env_by_tags("sdrs_locked").value = False
 
                 if allow_insecure and key == "shutdown":
                     # do shutdown

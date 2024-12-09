@@ -153,6 +153,9 @@ class Data:
         Env("MLAT_SITE_NAME_SANITIZED", default=[""], is_mandatory=True, tags=["site_name_sanitized"]),
         #
         # SDR settings are only valid on an integrated feeder or a micro feeder, not on stage2
+        # sdrs_locked means the initial setup has been completed, don't change
+        # SDR assignments unless requested explicitely by the user
+        Env("FEEDER_SDRS_LOCKED", default=False, tags=["sdrs_locked"]),
         # misnomer, FEEDER_RTL_SDR is used as follows: READSB_DEVICE_TYPE=${FEEDER_RTL_SDR}
         Env("FEEDER_RTL_SDR", default="rtlsdr", tags=["readsb_device_type"]),
         Env(
