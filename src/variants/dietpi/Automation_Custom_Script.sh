@@ -32,7 +32,16 @@ systemctl restart systemd-journald && echo "journal should now be persistent"
 # when chrony is installed it's imperative that CONFIG_NTP_MODE=0
 # (custom/disabled) is set in dietpi.txt to avoid breakage of dietpi-update
 /boot/dietpi/func/dietpi-set_software ntpd-mode 0
-apt install -y --no-install-recommends chrony jq zstd
+apt install -y --no-install-recommends chrony jq zstd acpid
+
+# also install acpid with the other stuff above and configure the power button to perform a clean shutdown
+cat > /etc/acpi/events/power_button <<EOF
+event=button/power PBTN 00000080 00000000
+action=/usr/sbin/poweroff
+EOF
+
+systemctl restart acpid
+
 
 # copy the blocklisting code from Ramon Kolb's install-docker.sh script
 # DOCKER-INSTALL.SH -- Installation script for the Docker infrastructure on a Raspbian or Ubuntu system
