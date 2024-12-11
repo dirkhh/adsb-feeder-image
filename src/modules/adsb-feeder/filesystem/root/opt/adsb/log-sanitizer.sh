@@ -8,10 +8,16 @@ SEPARATOR="
 # and also append a bunch of other diagnostic info
 SANITIZED_LOG="
 important:
-$(jq < /opt/adsb/config/config.json '{ version: ._ADSBIM_BASE_VERSION, board: ._ADSBIM_STATE_BOARD_NAME, base: ._ADSBIM_BASE_VERSION, user_env: ._ADSBIM_STATE_EXTRA_ENV, user_ultrafeeder: ._ADSBIM_STATE_ULTRAFEEDER_EXTRA_ARGS }')
+$(jq < /opt/adsb/config/config.json '{ version: ._ADSBIM_BASE_VERSION, board: ._ADSBIM_STATE_BOARD_NAME, user_env: ._ADSBIM_STATE_EXTRA_ENV, user_ultrafeeder: ._ADSBIM_STATE_ULTRAFEEDER_EXTRA_ARGS }')
 ${SEPARATOR}
 uname -a:
 $(uname -a)
+${SEPARATOR}
+base_image:
+$(cat /opt/adsb/feeder-image.name || echo "probably app install")
+${SEPARATOR}
+/etc/os-release:
+$(cat /etc/os-release)
 ${SEPARATOR}
 "
 
