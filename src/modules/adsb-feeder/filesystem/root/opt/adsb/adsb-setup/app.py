@@ -37,7 +37,7 @@ from utils.config import (
     write_values_to_config_json,
     write_values_to_env_file,
 )
-from utils.util import create_fake_info, make_int, print_err, mf_get_ip_and_triplet
+from utils.util import create_fake_info, make_int, print_err, mf_get_ip_and_triplet, string2file
 
 # nofmt: on
 # isort: off
@@ -1263,23 +1263,12 @@ class AdsbIm:
         return channel
 
     def clear_range_outline(self, idx=0):
-        def tryWriteFile(path, string):
-            try:
-                fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path))
-                with os.fdopen(fd, "w") as file:
-                    file.write(string)
-                os.rename(tmp, path)
-            except:
-                print_err(f'error writing "{string}" to {path}')
-            else:
-                print_err(f'wrote "{string}" to {path}')
-
         suffix = f"uf_{idx}" if idx != 0 else "ultrafeeder"
         if self._d.env_by_tags("aggregator_choice").value == "nano":
             suffix = "nanofeeder"
         print_err(f"resetting range outline for {suffix}")
         setGainPath = pathlib.Path(f"/run/adsb-feeder-{suffix}/readsb/setGain")
-        tryWriteFile(setGainPath, f"resetRangeOutline")
+        string2file(path=setGainPath, string=f"resetRangeOutline", verbose=True)
 
     def set_rpw(self):
         try:
@@ -1641,13 +1630,6 @@ class AdsbIm:
         return (True, "")
 
     def setRtlGain(self):
-        def tryWriteFile(path, string):
-            try:
-                with open(path, "w") as file:
-                    file.write(string)
-            except:
-                print_err(f'error writing "{string}" to {path}')
-
         if self._d.is_enabled("stage2_nano") or self._d.env_by_tags("aggregator_choice").value == "nano":
             gaindir = pathlib.Path("/opt/adsb/config/nanofeeder/globe_history/autogain")
             setGainPath = pathlib.Path("/run/adsb-feeder-nanofeeder/readsb/setGain")
@@ -1675,10 +1657,10 @@ class AdsbIm:
             (gaindir / "suspend").touch(exist_ok=True)
 
             # this file sets the gain on readsb start
-            tryWriteFile(gaindir / "gain", f"{gain}\n")
+            string2file(path=(gaindir / "gain"), string=f"{gain}\n")
 
             # this adjusts the gain while readsb is running
-            tryWriteFile(setGainPath, f"{gain}\n")
+            string2file(path=setGainPath, string=f"{gain}\n")
 
     def setup_or_disable_uat(self, sitenum):
         if sitenum and self._d.list_is_enabled(["uat978"], sitenum):

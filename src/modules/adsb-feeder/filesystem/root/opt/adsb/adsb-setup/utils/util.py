@@ -10,6 +10,7 @@ import requests
 import sys
 import time
 import subprocess
+import tempfile
 import traceback
 
 verbose = (
@@ -177,6 +178,21 @@ def run_shell_captured(command="", timeout=1800):
 
     output = result.stdout.decode()
     return (True, output)
+
+
+def string2file(path=None, string=None, verbose=False):
+    try:
+        fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path))
+        with os.fdopen(fd, "w") as file:
+            file.write(string)
+        os.rename(tmp, path)
+    except:
+        print_err(traceback.format_exc())
+        print_err(f'error writing "{string}" to {path}')
+    else:
+        if verbose:
+            print_err(f'wrote "{string}" to {path}')
+
 
 def get_plain_url(plain_url):
     requests.packages.urllib3.util.connection.HAS_IPV6 = False
