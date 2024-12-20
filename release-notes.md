@@ -1,21 +1,10 @@
-Changes since v2.2.3 include:
-- explicitely set tty: false for containers mounting /dev read-only (dietpi appinstall docker defaults + docker version issue)
-- update ultrafeeder container
-- use new piaware container so it shows "map disabled" when the map is not available
-- minor webinterface improvements
-- add option to disable Tailscale and Zerotier
-- avoid unnecessary disk writes by zerotier when enabled
-- update all container images
-- alleviate performance issue with stage2 and docker version 20 (app install with distro docker, nested mounts grow /proc/mounts)
-- fast range outline reset without restarting container using new readsb feature (new ultrafeeder image)
-- fixup range outline reset and container recreate for old docker-compose (app-install)
-- feed status loading: speed up especially for stage2 and using the interface via high latency connections
-- status page: only show aggregators when enabled
-- Update UI library and improve overall UI experience (especially on smaller screens) as well as auto theme handling
-- More streamlining of images to reduce size, install- and boot-time
-- Switch autogain algorithm to readsb builtin (this brings a new Ultrafeeder image)
-- Update links for privacy policies at various aggregators
-- Add option for dark/light theme to follow browser setting (default on new installs)
+Changes since v2.2.4 include:
+- fix range outline reset not working in many cases
+- fix up base image reporting in log sanitizer
+- vm images / dietpi: shutdown on ACPI shutdown / power button pressed
+- after initial setup only change SDR assignments when explicitely requested
+- improve multiOutline robustness
+
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)

@@ -186,6 +186,8 @@ class AdsbIm:
 
         self._multi_outline_bg = None
 
+        self.lastSetGainWrite = 0
+
         # no one should share a CPU serial with RadarBox, so always create fake cpuinfo;
         # also identify if we would use the thermal hack for RB and Ultrafeeder
         self._d.env_by_tags("rbthermalhack").value = "/sys/class/thermal" if create_fake_info() else ""
@@ -1268,7 +1270,19 @@ class AdsbIm:
             suffix = "nanofeeder"
         print_err(f"resetting range outline for {suffix}")
         setGainPath = pathlib.Path(f"/run/adsb-feeder-{suffix}/readsb/setGain")
+
+        self.waitSetGainRace()
         string2file(path=setGainPath, string=f"resetRangeOutline", verbose=True)
+
+    def waitSetGainRace(self):
+        # readsb checks this the setGain file every 0.2 seconds
+        # avoid races by only writing to it every 0.25 seconds
+        wait = self.lastSetGainWrite + 0.25 - time.time()
+
+        if wait > 0:
+            time.sleep(wait)
+
+        self.lastSetGainWrite = time.time()
 
     def set_rpw(self):
         try:
@@ -1660,6 +1674,7 @@ class AdsbIm:
             string2file(path=(gaindir / "gain"), string=f"{gain}\n")
 
             # this adjusts the gain while readsb is running
+            self.waitSetGainRace()
             string2file(path=setGainPath, string=f"{gain}\n")
 
     def setup_or_disable_uat(self, sitenum):
