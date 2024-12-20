@@ -1265,17 +1265,21 @@ class AdsbIm:
     def clear_range_outline(self, idx=0):
         def tryWriteFile(path, string):
             try:
-                with open(path, "w") as file:
+                fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path))
+                with os.fdopen(fd, "w") as file:
                     file.write(string)
+                os.rename(tmp, path)
             except:
                 print_err(f'error writing "{string}" to {path}')
+            else:
+                print_err(f'wrote "{string}" to {path}')
 
         suffix = f"uf_{idx}" if idx != 0 else "ultrafeeder"
         if self._d.env_by_tags("aggregator_choice").value == "nano":
             suffix = "nanofeeder"
         print_err(f"resetting range outline for {suffix}")
         setGainPath = pathlib.Path(f"/run/adsb-feeder-{suffix}/readsb/setGain")
-        tryWriteFile(setGainPath, f"resetRangeOutline\n")
+        tryWriteFile(setGainPath, f"resetRangeOutline")
 
     def set_rpw(self):
         try:
