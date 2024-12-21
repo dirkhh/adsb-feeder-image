@@ -283,20 +283,6 @@ class Hotspot:
             shell=True,
         )
         if self._baseos == "dietpi":
-            # switch hotplug to allow wifi
-            with open("/etc/network/interfaces", "r") as current, open("/etc/network/interfaces.new", "w") as update:
-                lines = current.readlines()
-                for line in lines:
-                    if "allow-hotplug" in line:
-                        if self.wlan in line:
-                            update.write(f"allow-hotplug {self.wlan}\n")
-                        else:
-                            update.write(f"# {line}")
-                    else:
-                        update.write(f"{line}")
-                os.remove("/etc/network/interfaces")
-                os.rename("/etc/network/interfaces.new", "/etc/network/interfaces")
-
             output = subprocess.run(
                 f"systemctl restart --no-block networking.service",
                 shell=True,
@@ -361,8 +347,36 @@ p2p_disabled=1
         success = False
 
         if self._baseos == "dietpi":
+            # switch hotplug to test for wifi and apply changes
+            with open("/etc/network/interfaces", "r") as current, open("/etc/network/interfaces.new", "w") as update:
+                lines = current.readlines()
+                for line in lines:
+                    if "allow-hotplug" in line:
+                        if self.wlan in line:
+                            update.write(f"allow-hotplug {self.wlan}\n")
+                        else:
+                            update.write(f"# {line}")
+                    else:
+                        update.write(f"{line}")
+                os.rename("/etc/network/interfaces", "/etc/network/interfaces.orig.hotspot")
+                os.rename("/etc/network/interfaces.new", "/etc/network/interfaces")
+            output = subprocess.run(
+                f"systemctl restart --no-block networking.service",
+                shell=True,
+                capture_output=True,
+            )
+
+            # test wifi
             self.writeWpaConf(ssid=self.ssid, passwd=self.passwd, path="/etc/wpa_supplicant/wpa_supplicant.conf")
             success = self.wpa_cli_reconfigure()
+
+            # restore original /etc/network/interfaces and apply changes
+            os.rename("/etc/network/interfaces.orig.hotspot", "/etc/network/interfaces")
+            output = subprocess.run(
+                f"systemctl restart --no-block networking.service",
+                shell=True,
+                capture_output=True,
+            )
 
         elif self._baseos == "raspbian":
             # try for a while because it takes a bit for NetworkManager to come back up
