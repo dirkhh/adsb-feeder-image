@@ -8,6 +8,7 @@ import sys
 import threading
 import tempfile
 import time
+import traceback
 from flask import (
     Flask,
     redirect,
@@ -91,7 +92,7 @@ class Hotspot:
                     continue
 
                 output += line
-                # print(line, end="")
+                #print_err(f"wpa_cli: {line.rstrip()})")
                 if "Interactive mode" in line:
                     proc.stdin.write("reconfigure\n")
                     proc.stdin.flush()
@@ -101,7 +102,7 @@ class Hotspot:
                     connected = True
                     break
         except:
-            pass
+            print_err(traceback.format_exc())
         finally:
             if proc:
                 proc.terminate()
