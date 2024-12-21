@@ -123,7 +123,7 @@ class System:
         threading.Thread(target=do_reboot).start()
 
     def os_update(self) -> None:
-        subprocess.call("/opt/adsb/scripts/update-os", shell=True)
+        subprocess.call("systemd-run --wait -u adsb-feeder-update-os /bin/bash /opt/adsb/scripts/update-os", shell=True)
 
     def check_dns(self):
         try:

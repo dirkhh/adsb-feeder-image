@@ -1,4 +1,5 @@
 Changes since v2.2.4 include:
+- dietpi: fix os update from webinterface producing a bad state requiring reboot
 - fix range outline reset not working in many cases
 - fix up base image reporting in log sanitizer
 - vm images / dietpi: shutdown on ACPI shutdown / power button pressed

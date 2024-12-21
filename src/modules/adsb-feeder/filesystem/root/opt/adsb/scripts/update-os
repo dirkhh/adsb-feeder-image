@@ -1,9 +1,22 @@
 #!/bin/bash
 # do an OS update - either using the DietPi update tool or by just using apt
 
+# log to /run/adsb-feeder-image.log
+exec &>> /run/adsb-feeder-image.log
+
 if [ -x /boot/dietpi/dietpi-update ] ; then
     G_INTERACTIVE=0 CONFIG_CHECK_APT_UPDATES=2 /boot/dietpi/dietpi-update 1
 else
     apt update
     apt upgrade -y
+fi
+
+# restart important services if not running for some reason
+# dietpi-update will stop adsb-setup / adsb-docker (dietpi services?!)
+# it should start it back up but let's just be safe here
+if ! systemctl is-active adsb-update.service; then
+    systemctl restart adsb-update.service
+fi
+if ! systemctl is-active adsb-docker.service; then
+    systemctl restart adsb-docker.service
 fi
