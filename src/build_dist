@@ -127,7 +127,7 @@ if [[ "$VARIANT" == "dietpi"* ]] ; then
     echo 'INDEX_LOGGING=0' >> "$MNT_DIR"/boot/dietpi/.installed
     echo 'aSOFTWARE_INSTALL_STATE[103]=0' >> "$MNT_DIR"/boot/dietpi/.installed
 
-    cat <<EOF >> /etc/wpa_supplicant/wpa_supplicant.conf
+    cat >> /etc/wpa_supplicant/wpa_supplicant.conf <<EOF
 # disable p2p as it can cause errors
 p2p_disabled=1
 EOF
