@@ -144,6 +144,34 @@ EOF
     # reduce the timeout for acquiring a dhcp lease, this makes dietpi networking less painful (default 60s)
     echo "timeout 30;" >> "$MNT_DIR"/etc/dhcp/dhclient.conf
 
+    # make firstboot quicker
+    patch "$MNT_DIR"/var/lib/dietpi/services/dietpi-firstboot.bash <<'EOF'
+commit f34daa882afb7b2d9233db69285cab9fbf19c3f3
+Author: Matthias Wirth <matthias.wirth@gmail.com>
+Date:   Sun Dec 22 12:56:09 2024 +0000
+
+    firstboot: check ethernet / wifi at the same time
+
+diff --git a/rootfs/var/lib/dietpi/services/dietpi-firstboot.bash b/rootfs/var/lib/dietpi/services/dietpi-firstboot.bash
+index ae40549b..2638c025 100755
+--- a/rootfs/var/lib/dietpi/services/dietpi-firstboot.bash
++++ b/rootfs/var/lib/dietpi/services/dietpi-firstboot.bash
+@@ -352,8 +352,9 @@ _EOF_
+ 		# - Configure enabled interfaces now, /etc/network/interfaces will be effective from next boot on
+ 		#	Failsafe: Bring up Ethernet, whenever WiFi is disabled or fails to be configured, e.g. due to wrong credentials
+ 		# shellcheck disable=SC2015
+-		(( $wifi_enabled )) && ifup "$iface_wlan"
+-		(( $ethernet_enabled )) && ifup "$iface_eth"
++		(( $wifi_enabled )) && ifup "$iface_wlan" &
++		(( $ethernet_enabled )) && ifup "$iface_eth" &
++		wait
+ 
+ 		# - Boot wait for network
+ 		/boot/dietpi/func/dietpi-set_software boot_wait_for_network "$(( ! $(grep -cm1 '^[[:blank:]]*AUTO_SETUP_BOOT_WAIT_FOR_NETWORK=0' /boot/dietpi.txt) ))"
+EOF
+
+
+
     sed -i "s/ADSB_RANDOM_PASSWORD/$ROOT_PWD/" "${DIR}/variants/dietpi/dietpi.txt"
     echo "AUTO_SETUP_SSH_PUBKEY=$SSH_PUB_KEY" >> "${DIR}/variants/dietpi/dietpi.txt"
     cp "${DIR}/variants/dietpi/dietpi.txt" "$MNT_DIR"/"$CONFIG_DIR"
