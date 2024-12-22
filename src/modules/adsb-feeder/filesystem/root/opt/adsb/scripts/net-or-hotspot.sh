@@ -40,6 +40,7 @@ function test_network() {
     done
 
     wait
+    echo "test_network failed to reach the internet"
     return 1
 }
 
