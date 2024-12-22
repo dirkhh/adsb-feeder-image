@@ -141,6 +141,8 @@ EOF
 
     # reduce default networking timeout from 300 to 120 seconds for dietpi
     echo WAIT_ONLINE_TIMEOUT=120 >> "$MNT_DIR"/etc/default/networking
+    # reduce the timeout for acquiring a dhcp lease, this makes dietpi networking less painful (default 60s)
+    echo "timeout 30;" >> "$MNT_DIR"/etc/dhcp/dhclient.conf
 
     sed -i "s/ADSB_RANDOM_PASSWORD/$ROOT_PWD/" "${DIR}/variants/dietpi/dietpi.txt"
     echo "AUTO_SETUP_SSH_PUBKEY=$SSH_PUB_KEY" >> "${DIR}/variants/dietpi/dietpi.txt"

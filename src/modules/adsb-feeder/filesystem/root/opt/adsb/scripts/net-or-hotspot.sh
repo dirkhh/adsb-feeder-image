@@ -9,7 +9,7 @@ fi
 function test_network() {
     pids=()
 
-    TIMEOUT=5
+    TIMEOUT=$1
     sleep $TIMEOUT &
 
     # is there a gateway?
@@ -42,16 +42,20 @@ function test_network() {
     wait
     return 1
 }
+
 function check_network() {
-    for i in {1..6}; do
-        if test_network; then
+    TOTAL_TIMEOUT=$1
+    TIMEOUT=5
+    ITER=$(( TOTAL_TIMEOUT / TIMEOUT ))
+    for i in $(seq $ITER); do
+        if test_network $TIMEOUT; then
             return 0
         fi
     done
     return 1
 }
 
-if check_network; then
+if check_network 30; then
     echo "network reachable, no need to start an access point"
     # out of an abundance of caution make sure these services are not enabled:
     for service in hostapd.service isc-dhcp-server.service; do
@@ -93,7 +97,13 @@ while true; do
     echo "No internet connection detected, starting access point"
     python3 /opt/adsb/adsb-setup/hotspot-app.py "$wlan"
 
-    if check_network; then
+    if [[ -d /boot/dietpi/ ]]; then
+        # dietpi needs extra timeout on this after the hotspot-app has configured wifi
+        TOTAL=60
+    else
+        TOTAL=30
+    fi
+    if check_network $TOTAL; then
         # break outer loop as well if network tests good
         break
     fi

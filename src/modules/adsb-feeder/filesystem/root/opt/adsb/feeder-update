@@ -319,6 +319,10 @@ if [ -f /opt/adsb/os.adsb.feeder.image ] ; then
     fi
     # avoid unnecessary diskwrites by zerotier
     ln -sf /dev/null /var/lib/zerotier-one/metrics.prom
+    # on dietpi, reduce the dhclient timeout
+    if [[ -f /etc/dhcp/dhclient.conf ]] && ! grep -qs /etc/dhcp/dhclient.conf -e '^timeout 30;'; then
+        echo "timeout 30;" >> /etc/dhcp/dhclient.conf
+    fi
 fi
 
 # shellcheck disable=SC2164
