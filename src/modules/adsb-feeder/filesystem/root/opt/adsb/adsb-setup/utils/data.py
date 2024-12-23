@@ -23,6 +23,7 @@ class Data:
     is_feeder_image = True
     _env_by_tags_dict = dict()
     ultrafeeder = []
+    previous_version = ""
 
     _proxy_routes = [
         # endpoint, port, url_path

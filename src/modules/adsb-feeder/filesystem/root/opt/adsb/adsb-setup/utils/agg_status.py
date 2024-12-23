@@ -5,6 +5,7 @@ import requests
 import threading
 import traceback
 import time
+import pathlib
 from datetime import datetime, timedelta
 from enum import Enum
 from .util import generic_get_json, print_err, make_int, run_shell_captured, get_plain_url
@@ -580,6 +581,9 @@ class ImStatus:
                 if status == 200:
                     # good result, no need to update this sooner than in a minute
                     self._next_check = time.time() + 60
+                    if self._d.previous_version:
+                        self._d.previous_version = ""
+                        pathlib.Path("/opt/adsb/adsb.im.previous-version").unlink(missing_ok=True)
                 else:
                     # check again no earlier than 10 seconds from now
                     self._next_check = time.time() + 10

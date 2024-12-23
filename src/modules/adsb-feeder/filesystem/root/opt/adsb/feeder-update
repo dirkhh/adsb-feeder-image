@@ -328,6 +328,9 @@ fi
 # shellcheck disable=SC2164
 cd /opt/adsb
 
+# preserve information about previous version for statistics
+cp -f adsb.im.version adsb.im.previous-version
+
 # make sure the version information is correct
 # deal with remote branches like origin/somebranch that contain forward slashes
 # and end up being part of the VERSION string - those need to be escaped for sed

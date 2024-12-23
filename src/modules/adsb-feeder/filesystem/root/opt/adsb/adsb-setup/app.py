@@ -304,6 +304,8 @@ class AdsbIm:
         self.update_meminfo()
         self.update_journal_state()
 
+        self._d.previous_version = self.get_previous_version()
+
         # now all the envs are loaded and reconciled with the data on file - which means we should
         # actually write out the potentially updated values (e.g. when plain values were converted
         # to lists)
@@ -383,6 +385,18 @@ class AdsbIm:
                 print_err("no version found on disk or in memory, using v0.0.0")
                 self._d.env_by_tags("base_version").value = "v0.0.0"
 
+
+    def get_previous_version(self):
+        previous_version = ""
+        pv_file = "/opt/adsb/adsb.im.previous-version"
+
+        if pathlib.Path(pv_file).exists():
+            with open(pv_file, "r") as f:
+                previous_version = f.read().strip()
+
+        return previous_version
+
+
     def update_meminfo(self):
         self._memtotal = 0
         try:
@@ -415,6 +429,7 @@ class AdsbIm:
             "in": self._d.env_by_tags("image_name").value,
             "bn": self._d.env_by_tags("board_name").value,
             "bv": self._d.env_by_tags("base_version").value,
+            "pv": self._d.previous_version,
             "cv": self.agg_matrix,
         }
         if self._d.env_by_tags("initial_version").value == "":
@@ -2639,6 +2654,11 @@ class AdsbIm:
 
         # now let's check for disk space
         self._d.env_by_tags("low_disk").value = shutil.disk_usage("/").free < 1024 * 1024 * 1024
+
+        if self._d.previous_version:
+            print_err(f"sending previous version: {self._d.previous_version}")
+            self._im_status.check()
+
 
     @check_restart_lock
     def index(self):
