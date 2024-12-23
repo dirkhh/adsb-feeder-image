@@ -107,6 +107,7 @@ if [[ "$VARIANT" == "dietpi"* ]] ; then
     cp -v -a "$DIR"/modules/adsb-feeder/filesystem/root/usr/lib/systemd/system/* "$MNT_DIR"/opt/adsb/usr/lib/systemd/system/
     cp -v -a -r "$DIR"/modules/adsb-feeder/filesystem/root/opt/adsb "$MNT_DIR"/opt/
     echo "$FEEDER_IMAGE_NAME" > "$MNT_DIR"/opt/adsb/feeder-image.name
+    echo "image-install" > "$MNT_DIR"/opt/adsb/adsb.im.previous-version
     echo "$VERSION" > "$MNT_DIR"/opt/adsb/adsb.im.version
     touch "$MNT_DIR"/opt/adsb/os.adsb.feeder.image
     touch "$MNT_DIR"/opt/adsb/adsb.im.passwd.and.keys
@@ -178,6 +179,7 @@ EOF
     exit 0
 else
     VERSION=$(bash "${DIR}/get_version.sh")
+    echo "image-install" > modules/adsb-feeder/filesystem/root/opt/adsb/adsb.im.previous-version
     echo "$VERSION" > modules/adsb-feeder/filesystem/root/opt/adsb/adsb.im.version
 
     "${CUSTOM_PI_OS_PATH}/build_custom_os" "$@"

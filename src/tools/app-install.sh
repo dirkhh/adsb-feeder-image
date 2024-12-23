@@ -166,6 +166,7 @@ elif [[ -f /etc/os-release ]] ; then
 else
     OS="unrecognized OS"
 fi
+echo "app-install" > /opt/adsb/adsb.im.previous-version
 echo "ADS-B Feeder app running on ${OS}" > feeder-image.name
 echo "$ADSB_IM_VERSION" > adsb.im.version
 touch /opt/adsb/app.adsb.feeder.image
