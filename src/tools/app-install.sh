@@ -9,6 +9,7 @@ USAGE="
   -s srcdir      # the git checkout parent dir
   -b branch      # the branch to use (default: main)
   -t tag         # alternatively the tag to use
+  -f             # finish an install on DietPi using dietpi-software
 "
 
 ROOT_REQUIRED="
@@ -37,6 +38,7 @@ APP_DIR="/opt/adsb"
 BRANCH=""
 GIT_PARENT_DIR=""
 TAG=""
+FINISH_DIETPI=""
 
 while (( $# ))
 do
@@ -47,10 +49,26 @@ do
             ;;
         '-t') shift; TAG=$1
             ;;
+        '-f') FINISH_DIETPI="1"
+            ;;
         *) exit_message "$USAGE"
     esac
     shift
 done
+
+if [[ $FINISH_DIETPI == "1" ]] ; then
+    # are we just finishing up the install from dietpi-software?
+    if [[ -d /boot/dietpi && -f /boot/dietpi/.version ]] ; then
+        # shellcheck disable=SC1091
+        source /boot/dietpi/.version
+        OS="DietPi ${G_DIETPI_VERSION_CORE}.${G_DIETPI_VERSION_SUB}"
+        echo "app-install from $OS" > /opt/adsb/adsb.im.previous-version
+        # and for now that's all we need
+        exit 0
+    else
+        exit_message "do not use '-f' outside of installing via dietpi-software on DietPi"
+    fi
+fi
 
 if [[ $GIT_PARENT_DIR == '' ]] ; then
     GIT_PARENT_DIR=$(mktemp -d)
