@@ -1,4 +1,5 @@
 Changes since v2.2.4 include:
+- feeder homepage: small changes to declutter the page
 - dietpi: new images support using ethernet with wifi configured (still needs reboot for ethernet to activate)
 - statistics: send old version to adsb.im after update
 - dietpi: fix os update from webinterface producing a bad state requiring reboot

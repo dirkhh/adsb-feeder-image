@@ -209,14 +209,16 @@
       <h5 class="mt-1">Update feeder applications</h5>
       <form method="POST" onsubmit="show_spinner(); return true;">
         <label for="update_feeder_aps">
-          Update to the current ADS-B feeder applications (i.e. the web UI, setup apps, and
-          containers). Either the latest beta or stable version.
-          <br />
-          <span class="small">If this update brings in new container images, even with a fast internet connection this
-            can easily take more than ten minutes to complete. The web UI will pause while the update is running, but
-            the feeder apps will only be briefly interrupted once all new components have been downloaded.</span>
+          Update the web UI, setup apps, and containers to the latest beta or stable version.
+          <span onclick="$('#update_explain').toggleClass('d-none'); return false;">
+          <a class="small" href="">Toggle update duration information</a>
+          </span>
+          <span class="small d-none" id="update_explain"><br/>If this update brings in new container images, even with a fast
+            internet connection this can easily take more than ten minutes to complete. The web UI will pause while the
+            update is running, but the feeder apps will only be briefly interrupted once all new components have been
+            downloaded.</span>
         </label>
-        <div>
+        <div class="mt-2">
           <button type="submit" class="btn btn-primary mb-3 ml-3 col-md-2" name="update_feeder_aps_beta"
                   id="update_feeder_aps_beta" disabled value="go">Update (beta)</button>
           <button type="submit" class="btn btn-primary mb-3 ml-3 col-md-2" name="update_feeder_aps_stable"
