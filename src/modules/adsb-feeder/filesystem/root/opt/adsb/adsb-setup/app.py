@@ -1275,7 +1275,7 @@ class AdsbIm:
                 channel = match.group(1)
         if channel in ["stable", "beta", "main"]:
             channel = ""
-        if not channel.startswith("origin/"):
+        if channel and not channel.startswith("origin/"):
             channel = f"origin/{channel}"
         return channel
 
