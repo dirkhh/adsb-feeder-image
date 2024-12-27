@@ -433,9 +433,6 @@ class AdsbIm:
             "cv": self.agg_matrix,
         }
         if self._d.env_by_tags("initial_version").value == "":
-            if pathlib.Path("/opt/adsb/initial_install").exists():
-                pathlib.Path("/opt/adsb/initial_install").unlink()
-                image["iv"] = "1"
             self._d.env_by_tags("initial_version").value == self._d.env_by_tags("base_version").value
         return b64encode(compress(pickle.dumps(image))).decode("utf-8")
 
