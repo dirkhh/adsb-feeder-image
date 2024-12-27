@@ -343,7 +343,7 @@ class Data:
             "_ADSBIM_STATE_IMAGE_NAME",
             # somehow I can't make a path relative to data_path work here...
             default_call=lambda: (
-                Path("/opt/adsb/feeder-image.name").read_text()
+                Path("/opt/adsb/feeder-image.name").read_text().strip()
                 if Path("/opt/adsb/feeder-image.name").exists()
                 else "ADS-B Feeder Image prior to v0.12"
             ),
