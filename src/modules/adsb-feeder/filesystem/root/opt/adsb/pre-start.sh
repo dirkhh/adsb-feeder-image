@@ -42,6 +42,9 @@ if [[ -f "/opt/adsb/finish-update.done" ]]; then
     fi
 else
     ACTION="initial install of"
+    if ! [[ -f /opt/adsb/adsb.im.previous-version ]]; then
+        echo "unknown-install" > /opt/adsb/adsb.im.previous-version
+    fi
 fi
 
 # if we updated from a fairly old version, the feeder-update script will have written
