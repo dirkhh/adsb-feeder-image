@@ -188,7 +188,7 @@ class AdsbIm:
 
         self.lastSetGainWrite = 0
 
-        # no one should share a CPU serial with RadarBox, so always create fake cpuinfo;
+        # no one should share a CPU serial with AirNav, so always create fake cpuinfo;
         # also identify if we would use the thermal hack for RB and Ultrafeeder
         self._d.env_by_tags("rbthermalhack").value = "/sys/class/thermal" if create_fake_info() else ""
 
@@ -223,7 +223,7 @@ class AdsbIm:
             ["flightradar", "flightradar24", "https://www.flightradar24.com/", ["/fr24STG2IDX/"], 1],
             ["planewatch", "Plane.watch", "https:/plane.watch/desktop.html", [""], 1],
             ["flightaware", "FlightAware", "https://www.flightaware.com/live/map", ["/fa-statusSTG2IDX/"], 1],
-            ["radarbox", "RadarBox", "https://www.radarbox.com/coverage-map", ["https://www.radarbox.com/stations/<FEEDER_RADARBOX_SN>"], 1],
+            ["radarbox", "AirNav Radar", "https://www.airnavradar.com/coverage-map", ["https://www.airnavradar.com/stations/<FEEDER_RADARBOX_SN>"], 1],
             ["planefinder", "PlaneFinder", "https://planefinder.net/", ["/planefinder-statSTG2IDX/"], 1],
             ["adsbhub", "ADSBHub", "https://www.adsbhub.org/coverage.php", [""], 1],
             ["opensky", "OpenSky", "https://opensky-network.org/network/explorer", ["https://opensky-network.org/receiver-profile?s=<FEEDER_OPENSKY_SERIAL>"], 1],
@@ -385,7 +385,6 @@ class AdsbIm:
                 print_err("no version found on disk or in memory, using v0.0.0")
                 self._d.env_by_tags("base_version").value = "v0.0.0"
 
-
     def get_previous_version(self):
         previous_version = ""
         pv_file = "/opt/adsb/adsb.im.previous-version"
@@ -395,7 +394,6 @@ class AdsbIm:
                 previous_version = f.read().strip()
 
         return previous_version
-
 
     def update_meminfo(self):
         self._memtotal = 0
@@ -1795,7 +1793,9 @@ class AdsbIm:
 
         # make all the smart choices for plugged in SDRs - unless we are a stage2 that hasn't explicitly requested SDR support
         # only run this for initial setup or when the SDR setup is requested via the interface
-        if (not self._d.is_enabled("stage2") or self._d.is_enabled("stage2_nano")) and not self._d.env_by_tags("sdrs_locked").value:
+        if (not self._d.is_enabled("stage2") or self._d.is_enabled("stage2_nano")) and not self._d.env_by_tags(
+            "sdrs_locked"
+        ).value:
             # first grab the SDRs plugged in and check if we have one identified for UAT
             self._sdrdevices._ensure_populated()
             env978 = self._d.env_by_tags("978serial")
@@ -2655,7 +2655,6 @@ class AdsbIm:
         if self._d.previous_version:
             print_err(f"sending previous version: {self._d.previous_version}")
             self._im_status.check()
-
 
     @check_restart_lock
     def index(self):

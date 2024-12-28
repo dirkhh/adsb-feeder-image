@@ -1,4 +1,5 @@
 Changes since v2.2.4 include:
+- deal with the RadarBox -> AirNav Radar rebranding
 - small wording changes to several pages that hopefully improve the user experience
 - system management page: don't offer an incorrect / non-existent 'origin/' channel for updates
 - feeder homepage: small changes to declutter the page

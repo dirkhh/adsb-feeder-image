@@ -189,17 +189,17 @@
     <input type="checkbox" class="form-check-input me-1" name="radarbox--is_enabled" id="radarbox--is_enabled"
            {{ others_enabled("radarbox", m) }} />
     <label for="radarbox--is_enabled">
-      <a href="https://www.radarbox.com/terms-of-use" data-mdb-toggle="tooltip"
-         title="please note that this site is missing a clear data/privacy policy">RadarBox</a>
+      <a href="https://www.airnavradar.com/terms-of-use" data-mdb-toggle="tooltip"
+         title="please note that this site is missing a clear data/privacy policy">AirNav Radar</a>
       <div class="form-group" id="RB_FIELDS">
         <label for="radarbox--key">
-          You need a RadarBox sharing key. If you already have one, please enter it below. Otherwise, leave the field
-          empty and click on the button and we will try to get one for you. Please log into the
-          <a href="https://www.radarbox.com/sharing-data/claim">RadarBox website</a> once this process has completed
+          You need a AirNav Radar (formerly RadarBox) sharing key. If you already have one, please enter it below. Otherwise,
+          leave the field empty and click on the button and we will try to get one for you. Please log into the
+          <a href="https://www.radarbox.com/sharing-data/claim">AirNav Radar website</a> once this process has completed
           in order to claim the key for your account.
         </label>
         <input type="text" id="radarbox--key" name="radarbox--key" class="form-control w-75"
-               {{ env_values["RB"] | replace('checked', 'required') }} placeholder=" RadarBox sharing key"
+               {{ env_values["RB"] | replace('checked', 'required') }} placeholder="AirNav Radar sharing key"
                value="{{ list_value_by_tags(["radarbox", "key"], m) }}">
         <button type="submit" class="btn btn-primary mt-1" name="radarbox--submit" value="{{stay}}">Request key</button>
       </div>

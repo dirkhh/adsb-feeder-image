@@ -39,7 +39,7 @@ These aggregators are also supported:
 - [Plane.watch](https://plane.watch)
 - [Plane Finder](https://planefinder.net)
 - [Planespotters.net](http://planespotters.net)
-- [RadarBox](https://www.radarbox.com)
+- [AirNav Radar](https://www.airnavradar.com)
 - [RadarPlane](https://radarplane.com/)
 - [Radar Virtuel](https://www.radarvirtuel.com)
 
@@ -53,7 +53,7 @@ These aggregators are also supported:
 - buy one of the supported boards (at least the Le Potato seems to be easily and cheaply available in most places)
 - invest in a decent power supply - while many of these can be driven from a powered hub or a cheap 'charger' plug, not having a stable 5V power
 source tends to be the biggest cause of issues with these SBC
-- get an SDR and antenna. There are many many choices. Availability may differ depending on where you are. But often the 'green' RadarBox SDR and
+- get an SDR and antenna. There are many many choices. Availability may differ depending on where you are. But often a generic SDR and
 an indoor or (much better) outdoor antenna is all you need. More detail on the [ADSB.im website](https://adsb.im/supported).
 - download the current release from the [Release section](https://github.com/dirkhh/adsb-feeder-image/releases/latest)
 - use a tool like the [Raspberry Pi Imager](https://github.com/raspberrypi/rpi-imager/releases) to write the image to a µSD card on your computer
