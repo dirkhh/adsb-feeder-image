@@ -1,6 +1,6 @@
 import re
 import subprocess
-
+from flask import flash
 from .system import System
 from .util import is_email, make_int, print_err
 
@@ -63,6 +63,10 @@ class Aggregator:
 
     def _deactivate(self):
         raise NotImplementedError
+
+    def _report_issue(self, message: str):
+        print_err(message)
+        flash(message)
 
     def _download_docker_container(self, container: str) -> bool:
         print_err(f"download_docker_container {container}")
@@ -142,7 +146,7 @@ class FlightRadar24(Aggregator):
 
     def _request_fr24_sharing_key(self, email: str):
         if not self._download_docker_container(self.container):
-            print_err("failed to download the FR24 docker image")
+            self._report_issue("failed to download the FR24 docker image")
             return None
 
         lat = float(self.lat)
@@ -150,6 +154,7 @@ class FlightRadar24(Aggregator):
 
         if abs(lat) < 0.5 and abs(lon) < 0.5:
             # this is at null island, just fail for this
+            self._report_issue("FR24 cannot handle 'null island'")
             return None
 
         # so this signup doesn't work for latitude / longitude <0.1, work around that by just setting longitude 0.11 in that case
@@ -182,11 +187,13 @@ class FlightRadar24(Aggregator):
             if exc.stderr:
                 output += exc.stderr.decode()
             print_err(f"timeout running the FR24 signup script, output: {output}")
+            flash("FR24 signup script timed out")
             return None
 
         sharing_key_match = re.search("Your sharing key \\(([a-zA-Z0-9]*)\\) has been", output)
         if not sharing_key_match:
             print_err(f"couldn't find a sharing key in the container output: {output}")
+            flash("FR24: couldn't find a sharing key in server response")
             return None
         adsb_key = sharing_key_match.group(1)
         print_err(f"found adsb sharing key {adsb_key} in the container output")
@@ -194,7 +201,7 @@ class FlightRadar24(Aggregator):
 
     def _request_fr24_uat_sharing_key(self, email: str):
         if not self._download_docker_container(self.container):
-            print_err("failed to download the FR24 docker image")
+            self._report_issue("failed to download the FR24 docker image")
             return None
 
         uat_signup_command = (
@@ -220,17 +227,18 @@ class FlightRadar24(Aggregator):
             if exc.stderr:
                 output += exc.stderr.decode()
             print_err(f"timeout running the FR24 UAT signup script, output: {output}")
+            flash("FR24 UAT signup script timed out")
             return None
         sharing_key_match = re.search("Your sharing key \\(([a-zA-Z0-9]*)\\) has been", output)
         if not sharing_key_match:
-            print_err(f"couldn't find a sharing key in the container output: {output}")
+            print_err(f"couldn't find a UAT sharing key in the container output: {output}")
+            flash("FR24: couldn't find a UAT sharing key in server response")
             return None
         uat_key = sharing_key_match.group(1)
         print_err(f"found uat sharing key {uat_key} in the container output")
         return uat_key
 
     def _activate(self, user_input: str, idx=0):
-        print_err(f"FR_activate adsb |{user_input}| idx |{idx}|")
         if not user_input:
             return False
         input_values = user_input.count("::")
@@ -252,6 +260,7 @@ class FlightRadar24(Aggregator):
             print_err(f"got back sharing_key |{adsb_sharing_key}|")
         if adsb_sharing_key and not re.match("[0-9a-zA-Z]+", adsb_sharing_key):
             adsb_sharing_key = None
+            self._report_issue("invalid FR24 sharing key")
 
         if is_email(uat_sharing_key):
             # that's an email address, so we are looking to get a sharing key
@@ -259,6 +268,7 @@ class FlightRadar24(Aggregator):
             print_err(f"got back uat_sharing_key |{uat_sharing_key}|")
         if uat_sharing_key and not re.match("[0-9a-zA-Z]+", uat_sharing_key):
             uat_sharing_key = None
+            self._report_issue("invalid FR24 UAT sharing key")
 
         # overwrite email in config so that the container is not started with the email as sharing key if failed
         # otherwise just set sharing key as appropriate
@@ -296,7 +306,7 @@ class FlightAware(Aggregator):
 
     def _request_fa_feeder_id(self):
         if not self._download_docker_container(self.container):
-            print_err("failed to download the piaware docker image")
+            self._report_issue("failed to download the piaware docker image")
             return None
 
         cmdline = f"--rm {self.container}"
@@ -305,6 +315,7 @@ class FlightAware(Aggregator):
         if feeder_id_match:
             return feeder_id_match.group(1)
         print_err(f"couldn't find a feeder ID in the container output: {output}")
+        flash("FlightAware: couldn't find a feeder ID in server response")
         return None
 
     def _activate(self, user_input: str, idx=0):
@@ -335,7 +346,7 @@ class RadarBox(Aggregator):
         docker_image = self._d.env_by_tags(["radarbox", "container"]).value
 
         if not self._download_docker_container(docker_image):
-            print_err("failed to download the RadarBox docker image")
+            self._report_issue("failed to download the AirNav Radar docker image")
             return None
 
         # make sure we correctly enable the hacks
@@ -351,6 +362,7 @@ class RadarBox(Aggregator):
         sharing_key_match = re.search("Your new key is ([a-zA-Z0-9]*)", output)
         if not sharing_key_match:
             print_err(f"couldn't find a sharing key in the container output: {output}")
+            flash("AirNav Radar: couldn't find a sharing key in server response")
             return None
 
         return sharing_key_match.group(1)
@@ -383,7 +395,7 @@ class OpenSky(Aggregator):
         docker_image = self._d.env_by_tags(["opensky", "container"]).value
 
         if not self._download_docker_container(docker_image):
-            print_err("failed to download the OpenSky docker image")
+            self._report_issue("failed to download the OpenSky docker image")
             return None
 
         cmdline = (
@@ -394,6 +406,7 @@ class OpenSky(Aggregator):
         serial_match = re.search("Got a new serial number: ([-a-zA-Z0-9]*)", output)
         if not serial_match:
             print_err(f"couldn't find a serial number in the container output: {output}")
+            flash("OpenSky: couldn't find a serial number in server response")
             return None
 
         return serial_match.group(1)
