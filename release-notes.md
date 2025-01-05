@@ -1,16 +1,6 @@
-Changes since v2.2.4 include:
-- deal with the RadarBox -> AirNav Radar rebranding
-- small wording changes to several pages that hopefully improve the user experience
-- system management page: don't offer an incorrect / non-existent 'origin/' channel for updates
-- feeder homepage: small changes to declutter the page
-- dietpi: new images support using ethernet with wifi configured (still needs reboot for ethernet to activate)
-- statistics: send old version to adsb.im after update
-- dietpi: fix os update from webinterface producing a bad state requiring reboot
-- fix range outline reset not working in many cases
-- fix up base image reporting in log sanitizer
-- vm images / dietpi: shutdown on ACPI shutdown / power button pressed
-- after initial setup only change SDR assignments when explicitely requested
-- improve multiOutline robustness
+Changes since v2.2.5 include:
+- replace the language of semi-anonymous / commercial aggregators with account-less / account-based
+- update the README to reflect the current state of the project
 
 
 > [!NOTE]
