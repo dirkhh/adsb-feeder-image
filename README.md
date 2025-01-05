@@ -3,17 +3,22 @@
 <a href="https://www.youtube.com/@adsb">intro videos</a> &nbsp;&nbsp;&nbsp;
 <a href="https://adsb.im/home"><img src="https://adsb.im/static/images/adsb.im.logo.png" height="30" alt="adsb.im homepage"></a>
 
-Easy to use turn-key SD card image for a number of single board computers (or to run in an x86 VM).
+## The easiest way to track nearby aircraft with your own hardware and share with others
+
+Track aircraft around you broadcasting ADS-B messages on 1090 MHz (and, in the US, UAT messages on 978 MHz). Show the planes on a map, including recent tracks, altitude, speed, and in case of many commercial flights even the route that they are on. For some reason some of the commercial vendors call this 'aircraft radar', even though radar is definitely not involved - it's all UHF radio waves.
+
+This project provides an easy to use turn-key SD card image for a number of single board computers (or to run in an x86 VM).
 Currently we are building the following images:
-- Raspberry Pi Raspian based, supports Zero 2, 3a/b, and 4 (tested on Zero 2W, 3a, and 4 - note that Pi Zero W will NOT work)
-- Raspberry Pi DietPi based, supports Zero 2, 3a/b, and 4 (tested on Zero 2W, 3a, and 4 - note that Pi Zero W will NOT work)
+- Raspberry Pi Raspian based, supports Zero 2, 3a/b, 4, and 5 (frequently tested on Zero 2W, 3a, 3b, and 4 - note that Pi Zero W will NOT work)
+- Raspberry Pi DietPi based, supports Zero 2, 3a/b, and 4 (tested on 3b and 4 - note that Pi Zero W will NOT work)
 - Raspberry Pi 5, DietPi based (tested)
 - Libre Computing Le Potato (tested)
-- Orange Pi Zero 3 and 5plus (both tested)
-- NanoPi NEO3 (tested)
-- Pine64
+- Orange Pi Zero 3, 3LTS, and 5plus (Zero 3 regularly tested)
+- NanoPi NEO3
+- Odroid C4 and xu4
 
 - VM setup under VirtualBox (easy), VMware (almost as easy), or Proxmox (advanced users) -- note that when running in VMs, there are known issues that are outside of the control of the image with USB timing that frequently lead to MLAT issues.
+- x86 ISO for setup both as VM or natively on an x86_64 thin client or similar system
 
 This setup can work on many other systems - if there is enough demand, we can easily add more boards (as long as they have reasonably well supported versions of ideally DietPi or also Armbian available).
 Additionally, this software stack (with some differences in the user experience) can be installed on any DietPi board and even on most generic Linux systems running a Debian based distribution.
@@ -50,23 +55,20 @@ These aggregators are also supported:
 ### The goal of this project is to make things as simple as possible for the non-technical user.
 
 ## Feed from a Single Board Computer (like the Raspberry Pi)
-- buy one of the supported boards (at least the Le Potato seems to be easily and cheaply available in most places)
-- invest in a decent power supply - while many of these can be driven from a powered hub or a cheap 'charger' plug, not having a stable 5V power
-source tends to be the biggest cause of issues with these SBC
+- buy one of the supported boards (Raspberry Pi 4b is by far the most commonly used one, the Orange Pi Zero 3 has a great price/value)
+- invest in a decent power supply - we strongly recommend against attempting to power these boards from a powered hub or a cheap 'charger' plug, not having a stable 5V power source tends to be the biggest cause of issues with these SBC
 - get an SDR and antenna. There are many many choices. Availability may differ depending on where you are. But often a generic SDR and
 an indoor or (much better) outdoor antenna is all you need. More detail on the [ADSB.im website](https://adsb.im/supported).
 - download the current release from the [Release section](https://github.com/dirkhh/adsb-feeder-image/releases/latest)
 - use a tool like the [Raspberry Pi Imager](https://github.com/raspberrypi/rpi-imager/releases) to write the image to a µSD card on your computer
-- if doing this with the RPi image, only use the 'wifi setup' option to make sure the image can connect to your wifi - everything else should be
-- using a DietPi or non-Raspberry image, WiFi is either unsupported (non-Raspberry boards) or needs to be setup using a text editor making changes to two files on the mountable partifion of the feeder image. There's a README file with instructions in the same folder.
+- the standard Raspbian based images for Raspberry Pis allow configuring WiFi during image write with the Pi Imager, but in most cases it is easier to simply use the Hotspot method to connect to the image after boot and then set up the WiFi from a web browser. Simply wait after the first boot until you see a WiFi network called `adsb-feeder-image` - mode details at the [adsb.im Hotspot page](https://adsb.im/hotspot)
 - boot from the image
-- wait a couple of minutes for the initial boot to complete (with the DietPi based images that can mean quite a while, sometimes up to 20+ minutes if your internet is slow), then connect to the [ADSB-PI Setup Page](http://adsb-feeder.local) -- this link _should_ work to find the freshly booted system on your local network - assuming you have a reasonably standard setup with mDNS enabled. If this fails. got to the [adsb.im redirector](http://my.adsb.im) - which should forward you to the right local address on your network. In the rare case where this fails as well you'll need to manually find the board's IP address - either using a connected keyboard / monitor, or via your router or other source of local IP addresses.
+- wait a couple of minutes for the initial boot to complete (with the DietPi based images that can mean quite a while, sometimes up to 10+ minutes if your internet is slow), then connect to the [ADSB-PI Setup Page](http://adsb-feeder.local) -- this link _should_ work to find the freshly booted system on your local network - assuming you have a reasonably standard setup with mDNS enabled. If this fails. got to the [adsb.im redirector](http://my.adsb.im) - which should forward you to the right local address on your network. In the rare case where this fails as well you'll need to manually find the board's IP address - either using a connected keyboard / monitor, or via your router or other source of local IP addresses.
 Please note: if you have more than one ADSB.im feeder on the same network, they will be assigned names like `adsb-feeder-2.local`, etc. So please pay attention which of the different systems you are connecting to in that case.
 - on the setup website enter the latitude, longitude, and elevation of your receiver as well as a name.
-- there's a convenient button to get the correct time zone from your browser
-- finally there's a quick selection of the 'semi anonymous' aggregators to submit data to - the ones where you need accounts are on a separate config page
-- click on Submit and then be patient while everything gets installed and setup - depending on your internet speed this could take several minutes
-- there are two more pages to choose some options and decide which aggregators to feed
+- finally there's a quick selection of the 'account-less' aggregators to submit data to - the ones where you need accounts are on a separate config page
+- click on Submit and then be patient while everything gets installed and setup - depending on your internet speed this could again take several minutes
+- there are a few more pages to choose options for the live map, the SDR, a number of system administration topics, and finally to decide which aggregators to feed
 - once the setup is completed, you'll be forwarded to your feeder home page from where you can go to all of the various pages that your feeder offers. Usually a good one to start with is the TAR1090 Map at the top.
 
 ## Feed from an x86 virtual machine
