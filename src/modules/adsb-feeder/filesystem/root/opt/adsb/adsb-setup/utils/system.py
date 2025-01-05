@@ -139,13 +139,14 @@ class System:
 
     def is_ipv6_broken(self):
         success, output = run_shell_captured(
-            "ip -6 addr show scope global $(ip -j route get 1.2.3.4 | jq '.[0].dev' -r) | grep inet6 | grep -v 'inet6 f'"
+            "ip -6 addr show scope global $(ip -j route get 1.2.3.4 | jq '.[0].dev' -r) | grep inet6 | grep -v 'inet6 f'",
+            timeout=2,
         )
         if not success:
             # no global ipv6 addresses assigned, this means we don't have ipv6 so it can't be broken
             return False
         # we have at least one global ipv6 address, check if it works:
-        success, output = run_shell_captured("curl -o /dev/null -6 https://google.com")
+        success, output = run_shell_captured("curl -o /dev/null -6 https://google.com", timeout=2)
 
         if success:
             # it's working, so it's not broken

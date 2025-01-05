@@ -22,7 +22,7 @@ ${SEPARATOR}
 "
 
 if ip -6 addr show scope global $(ip -j route get 1.2.3.4 | jq '.[0].dev' -r) | grep -v 'inet6 f' | grep -qs inet6; then
-  if curl -sS -o /dev/null -6 https://google.com; then
+  if timeout 2 curl -sS -o /dev/null -6 https://google.com; then
     SANITIZED_LOG+="IPv6 is enabled and working."
   else
     SANITIZED_LOG+="IPv6 is enabled and BROKEN."
