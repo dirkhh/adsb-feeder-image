@@ -2767,7 +2767,7 @@ class AdsbIm:
 
         if target == "0x0.st":
             success, output = run_shell_captured(
-                command="bash /opt/adsb/log-sanitizer.sh | curl -F'expires=168' -F'file=@-'  https://0x0.st",
+                command="bash /opt/adsb/log-sanitizer.sh 2>&1 | curl -F'expires=168' -F'file=@-'  https://0x0.st",
                 timeout=60,
             )
             url = output.strip()
@@ -2779,7 +2779,7 @@ class AdsbIm:
 
         if target == "termbin.com":
             success, output = run_shell_captured(
-                command="bash /opt/adsb/log-sanitizer.sh | nc termbin.com 9999",
+                command="bash /opt/adsb/log-sanitizer.sh 2>&1 | nc termbin.com 9999",
                 timeout=60,
             )
             # strip extra chars for termbin

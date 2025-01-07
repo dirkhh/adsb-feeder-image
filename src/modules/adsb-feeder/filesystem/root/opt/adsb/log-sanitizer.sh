@@ -1,6 +1,9 @@
 #!/bin/bash
 # CC0 - public domain
 
+set -E
+trap 'echo "[ERROR] Error in line $LINENO when executing: $BASH_COMMAND"' ERR
+
 SEPARATOR="
 ----------------------------------------------------------------------------------------------------------
 "
@@ -34,7 +37,7 @@ fi
 SANITIZED_LOG+="
 ${SEPARATOR}
 dmesg | grep -iE under.?voltage:
-$(dmesg | grep -iE under.?voltage)
+$(dmesg | grep -iE under.?voltage || true)
 ${SEPARATOR}
 df:
 $(df -h | grep -v overlay)
@@ -90,7 +93,7 @@ for oldlog in $(find /opt/adsb/logs -name adsb-setup.log.\* | sort | tail -n2); 
 
 SANITIZED_LOG+="
 ${oldlog}:
-$(zstdcat $oldlog || cat $oldlog)
+$(zstdcat "$oldlog" || cat "$oldlog")
 ${SEPARATOR}
 "
 
@@ -137,10 +140,10 @@ for VAR in $SANITIZE_VARS; do
   if [ -z "$MY_VAR" ] ; then
     if [[ "$IMPORTANT_VARS" == *"$VAR"* ]]; then
       # If we are here, it means that the variable is empty, and it is one of the important ones
-      echo "WARNING: $VAR is empty, this is a critical variable, exiting"
+      echo "WARNING: $VAR is empty"
     fi
   else
-    echo "removing all references to ${VAR}"
+    #echo "removing all references to ${VAR}"
     case "$MY_VAR" in
         None | True | False )
             continue
