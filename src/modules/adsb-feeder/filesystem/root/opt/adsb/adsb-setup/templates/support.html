@@ -11,13 +11,14 @@
 <p class="{% if url == '' %}d-none{% endif %}">Please share this link with the developers who are trying to help you
   (and who most likely asked you to provide this info in the first place).</p>
 <form method="post" enctype="multipart/form-data">
-  <button type="submit" class="btn btn-primary btn-rounded p-4 mb-3" name="upload" value="0x0.st">Upload Logs to 0x0.st
-    (curl POST)</button>
-  <button type="submit" class="btn btn-primary btn-rounded p-4 mb-3" name="upload" value="termbin.com">Upload Logs to
-    termbin.com (netcat)</button>
-  <button type="submit" class="btn btn-primary btn-rounded p-4 mb-3" name="upload" value="local_download">Download
-    Logs</button>
-  <button type="submit" class="btn btn-primary btn-rounded p-4 mb-3" name="upload" value="local_view">View Logs</button>
+  <button type="submit" class="btn btn-primary btn-rounded p-4 mb-3" name="upload" value="0x0.st"
+    onclick="show_spinner(); return true;">Upload Logs to 0x0.st (curl POST)</button>
+  <button type="submit" class="btn btn-primary btn-rounded p-4 mb-3" name="upload" value="termbin.com"
+    onclick="show_spinner(); return true;">Upload Logs to termbin.com (netcat)</button>
+  <button type="submit" class="btn btn-primary btn-rounded p-4 mb-3" name="upload" value="local_download"
+    >Download Logs</button>
+  <button type="submit" class="btn btn-primary btn-rounded p-4 mb-3" name="upload" value="local_view"
+    onclick="show_spinner(); return true;">View Logs</button>
 </form>
 <div class="d-lg-block mt-4">
   <div class="mb-3">
