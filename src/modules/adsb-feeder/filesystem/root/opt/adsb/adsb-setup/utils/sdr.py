@@ -162,7 +162,7 @@ class SDRDevices:
         # - if we find an airspy, that's for 1090
         # - if we find an stratuxv3, that's for 978
         # - if we find an RTL SDR with serial 1090 or 00001090 - well, that's for 1090 (unless you have an airspy)
-        # - if we find an RTL SDR with serial 978 or 00000978 - that's for 978
+        # - if we find an RTL SDR with serial 978 or 00000978 - that's for 978 (if you have more than one SDR)
         # - if we find just one RTL SDR and no airspy, then that RTL SDR is for 1090
         # Make sure one SDR is used per frequency at most...
         ret = {frequency: "" for frequency in frequencies}
@@ -176,7 +176,7 @@ class SDRDevices:
             elif sdr._type == "rtlsdr":
                 if "1090" in sdr._serial:
                     ret[1090] = sdr._serial
-                elif "978" in sdr._serial:
+                elif "978" in sdr._serial and len(self.sdrs) > 1:
                     ret[978] = sdr._serial
         if not ret[1090] and not ret[978] and len(self.sdrs) == 1:
             ret[1090] = self.sdrs[0]._serial
