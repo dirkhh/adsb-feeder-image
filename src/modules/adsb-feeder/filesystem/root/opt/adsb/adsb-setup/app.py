@@ -1295,20 +1295,22 @@ class AdsbIm:
         self.lastSetGainWrite = time.time()
 
     def set_rpw(self):
-        try:
-            subprocess.call(f"echo 'root:{self.rpw}' | chpasswd", shell=True)
-        except:
-            print_err("failed to overwrite root password")
-        if os.path.exists("/etc/ssh/sshd_config"):
-            try:
-                subprocess.call(
-                    "sed -i 's/^\(PermitRootLogin.*\)/# \\1/' /etc/ssh/sshd_config &&"
-                    "echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config && "
-                    "systemctl restart sshd",
-                    shell=True,
-                )
-            except:
-                print_err("failed to allow root ssh login")
+        success, output = run_shell_captured(f"echo 'root:{self.rpw}' | chpasswd")
+        if not success:
+            print_err(f"failed to overwrite root password: {output}")
+
+        success, output = run_shell_captured(
+            "sed -i '/^PermitRootLogin.*/d' /etc/ssh/sshd_config &&"
+            + "echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config && "
+            + "systemctl restart sshd",
+            timeout=5,
+        )
+        if not success:
+            print_err(f"failed to allow root ssh login: {output}")
+
+        success, output = run_shell_captured("systemctl enable --now ssh || systemctl enable --now dropbear", timeout=5)
+        if not success:
+            print_err(f"failed to enable ssh: {output}")
 
     def unique_site_name(self, name, idx=-1):
         # make sure that a site name is unique - if the idx is given that's
@@ -2304,6 +2306,9 @@ class AdsbIm:
                     with open(ssh_dir / "authorized_keys", "a+") as authorized_keys:
                         authorized_keys.write(f"{value}\n")
                     self._d.env_by_tags("ssh_configured").value = True
+                    success, output = run_shell_captured("systemctl enable --now ssh || systemctl enable --now dropbear", timeout=5)
+                    if not success:
+                        print_err(f"failed to enable ssh: {output}")
                 if allow_insecure and key == "zerotierid":
                     try:
                         subprocess.call("/usr/bin/systemctl unmask zerotier-one", shell=True)
