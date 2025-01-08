@@ -1301,15 +1301,16 @@ class AdsbIm:
             print_err(f"failed to overwrite root password: {output}")
             issues_encountered = True
 
-        success, output = run_shell_captured(
-            "sed -i '/^PermitRootLogin.*/d' /etc/ssh/sshd_config &&"
-            + "echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config && "
-            + "systemctl restart sshd",
-            timeout=5,
-        )
-        if not success:
-            print_err(f"failed to allow root ssh login: {output}")
-            issues_encountered = True
+        if os.path.exists("/etc/ssh/sshd_config"):
+            success, output = run_shell_captured(
+                "sed -i '/^PermitRootLogin.*/d' /etc/ssh/sshd_config &&"
+                + "echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config && "
+                + "systemctl restart sshd",
+                timeout=5,
+            )
+            if not success:
+                print_err(f"failed to allow root ssh login: {output}")
+                issues_encountered = True
 
         success, output = run_shell_captured(
             "systemctl is-enabled ssh || systemctl is-enabled dropbear || "
