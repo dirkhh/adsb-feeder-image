@@ -32,7 +32,7 @@ systemctl restart systemd-journald && echo "journal should now be persistent"
 # when chrony is installed it's imperative that CONFIG_NTP_MODE=0
 # (custom/disabled) is set in dietpi.txt to avoid breakage of dietpi-update
 /boot/dietpi/func/dietpi-set_software ntpd-mode 0
-apt install -y --no-install-recommends chrony jq zstd acpid
+apt install -y --no-install-recommends chrony jq zstd acpid netcat-openbsd
 
 # also install acpid with the other stuff above and configure the power button to perform a clean shutdown
 cat > /etc/acpi/events/power_button <<EOF
