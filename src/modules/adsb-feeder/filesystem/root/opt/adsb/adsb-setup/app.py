@@ -1312,7 +1312,9 @@ class AdsbIm:
             issues_encountered = True
 
         success, output = run_shell_captured(
-            "systemctl enable --now ssh || systemctl enable --now dropbear", timeout=5
+            "systemctl is-enabled ssh || systemctl is-enabled dropbear || "
+            + "systemctl enable --now ssh || systemctl enable --now dropbear",
+            timeout=60,
         )
         if not success:
             print_err(f"failed to enable ssh: {output}")
@@ -2315,7 +2317,9 @@ class AdsbIm:
                     authorized_keys.write(f"{value}\n")
                 self._d.env_by_tags("ssh_configured").value = True
                 success, output = run_shell_captured(
-                    "systemctl enable --now ssh || systemctl enable --now dropbear", timeout=5
+                    "systemctl is-enabled ssh || systemctl is-enabled dropbear || "
+                    + "systemctl enable --now ssh || systemctl enable --now dropbear",
+                    timeout=60,
                 )
                 if not success:
                     report_issue(f"failed to enable ssh - check the logs for details")
