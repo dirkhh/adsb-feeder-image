@@ -51,6 +51,9 @@ for name in sanitize_vars:
             continue
         #print(f"{search} {replace}")
         sr.append((search, replace))
+        # in the .env file, $ is escaped with $$, in the json $ is not escaped
+        # thus in addition to the above replacement, we also need to replace
+        # the escaped version if there is a $ in the string
         if "$" in search:
             search = search.replace("$", "$$")
             sr.append((search, replace))
