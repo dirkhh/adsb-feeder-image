@@ -1,11 +1,11 @@
 Changes since v2.2.5 include:
+- significantly increase the number of warnings / issues that are communicated to the user via the web UI
 - log-sanitizer: improve search and replace
 - improve implementation of ssh password/keys and ensure that sshd is running
 - always have a single SDR default to ADS-B, even if its serial number is 978
 - replace the language of semi-anonymous / commercial aggregators with account-less / account-based
 - update the README to reflect the current state of the project
 - better handling of broken IPv6 environments when collecting support info
-- show warnings if we fail to automatically get credentials from an account-based aggregator
 
 
 > [!NOTE]

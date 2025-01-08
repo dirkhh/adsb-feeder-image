@@ -37,7 +37,7 @@ from utils.config import (
     write_values_to_config_json,
     write_values_to_env_file,
 )
-from utils.util import create_fake_info, make_int, print_err, mf_get_ip_and_triplet, string2file
+from utils.util import create_fake_info, make_int, print_err, report_issue, mf_get_ip_and_triplet, string2file
 
 # nofmt: on
 # isort: off
@@ -554,7 +554,7 @@ class AdsbIm:
         if success:
             self._d.env("FEEDER_TZ").list_set(0, timezone)
         else:
-            print_err(f"timezone {timezone} probably invalid, defaulting to UTC")
+            report_issue(f"timezone {timezone} probably invalid, defaulting to UTC")
             self._d.env("FEEDER_TZ").list_set(0, "UTC")
             self.set_system_tz("UTC")
 
@@ -660,7 +660,7 @@ class AdsbIm:
                     check=True,
                 )
             except:
-                print_err(f"{context}: docker exec failed - backed up graph data might miss up to 6h")
+                report_issue(f"{context}: docker exec failed - backed up graph data might miss up to 6h")
                 pass
             else:
                 count = 0
@@ -673,7 +673,7 @@ class AdsbIm:
                         print_err(f"{context}: success")
                         return
 
-                print_err(f"{context}: writeback timed out - backed up graph data might miss up to 6h")
+                report_issue(f"{context}: writeback timed out - backed up graph data might miss up to 6h")
 
         fdOut, fdIn = os.pipe()
         pipeOut = os.fdopen(fdOut, "rb")
@@ -711,10 +711,10 @@ class AdsbIm:
                             if graphs_path.exists():
                                 backup_zip.write(graphs_path, arcname=graphs_path.relative_to(adsb_path))
                             else:
-                                print_err(f"graphs1090 backup failed, file not found: {graphs_path}")
+                                report_issue(f"graphs1090 backup failed, file not found: {graphs_path}")
 
             except BrokenPipeError:
-                print_err(f"warning: backup download aborted mid-stream")
+                report_issue(f"warning: backup download aborted mid-stream")
 
         thread = threading.Thread(
             target=zip2fobj,
@@ -901,7 +901,7 @@ class AdsbIm:
                     timeout=30.0,
                 )
             except subprocess.TimeoutExpired:
-                print_err("timeout expired joining Zerotier network... trying to continue...")
+                report_issue("timeout expired joining Zerotier network... trying to continue...")
 
         self.handle_implied_settings()
         self.write_envfile()
@@ -909,7 +909,7 @@ class AdsbIm:
         try:
             subprocess.call("/opt/adsb/docker-compose-start", timeout=180.0, shell=True)
         except subprocess.TimeoutExpired:
-            print_err("timeout expired re-starting docker... trying to continue...")
+            report_issue("timeout expired re-starting docker... trying to continue...")
 
     def base_is_configured(self):
         base_config: set[Env] = {env for env in self._d._env if env.is_mandatory}
@@ -1295,9 +1295,11 @@ class AdsbIm:
         self.lastSetGainWrite = time.time()
 
     def set_rpw(self):
+        issues_encountered = False
         success, output = run_shell_captured(f"echo 'root:{self.rpw}' | chpasswd")
         if not success:
             print_err(f"failed to overwrite root password: {output}")
+            issues_encountered = True
 
         success, output = run_shell_captured(
             "sed -i '/^PermitRootLogin.*/d' /etc/ssh/sshd_config &&"
@@ -1307,12 +1309,17 @@ class AdsbIm:
         )
         if not success:
             print_err(f"failed to allow root ssh login: {output}")
+            issues_encountered = True
 
         success, output = run_shell_captured(
             "systemctl enable --now ssh || systemctl enable --now dropbear", timeout=5
         )
         if not success:
             print_err(f"failed to enable ssh: {output}")
+            issues_encountered = True
+
+        if issues_encountered:
+            report_issue("failure while setting root password, check logs for details")
 
     def unique_site_name(self, name, idx=-1):
         # make sure that a site name is unique - if the idx is given that's
@@ -1515,7 +1522,7 @@ class AdsbIm:
 
             print_err(f"done importing graphs and history from {ip}")
         except:
-            print_err(f"ERROR when importing graphs and history from {ip}")
+            report_issue(f"ERROR when importing graphs and history from {ip}")
         finally:
             os.remove(tmpfile)
 
@@ -1614,6 +1621,7 @@ class AdsbIm:
         if old_ip != ip:
             if any([s in ip for s in ["/", "\\", ":", "*", "?", '"', "<", ">", "|", "..", "$"]]):
                 print_err(f"found suspicious characters in IP address {ip} - let's not use this in a command")
+                return (False, f"found suspicious characters in IP address {ip} - rejected")
             else:
                 data_dir = pathlib.Path("/opt/adsb/config/ultrafeeder")
                 if (data_dir / f"{old_ip}").exists() and (data_dir / f"{old_ip}").is_dir():
@@ -2162,7 +2170,7 @@ class AdsbIm:
                         # right now we really only want to allow the login server arg
                         ts_cli_switch, ts_cli_value = ts_args.split("=")
                         if ts_cli_switch != "--login-server":
-                            print_err(
+                            report_issue(
                                 "at this point we only allow the --login-server argument; "
                                 "please let us know at the Zulip support link why you need "
                                 f"this to support {ts_cli_switch}"
@@ -2174,7 +2182,7 @@ class AdsbIm:
                             ts_cli_value,
                         )
                         if not match:
-                            print_err(f"the login server URL didn't make sense {ts_cli_value}")
+                            report_issue(f"the login server URL didn't make sense {ts_cli_value}")
                             continue
                     print_err(f"starting tailscale (args='{ts_args}')")
                     try:
@@ -2204,7 +2212,7 @@ class AdsbIm:
                         os.set_blocking(proc.stderr.fileno(), False)
                     except:
                         # this really needs a user visible error...
-                        print_err("exception trying to set up tailscale - giving up")
+                        report_issue("exception trying to set up tailscale - giving up")
                         continue
                     else:
                         startTime = time.time()
@@ -2233,7 +2241,7 @@ class AdsbIm:
                         print_err(f"found login link {login_link}")
                         self._d.env_by_tags("tailscale_ll").value = login_link
                     else:
-                        print_err(f"ERROR: tailscale didn't provide a login link within 30 seconds")
+                        report_issue(f"ERROR: tailscale didn't provide a login link within 30 seconds")
                     return redirect(url_for("systemmgmt"))
                 # tailscale handling uses 'continue' to avoid deep nesting - don't add other keys
                 # here at the end - instead insert them before tailscale
@@ -2269,7 +2277,7 @@ class AdsbIm:
                     except Exception as e:
                         print_err(f"error activating {key}: {e}")
                     if not is_successful:
-                        print_err(f"did not successfully enable {base}")
+                        report_issue(f"did not successfully enable {base}")
 
                     # immediately start the containers in case the user doesn't click "apply settings" after requesting a key
                     seen_go = True
@@ -2290,7 +2298,7 @@ class AdsbIm:
                 try:
                     subprocess.run(cmdline, timeout=5.0, shell=True)
                 except:
-                    print_err("Error running Ultrafeeder autogain reset")
+                    report_issue("Error running Ultrafeeder autogain reset")
                 continue
             if key == "resetuatgain" and value == "1":
                 # tell the dump978 container to restart the autogain processing
@@ -2298,7 +2306,7 @@ class AdsbIm:
                 try:
                     subprocess.run(cmdline, timeout=5.0, shell=True)
                 except:
-                    print_err("Error running UAT autogain reset")
+                    report_issue("Error running UAT autogain reset")
                 continue
             if allow_insecure and key == "ssh_pub":
                 ssh_dir = pathlib.Path("/root/.ssh")
@@ -2310,6 +2318,7 @@ class AdsbIm:
                     "systemctl enable --now ssh || systemctl enable --now dropbear", timeout=5
                 )
                 if not success:
+                    report_issue(f"failed to enable ssh - check the logs for details")
                     print_err(f"failed to enable ssh: {output}")
                 continue
             e = self._d.env_by_tags(key.split("--"))
@@ -2323,7 +2332,7 @@ class AdsbIm:
                             ["/usr/sbin/zerotier-cli", "join", f"{value}"],
                         )
                     except:
-                        print_err("exception trying to set up zerorier - giving up")
+                        report_issue("exception trying to set up zerorier - giving up")
                 if key in {"lat", "lon", "alt"}:
                     # remove letters, spaces, degree symbols
                     value = str(float(re.sub("[a-zA-Z° ]", "", value)))
@@ -2785,6 +2794,7 @@ class AdsbIm:
                 print_err(f"uploaded logs to {url}")
             else:
                 print_err(f"failed to upload logs, output: {output}")
+                report_issue(f"failed to upload logs")
             return render_template("support.html", url=url)
 
         if target == "termbin.com":
@@ -2798,6 +2808,7 @@ class AdsbIm:
                 print_err(f"uploaded logs to {url}")
             else:
                 print_err(f"failed to upload logs, output: {output}")
+                report_issue(f"failed to upload logs")
             return render_template("support.html", url=url)
 
         if target == "local_view" or target == "local_download":

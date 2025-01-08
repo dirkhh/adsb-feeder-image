@@ -3,7 +3,17 @@
 
 {% block content %}
 <h1 class="mt-3 text-center text-danger">{% block title %} Restore setup from a backup {% endblock %}</h1>
-
+  <div>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-warning">
+      {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+  </div>
 <p>If you have a configuration backup file, please upload it here:</p>
 <form method="post" enctype="multipart/form-data" onsubmit="show_spinner(); return true;">
   <input class="btn btn-secondary" type="file" name="file" />
