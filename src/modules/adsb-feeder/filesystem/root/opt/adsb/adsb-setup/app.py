@@ -1308,7 +1308,9 @@ class AdsbIm:
         if not success:
             print_err(f"failed to allow root ssh login: {output}")
 
-        success, output = run_shell_captured("systemctl enable --now ssh || systemctl enable --now dropbear", timeout=5)
+        success, output = run_shell_captured(
+            "systemctl enable --now ssh || systemctl enable --now dropbear", timeout=5
+        )
         if not success:
             print_err(f"failed to enable ssh: {output}")
 
@@ -2298,17 +2300,20 @@ class AdsbIm:
                 except:
                     print_err("Error running UAT autogain reset")
                 continue
+            if allow_insecure and key == "ssh_pub":
+                ssh_dir = pathlib.Path("/root/.ssh")
+                ssh_dir.mkdir(mode=0o700, exist_ok=True)
+                with open(ssh_dir / "authorized_keys", "a+") as authorized_keys:
+                    authorized_keys.write(f"{value}\n")
+                self._d.env_by_tags("ssh_configured").value = True
+                success, output = run_shell_captured(
+                    "systemctl enable --now ssh || systemctl enable --now dropbear", timeout=5
+                )
+                if not success:
+                    print_err(f"failed to enable ssh: {output}")
+                continue
             e = self._d.env_by_tags(key.split("--"))
             if e:
-                if allow_insecure and key == "ssh_pub":
-                    ssh_dir = pathlib.Path("/root/.ssh")
-                    ssh_dir.mkdir(mode=0o700, exist_ok=True)
-                    with open(ssh_dir / "authorized_keys", "a+") as authorized_keys:
-                        authorized_keys.write(f"{value}\n")
-                    self._d.env_by_tags("ssh_configured").value = True
-                    success, output = run_shell_captured("systemctl enable --now ssh || systemctl enable --now dropbear", timeout=5)
-                    if not success:
-                        print_err(f"failed to enable ssh: {output}")
                 if allow_insecure and key == "zerotierid":
                     try:
                         subprocess.call("/usr/bin/systemctl unmask zerotier-one", shell=True)
