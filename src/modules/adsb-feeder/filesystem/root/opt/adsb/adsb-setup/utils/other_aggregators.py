@@ -2,7 +2,7 @@ import re
 import subprocess
 from flask import flash
 from .system import System
-from .util import is_email, make_int, print_err
+from .util import is_email, make_int, print_err, report_issue
 
 
 class Aggregator:
@@ -63,10 +63,6 @@ class Aggregator:
 
     def _deactivate(self):
         raise NotImplementedError
-
-    def _report_issue(self, message: str):
-        print_err(message)
-        flash(message)
 
     def _download_docker_container(self, container: str) -> bool:
         print_err(f"download_docker_container {container}")
@@ -146,7 +142,7 @@ class FlightRadar24(Aggregator):
 
     def _request_fr24_sharing_key(self, email: str):
         if not self._download_docker_container(self.container):
-            self._report_issue("failed to download the FR24 docker image")
+            report_issue("failed to download the FR24 docker image")
             return None
 
         lat = float(self.lat)
@@ -154,7 +150,7 @@ class FlightRadar24(Aggregator):
 
         if abs(lat) < 0.5 and abs(lon) < 0.5:
             # this is at null island, just fail for this
-            self._report_issue("FR24 cannot handle 'null island'")
+            report_issue("FR24 cannot handle 'null island'")
             return None
 
         # so this signup doesn't work for latitude / longitude <0.1, work around that by just setting longitude 0.11 in that case
@@ -201,7 +197,7 @@ class FlightRadar24(Aggregator):
 
     def _request_fr24_uat_sharing_key(self, email: str):
         if not self._download_docker_container(self.container):
-            self._report_issue("failed to download the FR24 docker image")
+            report_issue("failed to download the FR24 docker image")
             return None
 
         uat_signup_command = (
@@ -260,7 +256,7 @@ class FlightRadar24(Aggregator):
             print_err(f"got back sharing_key |{adsb_sharing_key}|")
         if adsb_sharing_key and not re.match("[0-9a-zA-Z]+", adsb_sharing_key):
             adsb_sharing_key = None
-            self._report_issue("invalid FR24 sharing key")
+            report_issue("invalid FR24 sharing key")
 
         if is_email(uat_sharing_key):
             # that's an email address, so we are looking to get a sharing key
@@ -268,7 +264,7 @@ class FlightRadar24(Aggregator):
             print_err(f"got back uat_sharing_key |{uat_sharing_key}|")
         if uat_sharing_key and not re.match("[0-9a-zA-Z]+", uat_sharing_key):
             uat_sharing_key = None
-            self._report_issue("invalid FR24 UAT sharing key")
+            report_issue("invalid FR24 UAT sharing key")
 
         # overwrite email in config so that the container is not started with the email as sharing key if failed
         # otherwise just set sharing key as appropriate
@@ -306,7 +302,7 @@ class FlightAware(Aggregator):
 
     def _request_fa_feeder_id(self):
         if not self._download_docker_container(self.container):
-            self._report_issue("failed to download the piaware docker image")
+            report_issue("failed to download the piaware docker image")
             return None
 
         cmdline = f"--rm {self.container}"
@@ -346,7 +342,7 @@ class RadarBox(Aggregator):
         docker_image = self._d.env_by_tags(["radarbox", "container"]).value
 
         if not self._download_docker_container(docker_image):
-            self._report_issue("failed to download the AirNav Radar docker image")
+            report_issue("failed to download the AirNav Radar docker image")
             return None
 
         # make sure we correctly enable the hacks
@@ -395,7 +391,7 @@ class OpenSky(Aggregator):
         docker_image = self._d.env_by_tags(["opensky", "container"]).value
 
         if not self._download_docker_container(docker_image):
-            self._report_issue("failed to download the OpenSky docker image")
+            report_issue("failed to download the OpenSky docker image")
             return None
 
         cmdline = (
