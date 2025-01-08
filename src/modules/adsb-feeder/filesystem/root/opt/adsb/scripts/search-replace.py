@@ -51,7 +51,9 @@ for name in sanitize_vars:
             continue
         #print(f"{search} {replace}")
         sr.append((search, replace))
-
+        if "$" in search:
+            search = search.replace("$", "$$")
+            sr.append((search, replace))
 
 for line in sys.stdin:
     for search, replace in sr:
