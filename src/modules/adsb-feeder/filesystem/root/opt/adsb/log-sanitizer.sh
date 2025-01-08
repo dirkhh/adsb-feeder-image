@@ -109,7 +109,7 @@ ${SEPARATOR}
 SANITIZE_VARS="FEEDER_LAT FEEDER_LONG ADSBLOL_UUID AF_MICRO_IP ULTRAFEEDER_UUID FEEDER_1090UK_API_KEY
 FEEDER_ADSBHUB_STATION_KEY FEEDER_FR24_SHARING_KEY FEEDER_FR24_UAT_SHARING_KEY
 FEEDER_PLANEWATCH_API_KEY FEEDER_RADARBOX_SHARING_KEY FEEDER_RV_FEEDER_KEY
-_ADSB_STATE_SSH_KEY FEEDER_PIAWARE_FEEDER_ID FEEDER_RADARBOX_SHARING_KEY FEEDER_RADARBOX_SN
+FEEDER_PIAWARE_FEEDER_ID FEEDER_RADARBOX_SHARING_KEY FEEDER_RADARBOX_SN
 FEEDER_PLANEFINDER_SHARECODE FEEDER_OPENSKY_USERNAME FEEDER_OPENSKY_SERIAL FEEDER_HEYWHATSTHAT_ID"
 
 # We set vars that cannot be empty, have to be stripped
@@ -130,12 +130,15 @@ for i in $(seq $NUM_MICRO_SITES); do
     done
 done
 
+# simple fixed string replacement using search-replace.py, search and replace strings are given as pairs of command line arguments
+simple_replace=()
+# regex replacements using perl, this is more consistent than sed due to always different sed versions
 replace_args=()
 
 # For each
 for VAR in $SANITIZE_VARS; do
   # We get the value of the variable
-  MY_VAR=$(grep -e "^${VAR}=" /opt/adsb/config/.env | cut -d'=' -f2)
+  MY_VAR=$(grep -e "^${VAR}=" /opt/adsb/config/.env | sed -e 's/[^=]*=//')
   # MY_VAR is empty, and it is one of FEEDER_LAT FEEDER_LONG ADSBLOL_UUID, bail out
   if [ -z "$MY_VAR" ] ; then
     if [[ "$IMPORTANT_VARS" == *"$VAR"* ]]; then
@@ -149,23 +152,28 @@ for VAR in $SANITIZE_VARS; do
             continue
             ;;
     esac
-    # replace character class: ][\/$*.^
-    MY_VAR_ESCAPED="$(sed 's#[][\/$*.^]#\\&#g' <<< "${MY_VAR}")"
-    #echo "$MY_VAR_ESCAPED" 1>&2
-    replace_args+=(-e "s/${MY_VAR_ESCAPED}/MY_REAL_${VAR}/")
-    # Otherwise we just strip it out, and put it back into SANITIZED_LOG
+    if grep -qs -F -e '$$' <<< "${MY_VAR}"; then
+        # for the .env, $ is replaced with $$, undo this replacement
+        MY_VAR_UNESCAPED="$(sed 's#\$\$#\$#g' <<< "${MY_VAR}")"
+        simple_replace+=("${MY_VAR_UNESCAPED}" "MY_REAL_${VAR}")
+    fi
+    simple_replace+=("${MY_VAR}" "MY_REAL_${VAR}")
   fi
 done
-
-SANITIZED_LOG="$(sed "${replace_args[@]}" <<< "${SANITIZED_LOG}")"
-
-# print a new line do delineate our debug output above
-echo
+# replace --lat --lon arguments mainly from piaware log
+replace_args+='s/--lat.[^ ]*/--lat <redacted>/g;'
+replace_args+='s/--lon.[^ ]*/--lon <redacted>/g;'
+# replace 'handling ssh_pub' messages
+replace_args+='s/handling ssh_pub.*/handling ssh_pub <redacted>/;'
+# replace old messages of saing the ssh key to config
+replace_args+='s/_ADSB_STATE_SSH_KEY.*/_ADSB_STATE_SSH_KEY <redacted>/;'
+# replace sshd pubkey messages
+replace_args+='s/Accepted publickey.*/Accepted publickey <redacted>/;'
+# replace dropbear pubkey messages
+replace_args+='s/Pubkey auth.*/Pubkey auth <redacted>/;'
 # now get rid of anything that looks like an IP address
-SANITIZED_LOG=$(sed -r 's/((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])/<hidden-ip-address>/g' <<< $SANITIZED_LOG)
+replace_args+='s/((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])/<hidden-ip-address>/g;'
 # finally, replace everything that looks like a uuid
-SANITIZED_LOG=$(sed -r 's/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/<hidden-uuid>/g' <<< $SANITIZED_LOG)
-#
-# Then we echo the sanitised log
-echo "$SANITIZED_LOG"
+replace_args+='s/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/<hidden-uuid>/g;'
 
+perl -pe "${replace_args}" <<< "${SANITIZED_LOG}" | /opt/adsb/scripts/search-replace.py "${simple_replace[@]}"

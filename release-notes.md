@@ -1,4 +1,5 @@
 Changes since v2.2.5 include:
+- log-sanitizer: improve search and replace
 - improve implementation of ssh password/keys and ensure that sshd is running
 - always have a single SDR default to ADS-B, even if its serial number is 978
 - replace the language of semi-anonymous / commercial aggregators with account-less / account-based

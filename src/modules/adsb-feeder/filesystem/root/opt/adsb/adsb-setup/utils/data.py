@@ -429,10 +429,6 @@ class Data:
             tags=["ssh_configured", "is_enabled", "norestore"],
         ),
         Env(
-            "_ADSB_STATE_SSH_KEY",
-            tags=["ssh_pub", "key", "norestore"],
-        ),
-        Env(
             "AF_IS_BASE_CONFIG_FINISHED",
             default=False,
             tags=["base_config", "is_enabled"],
