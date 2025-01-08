@@ -113,6 +113,9 @@ replace_args=()
 # replace --lat --lon arguments mainly from piaware log
 replace_args+='s/--lat.[^ ]*/--lat <redacted>/g;'
 replace_args+='s/--lon.[^ ]*/--lon <redacted>/g;'
+# remove FA name from piaware log
+replace_args+='s#flightaware.com/adsb/stats/user.*#flightaware.com/adsb/stats/user/<redacted>#g;'
+replace_args+='s/FlightAware as user .*/FlightAware as user <redacted>/g;'
 # replace 'handling ssh_pub' messages
 replace_args+='s/handling ssh_pub.*/handling ssh_pub <redacted>/;'
 # replace old messages of saing the ssh key to config
