@@ -2,7 +2,7 @@
 # CC0 - public domain
 
 set -E
-trap 'echo "[ERROR] Error in line $LINENO when executing: $BASH_COMMAND"' ERR
+trap 'echo "[ERROR] Error in line $LINENO"' ERR
 
 SEPARATOR="
 ----------------------------------------------------------------------------------------------------------
@@ -11,16 +11,16 @@ SEPARATOR="
 # and also append a bunch of other diagnostic info
 SANITIZED_LOG="
 important:
-$(jq < /opt/adsb/config/config.json '{ version: ._ADSBIM_BASE_VERSION, board: ._ADSBIM_STATE_BOARD_NAME, user_env: ._ADSBIM_STATE_EXTRA_ENV, user_ultrafeeder: ._ADSBIM_STATE_ULTRAFEEDER_EXTRA_ARGS }')
+$(jq '{ version: ._ADSBIM_BASE_VERSION, board: ._ADSBIM_STATE_BOARD_NAME, user_env: ._ADSBIM_STATE_EXTRA_ENV, user_ultrafeeder: ._ADSBIM_STATE_ULTRAFEEDER_EXTRA_ARGS }' /opt/adsb/config/config.json 2>&1)
 ${SEPARATOR}
 uname -a:
 $(uname -a)
 ${SEPARATOR}
 base_image:
-$(cat /opt/adsb/feeder-image.name || echo "probably app install")
+$(cat /opt/adsb/feeder-image.name 2>/dev/null || echo "probably app install")
 ${SEPARATOR}
 /etc/os-release:
-$(cat /etc/os-release)
+$(cat /etc/os-release 2>&1)
 ${SEPARATOR}
 "
 
@@ -46,54 +46,54 @@ top -b -n1 | head -n20:
 $(top -b -n1 | head -n20)
 ${SEPARATOR}
 zramctl:
-$(zramctl)
+$(zramctl 2>&1)
 ${SEPARATOR}
 free -h:
-$(free -h)
+$(free -h 2>&1)
 ${SEPARATOR}
 journal storage:
-$( ( systemd-analyze cat-config systemd/journald.conf | grep ^Storage ; echo 'Storage=auto' ) | head -1 | cut -d= -f2)
+$( ( systemd-analyze cat-config systemd/journald.conf | grep ^Storage ; echo 'Storage=auto' ) | head -1 | cut -d= -f2 2>&1)
 ${SEPARATOR}
 cat /etc/docker/daemon.json:
-$(cat /etc/docker/daemon.json)
+$(cat /etc/docker/daemon.json 2>&1)
 ${SEPARATOR}
 docker ps:
-$(timeout 4 docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Image}}")
+$(timeout 4 docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Image}}" 2>&1)
 ${SEPARATOR}
 docker images:
-$(timeout 4 docker images -a --format "{{.Repository}}:{{.Tag}}")
+$(timeout 4 docker images -a --format "{{.Repository}}:{{.Tag}}" 2>&1)
 ${SEPARATOR}
 docker network ls:
-$(timeout 4 docker network ls)
+$(timeout 4 docker network ls 2>&1)
 ${SEPARATOR}
 docker system df:
-$(timeout 4 docker system df)
+$(timeout 4 docker system df 2>&1)
 ${SEPARATOR}
 lsusb -vt:
-$(timeout 4 lsusb -vt)
+$(timeout 4 lsusb -vt 2>&1)
 ${SEPARATOR}
 grep -e sdr_info /run/adsb-feeder-image.log:
-$(grep -e sdr_info /run/adsb-feeder-image.log)
+$(grep -e sdr_info /run/adsb-feeder-image.log 2>&1)
 ${SEPARATOR}
 lsusb -v:
-$(timeout 4 lsusb -v)
+$(timeout 4 lsusb -v 2>&1)
 ${SEPARATOR}
 config.json:
-$(</opt/adsb/config/config.json)
+$(cat /opt/adsb/config/config.json 2>&1)
 ${SEPARATOR}
 .env:
-$(</opt/adsb/config/.env)
+$(cat /opt/adsb/config/.env 2>&1)
 ${SEPARATOR}
 journalctl -e -n3000:
-$(journalctl -e -n3000)
+$(journalctl -e -n3000 2>&1)
 ${SEPARATOR}
 "
 
-for oldlog in $(find /opt/adsb/logs -name adsb-setup.log.\* | sort | tail -n2); do
+for oldlog in $(find /opt/adsb/logs -name adsb-setup.log.\*zst | sort | tail -n2); do
 
 SANITIZED_LOG+="
 ${oldlog}:
-$(zstdcat "$oldlog" || cat "$oldlog")
+$(zstdcat "$oldlog" 2>&1)
 ${SEPARATOR}
 "
 
@@ -101,7 +101,7 @@ done
 
 SANITIZED_LOG+="
 adsb-setup.log:
-$(</run/adsb-feeder-image.log)
+$(cat /run/adsb-feeder-image.log 2>&1)
 ${SEPARATOR}
 "
 
