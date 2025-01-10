@@ -7,9 +7,19 @@ config = json.load(open("/opt/adsb/config/config.json", "r"))
 
 sr = []
 
+if (len(sys.argv) - 1) % 2 != 0:
+    print("ERROR: even number of search replace pairs required!")
+    sys.exit(1)
+
+for i in range(int((len(sys.argv) - 1) / 2)):
+    sr.append((sys.argv[2 * i + 1], sys.argv[2 * i + 2]))
+    #print(f"{sr[-1]}")
+
 sanitize_vars = [
     "FEEDER_LAT",
     "FEEDER_LONG",
+    "MLAT_SITE_NAME",
+    "MLAT_SITE_NAME_SANITIZED",
     "ADSBLOL_UUID",
     "AF_MICRO_IP",
     "ULTRAFEEDER_UUID",

@@ -106,6 +106,7 @@ ${SEPARATOR}
 "
 
 # config variable replacement now done in search-replace.py
+# search-replace also accepts argument pairs for search replace
 
 # regex replacements using perl, this is more consistent than sed due to always different sed versions
 replace_args=()
@@ -129,4 +130,4 @@ replace_args+='s/((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9][0-9]?|2[0-4]
 # finally, replace everything that looks like a uuid
 replace_args+='s/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/<hidden-uuid>/g;'
 
-perl -pe "${replace_args}" <<< "${SANITIZED_LOG}" | /opt/adsb/scripts/search-replace.py
+perl -pe "${replace_args}" <<< "${SANITIZED_LOG}" | /opt/adsb/scripts/search-replace.py "$(hostname)" HOSTNAME
