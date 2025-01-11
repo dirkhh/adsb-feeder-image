@@ -2868,7 +2868,7 @@ class AdsbIm:
                 return f"failed to run '{cmd}'"
 
         storage = simple_cmd_result("df -h | grep -v overlay")
-        kernel = simple_cmd_result("uname -a")
+        kernel = simple_cmd_result("uname -rvmo")
         memory = simple_cmd_result("free -h")
         top = simple_cmd_result("top -b -n1 | head -n5")
         journal = "persistent on disk" if self._persistent_journal else "in memory"
