@@ -1,0 +1,18 @@
+[Unit]
+Description=ADS-B Feeder Temperature Service
+After=adsb-setup.service
+
+[Service]
+SyslogIdentifier=adsb-temperature
+WorkingDirectory=/opt/adsb/extras
+ExecStart=/usr/bin/python3 /opt/adsb/extras/temperature.py
+Restart=always
+Type=simple
+RestartSec=5
+StartLimitInterval=1
+StartLimitBurst=100
+StandardOutput=append:/run/adsb-feeder-image.log
+StandardError=append:/run/adsb-feeder-image.log
+
+[Install]
+WantedBy=multi-user.target

@@ -2766,7 +2766,7 @@ class AdsbIm:
     def temperatures(self):
         temperature_json = {}
         try:
-            with open("/opt/adsb/extras/temperature.json", "r") as temperature_file:
+            with open("/run/adsb-feeder-ultrafeeder/temperature.json", "r") as temperature_file:
                 temperature_json = json.load(temperature_file)
                 now = int(time.time())
                 age = now - int(temperature_json.get("now", "0"))
