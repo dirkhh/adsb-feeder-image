@@ -1,4 +1,5 @@
 Changes since v2.2.5 include:
+- update containers - this will cause the update to take a bit longer
 - only run nightly update if there actually is a newer version available in the active channel
 - significantly increase the number of warnings / issues that are communicated to the user via the web UI
 - log-sanitizer: improve search and replace
