@@ -1501,6 +1501,7 @@ class AdsbIm:
 
         url = f"http://{ip}:{port}/backupexecutefull"
         # make tmpfile
+        os.makedirs(self._d.config_path / "ultrafeeder", exist_ok=True)
         fd, tmpfile = tempfile.mkstemp(dir=self._d.config_path / "ultrafeeder")
         os.close(fd)
 
