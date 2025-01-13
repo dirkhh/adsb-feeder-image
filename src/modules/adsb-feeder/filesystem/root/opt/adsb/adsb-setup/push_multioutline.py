@@ -15,8 +15,8 @@ try:
     with open(f"/run/adsb-feeder-ultrafeeder/readsb/multiOutline.json", "w") as f:
         json.dump(mo_data, f)
 except:
-    print_err(traceback.format_exc())
-    print_err("failed to push multiOutline.json")
+    print_err(traceback.format_exc(), level=8)
+    print_err("failed to push multiOutline.json verbose 8 for details")
 
 
 # heywhatsthat
@@ -35,5 +35,5 @@ try:
         ]
         subprocess.run(cmd, check=True)
 except:
-    print_err(traceback.format_exc())
-    print_err("failed to push heywhatsthat.json")
+    print_err(traceback.format_exc(), level=8)
+    print_err("failed to push heywhatsthat.json - verbose 8 for details")
