@@ -139,7 +139,6 @@ class Env:
         # only call after you verified that this env is a list and idx is an int
         # internal function - does not reconcile
         if idx >= len(self._value):
-            print_err(f"{self._name} has only {len(self._value)} values, padding with default")
             d = None
             if type(self._default) != list:
                 print_err(f"{self._name}: default type should be list: {type(self._default)}, using None as default")
@@ -183,9 +182,6 @@ class Env:
         if type(self._default) == list and len(self._default) == 1:
             while len(self._value) <= idx:
                 self._value.append(self._default[0])
-                print_err(
-                    f"{self._name} -> list_get({idx}) appended default {self._default[0]}, new len: {len(self._value)}"
-                )
                 self._reconcile(self._value)
             return self._value[idx]
 

@@ -32,7 +32,7 @@ class MultiOutline:
         data = []
         hwt_feeders = []
         now = time.time()
-        tar1090port=8080
+        tar1090port = 8080
         with open("/opt/adsb/config/.env", "r") as env:
             for line in env:
                 match = re.search(r"AF_TAR1090_PORT=(\d+)", line)
@@ -79,7 +79,7 @@ class MultiOutline:
         return result
 
     def create(self, data, hwt_alt=0):
-        #print_err(f"multioutline: called create with for data with len {len(data)}")
+        # print_err(f"multioutline: called create with for data with len {len(data)}")
         result = {"multiRange": []}
         polygons = []
         for i in range(len(data)):
