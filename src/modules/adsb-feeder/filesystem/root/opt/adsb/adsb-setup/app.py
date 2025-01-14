@@ -1591,9 +1591,6 @@ class AdsbIm:
         print_err(f"removing micro site {num}")
         for t in self.microfeeder_setting_tags + (
             "mf_ip",
-            "airspyurl",
-            "1090signalurl",
-            "978url",
             "978piaware",
             "replay978",
             "978host",
