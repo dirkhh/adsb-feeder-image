@@ -236,13 +236,13 @@ class AdsbIm:
         self.cache_agg_status_lock = threading.Lock()
         self.last_aggregator_debug_print = None
         self.microfeeder_setting_tags = (
-            "site_name", "lat", "lon", "alt", "tz", "mf_version",
-            "adsblol_uuid", "ultrafeeder_uuid", "mlat_privacy", "route_api",
+            "site_name", "lat", "lon", "alt", "tz", "mf_version", "max_range",
+            "adsblol_uuid", "adsblol_link", "ultrafeeder_uuid", "mlat_privacy", "route_api",
             "uat978", "heywhatsthat", "heywhatsthat_id",
             "flightradar--key", "flightradar_uat--key", "flightradar--is_enabled",
             "planewatch--key", "planewatch--is_enabled",
             "flightaware--key", "flightaware--is_enabled",
-            "radarbox--key", "radarbox--is_enabled",
+            "radarbox--key", "radarbox--snkey", "radarbox--is_enabled",
             "planefinder--key", "planefinder--is_enabled",
             "adsbhub--key", "adsbhub--is_enabled",
             "opensky--user", "opensky--key", "opensky--is_enabled",
