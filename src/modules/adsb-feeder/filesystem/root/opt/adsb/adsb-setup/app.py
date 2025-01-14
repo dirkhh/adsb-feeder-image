@@ -129,7 +129,7 @@ class AdsbIm:
                 "env_value_by_tags": lambda tags: get_value(tags),  # list of tags
                 "list_value_by_tag": lambda tag, idx: list_value_by_tags([tag], idx),
                 "list_value_by_tags": lambda tag, idx: list_value_by_tags(tag, idx),
-                "env_values": self._d.envs,
+                "env_values": self._d.env_values,
             }
 
         self._routemanager = RouteManager(self.app)
@@ -310,7 +310,7 @@ class AdsbIm:
         # actually write out the potentially updated values (e.g. when plain values were converted
         # to lists)
         with config_lock:
-            write_values_to_config_json(self._d.envs, reason="Startup")
+            write_values_to_config_json(self._d.env_values, reason="Startup")
 
     def update_boardname(self):
         board = ""

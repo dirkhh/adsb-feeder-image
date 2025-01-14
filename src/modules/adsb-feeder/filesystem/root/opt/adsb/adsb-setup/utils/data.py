@@ -726,7 +726,7 @@ class Data:
         # fmt: on
 
     @property
-    def envs(self):
+    def env_values(self):
         return {e.name: e._value for e in self._env}
 
     @property
