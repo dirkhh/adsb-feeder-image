@@ -99,6 +99,10 @@ class Env:
         return "is_enabled" in self._tags
 
     @property
+    def is_list(self) -> bool:
+        return type(self._default) == list
+
+    @property
     def value(self):
         if self._value_call:
             return self._value_call()

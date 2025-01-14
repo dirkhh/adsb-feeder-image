@@ -1589,29 +1589,12 @@ class AdsbIm:
     def remove_micro_site(self, num):
         # carefully shift everything down
         print_err(f"removing micro site {num}")
-        for t in self.microfeeder_setting_tags + (
-            "mf_ip",
-            "978piaware",
-            "replay978",
-            "978host",
-            "mf_brofm",
-            "mf_brofm_capable",
-            "ultrafeeder_config",
-            "rb978host",
-            "airspyurl",
-            "rtlsdrurl",
-            "978url",
-        ):
-            tags = t.split("--")
-            e = self._d.env_by_tags(tags)
-            if e and type(e._value) == list:
-                print_err(f"shifting {e.name} down and deleting last element {e._value}")
-                for i in range(num, self._d.env_by_tags("num_micro_sites").value):
-                    e.list_set(i, e.list_get(i + 1))
-                while len(e._value) > self._d.env_by_tags("num_micro_sites").value:
-                    e.list_remove()
-            else:
-                print_err(f"couldn't find env list for {tags}")
+        for e in self._d.stage2_envs:
+            print_err(f"shifting {e.name} down and deleting last element {e._value}")
+            for i in range(num, self._d.env_by_tags("num_micro_sites").value):
+                e.list_set(i, e.list_get(i + 1))
+            while len(e._value) > self._d.env_by_tags("num_micro_sites").value:
+                e.list_remove()
         self._d.env_by_tags("num_micro_sites").value -= 1
 
     def edit_micro_site(self, num: int, site_name, ip, uat, brofm, new_idx: int):
@@ -1673,25 +1656,9 @@ class AdsbIm:
         # now that all the editing has been done, move things around if needed
         if new_idx != num:
             print_err(f"moving micro site {num} to {new_idx}")
-            for t in self.microfeeder_setting_tags + (
-                "mf_ip",
-                "978piaware",
-                "replay978",
-                "978host",
-                "mf_brofm",
-                "mf_brofm_capable",
-                "ultrafeeder_config",
-                "rb978host",
-                "airspyurl",
-                "rtlsdrurl",
-                "978url",
-            ):
-                tags = t.split("--")
-                e = self._d.env_by_tags(tags)
-                if e and type(e._value) == list:
-                    e.list_move(num, new_idx)
-                else:
-                    print_err(f"couldn't find env list for {tags}")
+
+            for e in self._d.stage2_envs:
+                e.list_move(num, new_idx)
 
         return (True, "")
 

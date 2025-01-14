@@ -729,6 +729,10 @@ class Data:
     def envs(self):
         return {e.name: e._value for e in self._env}
 
+    @property
+    def stage2_envs(self):
+        return [e for e in self._env if e.is_list]
+
     # helper function to find env by name
     def env(self, name: str):
         for e in self._env:
