@@ -1,4 +1,5 @@
 Changes since v2.2.5 include:
+- stage2: avoid potential data consistency issues when manipulating micro feeders
 - stage2: allow reordering of micro feeders
 - update containers - this will cause the update to take a bit longer
 - only run nightly update if there actually is a newer version available in the active channel

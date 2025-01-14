@@ -3,7 +3,7 @@ import os
 import os.path
 import tempfile
 import threading
-from .util import print_err
+from .util import make_int, print_err, verbose
 
 CONF_DIR = "/opt/adsb/config"
 ENV_FILE_PATH = CONF_DIR + "/.env"
@@ -12,8 +12,15 @@ JSON_FILE_PATH = CONF_DIR + "/config.json"
 
 config_lock = threading.Lock()
 
+log_consistency_warnings = True
 
-def read_values_from_config_json():
+
+def log_consistency_warning(value: bool):
+    global log_consistency_warnings
+    log_consistency_warnings = value
+
+
+def read_values_from_config_json(check_integrity=False):
     # print_err("reading .json file")
     if not os.path.exists(JSON_FILE_PATH):
         # this must be either a first run after an install,
@@ -27,6 +34,20 @@ def read_values_from_config_json():
         ret = json.load(open(JSON_FILE_PATH, "r"))
     except:
         print_err("Failed to read .json file")
+    global log_consistency_warnings
+    if log_consistency_warnings:
+        n = make_int(ret.get("AF_NUM_MICRO_SITES", 0)) + 1
+        found = False
+        for k, v in ret.items():
+            if type(v) == list and len(v) != n:
+                print_err(
+                    f"WARNING: list {k} has length: {len(v)} instead of expected {n} - log: {log_consistency_warnings}"
+                )
+                found = True
+        if found:
+            print_err(f"WARNING: found list with inconsistent lengths - log: {log_consistency_warnings}")
+        elif check_integrity:
+            print_err("INFO: all lists have consistent lengths")
     return ret
 
 

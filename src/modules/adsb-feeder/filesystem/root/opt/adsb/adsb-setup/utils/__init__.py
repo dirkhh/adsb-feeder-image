@@ -3,6 +3,7 @@ from .config import (
     write_values_to_config_json,
     read_values_from_env_file,
     write_values_to_env_file,
+    log_consistency_warnings,
 )
 from .data import Data
 from .environment import Env
