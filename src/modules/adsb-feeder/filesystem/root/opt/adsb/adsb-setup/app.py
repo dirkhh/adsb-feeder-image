@@ -1614,10 +1614,15 @@ class AdsbIm:
                 print_err(f"couldn't find env list for {tags}")
         self._d.env_by_tags("num_micro_sites").value -= 1
 
-    def edit_micro_site(self, num, site_name, ip, uat, brofm):
+    def edit_micro_site(self, num: int, site_name, ip, uat, brofm, new_idx: int):
         print_err(
-            f"editing micro site {num} from {self._d.env_by_tags('site_name').list_get(num)} at {self._d.env_by_tags('mf_ip').list_get(num)} to {site_name} at {ip}"
+            f"editing micro site {num} from {self._d.env_by_tags('site_name').list_get(num)} at "
+            + f"{self._d.env_by_tags('mf_ip').list_get(num)} to {site_name} at {ip}"
+            + (f" (new index {new_idx})" if new_idx != num else "")
         )
+        if new_idx < 0 or new_idx > self._d.env_by_tags("num_micro_sites").value:
+            print_err(f"invalid new index {new_idx}, ignoring")
+            new_idx = num
         old_ip = self._d.env_by_tags("mf_ip").list_get(num)
         if old_ip != ip:
             if any([s in ip for s in ["/", "\\", ":", "*", "?", '"', "<", ">", "|", "..", "$"]]):
@@ -1664,6 +1669,30 @@ class AdsbIm:
             self.setup_or_disable_uat(num)
 
         self._d.env_by_tags("mf_brofm").list_set(num, brofm)
+
+        # now that all the editing has been done, move things around if needed
+        if new_idx != num:
+            print_err(f"moving micro site {num} to {new_idx}")
+            for t in self.microfeeder_setting_tags + (
+                "mf_ip",
+                "978piaware",
+                "replay978",
+                "978host",
+                "mf_brofm",
+                "mf_brofm_capable",
+                "ultrafeeder_config",
+                "rb978host",
+                "airspyurl",
+                "rtlsdrurl",
+                "978url",
+            ):
+                tags = t.split("--")
+                e = self._d.env_by_tags(tags)
+                if e and type(e._value) == list:
+                    e.list_move(num, new_idx)
+                else:
+                    print_err(f"couldn't find env list for {tags}")
+
         return (True, "")
 
     def setRtlGain(self):
@@ -2059,6 +2088,7 @@ class AdsbIm:
                         form.get(f"mf_ip_{num}"),
                         form.get(f"mf_uat_{num}"),
                         form.get(f"mf_brofm_{num}"),
+                        make_int(form.get(f"site_order_{num}")),
                     )
                     if success:
                         self._next_url_from_director = url_for("stage2")

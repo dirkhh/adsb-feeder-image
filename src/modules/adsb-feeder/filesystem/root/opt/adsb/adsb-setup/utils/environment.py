@@ -130,6 +130,22 @@ class Env:
             self._value = value
             self._reconcile(value)
 
+    def _list_pad(self, idx: int):
+        # make sure we have at least idx + 1 values, padding with default if necessary
+        # only call after you verified that this env is a list and idx is an int
+        # internal function - does not reconcile
+        if idx >= len(self._value):
+            print_err(f"{self._name} has only {len(self._value)} values, padding with default")
+            d = None
+            if type(self._default) != list:
+                print_err(f"{self._name}: default type should be list: {type(self._default)}, using None as default")
+            elif len(self._default) == 0:
+                print_err(f"{self._name}: default list len should be 1: {len(self._default)}")
+            else:
+                d = self._default[0]
+            while len(self._value) <= idx:
+                self._value.append(d)
+
     def list_set(self, idx, value):
         # mess with value in case we are a bool
         # we get "1" from .env files and "on" from checkboxes in HTML
@@ -146,19 +162,12 @@ class Env:
             # no change, return silently
             return
 
+        if idx >= len(self._value):
+            self._list_pad(idx)
+
         print_err(f"list_set {self._name}[{idx}] = {value}")
-        if type(self._default) == list and len(self._default) == 1:
-            default_value = self._default[0]
-        else:
-            default_value = None
-        while len(self._value) < idx:
-            self._value.append(default_value)
-        if idx == len(self._value):
-            self._value.append(value)
-        else:
-            self._value[idx] = value
+        self._value[idx] = value
         self._reconcile(self._value)
-        # print_err(f"after reconcile {self._name} = {self._value}")
 
     def list_get(self, idx):
         idx = make_int(idx)
@@ -193,6 +202,20 @@ class Env:
             idx = len(self._value) - 1
         while idx < len(self._value):
             self._value.pop()
+        self._reconcile(self._value)
+
+    def list_move(self, from_idx, to_idx):
+        from_idx = make_int(from_idx)
+        to_idx = make_int(to_idx)
+        if type(self._value) != list:
+            print_err(f"{self._name} is not a list, giving up")
+            return
+        # make sure the list is long enough for the operation to complete, padding with default if necessary
+        idx = max(from_idx, to_idx)
+        if idx >= len(self._value):
+            print_err(f"{self._name} has only {len(self._value)} values, padding with default")
+            self.list_pad(idx)
+        self._value.insert(to_idx, self._value.pop(from_idx))
         self._reconcile(self._value)
 
     @property
