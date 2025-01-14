@@ -1364,15 +1364,6 @@ class AdsbIm:
                     e = self._d.env_by_tags(tags)
                     if e:
                         e.list_set(n, value)
-                # now, if the microfeeder is older it might be missing some keys that we need
-                for key in self.microfeeder_setting_tags:
-                    if key not in micro_settings:
-                        e = self._d.env_by_tags(key.split("--"))
-                        if e:
-                            if e._default and len(e._default) > 0:
-                                e.list_set(n, e._default[0])
-                            else:
-                                e.list_set(n, None)
         base_info, status = generic_get_json(f"http://{ip}:{port}/api/base_info", timeout=timeout)
         if (status != 200 or base_info == None) and port == "80":
             # maybe we're running on 1099?
