@@ -1,4 +1,4 @@
-ULTRAFEEDER_CONTAINER=ghcr.io/sdr-enthusiasts/docker-adsb-ultrafeeder:latest-build-614
+ULTRAFEEDER_CONTAINER=ghcr.io/sdr-enthusiasts/docker-adsb-ultrafeeder:latest-build-615
 UAT978_CONTAINER=ghcr.io/sdr-enthusiasts/docker-dump978:latest-build-717
 FR24_CONTAINER=ghcr.io/sdr-enthusiasts/docker-flightradar24:latest-build-764
 FA_CONTAINER=ghcr.io/sdr-enthusiasts/docker-piaware:latest-build-586
