@@ -54,6 +54,7 @@
       <div class="col-12">
         <table class="table table-bordered table-sm lh-1 table-striped">
           <thead>
+            <td>#</td>
             <td>Site</td>
             <td class="text-center">IP</td>
             <td class="text-center d-none d-md-table-cell">Lat/Long@Alt</td>
@@ -68,6 +69,11 @@
             {% if loop.index0 != 0 %}<!-- skip the entry for the host -->
             {% if loop.index0 == edit_index %}<!-- edit mode -->
             <tr class="align-middle">
+              <td>
+                <input type="text" name="site_order_{{ loop.index0 }}" id="site_order_idx"
+                       value="{{ loop.index0 }}" patter="[0-9]+"
+                       title="Row number" class="form-control-sm accept_edit" onfocusout=""/>
+              </td>
               <td>
                 <input type="text" name="site_name_{{ loop.index0 }}" value="{{ site }}" pattern="[\-_.a-zA-Z0-9 ]+"
                        title="Letters, numbers, -, _, ." class="form-control-sm accept_edit" />
@@ -99,6 +105,7 @@
             </tr>
             {% else %}
             <tr class="align-middle">
+              <td><span id="site_order_{{ loop.index0 }}">{{ loop.index0 }}</span></td>
               <td>
                 <a href="/map_{{loop.index0}}/">{{ site }}</a>
               </td>
@@ -426,7 +433,36 @@
       });
   }
   get_stage2_info();
-
+  $("#site_order_idx").on('focusout', function (e) {
+    let n = parseInt("{{ env_value_by_tag('num_micro_sites') }}")
+    let edit_idx = parseInt("{{ edit_index }}");
+    let new_idx = parseInt(e.target.value);
+    if (new_idx != +e.target.value) {
+      e.target.value = edit_idx;
+      return;
+    }
+    if (new_idx < 1 || new_idx > n) {
+      e.target.value = edit_idx;
+      return;
+    }
+    for (let i = 1; i <= n; i++) {
+      if (i == edit_idx) continue;
+      <!-- we overwrite all the indices in case the user edits multiple times-->
+      if ((i < new_idx && i < edit_idx) || (i > new_idx && i > edit_idx)) {
+        $("#site_order_" + i).text(i);
+        continue;
+      }
+      if (i <= new_idx && i > edit_idx) {
+        $("#site_order_" + i).text(i - 1);
+        continue;
+      }
+      if (i >= new_idx && i < edit_idx) {
+        $("#site_order_" + i).text(i + 1);
+        continue;
+      }
+      console.log("I missed a case ", i, new_idx, edit_idx);
+    };
+  });
   $(".accept_edit").on('keypress', function (e) {
     if ((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13)) {
       $("#save_edit").click();
