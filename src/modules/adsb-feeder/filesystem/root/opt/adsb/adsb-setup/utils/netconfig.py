@@ -110,6 +110,13 @@ class UltrafeederConfig:
                 # or the UAT port on the micro feeder
                 ret.add(f"adsb,{ip},30978,uat_in")
 
+            if mf_ip != "local":
+                # while a rare usecase, people might run feed clients on the
+                # microfeeder (technically not a microfeeder then) and then use
+                # stage2 just for aggregation of the data
+                # always get MLAT results to accomodate this
+                ret.add(f"mlathub,{ip},31005,beast_in,silent_fail")
+
         if not is_stage2:
             if self._d.list_is_enabled("uat978", self._micro):
                 # the dump978 container if this is an integrated feeder
