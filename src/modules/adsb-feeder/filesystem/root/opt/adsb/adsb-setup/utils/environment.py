@@ -213,8 +213,7 @@ class Env:
         # make sure the list is long enough for the operation to complete, padding with default if necessary
         idx = max(from_idx, to_idx)
         if idx >= len(self._value):
-            print_err(f"{self._name} has only {len(self._value)} values, padding with default")
-            self.list_pad(idx)
+            self._list_pad(idx)
         self._value.insert(to_idx, self._value.pop(from_idx))
         self._reconcile(self._value)
 
