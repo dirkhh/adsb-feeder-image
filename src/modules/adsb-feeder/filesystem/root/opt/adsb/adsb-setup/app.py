@@ -1360,11 +1360,18 @@ class AdsbIm:
                     if key not in self.microfeeder_setting_tags:
                         continue
                     tags = key.split("--")
-                    print_err(f"setting env for {tags} to {value}", level=4)
                     e = self._d.env_by_tags(tags)
                     if e:
                         e.list_set(n, value)
-
+                # now, if the microfeeder is older it might be missing some keys that we need
+                for key in self.microfeeder_setting_tags:
+                    if key not in micro_settings:
+                        e = self._d.env_by_tags(key.split("--"))
+                        if e:
+                            if e._default and len(e._default) > 0:
+                                e.list_set(n, e._default[0])
+                            else:
+                                e.list_set(n, None)
         base_info, status = generic_get_json(f"http://{ip}:{port}/api/base_info", timeout=timeout)
         if (status != 200 or base_info == None) and port == "80":
             # maybe we're running on 1099?
@@ -1567,6 +1574,9 @@ class AdsbIm:
             self._d.env_by_tags("tz").list_set(n, "UTC")
             self._d.env_by_tags("mf_version").list_set(n, "not an adsb.im feeder")
             self._d.env_by_tags(["uat978", "is_enabled"]).list_set(n, uat)
+            # accessing the microfeeder envs will create them
+            for e in self._d.stage2_envs:
+                e.list_get(n)
             return (True, "")
 
         # now let's see if we can get the data from the micro feeder
@@ -1584,6 +1594,10 @@ class AdsbIm:
             return (False, "unable to get base info from micro feeder")
 
         self._d.env_by_tags(["uat978", "is_enabled"]).list_set(n, uat)
+        # accessing the microfeeder envs will create them
+        for e in self._d.stage2_envs:
+            e.list_get(n)
+
         return (True, "")
 
     def remove_micro_site(self, num):
