@@ -168,9 +168,9 @@
         <div class="col-4">
           <div class="row mx-auto gy-2">
             <button type="submit" class="btn btn-primary mx-auto w-100 col-12" name="update_feeder_aps_beta"
-                    value="go">Update (beta)</button>
+                    id="update_feeder_aps_beta" value="go">Update (beta)</button>
             <button type="submit" class="btn btn-primary mx-auto w-100 col-12" name="update_feeder_aps_stable"
-                    value="go">Update (stable)</button>
+                    id="update_feeder_aps_stable" value="go">Update (stable)</button>
             {% if channel != "" %}
             <button type="submit" class="btn btn-primary mx-auto w-100 col-12" name="update_feeder_aps_branch"
                     value="go">Update ({{ channel }})</button>
@@ -301,4 +301,16 @@
 
   <!-- FULL_IMAGE_ONLY_END -->
 </div>
+<script>
+  fetch("/api/status/im")
+  .then(response => response.json())
+  .then(data => {
+    if (data["beta_changelog"]) {
+      $("#update_feeder_aps_beta").attr("title", data["beta_changelog"]);
+    }
+    if (data["main_changelog"]) {
+        $("#update_feeder_aps_stable").attr("title", data["main_changelog"]);
+    }
+  });
+</script>
 {% endblock %}

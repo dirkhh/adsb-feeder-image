@@ -534,10 +534,15 @@
             $("#advice").attr("title", data["beta_changelog"]);
           }
           if (show_both || data["main_changelog"]) {
-            $("#update_feeder_aps_stable").attr("disabled", false);
-            $("#update_feeder_aps_stable").attr("title", data["main_changelog"]);
-            $("#latest_tag").attr("title", data["main_changelog"]);
-            $("#version_update").attr("title", data["main_changelog"]);
+            let message = data["main_changelog"];
+            let set_disabled = false;
+            if (!show_both && data["main_changelog"] == "this will get you back to the last release version") {
+              message = "you can downgrade to the last release version on the System->Management page";
+              set_disabled = true;
+            }
+            $("#update_feeder_aps_stable").attr("disabled", set_disabled);
+            $("#update_feeder_aps_stable").attr("title", message);
+            $("#latest_tag").attr("title", message);
           }
         } else {
           $("#update_buttons").addClass("text-secondary");

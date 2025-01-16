@@ -1,4 +1,5 @@
 Changes since v2.2.5 include:
+- don't show the 'upgrade to stable' button on the home page when this is actually a downgrade. Still offer that ability on the system management page.
 - stage2: avoid potential data consistency issues when manipulating micro feeders
 - stage2: allow reordering of micro feeders
 - update containers - this will cause the update to take a bit longer
