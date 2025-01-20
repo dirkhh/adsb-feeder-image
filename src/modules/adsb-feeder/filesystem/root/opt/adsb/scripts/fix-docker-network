@@ -1,0 +1,32 @@
+#!/bin/bash
+# in the hopefully unlikely case that the network the user is connected to
+# conflicts with the docker network, let's avoid that
+
+# we only want this if we are running as an image
+[ ! -f /opt/adsb/os.adsb.feeder.image ] && exit 0
+
+if [ ! -f /opt/adsb/scripts/common.sh ]
+then
+    echo "missing /opt/adsb/scripts/common.sh -- that's generally a bad sign"
+else
+    . /opt/adsb/scripts/common.sh
+    rootcheck
+    logparent
+fi
+
+# find all physical network interfaces and create a space separated list of their local CIDRs
+phys_if=$(find /sys/class/net -type l -not -lname '*virtual*' -printf '%f\n')
+phys_cidrs=$(for i in $phys_if; do ip ad li "$i" | grep -oP '(?<=inet\s)\d+(\.\d+){3}/\d+'; done | sed -e "s/[[:space:]]\+/ /g")
+
+# check all those CIDRs against a few private network ranges - done in python to avoid complexity of doing thing by hand
+# shellcheck disable=SC2086  # we WANT you to word split...
+cidr=$(python3 /opt/adsb/adsb-setup/find-safe-docker-network.py ${phys_cidrs})
+
+# now set this up in the Docker config file (which we create if necessary)
+[ ! -f /etc/docker/daemon.json ] && echo "{}" > /etc/docker/daemon.json
+tmp=$(mktemp)
+jq --arg cidr "$cidr" '."default-address-pools" = {"base": $cidr, "size": 24}' /etc/docker/daemon.json > "$tmp"
+mv "$tmp" /etc/docker/daemon.json
+echo "Docker setup with available network pool:"
+cat /etc/docker/daemon.json
+

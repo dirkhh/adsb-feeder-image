@@ -1,4 +1,5 @@
 Changes since v2.2.5 include:
+- ensure that the Docker network doesn't conflict with any network that the user is already connected to
 - update Dozzle container to current version
 - don't show the 'upgrade to stable' button on the home page when this is actually a downgrade. Still offer that ability on the system management page.
 - stage2: avoid potential data consistency issues when manipulating micro feeders
