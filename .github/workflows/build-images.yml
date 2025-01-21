@@ -33,7 +33,6 @@ jobs:
   # next run all the board builds
   build:
     needs: prepare
-    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -41,46 +40,54 @@ jobs:
         include:
         - name: lepotato
           base_arch: arm64
+          runner: ubuntu-24.04-arm
           variant: armbian
           url: https://test.adsb.im/downloads/Armbian-unofficial_23.11.0-trunk_Lepotato_bookworm_current_6.1.63_minimal.img.xz
           magic_path: "repository/src/image-armbian/le-potato.img.xz"
         - name: nanopi-neo3-dietpi
           variant: dietpi-fat-2
           base_arch: arm64
+          runner: ubuntu-24.04-arm
           dietpi_machine: 56
           url: https://github.com/dirkhh/DietPi/releases/download/latest/DietPi_NanoPiNEO3-ARMv8-Bookworm.img.xz
           magic_path: "repository/src/image-dietpi/DietPi_NanoPiNEO3-ARMv8-Bookworm.img.xz"
         - name: orangepi-3LTS-dietpi
           variant: dietpi-fat-2
           base_arch: arm64
+          runner: ubuntu-24.04-arm
           dietpi_machine: 89
           url: https://github.com/dirkhh/DietPi/releases/download/latest/DietPi_OrangePi3LTS-ARMv8-Bookworm.img.xz
           magic_path: "repository/src/image-dietpi/DietPi_OrangePi3LTS-ARMv8-Bookworm.img.xz"
         - name: orangepi-5plus-dietpi
           variant: dietpi-fat-2
           base_arch: arm64
+          runner: ubuntu-24.04-arm
           dietpi_machine: 82
           url: https://github.com/dirkhh/DietPi/releases/download/latest/DietPi_OrangePi5Plus-ARMv8-Bookworm.img.xz
           magic_path: "repository/src/image-dietpi/DietPi_OrangePi5Plus-ARMv8-Bookworm.img.xz"
         - name: orangepi-zero3-dietpi
           variant: dietpi-fat-2
           base_arch: arm64
+          runner: ubuntu-24.04-arm
           dietpi_machine: 83
           url: https://github.com/dirkhh/DietPi/releases/download/latest/DietPi_OrangePiZero3-ARMv8-Bookworm.img.xz
           magic_path: "repository/src/image-dietpi/DietPi_OrangePiZero3-ARMv8-Bookworm.img.xz"
         - name: raspberrypi64-pi-2-3-4-5
           base_arch: arm64
+          runner: ubuntu-24.04-arm
           variant: default
           url: https://downloads.raspberrypi.com/raspios_lite_arm64/images/raspios_lite_arm64-2024-10-28/2024-10-22-raspios-bookworm-arm64-lite.img.xz
           magic_path: "repository/src/image/2024-03-15-raspios-bookworm-arm64-lite.img.xz"
         - name: raspberrypi64-dietpi-pi-2-3-4
           base_arch: arm64
+          runner: ubuntu-24.04-arm
           variant: dietpi-fat-1
           dietpi_machine: 4
           url: https://github.com/dirkhh/DietPi/releases/download/latest/DietPi_RPi234-ARMv8-Bookworm.img.xz
           magic_path: "repository/src/image-dietpi/DietPi_RPi-ARMv8-Bookworm.img.xz"
         - name: raspberrypi64-dietpi-pi-5
           base_arch: arm64
+          runner: ubuntu-24.04-arm
           variant: dietpi-fat-1
           dietpi_machine: 5
           url: https://github.com/dirkhh/DietPi/releases/download/latest/DietPi_RPi5-ARMv8-Bookworm.img.xz
@@ -88,16 +95,18 @@ jobs:
         - name: x86-64-native
           variant: dietpi-root-only
           base_arch: x86_64
+          runner: ubuntu-24.04
           dietpi_machine: 21
           url: https://github.com/dirkhh/DietPi/releases/download/latest/DietPi_NativePC-BIOS-x86_64-Bookworm.img.xz
           magic_path: "repository/src/image-dietpi/DietPi_NativePC-BIOS-x86_64-Bookworm.img.xz"
         - name: x86-64-vm
           variant: dietpi-root-only
           base_arch: x86_64
+          runner: ubuntu-24.04
           dietpi_machine: 20
           url: https://github.com/dirkhh/DietPi/releases/download/latest/DietPi_VM-x86_64-Bookworm.img.xz
           magic_path: "repository/src/image-dietpi/DietPi_VM-x86_64-Bookworm.img.xz"
-
+    runs-on: ${{ matrix.runner }}
     env:
       IMG_NAME: ${{ matrix.name }}
       BASE_ARCH: ${{ matrix.base_arch }}
