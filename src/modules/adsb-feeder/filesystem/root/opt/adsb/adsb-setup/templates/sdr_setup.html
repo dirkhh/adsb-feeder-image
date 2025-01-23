@@ -154,6 +154,7 @@
         for (let i = 0; i < num; i++) {
           let id = 'sdr' + i;
           let serial = sdrs[i]['serial'];
+          let type = sdrs[i]['type'];
           document.getElementById(id).style.display = 'flex';
           document.getElementById(id + "-serial").innerHTML = serial;
           let used = false;
@@ -166,6 +167,8 @@
           if (!used) {
             document.getElementById('other' + '-' + i).checked = true;
           }
+          // don't show the 978 checkbox for non-rtlsdr SDRs as they can't be used for 978
+          document.getElementById("978-" + i).parentNode.style.display = (type != "rtlsdr") ? "none" : "";
         }
         for (let i = num; i < 4; i++) {
           let id = 'sdr' + i;
