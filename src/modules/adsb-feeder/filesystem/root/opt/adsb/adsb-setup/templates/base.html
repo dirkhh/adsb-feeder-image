@@ -160,7 +160,7 @@
       verbose && console.log(`check_mf ${new Date()}`);
       let url = "/api/stage2_stats";
       fetch(url, {
-        method: "GET", cors: "no-cors"
+        method: "GET", cors: "no-cors", signal: AbortSignal.timeout(15000)
       })
         .then(response => { return response.json() })
         .then(data => {
@@ -187,7 +187,7 @@
     function get_temperatures() {
       let url = "/api/get_temperatures.json";
       fetch(url, {
-        method: "GET", cors: "no-cors"
+        method: "GET", cors: "no-cors", signal: AbortSignal.timeout(15000)
       })
         .then(response => { return response.json() })
         .then(data => {

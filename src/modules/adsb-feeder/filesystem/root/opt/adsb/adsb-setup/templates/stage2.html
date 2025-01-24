@@ -368,7 +368,7 @@
       let url = "/api/check_remote_feeder/" + ip;
       console.log("Accessing", url);
       fetch(url, {
-        method: "GET", cors: "no-cors"
+        method: "GET", cors: "no-cors", signal: AbortSignal.timeout(8000)
       })
         .then(response => { console.log(response); return response.json() })
         .then(data => {
@@ -414,7 +414,7 @@
     if (n == 0) return;
     let url = "/api/stage2_info";
     fetch(url, {
-      method: "GET", cors: "no-cors"
+      method: "GET", cors: "no-cors", signal: AbortSignal.timeout(8000)
     })
       .then(response => { return response.json() })
       .then(data => {

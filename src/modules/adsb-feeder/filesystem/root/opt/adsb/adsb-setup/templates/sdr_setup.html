@@ -138,7 +138,7 @@
 <script>
 
   function sdr_info() {
-    fetch("/api/sdr_info")
+    fetch("/api/sdr_info", { signal: AbortSignal.timeout(15000) })
       .then(response => response.json())
       .then(data => {
         let num = data['sdrdevices'].length;

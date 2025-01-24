@@ -302,7 +302,7 @@
   <!-- FULL_IMAGE_ONLY_END -->
 </div>
 <script>
-  fetch("/api/status/im")
+  fetch("/api/status/im", { signal: AbortSignal.timeout(5000) })
   .then(response => response.json())
   .then(data => {
     if (data["beta_changelog"]) {

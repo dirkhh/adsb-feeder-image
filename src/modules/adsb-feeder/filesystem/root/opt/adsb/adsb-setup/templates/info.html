@@ -61,13 +61,13 @@
       $("#ip-match").removeClass("d-none")
     }
   }
-  fetch("https://api.ipify.org?format=json")
+  fetch("https://api.ipify.org?format=json", { signal: AbortSignal.timeout(15000) })
     .then(response => response.json())
     .then(data => {
       browser_ip = data["ip"];
       compareIps();
     });
-  fetch("/api/ip_info")
+  fetch("/api/ip_info", { signal: AbortSignal.timeout(15000) })
     .then(response => response.json())
     .then(data => {
       feeder_ip = data["feeder_ip"];
