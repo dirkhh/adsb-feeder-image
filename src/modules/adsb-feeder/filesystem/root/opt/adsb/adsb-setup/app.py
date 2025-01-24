@@ -299,6 +299,7 @@ class AdsbIm:
         self.app.add_url_rule(f"/api/status/<agg>", "beast", self.agg_status)
         self.app.add_url_rule("/api/stage2_connection", "stage2_connection", self.stage2_connection)
         self.app.add_url_rule("/api/get_temperatures.json", "temperatures", self.temperatures)
+        self.app.add_url_rule(f"/feeder-update-<channel>", "feeder-update", self.feeder_update)
         # fmt: on
         self.update_boardname()
         self.update_version()
@@ -2935,6 +2936,14 @@ class AdsbIm:
 
         return Response(tail(), mimetype="text/event-stream")
 
+    @check_restart_lock
+    def feeder_update(self, channel):
+        if channel not in [ "stable", "beta" ]:
+            return "This update functionality is only available for stable and beta"
+        self.set_channel(channel)
+        print_err(f"updating feeder to {channel} channel")
+        self._system._restart.bg_run(cmdline="systemctl start adsb-feeder-update.service")
+        return render_template("/restarting.html")
 
 def create_stage2_yml_from_template(stage2_yml_name, n, ip, template_file):
     if n:
