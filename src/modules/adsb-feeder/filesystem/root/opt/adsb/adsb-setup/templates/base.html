@@ -178,9 +178,10 @@
             $("#mf_status_" + i).attr('title', tooltip);
             $("#mf_status_" + i).text(d["pps"] + " pos / " + d["mps"] + " msg per sec");
           })
-        })
-      clearTimeout(check_mf_timer); // abundance of caution to avoid multiple timers
-      check_mf_timer = setTimeout(check_mf_status, 15000);
+        }).finally(() => {
+          clearTimeout(check_mf_timer); // abundance of caution to avoid multiple timers
+          check_mf_timer = setTimeout(check_mf_status, 15000);
+        });
     };
 
     function get_temperatures() {
