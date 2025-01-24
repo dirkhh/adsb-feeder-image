@@ -255,7 +255,7 @@ class System:
             self.lastContainerCheck = now
             self.dockerPsCache = dict()
             cmdline = "docker ps --filter status=running --format '{{.Names}};{{.Status}}'"
-            success, output = run_shell_captured(cmdline)
+            success, output = run_shell_captured(cmdline, timeout=5)
             if not success:
                 print_err(f"Error: cmdline: {cmdline} output: {output}")
                 return
