@@ -308,6 +308,14 @@ systemctl daemon-reload
 
 echo "$(date -u +"%FT%T.%3NZ") updating systemd services ... done"
 
+if [[ $(jq < /etc/docker/daemon.json '."default-address-pools" | has("base")' 2>/dev/null) == "true" ]]; then
+    echo "Fixing broken default-address-pools in daemon.json"
+    tmp=$(mktemp)
+    jq < /etc/docker/daemon.json 'del(."default-address-pools")' > "$tmp"
+    mv "$tmp" /etc/docker/daemon.json
+    timeout 5 docker ps || systemctl restart docker
+fi
+
 # enable zram so no reboot is required (script exits for non image installs or when already enabled)
 systemctl start --no-block adsb-zram
 
