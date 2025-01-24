@@ -12,4 +12,4 @@ fi
 chronyc waitsync
 
 # docker compose pull on all activated containers (and ultrafeeder even if not configured yet)
-bash /opt/adsb/docker-compose-adsb pull &>>/run/adsb-feeder-image.log
+bash /opt/adsb/docker-compose-adsb pull --ignore-pull-failures &>>/run/adsb-feeder-image.log
