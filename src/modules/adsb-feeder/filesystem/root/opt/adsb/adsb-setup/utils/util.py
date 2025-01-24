@@ -193,9 +193,9 @@ def string2file(path=None, string=None, verbose=False):
         with os.fdopen(fd, "w") as file:
             file.write(string)
         os.rename(tmp, path)
-    except:
-        print_err(traceback.format_exc())
-        print_err(f'error writing "{string}" to {path}')
+    except Exception as e:
+        #print_err(traceback.format_exc())
+        print_err(f'error writing "{string}" to {path} ({type(e).__name__})')
     else:
         if verbose:
             print_err(f'wrote "{string}" to {path}')
