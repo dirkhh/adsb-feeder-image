@@ -35,7 +35,7 @@ fi
 # now set this up in the Docker config file (which we create if necessary)
 [ ! -f /etc/docker/daemon.json ] && echo "{}" > /etc/docker/daemon.json
 tmp=$(mktemp)
-jq --arg cidr "$cidr" '."default-address-pools" = {"base": $cidr, "size": 24}' /etc/docker/daemon.json > "$tmp"
+jq --arg cidr "$cidr" '."default-address-pools" = [ {"base": $cidr, "size": 24} ]' /etc/docker/daemon.json > "$tmp"
 mv "$tmp" /etc/docker/daemon.json
 echo "Docker setup with available network pool:"
 cat /etc/docker/daemon.json
