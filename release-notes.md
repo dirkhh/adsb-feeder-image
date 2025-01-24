@@ -1,4 +1,5 @@
 Changes since v2.2.5 include:
+- fix docker breakage introduced in beta.5
 - make webinterface handle backend failure better
 - don't show the 978 checkbox for non-rtlsdr SDRs as they can't be used for 978
 - ensure that the Docker network doesn't conflict with any network that the user is already connected to
