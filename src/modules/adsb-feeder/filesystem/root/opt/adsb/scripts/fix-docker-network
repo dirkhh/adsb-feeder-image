@@ -35,11 +35,19 @@ if [[ "$cidr" == "172.17.0.0/16" ]] && ! grep -qs default-address-pools /etc/doc
     exit 0
 fi
 
+echo "Docker setup: Using available network pool: $cidr"
+
 # now set this up in the Docker config file (which we create if necessary)
 [ ! -f /etc/docker/daemon.json ] && echo "{}" > /etc/docker/daemon.json
 tmp=$(mktemp)
 jq --arg cidr "$cidr" '."default-address-pools" = [ {"base": $cidr, "size": 24} ]' /etc/docker/daemon.json > "$tmp"
+if diff "$tmp" /etc/docker/daemon.json > /dev/null; then
+    rm -f "$tmp"
+    # nothing to do
+    exit 0
+fi
+echo "Docker setup: Modifying daemon.json and restarting docker"
 mv "$tmp" /etc/docker/daemon.json
-echo "Docker setup with available network pool:"
 cat /etc/docker/daemon.json
+systemctl restart docker
 
