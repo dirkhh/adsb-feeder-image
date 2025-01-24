@@ -61,7 +61,7 @@ if __name__ == "__main__":
     if len(argv) >= 3:
         logfile = argv[2]
     if len(argv) >= 4:
-        title = argv[3] + " the ADS-B Feeder System"
+        title = argv[3] + " ADS-B Feeder System"
 
     print_err(f'Starting waiting-app.py on port {port} with title "{title}" streaming logfile {logfile}')
 
