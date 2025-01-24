@@ -26,6 +26,12 @@ cidr=$(python3 /opt/adsb/adsb-setup/find-safe-docker-network.py ${phys_cidrs})
 # not sure whic docker version is required, if it's our image and daemon.json exists it's probably fine (quick fix so we don't break more old images for the moment)
 [ ! -f /etc/docker/daemon.json ] && exit 0
 
+# don't mess with daemon.json if we would just specifically set the default
+if [[ "$cidr" == "172.17.0.0/16" ]] && ! grep -qs default-address-pools /etc/docker/daemon.json; then
+    echo "Docker network pool left at default settings"
+    exit 0
+fi
+
 # now set this up in the Docker config file (which we create if necessary)
 [ ! -f /etc/docker/daemon.json ] && echo "{}" > /etc/docker/daemon.json
 tmp=$(mktemp)
