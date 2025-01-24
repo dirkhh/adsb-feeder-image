@@ -22,6 +22,10 @@ phys_cidrs=$(for i in $phys_if; do ip ad li "$i" | grep -oP '(?<=inet\s)\d+(\.\d
 # shellcheck disable=SC2086  # we WANT you to word split...
 cidr=$(python3 /opt/adsb/adsb-setup/find-safe-docker-network.py ${phys_cidrs})
 
+# old docker versions on old image installs might not understand the config parameters required for that, bail if daemon.json does not exist
+# not sure whic docker version is required, if it's our image and daemon.json exists it's probably fine (quick fix so we don't break more old images for the moment)
+[ ! -f /etc/docker/daemon.json ] && exit 0
+
 # now set this up in the Docker config file (which we create if necessary)
 [ ! -f /etc/docker/daemon.json ] && echo "{}" > /etc/docker/daemon.json
 tmp=$(mktemp)
