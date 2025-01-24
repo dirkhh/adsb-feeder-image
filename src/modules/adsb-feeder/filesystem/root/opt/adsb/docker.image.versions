@@ -12,5 +12,5 @@ AIRSPY_CONTAINER=ghcr.io/sdr-enthusiasts/airspy_adsb:latest-build-231
 TNUK_CONTAINER=ghcr.io/sdr-enthusiasts/docker-radar1090:latest-build-217
 SDRPLAY_CONTAINER=ghcr.io/sdr-enthusiasts/docker-sdrplay-beast1090:latest-build-6
 WEBPROXY_CONTAINER=ghcr.io/sdr-enthusiasts/docker-reversewebproxy:latest-build-656
-DOZZLE_CONTAINER=amir20/dozzle:v8.10.4
+DOZZLE_CONTAINER=ghcr.io/amir20/dozzle:v8.10.4
 ALPINE_CONTAINER=alpine:3.20.3
