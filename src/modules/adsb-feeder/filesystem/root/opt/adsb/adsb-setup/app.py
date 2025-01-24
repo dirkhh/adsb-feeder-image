@@ -300,6 +300,8 @@ class AdsbIm:
         self.app.add_url_rule("/api/stage2_connection", "stage2_connection", self.stage2_connection)
         self.app.add_url_rule("/api/get_temperatures.json", "temperatures", self.temperatures)
         self.app.add_url_rule(f"/feeder-update-<channel>", "feeder-update", self.feeder_update)
+        self.app.add_url_rule(f"/get-logs", "get-logs", self.get_logs)
+        self.app.add_url_rule(f"/view-logs", "view-logs", self.view_logs)
         # fmt: on
         self.update_boardname()
         self.update_version()
@@ -2829,40 +2831,48 @@ class AdsbIm:
             return render_template("support.html", url=url)
 
         if target == "local_view" or target == "local_download":
-
-            as_attachment = target == "local_download"
-
-            fdOut, fdIn = os.pipe()
-            pipeOut = os.fdopen(fdOut, "rb")
-            pipeIn = os.fdopen(fdIn, "wb")
-
-            def get_log(fobj):
-                subprocess.run(
-                    "bash /opt/adsb/log-sanitizer.sh",
-                    shell=True,
-                    stdout=fobj,
-                    stderr=subprocess.STDOUT,
-                    timeout=30,
-                )
-
-            thread = threading.Thread(
-                target=get_log,
-                kwargs={
-                    "fobj": pipeIn,
-                },
-            )
-            thread.start()
-
-            site_name = self._d.env_by_tags("site_name").list_get(0)
-            now = datetime.now().replace(microsecond=0).isoformat().replace(":", "-")
-            download_name = f"adsb-feeder-config-{site_name}-{now}.txt"
-            return send_file(
-                pipeOut,
-                as_attachment=as_attachment,
-                download_name=download_name,
-            )
+            return self.download_logs(target)
 
         return render_template("support.html", url="upload logs: unexpected code path")
+
+    def get_logs(self):
+        return self.download_logs("local_download")
+
+    def view_logs(self):
+        return self.download_logs("local_view")
+
+    def download_logs(self, target):
+        as_attachment = (target == "local_download")
+
+        fdOut, fdIn = os.pipe()
+        pipeOut = os.fdopen(fdOut, "rb")
+        pipeIn = os.fdopen(fdIn, "wb")
+
+        def get_log(fobj):
+            subprocess.run(
+                "bash /opt/adsb/log-sanitizer.sh",
+                shell=True,
+                stdout=fobj,
+                stderr=subprocess.STDOUT,
+                timeout=30,
+            )
+
+        thread = threading.Thread(
+            target=get_log,
+            kwargs={
+                "fobj": pipeIn,
+            },
+        )
+        thread.start()
+
+        site_name = self._d.env_by_tags("site_name").list_get(0)
+        now = datetime.now().replace(microsecond=0).isoformat().replace(":", "-")
+        download_name = f"adsb-feeder-config-{site_name}-{now}.txt"
+        return send_file(
+            pipeOut,
+            as_attachment=as_attachment,
+            download_name=download_name,
+        )
 
     def info(self):
         board = self._d.env_by_tags("board_name").value
