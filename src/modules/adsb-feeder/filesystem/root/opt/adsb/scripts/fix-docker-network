@@ -23,8 +23,11 @@ phys_cidrs=$(for i in $phys_if; do ip ad li "$i" | grep -oP '(?<=inet\s)\d+(\.\d
 cidr=$(python3 /opt/adsb/adsb-setup/find-safe-docker-network.py ${phys_cidrs})
 
 # old docker versions on old image installs might not understand the config parameters required for that, bail if daemon.json does not exist
-# not sure whic docker version is required, if it's our image and daemon.json exists it's probably fine (quick fix so we don't break more old images for the moment)
-[ ! -f /etc/docker/daemon.json ] && exit 0
+# not sure which docker version is required, if it's our image and daemon.json exists it's probably fine (quick fix so we don't break more old images for the moment)
+if [[ ! -f /etc/docker/daemon.json ]]; then
+    echo "Docker network pool left at default settings (daemon.json does not exist, docker version presumed too old)"
+    exit 0
+fi
 
 # don't mess with daemon.json if we would just specifically set the default
 if [[ "$cidr" == "172.17.0.0/16" ]] && ! grep -qs default-address-pools /etc/docker/daemon.json; then
