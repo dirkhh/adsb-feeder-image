@@ -556,10 +556,10 @@
     // idx {{ idx }}
     {% if list_is_enabled(agg, idx) %}
     reset_status("{{ agg }}", {{ idx }});
-  {% endif %}
-  {% endfor %}
-  get_status("{{ agg }}");
-  {% endfor %}
+    {% endif %}
+    {% endfor %}
+    get_status("{{ agg }}");
+    {% endfor %}
   }
 
   function reset_status(agg, idx) {
