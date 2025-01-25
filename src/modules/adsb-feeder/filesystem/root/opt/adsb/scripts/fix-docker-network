@@ -41,7 +41,7 @@ echo "Docker setup: Using available network pool: $cidr"
 [ ! -f /etc/docker/daemon.json ] && echo "{}" > /etc/docker/daemon.json
 tmp=$(mktemp)
 jq --arg cidr "$cidr" '."default-address-pools" = [ {"base": $cidr, "size": 24} ]' /etc/docker/daemon.json > "$tmp"
-if diff "$tmp" /etc/docker/daemon.json > /dev/null; then
+if diff <(jq --sort-keys <"$tmp") <(jq --sort-keys </etc/docker/daemon.json) > /dev/null; then
     rm -f "$tmp"
     # nothing to do
     exit 0
