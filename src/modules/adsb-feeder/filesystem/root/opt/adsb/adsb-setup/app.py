@@ -2177,7 +2177,7 @@ class AdsbIm:
                     self.get_lat_lon_alt()
                 if key == "turn_off_gpsd":
                     self._d.env_by_tags(["use_gpsd", "is_enabled"]).value = False
-                if "able_parallel_docker" in key:  # either enable or disable
+                if key in [ "enable_parallel_docker", "disable_parallel_docker" ]:
                     self.set_docker_concurrent(key == "enable_parallel_docker")
                 if key.startswith("update_feeder_aps"):
                     channel = key.rsplit("_", 1)[-1]
