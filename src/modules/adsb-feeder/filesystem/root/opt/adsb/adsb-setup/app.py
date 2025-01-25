@@ -1985,7 +1985,7 @@ class AdsbIm:
         if new_daemon_json != daemon_json:
             print_err(f"set_docker_concurrent({value}): applying change")
             with open("/etc/docker/daemon.json", "w") as f:
-                json.dump(new_daemon_json, f)
+                json.dump(new_daemon_json, f, indent=2)
             # reload docker config (this is sufficient for the max-concurrent-downloads setting)
             success, output = run_shell_captured("bash -c 'kill -s SIGHUP $(pidof dockerd)'", timeout=5)
             if not success:
