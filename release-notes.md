@@ -1,4 +1,5 @@
 Changes since v2.2.5 include:
+- add expert option to not use concurrent downloads for Docker pull
 - switch Dozzle to ghcr registry
 - make webinterface handle backend failure better
 - don't show the 978 checkbox for non-rtlsdr SDRs as they can't be used for 978

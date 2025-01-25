@@ -1967,6 +1967,29 @@ class AdsbIm:
 
         self.generate_agg_structure()
 
+    def set_docker_concurrent(self, value):
+        self._d.env_by_tags("docker_concurrent").value = value
+        if not os.path.exists("/etc/docker/daemon.json") and value:
+            # this is the default, nothing to do
+            return
+        try:
+            with open("/etc/docker/daemon.json", "r") as f:
+                daemon_json = json.load(f)
+        except:
+            daemon_json = {}
+        new_daemon_json = daemon_json.copy()
+        if value:
+            del new_daemon_json["max-concurrent-downloads"]
+        else:
+            new_daemon_json["max-concurrent-downloads"] = 1
+        if new_daemon_json != daemon_json:
+            with open("/etc/docker/daemon.json", "w") as f:
+                json.dump(new_daemon_json, f)
+            # reload docker config (this is sufficient for the max-concurrent-downloads setting)
+            success, output = run_shell_captured("bash -c 'kill -s SIGHUP $(pidof dockerd)'", timeout=5)
+            if not success:
+                print_err(f"failed to reload docker config: {output}")
+
     @check_restart_lock
     def update(self):
         description = """
@@ -2154,6 +2177,8 @@ class AdsbIm:
                     self.get_lat_lon_alt()
                 if key == "turn_off_gpsd":
                     self._d.env_by_tags(["use_gpsd", "is_enabled"]).value = False
+                if "able_parallel_docker" in key:  # either enable or disable
+                    self.set_docker_concurrent(key == "enable_parallel_docker")
                 if key.startswith("update_feeder_aps"):
                     channel = key.rsplit("_", 1)[-1]
                     if channel == "branch":
