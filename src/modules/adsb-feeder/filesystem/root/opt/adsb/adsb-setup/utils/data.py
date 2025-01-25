@@ -183,6 +183,7 @@ class Data:
         Env("FEEDER_MAX_RANGE", default=[300], tags=["max_range"]),
         Env("FEEDER_USE_GPSD", default=False, tags=["use_gpsd", "is_enabled"]),
         Env("_ADSBIM_FEEDER_HAS_GPSD", default=False, tags=["has_gpsd", "is_enabled"]),
+        Env("_ADSBIM_STATE_DOCKER_CONCURRENT", default=True, tags=["docker_concurrent", "is_enabled"]),
         Env("_ADSBIM_STATE_TEMPERATURE_BLOCK", default=False, tags=["temperature_block", "is_enabled"]),
         #
         # Ultrafeeder config, used for all 4 types of Ultrafeeder instances
