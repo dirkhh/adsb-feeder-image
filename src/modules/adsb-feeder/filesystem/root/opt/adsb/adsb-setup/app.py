@@ -1983,6 +1983,7 @@ class AdsbIm:
         else:
             new_daemon_json["max-concurrent-downloads"] = 1
         if new_daemon_json != daemon_json:
+            print_err(f"set_docker_concurrent({value}): applying change")
             with open("/etc/docker/daemon.json", "w") as f:
                 json.dump(new_daemon_json, f)
             # reload docker config (this is sufficient for the max-concurrent-downloads setting)
