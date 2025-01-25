@@ -186,37 +186,37 @@
   </div>
   {% if is_enabled('docker_concurrent') %}
   <div class="col-12 col-lg-6">
-    <h5 class="mt-3">Do not use concurrent downloads for Docker</h5>
+    <h5 class="mt-3">Docker pull: Disable concurrent downloads</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
       <div class="row align-items-center">
         <div class="col-8">
-          <label for="disable_parallel_docker">When pulling new Docker images during an update, explicitly prevent
-            concurrent downloads. This can be helpful on slow connections to avoid stalling for a long time and
-            potentially experiencing failed updates.
+          <label for="disable_parallel_docker">
+            Disabling concurrent downloads can be helpful on slow connections to avoid update
+            failures or improve update speed slightly.
           </label>
         </div>
         <div class="col-4">
-          <button type="submit" class="btn btn-primary mx-auto w-100" name="disable_parallel_docker" value="go">Update
-            Settings</button>
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="disable_parallel_docker" value="go">
+            Disable concurrency</button>
         </div>
       </div>
     </form>
   </div>
   {% else %}
   <div class="col-12 col-lg-6">
-    <h5 class="mt-3">Use concurrent downloads for Docker</h5>
+    <h5 class="mt-3">Docker pull: Enable concurrent downloads</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
       <div class="row align-items-center">
         <div class="col-8">
-          <label for="enable_parallel_docker">When pulling new Docker images during an update, allow
-            concurrent downloads. This is the default behavior and is reasonable on most connections.
-            However, not using concurrent downloads can be helpful on slow connections to avoid stalling
-            for a long time and potentially experiencing failed updates.
+          <label for="enable_parallel_docker">
+            Concurrent downloads are the default behavior and work well on most connections.
+            However, not using concurrent downloads can be helpful on slow connections to avoid
+            update failures or improve update speed slightly.
           </label>
         </div>
         <div class="col-4">
-          <button type="submit" class="btn btn-primary mx-auto w-100" name="enable_parallel_docker" value="go">Update
-            Settings</button>
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="enable_parallel_docker" value="go">
+            Enable concurrency</button>
         </div>
       </div>
     </form>
