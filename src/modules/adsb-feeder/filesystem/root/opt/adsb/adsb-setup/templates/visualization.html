@@ -33,7 +33,7 @@
       known.
     </label>
   </div>
-  <div class="col-12 form-check {% if env_value_by_tag('aggregator_choice') in ['micro','nano']  %}d-none{% endif %}">
+  <div class="col-12 form-check">
     <input class="form-check-input me-1" type="checkbox" name="heywhatsthat--is_enabled" id="heywhatsthat--is_enabled"
            {% if list_is_enabled("heywhatsthat", m) %}checked{% endif %} />
     <div>
