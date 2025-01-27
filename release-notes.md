@@ -1,4 +1,5 @@
 Changes since v2.2.5 include:
+- improve wording of the set password UI
 - allow setting a HeyWhatsThat ID on a micro or nano feeder as well
 - add expert option to not use concurrent downloads for Docker pull
 - switch Dozzle to ghcr registry
