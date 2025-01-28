@@ -2,11 +2,10 @@ Changes since v2.2.5 include:
 - improve wording of the set password UI
 - allow setting a HeyWhatsThat ID on a micro or nano feeder as well
 - add expert option to not use concurrent downloads for Docker pull
-- switch Dozzle to ghcr registry
+- update Dozzle container and switch Dozzle to ghcr registry
 - make webinterface handle backend failure better
 - don't show the 978 checkbox for non-rtlsdr SDRs as they can't be used for 978
 - ensure that the Docker network doesn't conflict with any network that the user is already connected to
-- update Dozzle container to current version
 - don't show the 'upgrade to stable' button on the home page when this is actually a downgrade. Still offer that ability on the system management page.
 - stage2: avoid potential data consistency issues when manipulating micro feeders
 - stage2: allow reordering of micro feeders
