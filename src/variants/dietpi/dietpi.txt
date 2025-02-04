@@ -187,7 +187,7 @@ CONFIG_PROXY_PASSWORD=
 CONFIG_G_CHECK_URL_TIMEOUT=10
 # Connection attempts with above timeout each, before G_CHECK_NET and G_CHECK_URL give up and prompt an error.
 # - Any value below "1" or a non-integer value will result in the default of 2 attempts.
-CONFIG_G_CHECK_URL_ATTEMPTS=2
+CONFIG_G_CHECK_URL_ATTEMPTS=30
 # General connection and DNS testing
 # - IPv4 address to ping when checking network connectivity. Default: 9.9.9.9 (Quad9 DNS IP)
 CONFIG_CHECK_CONNECTION_IP=9.9.9.9
