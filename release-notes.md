@@ -1,23 +1,6 @@
-Changes since v2.2.5 include:
-- improve wording of the set password UI
-- allow setting a HeyWhatsThat ID on a micro or nano feeder as well
-- add expert option to not use concurrent downloads for Docker pull
-- update Dozzle container and switch Dozzle to ghcr registry
-- make webinterface handle backend failure better
-- don't show the 978 checkbox for non-rtlsdr SDRs as they can't be used for 978
-- ensure that the Docker network doesn't conflict with any network that the user is already connected to
-- don't show the 'upgrade to stable' button on the home page when this is actually a downgrade. Still offer that ability on the system management page.
-- stage2: avoid potential data consistency issues when manipulating micro feeders
-- stage2: allow reordering of micro feeders
-- update containers - this will cause the update to take a bit longer
-- only run nightly update if there actually is a newer version available in the active channel
-- significantly increase the number of warnings / issues that are communicated to the user via the web UI
-- log-sanitizer: improve search and replace
-- improve implementation of ssh password/keys and ensure that sshd is running
-- always have a single SDR default to ADS-B, even if its serial number is 978
-- replace the language of semi-anonymous / commercial aggregators with account-less / account-based
-- update the README to reflect the current state of the project
-- better handling of broken IPv6 environments when collecting support info
+Changes since v2.2.6 include:
+- Don't show beta/stable channel indicator in the version shown on feeder home page
+- Don't show live map link until feeder is configured
 
 
 > [!NOTE]

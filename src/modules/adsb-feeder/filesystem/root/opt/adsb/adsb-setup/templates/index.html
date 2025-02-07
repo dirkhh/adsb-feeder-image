@@ -209,7 +209,7 @@
   </div>
   <div class="col-12 mb-4">
     <h5>
-      ADS-B Feeder <small class="ml-1">running {{ env_value_by_tag("base_version") }}</small>
+      ADS-B Feeder <small class="ml-1">running {{ env_value_by_tag("base_version")|replace('(beta)', '')|replace('(stable)', '') }}</small>
     </h5>
     <div class="mb-4">
       Latest version: <span id="latest_tag"></span> - <span id="version_update"></span>
