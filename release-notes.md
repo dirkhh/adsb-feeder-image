@@ -1,4 +1,5 @@
 Changes since v2.2.6 include:
+- Make it explicit which branch is used for automated nightly updates
 - Don't show beta/stable channel indicator in the version shown on feeder home page
 - Don't show live map link until feeder is configured
 

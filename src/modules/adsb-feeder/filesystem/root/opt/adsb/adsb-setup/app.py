@@ -1272,11 +1272,12 @@ class AdsbIm:
             match = re.search(r"\((.*?)\)", channel)
             if match:
                 channel = match.group(1)
+        branch = channel
         if channel in ["stable", "beta", "main"]:
             channel = ""
         if channel and not channel.startswith("origin/"):
             channel = f"origin/{channel}"
-        return channel
+        return channel, branch
 
     def clear_range_outline(self, idx=0):
         suffix = f"uf_{idx}" if idx != 0 else "ultrafeeder"
@@ -2183,7 +2184,7 @@ class AdsbIm:
                 if key.startswith("update_feeder_aps"):
                     channel = key.rsplit("_", 1)[-1]
                     if channel == "branch":
-                        channel = self.extract_channel()
+                        channel, _ = self.extract_channel()
                     self.set_channel(channel)
                     print_err(f"updating feeder to {channel} channel")
                     self._system._restart.bg_run(cmdline="systemctl start adsb-feeder-update.service")
@@ -2519,13 +2520,16 @@ class AdsbIm:
         alphabet = string.ascii_letters + string.digits
         self.rpw = "".join(secrets.choice(alphabet) for i in range(12))
         # if we are on a branch that's neither stable nor beta, pass the value to the template
-        # so that a third update button will be shown
+        # so that a third update button will be shown - separately, pass along unconditional
+        # information on the current branch the user is on so we can show that in the explanatory text.
+        channel, current_branch = self.extract_channel()
         return render_template(
             "systemmgmt.html",
             tailscale_running=tailscale_running,
             zerotier_running=zerotier_running,
             rpw=self.rpw,
-            channel=self.extract_channel(),
+            channel=channel,
+            current_branch=current_branch,
             containers=self._system.list_containers(),
             persistent_journal=self._persistent_journal,
         )
