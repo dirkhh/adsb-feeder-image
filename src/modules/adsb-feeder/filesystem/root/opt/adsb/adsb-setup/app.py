@@ -2178,7 +2178,7 @@ class AdsbIm:
                     self.get_lat_lon_alt()
                 if key == "turn_off_gpsd":
                     self._d.env_by_tags(["use_gpsd", "is_enabled"]).value = False
-                if key in [ "enable_parallel_docker", "disable_parallel_docker" ]:
+                if key in ["enable_parallel_docker", "disable_parallel_docker"]:
                     self.set_docker_concurrent(key == "enable_parallel_docker")
                 if key.startswith("update_feeder_aps"):
                     channel = key.rsplit("_", 1)[-1]
@@ -2868,7 +2868,7 @@ class AdsbIm:
         return self.download_logs("local_view")
 
     def download_logs(self, target):
-        as_attachment = (target == "local_download")
+        as_attachment = target == "local_download"
 
         fdOut, fdIn = os.pipe()
         pipeOut = os.fdopen(fdOut, "rb")
@@ -2974,12 +2974,13 @@ class AdsbIm:
 
     @check_restart_lock
     def feeder_update(self, channel):
-        if channel not in [ "stable", "beta" ]:
+        if channel not in ["stable", "beta"]:
             return "This update functionality is only available for stable and beta"
         self.set_channel(channel)
         print_err(f"updating feeder to {channel} channel")
         self._system._restart.bg_run(cmdline="systemctl start adsb-feeder-update.service")
         return render_template("/restarting.html")
+
 
 def create_stage2_yml_from_template(stage2_yml_name, n, ip, template_file):
     if n:
