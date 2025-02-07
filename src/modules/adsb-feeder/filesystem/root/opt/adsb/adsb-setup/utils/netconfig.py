@@ -147,12 +147,15 @@ class UltrafeederConfig:
 
         # finally, add user provided things
         ultrafeeder_extra_args = self._d.env_by_tags("ultrafeeder_extra_args").value
+        ultrafeeder_extra_args_microsites = self._d.env_by_tags("ultrafeeder_extra_args_microsites").value
         if ultrafeeder_extra_args:
             if not is_stage2:
                 ret.add(ultrafeeder_extra_args)
-            # for stage2 add extra args only to the main uf instance
             if is_stage2 and self._micro == 0:
-                ret.add(ultrafeeder_extra_args)
+                    ret.add(ultrafeeder_extra_args)
+        if ultrafeeder_extra_args_microsites:
+            if is_stage2 and self._micro != 0:
+                ret.add(ultrafeeder_extra_args_microsites)
 
         if self._micro > 0:
             # this is one of the proxies - so it also should feed the aggregate map

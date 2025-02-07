@@ -27,6 +27,19 @@
             Add the configuration that you need here - it will be appended to the Ultrafeeder config.
           </label>
         </div>
+        {% if is_enabled('stage2') %}
+        <div class="col-12 mb-2">Stage2: applied to all microsite ultrafeeder instances:</div>
+        <div class="col-8">
+          <input class="mx-auto w-100" id="ultrafeeder_extra_args_microsites"
+                 name="ultrafeeder_extra_args_microsites" type="text"
+                 value="{{ env_value_by_tag('ultrafeeder_extra_args_microsites') }}">
+        </div>
+        <div class="col-4">
+          <button type="submit" class="btn btn-primary mx-auto w-100"
+                  name="ultrafeeder_extra_args_microsites--submit"
+                  value="go">Submit</button>
+        </div>
+        <div class="col-12 mb-2">Stage2: applied to the ultrafeeder instance with combined data:</div>
         <div class="col-8">
           <input class="mx-auto w-100" id="ultrafeeder_extra_args" name="ultrafeeder_extra_args" type="text"
                  value="{{ env_value_by_tag('ultrafeeder_extra_args') }}">
@@ -35,6 +48,16 @@
           <button type="submit" class="btn btn-primary mx-auto w-100" name="ultrafeeder_extra_args--submit"
                   value="go">Submit</button>
         </div>
+        {% else %}
+        <div class="col-8">
+          <input class="mx-auto w-100" id="ultrafeeder_extra_args" name="ultrafeeder_extra_args" type="text"
+                 value="{{ env_value_by_tag('ultrafeeder_extra_args') }}">
+        </div>
+        <div class="col-4">
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="ultrafeeder_extra_args--submit"
+                  value="go">Submit</button>
+        </div>
+        {% endif %}
       </div>
     </form>
   </div>

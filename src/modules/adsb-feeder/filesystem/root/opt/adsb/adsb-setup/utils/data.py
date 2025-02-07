@@ -535,6 +535,10 @@ class Data:
             tags=["ultrafeeder_extra_args"],
         ),
         Env(
+            "_ADSBIM_STATE_ULTRAFEEDER_EXTRA_ARGS_MICROSITES",
+            tags=["ultrafeeder_extra_args_microsites"],
+        ),
+        Env(
             "FEEDER_TAR1090_ENABLE_AC_DB",
             default=True,
             tags=["tar1090_ac_db", "is_enabled"],
