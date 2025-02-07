@@ -72,22 +72,22 @@ class UltrafeederConfig:
         # when not in stage2 mode, no point in setting up the others
         if self._micro > 0 and not is_stage2:
             return ""
-        # in stage2 mode, don't feed from the internal aggregator, don't set up more
-        # proxy ultrafeeders than are configured
-        if is_stage2 and (self._micro == 0 or self._micro > num_micro):
+        # in stage2 mode, don't set up more proxy ultrafeeders than are configured
+        if is_stage2 and self._micro > num_micro:
             return ""
         print_err(f"generating netconfigs for {f'micro site {self._micro}' if self._micro > 0 else 'Ultrafeeder'}")
         mlat_privacy = self._d.list_is_enabled("mlat_privacy", self._micro)
         mlat_enable = self._d.list_is_enabled("mlat_enable", self._micro)
         ret = set()
         # let's grab the values, depending on the mode
-        for name, netconfig in self.enabled_aggregators.items():
-            uuid_tag = "adsblol_uuid" if name == "adsblol" else "ultrafeeder_uuid"
-            uuid = self._d.env_by_tags(uuid_tag).list_get(self._micro)
-            if not uuid:
-                uuid = str(uuid4())
-                self._d.env_by_tags(uuid_tag).list_set(self._micro, uuid)
-            ret.add(netconfig.generate(mlat_privacy=mlat_privacy, uuid=uuid, mlat_enable=mlat_enable))
+        if not is_stage2 or self._micro > 0:
+            for name, netconfig in self.enabled_aggregators.items():
+                uuid_tag = "adsblol_uuid" if name == "adsblol" else "ultrafeeder_uuid"
+                uuid = self._d.env_by_tags(uuid_tag).list_get(self._micro)
+                if not uuid:
+                    uuid = str(uuid4())
+                    self._d.env_by_tags(uuid_tag).list_set(self._micro, uuid)
+                ret.add(netconfig.generate(mlat_privacy=mlat_privacy, uuid=uuid, mlat_enable=mlat_enable))
         ret.discard("")
 
         # now we need to add the inbound links (if needed)
@@ -163,7 +163,7 @@ class UltrafeederConfig:
             # push mlat results into central mlathub (possibly useful to separately process / forward mlat data)
             ret.add("mlathub,ultrafeeder,31004,beast_out")
 
-        if self._d.is_enabled("use_gpsd"):
+        if self._d.is_enabled("use_gpsd") and self._micro == 0:
             ret.add("gpsd,host.docker.internal,2947")
 
         # generate sorted listed for deterministic env var (avoid unnecessary container recreation by docker compose)
