@@ -101,6 +101,24 @@
     </form>
   </div>
   <div class="col-12 col-lg-6">
+    <h5 class="mt-3">System log persistence toggle</h5>
+    <form method="POST" onsubmit="show_spinner(); return true;">
+      <div class="row align-items-center">
+        <div class="col-8">
+          <div class="row align-items-center ms-1">
+            <label for="log_persistence_toggle">Currently the log is {% if not persistent_journal %}not {% endif %}
+              written to disk.
+            </label>
+          </div>
+        </div>
+        <div class="col-4">
+          <button type="submit" class="mb-3 btn btn-primary mx-auto w-100" name="log_persistence_toggle"
+                  value="go">{% if persistent_journal %}Disable{% else %}Enable{% endif %} persistent logging</button>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="col-12 col-lg-6">
     <h5 class="mt-3">System update settings</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
       <div class="row align-items-center">
@@ -131,25 +149,6 @@
       </div>
     </form>
   </div>
-  <div class="col-12 col-lg-6">
-    <h5 class="mt-3">System log persistence toggle</h5>
-    <form method="POST" onsubmit="show_spinner(); return true;">
-      <div class="row align-items-center">
-        <div class="col-8">
-          <div class="row align-items-center ms-1">
-            <label for="log_persistence_toggle">Currently the log is {% if not persistent_journal %}not {% endif %}
-              written to disk.
-            </label>
-          </div>
-        </div>
-        <div class="col-4">
-          <button type="submit" class="mb-3 btn btn-primary mx-auto w-100" name="log_persistence_toggle"
-                  value="go">{% if persistent_journal %}Disable{% else %}Enable{% endif %} persistent logging</button>
-        </div>
-      </div>
-    </form>
-  </div>
-
   <!-- FULL_IMAGE_ONLY_END -->
   <div class="col-12 col-lg-6">
     <h5 class="mt-3">Update feeder applications</h5>
