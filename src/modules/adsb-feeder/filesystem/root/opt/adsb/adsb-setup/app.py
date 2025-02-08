@@ -2379,12 +2379,9 @@ class AdsbIm:
                         )
                     except:
                         report_issue("exception trying to set up zerorier - giving up")
-                if key in {"lat", "lon", "alt"}:
+                if key in {"lat", "lon"}:
                     # remove letters, spaces, degree symbols
                     value = str(float(re.sub("[a-zA-Z° ]", "", value)))
-                if key == "alt":
-                    # remove decimals as well
-                    value = str(int(float(value)))
                 if key == "tz":
                     self.set_tz(value)
                     continue

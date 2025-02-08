@@ -61,8 +61,8 @@
       <label for="alt">Altitude above mean sealevel, rounded to whole meters</label>
     </span>
     <span class="col-md">
-      <input type="text" id="alt" name="alt" required placeholder="Antenna MSL altitude (in m)" class="form-control"
-             pattern="(?:\+|-|)\d+" value="{{ list_value_by_tag('alt', 0) }}" />
+      <input type="text" id="alt" name="alt" required placeholder="in m - or add 'ft' to enter in ft" class="form-control"
+             pattern="(?:\+|-|)\d+(?:m|ft)" value="{{ list_value_by_tag('alt', 0) }}m" />
     </span>
   </div>
   <div class="form-group row align-items-center mb-1">
@@ -184,8 +184,8 @@
     let alt_value = $("#alt").val();
     let factor = 1.0;
     if (alt_value.toLowerCase().includes("ft")) factor = 0.3048;
-    let new_alt = Math.round(parseFloat(alt_value)) * factor;
-    if (new_alt.toString() == "NaN") new_alt = "";
+    let new_alt = Math.round(parseFloat(alt_value) * factor);
+    if (new_alt.toString() == "NaN") new_alt = ""; else new_alt = new_alt + "m";
     $("#alt").val(new_alt);
   });
   function browserTZ() {
