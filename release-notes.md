@@ -1,4 +1,5 @@
 Changes since v2.2.6 include:
+- stage 2: allow updating time zone
 - Basic setup: allow altitude entry with unit, including conversion from ft to m
 - Make it explicit which branch is used for automated nightly updates
 - Don't show beta/stable channel indicator in the version shown on feeder home page

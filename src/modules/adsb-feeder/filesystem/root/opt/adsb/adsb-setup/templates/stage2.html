@@ -39,6 +39,19 @@
                value="{{ list_value_by_tag('lon', 0) }}" />
       </span>
     </div>
+    <div class="form-group row align-items-center mb-1">
+      <span class="col-md">
+        <label for="tz">Timezone</label>
+        <button class="pb-1 btn btn-secondary"
+                onclick="updateTimezone(); return false; // return false inhibits the form to be submitted">update
+          timezone</button>
+      </span>
+      <span class="col-md">
+        <input type="text" name="tz" id="tz" required
+               placeholder="populate from the browser timezone by clicking the 'update timezone' button"
+               class="form-control mt-2" value="{{ list_value_by_tag('tz', 0) }}" />
+      </span>
+    </div>
     <div class="form-group">
       <button type="submit" name="set_stage2_data" value="go" class="btn btn-primary">Update</button>
     </div>
@@ -333,6 +346,24 @@
   </div>
 </div>
 <script>
+  function browserTZ() {
+    let timezone = "";
+    try {
+      timezone = Intl.DateTimeFormat("en-US").resolvedOptions().timeZone;
+    } catch (error) {
+      console.error(error);
+    }
+    console.log("browser timezone: " + timezone);
+    return timezone;
+  }
+    function updateTimezone() {
+    $("#tz").val(browserTZ());
+  }
+  // set timezone field to browser tz on load if not set already
+  if (!$("#tz").val()) {
+    $("#tz").val(browserTZ());
+  }
+
   const explainAll = document.getElementById("explain-all");
   const explainPriv = document.getElementById("explain-privacy");
   const explainInd = document.getElementById("explain-individual");
