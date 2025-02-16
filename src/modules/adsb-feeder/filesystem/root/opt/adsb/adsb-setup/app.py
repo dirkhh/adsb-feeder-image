@@ -23,7 +23,7 @@ from uuid import uuid4
 import sys
 import zipfile
 from base64 import b64encode
-from datetime import datetime
+from datetime import datetime, timezone
 from os import urandom
 from time import sleep
 from typing import Dict, List
@@ -310,6 +310,8 @@ class AdsbIm:
         self.update_journal_state()
 
         self._d.previous_version = self.get_previous_version()
+
+        self.load_planes_seen_per_day()
 
         # now all the envs are loaded and reconciled with the data on file - which means we should
         # actually write out the potentially updated values (e.g. when plain values were converted
@@ -1063,15 +1065,20 @@ class AdsbIm:
         response.headers.add("Access-Control-Allow-Origin", "*")
         return response
 
+    def uf_suffix(self, i):
+        suffix = f"uf_{i}" if i != 0 else "ultrafeeder"
+        if self._d.env_by_tags("aggregator_choice").value == "nano":
+            suffix = "nanofeeder"
+        return suffix
+
     def stage2_stats(self):
         ret = []
         if True:
             for i in [0] + self.micro_indices():
+                tplanes = len(self.planes_seen_per_day[i])
                 ip = self._d.env_by_tags("mf_ip").list_get(i)
                 ip, triplet = mf_get_ip_and_triplet(ip)
-                suffix = f"uf_{i}" if i != 0 else "ultrafeeder"
-                if self._d.env_by_tags("aggregator_choice").value == "nano":
-                    suffix = "nanofeeder"
+                suffix = self.uf_suffix(i)
                 try:
                     with open(f"/run/adsb-feeder-{suffix}/readsb/stats.prom") as f:
                         uptime = 0
@@ -1085,20 +1092,31 @@ class AdsbIm:
                             if "readsb_messages_valid" in line:
                                 mps = round(int(line.split()[1]) / 60)
                                 found |= 4
+                            if "readsb_aircraft_with_position" in line:
+                                planes = int(line.split()[1])
+                                found |= 8
                             if i != 0 and f'readsb_net_connector_status{{host="{ip}"' in line:
                                 uptime = int(line.split()[1])
                                 found |= 2
                             if i == 0 and "readsb_uptime" in line:
                                 uptime = int(int(line.split()[1]) / 1000)
                                 found |= 2
-                            if found == 7:
+                            if found == 15:
                                 break
-                        ret.append({"pps": pps, "mps": mps, "uptime": uptime})
+                        ret.append(
+                            {
+                                "pps": pps,
+                                "mps": mps,
+                                "uptime": uptime,
+                                "planes": planes,
+                                "tplanes": tplanes,
+                            }
+                        )
                 except FileNotFoundError:
-                    ret.append({"pps": 0, "mps": 0, "uptime": 0})
+                    ret.append({"pps": 0, "mps": 0, "uptime": 0, "planes": 0, "tplanes": tplanes})
                 except:
                     print_err(traceback.format_exc())
-                    ret.append({"pps": 0, "mps": 0, "uptime": 0})
+                    ret.append({"pps": 0, "mps": 0, "uptime": 0, "planes": 0, "tplanes": tplanes})
         return Response(json.dumps(ret), mimetype="application/json")
 
     def stage2_connection(self):
@@ -1281,9 +1299,7 @@ class AdsbIm:
         return channel, branch
 
     def clear_range_outline(self, idx=0):
-        suffix = f"uf_{idx}" if idx != 0 else "ultrafeeder"
-        if self._d.env_by_tags("aggregator_choice").value == "nano":
-            suffix = "nanofeeder"
+        suffix = self.uf_suffix(idx)
         print_err(f"resetting range outline for {suffix}")
         setGainPath = pathlib.Path(f"/run/adsb-feeder-{suffix}/readsb/setGain")
 
@@ -2647,7 +2663,63 @@ class AdsbIm:
         print_err("director redirecting to aggregators: to be configured")
         return self.aggregators()
 
+    def reset_planes_seen_per_day(self):
+        self.planes_seen_per_day = [set() for i in [0] + self.micro_indices()]
+
+    def load_planes_seen_per_day(self):
+        # we base this on UTC time so it's comparable across time zones
+        now = datetime.now(timezone.utc)
+        start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        self.reset_planes_seen_per_day()
+        try:
+            with open("/run/adsb_planes_seen_per_day.json") as f:
+                planes = json.load(f)
+                ts = planes.get("timestamp", 0)
+                if ts >= start_of_day.timestamp():
+                    # ok, this dump is from today
+                    planelists = planes.get("planes")
+                    for i in [0] + self.micro_indices():
+                        # json can't store sets, so we use list on disk, but sets in memory
+                        self.planes_seen_per_day[i] = set(planelists[i])
+        except:
+            pass
+
+    def write_planes_seen_per_day(self):
+        # json can't store sets, so we use list on disk, but sets in memory
+        planelists = [list(self.planes_seen_per_day[i]) for i in [0] + self.micro_indices()]
+        planes = {"timestamp": int(time.time()), "planes": planelists}
+        with open("/run/adsb_planes_seen_per_day.json", "w") as f:
+            json.dump(planes, f)
+
+    def get_current_planes(self, idx):
+        planes = set()
+        path = "/run/adsb-feeder-" + self.uf_suffix(idx) + "/readsb/aircraft.json"
+        try:
+            with open(path) as f:
+                aircraftdict = json.load(f)
+                aircraft = aircraftdict.get("aircraft", [])
+                planes = set([plane["hex"] for plane in aircraft if not plane["hex"].startswith("~")])
+        except:
+            pass
+        return planes
+
+    def track_planes_seen_per_day(self):
+        # we base this on UTC time so it's comparable across time zones
+        now = datetime.now(timezone.utc)
+        start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        ultrafeeders = [0] + self.micro_indices()
+        if (now - start_of_day).total_seconds() < 60:
+            # it's a new day, reset the data
+            self.reset_planes_seen_per_day()
+        for i in ultrafeeders:
+            # using sets it's really easy to keep track of what we've seen
+            self.planes_seen_per_day[i] |= self.get_current_planes(i)
+
     def every_minute(self):
+        # track the number of planes seen per day - that's a fun statistic to have and
+        # readsb makes it a bit annoying to get that
+        self.track_planes_seen_per_day()
+
         # make sure DNS works, every 5 minutes is sufficient
         if time.time() - self.last_dns_check > 300:
             self.update_dns_state()
@@ -3049,4 +3121,16 @@ if __name__ == "__main__":
 
     no_server = len(sys.argv) > 1 and sys.argv[1] == "--update-config"
 
-    AdsbIm().run(no_server=no_server)
+    a = AdsbIm()
+
+    def signal_handler(sig, frame):
+        print_err("received signal, shutting down...")
+        a.write_planes_seen_per_day()
+        signal.signal(sig, signal.SIG_DFL)  # Restore default handler
+        signal.raise_signal(sig)
+
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGHUP, signal_handler)
+
+    a.run(no_server=no_server)
