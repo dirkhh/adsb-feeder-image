@@ -76,7 +76,7 @@
   <div class="col-12 mb-3 {% if not is_enabled('stage2') %} d-none {% endif %}">
     <h5>You are running as Stage 2 feeder</h5>
     <div class="col-12 mb-3">{% if env_value_by_tag('num_micro_sites') == 0 %}No micro feeder sites configured, yet.
-      Please do so on the <a href={{ url_for('stage2') }}>Stage 2 Setup page</a>{% else %}
+      Please do so on the <a href={{ url_for('stage2') }}>Stage 2 Setup page</a>.{% else %}
       <table class="table table-bordered table-sm lh-1 w-auto table-striped">
         <thead>
           <th class="text-center" scope="col">#</th>
@@ -99,7 +99,7 @@
         </tbody>
       </table>
       More configuration options for this are available on the <a href={{ url_for('stage2') }}>Stage 2 Setup
-        page</a>{% endif %}
+        page</a>.{% endif %}
     </div>
   </div>
   <div class="col-12 {% if (aggregators | length) == 0 %} d-none {% endif %}">
@@ -194,18 +194,20 @@
     </div>
   </div>
   <div class="col-12 mb-4 {% if env_value_by_tag('aggregator_choice') in ['micro', 'nano'] %} d-none {% endif %}">
-    <div class "small">
-      {% if (aggregators | length) == 0 %}
-        No aggregators configured. Add aggregators:
-      {%else%}
-        Add or remove aggregators:
-      {% endif %}
-      {% if is_enabled('stage2') %}
-        See Data Sharing at the top of the page
-      {% else %}
-        <a href="/aggregators">Data Sharing</a>
-      {% endif %}
-    </div>
+    {% if is_enabled('stage2') and env_value_by_tag('num_micro_sites') > 0 %}
+      <div class "small">
+        {% if (aggregators | length) == 0 %}
+          No aggregators configured. Add aggregators:
+        {%else%}
+          Add or remove aggregators:
+        {% endif %}
+        {% if is_enabled('stage2') %}
+          See Data Sharing at the top of the page.
+        {% else %}
+          <a href="/aggregators">Data Sharing</a>
+        {% endif %}
+      </div>
+    {% endif %}
   </div>
   <div class="col-12 mb-4">
     <h5>
