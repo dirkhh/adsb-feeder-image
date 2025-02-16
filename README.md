@@ -34,7 +34,6 @@ These aggregators are also supported:
 - [adsb.fi](https://adsb.fi)
 - [ADS-B Exchange](https://adsbexchange.com)
 - [ADSBHub](https://adsbhub.org)
-- [ADS-B One](https://adsb.one)
 - [airplanes.live](https://airplanes.live)
 - [AVDelphi](https://www.avdelphi.com)
 - [FlightAware](https://flightaware.com)
@@ -45,7 +44,6 @@ These aggregators are also supported:
 - [Plane Finder](https://planefinder.net)
 - [Planespotters.net](http://planespotters.net)
 - [AirNav Radar](https://www.airnavradar.com)
-- [RadarPlane](https://radarplane.com/)
 - [Radar Virtuel](https://www.radarvirtuel.com)
 
 ### Home page of an installed ADS-B Feeder Image

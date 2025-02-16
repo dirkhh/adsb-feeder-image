@@ -28,12 +28,12 @@ ultrafeeder_aggs = [
     "avdelphi",
     "planespotters",
     "tat",
-    "radarplane",
     "adsbfi",
     "adsbx",
     "hpradar",
     "alive",
 ]
+
 
 class AggStatus:
     def __init__(self, agg: str, idx, data: Data, url: str, system):
@@ -86,7 +86,7 @@ class AggStatus:
             peer_count = mlat_json.get("peer_count", 0)
             now = mlat_json.get("now")
         except:
-            #print_err(f"checking {self.uf_path()}/mlat-client/{filename} failed")
+            # print_err(f"checking {self.uf_path()}/mlat-client/{filename} failed")
             self._mlat = T.Disconnected
             return
         if time.time() - now > 60:
@@ -132,7 +132,7 @@ class AggStatus:
             else:
                 self._beast = T.Warning
 
-            #if self._beast != T.Good:
+            # if self._beast != T.Good:
             #    print_err(f"beast check {self._agg :{' '}<{20}}: {self._beast} status: {status}")
         else:
             print_err(f"ERROR: no match checking beast for {pattern}")
@@ -153,7 +153,7 @@ class AggStatus:
             return False
 
     def check_impl(self):
-        #print_err(f"agg_status check_impl for {self._agg}-{self._idx}")
+        # print_err(f"agg_status check_impl for {self._agg}-{self._idx}")
         if self._agg in ultrafeeder_aggs:
             container_name = "ultrafeeder" if self._idx == 0 else f"uf_{self._idx}"
         else:
@@ -255,17 +255,6 @@ class AggStatus:
                 self._last_check = datetime.now()
             else:
                 print_err(f"adsbfi v1/feeder returned {status}")
-        elif self._agg == "radarplane":
-            json_url = "https://radarplane.com/api/v1/feed/check"
-            radarplane_dict, status = self.get_json(json_url)
-            if radarplane_dict and status == 200:
-                rdata = radarplane_dict.get("data")
-                if rdata:
-                    self._beast = T.Good if rdata.get("beast") else T.Disconnected
-                    self._mlat = T.Good if rdata.get("mlat") else T.Disconnected
-                    self._last_check = datetime.now()
-            else:
-                print_err(f"radarplane returned {status}")
         elif self._agg == "flightaware":
             suffix = "" if self._idx == 0 else f"_{self._idx}"
             json_url = f"{self._url}/fa-status.json{suffix}/"
@@ -309,16 +298,6 @@ class AggStatus:
                 self._last_check = datetime.now()
             else:
                 print_err(f"flightradar at {json_url} returned {status}")
-        elif self._agg == "radarplane":
-            uuid = self._d.env_by_tags("ultrafeeder_uuid").list_get(self._idx)
-            json_url = f"https://radarplane.com/api/v1/feed/check/{uuid}"
-            rp_dict, status = self.get_json(json_url)
-            if rp_dict and rp_dict.get("data") and status == 200:
-                self._beast = T.Good if rp_dict["data"].get("beast") else T.Disconnected
-                self._mlat = T.Good if rp_dict["data"].get("mlat") else T.Disconnected
-                self._last_check = datetime.now()
-            else:
-                print_err(f"radarplane returned {status}")
         elif self._agg == "radarbox":
 
             rbkey = self._d.env_by_tags(["radarbox", "key"]).list_get(self._idx)
@@ -560,7 +539,6 @@ class AggStatus:
                 else:
                     print_err(f"ran: docker logs {container_name} | grep 'www.adsbexchange.com/api/feeders' | tail -1")
                     print_err(f"failed to find adsbx ID in response {output}")
-
 
     def __repr__(self):
         return f"Aggregator({self._agg} last_check: {str(self._last_check)}, beast: {self._beast} mlat: {self._mlat})"

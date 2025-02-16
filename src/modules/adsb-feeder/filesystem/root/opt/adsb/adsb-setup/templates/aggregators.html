@@ -79,13 +79,6 @@
     </label>
   </div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1" name="is_enabled--ultrafeeder--radarplane"
-           id="is_enabled--radarplane" {{ uf_enabled("radarplane", m) }} />
-    <label for="is_enabled--radarplane">
-      <a href="https://radarplane.com/privacy-policy">RadarPlane</a>
-    </label>
-  </div>
-  <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
     <input type="checkbox" class="form-check-input me-1" name="is_enabled--ultrafeeder--adsbfi" id="is_enabled--adsbfi"
            {{ uf_enabled("adsbfi", m) }} />
     <label for="is_enabled--adsbfi">
@@ -118,7 +111,7 @@
   <div class="col-12 small fw-light text-muted text-end">
     <div class="small fw-light text-muted text-end collapse" id="showuuids">
       {% if uf_enabled("adsblol", m) %}adsb.lol UUID: {{ list_value_by_tag('adsblol_uuid', m) }} {% endif %}<br>
-      {% if uf_enabled("flyitaly", m) or uf_enabled("avdelphi", m) or uf_enabled("planespotters", m) or uf_enabled("tat", m) or uf_enabled("radarplane", m) or uf_enabled("adsbfi", m) or uf_enabled("hpradar", m) or uf_enabled("alive", m) or uf_enabled("adsbx", m) %}
+      {% if uf_enabled("flyitaly", m) or uf_enabled("avdelphi", m) or uf_enabled("planespotters", m) or uf_enabled("tat", m) or uf_enabled("adsbfi", m) or uf_enabled("hpradar", m) or uf_enabled("alive", m) or uf_enabled("adsbx", m) %}
       Ultrafeeder UUID: {{ list_value_by_tag('ultrafeeder_uuid', m) }} {% endif %}
     </div>
     <button class="btn btn-secondary small" type="button" data-mdb-toggle="collapse" data-mdb-target="#showuuids"

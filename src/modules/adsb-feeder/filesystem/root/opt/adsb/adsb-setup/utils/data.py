@@ -120,11 +120,6 @@ class Data:
             "",
             has_policy=True,
         ),
-        "radarplane": NetConfig(
-            "adsb,feed.radarplane.com,30001,beast_reduce_plus_out",
-            "mlat,feed.radarplane.com,31090,39010",
-            has_policy=True,
-        ),
         "hpradar": NetConfig(
             "adsb,skyfeed.hpradar.com,30004,beast_reduce_plus_out",
             "mlat,skyfeed.hpradar.com,31090,39011",
@@ -514,11 +509,6 @@ class Data:
             "_ADSBIM_STATE_IS_ULTRAFEEDER_AVDELPHI_ENABLED",
             default=[False],
             tags=["avdelphi", "ultrafeeder", "is_enabled"],
-        ),
-        Env(
-            "_ADSBIM_STATE_IS_ULTRAFEEDER_RADARPLANE_ENABLED",
-            default=[False],
-            tags=["radarplane", "ultrafeeder", "is_enabled"],
         ),
         Env(
             "_ADSBIM_STATE_IS_ULTRAFEEDER_HPRADAR_ENABLED",
