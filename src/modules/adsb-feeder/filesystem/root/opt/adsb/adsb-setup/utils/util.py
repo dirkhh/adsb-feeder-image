@@ -119,25 +119,29 @@ def generic_get_json(url: str, data=None, timeout=5.0):
     return None, status
 
 
-def create_fake_info():
+def create_fake_info(indices):
     # instead of trying to figure out if we need this and creating it only in that case,
     # let's just make sure the fake files are there and move on
     os.makedirs("/opt/adsb/rb/thermal_zone0", exist_ok=True)
-    cpuinfo = pathlib.Path("/opt/adsb/rb/cpuinfo")
-    # when docker tries to mount this file without it existing, it creates a directory
-    # in case that has happened, remove it
-    if cpuinfo.is_dir():
-        try:
-            cpuinfo.rmdir()
-        except:
-            pass
-    if not cpuinfo.exists():
-        with open("/proc/cpuinfo", "r") as ci_in, open(cpuinfo, "w") as ci_out:
-            for line in ci_in:
-                if not line.startswith("Serial"):
-                    ci_out.write(line)
-            random_hex_string = secrets.token_hex(8)
-            ci_out.write(f"Serial\t\t: {random_hex_string}\n")
+
+    for idx in indices:
+        suffix = f"_{idx}" if idx else ""
+        cpuinfo = pathlib.Path(f"/opt/adsb/rb/cpuinfo{suffix}")
+        # when docker tries to mount this file without it existing, it creates a directory
+        # in case that has happened, remove it
+        if cpuinfo.is_dir():
+            try:
+                cpuinfo.rmdir()
+            except:
+                pass
+        if not cpuinfo.exists():
+            with open("/proc/cpuinfo", "r") as ci_in, open(cpuinfo, "w") as ci_out:
+                for line in ci_in:
+                    if not line.startswith("Serial"):
+                        ci_out.write(line)
+                random_hex_string = secrets.token_hex(8)
+                ci_out.write(f"Serial\t\t: {random_hex_string}\n")
+
     if not pathlib.Path("/opt/adsb/rb/thermal_zone0/temp").exists():
         with open("/opt/adsb/rb/thermal_zone0/temp", "w") as fake_temp:
             fake_temp.write("12345\n")
