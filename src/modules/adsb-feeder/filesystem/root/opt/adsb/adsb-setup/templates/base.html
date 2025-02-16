@@ -106,6 +106,9 @@
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAgg" role="button" data-mdb-toggle="dropdown"
                aria-expanded="false">Data Sharing</a>
             <ul class="dropdown-menu" aria-labelledby="navbarDropdownAgg">
+              {% if env_value_by_tag('num_micro_sites') == 0 %}
+              <li><a class="dropdown-item" href="/setup">No microfeeders configured. Set up Stage 2.</a></li>
+              {% endif %}
               {% for site in env_value_by_tag('site_name') if not site == list_value_by_tag('site_name', 0) %}
               <li><a class="dropdown-item" href="/aggregators?m={{loop.index}}">{{site}}</a></li>
               {% endfor %}
