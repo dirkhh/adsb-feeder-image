@@ -338,15 +338,16 @@ class RadarBox(Aggregator):
             system=system,
         )
 
-    def _request_rb_sharing_key(self):
+    def _request_rb_sharing_key(self, idx):
         docker_image = self._d.env_by_tags(["radarbox", "container"]).value
 
         if not self._download_docker_container(docker_image):
             report_issue("failed to download the AirNav Radar docker image")
             return None
 
+        suffix = f"_{idx}" if idx else ""
         # make sure we correctly enable the hacks
-        extra_env = "-v /opt/adsb/rb/cpuinfo:/proc/cpuinfo "
+        extra_env = f"-v /opt/adsb/rb/cpuinfo{suffix}:/proc/cpuinfo "
         if self._d.env_by_tags("rbthermalhack").value != "":
             extra_env += "-v /opt/adsb/rb:/sys/class/thermal:ro "
 
@@ -370,7 +371,7 @@ class RadarBox(Aggregator):
             sharing_key = user_input
         else:
             # try to get a key
-            sharing_key = self._request_rb_sharing_key()
+            sharing_key = self._request_rb_sharing_key(idx)
         if not sharing_key:
             return False
 

@@ -191,7 +191,10 @@ class AdsbIm:
 
         # no one should share a CPU serial with AirNav, so always create fake cpuinfo;
         # also identify if we would use the thermal hack for RB and Ultrafeeder
-        self._d.env_by_tags("rbthermalhack").value = "/sys/class/thermal" if create_fake_info() else ""
+        if create_fake_info([0] + self.micro_indices()):
+            self._d.env_by_tags("rbthermalhack").value = "/sys/class/thermal"
+        else:
+            self._d.env_by_tags("rbthermalhack").value = ""
 
         # Ensure secure_image is set the new way if before the update it was set only as env variable
         if self._d.is_enabled("secure_image"):
@@ -1571,6 +1574,8 @@ class AdsbIm:
             # accessing the microfeeder envs will create them
             for e in self._d.stage2_envs:
                 e.list_get(n)
+            # create fake cpu info for airnav
+            create_fake_info([0] + self.micro_indices())
             return (True, "")
 
         # now let's see if we can get the data from the micro feeder
@@ -1591,6 +1596,8 @@ class AdsbIm:
         # accessing the microfeeder envs will create them
         for e in self._d.stage2_envs:
             e.list_get(n)
+        # create fake cpu info for airnav
+        create_fake_info([0] + self.micro_indices())
 
         return (True, "")
 

@@ -27,4 +27,4 @@ services:
       - /var/log
     volumes:
       - /opt/adsb/rb:${FEEDER_RB_THERMAL_HACK:-/tmp/rbt}:ro
-      - /opt/adsb/rb/cpuinfo:/proc/cpuinfo:ro
+      - /opt/adsb/rb/cpuinfo_STAGE2NUM:/proc/cpuinfo:ro
