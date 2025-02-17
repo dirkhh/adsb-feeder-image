@@ -1592,6 +1592,8 @@ class AdsbIm:
                 e.list_get(n)
             # create fake cpu info for airnav
             create_fake_info([0] + self.micro_indices())
+            self.plane_stats.append([])
+            self.planes_seen_per_day.append(set())
             return (True, "")
 
         # now let's see if we can get the data from the micro feeder
@@ -1614,6 +1616,8 @@ class AdsbIm:
             e.list_get(n)
         # create fake cpu info for airnav
         create_fake_info([0] + self.micro_indices())
+        self.plane_stats.append([])
+        self.planes_seen_per_day.append(set())
 
         return (True, "")
 
@@ -1694,6 +1698,8 @@ class AdsbIm:
 
             for e in self._d.stage2_envs:
                 e.list_move(num, new_idx)
+            self.plane_stats.insert(new_idx, self.plane_stats.pop(num))
+            self.planes_seen_per_day.insert(new_idx, self.planes_seen_per_day.pop(num))
 
         return (True, "")
 
