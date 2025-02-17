@@ -109,7 +109,7 @@
       <div class="col-12 {% if num_micro_sites < 4 %}col-md-6{% endif %}" style="overflow-x: auto;">
         <table class="table table-bordered table-sm lh-1 table-striped">
           <thead>
-            <td>Aggregator</td>
+            <td style="position: -webkit-sticky; position: sticky; left: 0px;">Aggregator</td>
             <td class="text-center" colspan="{{num_micro_sites}}">Enabled</td>
             <td class="text-center" colspan="{{num_micro_sites}}">Data</td>
             <td class="text-center" colspan="{{num_micro_sites}}">MLAT</td>
@@ -118,7 +118,7 @@
           <tbody>
             {% if num_micro_sites > 1 %}
             <tr>
-              <td>Feeder #</td>
+              <td style="position: -webkit-sticky; position: sticky; left: 0px;">Feeder #</td>
               {% for cols in [1,2,3,4] %}
               {% for idx in ns.site_indices %}
               <td class="text-center">
@@ -131,7 +131,7 @@
             {% for agg, name, map, status, table in aggregators %}
             {% if (tc == table) %}
             <tr>
-              <td>
+              <td style="position: -webkit-sticky; position: sticky; left: 0px;">
                 <a href="{{ map }}">{{ name }}</a>
               </td>
               {% for idx in ns.site_indices %}
