@@ -2677,6 +2677,7 @@ class AdsbIm:
         now = datetime.now(timezone.utc)
         start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
         self.reset_planes_seen_per_day()
+        self.plane_stats = [[] for i in [0] + self.micro_indices()]
         try:
             with gzip.open("/opt/adsb/adsb_planes_seen_per_day.json.gz", "r") as f:
                 planes = json.load(f)
@@ -2687,13 +2688,18 @@ class AdsbIm:
                     for i in [0] + self.micro_indices():
                         # json can't store sets, so we use list on disk, but sets in memory
                         self.planes_seen_per_day[i] = set(planelists[i])
+                    self.plane_stats = planes.get("stats", [])
+                    if len(self.plane_stats) == 0:
+                        # create the correct layout for the stats
+                        self.plane_stats = [[] for i in [0] + self.micro_indices()]
+
         except:
             pass
 
     def write_planes_seen_per_day(self):
         # json can't store sets, so we use list on disk, but sets in memory
         planelists = [list(self.planes_seen_per_day[i]) for i in [0] + self.micro_indices()]
-        planes = {"timestamp": int(time.time()), "planes": planelists}
+        planes = {"timestamp": int(time.time()), "planes": planelists, "stats": self.plane_stats}
         with gzip.open("/opt/adsb/adsb_planes_seen_per_day.json.gz", "w") as f:
             json.dump(planes, f)
 
@@ -2715,8 +2721,16 @@ class AdsbIm:
         start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
         ultrafeeders = [0] + self.micro_indices()
         if (now - start_of_day).total_seconds() < 60:
-            # it's a new day, reset the data
+            # it's a new day, store and then reset the data
+            for i in ultrafeeders:
+                self.plane_stats[i].insert(0, len(self.planes_seen_per_day[i]))
+                if len(self.plane_stats[i]) > 14:
+                    self.plane_stats[i].pop()
             self.reset_planes_seen_per_day()
+        if now.minute == 0:
+            # this function is called once every minute - so this triggers once an hour
+            # write the data to disk every hour
+            self.write_planes_seen_per_day()
         for i in ultrafeeders:
             # using sets it's really easy to keep track of what we've seen
             self.planes_seen_per_day[i] |= self.get_current_planes(i)
