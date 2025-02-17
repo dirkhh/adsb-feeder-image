@@ -173,14 +173,14 @@
             let tooltip = "not receiving any data"
             if (d["pps"] > 0) {
               color_class = "text-success";
-              tooltip = "receiving data"
+              tooltip = "receiving data (plane total since midnight UTC)"
             } else if (d["uptime"] > 60) {
               color_class = "text-warning";
               tooltip = "receiving unusually little data"
             }
-            $("#mf_status_" + i).attr('class', color_class);
+            $("#mf_status_" + i).attr('class', color_class + " small");
             $("#mf_status_" + i).attr('title', tooltip);
-            $("#mf_status_" + i).text(d["pps"] + " pos / " + d["mps"] + " msg per sec");
+            $("#mf_status_" + i).html(d["pps"] + " pos / " + d["mps"] + " msg per sec<br/>" + d["planes"] + " planes / " + d["tplanes"] + " today");
           })
         }).finally(() => {
           clearTimeout(check_mf_timer); // abundance of caution to avoid multiple timers

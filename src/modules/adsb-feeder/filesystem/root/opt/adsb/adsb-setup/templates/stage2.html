@@ -74,7 +74,7 @@
             <td class="text-center d-none d-md-table-cell">Feeder Version</td>
             <td class="text-center">Status / Stats</td>
             <td class="text-center">UAT</td>
-            <td class="text-center small">Bandwidth<br />Reduce</td>
+            <td class="text-center small" title="Bandwidth Reduce">BWR</td>
             <td class="text-center">Action</td>
           </thead>
           <tbody>
@@ -118,19 +118,19 @@
             </tr>
             {% else %}
             <tr class="align-middle">
-              <td><span id="site_order_{{ loop.index0 }}">{{ loop.index0 }}</span></td>
+              <td><span id="site_order_{{ loop.index0 }}" class="small">{{ loop.index0 }}</span></td>
               <td>
-                <a href="/map_{{loop.index0}}/">{{ site }}</a>
+                <a href="/map_{{loop.index0}}/" class="small">{{ site }}</a>
               </td>
-              <td class="text-center">
+              <td class="text-center small">
                 <a id="table_mf_ip_{{ loop.index0 }}"
                    href="http://{{ list_value_by_tag('mf_ip', loop.index0).split(',')[0] }}">{{ list_value_by_tag('mf_ip', loop.index0).replace(',30006,beast_in', '') }}</a>
               </td>
-              <td class="text-center d-none d-md-table-cell" id="table_mf_lla_{{ loop.index0 }}">
+              <td class="text-center d-none d-md-table-cell small" id="table_mf_lla_{{ loop.index0 }}">
                 {{ list_value_by_tag('lat', loop.index0) }} /
-                {{ list_value_by_tag('lon', loop.index0) }} / {{ list_value_by_tag('alt', loop.index0) }}m
+                {{ list_value_by_tag('lon', loop.index0) }} @ {{ list_value_by_tag('alt', loop.index0) }}m
               </td>
-              <td class="text-center d-none d-md-table-cell" id="table_mf_version_{{ loop.index0 }}">
+              <td class="text-center d-none d-md-table-cell small" id="table_mf_version_{{ loop.index0 }}">
                 {{ list_value_by_tag('mf_version', loop.index0).split('(')[0]}}
               </td>
               <td class="text-center"><a id="mf_status_{{ loop.index0 }}" href="/stats_{{loop.index0}}/"></a></td>
