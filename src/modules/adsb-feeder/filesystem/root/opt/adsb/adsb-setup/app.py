@@ -1,6 +1,6 @@
 import copy
 import filecmp
-import io
+import gzip
 import json
 import os
 import os.path
@@ -2672,7 +2672,7 @@ class AdsbIm:
         start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
         self.reset_planes_seen_per_day()
         try:
-            with open("/run/adsb_planes_seen_per_day.json") as f:
+            with gzip.open("/opt/adsb/adsb_planes_seen_per_day.json.gz", "r") as f:
                 planes = json.load(f)
                 ts = planes.get("timestamp", 0)
                 if ts >= start_of_day.timestamp():
@@ -2688,7 +2688,7 @@ class AdsbIm:
         # json can't store sets, so we use list on disk, but sets in memory
         planelists = [list(self.planes_seen_per_day[i]) for i in [0] + self.micro_indices()]
         planes = {"timestamp": int(time.time()), "planes": planelists}
-        with open("/run/adsb_planes_seen_per_day.json", "w") as f:
+        with gzip.open("/opt/adsb/adsb_planes_seen_per_day.json.gz", "w") as f:
             json.dump(planes, f)
 
     def get_current_planes(self, idx):
