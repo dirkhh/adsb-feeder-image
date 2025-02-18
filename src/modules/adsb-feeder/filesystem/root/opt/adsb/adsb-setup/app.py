@@ -2704,11 +2704,19 @@ class AdsbIm:
             pass
 
     def write_planes_seen_per_day(self):
-        # json can't store sets, so we use list on disk, but sets in memory
-        planelists = [list(self.planes_seen_per_day[i]) for i in [0] + self.micro_indices()]
-        planes = {"timestamp": int(time.time()), "planes": planelists, "stats": self.plane_stats}
-        with gzip.open("/opt/adsb/adsb_planes_seen_per_day.json.gz", "w") as f:
-            json.dump(planes, f)
+        # we want to make absolutely sure we don't throw any errors here as this is
+        # called during termination
+        try:
+            # json can't store sets, so we use list on disk, but sets in memory
+            planelists = [list(self.planes_seen_per_day[i]) for i in [0] + self.micro_indices()]
+            planes = {"timestamp": int(time.time()), "planes": planelists, "stats": self.plane_stats}
+            planes_json = json.dumps(planes, indent=2)
+            with gzip.open("/opt/adsb/adsb_planes_seen_per_day.json.gz", "w") as f:
+                f.write(planes_json.encode("utf-8"))
+            print_err("wrote planes_seen_per_day")
+        except Exception as e:
+            print_err(f"error writing planes_seen_per_day: {e}")
+            pass
 
     def get_current_planes(self, idx):
         planes = set()
