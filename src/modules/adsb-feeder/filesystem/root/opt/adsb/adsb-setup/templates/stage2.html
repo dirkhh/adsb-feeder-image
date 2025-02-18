@@ -101,7 +101,8 @@
               <td class="text-center d-none d-md-table-cell">
                 {{ list_value_by_tag('mf_version', loop.index0).split('(')[0] }}
               </td>
-              <td class="text-center"><span id="mf_status_{{ loop.index0 }}"></span></td>
+              <td class="text-center"><span id="mf_status_{{ loop.index0 }}" class="small"></span><br/><span id="mf_stats_{{ loop.index0 }}" class="small"></span></td>
+
               <td class="text-center"><input type="checkbox" class="form-check-input" name="mf_uat_{{ loop.index0 }}"
                        id="mf_uat_{{ loop.index0 }}" {% if list_is_enabled('uat978', loop.index0) %}checked="checked"
                        {% endif %} /></td>
@@ -133,7 +134,7 @@
               <td class="text-center d-none d-md-table-cell small" id="table_mf_version_{{ loop.index0 }}">
                 {{ list_value_by_tag('mf_version', loop.index0).split('(')[0]}}
               </td>
-              <td class="text-center"><a id="mf_status_{{ loop.index0 }}" href="/stats_{{loop.index0}}/"></a></td>
+              <td class="text-center"><a href="/stats_{{loop.index0}}/"><span id="mf_status_{{ loop.index0 }}" class="small"></span><br/><span id="mf_stats_{{ loop.index0 }}" class="small"></span></a></td>
               <td class="text-center"><span
                       id="table_mf_uat_{{ loop.index0 }}">{% if list_is_enabled('uat978', loop.index0) %}&#10003;{% endif %}</span>
               </td>

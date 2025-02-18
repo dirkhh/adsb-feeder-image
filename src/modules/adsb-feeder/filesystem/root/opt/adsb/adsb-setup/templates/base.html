@@ -178,9 +178,13 @@
               color_class = "text-warning";
               tooltip = "receiving unusually little data"
             }
-            $("#mf_status_" + i).attr('class', color_class + " small");
+            $("#mf_status_" + i).removeClass("text-danger text-success text-warning");
+            $("#mf_status_" + i).addClass(color_class);
             $("#mf_status_" + i).attr('title', tooltip);
-            $("#mf_status_" + i).html(d["pps"] + " pos / " + d["mps"] + " msg per sec<br/>" + d["planes"] + " planes / " + d["tplanes"] + " today");
+            $("#mf_status_" + i).text(d["pps"] + " pos / " + d["mps"] + " msg per sec");
+            $("#mf_stats_" + i).removeClass("text-danger text-success text-warning");
+            $("#mf_stats_" + i).addClass(color_class);
+            $("#mf_stats_" + i).text(d["planes"] + " planes / " + d["tplanes"] + " today");
           })
         }).finally(() => {
           clearTimeout(check_mf_timer); // abundance of caution to avoid multiple timers

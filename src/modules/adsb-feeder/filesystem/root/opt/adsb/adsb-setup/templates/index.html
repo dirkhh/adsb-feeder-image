@@ -70,8 +70,8 @@
     </div>
   </div>
   <div class="col-12 mb-3 {% if is_enabled('stage2') %} d-none {% endif %}">
-    Position / Message rate: <a id="{% if not is_enabled('stage2') %}mf_status_0{% endif %}"
-    {% if env_value_by_tag('aggregator_choice') != 'nano' %} href="/stats_0/" {% endif %}></a>
+    Position / Message rate: <a {% if env_value_by_tag('aggregator_choice') != 'nano' %} href="/stats_0/" {% endif %}><span id="{% if not is_enabled('stage2') %}mf_status_0{% endif %}"></span> &mdash;
+      <span id="{% if not is_enabled('stage2') %}mf_stats_0{% endif %}"></span></a>
   </div>
   <div class="col-12 mb-3 {% if not is_enabled('stage2') %} d-none {% endif %}">
     <h5>You are running as Stage 2 feeder</h5>
@@ -87,13 +87,15 @@
           <tr>
             <td class="text-center" scope="row">*</td>
             <td class="text-left"><a href="/map/">{{ list_value_by_tag("site_name", 0) }}</a></td>
-            <td class="text-center"><a id="mf_status_0" href="/stats/"></a></td>
+            <td class="text-center"><a href="/stats/"></a><span class="small" id="mf_status_0"></span>
+              <br/><span class="small" id="mf_stats_0"></span></td>
           </tr>
           {% for site in env_value_by_tag('site_name') if not site == list_value_by_tag('site_name', 0) %}
           <tr>
             <td class="text-center" scope="row">{{loop.index}}</td>
             <td class="text-left"><a href="/map_{{loop.index}}/">{{site}}</a></td>
-            <td class="text-center"><a id="mf_status_{{loop.index}}" href="/stats_{{loop.index}}/"></a></td>
+            <td class="text-center"><a href="/stats_{{loop.index}}/"></a><span id="mf_status_{{loop.index}}" class="small"></span>
+              <br/><span id="mf_stats_{{loop.index}}" class="small"></span></td>
           </tr>
           {% endfor %}
         </tbody>
