@@ -98,8 +98,7 @@
           {% endfor %}
         </tbody>
       </table>
-      More configuration options for this are available on the <a href={{ url_for('stage2') }}>Stage 2 Setup
-        page</a>.{% endif %}
+      Configure micro feeders on the <a href={{ url_for('stage2') }}>Stage 2 Setup page</a>.{% endif %}
     </div>
   </div>
   <div class="col-12 {% if (aggregators | length) == 0 %} d-none {% endif %}">
@@ -194,20 +193,20 @@
     </div>
   </div>
   <div class="col-12 mb-4 {% if env_value_by_tag('aggregator_choice') in ['micro', 'nano'] %} d-none {% endif %}">
-    {% if is_enabled('stage2') and env_value_by_tag('num_micro_sites') > 0 %}
-      <div class "small">
+    <div class "small">
+      {% if is_enabled('stage2') %}
+        {% if not env_value_by_tag('num_micro_sites') == 0 %}
+          To configure aggregators, see Data Sharing menu at the top of the page.
+        {% endif %}
+      {% else %}
         {% if (aggregators | length) == 0 %}
           No aggregators configured. Add aggregators:
-        {%else%}
+        {% else %}
           Add or remove aggregators:
         {% endif %}
-        {% if is_enabled('stage2') %}
-          See Data Sharing at the top of the page.
-        {% else %}
-          <a href="/aggregators">Data Sharing</a>
-        {% endif %}
-      </div>
-    {% endif %}
+        <a href="/aggregators">Data Sharing</a>
+      {% endif %}
+    </div>
   </div>
   <div class="col-12 mb-4">
     <h5>
