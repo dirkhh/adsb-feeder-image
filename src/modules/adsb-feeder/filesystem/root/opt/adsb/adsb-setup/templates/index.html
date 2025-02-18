@@ -195,7 +195,7 @@
   <div class="col-12 mb-4 {% if env_value_by_tag('aggregator_choice') in ['micro', 'nano'] %} d-none {% endif %}">
     <div class "small">
       {% if is_enabled('stage2') %}
-        {% if not env_value_by_tag('num_micro_sites') == 0 %}
+        {% if env_value_by_tag('num_micro_sites') > 0 %}
           To configure aggregators, see Data Sharing menu at the top of the page.
         {% endif %}
       {% else %}
