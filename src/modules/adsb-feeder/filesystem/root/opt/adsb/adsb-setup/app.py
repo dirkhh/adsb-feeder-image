@@ -295,6 +295,7 @@ class AdsbIm:
         self.app.add_url_rule("/api/base_info", "base_info", self.base_info)
         self.app.add_url_rule("/api/stage2_info", "stage2_info", self.stage2_info)
         self.app.add_url_rule("/api/stage2_stats", "stage2_stats", self.stage2_stats)
+        self.app.add_url_rule("/api/stats", "stats", self.stats)
         self.app.add_url_rule("/api/micro_settings", "micro_settings", self.micro_settings)
         self.app.add_url_rule("/api/check_remote_feeder/<ip>", "check_remote_feeder", self.check_remote_feeder)
         self.app.add_url_rule(f"/api/status/<agg>", "beast", self.agg_status)
@@ -1070,6 +1071,12 @@ class AdsbIm:
         if self._d.env_by_tags("aggregator_choice").value == "nano":
             suffix = "nanofeeder"
         return suffix
+
+    def stats(self):
+        plane_stats = []
+        for i in [0] + self.micro_indices():
+            plane_stats.append([len(self.planes_seen_per_day[i])] + self.plane_stats[i])
+        return Response(json.dumps(plane_stats), mimetype="application/json")
 
     def stage2_stats(self):
         ret = []
