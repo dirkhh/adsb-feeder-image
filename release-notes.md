@@ -1,4 +1,5 @@
 Changes since v2.2.6 include:
+- several consistency and user interaction improvements for the UI, especially for Stage 2 systems
 - fix AirNav support in stage 2 scenarios
 - remove RadarPlane (which has been defunct for a while) plus remnants of some other defunct aggregators
 - stage 2: allow updating time zone
