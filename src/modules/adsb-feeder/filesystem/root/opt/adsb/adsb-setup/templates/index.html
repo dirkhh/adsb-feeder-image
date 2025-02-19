@@ -77,32 +77,52 @@
     <h5>You are running as Stage 2 feeder</h5>
     <div class="col-12 mb-3">{% if env_value_by_tag('num_micro_sites') == 0 %}No micro feeder sites configured, yet.
       Please do so on the <a href={{ url_for('stage2') }}>Stage 2 Setup page</a>.{% else %}
-      <table class="table table-bordered table-sm lh-1 w-auto table-striped">
-        <thead>
-          <th class="text-center" scope="col">#</th>
-          <th class="text-center" scope="col">Name</th>
-          <th class="text-center" scope="col">Status / Stats</th>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="text-center" scope="row">*</td>
-            <td class="text-left"><a href="/map/">{{ list_value_by_tag("site_name", 0) }}</a></td>
-            <td class="text-center"><a href="/stats/"></a><span class="small" id="mf_status_0"></span>
-              <br/><span class="small" id="mf_stats_0"></span></td>
-          </tr>
-          {% for site in env_value_by_tag('site_name') if not site == list_value_by_tag('site_name', 0) %}
-          <tr>
-            <td class="text-center" scope="row">{{loop.index}}</td>
-            <td class="text-left"><a href="/map_{{loop.index}}/">{{site}}</a></td>
-            <td class="text-center"><a href="/stats_{{loop.index}}/"></a><span id="mf_status_{{loop.index}}" class="small"></span>
-              <br/><span id="mf_stats_{{loop.index}}" class="small"></span></td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      Configure micro feeders on the <a href={{ url_for('stage2') }}>Stage 2 Setup page</a>.{% endif %}
+      <div class="row">
+        <div class="col-xl-5 col-lg-6 col-12">
+          <table class="table table-bordered table-sm lh-1 w-auto table-striped">
+            <thead>
+              <th class="text-center" scope="col">#</th>
+              <th class="text-center" scope="col">Name</th>
+              <th class="text-center" scope="col">Status / Stats</th>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-center" scope="row">*</td>
+                <td class="text-left"><a href="/map/">{{ list_value_by_tag("site_name", 0) }}</a></td>
+                <td class="text-center"><a href="/stats/"></a><span class="small" id="mf_status_0"></span>
+                  <br/><span class="small" id="mf_stats_0"></span></td>
+              </tr>
+              {% for site in env_value_by_tag('site_name') if not site == list_value_by_tag('site_name', 0) %}
+              <tr>
+                <td class="text-center" scope="row">{{loop.index}}</td>
+                <td class="text-left"><a href="/map_{{loop.index}}/">{{site}}</a></td>
+                <td class="text-center"><a href="/stats_{{loop.index}}/"></a><span id="mf_status_{{loop.index}}" class="small"></span>
+                  <br/><span id="mf_stats_{{loop.index}}" class="small"></span></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="col-lg-6 col-12">
+          {% if is_enabled('stage2') %}
+          <div style="position: relative; width: 100%; height: 100%;" id="chart-wrapper">
+            <canvas id="plane-history-chart"></canvas>
+          </div>
+          {% endif %}
+        </div>
+        <div class="col-12">
+          Configure micro feeders on the <a href={{ url_for('stage2') }}>Stage 2 Setup page</a>.
+        </div>
+      </div>{% endif %}
     </div>
   </div>
+  {% if not is_enabled('stage2') %}
+  <div class="col-xl-5 col-lg-6 col-md-8 col-sm-10 col-12">
+    <div style="position: relative; width: 100%; height: 100%;" id="chart-wrapper">
+      <canvas id="plane-history-chart"></canvas>
+    </div>
+  </div>
+  {% endif %}
   <div class="col-12 {% if (aggregators | length) == 0 %} d-none {% endif %}">
     <h4>You are feeding</h4>
     <div class="row small">
@@ -469,7 +489,85 @@
     system might be a good idea.
   </div>
 </div>
+<script src="/static/js/chart.js" integrity="sha256-QvTb/nDEMP/CLHEo82yujVmcrJC4zTfI9CpZ5WXl3rc="
+          crossorigin="anonymous"></script>
 <script>
+  let context = document.getElementById('plane-history-chart');
+  fetch("/api/stats", { signal: AbortSignal.timeout(15000) })
+        .then(response => response.json())
+        .then(planesHistory => {
+          // now let's format the data the way Chart.js wants it
+          let len = planesHistory.length;
+          let datasets = [];
+          let labels = [];
+          let feeders = [];
+          let distinct_colors = [
+            "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941", "#006FA6", "#A30059",
+            "#FFDBE5", "#7A4900", "#0000A6", "#63FFAC", "#B79762", "#004D43", "#8FB0FF", "#997D87",
+            "#5A0007", "#809693", "#FEFFE6", "#1B4400", "#4FC601", "#3B5DFF", "#4A3B53", "#FF2F80",
+            "#61615A", "#BA0900", "#6B7900", "#00C2A0", "#FFAA92", "#FF90C9", "#B903AA", "#D16100",
+            "#DDEFFF", "#000035", "#7B4F4B", "#A1C299", "#300018", "#0AA6D8", "#013349", "#00846F",
+            "#372101", "#FFB500", "#C2FFED", "#A079BF", "#CC0744", "#C0B9B2", "#C2FF99", "#001E09",
+            "#00489C", "#6F0062", "#0CBD66", "#EEC3FF", "#456D75", "#B77B68", "#7A87A1", "#788D66",
+            "#885578", "#FAD09F", "#FF8A9A", "#D157A0", "#BEC459", "#456648", "#0086ED", "#886F4C",
+            "#34362D", "#B4A8BD", "#00A6AA", "#452C2C", "#636375", "#A3C8C9", "#FF913F", "#938A81",
+            "#575329", "#00FECF", "#B05B6F", "#8CD0FF", "#3B9700", "#04F757", "#C8A1A1", "#1E6E00",
+            "#7900D7", "#A77500", "#6367A9", "#A05837", "#6B002C", "#772600", "#D790FF", "#9B9700",
+            "#549E79", "#FFF69F", "#201625", "#72418F", "#BC23FF", "#99ADC0", "#3A2465", "#922329",
+            "#5B4534", "#FDE8DC", "#404E55", "#0089A3", "#CB7E98", "#A4E804", "#324E72", "#6A3A4C"
+          ];
+          // determine the length of the longest array in planesHistory and use that as the number of days for the chart
+          let days = 0;
+          for (let i = 0; i < planesHistory.length; i++) {
+            days = Math.max(planesHistory[i].length, days);
+          }
+          for (let i = days-1; i >= 0; i--) {
+            let date = new Date();
+            date.setDate(date.getDate() - i);
+            let day = date.getUTCDate();
+            let month = date.getUTCMonth() + 1;
+            labels.push(`${month}/${day}`);
+          }
+          console.log("labels", labels);
+          // now collect the feeder names - need to do this in jinja, not JS
+          feeders[0] = "{{ list_value_by_tag('site_name', 0) }}";
+          {% for idx in ns.site_indices %}
+          feeders["{{ idx }}"] = "{{ list_value_by_tag('site_name', idx) }}";
+          {% endfor %}
+          console.log("feeders", feeders);
+          // now build the datasets
+          for (let i = 0; i < len; i++) {
+            datasets.push({
+              label: feeders[i],
+              data: planesHistory[i].reverse(),
+              borderColor: distinct_colors[i % distinct_colors.length]
+            });
+          }
+          let ar = 2;
+          if (len < 4) ar = 2;
+          else if (len < 6) ar = 1.7;
+          else if (len < 9) ar = 1.4;
+          else if (len < 12) ar = 1.1;
+          else ar = 0.9;
+          let data = {
+            labels: labels,
+            datasets: datasets
+          };
+          console.log("data", data);
+          new Chart(context, {
+            type: 'line',
+            data: data,
+            options: {
+              aspectRatio: ar,
+              scales: {
+                y: {
+                  beginAtZero: true
+                }
+              }
+            }
+          });
+        });
+
   let browser_ip = null;
   let feeder_ip = null;
   let ip_message = "";

@@ -1,4 +1,5 @@
 Changes since v2.2.6 include:
+- add chart of planes seen for up to the last two weeks (this will take time to populate data as it requires the new statistics just added)
 - stage 2: make number of planes available as part of stage2_stats API
 - several consistency and user interaction improvements for the UI, especially for Stage 2 systems
 - fix AirNav support in stage 2 scenarios
