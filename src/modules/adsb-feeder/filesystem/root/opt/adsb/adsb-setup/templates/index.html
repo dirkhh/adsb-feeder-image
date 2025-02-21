@@ -524,20 +524,22 @@
           for (let i = 0; i < planesHistory.length; i++) {
             days = Math.max(planesHistory[i].length, days);
           }
+          let today = new Date();
+          let month = today.toLocaleString('en-us', { month: 'long', timeZone: "UTC" });
+          let day = today.getUTCDate();
+          todayString = `${month} ${day}`
           for (let i = days-1; i >= 0; i--) {
-            let date = new Date();
+            let date = new Date()
             date.setDate(date.getDate() - i);
             let day = date.getUTCDate();
             let month = date.getUTCMonth() + 1;
-            labels.push(`${month}/${day}`);
+            labels.push(day);
           }
-          console.log("labels", labels);
           // now collect the feeder names - need to do this in jinja, not JS
           feeders[0] = "{{ list_value_by_tag('site_name', 0) }}";
           {% for idx in ns.site_indices %}
           feeders["{{ idx }}"] = "{{ list_value_by_tag('site_name', idx) }}";
           {% endfor %}
-          console.log("feeders", feeders);
           // now build the datasets
           for (let i = 0; i < len; i++) {
             datasets.push({
@@ -556,11 +558,19 @@
             labels: labels,
             datasets: datasets
           };
-          console.log("data", data);
           new Chart(context, {
             type: 'line',
             data: data,
             options: {
+              plugins: {
+                title: {
+                  display: true,
+                  text: `Statistics ending ${todayString} (UTC)`,
+                  font: {
+                    size: 18,
+                  }
+                }
+              },
               aspectRatio: ar,
               scales: {
                 y: {
