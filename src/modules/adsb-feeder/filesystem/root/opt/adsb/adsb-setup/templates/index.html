@@ -521,7 +521,7 @@
           }
           // determine the length of the longest array in planesHistory and use that as the number of days for the chart
           let days = 0;
-          for (let i = 0; i < planesHistory.length; i++) {
+          for (let i = 0; i < len; i++) {
             days = Math.max(planesHistory[i].length, days);
           }
           let today = new Date();
