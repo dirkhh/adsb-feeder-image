@@ -89,8 +89,8 @@
               <tr>
                 <td class="text-center" scope="row">*</td>
                 <td class="text-left"><a href="/map/">{{ list_value_by_tag("site_name", 0) }}</a></td>
-                <td class="text-center"><a href="/stats/"></a><span class="small" id="mf_status_0"></span>
-                  <br/><span class="small" id="mf_stats_0"></span></td>
+                <td class="text-center"><a href="/stats/"><span class="small" id="mf_status_0"></span>
+                  <br/><span class="small" id="mf_stats_0"></span></a></td>
               </tr>
               {% for site in env_value_by_tag('site_name') if not site == list_value_by_tag('site_name', 0) %}
               <tr>
