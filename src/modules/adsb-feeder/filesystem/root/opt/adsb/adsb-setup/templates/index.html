@@ -493,6 +493,7 @@
           crossorigin="anonymous"></script>
 <script>
   let context = document.getElementById('plane-history-chart');
+  shownIndices = new Set();
   fetch("/api/stats", { signal: AbortSignal.timeout(15000) })
         .then(response => response.json())
         .then(planesHistory => {
@@ -569,6 +570,25 @@
                   font: {
                     size: 18,
                   }
+                },
+                legend: {
+                  display: (len > 1),
+                  onClick: function (e, legendItem) {
+                    var index = legendItem.datasetIndex;
+                    if (shownIndices.has(index)) {
+                      shownIndices.delete(index)
+                    } else {
+                      shownIndices.add(index)
+                    }
+                    clear = shownIndices.size == 0
+                    var ci = this.chart;
+                    for (let i = 0; i < len; i++) {
+                      var meta = ci.getDatasetMeta(i);
+                      meta.hidden = (clear ? false : (!shownIndices.has(i)));
+                    }
+                    // We hid a dataset ... rerender the chart
+                    ci.update();
+                  },
                 }
               },
               aspectRatio: ar,

@@ -1,4 +1,5 @@
 Changes since v2.2.6 include:
+- stage 2: allow selecting the feeders shown in the statistics chart by clicking on the legend
 - improve colors and date display for the statistics chart
 - fix broken statistics link on Stage 2 home page
 - add chart of planes seen for up to the last two weeks (this will take time to populate data as it requires the new statistics just added)
