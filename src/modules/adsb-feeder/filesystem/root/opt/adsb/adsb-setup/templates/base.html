@@ -65,13 +65,19 @@
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownFeederSelection" role="button"
                data-mdb-toggle="dropdown" aria-expanded="false">Target: </a>
             <ul class="dropdown-menu" aria-labelledby="navbarDropdownFeederSelection" style="width: 18em">
-              <li><form class="px-4 py-3 no_spinner" id="stage2_feeder_target_form">
-                <div class="form-outline mb-4" data-mdb-input-init>
-                  <input type="text" id="feederTarget" class="form-control" />
-                  <label class="form-label" for="stage2_feeder_target">'*' or Feeder Num (1-{{ env_value_by_tag('num_micro_sites') }})</label>
+              <div class="row mx-2 g-1">
+                <div class="col-12 my-1 text-secondary">Select the target for maps/sharing</div>
+                <div class="col-6 my-1">
+                  <button type="submit" class="btn-sm btn-outline-secondary btn-rounded btn-block"
+                          onclick="stage2_feeder_target_submit(0);return false;">Combined</button>
                 </div>
-                <button type="submit" name="stage2_feeder_target" class="btn btn-primary btn-block" onclick="stage2_feeder_target_submit();return false;">Choose Target</button>
-              </form></li>
+                {% for i in range(env_value_by_tag('num_micro_sites')) %}
+                <div class="col-3 my-1">
+                  <button type="submit" class="btn-sm btn-outline-secondary btn-rounded btn-block"
+                          onclick="stage2_feeder_target_submit({{ i + 1 }});return false;"><span width="2em">{{ i + 1 }}</span></button>
+                </div>
+                {% endfor %}
+              </div>
             </ul>
           </li>
           {% endif %}
@@ -99,18 +105,6 @@
                href="/aggregators">Data Sharing</a>
           </li>
           {% else %}
-          <li id="data_sharing_all" class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAgg" role="button" data-mdb-toggle="dropdown"
-               aria-expanded="false">Data Sharing</a>
-            <ul class="dropdown-menu" aria-labelledby="navbarDropdownAgg">
-              {% if env_value_by_tag('num_micro_sites') == 0 %}
-              <li><a class="dropdown-item" href="/setup">No microfeeders configured. Set up Stage 2.</a></li>
-              {% endif %}
-              {% for site in env_value_by_tag('site_name') if not site == list_value_by_tag('site_name', 0) %}
-              <li><a class="dropdown-item" href="/aggregators?m={{loop.index}}">{{site}}</a></li>
-              {% endfor %}
-            </ul>
-          </li>
           <li id="data_sharing_current" class="nav-item">
             <a class="nav-link" href="#" id="data_sharing_current_link">Data Sharing</a>
           </li>
@@ -181,13 +175,11 @@
       $("#options").attr("href", "/visualization?m=" + feederTarget);
       $("#data_sharing_current_link").attr("href", "/aggregators?m=" + feederTarget);
       $("#data_sharing_current").removeClass("d-none");
-      $("#data_sharing_all").addClass("d-none");
       $("#stats_current").removeClass("d-none");
       $("#stats_current").attr("href", "/stats_" + feederTarget + "/");
       $("#stats_current").text(`${siteName} Stats`);
     } else {
       $("#data_sharing_current").addClass("d-none");
-      $("#data_sharing_all").removeClass("d-none");
       $("#stats_current").addClass("d-none");
     }
     function check_mf_status() {
@@ -294,9 +286,8 @@
       document.getElementById("overlay").style.display = "none";
       console.log('hide_spinner');
     }
-    function stage2_feeder_target_submit() {
-      let newTarget = $('#feederTarget').val();
-      if (newTarget == '*' || newTarget == '0' || newTarget ==''  ) {
+    function stage2_feeder_target_submit(newTarget) {
+      if (newTarget == '*' || newTarget == '0' || newTarget =='' || newTarget == undefined) {
         queryString = "";
       } else {
         queryString = "?m=" + newTarget;
