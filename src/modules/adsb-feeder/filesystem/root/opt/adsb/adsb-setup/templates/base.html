@@ -60,40 +60,36 @@
       </button>
       <div class="collapse navbar-collapse " id="navbarNav">
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          {% if is_enabled('stage2') %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownFeederSelection" role="button"
+               data-mdb-toggle="dropdown" aria-expanded="false">Target: </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdownFeederSelection" style="width: 18em">
+              <li><form class="px-4 py-3 no_spinner" id="stage2_feeder_target_form">
+                <div class="form-outline mb-4" data-mdb-input-init>
+                  <input type="text" id="feederTarget" class="form-control" />
+                  <label class="form-label" for="stage2_feeder_target">'*' or Feeder Num (1-{{ env_value_by_tag('num_micro_sites') }})</label>
+                </div>
+                <button type="submit" name="stage2_feeder_target" class="btn btn-primary btn-block" onclick="stage2_feeder_target_submit();return false;">Choose Target</button>
+              </form></li>
+            </ul>
+          </li>
+          {% endif %}
           <!-- Maps -->
           <li class="nav-item dropdown {% if not is_enabled('base_config') %}d-none{% endif %}">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMaps" role="button"
                data-mdb-toggle="dropdown" aria-expanded="false">Maps</a>
             <ul class="dropdown-menu" aria-labelledby="navbarDropdownMaps">
-              <li><a class="dropdown-item" href="/map/{{ env_value_by_tag('tar1090_query_params') }}">Live Traffic</a>
+              <li><a id="live_traffic" class="dropdown-item" href="/map/{{ env_value_by_tag('tar1090_query_params') }}">Live Traffic</a>
               </li>
               {% if env_value_by_tag("aggregator_choice") != 'nano' %}
-              <li><a class="dropdown-item" href="/map/?heatmap">Heatmap</a></li>
+              <li><a id="heatmap" class="dropdown-item" href="/map/?heatmap">Heatmap</a></li>
               {% endif %}
-              <li><a class="dropdown-item" href="/map/?pTracks">Tracks</a></li>
+              <li><a id="tracks" class="dropdown-item" href="/map/?pTracks">Tracks</a></li>
               {% if env_value_by_tag("aggregator_choice") != 'nano' %}
-              <li><a class="dropdown-item" href="/map/?replay">Replay</a></li>
+              <li><a id="replay" class="dropdown-item" href="/map/?replay">Replay</a></li>
               {% endif %}
-              <li><a class="dropdown-item" href="/visualization">Options</a></li>
-              {% if is_enabled('stage2') %}
-              <!-- awkward double dropdown for the micro proxies -->
-              {% for site in env_value_by_tag('site_name') %}
-              {% if loop.index0 != 0 %}
-              <li>
-                <a class="dropdown-item" href="#">{{site}} &raquo;</a>
-                <ul class="dropdown-menu dropdown-submenu">
-                  {% set url = "/map_" ~ loop.index0 %}
-                  <li><a class="dropdown-item" href="{{ url }}/{{env_value_by_tag('tar1090_query_params') }}">Live
-                      Traffic</a></li>
-                  <li><a class="dropdown-item" href="{{ url }}/?heatmap">Heatmap</a></li>
-                  <li><a class="dropdown-item" href="{{ url }}/?pTracks">Tracks</a></li>
-                  <li><a class="dropdown-item" href="{{ url }}/?replay">Replay</a></li>
-                  <li><a class="dropdown-item" href="/visualization?m={{loop.index0}}">Options</a></li>
-                </ul>
-              </li>
-              {% endif %}
-              {% endfor %}
-              {% endif %}
+              <li><a id="options" class="dropdown-item" href="/visualization">Options</a></li>
             </ul>
           </li>
           <!-- Data Sharing -->
@@ -103,7 +99,7 @@
                href="/aggregators">Data Sharing</a>
           </li>
           {% else %}
-          <li class="nav-item dropdown">
+          <li id="data_sharing_all" class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAgg" role="button" data-mdb-toggle="dropdown"
                aria-expanded="false">Data Sharing</a>
             <ul class="dropdown-menu" aria-labelledby="navbarDropdownAgg">
@@ -114,6 +110,9 @@
               <li><a class="dropdown-item" href="/aggregators?m={{loop.index}}">{{site}}</a></li>
               {% endfor %}
             </ul>
+          </li>
+          <li id="data_sharing_current" class="nav-item">
+            <a class="nav-link" href="#" id="data_sharing_current_link">Data Sharing</a>
           </li>
           {% endif %}
           <!-- Setup -->
@@ -142,11 +141,9 @@
               <li><a class="dropdown-item" href="/restore">Restore</a></li>
               {% if env_value_by_tag("aggregator_choice") != 'nano' %}
               <li><a class="dropdown-item" href="/stats/">{%if is_enabled('stage2')%}Combined {%endif%}Stats</a></li>
-              {% for site in env_value_by_tag('site_name') %}
-              {% if loop.index0 != 0 %}
-              <li><a class="dropdown-item" href="/stats_{{loop.index0}}/">{{site}} Stats</a></li>
+              {% if is_enabled('stage2') %}
+              <li><a id="stats_current" class="dropdown-item" href="/stats_1/">Current Stats</a></li>
               {% endif %}
-              {% endfor %}
               {% endif %}
             </ul>
           </li>
@@ -160,6 +157,39 @@
   <script>
     let verbose = false;
     let check_mf_timer = null;
+    let feederTarget = 0;
+    let parameters = location.search.substring(1).split('&');
+    for (let i = 0; i < parameters.length; i++) {
+      if (parameters[i].startsWith("m=")) {
+        feederTarget = parameters[i].split("=")[1];
+        console.log(`feederTarget: ${feederTarget}`);
+      }
+    }
+    let siteNames = [];
+    {% for site in env_value_by_tag('site_name') %}
+    siteNames.push('{{site}}');
+    {% endfor %}
+    siteName = siteNames[feederTarget];
+    $("#navbarDropdownFeederSelection").text(`Target: ${siteName}`);
+    if (feederTarget > 0) {
+      let tag = "";
+      for (tag of ["live_traffic", "heatmap", "tracks", "replay"]) {
+        let oldhref = $("#" + tag).attr("href");
+        let newhref = oldhref.replace("/map/", "/map_" + feederTarget + "/");
+        $("#" + tag).attr("href", newhref);
+      }
+      $("#options").attr("href", "/visualization?m=" + feederTarget);
+      $("#data_sharing_current_link").attr("href", "/aggregators?m=" + feederTarget);
+      $("#data_sharing_current").removeClass("d-none");
+      $("#data_sharing_all").addClass("d-none");
+      $("#stats_current").removeClass("d-none");
+      $("#stats_current").attr("href", "/stats_" + feederTarget + "/");
+      $("#stats_current").text(`${siteName} Stats`);
+    } else {
+      $("#data_sharing_current").addClass("d-none");
+      $("#data_sharing_all").removeClass("d-none");
+      $("#stats_current").addClass("d-none");
+    }
     function check_mf_status() {
       verbose && console.log(`check_mf ${new Date()}`);
       let url = "/api/stage2_stats";
@@ -264,9 +294,19 @@
       document.getElementById("overlay").style.display = "none";
       console.log('hide_spinner');
     }
+    function stage2_feeder_target_submit() {
+      let newTarget = $('#feederTarget').val();
+      if (newTarget == '*' || newTarget == '0' || newTarget ==''  ) {
+        queryString = "";
+      } else {
+        queryString = "?m=" + newTarget;
+      }
+      location.replace(location.href.split('?')[0] + queryString);
+      return false;
+    }
 
     $(document).find('form').each((key, value) => {
-      //console.log(value)
+      if ("no_spinner" in value.className.split(" ")) return;
       value.addEventListener("submit", (event) => { show_spinner(); });
     });
     $(document).ready(function () {

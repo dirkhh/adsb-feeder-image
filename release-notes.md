@@ -1,4 +1,5 @@
 Changes since v2.2.6 include:
+- stage2: radical UI change, removing nested dropdowns
 - fix remaining broken statistics link on Stage 2 home page
 - stage 2: allow selecting the feeders shown in the statistics chart by clicking on the legend
 - improve colors and date display for the statistics chart
