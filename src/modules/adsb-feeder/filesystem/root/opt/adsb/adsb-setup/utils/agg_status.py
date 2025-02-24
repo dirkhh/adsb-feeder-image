@@ -328,7 +328,7 @@ class AggStatus:
             if station_serial:
                 html_url = f"https://www.radarbox.com/stations/{station_serial}"
                 rb_page, status = get_plain_url(html_url)
-                match = re.search(r"window.init\((.*)\)", rb_page)
+                match = re.search(r"window.init\((.*)\)", rb_page) if rb_page else None
                 if match:
                     rb_json = match.group(1)
                     rb_dict = json.loads(rb_json)
