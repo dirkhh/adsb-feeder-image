@@ -119,6 +119,10 @@ else
     fi
 fi
 
+if ! which lsusb &> /dev/null; then
+    missing+="usbutils "
+fi
+
 if [[ $missing != "" ]] ; then
 	inst=""
         [ "$distro" == "fedora" ] && inst="dnf install -y"
