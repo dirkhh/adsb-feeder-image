@@ -60,7 +60,6 @@
   top: 50%;
   left: 50%;
   font-size: 50px;
-  color: white;
   transform: translate(-50%, -50%);
   -ms-transform: translate(-50%, -50%);
 }
@@ -95,7 +94,6 @@ font-size: 50%;
     position: fixed;
     left: 0;
     z-index: -1;
-    background-color: white;
 }
 .bgimage img {
     position:absolute;
