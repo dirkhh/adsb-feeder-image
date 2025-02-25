@@ -398,7 +398,7 @@ class AggStatus:
                     self._d.env_by_tags("alivemaplink").list_set(self._idx, map_link)
                 self._last_check = datetime.now()
             else:
-                print_err(f"airplanes.james returned {status}")
+                print_err(f"airplanes.live returned {status}")
         elif self._agg == "adsbx":
             feeder_id = self._d.env_by_tags("adsbxfeederid").list_get(self._idx)
             if not feeder_id or len(feeder_id) != 12:
