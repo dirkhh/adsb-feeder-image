@@ -34,10 +34,13 @@ class SDR:
             serial_match = re.search(r"iSerial\s+\d+\s+(.*)$", line)
             if serial_match:
                 self._serial_probed = serial_match.group(1).strip()
-        if not self._serial_probed and self._type == "stratuxv3":
-            self._serial_probed = "stratuxv3 w/o serial"
-        if not self._serial_probed and self._type == "sdrplay":
-            return "SDRplay w/o serial"
+        if not self._serial_probed:
+            if self._type == "stratuxv3":
+                self._serial_probed = "stratuxv3 w/o serial"
+            if self._type == "modesbeast":
+                self._serial_probed = "Mode-S Beast w/o serial"
+            if self._type == "sdrplay":
+                self._serial_probed = "SDRplay w/o serial"
         return self._serial_probed
 
     @property
@@ -160,6 +163,7 @@ class SDRDevices:
         check_pidvid(pv_list=rtlsdr_pv_list, sdr_type="rtlsdr")
         check_pidvid(pv_list=["0403:7028"], sdr_type="stratuxv3")
         check_pidvid(pv_list=["1d50:60a1"], sdr_type="airspy")
+        check_pidvid(pv_list=["0403:6001"], sdr_type="modesbeast")
 
         sdrplay_pv_list = [
             "1df7:2500",
@@ -216,6 +220,8 @@ class SDRDevices:
         ret = {frequency: "" for frequency in frequencies}
         for sdr in self.sdrs:
             if sdr._type == "airspy":
+                ret[1090] = sdr._serial
+            if sdr._type == "modesbeast":
                 ret[1090] = sdr._serial
             elif sdr._type == "stratuxv3":
                 ret[978] = sdr._serial

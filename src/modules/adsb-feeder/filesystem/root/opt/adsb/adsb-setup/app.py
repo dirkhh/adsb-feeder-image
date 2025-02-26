@@ -1902,6 +1902,8 @@ class AdsbIm:
             # SDRplay devices
             sdrplay = any([sdr._serial == env1090.value and sdr._type == "sdrplay" for sdr in self._sdrdevices.sdrs])
             self._d.env_by_tags(["sdrplay", "is_enabled"]).value = sdrplay
+            # Mode-S Beast
+            modesbeast = any([sdr._serial == env1090.value and sdr._type == "modesbeast" for sdr in self._sdrdevices.sdrs])
 
             # next - if we have exactly one SDR and it hasn't been assigned to anything, use it for 1090
             if (
@@ -1914,7 +1916,13 @@ class AdsbIm:
             rtlsdr = any(sdr._type == "rtlsdr" and sdr._serial == env1090.value for sdr in self._sdrdevices.sdrs)
             if not rtlsdr:
                 env1090.value = ""
-            self._d.env_by_tags("readsb_device_type").value = "rtlsdr" if rtlsdr else ""
+
+            if rtlsdr:
+                self._d.env_by_tags("readsb_device_type").value = "rtlsdr"
+            elif modesbeast:
+                self._d.env_by_tags("readsb_device_type").value = "modesbeast"
+            else:
+                self._d.env_by_tags("readsb_device_type").value = ""
 
             if rtlsdr:
                 # set rtl-sdr 1090 gain, bit hacky but means we don't have to restart the bulky ultrafeeder for gain changes
