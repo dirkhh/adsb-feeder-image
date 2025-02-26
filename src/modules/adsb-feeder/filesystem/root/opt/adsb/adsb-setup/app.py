@@ -1905,14 +1905,7 @@ class AdsbIm:
             # Mode-S Beast
             modesbeast = any([sdr._serial == env1090.value and sdr._type == "modesbeast" for sdr in self._sdrdevices.sdrs])
 
-            # next - if we have exactly one SDR and it hasn't been assigned to anything, use it for 1090
-            if (
-                len(self._sdrdevices.sdrs) == 1
-                and not airspy
-                and not any(self._d.env_by_tags(p).value for p in purposes)
-            ):
-                env1090.value = self._sdrdevices.sdrs[0]._serial
-
+            # rtl-sdr
             rtlsdr = any(sdr._type == "rtlsdr" and sdr._serial == env1090.value for sdr in self._sdrdevices.sdrs)
             if not rtlsdr:
                 env1090.value = ""
