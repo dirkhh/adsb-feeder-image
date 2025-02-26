@@ -1,4 +1,6 @@
 Changes since v2.2.6 include:
+- add support for Mode-S Beast and other less common SDRs
+- improve Proxmox instructions
 - add missing usbutils(lsusb) dependency for app install
 - improve proxmox instructions in the README
 - stage 2: radical UI change, removing nested dropdowns using buttons to pick the target micro feeder
