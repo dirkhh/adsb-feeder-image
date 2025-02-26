@@ -81,10 +81,10 @@ As mentioned above, there are known issues with USB timing when accessing an SDR
 
 ### for advanced users wanting to run this image on x86 under Proxmox
 
-- connect with ssh / putty to the proxmox system
-- either connect as root or become root with `sudo su -`
+- connect to your Proxmox host web UI and log in
+- select your host in the left pane, then in the center pane click on `>_ Shell` to open a web shell
 - make a directory and cd there: `mkdir -p ~/adsbim; cd ~/adsbim`
-- download the x86-64-vm proxmox image (use the URL for the current version): `wget -O adsb-im-vm.tar.xz https://github.com/dirkhh/adsb-feeder-image/releases/download/v2.2.6/adsb-im-x86-64-vm-v2.2.6-proxmox.tar.xz`
+- download the x86-64-vm Proxmox image (use the URL for the current version): `wget -O adsb-im-vm.tar.xz https://github.com/dirkhh/adsb-feeder-image/releases/download/v2.2.6/adsb-im-x86-64-vm-v2.2.6-proxmox.tar.xz`
 - unpack the image and create a fresh VM: `tar xJf adsb-im-vm.tar.xz && bash ./pve-vmcreate.sh -s 16G`
 - optional: remove the download: `cd && rm -rf ~/adsbim`
 - after this process completes, you should see the new VM in the Proxmox web UI
