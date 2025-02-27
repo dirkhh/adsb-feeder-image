@@ -1,4 +1,5 @@
 Changes since v2.2.6 include:
+- stage 2: correctly align stats for recently added microfeeders
 - add support for Mode-S Beast and other less common SDRs
 - improve Proxmox instructions
 - add missing usbutils(lsusb) dependency for app install

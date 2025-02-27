@@ -1073,9 +1073,16 @@ class AdsbIm:
         return suffix
 
     def stats(self):
+        # collect the stats for each microfeeder and ensure that they are all the same
+        # length by padding with zeros (that means the value for days for which we have
+        # no data is 0)
         plane_stats = []
+        l = 0
         for i in [0] + self.micro_indices():
             plane_stats.append([len(self.planes_seen_per_day[i])] + self.plane_stats[i])
+            l = max(l, len(plane_stats[-1]))
+        for i in range(len(plane_stats)):
+            plane_stats[i] = plane_stats[i] + [0] * (l - len(plane_stats[i]))
         return Response(json.dumps(plane_stats), mimetype="application/json")
 
     def stage2_stats(self):
