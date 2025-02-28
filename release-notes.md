@@ -1,4 +1,6 @@
 Changes since v2.2.6 include:
+- UI: improve SDR page for small displays
+- UI: dark mode improvements
 - chart: support shift-click to remove a microfeeder from the chart when all microdfeeders are shown (default)
 - update all containers to current versions
 - stage 2: correctly align stats for recently added microfeeders
