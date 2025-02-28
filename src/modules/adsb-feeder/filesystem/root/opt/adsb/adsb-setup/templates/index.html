@@ -492,7 +492,7 @@
 <script src="/static/js/chart.js" integrity="sha256-QvTb/nDEMP/CLHEo82yujVmcrJC4zTfI9CpZ5WXl3rc="
           crossorigin="anonymous"></script>
 <script>
-  let context = document.getElementById('plane-history-chart');
+  let context = document.getElementById("plane-history-chart");
   shownIndices = new Set();
   fetch("/api/stats", { signal: AbortSignal.timeout(15000) })
         .then(response => response.json())
@@ -513,7 +513,7 @@
             "#ff96ae", "#a7d5ff", "#fdff90", "#bb61ff", "#4c5800", "#283e95", "#bd00e0", "#4fa900",
             "#f8a9ff", "#9dff2f", "#007380", "#4b4539", "#a1003c", "#ffe5cb", "#c00028", "#90af00",
             "#6cf7ff", "#0285fc", "#956900", "#ff1bd4", "#ff8f16", "#ff683c", "#890159", "#00d36d"
-          ]
+          ];
           let distinct_colors = [];
           if (document.documentElement.dataset.mdbTheme == "dark") {
             distinct_colors = dark_distinct_colors;
@@ -526,14 +526,13 @@
             days = Math.max(planesHistory[i].length, days);
           }
           let today = new Date();
-          let month = today.toLocaleString('en-us', { month: 'long', timeZone: "UTC" });
+          let month = today.toLocaleString("en-us", { month: "long", timeZone: "UTC" });
           let day = today.getUTCDate();
-          todayString = `${month} ${day}`
+          todayString = `${month} ${day}`;
           for (let i = days-1; i >= 0; i--) {
-            let date = new Date()
+            let date = new Date();
             date.setDate(date.getDate() - i);
             let day = date.getUTCDate();
-            let month = date.getUTCMonth() + 1;
             labels.push(day);
           }
           // now collect the feeder names - need to do this in jinja, not JS
@@ -559,7 +558,7 @@
             labels: labels,
             datasets: datasets
           };
-          new Chart(context, {
+          chart = new Chart(context, {
             type: 'line',
             data: data,
             options: {
@@ -630,9 +629,9 @@
         ip_message = new_ip_message;
         console.log(ip_message);
       }
-      $("#ip-mismatch").show()
+      $("#ip-mismatch").show();
     } else {
-      $("#ip-mismatch").hide()
+      $("#ip-mismatch").hide();
     }
   }
   let timersActive = false;
@@ -667,7 +666,7 @@
           compareIps();
         });
     } else {
-      get_stage2_connection_status()
+      get_stage2_connection_status();
     }
     fetch("/api/status/im", { signal: AbortSignal.timeout(15000) })
       .then(response => response.json())
@@ -715,7 +714,7 @@
   function reset_status(agg, idx) {
     $("#" + agg + "beast" + idx).text(".");
     $("#" + agg + "mlat" + idx).text(".");
-    $("#" + agg + "span" + idx).attr("class", 'text-muted');
+    $("#" + agg + "span" + idx).attr("class", "text-muted");
   }
   function get_status(agg) {
     fetch(`/api/status/${agg}`, { signal: AbortSignal.timeout(15000) })
@@ -727,32 +726,32 @@
           // right now this is broken and just overwrites things
           $("#" + agg + "beast" + idx).text(data["beast"]);
           $("#" + agg + "mlat" + idx).text(data["mlat"]);
-          const mlat_broken = !(data["mlat"] == "+" || data["mlat"] == "." || data["mlat"] == " ")
-          const beast_broken = !(data["beast"] == "+" || data["beast"] == "." || data["beast"] == " ")
+          const mlat_broken = !(data["mlat"] == "+" || data["mlat"] == "." || data["mlat"] == " ");
+          const beast_broken = !(data["beast"] == "+" || data["beast"] == "." || data["beast"] == " ");
           if (data["beast"] == "+" && !mlat_broken) {
-            $("#" + agg + "span" + idx).attr("class", 'text-success')
+            $("#" + agg + "span" + idx).attr("class", "text-success");
           } else if (data["beast"] == "☒") {
-            $("#" + agg + "span" + idx).attr("class", 'text-danger')
+            $("#" + agg + "span" + idx).attr("class", "text-danger");
           } else if (beast_broken || mlat_broken) {
-            $("#" + agg + "span" + idx).attr("class", 'text-warning')
+            $("#" + agg + "span" + idx).attr("class", "text-warning");
           } else {
-            $("#" + agg + "span" + idx).attr("class", 'text-muted')
+            $("#" + agg + "span" + idx).attr("class", "text-muted");
           }
           if (agg == "adsblol") {
             // console.log("set adsblol-link" + idx + " to " + data["adsblollink"])
-            $("#adsblol-link-" + idx).attr("href", data["adsblollink"])
+            $("#adsblol-link-" + idx).attr("href", data["adsblollink"]);
           }
           if (agg == "alive") {
-            $("#alivemaplink_" + idx).attr("href", data["alivemaplink"])
+            $("#alivemaplink_" + idx).attr("href", data["alivemaplink"]);
           }
           if (agg == "adsbx") {
             if (idx == 0) {
-              $("#adsbxstatlink").attr("href", "https://www.adsbexchange.com/api/feeders/?feed=" + data["adsbxfeederid"])
-              $("#adsbxmaplink").attr("href", "https://globe.adsbexchange.com/?feed=" + data["adsbxfeederid"])
+              $("#adsbxstatlink").attr("href", "https://www.adsbexchange.com/api/feeders/?feed=" + data["adsbxfeederid"]);
+              $("#adsbxmaplink").attr("href", "https://globe.adsbexchange.com/?feed=" + data["adsbxfeederid"]);
             } else {
               // console.log("set adsbxstatlink" + idx)
-              $("#adsbxstatlink_" + idx).attr("href", "https://www.adsbexchange.com/api/feeders/?feed=" + data["adsbxfeederid"])
-              $("#adsbxmaplink_" + idx).attr("href", "https://globe.adsbexchange.com/?feed=" + data["adsbxfeederid"])
+              $("#adsbxstatlink_" + idx).attr("href", "https://www.adsbexchange.com/api/feeders/?feed=" + data["adsbxfeederid"]);
+              $("#adsbxmaplink_" + idx).attr("href", "https://globe.adsbexchange.com/?feed=" + data["adsbxfeederid"]);
             }
           }
         });
