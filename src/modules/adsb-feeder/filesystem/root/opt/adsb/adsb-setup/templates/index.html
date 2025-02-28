@@ -574,16 +574,27 @@
                 legend: {
                   display: (len > 1),
                   onClick: function (e, legendItem) {
-                    var index = legendItem.datasetIndex;
-                    if (shownIndices.has(index)) {
-                      shownIndices.delete(index)
+                    let index = legendItem.datasetIndex;
+                    let adding = e.native.shiftKey == false;
+                    if (adding && shownIndices.size == 0) {
+                      // invert
+                      for (let i = 0; i < len; i++) {
+                        if (i != index) {
+                          shownIndices.add(i);
+                        }
+                      }
                     } else {
-                      shownIndices.add(index)
+                      if (shownIndices.has(index)) {
+                        shownIndices.delete(index);
+                      } else {
+                        shownIndices.add(index);
+                      }
                     }
-                    clear = shownIndices.size == 0
-                    var ci = this.chart;
+                    if (shownIndices.size == len) shownIndices = new Set();
+                    clear = shownIndices.size == 0;
+                    let ci = this.chart;
                     for (let i = 0; i < len; i++) {
-                      var meta = ci.getDatasetMeta(i);
+                      let meta = ci.getDatasetMeta(i);
                       meta.hidden = (clear ? false : (!shownIndices.has(i)));
                     }
                     // We hid a dataset ... rerender the chart
