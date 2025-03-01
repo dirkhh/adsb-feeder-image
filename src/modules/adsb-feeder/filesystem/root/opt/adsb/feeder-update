@@ -272,6 +272,9 @@ fi
 
 services_enable=()
 
+# remove old static web resources
+rm -rf /opt/adsb/adsb-setup/static
+
 # if this an app and not the full image, prune some of the files that aren't wanted for the app
 # wanted for the app and copy the trees we need over
 if [ ! -f /opt/adsb/os.adsb.feeder.image ] ; then

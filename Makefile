@@ -37,6 +37,7 @@ sync-and-update:
 sync-py-control:
 # check if the SSH control port is open, if not, open it.
 	ssh -O check -S "${SSH_CONTROL}" root@$(HOST) || make ssh-control
+
 	rsync -av \
 	--delete --exclude="*.pyc" --progress \
 	-e "ssh -S ${SSH_CONTROL}" \
