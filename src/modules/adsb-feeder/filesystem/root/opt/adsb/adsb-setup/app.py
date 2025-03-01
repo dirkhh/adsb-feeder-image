@@ -113,6 +113,8 @@ class AdsbIm:
         self.app = Flask(__name__)
         self.app.secret_key = urandom(16).hex()
 
+        self.exiting = False
+
         @self.app.context_processor
         def env_functions():
             def get_value(tags):
@@ -614,7 +616,12 @@ class AdsbIm:
 
     def restart(self):
         self._system._restart.wait_restart_done(timeout=5)
-        return self._system._restart.state
+        if self.exiting:
+            state = "exiting"
+        else:
+            state = self._system._restart.state
+        #print_err(f"/restart returning state: {state}")
+        return state
 
     def running(self):
         return "OK"
@@ -2227,10 +2234,7 @@ class AdsbIm:
                     channel = key.rsplit("_", 1)[-1]
                     if channel == "branch":
                         channel, _ = self.extract_channel()
-                    self.set_channel(channel)
-                    print_err(f"updating feeder to {channel} channel")
-                    self._system._restart.bg_run(cmdline="systemctl start adsb-feeder-update.service")
-                    return render_template("/restarting.html")
+                    return self.do_feeder_update(channel)
                 if key == "nightly_update" or key == "zerotier":
                     # this will be handled through the separate key/value pairs
                     pass
@@ -3097,9 +3101,16 @@ class AdsbIm:
     def feeder_update(self, channel):
         if channel not in ["stable", "beta"]:
             return "This update functionality is only available for stable and beta"
+        return self.do_feeder_update(channel)
+
+    # internal helper function to start the feeder update
+    def do_feeder_update(self, channel):
         self.set_channel(channel)
         print_err(f"updating feeder to {channel} channel")
-        self._system._restart.bg_run(cmdline="systemctl start adsb-feeder-update.service")
+        # this bg_run should be canceled when feeder-update stops the service
+        self._system._restart.bg_run(
+            cmdline="systemctl start adsb-feeder-update.service; sleep 30"
+        )
         return render_template("/restarting.html")
 
 
@@ -3167,7 +3178,8 @@ if __name__ == "__main__":
     a = AdsbIm()
 
     def signal_handler(sig, frame):
-        print_err("received signal, shutting down...")
+        print_err(f"received signal {sig}, shutting down...")
+        a.exiting = True
         a.write_planes_seen_per_day()
         signal.signal(sig, signal.SIG_DFL)  # Restore default handler
         signal.raise_signal(sig)

@@ -18,12 +18,13 @@
       request.onload = function () {
         if (request.status === 200 && request.responseText === "done") {
           // restarting the ADS-B infra completed, redirect user
-          console.log('redirecting')
+          console.log('server says it is done, redirecting to /')
           window.location.replace("/");
           return;
         } else if (request.status === 200 && request.responseText === "restarting") {
-          if (new Date().getTime() - restartingSince > 9 * 1000) {
-            // been waiting for more than 10 seconds, let's show the log scroller so the user has something to look at
+          if (new Date().getTime() - restartingSince > 4 * 1000) {
+            // been waiting for more than 5 seconds, let's show the log scroller so the user has something to look at
+            console.log('redirecting to /waiting for webinterface stream log')
             window.location.replace("/waiting");
             return;
           }
@@ -33,8 +34,12 @@
           checkRestartStatus();
         } else if (request.status === 200 && request.responseText === "stream-log") {
           // the waiting-app has been detective active, switch to it
-          console.log('redirecting for stream log')
+          console.log('redirecting to / for waiting-app stream log')
           window.location.replace("/");
+          return;
+        } else if (request.status === 200 && request.responseText === "exiting") {
+          console.log('server is exiting, wait for it to start back up')
+          checkSoon();
           return;
         } else {
           // ops, we got an error from the server - could be it is briefly turned off for
