@@ -89,9 +89,9 @@ if [[ $LAST_ARG == "-go" ]]; then
 else
     if [[ $LAST_ARG == "-wait" ]]; then
         # we were called from the feeder-update-service... and in order for the web UI to be
-        # able to wait for the update to succeed, we need to give it a few seconds to show the
+        # able to wait for the update to succeed, we need to give it a second to show the
         # waiting page and set things up
-        sleep 5
+        sleep 1
     fi
     # this makes sure that the user can't interact with the UI while we are potentially
     # making changes under the hood
