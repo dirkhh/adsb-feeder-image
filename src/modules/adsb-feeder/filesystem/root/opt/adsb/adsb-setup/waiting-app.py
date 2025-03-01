@@ -1,3 +1,4 @@
+import json
 from flask import Flask, Response, render_template
 import re
 import os
@@ -9,6 +10,14 @@ import sys
 app = Flask(__name__)
 logfile = "/run/adsb-feeder-image.log"
 title = "Restarting the ADS-B Feeder System"
+theme = "auto"
+
+
+# we need to fake having env_value_by_tag so that the waiting.html can be
+# used both by this and the main app
+@app.context_processor
+def utility_processor():
+    return {"env_value_by_tag": lambda _: theme}
 
 
 def print_err(*args, **kwargs):
@@ -64,5 +73,8 @@ if __name__ == "__main__":
         title = argv[3] + " ADS-B Feeder System"
 
     print_err(f'Starting waiting-app.py on port {port} with title "{title}" streaming logfile {logfile}')
-
+    if os.path.exists("/opt/adsb/config/config.json"):
+        with open("/opt/adsb/config/config.json") as f:
+            config = json.load(f)
+        theme = config.get("_ASDBIM_CSS_THEME", "auto")
     app.run(host="0.0.0.0", port=port)
