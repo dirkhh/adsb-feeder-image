@@ -1,5 +1,7 @@
 Changes since v2.2.6 include:
-- fix inadvertantly broken 'waiting' app (that's needed by feeder update)
+- nicely cache static files in the browser for faster page load times
+- beta fix: race condition sometimes result in 'site unreachable' during feeder update
+- beta fix: inadvertantly broken 'waiting' app (that's needed by feeder update)
 - UI: improve SDR page for small displays
 - UI: dark mode improvements
 - chart: support shift-click to remove a microfeeder from the chart when all microdfeeders are shown (default)
