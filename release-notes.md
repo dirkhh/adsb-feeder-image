@@ -1,4 +1,5 @@
 Changes since v2.2.6 include:
+- automatically update statistics chart on feeder homepage without reload
 - nicely cache static files in the browser for faster page load times
 - beta fix: race condition sometimes result in 'site unreachable' during feeder update
 - beta fix: inadvertantly broken 'waiting' app (that's needed by feeder update)

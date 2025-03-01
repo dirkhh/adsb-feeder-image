@@ -493,129 +493,176 @@
           crossorigin="anonymous"></script>
 <script>
   let context = document.getElementById("plane-history-chart");
-  shownIndices = new Set();
-  fetch("/api/stats", { signal: AbortSignal.timeout(15000) })
-        .then(response => response.json())
-        .then(planesHistory => {
-          // now let's format the data the way Chart.js wants it
-          let len = planesHistory.length;
-          let datasets = [];
-          let labels = [];
-          let feeders = [];
-          let light_distinct_colors = [
-            "#61c8ff", "#f57200", "#025dfb", "#01d723", "#7300b3", "#a6e927", "#9055ff", "#d8c200",
-            "#0039af", "#01db78", "#ff64f8", "#00560b", "#d60098", "#ade587", "#557bff", "#ffaf4c",
-            "#6b91ff", "#9d1500", "#3ca4ff", "#574200", "#005296", "#ca0061", "#017960", "#ff8bc4",
-            "#1a1a00", "#8ae3ec", "#50003d", "#e4d3b6", "#0f0021", "#ffbbca", "#4f1700", "#008b94"
-          ];
-          let dark_distinct_colors = [
-            "#a94500", "#e1ffe9", "#960089", "#00633e", "#ffce63", "#015d92", "#ff76d4", "#e96200",
-            "#ff96ae", "#a7d5ff", "#fdff90", "#bb61ff", "#4c5800", "#283e95", "#bd00e0", "#4fa900",
-            "#f8a9ff", "#9dff2f", "#007380", "#4b4539", "#a1003c", "#ffe5cb", "#c00028", "#90af00",
-            "#6cf7ff", "#0285fc", "#956900", "#ff1bd4", "#ff8f16", "#ff683c", "#890159", "#00d36d"
-          ];
-          let distinct_colors = [];
-          if (document.documentElement.dataset.mdbTheme == "dark") {
-            distinct_colors = dark_distinct_colors;
-          } else {
-            distinct_colors = light_distinct_colors;
+  let shownIndices = new Set();
+  let chartGlobal = undefined;
+
+  function getStatsData() {
+    function updateChart(chart, datasets, labels) {
+      chart.data.datasets = datasets;
+      chart.data.labels = labels;
+      chart.update()
+    }
+    function elaborateUpdateChart(chart, datasets, labels) {
+      let days = chart.data.labels.size;
+      let newdays = labels.size;
+      let mfs = chart.data.datasets.size;
+      let newmfs = datasets.size;
+      // first deal with fewer days in the data (that's weird, really)
+      while (newdays < days) {
+        chart.data.labels.pop();
+        for (let j = 0; j < mfs; j++) chart.data.datasets[j].pop();
+        days = chart.data.labels.size;
+      }
+      // now update the days that already exist
+      for (let i = 0; i < days; i++) {
+        if (chart.data.labels[i] != labels[i]) {
+          // this looks better if you pop and push
+          while (chart.data.labels.size >= i) chart.data.labels.pop();
+          for (let k = i; k < days; k++) chart.data.labels.push(labels[k]);
+        }
+        for (let j = 0; j < mfs; j++) {
+          if (cart.data.datasets[j][i] != datasets[j][i]) {
+            while (chart.data.datasets[j].size >= i) chart.data.datasets[j].pop();
+            for (let k = i; k < days; k++) chart.data.datasets[j].push(datasets[j][k]);
           }
-          // determine the length of the longest array in planesHistory and use that as the number of days for the chart
-          let days = 0;
-          for (let i = 0; i < len; i++) {
-            days = Math.max(planesHistory[i].length, days);
-          }
-          let today = new Date();
-          let month = today.toLocaleString("en-us", { month: "long", timeZone: "UTC" });
-          let day = today.getUTCDate();
-          todayString = `${month} ${day}`;
-          for (let i = days-1; i >= 0; i--) {
-            let date = new Date();
-            date.setDate(date.getDate() - i);
-            let day = date.getUTCDate();
-            labels.push(day);
-          }
-          // now collect the feeder names - need to do this in jinja, not JS
-          feeders[0] = "{{ list_value_by_tag('site_name', 0) }}";
-          {% for idx in ns.site_indices %}
-          feeders["{{ idx }}"] = "{{ list_value_by_tag('site_name', idx) }}";
-          {% endfor %}
-          // now build the datasets
-          for (let i = 0; i < len; i++) {
-            datasets.push({
-              label: feeders[i],
-              data: planesHistory[i].reverse(),
-              borderColor: distinct_colors[i % distinct_colors.length]
-            });
-          }
-          let ar = 2;
-          if (len < 4) ar = 2;
-          else if (len < 6) ar = 1.7;
-          else if (len < 9) ar = 1.4;
-          else if (len < 12) ar = 1.1;
-          else ar = 0.9;
-          let data = {
-            labels: labels,
-            datasets: datasets
-          };
-          chart = new Chart(context, {
-            type: 'line',
-            data: data,
-            options: {
-              plugins: {
-                title: {
-                  display: true,
-                  text: `Statistics ending ${todayString} (UTC)`,
-                  font: {
-                    size: 18,
+        }
+      }
+      // next, add any new days
+      for (let i = days; i < newdays; i++) {
+        chart.data.labels.push(labels[i]);
+        for (let j = 0; j < mfs; j++) chart.data.datasets[j].push(datasets[j][i]);
+      }
+      // finally, add new feeders
+    }
+
+    function createChart(todayString, ar, len) {
+      chart = new Chart(context, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: []
+        },
+        options: {
+          plugins: {
+            title: {
+              display: true,
+              text: `Statistics ending ${todayString} (UTC)`,
+              font: {
+                size: 18,
+              }
+            },
+            legend: {
+              display: (len > 1),
+              onClick: function (e, legendItem) {
+                let index = legendItem.datasetIndex;
+                let adding = e.native.shiftKey == false;
+                if (adding && shownIndices.size == 0) {
+                  // invert
+                  for (let i = 0; i < len; i++) {
+                    if (i != index) {
+                      shownIndices.add(i);
+                    }
                   }
-                },
-                legend: {
-                  display: (len > 1),
-                  onClick: function (e, legendItem) {
-                    let index = legendItem.datasetIndex;
-                    let adding = e.native.shiftKey == false;
-                    if (adding && shownIndices.size == 0) {
-                      // invert
-                      for (let i = 0; i < len; i++) {
-                        if (i != index) {
-                          shownIndices.add(i);
-                        }
-                      }
-                    } else {
-                      if (shownIndices.has(index)) {
-                        shownIndices.delete(index);
-                      } else {
-                        shownIndices.add(index);
-                      }
-                    }
-                    if (shownIndices.size == len) shownIndices = new Set();
-                    clear = shownIndices.size == 0;
-                    let ci = this.chart;
-                    for (let i = 0; i < len; i++) {
-                      let meta = ci.getDatasetMeta(i);
-                      meta.hidden = (clear ? false : (!shownIndices.has(i)));
-                    }
-                    // We hid a dataset ... rerender the chart
-                    ci.update();
-                  },
-                  labels: {
-                    boxWidth: 20,
-                    useBorderRadius: true,
-                    borderRadius: 2
+                } else {
+                  if (shownIndices.has(index)) {
+                    shownIndices.delete(index);
+                  } else {
+                    shownIndices.add(index);
                   }
                 }
+                if (shownIndices.size == len) shownIndices = new Set();
+                clear = shownIndices.size == 0;
+                let ci = this.chart;
+                for (let i = 0; i < len; i++) {
+                  let meta = ci.getDatasetMeta(i);
+                  meta.hidden = (clear ? false : (!shownIndices.has(i)));
+                }
+                // We hid a dataset ... rerender the chart
+                ci.update();
               },
-              aspectRatio: ar,
-              scales: {
-                y: {
-                  beginAtZero: true
-                }
+              labels: {
+                boxWidth: 20,
+                useBorderRadius: true,
+                borderRadius: 2
               }
             }
+          },
+          aspectRatio: ar,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+      return chart;
+    }
+    fetch("/api/stats", { signal: AbortSignal.timeout(15000) })
+          .then(response => response.json())
+          .then(planesHistory => {
+            // now let's format the data the way Chart.js wants it
+            let len = planesHistory.length;
+            let datasets = [];
+            let labels = [];
+            let feeders = [];
+            let light_distinct_colors = [
+              "#61c8ff", "#f57200", "#025dfb", "#01d723", "#7300b3", "#a6e927", "#9055ff", "#d8c200",
+              "#0039af", "#01db78", "#ff64f8", "#00560b", "#d60098", "#ade587", "#557bff", "#ffaf4c",
+              "#6b91ff", "#9d1500", "#3ca4ff", "#574200", "#005296", "#ca0061", "#017960", "#ff8bc4",
+              "#1a1a00", "#8ae3ec", "#50003d", "#e4d3b6", "#0f0021", "#ffbbca", "#4f1700", "#008b94"
+            ];
+            let dark_distinct_colors = [
+              "#a94500", "#e1ffe9", "#960089", "#00633e", "#ffce63", "#015d92", "#ff76d4", "#e96200",
+              "#ff96ae", "#a7d5ff", "#fdff90", "#bb61ff", "#4c5800", "#283e95", "#bd00e0", "#4fa900",
+              "#f8a9ff", "#9dff2f", "#007380", "#4b4539", "#a1003c", "#ffe5cb", "#c00028", "#90af00",
+              "#6cf7ff", "#0285fc", "#956900", "#ff1bd4", "#ff8f16", "#ff683c", "#890159", "#00d36d"
+            ];
+            let distinct_colors = [];
+            if (document.documentElement.dataset.mdbTheme == "dark") {
+              distinct_colors = dark_distinct_colors;
+            } else {
+              distinct_colors = light_distinct_colors;
+            }
+            // determine the length of the longest array in planesHistory and use that as the number of days for the chart
+            let days = 0;
+            for (let i = 0; i < len; i++) {
+              days = Math.max(planesHistory[i].length, days);
+            }
+            let today = new Date();
+            let month = today.toLocaleString("en-us", { month: "long", timeZone: "UTC" });
+            let day = today.getUTCDate();
+            todayString = `${month} ${day}`;
+            for (let i = days-1; i >= 0; i--) {
+              let date = new Date();
+              date.setDate(date.getDate() - i);
+              let day = date.getUTCDate();
+              labels.push(day);
+            }
+            // now collect the feeder names - need to do this in jinja, not JS
+            feeders[0] = "{{ list_value_by_tag('site_name', 0) }}";
+            {% for idx in ns.site_indices %}
+            feeders["{{ idx }}"] = "{{ list_value_by_tag('site_name', idx) }}";
+            {% endfor %}
+            // now build the datasets
+            for (let i = 0; i < len; i++) {
+              datasets.push({
+                label: feeders[i],
+                data: planesHistory[i].reverse(),
+                borderColor: distinct_colors[i % distinct_colors.length]
+              });
+            }
+            if (chartGlobal === undefined) {
+              let ar = 2;
+              if (len < 4) ar = 2;
+              else if (len < 6) ar = 1.7;
+              else if (len < 9) ar = 1.4;
+              else if (len < 12) ar = 1.1;
+              else ar = 0.9;
+              chartGlobal = createChart(todayString, ar, len);
+            }
+            updateChart(chartGlobal, datasets, labels);
           });
-        });
-
+  }
   let browser_ip = null;
   let feeder_ip = null;
   let ip_message = "";
@@ -709,6 +756,7 @@
     {% endfor %}
     get_status("{{ agg }}");
     {% endfor %}
+    getStatsData()
   }
 
   function reset_status(agg, idx) {
