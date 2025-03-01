@@ -3107,7 +3107,9 @@ class AdsbIm:
     def do_feeder_update(self, channel):
         self.set_channel(channel)
         print_err(f"updating feeder to {channel} channel")
-        # this bg_run should be canceled when feeder-update stops the service
+        # the webinterface needs to stay in the waiting state until the feeder-update stops it
+        # because this is not guaranteed otherwise, add a sleep to the command running in the
+        # background
         self._system._restart.bg_run(
             cmdline="systemctl start adsb-feeder-update.service; sleep 30"
         )
