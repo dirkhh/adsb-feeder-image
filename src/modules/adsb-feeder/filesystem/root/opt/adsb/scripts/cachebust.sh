@@ -3,7 +3,9 @@
 set -e
 trap 'echo "[ERROR] Error in line $LINENO when executing: $BASH_COMMAND"' ERR
 
-STATIC="$(find /opt/adsb/adsb-setup/static/ -type f |  grep -v -e '\.License$' -e '\.ico$' -e '\.map$')"
+# ignore woff2 files they should not change anyhow, this makes this code simpler as the woff2 files
+# are referred to from a css file
+STATIC="$(find /opt/adsb/adsb-setup/static/ -type f |  grep -v -e '\.License$' -e '\.ico$' -e '\.map$' -e '\.woff2$')"
 
 sedreplaceargs=()
 
