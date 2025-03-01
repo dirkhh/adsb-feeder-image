@@ -291,6 +291,9 @@ else
     services_enable+=("adsb-zram.service")
 fi
 
+# browser caching helper script
+bash /opt/adsb/scripts/cachebust.sh
+
 echo "$(date -u +"%FT%T.%3NZ") updating systemd services ..."
 
 services_enable+=("adsb-docker.service")

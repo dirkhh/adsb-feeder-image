@@ -68,6 +68,8 @@ sync-py-control:
 	Makefile \
 	root@$(HOST):/opt/adsb/adsb-setup/Makefile
 
+	ssh -S "${SSH_CONTROL}" root@$(HOST) /bin/bash /opt/adsb/scripts/cachebust.sh
+
 run-loop:
 # python3 app.py in a loop
 	while true; do \

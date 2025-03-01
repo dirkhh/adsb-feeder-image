@@ -113,6 +113,10 @@ class AdsbIm:
         self.app = Flask(__name__)
         self.app.secret_key = urandom(16).hex()
 
+        # set Cache-Control max-age for static files served
+        # cachebust.sh ensures that the browser doesn't get outdated files
+        self.app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 1209600
+
         self.exiting = False
 
         @self.app.context_processor
