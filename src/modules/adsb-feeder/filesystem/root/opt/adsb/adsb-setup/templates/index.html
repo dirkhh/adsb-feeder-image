@@ -497,42 +497,42 @@
   let chartGlobal = undefined;
 
   function getStatsData() {
-    function updateChart(chart, datasets, labels) {
-      chart.data.datasets = datasets;
-      chart.data.labels = labels;
-      chart.update()
-    }
     function elaborateUpdateChart(chart, datasets, labels) {
-      let days = chart.data.labels.size;
-      let newdays = labels.size;
-      let mfs = chart.data.datasets.size;
-      let newmfs = datasets.size;
+      // get the length of chart.data.labels
+      let days = chart.data.labels.length;
+      let newdays = labels.length;
+      let mfs = chart.data.datasets.length;
+      let newmfs = datasets.length;
       // first deal with fewer days in the data (that's weird, really)
       while (newdays < days) {
         chart.data.labels.pop();
         for (let j = 0; j < mfs; j++) chart.data.datasets[j].pop();
-        days = chart.data.labels.size;
+        days = chart.data.labels.length;
       }
       // now update the days that already exist
       for (let i = 0; i < days; i++) {
         if (chart.data.labels[i] != labels[i]) {
           // this looks better if you pop and push
-          while (chart.data.labels.size >= i) chart.data.labels.pop();
+          while (chart.data.labels.length >= i) chart.data.labels.pop();
           for (let k = i; k < days; k++) chart.data.labels.push(labels[k]);
         }
         for (let j = 0; j < mfs; j++) {
-          if (cart.data.datasets[j][i] != datasets[j][i]) {
-            while (chart.data.datasets[j].size >= i) chart.data.datasets[j].pop();
-            for (let k = i; k < days; k++) chart.data.datasets[j].push(datasets[j][k]);
+          if (chart.data.datasets[j].data[i] != datasets[j].data[i]) {
+            for (let k = i; k < days; k++) chart.data.datasets[j].data[k] = datasets[j].data[k];
           }
         }
       }
       // next, add any new days
       for (let i = days; i < newdays; i++) {
         chart.data.labels.push(labels[i]);
-        for (let j = 0; j < mfs; j++) chart.data.datasets[j].push(datasets[j][i]);
+        for (let j = 0; j < mfs; j++) chart.data.datasets[j].data.push(datasets[j].data[i]);
       }
       // finally, add new feeders
+      for (let i = mfs; i < newmfs; i++) {
+        chart.data.datasets.push(datasets[i]);
+      }
+      // by now, the data should be identical
+      chart.update();
     }
 
     function createChart(todayString, ar, len) {
@@ -660,7 +660,7 @@
               else ar = 0.9;
               chartGlobal = createChart(todayString, ar, len);
             }
-            updateChart(chartGlobal, datasets, labels);
+            elaborateUpdateChart(chartGlobal, datasets, labels);
           });
   }
   let browser_ip = null;
