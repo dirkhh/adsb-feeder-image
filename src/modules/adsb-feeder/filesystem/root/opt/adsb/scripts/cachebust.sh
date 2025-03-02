@@ -16,7 +16,7 @@ while read -r FILE; do
     prefix="${base%.*}"
     postfix="${base##*.}"
     newname="${prefix}.${md5sum}.${postfix}"
-    mv "$FILE" "$dir/$newname"
+    ln -sf "$FILE" "$dir/$newname"
     sedreplaceargs+=("-e" "s#${base}#${newname}#")
 done <<< "$STATIC"
 
