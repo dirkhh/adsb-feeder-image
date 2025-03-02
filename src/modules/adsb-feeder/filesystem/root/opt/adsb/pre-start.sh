@@ -17,7 +17,7 @@ kill_wait_app() {
     # figure out if something is listening to that port and give it some time to stop running
     # keep killing the wait the app while waiting for the port
     for i in {1..100}; do
-        pkill -f 'python3 /opt/adsb/adsb-setup/waiting-app.py' || true
+        pkill -f 'python3 /opt/adsb.*/adsb-setup/waiting-app.py' || true
         sleep 0.1
         if ! grep /proc/net/tcp -F -e ": 00000000:${PORTHEX}" -qs; then
             return

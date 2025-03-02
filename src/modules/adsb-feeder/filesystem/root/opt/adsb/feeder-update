@@ -22,7 +22,14 @@ else
 fi
 
 start_wait_app() {
-    python3 /opt/adsb/adsb-setup/waiting-app.py "$@" &>> "$LOGFILE"
+    # as we mess with adsb-setup folder during the update,
+    # serve the waiting app from copy of the old version instead
+    # note the path is crucial for pkill to work
+    # needs to match the pkill in pre-start.sh as well0
+    rm -rf /opt/adsb/old-setup
+    mkdir -p /opt/adsb/old-setup
+    cp -a /opt/adsb/adsb-setup /opt/adsb/old-setup/adsb-setup
+    python3 /opt/adsb/old-setup/adsb-setup/waiting-app.py "$@" &>> "$LOGFILE"
 }
 kill_wait_app() {
     PORT=$(grep AF_WEBPORT /opt/adsb/config/.env | cut -d= -f2)
@@ -31,7 +38,7 @@ kill_wait_app() {
     # figure out if something is listening to that port and give it some time to stop running
     # keep killing the wait the app while waiting for the port
     for i in {1..100}; do
-        pkill -f 'python3 /opt/adsb/adsb-setup/waiting-app.py' || true
+        pkill -f 'python3 /opt/adsb.*/adsb-setup/waiting-app.py' || true
         sleep 0.1
         if ! grep /proc/net/tcp -F -e ": 00000000:${PORTHEX}" -qs; then
             return
