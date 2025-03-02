@@ -1,10 +1,12 @@
 <!DOCTYPE html>
+{% if env_value_by_tag is defined %}
 {% if env_value_by_tag("css_theme") == 'light' %}
 <html lang="en" data-mdb-theme="light">
 {% elif env_value_by_tag("css_theme") == 'dark' %}
 <html lang="en" data-mdb-theme="dark">
 {% else %}
 <html lang="en" data-mdb-theme="auto">
+{% endif %}
 {% endif %}
 
 <head>
@@ -15,6 +17,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts.css') }}" />
   <!-- MDB -->
   <link rel="stylesheet" id="css-theme" href="{{ url_for('static', filename='css/mdb.min.css') }}" />
+  {% if env_value_by_tag is defined %}
   {% if not ((env_value_by_tag("css_theme") == 'light') or (env_value_by_tag("css_theme") == 'dark')) %}
   <script>
     ; (function () {
@@ -29,6 +32,7 @@
       }
     })()
   </script>
+  {% endif %}
   {% endif %}
   <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" />
   <!-- Spinner -->
