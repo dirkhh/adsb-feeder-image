@@ -272,9 +272,6 @@ fi
 
 services_enable=()
 
-# remove old static web resources
-rm -rf /opt/adsb/adsb-setup/static
-
 # if this an app and not the full image, prune some of the files that aren't wanted for the app
 # wanted for the app and copy the trees we need over
 if [ ! -f /opt/adsb/os.adsb.feeder.image ] ; then
@@ -294,7 +291,10 @@ else
     services_enable+=("adsb-zram.service")
 fi
 
-# browser caching helper script
+
+# browser caching helper script and original files
+cp -T -f -a ./opt/adsb/adsb-setup/static /opt/adsb/adsb-setup/static-staging
+cp -T -f -a ./opt/adsb/adsb-setup/templates /opt/adsb/adsb-setup/templates-staging
 bash /opt/adsb/scripts/cachebust.sh
 
 echo "$(date -u +"%FT%T.%3NZ") updating systemd services ..."
