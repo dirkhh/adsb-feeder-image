@@ -1,4 +1,5 @@
 Changes since v2.2.6 include:
+- beta fix: finally fix 'unreachable' race condition during update?!
 - turn off power after shutdown from webinterface if supported by hardware
 - beta fix: fix the stream-log not working during the update
 - ensure updates from older versions don't fail when starting the waiting-app

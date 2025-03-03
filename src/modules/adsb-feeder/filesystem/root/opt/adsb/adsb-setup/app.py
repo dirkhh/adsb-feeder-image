@@ -619,11 +619,14 @@ class AdsbIm:
         return render_template("restarting.html")
 
     def restart(self):
-        self._system._restart.wait_restart_done(timeout=5)
+
         if self.exiting:
-            state = "exiting"
-        else:
-            state = self._system._restart.state
+            return "exiting"
+
+        self._system._restart.wait_restart_done(timeout=5)
+        state = self._system._restart.state
+
+
         #print_err(f"/restart returning state: {state}")
         return state
 
@@ -3117,6 +3120,7 @@ class AdsbIm:
         self._system._restart.bg_run(
             cmdline="systemctl start adsb-feeder-update.service; sleep 30"
         )
+        self.exiting = True
         return render_template("/restarting.html")
 
 
