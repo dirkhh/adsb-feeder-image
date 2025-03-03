@@ -2183,11 +2183,11 @@ class AdsbIm:
 
                 if allow_insecure and key == "shutdown":
                     # do shutdown
-                    def do_halt():
+                    def do_shutdown():
                         sleep(0.5)
-                        self._system.halt()
+                        self._system.shutdown()
 
-                    threading.Thread(target=do_halt).start()
+                    threading.Thread(target=do_shutdown).start()
                     return render_template("/shutdownpage.html")
                 if allow_insecure and key == "reboot":
                     # initiate reboot

@@ -104,8 +104,8 @@ class System:
     def restart(self):
         return self._restart
 
-    def halt(self) -> None:
-        subprocess.call("halt", shell=True)
+    def shutdown(self) -> None:
+        subprocess.call("shutdown now", shell=True)
 
     def reboot(self) -> None:
         # best effort: allow reboot even if lock is held
