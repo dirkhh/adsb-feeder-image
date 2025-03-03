@@ -80,7 +80,7 @@ class Restart:
     @property
     def state(self):
         if self.lock.locked():
-            return "restarting"
+            return "busy"
         return "done"
 
     @property

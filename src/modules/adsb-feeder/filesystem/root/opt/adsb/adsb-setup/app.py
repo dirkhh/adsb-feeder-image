@@ -619,16 +619,11 @@ class AdsbIm:
         return render_template("restarting.html")
 
     def restart(self):
-
         if self.exiting:
             return "exiting"
 
-        self._system._restart.wait_restart_done(timeout=5)
-        state = self._system._restart.state
-
-
-        #print_err(f"/restart returning state: {state}")
-        return state
+        self._system._restart.wait_restart_done(timeout=0.9)
+        return self._system._restart.state
 
     def running(self):
         return "OK"

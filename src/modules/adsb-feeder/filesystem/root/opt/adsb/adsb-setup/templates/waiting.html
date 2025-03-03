@@ -66,54 +66,77 @@
           crossorigin="anonymous"></script>
 
   <script>
+    let streamErrorHandled = false;
     function stream() {
       var streamlog = new EventSource("/stream-log");
-      console.log("created EventSource" + streamlog)
+      console.log("created EventSource" + streamlog.toString())
+      streamErrorHandled = false;
       streamlog.onerror = function (e) {
-        checkStatus();
+        if (streamErrorHandled) {
+          // ignore any errors but the first one
+          return;
+        }
+        console.log("streamlog error: " + e.toString())
+        checkSoon();
+        streamErrorHandled = true;
       }
       streamlog.onmessage = function (e) {
         $('#log').append(e.data + "\n");
         $('#logcontainer').scrollTop($('#logcontainer')[0].scrollHeight);
       };
     }
-    const checkDelay = 1000;
+
+    let httpTimeout = 500;
+    let httpTimeoutMax = 10000;
+    const checkDelay = 500;
+    let checkTimer = null;
+
+    function checkSoon(delay) {
+      clearTimeout(checkTimer);
+      checkTimer = setTimeout(checkStatus, delay);
+    }
+
     function checkStatus() {
       var request = new XMLHttpRequest();
       request.open('GET', '/restart');
-      request.timeout = 2000;
+
+      request.timeout = httpTimeout;
       request.ontimeout = function () {
-        console.log(`still waiting for /restart to become available`);
-        setTimeout(checkStatus, checkDelay);
+        httpTimeout = Math.min(httpTimeoutMax, httpTimeout * 1.5);
+        console.log(`timeout: wait and try /restart again`);
+        checkSoon(checkDelay);
+        return;
       };
+
+      request.onerror = function () {
+        console.log("request returned an error - let's hope it's just restarting and try again");
+        checkSoon(checkDelay);
+        return;
+      };
+
       request.onload = function () {
         if (request.readyState === 4 && request.status === 200) {
-          if (request.responseText === 'done') {
-            console.log('restarting the ADS-B Feeder infra completed, redirect user');
+          if (request.responseText === 'done' || request.responseText === 'busy') {
+            // these responses are only given by the main webinterface, not the waiting-app.py
+            console.log('adsb-setup webinterface should be back up, redirect user to /');
             window.location = '/';
             return;
           } else if (request.responseText === 'stream-log') {
-            console.log('continue reading the stream log, redirect user');
+            console.log('continue reading the stream log, redirect user to /waiting');
             window.location = '/waiting';
             return;
-          } else if (request.responseText === 'restarting') {
-            console.log('continue reading the stream log, redirect user');
-            // we use a page reload here instead of just opening the stream log again
-            // as apparently browsers like to run out of memory if you open the event source a bunch of times
-            window.location = '/';
-            return;
           } else {
-            setTimeout(checkStatus, checkDelay);
+            console.log("waiting.html: request to GET /restart returned unexpected responseText: ", request.responseText);
+            checkSoon(checkDelay);
+            return;
           }
         } else {
-          console.log(`request returned with readyState ${request.readyState}, status ${request.status} and text ${request.responseText}; keep waiting`);
-          setTimeout(checkStatus, checkDelay);
+          console.log(`waiting.html: request returned with readyState ${request.readyState}, status ${request.status} and text ${request.responseText}; keep waiting`);
+          checkSoon(checkDelay);
+          return;
         }
       };
-      request.onerror = function () {
-        console.log("request returned an error - let's hope it's just restarting and try again");
-        setTimeout(checkStatus, checkDelay);
-      };
+
       request.send();
     };
 
