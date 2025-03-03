@@ -2619,12 +2619,15 @@ class AdsbIm:
             try:
                 m = int(request.args.get("m"))
             except:
-                m = 1
+                m = 0
             if m == 0:  # do not set up aggregators for the aggregated feed
                 if self._d.env_by_tags("num_micro_sites").value == "0":
                     # things aren't set up yet, bail out to the stage 2 setup
                     return redirect(url_for("stage2"))
-                m = 1
+                else:
+                    # data sharing for the combined data is impossible,
+                    # redirect instead of showing the data sharing page
+                    return redirect(url_for("director"))
             site = self._d.env_by_tags("site_name").list_get(m)
             print_err(f"setting up aggregators for site {site} (m={m})")
         else:

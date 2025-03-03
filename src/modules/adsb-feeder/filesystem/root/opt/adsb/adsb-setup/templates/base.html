@@ -162,14 +162,16 @@
     for (let i = 0; i < parameters.length; i++) {
       if (parameters[i].startsWith("m=")) {
         feederTarget = parameters[i].split("=")[1];
-        console.log(`feederTarget: ${feederTarget}`);
       }
     }
+    {% if is_enabled('stage2') %}
+    console.log(`feederTarget: ${feederTarget}`);
+    {% endif %}
     let siteNames = [];
     {% for site in env_value_by_tag('site_name') %}
     siteNames.push('{{site}}');
     {% endfor %}
-    siteName = siteNames[feederTarget];
+    siteName = feederTarget == 0 ? siteName = "Combined": siteNames[feederTarget];
     $("#navbarDropdownFeederSelection").text(`Target: ${siteName}`);
     if (feederTarget > 0) {
       let tag = "";

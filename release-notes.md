@@ -1,4 +1,7 @@
 Changes since v2.2.6 include:
+- beta fix: stage2: adjust hint on how to configure Data Sharing with new target system
+- beta fix: stage2 targets: don't allow navigation to 'Combined' Data Sharing
+- beta fix: stage2 targets: use 'Combined' as label instead of sitename
 - beta fix: finally fix 'unreachable' race condition during update?!
 - turn off power after shutdown from webinterface if supported by hardware
 - beta fix: fix the stream-log not working during the update
