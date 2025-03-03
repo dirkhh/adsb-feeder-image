@@ -48,7 +48,11 @@ PRUNE_LIST=$(echo "$PRUNE_LIST"; echo "$PRUNE_LIST_NOTAG")
 if [[ -n "$PRUNE_LIST" ]]; then
     echo "PRUNING:"
     echo "$PRUNE_LIST"
-    docker rmi $PRUNE_LIST # unquoted expansion required
+    if [[ -f /opt/adsb/noprune ]]; then
+        echo NOT actually PRUNING due to flag file /opt/adsb/noprune being present
+    else
+        docker rmi $PRUNE_LIST # unquoted expansion required
+    fi
 fi
 echo "PRUNING DONE"
 
