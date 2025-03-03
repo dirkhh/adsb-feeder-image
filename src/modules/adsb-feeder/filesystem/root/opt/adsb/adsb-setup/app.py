@@ -2895,6 +2895,7 @@ class AdsbIm:
 
         self.cache_agg_status()
 
+        channel, current_branch = self.extract_channel()
         return render_template(
             "index.html",
             aggregators=self.agg_structure,
@@ -2905,6 +2906,7 @@ class AdsbIm:
             stage2_suggestion=stage2_suggestion,
             matrix=self.agg_matrix,
             compose_up_failed=compose_up_failed,
+            channel=channel,
         )
 
     @check_restart_lock

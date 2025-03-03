@@ -257,6 +257,13 @@
                   id="update_feeder_aps_beta" disabled value="go">Update (beta)</button>
           <button type="submit" class="btn btn-primary mb-3 ml-3 col-md-2" name="update_feeder_aps_stable"
                   id="update_feeder_aps_stable" disabled value="go">Update (stable)</button>
+          {% if channel != "" %}
+          <button type="submit" class="btn btn-primary mb-3 ml-3 col-md-3"
+                  name="update_feeder_aps_branch" id="update_feeder_aps_branch" value="go">
+            DANGER: Update ({{ channel }})
+          </button>
+          {% endif %}
+
         </div>
       </form>
     </div>
@@ -723,16 +730,16 @@
         $("#advice").html(data["advice"] + "&nbsp;");
         if (data["show_update"] == "1") {
           $("#update_buttons").removeClass("text-secondary");
-          const show_both = data["advice"] && data["advice"].startsWith("you are running a development version");
-          if (show_both || data["beta_changelog"]) {
+          const dev = data["advice"] && data["advice"].startsWith("you are running a development version");
+          if (dev || data["beta_changelog"]) {
             $("#update_feeder_aps_beta").attr("disabled", false);
             $("#update_feeder_aps_beta").attr("title", data["beta_changelog"]);
             $("#advice").attr("title", data["beta_changelog"]);
           }
-          if (show_both || data["main_changelog"]) {
+          if (dev || data["main_changelog"]) {
             let message = data["main_changelog"];
             let set_disabled = false;
-            if (!show_both && data["main_changelog"] == "this will get you back to the last release version") {
+            if (!dev && data["main_changelog"] == "this will get you back to the last release version") {
               message = "you can downgrade to the last release version on the System->Management page";
               set_disabled = true;
             }
