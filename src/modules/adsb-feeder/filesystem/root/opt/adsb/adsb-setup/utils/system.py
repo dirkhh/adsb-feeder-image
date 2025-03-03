@@ -104,23 +104,36 @@ class System:
     def restart(self):
         return self._restart
 
-    def shutdown(self) -> None:
-        subprocess.call("shutdown now", shell=True)
+    def shutdown_action(self, action="", delay=0):
+        if (action == "shutdown"):
+            cmd = "shutdown now"
+        elif (action == "reboot"):
+            cmd = "reboot"
+        else:
+            print_err(f"unknown shutdown action: {action}")
+            return
 
-    def reboot(self) -> None:
-        # best effort: allow reboot even if lock is held
+        print_err(f"shutdown action: {action}")
+
+        # best effort: allow reboot / shutdown even if lock is held
         gotLock = self._restart.lock.acquire(blocking=False)
 
-        def do_reboot():
-            sleep(0.5)
-            subprocess.call("reboot", shell=True)
+        def do_action():
+            sleep(delay)
+            subprocess.call(cmd, shell=True)
             # just in case the reboot doesn't work,
             # release the lock after 30 seconds:
             if gotLock:
                 sleep(30)
                 self._restart.lock.release()
 
-        threading.Thread(target=do_reboot).start()
+        threading.Thread(target=do_action).start()
+
+    def shutdown(self, delay=0) -> None:
+        self.shutdown_action(action="shutdown", delay=delay)
+
+    def reboot(self, delay=0) -> None:
+        self.shutdown_action(action="reboot", delay=delay)
 
     def os_update(self) -> None:
         subprocess.call("systemd-run --wait -u adsb-feeder-update-os /bin/bash /opt/adsb/scripts/update-os", shell=True)

@@ -273,6 +273,7 @@ class AdsbIm:
         self._routemanager.add_proxy_routes(self._d.proxy_routes)
         self.app.add_url_rule("/hotspot_test", "hotspot_test", self.hotspot_test)
         self.app.add_url_rule("/restarting", "restarting", self.restarting)
+        self.app.add_url_rule("/shutdownpage", "shutdownpage", self.shutdownpage)
         self.app.add_url_rule("/restart", "restart", self.restart, methods=["GET", "POST"])
         self.app.add_url_rule("/waiting", "waiting", self.waiting)
         self.app.add_url_rule("/stream-log", "stream_log", self.stream_log)
@@ -617,6 +618,12 @@ class AdsbIm:
 
     def restarting(self):
         return render_template("restarting.html")
+
+    def shutdownpage(self):
+        if self.exiting:
+            return render_template("shutdownpage.html")
+        else:
+            return render_template("restarting.html")
 
     def restart(self):
         if self.exiting:
@@ -2186,17 +2193,15 @@ class AdsbIm:
                     self._d.env_by_tags("sdrs_locked").value = False
 
                 if allow_insecure and key == "shutdown":
-                    # do shutdown
-                    def do_shutdown():
-                        sleep(0.5)
-                        self._system.shutdown()
-
-                    threading.Thread(target=do_shutdown).start()
-                    return render_template("/shutdownpage.html")
+                    # schedule shutdown in 0.5 seconds
+                    self._system.shutdown(delay=0.5)
+                    self.exiting = True
+                    return redirect(url_for("shutdownpage"))
                 if allow_insecure and key == "reboot":
-                    # initiate reboot
-                    self._system.reboot()
-                    return render_template("/restarting.html")
+                    # schedule reboot in 0.5 seconds
+                    self._system.reboot(delay=0.5)
+                    self.exiting = True
+                    return redirect(url_for("restarting"))
                 if key == "restart_containers" or key == "recreate_containers":
                     containers = self._system.list_containers()
                     containers_to_restart = []
