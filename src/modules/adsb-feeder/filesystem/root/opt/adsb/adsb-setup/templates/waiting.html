@@ -85,8 +85,10 @@
         $('#logcontainer').scrollTop($('#logcontainer')[0].scrollHeight);
       };
     }
+    // wait_restart python function waits 0.9s, so make this a bit longer than that
+    // if the timeout is too short due to RTT, it will be increased automatically
 
-    let httpTimeout = 500;
+    let httpTimeout = 1000;
     let httpTimeoutMax = 10000;
     const checkDelay = 500;
     let checkTimer = null;
@@ -116,13 +118,16 @@
 
       request.onload = function () {
         if (request.readyState === 4 && request.status === 200) {
-          if (request.responseText === 'done' || request.responseText === 'busy') {
-            // these responses are only given by the main webinterface, not the waiting-app.py
-            console.log('adsb-setup webinterface should be back up, redirect user to /');
+          if (request.responseText === 'done') {
+            console.log('adsb-setup webinterface indicates ready, redirect user to /');
             window.location = '/';
             return;
+          } else if (request.responseText === 'busy') {
+            console.log('webinterface running, continue reading the stream log, redirect user to /waiting');
+            window.location = '/waiting';
+            return;
           } else if (request.responseText === 'stream-log') {
-            console.log('continue reading the stream log, redirect user to /waiting');
+            console.log('waiting-app running, continue reading the stream log, redirect user to /waiting');
             window.location = '/waiting';
             return;
           } else {

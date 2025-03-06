@@ -3091,7 +3091,7 @@ class AdsbIm:
                 ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
                 tmp = file.read()[-16 * 1024 :]
                 # discard anything but the last 16 kB
-                while self._system._restart.state == "restarting":
+                while self._system._restart.state == "busy":
                     tmp += file.read(16 * 1024)
                     if tmp and tmp.find("\n") != -1:
                         block, tmp = tmp.rsplit("\n", 1)
