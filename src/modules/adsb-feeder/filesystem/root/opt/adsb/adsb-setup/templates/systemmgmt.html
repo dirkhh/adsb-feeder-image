@@ -282,18 +282,16 @@
             {% endif %}
           </label>
         </div>
+        {% if (env_value_by_tag("tailscale_name") =="" and env_value_by_tag("tailscale_ll") =="") or not tailscale_running %}
         <div class="col-8">
           <input class="mx-auto w-100" id="tailscale_extras" name="tailscale_extras" type="text"
                  value="{{ env_value_by_tag('tailscale_extras') }}"
-                 placeholder=" Enter additional tailscale options you need" {% if env_value_by_tag("tailscale_name")
-                    !="" or env_value_by_tag("tailscale_ll") !="" %}style="display: none;" {% endif %}>
+                 placeholder=" Enter additional tailscale options you need">
         </div>
         <div class="col-4">
-          <button type="submit" class="btn btn-primary mx-auto w-100" name="tailscale" value="go" {% if
-                    env_value_by_tag("tailscale_name") !="" or env_value_by_tag("tailscale_ll") !=""
-                    %}style="display: none;" {% endif %}>Submit</button>
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="tailscale" value="go">Submit</button>
         </div>
-        {% if tailscale_running %}
+        {% else %}
         <div class="col-8">
           <input class="mx-auto w-100" id="tailscale_disable" name="tailscale_disable" type="text">
           To <strong>disable</strong> Tailscale, enter "disable" and press Submit.
