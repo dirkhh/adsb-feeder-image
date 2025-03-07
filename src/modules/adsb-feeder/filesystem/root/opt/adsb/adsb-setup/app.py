@@ -2545,12 +2545,15 @@ class AdsbIm:
         tailscale_running = False
         zerotier_running = False
         if self._d.is_feeder_image:
-            zerotier_running, output = run_shell_captured("pgrep zerotier-one", timeout=2)
-            tailscale_running, output = run_shell_captured("pgrep tailscaled", timeout=2)
+            success, output = run_shell_captured("ps -e", timeout=2)
+            zerotier_running = "zerotier-one" in output
+            tailscale_running  = "tailscaled" in output
             # is tailscale set up?
             try:
+                if not tailscale_running:
+                    raise ProcessLookupError
                 result = subprocess.run(
-                    "pgrep tailscaled >/dev/null 2>/dev/null && tailscale status --json 2>/dev/null",
+                    "tailscale status --json 2>/dev/null",
                     shell=True,
                     check=True,
                     capture_output=True,
