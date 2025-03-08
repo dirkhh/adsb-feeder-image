@@ -25,7 +25,7 @@
     <a class="btn btn-secondary" href="{{  url_for('restore') }}">restore previous backup</a>
   </span>
 </p>
-<form method="post" action="{{ url_for('setup') }}">
+<form method="post" onsubmit="show_spinner(); return true;" action="{{ url_for('setup') }}">
   <div class="form-group row align-items-center mb-1">
     <span class="col-md">
       <label for="site_name">Station Name (shows up on public maps if enabled later)</label>
