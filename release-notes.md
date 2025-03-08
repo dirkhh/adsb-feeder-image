@@ -1,35 +1,25 @@
 Changes since v2.2.6 include:
-- beta fix: stream-log while for example env var changes are being applied wasn't working
-- beta fix: stage2: adjust hint on how to configure Data Sharing with new target system
-- beta fix: stage2 targets: don't allow navigation to 'Combined' Data Sharing
-- beta fix: stage2 targets: use 'Combined' as label instead of sitename
-- beta fix: finally fix 'unreachable' race condition during update?!
 - turn off power after shutdown from webinterface if supported by hardware
-- beta fix: fix the stream-log not working during the update
 - ensure updates from older versions don't fail when starting the waiting-app
-- automatically update statistics chart on feeder homepage without reload
 - nicely cache static files in the browser for faster page load times
-- beta fix: race condition sometimes result in 'site unreachable' during feeder update
-- beta fix: inadvertantly broken 'waiting' app (that's needed by feeder update)
-- UI: improve SDR page for small displays
-- UI: dark mode improvements
+- chart: automatically update statistics chart on feeder homepage without reload
 - chart: support shift-click to remove a microfeeder from the chart when all microdfeeders are shown (default)
+- add chart of planes seen for up to the last two weeks (this will take time to populate data as it requires the new statistics just added)
 - update all containers to current versions
-- stage 2: correctly align stats for recently added microfeeders
 - add support for Mode-S Beast and other less common SDRs
-- improve Proxmox instructions
 - add missing usbutils(lsusb) dependency for app install
 - improve proxmox instructions in the README
+- stage 2: fix remaining broken statistics link on stage 2 home page
+- stage 2: correctly align stats for recently added microfeeders
 - stage 2: radical UI change, removing nested dropdowns using buttons to pick the target micro feeder
-- fix remaining broken statistics link on Stage 2 home page
 - stage 2: allow selecting the feeders shown in the statistics chart by clicking on the legend
-- improve colors and date display for the statistics chart
-- add chart of planes seen for up to the last two weeks (this will take time to populate data as it requires the new statistics just added)
 - stage 2: make number of planes available as part of stage2_stats API
-- several consistency and user interaction improvements for the UI, especially for Stage 2 systems
-- fix AirNav support in stage 2 scenarios
-- remove RadarPlane (which has been defunct for a while) plus remnants of some other defunct aggregators
 - stage 2: allow updating time zone
+- stage 2: fix AirNav support
+- several consistency and user interaction improvements for the UI, especially for Stage 2 systems
+- UI: improve SDR page for small displays
+- UI: dark mode improvements
+- remove RadarPlane (which has been defunct for a while) plus remnants of some other defunct aggregators
 - Basic setup: allow altitude entry with unit, including conversion from ft to m
 - Make it explicit which branch is used for automated nightly updates
 - Don't show beta/stable channel indicator in the version shown on feeder home page
