@@ -70,8 +70,6 @@ sync-py-control:
 	root@$(HOST):/opt/adsb/adsb-setup/Makefile
 
 	ssh -S "${SSH_CONTROL}" root@$(HOST) '\
-		cp -T -f -a /opt/adsb/adsb-setup/static /opt/adsb/adsb-setup/static-staging; \
-		cp -T -f -a /opt/adsb/adsb-setup/templates /opt/adsb/adsb-setup/templates-staging; \
 		bash /opt/adsb/scripts/cachebust.sh \
 	'
 

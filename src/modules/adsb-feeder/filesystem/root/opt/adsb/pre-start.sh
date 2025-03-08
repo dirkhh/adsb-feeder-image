@@ -83,5 +83,7 @@ fi
 # remember that we handled the housekeeping for this version
 cp /opt/adsb/adsb.im.version /opt/adsb/finish-update.done
 
+# browser caching helper script (will only do anything if /opt/adsb/.cachebust_done doesn't exist)
+bash /opt/adsb/scripts/cachebust.sh
 
 echo "$(date -u +"%FT%T.%3NZ") adsb-setup: pre-start.sh done"

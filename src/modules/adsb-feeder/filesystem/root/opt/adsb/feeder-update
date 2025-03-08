@@ -298,11 +298,8 @@ else
     services_enable+=("adsb-zram.service")
 fi
 
-
-# browser caching helper script and original files
-cp -T -f -a ./opt/adsb/adsb-setup/static /opt/adsb/adsb-setup/static-staging
-cp -T -f -a ./opt/adsb/adsb-setup/templates /opt/adsb/adsb-setup/templates-staging
-bash /opt/adsb/scripts/cachebust.sh
+# remove flag file so the caching helper script will run via pre-start.sh
+rm -f /opt/adsb/.cachebust_done
 
 echo "$(date -u +"%FT%T.%3NZ") updating systemd services ..."
 
