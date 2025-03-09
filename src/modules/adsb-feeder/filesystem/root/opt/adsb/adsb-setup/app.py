@@ -2866,7 +2866,7 @@ class AdsbIm:
                         if "adsb.im" not in line and installkey not in line:
                             new_authfile.write(line)
             # now overwrite the root password with something random
-            alphabet = string.ascii_letters + string.digits + string.punctuation
+            alphabet = string.ascii_letters + string.digits
             self.rpw = "".join(secrets.choice(alphabet) for i in range(12))
             self.set_rpw()
             os.remove("/opt/adsb/adsb.im.passwd.and.keys")
