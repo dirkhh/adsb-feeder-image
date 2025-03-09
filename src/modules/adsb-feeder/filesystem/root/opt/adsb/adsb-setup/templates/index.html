@@ -257,7 +257,7 @@
                   id="update_feeder_aps_beta" disabled value="go">Update (beta)</button>
           <button type="submit" class="btn btn-primary mb-3 ml-3 col-md-2" name="update_feeder_aps_stable"
                   id="update_feeder_aps_stable" disabled value="go">Update (stable)</button>
-          {% if channel != "" %}
+          {% if "dev" in channel %}
           <button type="submit" class="btn btn-primary mb-3 ml-3 col-md-3"
                   name="update_feeder_aps_branch" id="update_feeder_aps_branch" value="go">
             DANGER: Update ({{ channel }})
