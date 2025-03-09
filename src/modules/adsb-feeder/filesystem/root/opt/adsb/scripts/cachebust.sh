@@ -9,7 +9,7 @@ if [[ -f /opt/adsb/.cachebust_done ]]; then
 fi
 
 ORIG=/opt/adsb-feeder-update/adsb-feeder-image/src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup/
-if ! [[ -d "$ORIG" ]]; then
+if ! [[ -d "$ORIG" ]] || [[ "$1" == "Makefile" ]]; then
     # if this is not an update, use the original files
     ORIG=/opt/adsb/adsb-setup/
 fi
