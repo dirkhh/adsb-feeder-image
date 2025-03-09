@@ -1,29 +1,5 @@
-Changes since v2.2.6 include:
-- turn off power after shutdown from webinterface if supported by hardware
-- ensure updates from older versions don't fail when starting the waiting-app
-- nicely cache static files in the browser for faster page load times
-- chart: automatically update statistics chart on feeder homepage without reload
-- chart: support shift-click to remove a microfeeder from the chart when all microdfeeders are shown (default)
-- add chart of planes seen for up to the last two weeks (this will take time to populate data as it requires the new statistics just added)
-- update all containers to current versions
-- add support for Mode-S Beast and other less common SDRs
-- add missing usbutils(lsusb) dependency for app install
-- improve proxmox instructions in the README
-- stage 2: fix remaining broken statistics link on stage 2 home page
-- stage 2: correctly align stats for recently added microfeeders
-- stage 2: radical UI change, removing nested dropdowns using buttons to pick the target micro feeder
-- stage 2: allow selecting the feeders shown in the statistics chart by clicking on the legend
-- stage 2: make number of planes available as part of stage2_stats API
-- stage 2: allow updating time zone
-- stage 2: fix AirNav support
-- several consistency and user interaction improvements for the UI, especially for Stage 2 systems
-- UI: improve SDR page for small displays
-- UI: dark mode improvements
-- remove RadarPlane (which has been defunct for a while) plus remnants of some other defunct aggregators
-- Basic setup: allow altitude entry with unit, including conversion from ft to m
-- Make it explicit which branch is used for automated nightly updates
-- Don't show beta/stable channel indicator in the version shown on feeder home page
-- Don't show live map link until feeder is configured
+Changes since v2.3.0 include:
+- fix hotspot
 
 
 > [!NOTE]
