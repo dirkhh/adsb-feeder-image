@@ -17,7 +17,7 @@ Currently we are building the following images:
 - NanoPi NEO3
 - Odroid C4 and xu4
 
-- VM setup under VirtualBox (easy), VMware (almost as easy), or Proxmox (advanced users) -- note that when running in VMs, there are known issues that are outside of the control of the image with USB timing that frequently lead to MLAT issues.
+- VM setup under VirtualBox (easy), VMware (almost as easy), Hyper-V (a little more complicated), or Proxmox (advanced users) -- note that when running in VMs, there are known issues that are outside of the control of the image with USB timing that frequently lead to MLAT issues.
 - x86 ISO for setup both as VM or natively on an x86_64 thin client or similar system
 
 This setup can work on many other systems - if there is enough demand, we can easily add more boards (as long as they have reasonably well supported versions of ideally DietPi or also Armbian available).
@@ -71,13 +71,18 @@ Please note: if you have more than one ADSB.im feeder on the same network, they 
 
 ## Feed from an x86 virtual machine
 
+As mentioned above, there are known issues with USB timing when accessing an SDR from within a VM - these are unrelated to the ADS-B Feeder image but instead based in the implementation details of most hypervisors. As a result, it is not uncommon to see MLAT issues with feeders running in a VM.
+
 ### for VirtualBox or VMware Workstation / Fusion
 
 Download the `adsb-im-x86-64-vm-*.ova.xz` for the latest release. Double click on the OVA (which should open your virtualization software). Finish the import (under VMware you'll get a warning about a compatibility issue, simply clicking retry should get you past that). Before you start the VM, pass your SDR (which should be connected to a USB port of your PC or Mac) through to that VM. How this is done varries by product and the OS you are running on (Windows, macOS, Linux), but basically in all cases there is an option to pass a USB device to a VM - select your SDR in that list.
 
 Now boot the image and wait a brief while until the console screen stops scrolling and shows a DietPi startup screen that below the two yellow lines presents you with an IP address. Connect to this IP address from your browser and you'll be able to set up the feeder and start sending data to the aggregators of your choice.
 
-As mentioned above, there are known issues with USB timing when accessing an SDR from within a VM - these are unrelated to the ADS-B Feeder image but instead based in the implementation details of most hypervisors. As a result, it is not uncommon to see MLAT issues with feeders running in a VM.
+
+### for Hyper-V
+
+Download the `adsb-im-x86-64-vm-*-Hyper-V-x86_64.vhdx.xz` for the latest release. Use File Explorer to extract the .vhdx file. In Hyper-V Manager, create a new virtual machine by selecting New->Virtual Machine... from the Action menu. In the following set of dialogs pick a name for the VM and then select Generation 1 (as the disk image assumes a standard BIOS-based VM, not a UEFI-based one. Otherwise proceed as normal, picking the desired amount of memory and the desired network connection. Then on the Connect Virtual Hard Disk page check the box for Use an existing virtual hard disk and browse to the location where the decompressed .vhdx file is located. Once that is completed, you can click Finish and start the VM. Wait a brief while until the console screen stops scrolling and shows a DietPi startup screen that below the two yellow lines presents you with an IP address. Connect to this IP address from your browser and you'll be able to set up the feeder and start sending data to the aggregators of your choice.
 
 ### for advanced users wanting to run this image on x86 under Proxmox
 
