@@ -1,5 +1,6 @@
-Changes since v2.3.0 include:
-- fix hotspot
+Changes since v2.3.1 include:
+- remove altitude unit from altitude setting in config (fixes planewatch issue)
+- fix dietpi-software install showing dev branch update button
 
 
 > [!NOTE]
