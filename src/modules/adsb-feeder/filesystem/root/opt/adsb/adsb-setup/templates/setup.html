@@ -175,14 +175,16 @@
       $("#lon").val(values[1]);
     }
   });
-  $("#alt").on("blur", function () {
+  function fixAlt() {
     let alt_value = $("#alt").val();
     let factor = 1.0;
     if (alt_value.toLowerCase().includes("ft")) factor = 0.3048;
     let new_alt = Math.round(parseFloat(alt_value) * factor);
     if (new_alt.toString() == "NaN") new_alt = ""; else new_alt = new_alt + "m";
     $("#alt").val(new_alt);
-  });
+  }
+  fixAlt();
+  $("#alt").on("blur", fixAlt);
   function browserTZ() {
     let timezone = "";
     try {

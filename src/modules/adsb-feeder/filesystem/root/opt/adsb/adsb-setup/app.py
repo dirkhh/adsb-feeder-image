@@ -1812,6 +1812,12 @@ class AdsbIm:
             sanitized = "".join(c if c.isalnum() or c in "-_." else "_" for c in site_name)
             self._d.env_by_tags("site_name_sanitized").list_set(sitenum, sanitized)
 
+            # fixup altitude mishaps by stripping the value
+            # strip meter units and whitespace for good measure
+            alt = self._d.env_by_tags("alt").list_get(sitenum)
+            alt_m = alt.strip().strip("m").strip()
+            self._d.env_by_tags("alt").list_set(sitenum, alt_m)
+
             # make sure use_route_api is populated with the default:
             self._d.env_by_tags("route_api").list_get(sitenum)
 
