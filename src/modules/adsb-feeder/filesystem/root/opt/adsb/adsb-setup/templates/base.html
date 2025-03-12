@@ -37,7 +37,7 @@
     {{ list_value_by_tag("site_name", 0) }}{% if list_value_by_tag("site_name", 0) != "" %}:
     {% endif %}{% block title %}{% endblock %}
   </title>
-  <nav class="navbar fixed-top navbar-expand-lg bg-body">
+  <nav class="navbar fixed-top bg-body {% if is_enabled('stage2') %} navbar-expand-lg {% else %} navbar-expand-md {% endif %}">
     <div class="container-fluid">
       <a class="navbar-brand ms-0 me-1 me-sm-3" href="{{ url_for("director") }}">ADS-B Feeder</a>
       <a class="btn btn-primary mx-0 mx-sm-1 {% if not is_enabled('base_config') %}d-none{% endif %}"
