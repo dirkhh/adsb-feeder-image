@@ -1,4 +1,5 @@
 Changes since v2.3.1 include:
+- improve navbar for (very) small screens
 - add Hyper-V instructions to the README
 - remove altitude unit from altitude setting in config (fixes planewatch issue)
 - fix dietpi-software install showing dev branch update button
