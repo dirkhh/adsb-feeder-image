@@ -102,3 +102,11 @@ font-size: 50%;
     max-width: 100%;
   z-index: -1;
 }
+
+/* hide some navbar buttons for very small screens */
+@media (max-width: 360px) {
+    #kofi-navbar-button { display: none; }
+}
+@media (max-width: 322px) {
+    #livemap-navbar-button { display: none; }
+}

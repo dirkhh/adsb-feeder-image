@@ -41,6 +41,7 @@
     <div class="container-fluid">
       <a class="navbar-brand ms-0 me-1 me-sm-3" href="{{ url_for("director") }}">ADS-B Feeder</a>
       <a class="btn btn-primary mx-0 mx-sm-1 {% if not is_enabled('base_config') %}d-none{% endif %}"
+        id="livemap-navbar-button"
         href="/map/{{ env_value_by_tag('tar1090_query_params') }}">Live Map</a>
       <div id="temperature_block" style="width: 4em; height:auto;" class="d-none d-sm-block">
         <span id="cpu" class="d-none"
@@ -54,7 +55,7 @@
       </div>
       <div class="mx-auto"><!-- filler element --></div>
       <div class="mx-1"><a href="https://ko-fi.com/H2H2H3JS5" target="_blank"><img height="2em" style="border:0.1em;height:1.8em;"
-                   src="/static/images/kofi_button_stroke_small.png" border="0"
+                   src="/static/images/kofi_button_stroke_small.png" border="0" id="kofi-navbar-button"
                    alt="Help sustain this project at ko-fi.com" /></a></div>
       <button class="navbar-toggler" type="button" data-mdb-toggle="collapse" data-mdb-target="#navbarNav"
               aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
