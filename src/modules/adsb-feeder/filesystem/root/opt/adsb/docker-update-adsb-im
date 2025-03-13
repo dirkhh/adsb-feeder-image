@@ -13,8 +13,15 @@ TIME=$(date -Iseconds)
 # it now merely pulls the container versions as set in config.json / .env
 
 echo "$(date -Iseconds): pulling new container images and restarting docker" >> /run/adsb-feeder-image.log
-bash ./docker-pull.sh
 bash /opt/adsb/docker-compose-start
+# there is no need to docker pull with pinned versions, compose up will pull if the pinned version does not exist
+# if the pinned version is already present a compose up will be much quicker as it does not need to talk to the
+# container registry
+# but if something failed, run the docker pull for good measure:
+if [[ -f /opt/adsb/state/compose_up_failed ]]; then
+    bash ./docker-pull.sh
+    bash /opt/adsb/docker-compose-start
+fi
 
 # finally remove the images and files we no longer use
 
