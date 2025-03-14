@@ -263,13 +263,8 @@ if [ -f /opt/adsb/os.adsb.feeder.image ] ; then
     done
 fi
 
-echo "$(date -u +"%FT%T.%3NZ") prepare the files that we need to replace"
-mkdir -p "${DIR}/root"
-cp -a src/modules/adsb-feeder/filesystem/root "${DIR}"
-
 echo "$(date -u +"%FT%T.%3NZ") copy the updated files in place"
-# shellcheck disable=SC2164
-cd "${DIR}/root"
+cd src/modules/adsb-feeder/filesystem/root || exit_with_message "can't cd src/modules/adsb-feeder/filesystem/root"
 
 
 # remove adsb.im services from /etc/systemd/system that were previously placed there
