@@ -56,6 +56,17 @@
               aria-expanded="false" aria-controls="showrpw">show password option</button>
     </form>
   </div>
+  <div class="col-12 col-lg-6 {% if not is_enabled('secure_image') %} d-none {% endif %}">
+    <h5 class="mt-3">The feeder system is secured</h5>
+      <div class="row align-items-center">
+        <div class="col-8">
+          If you're looking for missing options, this is likely the reason.
+          To unlock the system and re-enable all those options, log in locally or via SSH
+          and issue the following command:
+          /opt/adsb/scripts/secure-image-disable.sh
+        </div>
+      </div>
+  </div>
   <div class="col-12 col-lg-6 {% if is_enabled('secure_image') %} d-none {% endif %}">
     <h5 class="mt-3">Secure feeder system</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
