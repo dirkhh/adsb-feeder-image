@@ -98,8 +98,23 @@ else
         # we were called from the feeder-update-service... and in order for the web UI to be
         # able to wait for the update to succeed, we need to give it a second to show the
         # waiting page and set things up
-        sleep 1
+        sleep 0.5 &
     fi
+
+    echo "$(date -u +"%FT%T.%3NZ") make sure the git dir is up to date"
+    mkdir -p /opt/adsb-feeder-update
+    # make sure the git dir is up to date
+    # don't hide the output as that could be useful in the logs
+    if ! cd /opt/adsb-feeder-update/adsb-feeder-image || ! git fetch --force --tags --prune --prune-tags ; then
+        cd /opt/adsb-feeder-update || exit_with_message "can't cd /opt/adsb-feeder-update"
+        rm -rf /opt/adsb-feeder-update/adsb-feeder-image
+        git clone https://github.com/dirkhh/adsb-feeder-image || exit_with_message "git clone failed, giving up"
+        cd adsb-feeder-image || exit_with_message "can't cd /opt/adsb-feeder-update/adsb-feeder-image"
+    fi
+
+    # wait for the backgrounded sleep if it was started further up for -wait
+    wait
+
     # this makes sure that the user can't interact with the UI while we are potentially
     # making changes under the hood
     echo "$(date -u +"%FT%T.%3NZ") stop the running service"
@@ -126,15 +141,6 @@ else
         TARGET="$1"
     fi
     [ -z "$BRANCH" ] && BRANCH="$TARGET"
-    mkdir -p /opt/adsb-feeder-update
-    # make sure the git dir is up to date
-    # don't hide the output as that could be useful in the logs
-    if ! cd /opt/adsb-feeder-update/adsb-feeder-image || ! git fetch --force --tags --prune --prune-tags ; then
-        cd /opt/adsb-feeder-update || exit_with_message "can't cd /opt/adsb-feeder-update"
-        rm -rf /opt/adsb-feeder-update/adsb-feeder-image
-        git clone https://github.com/dirkhh/adsb-feeder-image || exit_with_message "git clone failed, giving up"
-        cd adsb-feeder-image || exit_with_message "can't cd /opt/adsb-feeder-update/adsb-feeder-image"
-    fi
     # 'stable' and 'beta' are special, they refer to tags.
     # everything else is interpreted as a branch or a hash
     if [[ "$TARGET" == "beta" ]] ; then
