@@ -254,7 +254,7 @@ fi
 if [ -f /opt/adsb/os.adsb.feeder.image ] ; then
     # in case a past feeder-update installed but didn't mask hostapd / isc-dhcp-server, fix that up
     for service in hostapd.service isc-dhcp-server.service; do
-        if systemctl is-enabled "$service" &>/dev/null || ! [[ -L /etc/systemd/system/hostapd.service ]]; then
+        if systemctl is-enabled "$service" &>/dev/null || ! [[ -L /etc/systemd/system/"$service" ]]; then
             echo "stopping / disabling / masking $service"
             systemctl stop "$service"
             systemctl disable "$service"
