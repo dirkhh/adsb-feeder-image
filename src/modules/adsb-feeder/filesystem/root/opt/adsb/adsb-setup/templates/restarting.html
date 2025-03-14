@@ -14,9 +14,12 @@
     const busySince = new Date().getTime();
     let checkTimer = null;
 
-    function checkSoon() {
+    function checkSoon(delay) {
+      if (delay == undefined) {
+        delay = checkDelay;
+      }
       clearTimeout(checkTimer);
-      checkTimer = setTimeout(checkRestartStatus, checkDelay);
+      checkTimer = setTimeout(checkRestartStatus, delay);
     }
 
     function checkRestartStatus() {
@@ -27,7 +30,7 @@
       request.ontimeout = function () {
         httpTimeout = Math.min(httpTimeoutMax, httpTimeout * 1.5);
         console.log(`timeout: wait and try /restart again`);
-        checkSoon();
+        checkSoon(0);
       };
 
       request.onerror = function () {
