@@ -77,7 +77,7 @@
           return;
         }
         console.log("streamlog error: " + e.toString())
-        checkSoon();
+        checkSoon(0);
         streamErrorHandled = true;
       }
       streamlog.onmessage = function (e) {
@@ -94,6 +94,9 @@
     let checkTimer = null;
 
     function checkSoon(delay) {
+      if (delay == undefined) {
+        delay = checkDelay;
+      }
       clearTimeout(checkTimer);
       checkTimer = setTimeout(checkStatus, delay);
     }
@@ -106,7 +109,7 @@
       request.ontimeout = function () {
         httpTimeout = Math.min(httpTimeoutMax, httpTimeout * 1.5);
         console.log(`timeout: wait and try /restart again`);
-        checkSoon(checkDelay);
+        checkSoon(0);
         return;
       };
 
