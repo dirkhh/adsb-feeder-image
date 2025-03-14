@@ -284,6 +284,16 @@ services_enable=()
 if [ ! -f /opt/adsb/os.adsb.feeder.image ] ; then
     rm -f ./usr/lib/systemd/system/adsb-hotspot.service
     rm -f ./usr/lib/systemd/system/adsb-bootstrap.service
+fi
+
+need_reload="no"
+for path in ./usr/lib/systemd/system/*; do
+    if ! diff -q "${path}" "${path:1}" &>/dev/null; then
+        need_reload="yes"
+    fi
+done
+
+if [ ! -f /opt/adsb/os.adsb.feeder.image ] ; then
     set -x
     cp -f -a ./usr/lib/systemd/system/* /usr/lib/systemd/system/
     cp -f -a ./opt/adsb/* /opt/adsb
@@ -320,7 +330,10 @@ for service in "${services_enable[@]}"; do
 done
 
 # make systemd aware of any changed service files
-systemctl daemon-reload
+if [[ "$need_reload" == "yes" ]]; then
+    echo "daemon-reload"
+    systemctl daemon-reload
+fi
 
 echo "$(date -u +"%FT%T.%3NZ") updating systemd services ... done"
 
