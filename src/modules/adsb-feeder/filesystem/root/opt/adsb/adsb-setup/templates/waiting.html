@@ -66,19 +66,14 @@
           crossorigin="anonymous"></script>
 
   <script>
-    let streamErrorHandled = false;
     function stream() {
       var streamlog = new EventSource("/stream-log");
-      console.log("created EventSource" + streamlog.toString())
+      console.log("created EventSource")
       streamErrorHandled = false;
       streamlog.onerror = function (e) {
-        if (streamErrorHandled) {
-          // ignore any errors but the first one
-          return;
-        }
-        console.log("streamlog error: " + e.toString())
+        streamlog.close();
+        console.log("streamlog error");
         checkSoon(0);
-        streamErrorHandled = true;
       }
       streamlog.onmessage = function (e) {
         $('#log').append(e.data + "\n");
