@@ -11,7 +11,7 @@ fi
 ORIG=/opt/adsb-feeder-update/adsb-feeder-image/src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup/
 if ! [[ -d "$ORIG" ]] || [[ "$1" == "Makefile" ]]; then
     # if this is not an update, use the original files
-    ORIG=/opt/adsb/adsb-setup/
+    ORIG=/opt/adsb/adsb-setup
 fi
 # move unmodified files to staging directories
 cp -T -f -a "$ORIG/static" /opt/adsb/adsb-setup/static-staging
@@ -48,3 +48,6 @@ mv /opt/adsb/adsb-setup/templates /opt/adsb/adsb-setup/templates-old
 mv /opt/adsb/adsb-setup/templates-staging /opt/adsb/adsb-setup/templates
 
 rm -rf /opt/adsb/adsb-setup/static-old /opt/adsb/adsb-setup/templates-old
+
+echo "$(date -u +"%FT%T.%3NZ") cachebust done"
+touch /opt/adsb/.cachebust_done
