@@ -102,7 +102,7 @@ else
     fi
     # this makes sure that the user can't interact with the UI while we are potentially
     # making changes under the hood
-    echo "stop the running service"
+    echo "$(date -u +"%FT%T.%3NZ") stop the running service"
     systemctl stop adsb-setup.service
     waiting_placeholder
 
@@ -167,8 +167,7 @@ fi
 
 # now we know that we are running the right script in the right place
 DIR=$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")
-TIMESTAMP=$(date +%Y-%m-%d+%H:%M)
-echo "${TIMESTAMP}: running ${DIR}/feeder-update from $TARGET"
+echo "$(date -u +"%FT%T.%3NZ") running ${DIR}/feeder-update from $TARGET"
 
 # if this is an update where the previous version of the image used /opt/adsb/adsb-setup.log
 # and this is the first time we use the new location, move the log to /run
@@ -197,7 +196,7 @@ TAG_COMPONENT=$(git describe --match "v[0-9]*" --long | sed "s/-[0-9]*-g[0-9a-f]
 DESCRIBE=$(git describe --match "v[0-9]*")
 SHA_COMPONENT=${DESCRIBE//$TAG_COMPONENT/}
 VERSION="${TAG_COMPONENT}(${BRANCH})${SHA_COMPONENT}"
-echo "starting the actual upgrade to ${VERSION}"
+echo "$(date -u +"%FT%T.%3NZ") starting the actual upgrade to ${VERSION}"
 
 # we now need some software that may not have been installed originally
 
@@ -258,11 +257,11 @@ if [ -f /opt/adsb/os.adsb.feeder.image ] ; then
     done
 fi
 
-echo "prepare the files that we need to replace"
+echo "$(date -u +"%FT%T.%3NZ") prepare the files that we need to replace"
 mkdir -p "${DIR}/root"
 cp -a src/modules/adsb-feeder/filesystem/root "${DIR}"
 
-echo "copy the updated files in place"
+echo "$(date -u +"%FT%T.%3NZ") copy the updated files in place"
 # shellcheck disable=SC2164
 cd "${DIR}/root"
 
