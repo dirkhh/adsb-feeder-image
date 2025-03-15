@@ -115,7 +115,7 @@ class AdsbIm:
 
         # set Cache-Control max-age for static files served
         # cachebust.sh ensures that the browser doesn't get outdated files
-        self.app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 1209600
+        self.app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 1209600
 
         self.exiting = False
 
@@ -1932,7 +1932,9 @@ class AdsbIm:
             sdrplay = any([sdr._serial == env1090.value and sdr._type == "sdrplay" for sdr in self._sdrdevices.sdrs])
             self._d.env_by_tags(["sdrplay", "is_enabled"]).value = sdrplay
             # Mode-S Beast
-            modesbeast = any([sdr._serial == env1090.value and sdr._type == "modesbeast" for sdr in self._sdrdevices.sdrs])
+            modesbeast = any(
+                [sdr._serial == env1090.value and sdr._type == "modesbeast" for sdr in self._sdrdevices.sdrs]
+            )
 
             # rtl-sdr
             rtlsdr = any(sdr._type == "rtlsdr" and sdr._serial == env1090.value for sdr in self._sdrdevices.sdrs)
@@ -2562,7 +2564,7 @@ class AdsbIm:
         if self._d.is_feeder_image:
             success, output = run_shell_captured("ps -e", timeout=2)
             zerotier_running = "zerotier-one" in output
-            tailscale_running  = "tailscaled" in output
+            tailscale_running = "tailscaled" in output
             # is tailscale set up?
             try:
                 if not tailscale_running:
@@ -3145,9 +3147,7 @@ class AdsbIm:
         # the webinterface needs to stay in the waiting state until the feeder-update stops it
         # because this is not guaranteed otherwise, add a sleep to the command running in the
         # background
-        self._system._restart.bg_run(
-            cmdline="systemctl start adsb-feeder-update.service; sleep 30"
-        )
+        self._system._restart.bg_run(cmdline="systemctl start adsb-feeder-update.service; sleep 30")
         self.exiting = True
         return render_template("/restarting.html")
 
