@@ -66,6 +66,13 @@
           crossorigin="anonymous"></script>
 
   <script>
+    // make sure we can propagate the target number if provided
+    const target = new URLSearchParams(window.location.search).get('m');
+    let extraArgs = "";
+    if (target) {
+      extraArgs = "?m=" + target;
+    }
+
     function stream() {
       var streamlog = new EventSource("/stream-log");
       console.log("created EventSource")
@@ -118,15 +125,15 @@
         if (request.readyState === 4 && request.status === 200) {
           if (request.responseText === 'done') {
             console.log('adsb-setup webinterface indicates ready, redirect user to /');
-            window.location = '/';
+            window.location = '/' + extraArgs;
             return;
           } else if (request.responseText === 'busy') {
             console.log('webinterface running, continue reading the stream log, redirect user to /waiting');
-            window.location = '/waiting';
+            window.location = '/waiting' + extraArgs;
             return;
           } else if (request.responseText === 'stream-log') {
             console.log('waiting-app running, continue reading the stream log, redirect user to /waiting');
-            window.location = '/waiting';
+            window.location = '/waiting' + extraArgs;
             return;
           } else {
             console.log("waiting.html: request to GET /restart returned unexpected responseText: ", request.responseText);

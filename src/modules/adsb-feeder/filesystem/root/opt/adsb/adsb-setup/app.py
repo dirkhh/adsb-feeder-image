@@ -2066,6 +2066,7 @@ class AdsbIm:
         """
         # let's try and figure out where we came from - for reasons I don't understand
         # the regexp didn't capture the site number, so let's do this the hard way
+        extra_args = ""
         referer = request.headers.get("referer")
         m_arg = referer.rfind("?m=")
         if m_arg > 0:
@@ -2075,6 +2076,7 @@ class AdsbIm:
         if arg in self.micro_indices():
             sitenum = arg
             site = self._d.env_by_tags("site_name").list_get(sitenum)
+            extra_args = f"?m={sitenum}"
         else:
             site = ""
             sitenum = 0
@@ -2543,7 +2545,7 @@ class AdsbIm:
                 return redirect(url_for("sdrplay_license"))
 
             self._system._restart.bg_run(cmdline="/opt/adsb/docker-compose-start", silent=False)
-            return render_template("/restarting.html")
+            return render_template("/restarting.html", extra_args=extra_args)
         print_err("base config not completed", level=2)
         return redirect(url_for("director"))
 

@@ -5,6 +5,7 @@
 
 <body>
   <script>
+    const extraArgs = "{{ extra_args }}";
     // wait_restart python function waits 0.9s, so make this a bit longer than that
     // if the timeout is too short due to RTT, it will be increased automatically
 
@@ -45,13 +46,13 @@
           if (request.responseText === "done") {
             // restarting the ADS-B infra completed, redirect user
             console.log('server says it is done, redirecting to /')
-            window.location.replace("/");
+            window.location.replace("/" + extraArgs);
             return;
           } else if (request.responseText === "busy") {
             if (new Date().getTime() - busySince > 5 * 1000) {
               // been waiting for more than 5 seconds, let's show the log scroller so the user has something to look at
               console.log('redirecting to /waiting for webinterface stream log')
-              window.location.replace("/waiting");
+              window.location.replace("/waiting" + extraArgs);
               return;
             }
             // restart is still in progress, check again immediately
@@ -63,7 +64,7 @@
           } else if (request.responseText === "stream-log") {
             // the waiting-app has been detective active, switch to it
             console.log('redirecting to / for waiting-app stream log')
-            window.location.replace("/");
+            window.location.replace("/" + extraArgs);
             return;
           } else if (request.responseText === "exiting") {
             console.log('server is exiting, wait for it to start back up')
