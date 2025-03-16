@@ -2304,6 +2304,12 @@ class AdsbIm:
                         cmd = ["/usr/bin/tailscale", "up"]
 
                         name = self.onlyAlphaNumDash(self._d.env_by_tags("site_name").list_get(0))
+                        # due to the following error, we just add --reset to the options
+                        # Error: changing settings via 'tailscale up' requires mentioning all
+                        # non-default flags. To proceed, either re-run your command with --reset or
+                        # use the command below to explicitly mention the current value of
+                        # all non-default settings:
+                        cmd += ["--reset"]
                         cmd += [f"--hostname={name}"]
 
                         if ts_args:
