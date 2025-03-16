@@ -2574,8 +2574,12 @@ class AdsbIm:
                     capture_output=True,
                 )
             except:
-                # a non-zero return value means tailscale isn't configured
+                # a non-zero return value means tailscale isn't configured or tailscale is disabled
+                # reset both associated env vars
+                # if tailscale recovers / is re-enabled and the system management page is visited,
+                # the code below will set the appropriate tailscale_name once more.
                 self._d.env_by_tags("tailscale_name").value = ""
+                self._d.env_by_tags("tailscale_ll").value = ""
             else:
                 ts_status = json.loads(result.stdout.decode())
                 if ts_status.get("BackendState") == "Running" and ts_status.get("Self"):
