@@ -25,13 +25,13 @@ ${SEPARATOR}
 "
 
 if ip -6 addr show scope global $(ip -j route get 1.2.3.4 | jq '.[0].dev' -r) | grep -v 'inet6 f' | grep -qs inet6; then
-  if timeout 2 curl -sS -o /dev/null -6 https://google.com; then
+  if err=$(timeout 2 curl -sS -o /dev/null -6 https://google.com 2>&1); then
     SANITIZED_LOG+="IPv6: working"
   else
-    SANITIZED_LOG+="IPv6: BROKEN"
+    SANITIZED_LOG+="IPv6: BROKEN ($err) ($(ip -6 addr show scope global $(ip -j route get 1.2.3.4 | jq '.[0].dev' -r) | grep -v 'inet6 f' | grep inet6))"
   fi
 else
-  if timeout 2 curl -sS -o /dev/null -6 https://google.com; then
+  if err=$(timeout 2 curl -sS -o /dev/null -6 https://google.com 2>&1); then
     SANITIZED_LOG+="IPv6: working (but no global ipv6 address on primary route interface found)"
   else
     SANITIZED_LOG+="IPv6: no global address or disabled"
