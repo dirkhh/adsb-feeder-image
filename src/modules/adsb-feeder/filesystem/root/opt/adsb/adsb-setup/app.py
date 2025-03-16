@@ -2271,10 +2271,14 @@ class AdsbIm:
                     ts_args = form.get("tailscale_extras", "")
                     if ts_args:
                         # right now we really only want to allow the login server arg
-                        ts_cli_switch, ts_cli_value = ts_args.split("=")
+                        try:
+                            ts_cli_switch, ts_cli_value = ts_args.split("=")
+                        except:
+                            ts_cli_switch, ts_cli_value = ["", ""]
+
                         if ts_cli_switch != "--login-server":
                             report_issue(
-                                "at this point we only allow the --login-server argument; "
+                                "at this point we only allow the --login-server=<server> argument; "
                                 "please let us know at the Zulip support link why you need "
                                 f"this to support {ts_cli_switch}"
                             )
