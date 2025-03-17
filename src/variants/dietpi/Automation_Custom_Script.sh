@@ -34,6 +34,11 @@ systemctl restart systemd-journald && echo "journal should now be persistent"
 /boot/dietpi/func/dietpi-set_software ntpd-mode 0
 apt install -y --no-install-recommends chrony jq zstd acpid netcat-openbsd
 
+# instead of only allowing stepping the clock for 3 updates after startup,
+# always step the clock if it's off by more than 0.5 seconds
+sed -i -e 's/^makestep.*/makestep 0.5 -1/' /etc/chrony/chrony.conf
+systemctl restart chrony
+
 # also install acpid with the other stuff above and configure the power button to perform a clean shutdown
 cat > /etc/acpi/events/power_button <<EOF
 event=button/power PBTN 00000080 00000000

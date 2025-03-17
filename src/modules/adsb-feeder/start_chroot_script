@@ -45,6 +45,9 @@ apt-get install -y --no-install-recommends python3 python3-flask python3-request
 
 # install chrony for better time synchronization compared to systemd-timesyncd
 apt-get install -y --no-install-recommends chrony
+# instead of only allowing stepping the clock for 3 updates after startup,
+# always step the clock if it's off by more than 0.5 seconds
+sed -i -e 's/^makestep.*/makestep 0.5 -1/' /etc/chrony/chrony.conf
 
 if [ "$FEEDER_IMAGE_NAME" != "" ] ; then
 	echo "$FEEDER_IMAGE_NAME" > /opt/adsb/feeder-image.name
