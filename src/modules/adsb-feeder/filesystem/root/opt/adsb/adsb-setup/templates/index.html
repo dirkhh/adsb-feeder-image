@@ -688,22 +688,18 @@
       $("#ip-mismatch").hide();
     }
   }
-  let timersActive = false;
-  let refreshDelay = 35 * 1000;
-  let refreshTimer = null;
-  let lastStartPage = 0;
-  function startPageIndex(opt) {
-    clearTimeout(refreshTimer); // abundance of caution to avoid multiple timers
-    if (opt != "noModifyDelay") {
-      refreshDelay = Math.min(300 * 1000, refreshDelay * 1.5);
+  let startPageTask = {};
+  startPageTask.func = function(opt) {
+    clearTimeout(startPageTask.timer); // abundance of caution to avoid multiple timers
+    if (!startPageTask.delay || (opt && opt.visibilityChange)) {
+      startPageTask.delay = 35 * 1000;
+    } else {
+      startPageTask.delay = Math.min(300 * 1000, startpageTask.delay * 1.5);
     }
     let now = Date.now() / 1000;
-    if (now - lastStartPage < 10) {
-      return;
-    }
-    lastStartPage = now;
-    verbose && console.log(new Date().toLocaleTimeString() + " refreshing status, next check in " + refreshDelay / 1000);
-    refreshTimer = setTimeout(startPageIndex, refreshDelay);
+    verbose && console.log(new Date().toLocaleTimeString() + " refreshing status, next check in " +
+      startPageTask.delay / 1000);
+    startPageTask.timer = setTimeout(startPageTask.func, startPageTask.delay);
     $("#last_status_update").html(new Date().toLocaleTimeString());
 
     if (!['micro', 'nano'].includes("{{ env_value_by_tags(['aggregator_choice']) }}")) {
@@ -830,29 +826,8 @@
       })
   }
 
-  function handleVisibilityChange() {
-    if (document.hidden && timersActive) {
-      verbose && console.log(new Date().toLocaleTimeString() + " visibility change: stopping timers");
-      clearTimeout(refreshTimer);
-      clearTimeout(check_mf_timer);
-      timersActive = false;
-    }
-    if (!document.hidden && !timersActive) {
-      verbose && console.log(new Date().toLocaleTimeString() + " visibility change: starting timers");
-      // start the micro feeder check
-      check_mf_status();
-      startPageIndex("noModifyDelay");
-      timersActive = true;
-    }
-  }
+  registerTask(check_mf_task);
+  registerTask(startPageTask);
 
-  // Warn if the browser doesn't support addEventListener or the Page Visibility API
-  if (typeof document.addEventListener === "undefined" || document.hidden === undefined) {
-    console.error("hidden tab handler requires a browser that supports the Page Visibility API.");
-  } else {
-    document.addEventListener("visibilitychange", handleVisibilityChange, false);
-  }
-
-  handleVisibilityChange();
 </script>
 {% endblock %}

@@ -154,8 +154,44 @@
           crossorigin="anonymous"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/mdb.min.js') }}"></script>
   <script>
-    let verbose = false;
-    let check_mf_timer = null;
+    let verbose = true;
+
+    let tasks = [];
+    let timersActive = false;
+    function handleVisibilityChange() {
+      if (document.hidden && timersActive) {
+        verbose && console.log(new Date().toLocaleTimeString() + " visibility change: stopping timers");
+        for (const task of tasks) {
+          clearTimeout(task.timer);
+        }
+        timersActive = false;
+      }
+      if (!document.hidden && !timersActive) {
+        verbose && console.log(new Date().toLocaleTimeString() + " visibility change: starting timers");
+        for (const task of tasks) {
+          task.func({ visibilityChange: true, });
+        }
+        timersActive = true;
+      }
+    }
+
+    // Warn if the browser doesn't support addEventListener or the Page Visibility API
+    if (typeof document.addEventListener === "undefined" || document.hidden === undefined) {
+      console.error("hidden tab handler requires a browser that supports the Page Visibility API.");
+      timersActive = true; // timers will always stay active
+    } else {
+      document.addEventListener("visibilitychange", handleVisibilityChange, false);
+    }
+
+    handleVisibilityChange();
+
+    function registerTask(task) {
+      tasks.push(task);
+      if (timersActive) {
+        task.func();
+      }
+    }
+
     let feederTarget = 0;
     let parameters = location.search.substring(1).split('&');
     for (let i = 0; i < parameters.length; i++) {
@@ -189,8 +225,10 @@
       $("#data_sharing_current").addClass("d-none");
       $("#stats_current").addClass("d-none");
     }
-    function check_mf_status() {
-      verbose && console.log(`check_mf ${new Date()}`);
+
+    let check_mf_task = {};
+    check_mf_task.func = function() {
+      verbose && console.log(new Date().toLocaleTimeString() + " check_mf");
       let url = "/api/stage2_stats";
       fetch(url, {
         method: "GET", cors: "no-cors", signal: AbortSignal.timeout(15000)
@@ -216,12 +254,13 @@
             $("#mf_stats_" + i).text(d["planes"] + " planes / " + d["tplanes"] + " today");
           })
         }).finally(() => {
-          clearTimeout(check_mf_timer); // abundance of caution to avoid multiple timers
-          check_mf_timer = setTimeout(check_mf_status, 15000);
+          clearTimeout(check_mf_task.timer);
+          check_mf_task.timer = setTimeout(check_mf_task.func, 15000);
         });
     };
 
-    function get_temperatures() {
+    let temperatureTask = {};
+    temperatureTask.func = function() {
       let url = "/api/get_temperatures.json";
       fetch(url, {
         method: "GET", cors: "no-cors", signal: AbortSignal.timeout(15000)
@@ -234,7 +273,8 @@
           console.log("requested temperatures and got error: " + err);
         })
         .finally(() => {
-          setTimeout(get_temperatures, 15000);
+          clearTimeout(temperatureTask.timer);
+          temperatureTask.timer = setTimeout(get_temperatures, 15000);
         });
     }
 
@@ -283,6 +323,10 @@
       }
     }
 
+    {% if is_enabled('temperature_block') %}
+    registerTask(temperatureTask);
+    {% endif %}
+
     function show_spinner() {
       document.getElementById("loader").style.display = "block";
       document.getElementById("overlay").style.display = "block";
@@ -327,9 +371,6 @@
           }
         });
       });
-      {% if is_enabled('temperature_block') %}
-      get_temperatures();
-      {% endif %}
     });
   </script>
 </head>

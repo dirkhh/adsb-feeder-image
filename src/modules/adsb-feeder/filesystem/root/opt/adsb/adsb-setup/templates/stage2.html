@@ -433,9 +433,12 @@
         });
     }
   };
+
   // start the micro feeder check if needed
-  check_mf_status();
-  function get_stage2_info() {
+  registerTask(check_mf_task);
+
+  let stage2InfoTask = {};
+  stage2InfoTask.func = function() {
     let n = parseInt("{{ env_value_by_tag('num_micro_sites') }}")
     if (isNaN(n)) n = 0;
     if (n == 0) return;
@@ -456,10 +459,13 @@
         })
       })
       .finally(() => {
-        setTimeout(get_stage2_info, 300000);
+        clearTimeout(stage2InfoTask.timer);
+        stage2InfoTask.timer = setTimeout(stage2InfoTask.func, 300000);
       });
   }
-  get_stage2_info();
+
+  registerTask(stage2InfoTask);
+
   $("#site_order_idx").on('focusout', function (e) {
     let n = parseInt("{{ env_value_by_tag('num_micro_sites') }}")
     let edit_idx = parseInt("{{ edit_index }}");
