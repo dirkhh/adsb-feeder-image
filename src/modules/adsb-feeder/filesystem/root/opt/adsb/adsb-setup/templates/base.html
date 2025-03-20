@@ -158,20 +158,32 @@
 
     let tasks = [];
     let timersActive = false;
+    let lastVisChange = 0;
     function handleVisibilityChange() {
       if (document.hidden && timersActive) {
-        verbose && console.log(new Date().toLocaleTimeString() + " visibility change: stopping timers");
+        verbose && console.log(new Date().toLocaleTimeString() + " visibility change: stopping tasks");
         for (const task of tasks) {
           clearTimeout(task.timer);
         }
         timersActive = false;
       }
       if (!document.hidden && !timersActive) {
-        verbose && console.log(new Date().toLocaleTimeString() + " visibility change: starting timers");
+        let delay = 0;
+        if (Date.now() - lastVisChange < 20 * 1000) {
+          verbose && console.log(new Date().toLocaleTimeString() + " visibility change: starting tasks with short delay");
+          // delay before we run the tasks in case the tab was only recently put in the background
+          delay = 2 * 1000;
+        } else {
+          verbose && console.log(new Date().toLocaleTimeString() + " visibility change: starting tasks");
+          // extremely short delay before we run the tasks in case the tab will only be in the foreground for a split second
+          delay = 50;
+        }
         for (const task of tasks) {
-          task.func({ visibilityChange: true, });
+          clearTimeout(task.timer);
+          task.timer = setTimeout(task.func, delay, { visibilityChange: true, })
         }
         timersActive = true;
+        lastVisChange = Date.now();
       }
     }
 
