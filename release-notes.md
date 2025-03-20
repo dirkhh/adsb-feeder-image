@@ -1,8 +1,13 @@
-Changes since v2.3.1 include:
-- improve navbar for (very) small screens
-- add Hyper-V instructions to the README
-- remove altitude unit from altitude setting in config (fixes planewatch issue)
-- fix dietpi-software install showing dev branch update button
+Changes since v2.3.2 include:
+- webinterface: more consistent handling of task suspension
+- chrony: always step the clock for offsets > 0.5s, not only on startup (helps with suspended VMs)
+- tailscale: improve handling of unlikely states / webinterface consistency
+- share diagnostics / log-sanitizer: remove stray curl error due to IPv6 check
+- explain how to disable secure image mode when it is enabled
+- feeder-update: various speedups
+- webinterface: fix shading of top bar for 'please wait' screen
+- system managent page: add spinners for various actions, load page faster
+- webinterface: restarting / streamlog: improve consistency
 
 
 > [!NOTE]
