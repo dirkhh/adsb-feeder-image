@@ -457,11 +457,8 @@
           $("#mf_uat_" + idx).prop('disabled', d["uat_capable"] == false);
           $("#mf_brofm_" + idx).prop('disabled', d["brofm_capable"] == false);
         })
-      })
-      .finally(() => {
-        clearTimeout(stage2InfoTask.timer);
-        stage2InfoTask.timer = setTimeout(stage2InfoTask.func, 300000);
       });
+    scheduleTask(stage2InfoTask, 300 * 1000);
   }
 
   registerTask(stage2InfoTask);

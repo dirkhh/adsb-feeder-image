@@ -204,6 +204,13 @@
       }
     }
 
+    function scheduleTask(task, delay) {
+      if (timersActive) {
+        clearTimeout(task.timer);
+        task.timer = setTimeout(task.func, delay);
+      }
+    }
+
     let feederTarget = 0;
     let parameters = location.search.substring(1).split('&');
     for (let i = 0; i < parameters.length; i++) {
@@ -265,10 +272,8 @@
             $("#mf_stats_" + i).addClass(color_class);
             $("#mf_stats_" + i).text(d["planes"] + " planes / " + d["tplanes"] + " today");
           })
-        }).finally(() => {
-          clearTimeout(check_mf_task.timer);
-          check_mf_task.timer = setTimeout(check_mf_task.func, 15000);
         });
+      scheduleTask(check_mf_task, 15000);
     };
 
     let temperatureTask = {};
@@ -283,11 +288,8 @@
         })
         .catch((err) => {
           console.log("requested temperatures and got error: " + err);
-        })
-        .finally(() => {
-          clearTimeout(temperatureTask.timer);
-          temperatureTask.timer = setTimeout(get_temperatures, 15000);
         });
+      scheduleTask(temperatureTask, 15000);
     }
 
     function update_temp_block(cpu, ext, age) {

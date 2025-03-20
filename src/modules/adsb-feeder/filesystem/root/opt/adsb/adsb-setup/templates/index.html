@@ -690,7 +690,6 @@
   }
   let startPageTask = {};
   startPageTask.func = function(opt) {
-    clearTimeout(startPageTask.timer); // abundance of caution to avoid multiple timers
     if (!startPageTask.delay || (opt && opt.visibilityChange)) {
       startPageTask.delay = 35 * 1000;
     } else {
@@ -699,7 +698,7 @@
     let now = Date.now() / 1000;
     verbose && console.log(new Date().toLocaleTimeString() + " refreshing status, next check in " +
       startPageTask.delay / 1000);
-    startPageTask.timer = setTimeout(startPageTask.func, startPageTask.delay);
+    scheduleTask(startPageTask, startPageTask.delay);
     $("#last_status_update").html(new Date().toLocaleTimeString());
 
     if (!['micro', 'nano'].includes("{{ env_value_by_tags(['aggregator_choice']) }}")) {
