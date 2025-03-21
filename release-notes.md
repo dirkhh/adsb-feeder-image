@@ -1,4 +1,6 @@
 Changes since v2.3.2 include:
+- update containers to latest versions
+- make ADS-B Feeder Image logo slighly higher contrast
 - webinterface: fix potential hang in the chart code for the feeder homepage
 - webinterface: more consistent handling of task suspension
 - chrony: always step the clock for offsets > 0.5s, not only on startup (helps with suspended VMs)
