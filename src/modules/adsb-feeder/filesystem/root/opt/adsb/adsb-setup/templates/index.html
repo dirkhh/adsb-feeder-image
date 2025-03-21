@@ -520,7 +520,7 @@
       for (let i = 0; i < days; i++) {
         if (chart.data.labels[i] != labels[i]) {
           // this looks better if you pop and push
-          while (chart.data.labels.length >= i) chart.data.labels.pop();
+          while (chart.data.labels.length > i) chart.data.labels.pop();
           for (let k = i; k < days; k++) chart.data.labels.push(labels[k]);
         }
         for (let j = 0; j < mfs; j++) {
