@@ -511,16 +511,22 @@
       let mfs = chart.data.datasets.length;
       let newmfs = datasets.length;
       // first deal with fewer days in the data (that's weird, really)
-      while (newdays < days) {
-        chart.data.labels.pop();
-        for (let j = 0; j < mfs; j++) chart.data.datasets[j].pop();
-        days = chart.data.labels.length;
+      while (chart.data.labels.length > newdays) {
+        for (let j = 0; j < mfs; j++) chart.data.datasets[j].data.pop();
+        if (chart.data.labels.pop() == undefined) {
+          break;
+        }
       }
+      days = chart.data.labels.length;
       // now update the days that already exist
       for (let i = 0; i < days; i++) {
         if (chart.data.labels[i] != labels[i]) {
           // this looks better if you pop and push
-          while (chart.data.labels.length > i) chart.data.labels.pop();
+          while (chart.data.labels.length > i) {
+            if (chart.data.labels.pop() == undefined) {
+              break;
+            }
+          }
           for (let k = i; k < days; k++) chart.data.labels.push(labels[k]);
         }
         for (let j = 0; j < mfs; j++) {
