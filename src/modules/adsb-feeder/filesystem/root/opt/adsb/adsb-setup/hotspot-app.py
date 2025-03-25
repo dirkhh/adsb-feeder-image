@@ -87,7 +87,7 @@ class Hotspot:
 
             return redirect("/restarting")
 
-        return render_template("hotspot.html", version=self.version, comment=self.comment, ssids=self.ssids)
+        return render_template("hotspot.html", version=self.version, comment=self.comment, ssids=self.wifi.ssids)
 
     def restarting(self):
         return render_template("hotspot-restarting.html")
@@ -195,7 +195,7 @@ class Hotspot:
 
         print_err(f"testing the '{self.ssid}' network")
 
-        success = self.wifi.wifi_connect(self.ssid, self.password)
+        success = self.wifi.wifi_connect(self.ssid, self.passwd)
 
         if success:
             print_err(f"successfully connected to '{self.ssid}'")
