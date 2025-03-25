@@ -193,26 +193,7 @@ p2p_disabled=1
             self.dietpi_add_wifi_hotplug()
 
             # wpa_supplicant can take extremely long to start up as long as eth0 has allow-hotplug
-            # enabled
-            # thus disable allow-hotplug for all interfaces but wlan0
-            # after testing the wifi, restore the original file
-            with open("/etc/network/interfaces", "r") as current, open("/etc/network/interfaces.new", "w") as update:
-                lines = current.readlines()
-                for line in lines:
-                    if "allow-hotplug" in line:
-                        if self.wlan in line:
-                            update.write(f"allow-hotplug {self.wlan}\n")
-                        else:
-                            update.write(f"# {line}")
-                    else:
-                        update.write(f"{line}")
-                os.rename("/etc/network/interfaces", "/etc/network/interfaces.orig.adsbim")
-                os.rename("/etc/network/interfaces.new", "/etc/network/interfaces")
-            output = subprocess.run(
-                f"systemctl restart --no-block networking.service",
-                shell=True,
-                capture_output=True,
-            )
+            # wpa_cli_reconfigure will wait for that so this test can take up to 60 seconds
 
             # test wifi
             success = self.writeWpaConf(
@@ -220,14 +201,6 @@ p2p_disabled=1
             )
             if success:
                 success = self.wpa_cli_reconfigure()
-
-            # restore original /etc/network/interfaces and apply changes
-            os.rename("/etc/network/interfaces.orig.adsbim", "/etc/network/interfaces")
-            output = subprocess.run(
-                f"systemctl restart --no-block networking.service",
-                shell=True,
-                capture_output=True,
-            )
 
         elif self.baseos == "raspbian":
             # try for a while because it takes a bit for NetworkManager to come back up
