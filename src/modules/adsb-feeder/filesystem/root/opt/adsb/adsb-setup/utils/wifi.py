@@ -208,6 +208,9 @@ p2p_disabled=1
                 success = self.wpa_cli_reconfigure()
 
         elif self.baseos == "raspbian":
+            # do a wifi scan to ensure the following connect works
+            # this is apparently necessary for NetworkManager
+            self.scan_ssids()
             # try for a while because it takes a bit for NetworkManager to come back up
             startTime = time.time()
             while time.time() - startTime < 20:
