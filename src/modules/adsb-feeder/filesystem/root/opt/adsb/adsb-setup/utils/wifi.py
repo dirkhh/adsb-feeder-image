@@ -3,7 +3,7 @@ import subprocess
 import time
 import traceback
 
-from utils.util import print_err
+from utils.util import print_err, run_shell_captured
 
 
 class Wifi:
@@ -34,6 +34,16 @@ class Wifi:
     def wpa_cli_reconfigure(self):
         connected = False
         output = ""
+        # wait for wpa_supplicant to be running
+        startTime = time.time()
+        success = False
+        while time.time() - startTime < 45:
+            success, output = run_shell_captured("pgrep wpa_supplicant", timeout=5)
+            if success:
+                break
+        if not success:
+            print_err("timeout while waiting for wpa_supplicant to start")
+
         try:
             proc = subprocess.Popen(
                 ["wpa_cli", f"-i{self.wlan}"],
