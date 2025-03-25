@@ -152,10 +152,36 @@ p2p_disabled=1
 
         return True
 
+
+    def dietpi_add_wifi_hotplug(self):
+        # enable hotplug in case this is an old dietpi image (before may 2024)
+        changedInterfaces = False
+        with open("/etc/network/interfaces", "r") as current, open("/etc/network/interfaces.new", "w") as update:
+            lines = current.readlines()
+            for line in lines:
+                if line.startswith("#") and "allow-hotplug" in line and self.wlan in line:
+                    changedInterfaces = True
+                    update.write(f"allow-hotplug {self.wlan}\n")
+                else:
+                    update.write(f"{line}")
+
+        if changedInterfaces:
+            print_err(f"uncommenting allow-hotplug for {self.wlan}")
+            os.rename("/etc/network/interfaces.new", "/etc/network/interfaces")
+            output = subprocess.run(
+                f"systemctl restart --no-block networking.service",
+                shell=True,
+                capture_output=True,
+            )
+        else:
+            os.remove("/etc/network/interfaces.new")
+
     def wifi_connect(self, ssid, passwd, country_code="GB"):
         success = False
 
         if self.baseos == "dietpi":
+            self.dietpi_add_wifi_hotplug()
+
             # wpa_supplicant can take extremely long to start up as long as eth0 has allow-hotplug
             # enabled
             # thus disable allow-hotplug for all interfaces but wlan0
