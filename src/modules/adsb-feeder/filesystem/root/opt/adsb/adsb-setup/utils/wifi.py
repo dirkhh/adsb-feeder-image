@@ -156,12 +156,12 @@ p2p_disabled=1
                     check=True,
                 )
                 conf.write(output.stdout.decode())
-        except:
+        except Exception as e:
             print_err(f"ERROR when writing wpa supplicant config to {path}")
+            print_err("exception: " + str(e))
             return False
 
         return True
-
 
     def dietpi_add_wifi_hotplug(self):
         # enable hotplug in case this is an old dietpi image (before may 2024)

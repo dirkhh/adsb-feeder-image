@@ -2382,6 +2382,15 @@ class AdsbIm:
                     print_err("updating the root password")
                     self.set_rpw()
                     continue
+                if key == "wifi":
+                    print_err("updating the wifi settings")
+                    if self.wifi is None:
+                        self.wifi = Wifi()
+                    status = self.wifi.wifi_connect(
+                        form.get("wifi_ssid"), form.get("wifi_password"), self._d.env_by_tags("country").value
+                    )
+                    print_err(f"wifi_connect returned {status}")
+                    # FIXME: let user know
                 if key in self._other_aggregators:
                     l_sitenum = 0
                     if value.startswith("stay-"):
