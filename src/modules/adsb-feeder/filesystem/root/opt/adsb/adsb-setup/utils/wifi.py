@@ -200,6 +200,11 @@ p2p_disabled=1
                 ssid=ssid, passwd=passwd, path="/etc/wpa_supplicant/wpa_supplicant.conf", country_code=country_code
             )
             if success:
+                output = subprocess.run(
+                        f"systemctl restart --no-block networking.service",
+                        shell=True,
+                        capture_output=True,
+                        )
                 success = self.wpa_cli_reconfigure()
 
         elif self.baseos == "raspbian":
