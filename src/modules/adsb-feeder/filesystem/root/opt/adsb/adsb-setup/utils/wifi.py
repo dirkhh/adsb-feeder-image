@@ -156,7 +156,10 @@ p2p_disabled=1
         success = False
 
         if self.baseos == "dietpi":
-            # switch hotplug to test for wifi and apply changes
+            # wpa_supplicant can take extremely long to start up as long as eth0 has allow-hotplug
+            # enabled
+            # thus disable allow-hotplug for all interfaces but wlan0
+            # after testing the wifi, restore the original file
             with open("/etc/network/interfaces", "r") as current, open("/etc/network/interfaces.new", "w") as update:
                 lines = current.readlines()
                 for line in lines:
@@ -182,14 +185,13 @@ p2p_disabled=1
             if success:
                 success = self.wpa_cli_reconfigure()
 
-            if not success:
-                # restore original /etc/network/interfaces and apply changes
-                os.rename("/etc/network/interfaces.orig.adsbim", "/etc/network/interfaces")
-                output = subprocess.run(
-                    f"systemctl restart --no-block networking.service",
-                    shell=True,
-                    capture_output=True,
-                )
+            # restore original /etc/network/interfaces and apply changes
+            os.rename("/etc/network/interfaces.orig.adsbim", "/etc/network/interfaces")
+            output = subprocess.run(
+                f"systemctl restart --no-block networking.service",
+                shell=True,
+                capture_output=True,
+            )
 
         elif self.baseos == "raspbian":
             # try for a while because it takes a bit for NetworkManager to come back up
