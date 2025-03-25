@@ -2839,7 +2839,12 @@ class AdsbIm:
         except:
             result = ""
         else:
-            dev, addr = result.decode().strip().split(" ")
+            result = result.decode().strip()
+            if " " in result:
+                dev, addr = result.split(" ")
+            else:
+                dev = result
+                addr = ""
         if result and addr:
             self.local_address = addr
             self.local_dev = dev
