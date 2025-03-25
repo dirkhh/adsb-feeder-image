@@ -135,7 +135,7 @@ class Wifi:
 
         return ssids
 
-    def writeWpaConf(self, ssid=None, passwd=None, path=None, country_code="GB"):
+    def writeWpaConf(self, ssid=None, passwd=None, path=None, country_code="PA"):
         try:
             with open(path, "w") as conf:
                 conf.write(
@@ -186,7 +186,7 @@ p2p_disabled=1
         else:
             os.remove("/etc/network/interfaces.new")
 
-    def wifi_connect(self, ssid, passwd, country_code="GB"):
+    def wifi_connect(self, ssid, passwd, country_code="PA"):
         success = False
 
         if self.baseos == "dietpi":

@@ -206,16 +206,6 @@ class AdsbIm:
         else:
             self._d.env_by_tags("rbthermalhack").value = ""
 
-        # make sure we know which country we are in (we might need that for WiFi setup)
-        if self._d.env_by_tags("country").value == "":
-            ip_lookup_json, status = generic_get_json("https://ipinfo.io/json/", timeout=5)
-            if status == 200:
-                self._d.env_by_tags("country").value = ip_lookup_json["country"]
-            else:
-                # that's a cruel joke... but since we are trying to connect to an access point,
-                # using one of the least restrictive country code (Panama) significantly increases
-                # the chance of success
-                self._d.env_by_tags("country").value = "PA"
         # Ensure secure_image is set the new way if before the update it was set only as env variable
         if self._d.is_enabled("secure_image"):
             self.set_secure_image()
@@ -2386,12 +2376,11 @@ class AdsbIm:
                     print_err("updating the wifi settings")
                     ssid = form.get("wifi_ssid")
                     password = form.get("wifi_password")
-                    country = self._d.env_by_tags("country").value
                     def connect_wifi():
                         if self.wifi is None:
                             self.wifi = Wifi()
                         status = self.wifi.wifi_connect(
-                            ssid, password, country
+                            ssid, password
                         )
                         print_err(f"wifi_connect returned {status}")
                     self._system._restart.bg_run(func=connect_wifi)
