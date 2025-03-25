@@ -307,7 +307,20 @@
       </div>
     </form>
   </div>
-
+  {% if wifi != "" %}
+  <div class="col-12 col-lg-6 {% if is_enabled('secure_image') %} d-none {% endif %}">
+    <h5 class="mt-3">Wifi Info</h5>
+    <form method="POST" onsubmit="show_spinner(); return true;">
+      <div class="row align-items-center">
+        <div class="col-12 mb-2">
+          <label for="tailscale">
+            This feeder is connected to the following wifi network: {{ wifi }}
+          </label>
+        </div>
+      </div>
+    </form>
+  </div>
+  {% endif %}
   <!-- FULL_IMAGE_ONLY_END -->
 </div>
 <script>
