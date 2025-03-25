@@ -39,6 +39,7 @@ from utils.config import (
     write_values_to_env_file,
 )
 from utils.util import create_fake_info, make_int, print_err, report_issue, mf_get_ip_and_triplet, string2file
+from utils.wifi import Wifi
 
 # nofmt: on
 # isort: off
@@ -142,6 +143,9 @@ class AdsbIm:
         self._routemanager = RouteManager(self.app)
         self._d = Data()
         self._system = System(data=self._d)
+        # let's only instantiate the Wifi class if we are on WiFi
+        self.wifi = None
+        self.wifi_ssid = ""
 
         # prepare for app use (vs ADS-B Feeder Image use)
         # newer images will include a flag file that indicates that this is indeed
@@ -2609,6 +2613,7 @@ class AdsbIm:
             current_branch=current_branch,
             containers=self._system.list_containers(),
             persistent_journal=self._persistent_journal,
+            wifi=self.wifi_ssid,
         )
 
     @check_restart_lock
@@ -2812,7 +2817,7 @@ class AdsbIm:
 
         try:
             result = subprocess.run(
-                "ip route get 1 | head -1  | cut -d' ' -f7",
+                "ip route get 1 | head -1  | cut -d' ' -f5,7",
                 shell=True,
                 capture_output=True,
                 timeout=2.0,
@@ -2820,11 +2825,20 @@ class AdsbIm:
         except:
             result = ""
         else:
-            result = result.decode().strip()
-        if result:
-            self.local_address = result
+            dev, addr = result.decode().strip().split(" ")
+        if result and addr:
+            self.local_address = addr
+            self.local_dev = dev
         else:
             self.local_address = ""
+            self.local_dev = ""
+
+        if self.local_dev.startswith("wlan"):
+            if self.wifi is None:
+                self.wifi = Wifi()
+            self.wifi_ssid = self.wifi.get_ssid()
+        else:
+            self.wifi_ssid = ""
 
         if self._d.env_by_tags("tailscale_name").value:
             try:
