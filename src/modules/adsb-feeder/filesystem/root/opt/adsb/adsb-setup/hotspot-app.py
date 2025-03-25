@@ -17,6 +17,7 @@ from flask import (
 )
 from sys import argv
 from fakedns import DNSHandler
+from utils.wifi import Wifi
 
 
 def print_err(*args, **kwargs):
@@ -30,6 +31,7 @@ class Hotspot:
     def __init__(self, wlan):
         self.app = Flask(__name__)
         self.wlan = wlan
+        self.wifi = Wifi(wlan)
         if pathlib.Path("/opt/adsb/adsb.im.version").exists():
             with open("/opt/adsb/adsb.im.version", "r") as f:
                 self.version = f.read().strip()
@@ -41,21 +43,17 @@ class Hotspot:
         self.passwd = ""
         self._dnsserver = None
         self._dns_thread = None
-
-        if pathlib.Path("/boot/dietpi").exists():
-            self._baseos = "dietpi"
-        elif pathlib.Path("/etc/rpi-issue").exists():
-            self._baseos = "raspbian"
-        else:
+        self._baseos = self.wifi.baseos
+        if self._baseos == "unknown":
             print_err("unknown baseos - giving up")
             sys.exit(1)
         print_err("trying to scan for SSIDs")
-        self.ssids = []
+        self.wifi.ssids = []
         i = 0
         startTime = time.time()
         while time.time() - startTime < 20:
-            self.scan_ssids()
-            if len(self.ssids) > 0:
+            self.wifi.scan_ssids()
+            if len(self.wifi.ssids) > 0:
                 break
 
         self.app.add_url_rule("/restarting", view_func=self.restarting)
@@ -69,129 +67,6 @@ class Hotspot:
             methods=["GET", "POST"],
         )
         self.app.add_url_rule("/<path:path>", view_func=self.catch_all, methods=["GET", "POST"])
-
-    def wpa_cli_reconfigure(self):
-        connected = False
-        output = ""
-        try:
-            proc = subprocess.Popen(
-                ["wpa_cli", f"-i{self.wlan}"],
-                stderr=subprocess.STDOUT,
-                stdout=subprocess.PIPE,
-                stdin=subprocess.PIPE,
-                text=True,
-            )
-            os.set_blocking(proc.stdout.fileno(), False)
-
-            startTime = time.time()
-            reconfigured = False
-            while time.time() - startTime < 20:
-                line = proc.stdout.readline()
-                if not line:
-                    time.sleep(0.01)
-                    continue
-
-                output += line
-                #print_err(f"wpa_cli: {line.rstrip()})")
-                if "Interactive mode" in line:
-                    proc.stdin.write("reconfigure\n")
-                    proc.stdin.flush()
-                if "reconfigure" in line:
-                    reconfigured = True
-                if reconfigured and "CTRL-EVENT-CONNECTED" in line:
-                    connected = True
-                    break
-        except:
-            print_err(traceback.format_exc())
-        finally:
-            if proc:
-                proc.terminate()
-
-        if not connected:
-            print_err(f"Couldn't connect after wpa_cli reconfigure: ouput: {output}")
-
-        return connected
-
-    def wpa_cli_scan(self):
-        ssids = []
-        try:
-            proc = subprocess.Popen(
-                ["wpa_cli", f"-i{self.wlan}"],
-                stderr=subprocess.STDOUT,
-                stdout=subprocess.PIPE,
-                stdin=subprocess.PIPE,
-                text=True,
-            )
-            os.set_blocking(proc.stdout.fileno(), False)
-
-            output = ""
-
-            startTime = time.time()
-            while time.time() - startTime < 15:
-                line = proc.stdout.readline()
-                if not line:
-                    time.sleep(0.01)
-                    continue
-
-                output += line
-                # print(line, end="")
-                if line.count("Interactive mode"):
-                    proc.stdin.write("scan\n")
-                    proc.stdin.flush()
-                if line.count("CTRL-EVENT-SCAN-RESULTS"):
-                    proc.stdin.write("scan_results\n")
-                    proc.stdin.flush()
-                    break
-
-            startTime = time.time()
-            while time.time() - startTime < 1:
-                line = proc.stdout.readline()
-                if not line:
-                    time.sleep(0.01)
-                    continue
-
-                output += line
-                if line.count("\t"):
-                    fields = line.rstrip("\n").split("\t")
-                    if len(fields) == 5:
-                        ssids.append(fields[4])
-
-        except:
-            print_err(f"ERROR in wpa_cli_scan(), wpa_cli ouput: {output}")
-        finally:
-            if proc:
-                proc.terminate()
-
-        return ssids
-
-    def scan_ssids(self):
-        try:
-            if self._baseos == "raspbian":
-                try:
-                    output = subprocess.run(
-                        "nmcli --terse --fields SSID dev wifi",
-                        shell=True,
-                        capture_output=True,
-                    )
-                except subprocess.CalledProcessError as e:
-                    print_err(f"error scanning for SSIDs: {e}")
-                    return
-
-                ssids = []
-                for line in output.stdout.decode().split("\n"):
-                    if line and line != "--" and line not in ssids:
-                        ssids.append(line)
-            else:
-                ssids = self.wpa_cli_scan()
-
-            if len(ssids) > 0:
-                print_err(f"found SSIDs: {ssids}")
-                self.ssids = ssids
-            else:
-                print_err("no SSIDs found")
-
-        except Exception as e:
-            print_err(f"ERROR in scan_ssids(): {e}")
 
     def restart(self):
         return self.restart_state
@@ -299,30 +174,6 @@ class Hotspot:
         # used to wait here, just spin around the wifi instead
         print_err("turned off hotspot")
 
-    def writeWpaConf(self, ssid=None, passwd=None, path=None):
-        try:
-            with open(path, "w") as conf:
-                conf.write(
-                    """
-# WiFi country code, set here in case the access point does send one
-country=GB
-# Grant all members of group "netdev" permissions to configure WiFi, e.g. via wpa_cli or wpa_gui
-ctrl_interface=DIR=/run/wpa_supplicant GROUP=netdev
-# Allow wpa_cli/wpa_gui to overwrite this config file
-update_config=1
-# disable p2p as it can cause errors
-p2p_disabled=1
-"""
-                )
-                output = subprocess.run(
-                    ["wpa_passphrase", f"{ssid}", f"{passwd}"],
-                    capture_output=True,
-                    check=True,
-                )
-                conf.write(output.stdout.decode())
-        except:
-            print_err(f"ERROR when writing wpa supplicant config to {path}")
-
     def setup_wifi(self):
         if self._dnsserver:
             print_err("shutting down DNS server")
@@ -344,79 +195,7 @@ p2p_disabled=1
 
         print_err(f"testing the '{self.ssid}' network")
 
-        success = False
-
-        if self._baseos == "dietpi":
-            # switch hotplug to test for wifi and apply changes
-            with open("/etc/network/interfaces", "r") as current, open("/etc/network/interfaces.new", "w") as update:
-                lines = current.readlines()
-                for line in lines:
-                    if "allow-hotplug" in line:
-                        if self.wlan in line:
-                            update.write(f"allow-hotplug {self.wlan}\n")
-                        else:
-                            update.write(f"# {line}")
-                    else:
-                        update.write(f"{line}")
-                os.rename("/etc/network/interfaces", "/etc/network/interfaces.orig.hotspot")
-                os.rename("/etc/network/interfaces.new", "/etc/network/interfaces")
-            output = subprocess.run(
-                f"systemctl restart --no-block networking.service",
-                shell=True,
-                capture_output=True,
-            )
-
-            # test wifi
-            self.writeWpaConf(ssid=self.ssid, passwd=self.passwd, path="/etc/wpa_supplicant/wpa_supplicant.conf")
-            success = self.wpa_cli_reconfigure()
-
-            # restore original /etc/network/interfaces and apply changes
-            os.rename("/etc/network/interfaces.orig.hotspot", "/etc/network/interfaces")
-            output = subprocess.run(
-                f"systemctl restart --no-block networking.service",
-                shell=True,
-                capture_output=True,
-            )
-
-        elif self._baseos == "raspbian":
-            # try for a while because it takes a bit for NetworkManager to come back up
-            startTime = time.time()
-            while time.time() - startTime < 20:
-                try:
-                    result = subprocess.run(
-                        [
-                            "nmcli",
-                            "d",
-                            "wifi",
-                            "connect",
-                            f"{self.ssid}",
-                            "password",
-                            f"{self.passwd}",
-                            "ifname",
-                            f"{self.wlan}",
-                        ],
-                        capture_output=True,
-                        timeout=20.0,
-                    )
-                except subprocess.SubprocessError as e:
-                    # something went wrong
-                    output = ""
-                    if e.stdout:
-                        output += e.stdout.decode()
-                    if e.stderr:
-                        output += e.stderr.decode()
-                else:
-                    output = result.stdout.decode() + result.stderr.decode()
-
-                success = "successfully activated" in output
-
-                if success:
-                    break
-                else:
-                    # just to safeguard against super fast spin, sleep a bit
-                    print_err(f"failed to connect to '{self.ssid}': {output}")
-                    time.sleep(2)
-                    continue
+        success = self.wifi.wifi_connect(self.ssid, self.password)
 
         if success:
             print_err(f"successfully connected to '{self.ssid}'")
