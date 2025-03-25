@@ -2384,12 +2384,18 @@ class AdsbIm:
                     continue
                 if key == "wifi":
                     print_err("updating the wifi settings")
-                    if self.wifi is None:
-                        self.wifi = Wifi()
-                    status = self.wifi.wifi_connect(
-                        form.get("wifi_ssid"), form.get("wifi_password"), self._d.env_by_tags("country").value
-                    )
-                    print_err(f"wifi_connect returned {status}")
+                    ssid = form.get("wifi_ssid")
+                    password = form.get("wifi_password")
+                    country = self._d.env_by_tags("country").value
+                    def connect_wifi():
+                        if self.wifi is None:
+                            self.wifi = Wifi()
+                        status = self.wifi.wifi_connect(
+                            ssid, password, country
+                        )
+                        print_err(f"wifi_connect returned {status}")
+                    self._system._restart.bg_run(func=connect_wifi)
+                    self._next_url_from_director = url_for("systemmgmt")
                     # FIXME: let user know
                 if key in self._other_aggregators:
                     l_sitenum = 0
