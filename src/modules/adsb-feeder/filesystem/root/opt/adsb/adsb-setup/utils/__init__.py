@@ -34,3 +34,4 @@ from .util import (
     run_shell_captured,
 )
 from .background import Background
+from .wifi import Wifi
