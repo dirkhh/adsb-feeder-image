@@ -2376,13 +2376,13 @@ class AdsbIm:
                     print_err("updating the wifi settings")
                     ssid = form.get("wifi_ssid")
                     password = form.get("wifi_password")
+
                     def connect_wifi():
                         if self.wifi is None:
                             self.wifi = Wifi()
-                        status = self.wifi.wifi_connect(
-                            ssid, password
-                        )
+                        status = self.wifi.wifi_connect(ssid, password)
                         print_err(f"wifi_connect returned {status}")
+
                     self._system._restart.bg_run(func=connect_wifi)
                     self._next_url_from_director = url_for("systemmgmt")
                     # FIXME: let user know
