@@ -135,8 +135,37 @@ class Wifi:
 
         return ssids
 
-    def writeWpaConf(self, ssid=None, passwd=None, path=None, country_code="PA"):
+    def writeWpaConf(self, ssid=None, passwd=None, path=None, country_code="GB"):
+        netblocks = {}
         try:
+            # painfully extract the existing network blocks from the config file
+            # I'm sure there are easier ways to do this
+            with open(path, "r") as conf:
+                lines = conf.readlines()
+                for i in range(len(lines)):
+                    line = lines[i]
+                    if line.strip().startswith("network="):
+                        networkblock = line.rstrip() + "\n"
+                        j = i + 1
+                        while j < len(lines):
+                            networkline = lines[j]
+                            if "ssid" in networkline:
+                                exist_ssid = networkline.split('"')[1]
+                            if "priority" in networkline:
+                                # using the current line number gives us distinct priorities that will be smaller than 1000
+                                networkline = networkline.split("=")[0] + f"={j}"
+                            networkblock += networkline.rstrip() + "\n"
+                            if "}" in lines[j]:
+                                break
+                            j += 1
+                        i = j
+                        netblocks[exist_ssid] = networkblock
+                output = subprocess.run(
+                    ["wpa_passphrase", f"{ssid}", f"{passwd}"],
+                    capture_output=True,
+                    check=True,
+                ).stdout.decode()
+                netblocks[ssid] = output.replace("}", "\tpriority=1000\n}")
             with open(path, "w") as conf:
                 conf.write(
                     f"""
@@ -150,17 +179,13 @@ update_config=1
 p2p_disabled=1
 """
                 )
-                output = subprocess.run(
-                    ["wpa_passphrase", f"{ssid}", f"{passwd}"],
-                    capture_output=True,
-                    check=True,
-                )
-                conf.write(output.stdout.decode())
+                for k in netblocks.keys():
+                    conf.write(netblocks[k])
         except Exception as e:
             print_err(f"ERROR when writing wpa supplicant config to {path}")
             print_err("exception: " + str(e))
             return False
-
+        print_err("wpa supplicant config written to " + path)
         return True
 
     def dietpi_add_wifi_hotplug(self):
@@ -201,10 +226,10 @@ p2p_disabled=1
             )
             if success:
                 output = subprocess.run(
-                        f"systemctl restart --no-block networking.service",
-                        shell=True,
-                        capture_output=True,
-                        )
+                    f"systemctl restart --no-block networking.service",
+                    shell=True,
+                    capture_output=True,
+                )
                 success = self.wpa_cli_reconfigure()
 
         elif self.baseos == "raspbian":
