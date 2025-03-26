@@ -160,7 +160,7 @@ EOF
     # this causes dhclient to configure multiple default routes
     # connectivity stays intact in case one of the connection drops
 
-    if ! grep -qs -e metric etc/network/interfaces; then
+    if ! grep -qs -e metric "$MNT_DIR"/etc/network/interfaces; then
         sed -i "$MNT_DIR"/etc/network/interfaces -e 's/iface eth0.*/\0\nmetric 100/'  -e 's/iface wlan0.*/\0\nmetric 600/'
     fi
 
