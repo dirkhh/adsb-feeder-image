@@ -222,6 +222,10 @@ function check_missing() {
         if ! command -v avahi-publish &>/dev/null || ! command -v avahi-resolve &>/dev/null; then
             missing+=("avahi-utils")
         fi
+        if [[ -d /boot/dietpi/ ]] && ! command -v ifplugd &>/dev/null; then
+            configure_ifplugd="yes"
+            missing+=("ifplugd")
+        fi
     fi
     if ! command -v jq &>/dev/null; then
         missing+=("jq")
@@ -249,6 +253,14 @@ if [[ ${#missing[@]} -gt 0 ]] ; then
         echo "cannot install these packages: "${missing[@]}" - please contact the adsb.im maintainer"
         exit 1
     fi
+fi
+
+
+if [[ "$configure_ifplugd" == "yes" ]]; then
+    sed -i  /etc/default/ifplugd \
+        -e 's/^INTERFACES=.*/INTERFACES="eth0"/' \
+        -e 's/^ARGS=.*/ARGS="-q -f -u2 -d5 -w -I --initial-down"/'
+    systemctl restart --no-block ifplugd
 fi
 
 if [ -f /opt/adsb/os.adsb.feeder.image ] ; then
