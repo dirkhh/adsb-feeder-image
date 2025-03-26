@@ -1,4 +1,5 @@
 Changes since v2.3.2 include:
+- add UI capability to change WiFi network (only for feeder image, not for app installs)
 - update containers to latest versions
 - make ADS-B Feeder Image logo slightly higher contrast
 - webinterface: fix potential hang in the chart code for the feeder homepage

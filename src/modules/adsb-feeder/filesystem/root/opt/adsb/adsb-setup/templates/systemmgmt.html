@@ -319,8 +319,15 @@
           {% endif %}
         </div>
         <div class="col-12 mb-2">
-        Enter the SSID and password of the WiFi network you want to connect to. Note that it can take more than a minute
-        for the connection to be tested.
+          Enter the SSID and password of the WiFi network you want to connect to. Note that it can take
+          several minutes for the connection to be established and tested. And in some cases a forced
+          reboot (pull power) may be required. Depending on the exact version of the base OS of the
+          feeder image that you are using, the user experience may be slightly different, but when the
+          process appears stuck even after a longer wait, a reboot may be the way to go.
+        </div>
+        <div class="col-12 mb-2">
+          Remember that if the change is successful, you need to connect to the feeder on that new
+          network. There is no way for the feeder to automatically forward you to that.
         </div>
         <div class="col-4">
           <input class="mx-auto w-100" id="wifi_ssid" name="wifi_ssid" type="text" placeholder="SSID" required>
