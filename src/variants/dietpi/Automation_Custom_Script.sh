@@ -32,8 +32,12 @@ systemctl restart systemd-journald && echo "journal should now be persistent"
 # when chrony is installed it's imperative that CONFIG_NTP_MODE=0
 # (custom/disabled) is set in dietpi.txt to avoid breakage of dietpi-update
 /boot/dietpi/func/dietpi-set_software ntpd-mode 0
-apt install -y --no-install-recommends chrony jq zstd acpid netcat-openbsd ifplugd
+apt install -y --no-install-recommends chrony jq zstd acpid netcat-openbsd ifplugd ifmetric
 
+# ifmetric ensures proper precedence for local network connections
+# dhclient applies the metric setting from interfaces only to the default
+# routes not to the other routes
+#
 # ifplugd will trigger on link state and up or down the interface
 # ifplugd is required so ethernet works when the link is established after boot
 sed -i  /etc/default/ifplugd \

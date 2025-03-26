@@ -224,7 +224,7 @@ function check_missing() {
         fi
         if [[ -d /boot/dietpi/ ]] && ! command -v ifplugd &>/dev/null; then
             configure_ifplugd="yes"
-            missing+=("ifplugd")
+            missing+=("ifplugd ifmetric")
         fi
     fi
     if ! command -v jq &>/dev/null; then
