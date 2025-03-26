@@ -141,9 +141,28 @@ EOF
     ln -sf /usr/lib/systemd/system/adsb-hotspot.service "$MNT_DIR"/etc/systemd/system/multi-user.target.wants/adsb-hotspot.service
 
     # reduce default networking timeout from 300 to 120 seconds for dietpi
+    # (don't think this actually does anything)
     echo WAIT_ONLINE_TIMEOUT=120 >> "$MNT_DIR"/etc/default/networking
     # reduce the timeout for acquiring a dhcp lease, this makes dietpi networking less painful (default 60s)
-    echo "timeout 30;" >> "$MNT_DIR"/etc/dhcp/dhclient.conf
+    # but if this fails, wait 2 min until retrying (default 5 min)
+    cat >> "$MNT_DIR"/etc/dhcp/dhclient.conf << EOF
+timeout 30;
+retry 120;
+EOF
+
+    # the system default route and route is set by dhclient
+    # dhclient is started by ifup
+    # ifup reads /etc/network/interfaces
+
+    # usually only one default route is configured by dhclient even if
+    # ethernet and wifi are up
+    # set a metric for ethernet and wifi in /etc/network/interfaces
+    # this causes dhclient to configure multiple default routes
+    # connectivity stays intact in case one of the connection drops
+
+    if ! grep -qs -e metric etc/network/interfaces; then
+        sed -i "$MNT_DIR"/etc/network/interfaces -e 's/iface eth0.*/\0\nmetric 100/'  -e 's/iface wlan0.*/\0\nmetric 600/'
+    fi
 
     sed -i "s/ADSB_RANDOM_PASSWORD/$ROOT_PWD/" "${DIR}/variants/dietpi/dietpi.txt"
     echo "AUTO_SETUP_SSH_PUBKEY=$SSH_PUB_KEY" >> "${DIR}/variants/dietpi/dietpi.txt"
