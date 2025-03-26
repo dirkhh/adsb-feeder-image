@@ -56,6 +56,11 @@ function check_network() {
     return 1
 }
 
+# raspbian: there is no good way to set wifi country persistently so just do it on boot in this script
+if [[ -f /etc/rpi-issue ]]; then
+    iw reg set PA
+fi
+
 if check_network 30; then
     echo "network reachable, no need to start an access point"
     # out of an abundance of caution make sure these services are not enabled:
