@@ -256,10 +256,11 @@ if [[ ${#missing[@]} -gt 0 ]] ; then
 fi
 
 
+if [[ -d /boot/dietpi/ ]] && ! grep -qs -e '^metric' /etc/network/interfaces; then
+    echo "adding metric lines to /etc/network/interfaces"
+    sed -i /etc/network/interfaces -e 's/iface eth0.*/\0\nmetric 100/'  -e 's/iface wlan0.*/\0\nmetric 600/'
+fi
 if [[ "$configure_ifplugd" == "yes" ]]; then
-    if ! grep -qs -e metric /etc/network/interfaces; then
-        sed -i /etc/network/interfaces -e 's/iface eth0.*/\0\nmetric 100/'  -e 's/iface wlan0.*/\0\nmetric 600/'
-    fi
     sed -i  /etc/default/ifplugd \
         -e 's/^INTERFACES=.*/INTERFACES="eth0"/' \
         -e 's/^ARGS=.*/ARGS="-q -f -u2 -d5 -w -I --initial-down"/'
