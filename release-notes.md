@@ -1,4 +1,5 @@
 Changes since v2.3.2 include:
+- fix several network related issues on DietPi, speeding up reboot and enabling switching to Ethernet once WiFi was enabled
 - add UI capability to change WiFi network (only for feeder image, not for app installs)
 - update containers to latest versions
 - make ADS-B Feeder Image logo slightly higher contrast
