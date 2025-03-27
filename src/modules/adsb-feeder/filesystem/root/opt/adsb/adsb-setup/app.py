@@ -2382,6 +2382,7 @@ class AdsbIm:
                             self.wifi = Wifi()
                         status = self.wifi.wifi_connect(ssid, password)
                         print_err(f"wifi_connect returned {status}")
+                        self.update_net_dev()
 
                     self._system._restart.bg_run(func=connect_wifi)
                     self._next_url_from_director = url_for("systemmgmt")
@@ -2818,17 +2819,8 @@ class AdsbIm:
             # using sets it's really easy to keep track of what we've seen
             self.planes_seen_per_day[i] |= self.get_current_planes(i)
 
-    def every_minute(self):
-        # track the number of planes seen per day - that's a fun statistic to have and
-        # readsb makes it a bit annoying to get that
-        self.track_planes_seen_per_day()
 
-        # make sure DNS works, every 5 minutes is sufficient
-        if time.time() - self.last_dns_check > 300:
-            self.update_dns_state()
-
-        self._sdrdevices._ensure_populated()
-
+    def update_net_dev(self):
         try:
             result = subprocess.run(
                 "ip route get 1 | head -1  | cut -d' ' -f5,7",
@@ -2858,6 +2850,20 @@ class AdsbIm:
             self.wifi_ssid = self.wifi.get_ssid()
         else:
             self.wifi_ssid = ""
+
+
+    def every_minute(self):
+        # track the number of planes seen per day - that's a fun statistic to have and
+        # readsb makes it a bit annoying to get that
+        self.track_planes_seen_per_day()
+
+        # make sure DNS works, every 5 minutes is sufficient
+        if time.time() - self.last_dns_check > 300:
+            self.update_dns_state()
+
+        self._sdrdevices._ensure_populated()
+
+        self.update_net_dev()
 
         if self._d.env_by_tags("tailscale_name").value:
             try:
