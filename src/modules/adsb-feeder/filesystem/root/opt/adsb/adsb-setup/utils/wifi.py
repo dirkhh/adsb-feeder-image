@@ -152,8 +152,10 @@ class Wifi:
                             if "ssid" in networkline:
                                 exist_ssid = networkline.split('"')[1]
                             if "priority" in networkline:
-                                # using the current line number gives us distinct priorities that will be smaller than 1000
-                                networkline = networkline.split("=")[0] + f"={j}"
+                                p1, p2 = networkline.split("=")
+                                # lower priority of all existing networks by 1
+                                # negative priorities are allowed so this is fine
+                                networkline = p1 + f"={int(p2) - 1}"
                             networkblock += networkline.rstrip() + "\n"
                             if "}" in lines[j]:
                                 break
