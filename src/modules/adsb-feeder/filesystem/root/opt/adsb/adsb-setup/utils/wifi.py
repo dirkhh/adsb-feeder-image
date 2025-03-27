@@ -31,18 +31,22 @@ class Wifi:
 
         return ssid.strip()
 
-    def wpa_cli_reconfigure(self):
-        connected = False
-        output = ""
+    def wait_wpa_supplicant(self):
         # wait for wpa_supplicant to be running
         startTime = time.time()
         success = False
         while time.time() - startTime < 45:
             success, output = run_shell_captured("pgrep wpa_supplicant", timeout=5)
+            time.sleep(1)
             if success:
                 break
         if not success:
             print_err("timeout while waiting for wpa_supplicant to start")
+        return success
+
+    def wpa_cli_reconfigure(self):
+        connected = False
+        output = ""
 
         try:
             proc = subprocess.Popen(
@@ -55,6 +59,7 @@ class Wifi:
             os.set_blocking(proc.stdout.fileno(), False)
 
             startTime = time.time()
+            reconfigureSent = False
             reconfigured = False
             while time.time() - startTime < 20:
                 line = proc.stdout.readline()
@@ -64,9 +69,10 @@ class Wifi:
 
                 output += line
                 # print_err(f"wpa_cli: {line.rstrip()})")
-                if "Interactive mode" in line:
+                if not reconfigureSent and line.startswith(">"):
                     proc.stdin.write("reconfigure\n")
                     proc.stdin.flush()
+                    reconfigureSent = True
                 if "reconfigure" in line:
                     reconfigured = True
                 if reconfigured and "CTRL-EVENT-CONNECTED" in line:
@@ -198,6 +204,9 @@ p2p_disabled=1
         print_err("wpa supplicant config written to " + path)
         return True
 
+    def restart_networking_noblock(self):
+        res, out = run_shell_captured("systemctl restart --no-block networking.service", timeout=5)
+
     def dietpi_add_wifi_hotplug(self):
         # enable hotplug in case this is an old dietpi image (before may 2024)
         changedInterfaces = False
@@ -213,11 +222,7 @@ p2p_disabled=1
         if changedInterfaces:
             print_err(f"uncommenting allow-hotplug for {self.wlan}")
             os.rename("/etc/network/interfaces.new", "/etc/network/interfaces")
-            output = subprocess.run(
-                f"systemctl restart --no-block networking.service",
-                shell=True,
-                capture_output=True,
-            )
+            self.restart_networking_noblock()
         else:
             os.remove("/etc/network/interfaces.new")
 
@@ -235,11 +240,9 @@ p2p_disabled=1
                 ssid=ssid, passwd=passwd, path="/etc/wpa_supplicant/wpa_supplicant.conf", country_code=country_code
             )
             if success:
-                output = subprocess.run(
-                    f"systemctl restart --no-block networking.service",
-                    shell=True,
-                    capture_output=True,
-                )
+                self.restart_networking_noblock()
+                self.wait_wpa_supplicant()
+
                 success = self.wpa_cli_reconfigure()
 
         elif self.baseos == "raspbian":
