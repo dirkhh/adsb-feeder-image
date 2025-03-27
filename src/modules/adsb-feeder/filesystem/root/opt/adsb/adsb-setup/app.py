@@ -56,11 +56,12 @@ from flask import (
 )
 
 
-from utils import (
+from utils.data import Data
+from utils.environment import Env
+from utils.flask import RouteManager, check_restart_lock
+from utils.netconfig import NetConfig, UltrafeederConfig
+from utils.other_aggregators import (
     ADSBHub,
-    Background,
-    Data,
-    Env,
     FlightAware,
     FlightRadar24,
     OpenSky,
@@ -69,21 +70,22 @@ from utils import (
     RadarBox,
     RadarVirtuel,
     Uk1090,
-    RouteManager,
-    SDRDevices,
-    AggStatus,
-    ImStatus,
-    System,
-    check_restart_lock,
-    UltrafeederConfig,
+)
+from utils.sdr import SDR, SDRDevices
+from utils.agg_status import AggStatus, ImStatus
+from utils.system import System
+from utils.util import (
     cleanup_str,
-    print_err,
-    run_shell_captured,
-    stack_info,
     generic_get_json,
     is_true,
+    print_err,
+    stack_info,
     verbose,
+    make_int,
+    run_shell_captured,
 )
+from utils.background import Background
+from utils.wifi import Wifi
 
 # nofmt: off
 # isort: on
