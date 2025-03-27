@@ -162,12 +162,19 @@ class Wifi:
                             j += 1
                         i = j
                         netblocks[exist_ssid] = networkblock
-                output = subprocess.run(
-                    ["wpa_passphrase", f"{ssid}", f"{passwd}"],
-                    capture_output=True,
-                    check=True,
-                ).stdout.decode()
-                netblocks[ssid] = output.replace("}", "\tpriority=1000\n}")
+        except:
+            print_err(traceback.format_exc())
+            print_err(f"ERROR when parsing existing wpa supplicant config, will DISCARD OLD CONFIG")
+            netblocks = {}
+
+        try:
+            output = subprocess.run(
+                ["wpa_passphrase", f"{ssid}", f"{passwd}"],
+                capture_output=True,
+                check=True,
+            ).stdout.decode()
+            netblocks[ssid] = output.replace("}", "\tpriority=1000\n}")
+
             with open(path, "w") as conf:
                 conf.write(
                     f"""
@@ -183,9 +190,9 @@ p2p_disabled=1
                 )
                 for k in netblocks.keys():
                     conf.write(netblocks[k])
-        except Exception as e:
+        except:
+            print_err(traceback.format_exc())
             print_err(f"ERROR when writing wpa supplicant config to {path}")
-            print_err("exception: " + str(e))
             return False
         print_err("wpa supplicant config written to " + path)
         return True
