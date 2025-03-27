@@ -147,7 +147,7 @@ EOF
     # but if this fails, wait 2 min until retrying (default 5 min)
     cat >> "$MNT_DIR"/etc/dhcp/dhclient.conf << EOF
 timeout 30;
-retry 120;
+retry 30;
 EOF
 
     # the system default route and route is set by dhclient

@@ -256,6 +256,15 @@ if [[ ${#missing[@]} -gt 0 ]] ; then
 fi
 
 if [ -f /opt/adsb/os.adsb.feeder.image ] ; then
+    # make dhclient not sleep as long (retry default is 5 min)
+    # also ensure the canonical timeout is set
+    if [[ -f /etc/dhcp/dhclient.conf ]] && ! grep -qs -e '^retry' /etc/dhcp/dhclient.conf; then
+        cat >>/etc/dhcp/dhclient.conf  <<EOF
+timeout 30;
+retry 30;
+EOF
+    fi
+    sed -i -e 's/^retry\s.*/retry 30;/' -e 's/^timeout\s.*/timeout 30;/' /etc/dhcp/dhclient.conf
 
     if [[ -d /boot/dietpi/ ]] && ! grep -qs -e '^metric' /etc/network/interfaces; then
         echo "adding metric lines to /etc/network/interfaces"
