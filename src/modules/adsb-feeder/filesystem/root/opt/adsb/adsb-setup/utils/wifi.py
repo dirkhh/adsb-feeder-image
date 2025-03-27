@@ -222,6 +222,7 @@ p2p_disabled=1
         if changedInterfaces:
             print_err(f"uncommenting allow-hotplug for {self.wlan}")
             os.rename("/etc/network/interfaces.new", "/etc/network/interfaces")
+            self.restart_networking_noblock()
         else:
             os.remove("/etc/network/interfaces.new")
 
@@ -239,10 +240,14 @@ p2p_disabled=1
                 ssid=ssid, passwd=passwd, path="/etc/wpa_supplicant/wpa_supplicant.conf", country_code=country_code
             )
             if success:
-                res, out = run_shell_captured(f"ifdown {self.wlan}", timeout=120)
-                success, out = run_shell_captured(f"ifup {self.wlan}", timeout=120)
-                if not success:
-                    print_err(f"ifup failed: {out}")
+                # note to self: don't call ifup from within this
+                # stopping adsb-setup service will terminate wpa_supplicant somehow
+                if not self.wait_wpa_supplicant():
+                    print_err("ERROR: wait_wpa_supplicant didn't work, restarting networking and re-trying")
+                    self.restart_networking_noblock()
+                    self.wait_wpa_supplicant()
+
+                success = self.wpa_cli_reconfigure()
 
         elif self.baseos == "raspbian":
             # do a wifi scan to ensure the following connect works
