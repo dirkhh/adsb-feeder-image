@@ -102,15 +102,7 @@ done
 while true; do
     echo "No internet connection detected, starting access point"
     python3 /opt/adsb/adsb-setup/hotspot-app.py "$wlan"
-
-    if [[ -d /boot/dietpi/ ]]; then
-        # dietpi needs extra timeout on this after the hotspot-app has configured wifi
-        TOTAL=60
-    else
-        TOTAL=30
-    fi
-    if check_network $TOTAL; then
-        # break outer loop as well if network tests good
+    if check_network 30; then
         break
     fi
 done
