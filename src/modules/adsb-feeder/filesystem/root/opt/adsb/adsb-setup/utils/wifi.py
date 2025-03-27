@@ -138,30 +138,31 @@ class Wifi:
     def writeWpaConf(self, ssid=None, passwd=None, path=None, country_code="GB"):
         netblocks = {}
         try:
-            # painfully extract the existing network blocks from the config file
-            # I'm sure there are easier ways to do this
+            # extract the existing network blocks from the config file
             with open(path, "r") as conf:
                 lines = conf.readlines()
-                for i in range(len(lines)):
-                    line = lines[i]
+                inBlock = False
+                for line in lines:
                     if line.strip().startswith("network="):
-                        networkblock = line.rstrip() + "\n"
-                        j = i + 1
-                        while j < len(lines):
-                            networkline = lines[j]
-                            if "ssid" in networkline:
-                                exist_ssid = networkline.split('"')[1]
-                            if "priority" in networkline:
-                                p1, p2 = networkline.split("=")
-                                # lower priority of all existing networks by 1
-                                # negative priorities are allowed so this is fine
-                                networkline = p1 + f"={int(p2) - 1}"
-                            networkblock += networkline.rstrip() + "\n"
-                            if "}" in lines[j]:
-                                break
-                            j += 1
-                        i = j
-                        netblocks[exist_ssid] = networkblock
+                        if inBlock:
+                            raise SyntaxError("nested network block")
+                        netblock = ""
+                        exist_ssid = None
+                        inBlock = True
+                    if inBlock:
+                        if "ssid" in line:
+                            exist_ssid = line.split('"')[1]
+                        if "priority" in line:
+                            p1, p2 = line.split("=")
+                            # lower priority of all existing networks by 1
+                            # negative priorities are allowed so this is fine
+                            line = p1 + f"={int(p2) - 1}"
+                        netblock += line.rstrip() + "\n"
+                    if "}" in line:
+                        if not inBlock or not exist_ssid:
+                            raise SyntaxError("unexpected close of network block")
+                        inBlock = False
+                        netblocks[exist_ssid] = netblock
         except:
             print_err(traceback.format_exc())
             print_err(f"ERROR when parsing existing wpa supplicant config, will DISCARD OLD CONFIG")
