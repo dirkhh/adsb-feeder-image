@@ -265,6 +265,14 @@ if [[ "$configure_ifplugd" == "yes" ]]; then
         -e 's/^INTERFACES=.*/INTERFACES="eth0"/' \
         -e 's/^ARGS=.*/ARGS="-q -f -u2 -d2 -w -I --initial-down"/'
     systemctl restart --no-block ifplugd
+
+    # ifplugd will handle eth0, not necessary for networking service to bring it up
+    sed -i -e 's/^allow-hotplug\s*eth0/#\0/' /etc/network/interfaces
+fi
+if [[ -d /boot/dietpi/ ]] && ! grep -qs -e 'network=' /etc/wpa_supplicant/wpa_supplicant.conf; then
+    # if no network is configured in wpa_supplicant.conf, disable wifi
+    # it will be re-enabled by the hotspot or in the webinterface (wifi.py)
+    sed -i -e 's/^allow-hotplug\s*wlan0/#\0/' /etc/network/interfaces
 fi
 
 if [ -f /opt/adsb/os.adsb.feeder.image ] ; then

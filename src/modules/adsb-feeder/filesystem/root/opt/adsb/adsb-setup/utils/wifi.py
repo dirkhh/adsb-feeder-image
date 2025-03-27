@@ -208,7 +208,7 @@ p2p_disabled=1
         res, out = run_shell_captured("systemctl restart --no-block networking.service", timeout=5)
 
     def dietpi_add_wifi_hotplug(self):
-        # enable hotplug in case this is an old dietpi image (before may 2024)
+        # enable dietpi wifi in case it is disabled
         changedInterfaces = False
         with open("/etc/network/interfaces", "r") as current, open("/etc/network/interfaces.new", "w") as update:
             lines = current.readlines()

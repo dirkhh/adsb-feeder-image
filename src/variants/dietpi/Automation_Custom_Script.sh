@@ -45,6 +45,15 @@ sed -i  /etc/default/ifplugd \
     -e 's/^ARGS=.*/ARGS="-q -f -u2 -d2 -w -I --initial-down"/'
 systemctl restart --no-block ifplugd
 
+# ifplugd will handle eth0, not necessary for networking service to bring it up
+sed -i -e 's/^allow-hotplug\s*eth0/#\0/' /etc/network/interfaces
+
+# if no network is configured in wpa_supplicant.conf, disable wifi
+# it will be re-enabled by the hotspot or in the webinterface (wifi.py)
+if ! grep -qs -e 'network=' /etc/wpa_supplicant/wpa_supplicant.conf; then
+    sed -i -e 's/^allow-hotplug\s*wlan0/#\0/' /etc/network/interfaces
+fi
+
 # instead of only allowing stepping the clock for 3 updates after startup,
 # always step the clock if it's off by more than 0.5 seconds
 sed -i -e 's/^makestep.*/makestep 0.5 -1/' /etc/chrony/chrony.conf
