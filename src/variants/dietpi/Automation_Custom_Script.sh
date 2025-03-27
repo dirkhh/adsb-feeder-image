@@ -42,7 +42,7 @@ apt install -y --no-install-recommends chrony jq zstd acpid netcat-openbsd ifplu
 # ifplugd is required so ethernet works when the link is established after boot
 sed -i  /etc/default/ifplugd \
     -e 's/^INTERFACES=.*/INTERFACES="eth0"/' \
-    -e 's/^ARGS=.*/ARGS="-q -f -u2 -d5 -w -I --initial-down"/'
+    -e 's/^ARGS=.*/ARGS="-q -f -u2 -d2 -w -I --initial-down"/'
 systemctl restart --no-block ifplugd
 
 # instead of only allowing stepping the clock for 3 updates after startup,
