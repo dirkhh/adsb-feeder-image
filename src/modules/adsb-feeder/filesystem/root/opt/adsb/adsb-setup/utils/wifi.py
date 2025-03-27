@@ -178,7 +178,7 @@ class Wifi:
             with open(path, "w") as conf:
                 conf.write(
                     f"""
-# WiFi country code, set here in case the access point does send one
+# WiFi country code, set here in case the access point does not send one
 country={country_code}
 # Grant all members of group "netdev" permissions to configure WiFi, e.g. via wpa_cli or wpa_gui
 ctrl_interface=DIR=/run/wpa_supplicant GROUP=netdev
