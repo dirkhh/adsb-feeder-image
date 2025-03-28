@@ -3,6 +3,7 @@ services:
     image: ${FR24_CONTAINER}
     healthcheck:
       disable: true
+    dns_search: . # Ensures unified DNS config.
     container_name: fr24feed
     restart: unless-stopped
     cpu_period: 50000
