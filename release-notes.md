@@ -1,4 +1,5 @@
 Changes since v2.3.2 include:
+- readsb bandwith reduction: will not throttle all aggregators if there is a bad connection to one of them
 - fix rare FR24 connection issues (docker incorrectly using DNS search domain, fr24 mishandling DNS replies)
 - fix several network related issues on DietPi, speeding up reboot and enabling switching to Ethernet once WiFi was enabled
 - add UI capability to change WiFi network (only for feeder image, not for app installs)
