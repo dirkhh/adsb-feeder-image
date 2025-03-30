@@ -302,6 +302,26 @@
       </div>
     </label>
   </div>
+  <div class="ol-12 form-check">
+    <input type="checkbox" class="form-check-input me-1" name="sdrmap--is_enabled" id="sdrmap--is_enabled"
+           {{ others_enabled("sdrmap", m) }} />
+    <label class="mx-1 w-auto" for="sdrmap--is_enabled">
+      <a href="https://sdrmap.org/">sdrmap</a>
+      <div class="form-group" id="SM_FIELDS">
+        <label for="sdrmap--user">
+          You need an sdrmap username and password. If you already have these, please enter them below.
+          Otherwise, please send them an email at <tt>send us an email feed@sdrmap.org</tt> and request
+          an account. To make things easier, include your broad location (city/state/country) in the email.
+        </label>
+        <input type="text" id="sdrmap--user" name="sdrmap--user" class="form-control w-75"
+               {{ others_enabled("sdrmap", m) | replace("checked", "required" ) }} placeholder=" sdrmap username"
+               value="{{ list_value_by_tags(["sdrmap", "user"], m) }}">
+        <input type="text" id="sdrmap--key" name="sdrmap--key" class="form-control w-75"
+               placeholder="sdrmap password" value="{{ list_value_by_tags(["sdrmap", "key"], m) }}" />
+
+        </div>
+    </label>
+  </div>
   <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="aggregators"
           value={{go}}>apply settings - take me to the website</button>
 </form>
@@ -321,6 +341,7 @@
     ["opensky--is_enabled", "OS_FIELDS", ["opensky--user"]],
     ["radarvirtuel--is_enabled", "RV_FIELDS", ["radarvirtuel--key"]],
     ["1090uk--is_enabled", "TNUK_FIELDS", ["1090uk--key"]],
+    ["sdrmap--is_enabled", "SM_FIELDS", ["sdrmap--user", "sdrmap--key"]],
   ];
   for (const ids of box_fields) {
     let box = document.getElementById(ids[0]);

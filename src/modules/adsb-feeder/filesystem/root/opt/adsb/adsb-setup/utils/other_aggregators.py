@@ -461,3 +461,27 @@ class Uk1090(Aggregator):
 
     def _activate(self, user_input: str, idx=0):
         return self._simple_activate(user_input, idx)
+
+
+class Sdrmap(Aggregator):
+    def __init__(self, system: System):
+        super().__init__(
+            name="sdrmap",
+            tags=["sdrmap"],
+            system=system,
+        )
+
+    def _activate(self, user_input: str, idx=0):
+        self._idx = make_int(idx)
+        password, user = user_input.split("::")
+        print_err(f"passed in {user_input} seeing user |{user}| and password |{password}|")
+        if not user:
+            print_err(f"missing user name for sdrmap")
+            return False
+        if not password:
+            print_err(f"missing password for sdrmap")
+            return False
+        self._d.env_by_tags(self.tags + ["user"]).list_set(idx, user)
+        self._d.env_by_tags(self.tags + ["key"]).list_set(idx, password)
+        self._d.env_by_tags(self.tags + ["is_enabled"]).list_set(idx, True)
+        return True

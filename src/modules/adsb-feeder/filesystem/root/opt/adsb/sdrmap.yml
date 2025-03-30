@@ -1,0 +1,25 @@
+services:
+  sdrmap:
+    image: ${SDRMAP_CONTAINER}
+    healthcheck:
+      disable: true
+    container_name: sdrmap
+    restart: unless-stopped
+    cpu_period: 50000
+    cpu_quota: 7500
+    stop_grace_period: 3s
+    environment:
+      - BEASTHOST=ultrafeeder
+      - TZ=${FEEDER_TZ}
+      - READSB_LAT=${FEEDER_LAT}
+      - READSB_LON=${FEEDER_LONG}
+      - SMUSERNAME=${FEEDER_SM_USERNAME}
+      - SMPASSWORD=${FEEDER_SM_PASSWORD}
+      - ALT=${FEEDER_ALT_M}
+      - MLAT=${MLAT_ENABLE}
+      # USER_PROVIDED_ENV_START
+      # USER_PROVIDED_ENV_END
+    tmpfs:
+      - /run:exec,size=64M
+      - /tmp:size=16M
+      - /var/log:size=16M

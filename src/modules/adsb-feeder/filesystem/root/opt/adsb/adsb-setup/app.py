@@ -70,6 +70,7 @@ from utils.other_aggregators import (
     RadarBox,
     RadarVirtuel,
     Uk1090,
+    Sdrmap,
 )
 from utils.sdr import SDR, SDRDevices
 from utils.agg_status import AggStatus, ImStatus
@@ -222,6 +223,7 @@ class AdsbIm:
             "radarbox--submit": RadarBox(self._system),
             "radarvirtuel--submit": RadarVirtuel(self._system),
             "1090uk--submit": Uk1090(self._system),
+            "sdrmap--submit": Sdrmap(self._system),
         }
         # fmt: off
         self.all_aggregators = [
@@ -244,6 +246,7 @@ class AdsbIm:
             ["opensky", "OpenSky", "https://opensky-network.org/network/explorer", ["https://opensky-network.org/receiver-profile?s=<FEEDER_OPENSKY_SERIAL>"], 1],
             ["radarvirtuel", "RadarVirtuel", "https://www.radarvirtuel.com/", [""], 1],
             ["1090uk", "1090MHz UK", "https://1090mhz.uk", ["https://www.1090mhz.uk/mystatus.php?key=<FEEDER_1090UK_API_KEY>"], 1],
+            ["sdrmap", "sdrmap", "https://sdrmap.org/", [""], 1],
         ]
         self.agg_matrix = None
         self.agg_structure = None
@@ -274,6 +277,7 @@ class AdsbIm:
             "hpradar--is_enabled",
             "alive--is_enabled",
             "uat978--is_enabled",
+            "sdrmap--is_enabled", "sdrmap--user", "sdrmap--key",
         )
 
         self._routemanager.add_proxy_routes(self._d.proxy_routes)
@@ -2408,6 +2412,9 @@ class AdsbIm:
                     if base == "opensky":
                         user = form.get(f"{base}--user", None)
                         aggregator_argument += f"::{user}"
+                    if base == "sdrmap":
+                        user = form.get(f"{base}--user", None)
+                        aggregator_argument += f"::{user}"
                     aggregator_object = self._other_aggregators[key]
                     print_err(f"got aggregator object {aggregator_object} -- activating for sitenum {l_sitenum}")
                     try:
@@ -2821,7 +2828,6 @@ class AdsbIm:
             # using sets it's really easy to keep track of what we've seen
             self.planes_seen_per_day[i] |= self.get_current_planes(i)
 
-
     def update_net_dev(self):
         try:
             result = subprocess.run(
@@ -2852,7 +2858,6 @@ class AdsbIm:
             self.wifi_ssid = self.wifi.get_ssid()
         else:
             self.wifi_ssid = ""
-
 
     def every_minute(self):
         # track the number of planes seen per day - that's a fun statistic to have and
@@ -3219,6 +3224,7 @@ def create_stage2_yml_files(n, ip):
         [f"pw_{n}.yml", "pw_stage2_template.yml"],
         [f"rb_{n}.yml", "rb_stage2_template.yml"],
         [f"rv_{n}.yml", "rv_stage2_template.yml"],
+        [f"sdrmap_{n}.yml", "sdrmap_stage2_template.yml"],
     ]:
         create_stage2_yml_from_template(f"/opt/adsb/config/{yml_file}", n, ip, f"/opt/adsb/config/{template}")
 

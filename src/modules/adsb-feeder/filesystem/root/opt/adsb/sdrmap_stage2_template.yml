@@ -1,0 +1,25 @@
+services:
+  sdrmap_STAGE2NUM:
+    image: ${SDRMAP_CONTAINER}
+    healthcheck:
+      disable: true
+    container_name: sdrmap_STAGE2NUM
+    restart: unless-stopped
+    cpu_period: 50000
+    cpu_quota: 7500
+    stop_grace_period: 3s
+    environment:
+      - BEASTHOST=uf_STAGE2NUM
+      - TZ=${FEEDER_TZ_STAGE2NUM}
+      - READSB_LAT=${FEEDER_LAT_STAGE2NUM}
+      - READSB_LON=${FEEDER_LONG_STAGE2NUM}
+      - SMUSERNAME=${FEEDER_SM_USERNAME_STAGE2NUM}
+      - SMPASSWORD=${FEEDER_SM_PASSWORD_STAGE2NUM}
+      - ALT=${FEEDER_ALT_M_STAGE2NUM}
+      - MLAT=${MLAT_ENABLE_STAGE2NUM}
+      # USER_PROVIDED_ENV_START
+      # USER_PROVIDED_ENV_END
+    tmpfs:
+      - /run:exec,size=64M
+      - /tmp:size=16M
+      - /var/log:size=16M

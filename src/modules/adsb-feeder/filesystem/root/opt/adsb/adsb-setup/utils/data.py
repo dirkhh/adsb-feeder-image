@@ -311,6 +311,16 @@ class Data:
             default=[""],
             tags=["1090uk", "key"],
         ),
+        Env(
+            "FEEDER_SM_USERNAME",
+            default=[""],
+            tags=["sdrmap", "user"],
+        ),
+        Env(
+            "FEEDER_SM_PASSWORD",
+            default=[""],
+            tags=["sdrmap", "key"],
+        ),
         # ADSB.im specific
         Env("_ADSBIM_AGGREGATORS_SELECTION", tags=["aggregator_choice"]),
         Env(
@@ -401,6 +411,11 @@ class Data:
             "AF_IS_1090UK_ENABLED",
             default=[False],
             tags=["other_aggregator", "is_enabled", "1090uk"],
+        ),
+        Env(
+            "AF_IS_SDRMAP_ENABLED",
+            default=[False],
+            tags=["other_aggregator", "is_enabled", "sdrmap"],
         ),
         Env(
             "AF_IS_AIRSPY_ENABLED",
@@ -605,6 +620,7 @@ class Data:
         "RV_CONTAINER": "radarvirtuel",
         "PW_CONTAINER": "planewatch",
         "TNUK_CONTAINER": "1090uk",
+        "SDRMAP_CONTAINER": "sdrmap",
     }
     with open(data_path / "docker.image.versions", "r") as file:
         for line in file:

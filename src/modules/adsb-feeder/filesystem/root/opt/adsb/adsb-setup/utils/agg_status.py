@@ -17,9 +17,9 @@ status_symbol = {
     T.Unknown: ".",
     T.Good: "+",
     T.Bad: "\u2639",
-    T.Warning: "\u26A0",
+    T.Warning: "\u26a0",
     T.Unsupported: " ",
-    T.Starting: "\u27F3",
+    T.Starting: "\u27f3",
     T.ContainerDown: "\u2608",
 }
 ultrafeeder_aggs = [
@@ -167,6 +167,7 @@ class AggStatus:
                 "opensky": "opensky",
                 "adsbhub": "adsbhub",
                 "planewatch": "planewatch",
+                "sdrmap": "sdrmap",
             }
             container_name = container_for_agg.get(self._agg)
             if self._idx != 0:
@@ -484,6 +485,10 @@ class AggStatus:
                 self._last_check = datetime.now()
             else:
                 print_err(f"planewatch returned {status}")
+        elif self._agg == "sdrmap":
+            self._last_check = datetime.now()
+            self._beast = T.Unsupported
+            self._mlat = T.Unsupported
 
         # if mlat isn't enabled ignore status check results
         if not self._d.list_is_enabled("mlat_enable", self._idx):
