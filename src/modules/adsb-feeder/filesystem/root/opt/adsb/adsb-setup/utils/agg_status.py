@@ -493,7 +493,9 @@ class AggStatus:
                 self._beast = T.Good
             else:
                 self._beast = T.Disconnected
-            self.get_mlat_status(path=f"/run/sdrmap_{self._idx}/mlat-client-stats.json")
+            #self.get_mlat_status(path=f"/run/sdrmap_{self._idx}/mlat-client-stats.json")
+            self._mlat = T.Unknown
+
 
         # if mlat isn't enabled ignore status check results
         if not self._d.list_is_enabled("mlat_enable", self._idx):
