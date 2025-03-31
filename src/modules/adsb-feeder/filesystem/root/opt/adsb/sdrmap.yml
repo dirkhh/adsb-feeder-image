@@ -11,8 +11,8 @@ services:
     environment:
       - BEASTHOST=ultrafeeder
       - TZ=${FEEDER_TZ}
-      - READSB_LAT=${FEEDER_LAT}
-      - READSB_LON=${FEEDER_LONG}
+      - LAT=${FEEDER_LAT}
+      - LON=${FEEDER_LONG}
       - SMUSERNAME=${FEEDER_SM_USERNAME}
       - SMPASSWORD=${FEEDER_SM_PASSWORD}
       - ALT=${FEEDER_ALT_M}
