@@ -19,7 +19,8 @@ services:
       - MLAT=${MLAT_ENABLE_STAGE2NUM}
       # USER_PROVIDED_ENV_START
       # USER_PROVIDED_ENV_END
+    volumes:
+      - /run/sdrmap_STAGE2NUM:/run
     tmpfs:
-      - /run:exec,size=64M
       - /tmp:size=16M
       - /var/log:size=16M

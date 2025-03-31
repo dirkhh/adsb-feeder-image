@@ -6,6 +6,7 @@ import threading
 import traceback
 import time
 import pathlib
+import os
 from datetime import datetime, timedelta
 from enum import Enum
 from .util import generic_get_json, print_err, make_int, run_shell_captured, get_plain_url
@@ -67,26 +68,27 @@ class AggStatus:
         uf_dir += f"uf_{self._idx}" if self._idx != 0 else "ultrafeeder"
         return uf_dir
 
-    def get_mlat_status(self):
-        mconf = None
-        netconfig = self._d.netconfigs.get(self._agg)
-        if not netconfig:
-            print_err(f"ERROR: get_mlat_status called on {self._agg} not found in netconfigs: {self._d.netconfigs}")
-            return
-        mconf = netconfig.mlat_config
-        # example mlat_config: "mlat,dati.flyitalyadsb.com,30100,39002",
-        if not mconf:
-            self._mlat = T.Unsupported
-            return
-        filename = f"{mconf.split(',')[1]}:{mconf.split(',')[2]}.json"
+    def get_mlat_status(self, path=None):
+        if not path:
+            mconf = None
+            netconfig = self._d.netconfigs.get(self._agg)
+            if not netconfig:
+                print_err(f"ERROR: get_mlat_status called on {self._agg} not found in netconfigs: {self._d.netconfigs}")
+                return
+            mconf = netconfig.mlat_config
+            # example mlat_config: "mlat,dati.flyitalyadsb.com,30100,39002",
+            if not mconf:
+                self._mlat = T.Unsupported
+                return
+            filename = f"{mconf.split(',')[1]}:{mconf.split(',')[2]}.json"
+            path = f"{self.uf_path()}/mlat-client/{filename}"
         try:
-            mlat_json = json.load(open(f"{self.uf_path()}/mlat-client/{filename}", "r"))
+            mlat_json = json.load(open(path, "r"))
             percent_good = mlat_json.get("good_sync_percentage_last_hour", 0)
             percent_bad = mlat_json.get("bad_sync_percentage_last_hour", 0)
             peer_count = mlat_json.get("peer_count", 0)
             now = mlat_json.get("now")
         except:
-            # print_err(f"checking {self.uf_path()}/mlat-client/{filename} failed")
             self._mlat = T.Disconnected
             return
         if time.time() - now > 60:
@@ -487,8 +489,11 @@ class AggStatus:
                 print_err(f"planewatch returned {status}")
         elif self._agg == "sdrmap":
             self._last_check = datetime.now()
-            self._beast = T.Unsupported
-            self._mlat = T.Unsupported
+            if os.path.exists(f"/run/sdrmap_{self._idx}/feed_ok"):
+                self._beast = T.Good
+            else:
+                self._beast = T.Disconnected
+            self.get_mlat_status(path=f"/run/sdrmap_{self._idx}/mlat-client-stats.json")
 
         # if mlat isn't enabled ignore status check results
         if not self._d.list_is_enabled("mlat_enable", self._idx):
