@@ -44,6 +44,8 @@ sanitize_vars = [
     "_ADSBIM_STATE_ZEROTIER_KEY",
     "_ADSBIM_STATE_TAILSCALE_LOGIN_LINK",
     "_ADSBIM_STATE_TAILSCALE_NAME",
+    "FEEDER_SM_USERNAME",
+    "FEEDER_SM_PASSWORD",
 ]
 
 for name in sanitize_vars:
