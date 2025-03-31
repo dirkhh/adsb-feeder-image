@@ -12,14 +12,14 @@ from enum import Enum
 from .util import generic_get_json, print_err, make_int, run_shell_captured, get_plain_url
 from .data import Data
 
-T = Enum("T", ["Disconnected", "Unknown", "Good", "Bad", "Warning", "Unsupported", "Starting", "ContainerDown"])
+T = Enum("T", ["Disconnected", "Unknown", "Good", "Bad", "Warning", "Disabled", "Starting", "ContainerDown"])
 status_symbol = {
     T.Disconnected: "\u2612",
     T.Unknown: ".",
     T.Good: "+",
     T.Bad: "\u2639",
     T.Warning: "\u26a0",
-    T.Unsupported: " ",
+    T.Disabled: " ",
     T.Starting: "\u27f3",
     T.ContainerDown: "\u2608",
 }
@@ -78,7 +78,7 @@ class AggStatus:
             mconf = netconfig.mlat_config
             # example mlat_config: "mlat,dati.flyitalyadsb.com,30100,39002",
             if not mconf:
-                self._mlat = T.Unsupported
+                self._mlat = T.Disabled
                 return
             filename = f"{mconf.split(',')[1]}:{mconf.split(',')[2]}.json"
             path = f"{self.uf_path()}/mlat-client/{filename}"
@@ -179,12 +179,12 @@ class AggStatus:
             container_status = self._system.getContainerStatus(container_name)
             if container_status == "down":
                 self._beast = T.ContainerDown
-                self._mlat = T.Unsupported
+                self._mlat = T.Disabled
                 self._last_check = datetime.now()
                 return
             if container_status == "starting":
                 self._beast = T.Starting
-                self._mlat = T.Unsupported
+                self._mlat = T.Disabled
                 self._last_check = datetime.now()
                 return
 
@@ -291,7 +291,7 @@ class AggStatus:
             else:
                 print_err(f"flightaware at {json_url} returned {status}")
         elif self._agg == "flightradar":
-            self._mlat = T.Unsupported
+            self._mlat = T.Disabled
             suffix = "" if self._idx == 0 else f"_{self._idx}"
             json_url = f"{self._url}/fr24-monitor.json{suffix}/"
             fr_dict, status = self.get_json(json_url)
@@ -344,7 +344,7 @@ class AggStatus:
                         self._last_check = datetime.now()
         elif self._agg == "1090uk":
             self._beast = T.Unknown
-            self._mlat = T.Unsupported
+            self._mlat = T.Disabled
             if False:
                 key = self._d.env_by_tags(["1090uk", "key"]).list_get(self._idx)
                 json_url = f"https://www.1090mhz.uk/mystatus.php?key={key}"
@@ -359,15 +359,15 @@ class AggStatus:
 
         elif self._agg == "planefinder":
             self._beast = T.Unknown
-            self._mlat = T.Unsupported
+            self._mlat = T.Disabled
             self._last_check = datetime.now()
         elif self._agg == "adsbhub":
             self._beast = T.Unknown
-            self._mlat = T.Unsupported
+            self._mlat = T.Disabled
             self._last_check = datetime.now()
         elif self._agg == "opensky":
             self._beast = T.Unknown
-            self._mlat = T.Unsupported
+            self._mlat = T.Disabled
             self._last_check = datetime.now()
         elif self._agg == "radarvirtuel":
             self._beast = T.Unknown
@@ -499,7 +499,7 @@ class AggStatus:
 
         # if mlat isn't enabled ignore status check results
         if not self._d.list_is_enabled("mlat_enable", self._idx):
-            self._mlat = T.Unsupported
+            self._mlat = T.Disabled
 
     def get_maplink(self):
         if self._agg == "alive" and not self._d.env_by_tags("alivemaplink").list_get(self._idx):
