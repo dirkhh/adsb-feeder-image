@@ -1,4 +1,5 @@
 Changes since v2.3.2 include:
+- beta changelog: update ultrafeeder / sdrmap containers
 - experimental support for sdrmap.org (updated)
 - readsb bandwith reduction: will not throttle all aggregators if there is a bad connection to one of them
 - fix rare FR24 connection issues (docker incorrectly using DNS search domain, fr24 mishandling DNS replies)
