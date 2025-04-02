@@ -2,6 +2,7 @@ import copy
 import filecmp
 import gzip
 import json
+import math
 import os
 import os.path
 import pathlib
@@ -2768,6 +2769,8 @@ class AdsbIm:
         self.planes_seen_per_day = [set() for i in [0] + self.micro_indices()]
 
     def load_planes_seen_per_day(self):
+        # set limit on how many days of statistics to keep
+        self.plane_stats_limit = 14
         # we base this on UTC time so it's comparable across time zones
         now = datetime.now(timezone.utc)
         start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -2784,12 +2787,34 @@ class AdsbIm:
                     for i in [0] + self.micro_indices():
                         # json can't store sets, so we use list on disk, but sets in memory
                         self.planes_seen_per_day[i] = set(planelists[i])
-                    self.plane_stats = planes.get("stats", [])
-                    if len(self.plane_stats) == 0:
-                        # create the correct layout for the stats
-                        self.plane_stats = [[] for i in [0] + self.micro_indices()]
+
+                planestats = planes.get("stats")
+                for i in [0] + self.micro_indices():
+                    self.plane_stats[i] = planestats[i]
+
+                diff = start_of_day.timestamp() - ts
+                if diff > 0:
+                    print_err(f"loading planes_seen_per_day: file not from this utc day")
+                    days = math.ceil(diff / (24 * 60 * 60))
+                    if days > 0:
+                        days -= 1
+                        planelists = planes.get("planes")
+                        for i in [0] + self.micro_indices():
+                            self.plane_stats[i].insert(0, len(planelists[i]))
+                    if days > 0:
+                        print_err(f"loading planes_seen_per_day: padding with {days} zeroes")
+                    while days > 0:
+                        days -= 1
+                        for i in [0] + self.micro_indices():
+                            self.plane_stats[i].insert(0, 0)
+
+                for i in [0] + self.micro_indices():
+                    while len(self.plane_stats[i]) > self.plane_stats_limit:
+                        self.plane_stats[i].pop()
+
 
         except:
+            print_err(f"error loading planes_seen_per_day:\n{traceback.format_exc()}")
             pass
 
     def write_planes_seen_per_day(self):
@@ -2834,7 +2859,7 @@ class AdsbIm:
             # it's a new day, store and then reset the data
             for i in ultrafeeders:
                 self.plane_stats[i].insert(0, len(self.planes_seen_per_day[i]))
-                if len(self.plane_stats[i]) > 14:
+                if len(self.plane_stats[i]) > self.plane_stats_limit:
                     self.plane_stats[i].pop()
             self.reset_planes_seen_per_day()
         if now.minute == 0:
