@@ -1664,6 +1664,16 @@ class AdsbIm:
     def remove_micro_site(self, num):
         # carefully shift everything down
         print_err(f"removing micro site {num}")
+
+        # deal with plane stats
+        for i in range(num, self._d.env_by_tags("num_micro_sites").value):
+            self.plane_stats[i] = self.plane_stats[i + 1]
+            self.planes_seen_per_day[i] = self.planes_seen_per_day[i + 1]
+
+        self.plane_stats.pop()
+        self.planes_seen_per_day.pop()
+
+        # deal with env vars
         log_consistency_warning(False)
         for e in self._d.stage2_envs:
             print_err(f"shifting {e.name} down and deleting last element {e._value}")
