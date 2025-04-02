@@ -17,6 +17,7 @@ services:
       - SMPASSWORD=${FEEDER_SM_PASSWORD}
       - ALT=${FEEDER_ALT_M}
       - MLAT=${MLAT_ENABLE}
+      - MLAT_PRIVACY=${MLAT_PRIVACY}
       # USER_PROVIDED_ENV_START
       # USER_PROVIDED_ENV_END
     volumes:
