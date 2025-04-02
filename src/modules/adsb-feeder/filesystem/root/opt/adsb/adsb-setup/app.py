@@ -2812,7 +2812,6 @@ class AdsbIm:
                     while len(self.plane_stats[i]) > self.plane_stats_limit:
                         self.plane_stats[i].pop()
 
-
         except:
             print_err(f"error loading planes_seen_per_day:\n{traceback.format_exc()}")
             pass
@@ -2862,6 +2861,10 @@ class AdsbIm:
                 if len(self.plane_stats[i]) > self.plane_stats_limit:
                     self.plane_stats[i].pop()
             self.reset_planes_seen_per_day()
+            pv = self._d.previous_version
+            self._d.previous_version = "check-in"
+            self._im_status.check(True)
+            self._d.previous_version = pv
         if now.minute == 0:
             # this function is called once every minute - so this triggers once an hour
             # write the data to disk every hour

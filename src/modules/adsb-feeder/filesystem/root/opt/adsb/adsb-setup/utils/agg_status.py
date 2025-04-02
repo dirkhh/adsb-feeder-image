@@ -73,7 +73,9 @@ class AggStatus:
             mconf = None
             netconfig = self._d.netconfigs.get(self._agg)
             if not netconfig:
-                print_err(f"ERROR: get_mlat_status called on {self._agg} not found in netconfigs: {self._d.netconfigs}")
+                print_err(
+                    f"ERROR: get_mlat_status called on {self._agg} not found in netconfigs: {self._d.netconfigs}"
+                )
                 return
             mconf = netconfig.mlat_config
             # example mlat_config: "mlat,dati.flyitalyadsb.com,30100,39002",
@@ -493,9 +495,8 @@ class AggStatus:
                 self._beast = T.Good
             else:
                 self._beast = T.Disconnected
-            #self.get_mlat_status(path=f"/run/sdrmap_{self._idx}/mlat-client-stats.json")
+            # self.get_mlat_status(path=f"/run/sdrmap_{self._idx}/mlat-client-stats.json")
             self._mlat = T.Unknown
-
 
         # if mlat isn't enabled ignore status check results
         if not self._d.list_is_enabled("mlat_enable", self._idx):
@@ -563,9 +564,9 @@ class ImStatus:
         self._next_check = 0
         self._cached = None
 
-    def check(self):
+    def check(self, check=False):
         with self._lock:
-            if not self._cached or time.time() > self._next_check:
+            if not self._cached or time.time() > self._next_check or check:
                 json_url = f"https://adsb.im/api/status"
                 self._cached, status = generic_get_json(json_url, self._d.env_by_tags("pack").value)
                 if status == 200:
