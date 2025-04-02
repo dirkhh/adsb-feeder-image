@@ -1,4 +1,5 @@
 Changes since v2.3.2 include:
+- ultrafeeder: readsb: avoid data loops when pihole returns :: or 0.0.0.0
 - plane count statistics: more robust / keep stats when system off over midnight
 - address some odd DNS edge cases
 - beta changelog: update ultrafeeder / sdrmap containers
