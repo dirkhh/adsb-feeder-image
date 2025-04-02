@@ -2772,6 +2772,7 @@ class AdsbIm:
         now = datetime.now(timezone.utc)
         start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
         self.reset_planes_seen_per_day()
+        self.plane_stats_day = start_of_day.timestamp()
         self.plane_stats = [[] for i in [0] + self.micro_indices()]
         try:
             with gzip.open("/opt/adsb/adsb_planes_seen_per_day.json.gz", "r") as f:
@@ -2827,7 +2828,9 @@ class AdsbIm:
         now = datetime.now(timezone.utc)
         start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
         ultrafeeders = [0] + self.micro_indices()
-        if (now - start_of_day).total_seconds() < 60:
+        if self.plane_stats_day != start_of_day.timestamp():
+            self.plane_stats_day = start_of_day.timestamp()
+            print_err("planes_seen_per_day: new day!")
             # it's a new day, store and then reset the data
             for i in ultrafeeders:
                 self.plane_stats[i].insert(0, len(self.planes_seen_per_day[i]))
