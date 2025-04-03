@@ -18,6 +18,7 @@ services:
       - ALT=${FEEDER_ALT_M_STAGE2NUM}
       - MLAT=${MLAT_ENABLE_STAGE2NUM}
       - MLAT_PRIVACY=${MLAT_PRIVACY}
+      - SEND_SYSINFO=true
       # USER_PROVIDED_ENV_START
       # USER_PROVIDED_ENV_END
     volumes:
