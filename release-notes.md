@@ -1,4 +1,6 @@
 Changes since v2.3.2 include:
+- beta changelog: another new ultrafeeder with small readsb improvements
+- beta changelog: send sysinfo to sdrmap
 - ultrafeeder: readsb: avoid data loops when pihole returns :: or 0.0.0.0
 - plane count statistics: more robust / keep stats when system off over midnight
 - address some odd DNS edge cases
