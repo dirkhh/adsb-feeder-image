@@ -11,7 +11,6 @@ ExecStartPre=/opt/adsb/scripts/fix-docker-network
 ExecStart=/opt/adsb/docker-compose-start
 RemainAfterExit=yes
 ExecStop=/opt/adsb/docker-compose-adsb stop -t 30
-ExecStop=/opt/adsb/scripts/log2disk.sh
 RestartSec=30
 TimeoutStartSec=10min
 TimeoutStopSec=2min

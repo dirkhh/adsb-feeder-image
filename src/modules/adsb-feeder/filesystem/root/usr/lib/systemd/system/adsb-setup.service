@@ -7,6 +7,7 @@ SyslogIdentifier=adsb-setup
 WorkingDirectory=/opt/adsb/adsb-setup
 ExecStartPre=/usr/bin/bash /opt/adsb/pre-start.sh
 ExecStart=/usr/bin/python3 /opt/adsb/adsb-setup/app.py
+ExecStopPost=/opt/adsb/scripts/log2disk.sh
 Restart=always
 Type=simple
 RestartSec=5
