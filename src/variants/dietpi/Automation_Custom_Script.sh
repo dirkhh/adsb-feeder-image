@@ -19,7 +19,7 @@ EOF
 
 cat >> /etc/systemd/system.conf <<EOF
 RuntimeWatchdogSec=15
-RebootWatchdogSec=2min
+RebootWatchdogSec=10min
 EOF
 
 # dietpi deletes and creates a new /etc/machine-id after systemd-journald starts up

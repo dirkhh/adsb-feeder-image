@@ -257,10 +257,13 @@ fi
 
 if [ -f /opt/adsb/os.adsb.feeder.image ] ; then
 
+    if grep -qs /etc/systemd/system.conf -e '^RebootWatchdogSec=2min'; then
+        sed -i -e '/^RuntimeWatchdogSec.*/d' -e '/^RebootWatchdogSec.*/d' /etc/systemd/system.conf
+    fi
     if ! grep -qs /etc/systemd/system.conf -e '^RuntimeWatchdogSec='; then
         cat >> /etc/systemd/system.conf <<EOF
 RuntimeWatchdogSec=15
-RebootWatchdogSec=2min
+RebootWatchdogSec=10min
 EOF
         need_reload="yes"
     fi
