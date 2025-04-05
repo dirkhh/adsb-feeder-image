@@ -1,4 +1,5 @@
 Changes since v2.3.2 include:
+- add network and system watchdogs that should restart networking / reboot system when networking goes down (or the system hangs for boards with hardware watchdog)
 - beta changelog: another new ultrafeeder with small readsb improvements
 - beta changelog: send sysinfo to sdrmap
 - ultrafeeder: readsb: avoid data loops when pihole returns :: or 0.0.0.0
