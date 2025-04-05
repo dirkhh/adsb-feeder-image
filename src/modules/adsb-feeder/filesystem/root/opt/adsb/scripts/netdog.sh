@@ -19,7 +19,7 @@ FAILS=0
 while sleep 120; do
     # don't check when adsb-hotspot is running
     HOTSPOT=$(systemctl is-active adsb-hotspot)
-    if [[ "$HOTSPOT" == "activating" ]] || [[ "$HOTSPOT" == "active" ]]; then
+    if [[ "$HOTSPOT" == "activating" ]]; then
         continue
     fi
 
