@@ -17,6 +17,11 @@ cat > /etc/docker/daemon.json <<EOF
 }
 EOF
 
+cat >> /etc/systemd/system.conf <<EOF
+RuntimeWatchdogSec=15
+RebootWatchdogSec=2min
+EOF
+
 # dietpi deletes and creates a new /etc/machine-id after systemd-journald starts up
 # thus systemd-journald is writing to /var/log/journal/<old-machine-id>
 # journalctl on the other hand tries to read from /var/log/journal/<new-machine-id>

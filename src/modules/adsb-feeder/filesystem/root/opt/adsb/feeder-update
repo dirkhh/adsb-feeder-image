@@ -256,6 +256,14 @@ if [[ ${#missing[@]} -gt 0 ]] ; then
 fi
 
 if [ -f /opt/adsb/os.adsb.feeder.image ] ; then
+
+    if ! grep -qs /etc/systemd/system.conf -e '^RuntimeWatchdogSec='; then
+        cat >> /etc/systemd/system.conf <<EOF
+RuntimeWatchdogSec=15
+RebootWatchdogSec=2min
+EOF
+        need_reload="yes"
+    fi
     # make dhclient not sleep as long (retry default is 5 min)
     # also ensure the canonical timeout is set
     if [[ -f /etc/dhcp/dhclient.conf ]] && ! grep -qs -e '^retry' /etc/dhcp/dhclient.conf; then

@@ -80,6 +80,11 @@ then
   echo "done!"
 fi
 
+cat >> /etc/systemd/system.conf <<EOF
+RuntimeWatchdogSec=15
+RebootWatchdogSec=2min
+EOF
+
 # Add some aliases to localhost in `/etc/hosts`. This will speed up recreation of images with docker-compose
 if ! grep localunixsocket /etc/hosts >/dev/null 2>&1
 then
