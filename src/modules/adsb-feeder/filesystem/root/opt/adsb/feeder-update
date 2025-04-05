@@ -235,6 +235,8 @@ function check_missing() {
     fi
 }
 
+need_reload="no"
+
 missing=()
 check_missing
 
@@ -330,7 +332,6 @@ if [ ! -f /opt/adsb/os.adsb.feeder.image ] ; then
     rm -f ./usr/lib/systemd/system/adsb-bootstrap.service
 fi
 
-need_reload="no"
 for path in ./usr/lib/systemd/system/*; do
     if ! diff -q "${path}" "${path:1}" &>/dev/null; then
         need_reload="yes"
