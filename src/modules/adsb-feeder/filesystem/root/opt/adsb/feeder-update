@@ -339,6 +339,7 @@ else
 
     services_enable+=("adsb-hotspot.service")
     services_enable+=("adsb-zram.service")
+    services_enable+=("adsb-netdog.service")
 fi
 
 # remove flag file so the caching helper script will run via pre-start.sh
@@ -382,6 +383,12 @@ fi
 systemctl start --no-block adsb-zram
 
 if [ -f /opt/adsb/os.adsb.feeder.image ] ; then
+    # adsb-hotspot.service had RemainAfterExit set which makes it hard to check if the hotspot is
+    # running, the new service file has it no longer set but this won't apply until a reboot or if
+    # the hotspot service is restarted
+    if systemctl is-active adsb-hotspot >/dev/null; then
+        systemctl restart adsb-hotspot
+    fi
     # try turning off dphys-swapfile on raspbian
     if systemctl is-enabled dphys-swapfile &>/dev/null; then
         systemctl disable --now dphys-swapfile || true

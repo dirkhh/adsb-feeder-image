@@ -1,0 +1,12 @@
+[Unit]
+Description=ADS-B Feeder Image Network Watchdog
+
+[Service]
+WorkingDirectory=/opt/adsb
+ExecStart=/opt/adsb/scripts/netdog.sh
+SyslogIdentifier=adsb-netdog
+Restart=always
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
