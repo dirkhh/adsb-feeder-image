@@ -13,7 +13,7 @@ function test_network() {
     sleep $TIMEOUT &
 
     # is there a gateway?
-    gateway=$(ip route | awk '/default/ { print $3 }')
+    gateway=$(ip route get 1.2.3.4 | awk '/via/ { print $3 }')
     if [[ $gateway != "" ]]; then
         ping -c 1 -W $TIMEOUT "$gateway" &> /dev/null &
         pids+=($!)
