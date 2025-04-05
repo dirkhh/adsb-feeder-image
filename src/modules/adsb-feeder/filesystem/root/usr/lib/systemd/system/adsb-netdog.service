@@ -1,5 +1,6 @@
 [Unit]
 Description=ADS-B Feeder Image Network Watchdog
+After=network.target
 
 [Service]
 WorkingDirectory=/opt/adsb
