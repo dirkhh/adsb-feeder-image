@@ -358,7 +358,7 @@ services_enable+=("adsb-setup.service")
 for service in "${services_enable[@]}"; do
     if ! systemctl is-enabled "${service}" >/dev/null; then
         echo "${service} wasn't enabled, enabling it"
-        systemctl enable "${service}"
+        systemctl enable --now "${service}"
     fi
 done
 
