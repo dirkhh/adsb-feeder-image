@@ -16,7 +16,7 @@ function test_network() {
 
 
 FAILS=0
-while sleep 300; do
+while sleep 120; do
     # don't check when adsb-hotspot is running
     HOTSPOT=$(systemctl is-active adsb-hotspot)
     if [[ "$HOTSPOT" == "activating" ]] || [[ "$HOTSPOT" == "active" ]]; then
@@ -34,10 +34,10 @@ while sleep 300; do
     FAILS=$(( FAILS + 1 ))
 
     echo "Network doesn't seem to be working! Successive Failures: $FAILS"
-    if (( FAILS >= 4 )); then
+    if (( FAILS >= 6 )); then
         echo "Rebooting"
         reboot
-    elif (( FAILS >= 2 )); then
+    elif (( FAILS == 3 )); then
         if systemctl is-enabled NetworkManager &>/dev/null; then
             echo "Restarting NetworkManager"
             systemctl restart NetworkManager
