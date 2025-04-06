@@ -391,9 +391,6 @@ if [[ $(jq < /etc/docker/daemon.json '."default-address-pools" | has("base")' 2>
     timeout 5 docker ps || systemctl restart docker
 fi
 
-# enable zram so no reboot is required (script exits for non image installs or when already enabled)
-systemctl start --no-block adsb-zram
-
 if [ -f /opt/adsb/os.adsb.feeder.image ] ; then
     # try turning off dphys-swapfile on raspbian
     if systemctl is-enabled dphys-swapfile &>/dev/null; then
