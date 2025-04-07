@@ -1959,8 +1959,6 @@ class AdsbIm:
 
             # rtl-sdr
             rtlsdr = any(sdr._type == "rtlsdr" and sdr._serial == env1090.value for sdr in self._sdrdevices.sdrs)
-            if not rtlsdr:
-                env1090.value = ""
 
             if rtlsdr:
                 self._d.env_by_tags("readsb_device_type").value = "rtlsdr"
@@ -2745,17 +2743,12 @@ class AdsbIm:
             print_err("director redirecting to sdr_setup: duplicate SDR serials")
             #return self.sdr_setup()
 
-        # check that "something" is configured as input
-        if (
-            (len(self._sdrdevices) > 1 or any([sdr._type == "airspy" for sdr in self._sdrdevices.sdrs]))
-            and not (
-                self._d.env_by_tags("1090serial").value
-                or self._d.env_by_tags("978serial").value
-                or self._d.is_enabled("airspy")
-            )
-            and not self._d.is_enabled("stage2")
-        ):
-            print_err("director redirecting to sdr_setup: devices present but not configured")
+        # check if any of the SDRs aren't configured
+        configured_serials = [self._d.env_by_tags(purpose).value for purpose in self._sdrdevices.purposes()]
+        print_err(configured_serials)
+        print_err([sdr._serial for sdr in self._sdrdevices.sdrs])
+        if any([sdr._serial not in configured_serials for sdr in self._sdrdevices.sdrs]):
+            print_err("director redirecting to sdr_setup: unconfigured devices present")
             return self.sdr_setup()
 
         # if the user chose to individually pick aggregators but hasn't done so,
