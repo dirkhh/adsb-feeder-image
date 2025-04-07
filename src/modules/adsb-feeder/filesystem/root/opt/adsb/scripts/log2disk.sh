@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ -f /run/adsb-feeder-image.log ]]; then
-    TIMESTAMP=$(date +%Y-%m-%d+%H:%M)
+    TIMESTAMP=$(date +%Y-%m-%d+%H:%M:%S)
     mkdir -p /opt/adsb/logs
     zstd /run/adsb-feeder-image.log -o /opt/adsb/logs/adsb-setup.log."$TIMESTAMP".zst
     truncate -s 0 /run/adsb-feeder-image.log
