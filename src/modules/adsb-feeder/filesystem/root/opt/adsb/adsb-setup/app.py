@@ -2743,7 +2743,7 @@ class AdsbIm:
         # do we have duplicate SDR serials?
         if len(self._sdrdevices.duplicates) > 0:
             print_err("director redirecting to sdr_setup: duplicate SDR serials")
-            return self.sdr_setup()
+            #return self.sdr_setup()
 
         # check that "something" is configured as input
         if (
