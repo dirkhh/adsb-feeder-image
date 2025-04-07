@@ -3175,6 +3175,8 @@ class AdsbIm:
         else:
             ipv6 = "IPv6 is working or disabled"
 
+        netdog = simple_cmd_result("tail -n 10 /opt/adsb/logs/netdog.log 2>/dev/null")
+
         containers = [
             self._d.env_by_tags(["container", container]).value
             for container in self._d.tag_for_name.values()
@@ -3195,6 +3197,7 @@ class AdsbIm:
             sdrs=sdrs,
             ufargs=ufargs,
             envvars=envvars,
+            netdog=netdog,
         )
 
     def waiting(self):

@@ -36,6 +36,7 @@ while sleep 120; do
     echo "Network doesn't seem to be working! Successive Failures: $FAILS"
     if (( FAILS >= 6 )); then
         echo "Rebooting"
+        echo "$(date --rfc-3339=seconds): Rebooting after ${FAILS} failed attempts" >> /opt/adsb/logs/netdog.log
         reboot
     elif (( FAILS == 3 )); then
         if systemctl is-enabled NetworkManager &>/dev/null; then
