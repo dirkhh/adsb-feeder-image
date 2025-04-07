@@ -1,4 +1,6 @@
 Changes since v2.3.2 include:
+- SDR setup page: improve logic for automatically showing SDR setup page when SDRs are not yet configured
+- beta changelog: sdrmap update: fix cpu model displayed for rpi
 - beta changelog: small but important adjustment to the changes in beta.10
 - add network and system watchdogs that should restart networking / reboot system when networking goes down (or the system hangs for boards with hardware watchdog)
 - beta changelog: another new ultrafeeder with small readsb improvements
