@@ -392,6 +392,8 @@ if [[ $(jq < /etc/docker/daemon.json '."default-address-pools" | has("base")' 2>
 fi
 
 if [ -f /opt/adsb/os.adsb.feeder.image ] ; then
+    # just in case this script has changed, restart the service
+    systemctl restart --no-block adsb-netdog.service
     # try turning off dphys-swapfile on raspbian
     if systemctl is-enabled dphys-swapfile &>/dev/null; then
         systemctl disable --now dphys-swapfile || true
