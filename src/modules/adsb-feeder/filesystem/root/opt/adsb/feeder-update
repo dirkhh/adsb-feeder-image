@@ -339,11 +339,16 @@ for path in ./usr/lib/systemd/system/*; do
 done
 
 if [ ! -f /opt/adsb/os.adsb.feeder.image ] ; then
+    # app install
     set -x
     cp -f -a ./usr/lib/systemd/system/* /usr/lib/systemd/system/
     cp -f -a ./opt/adsb/* /opt/adsb
     set +x
 else
+    # feeder image
+    if ! diff -q /opt/adsb/scripts/netdog.sh ./opt/adsb/scripts/netdog.sh; then
+        restart_netdog="true"
+    fi
     # copy the complete tree into the / filesystem
     set -x
     cp -f -a ./* /
@@ -392,8 +397,7 @@ if [[ $(jq < /etc/docker/daemon.json '."default-address-pools" | has("base")' 2>
 fi
 
 if [ -f /opt/adsb/os.adsb.feeder.image ] ; then
-    # just in case this script has changed, restart the service
-    systemctl restart --no-block adsb-netdog.service
+    [[ "$restart_netdog" == "true" ]] && systemctl restart --no-block adsb-netdog.service
     # try turning off dphys-swapfile on raspbian
     if systemctl is-enabled dphys-swapfile &>/dev/null; then
         systemctl disable --now dphys-swapfile || true
