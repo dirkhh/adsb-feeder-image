@@ -1044,10 +1044,10 @@ class AdsbIm:
         serial_guess: Dict[str, str] = self._sdrdevices.addresses_per_frequency
         print_err(f"serial guess: {serial_guess}")
         serials: Dict[str, str] = {f: self._d.env_by_tags(f"{f}serial").value for f in [978, 1090]}
-        used_serials = {self._d.env_by_tags(f).value for f in self._sdrdevices.purposes()}
+        configured_serials = {self._d.env_by_tags(f).value for f in self._sdrdevices.purposes()}
         available_serials = [sdr._serial for sdr in self._sdrdevices.sdrs]
         for f in [978, 1090]:
-            if (not serials[f] or serials[f] not in available_serials) and serial_guess[f] not in used_serials:
+            if (not serials[f] or serials[f] not in available_serials) and serial_guess[f] not in configured_serials:
                 serials[f] = serial_guess[f]
 
         print_err(f"sdr_info->frequencies: {str(serials)}")
@@ -2819,10 +2819,12 @@ class AdsbIm:
             print_err("director redirecting to sdr_setup: unconfigured devices present")
             return self.sdr_setup()
 
-        if any([serial not in available_serials for serial in configured_serials]):
-            print_err(f"configured serials: {configured_serials}")
+        used_serials = [self._d.env_by_tags(purpose).value for purpose in ["978serial","1090serial"]]
+        used_serials = [serial for serial in used_serials if serial != ""]
+        if any([serial not in available_serials for serial in used_serials]):
+            print_err(f"used serials: {used_serials}")
             print_err(f"available serials: {available_serials}")
-            print_err("director redirecting to sdr_setup: at least one configured device is not present")
+            print_err("director redirecting to sdr_setup: at least one used device is not present")
             return self.sdr_setup()
 
         # if the user chose to individually pick aggregators but hasn't done so,
