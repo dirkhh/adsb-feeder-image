@@ -2741,14 +2741,15 @@ class AdsbIm:
 
         # do we have duplicate SDR serials?
         if len(self._sdrdevices.duplicates) > 0:
-            print_err("director redirecting to sdr_setup: duplicate SDR serials")
+            print_err("duplicate SDR serials detected")
             # return self.sdr_setup()
 
         # check if any of the SDRs aren't configured
         configured_serials = [self._d.env_by_tags(purpose).value for purpose in self._sdrdevices.purposes()]
-        print_err(configured_serials)
-        print_err([sdr._serial for sdr in self._sdrdevices.sdrs])
-        if any([sdr._serial not in configured_serials for sdr in self._sdrdevices.sdrs]):
+        available_serials = [sdr._serial for sdr in self._sdrdevices.sdrs]
+        if any([serial not in configured_serials for serial in available_serials]):
+            print_err(f"configured serials: {configured_serials}")
+            print_err(f"available serials: {available_serials}")
             print_err("director redirecting to sdr_setup: unconfigured devices present")
             return self.sdr_setup()
 

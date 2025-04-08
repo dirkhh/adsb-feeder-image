@@ -42,7 +42,7 @@ class UltrafeederConfig:
         aggregator_selection = self._d.env_by_tags("aggregator_choice").value
         print_err(
             f"enabled_aggregators for {self._micro} with agg_sel {aggregator_selection} and stage2 {self._d.is_enabled('stage2')}",
-            level=4,
+            level=8,
         )
         # be careful to set the correct values for the individual aggregators;
         # these values are used in the main landing page for the feeder to provide
