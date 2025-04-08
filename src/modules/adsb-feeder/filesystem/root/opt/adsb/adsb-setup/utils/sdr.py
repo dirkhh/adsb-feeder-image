@@ -34,6 +34,11 @@ class SDR:
             serial_match = re.search(r"iSerial\s+\d+\s+(.*)$", line)
             if serial_match:
                 self._serial_probed = serial_match.group(1).strip()
+        if self._type == "airspy" and self._serial_probed:
+            split = self._serial_probed.split(":")
+            if len(split) == 2 and len(split[1]) == 16:
+                self._serial_probed = split[1]
+
         if not self._serial_probed:
             if self._type == "stratuxv3":
                 self._serial_probed = "stratuxv3 w/o serial"
