@@ -82,13 +82,15 @@
       <div class=".g-0">
         <div class="row gx-0">
           <p class="col-2 bg-info mr-2">SDR #</p>
-          <p class="col-4 bg-info mr-2">Serial</p>
+          <p class="col-2 bg-info mr-2">Type</p>
+          <p class="col-2 bg-info mr-2">Serial</p>
           <p class="col-6 bg-info mr-2">Used for</p>
         </div>
         {% for sdr in [ "0", "1", "2", "3"] %}
         <div class="row" id="sdr{{ sdr }}" style="display: none">
           <p class="col-2" id="sdr{{ sdr }}-tag">SDR {{ sdr }}</p>
-          <p class="col-4" id="sdr{{ sdr }}-serial"></p>
+          <p class="col-2" id="sdr{{ sdr }}-type"></p>
+          <p class="col-2" id="sdr{{ sdr }}-serial"></p>
           <p class="col-6 small" id="sdr{{ sdr }}-puprpose">
             <label class="checkbox-inline mr-2">
               <input type="radio" id="1090-{{ sdr }}" name="1090serial" value="">
@@ -159,6 +161,7 @@
           let type = sdrs[i]['type'];
           document.getElementById(id).style.display = 'flex';
           document.getElementById(id + "-serial").innerHTML = serial;
+          document.getElementById(id + "-type").innerHTML = type;
           let used = false;
           for (const c of consumers) {
             document.getElementById(c + '-' + i).value = serial;
