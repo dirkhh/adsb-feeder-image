@@ -565,11 +565,68 @@ class AdsbIm:
             threading.Thread(target=self.stage2_checks).start()
             self._stage2_checks = Background(600, self.stage2_checks)
 
+
+        threading.Thread(target=self.monitor_dmesg).start()
+
+        # reset undervoltage indicator
+        self._d.env_by_tags("under_voltage").value = False
+        self.undervoltage_epoch = 0
+
         self.app.run(
             host="0.0.0.0",
             port=int(self._d.env_by_tags("webport").value),
             debug=debug,
         )
+
+    # only need to check for undervoltage during runtime in monitor_dmesg
+    # let's keep this around for the moment
+    def check_undervoltage(self):
+        # next check if there were under-voltage events (this is likely only relevant on an RPi)
+        self._d.env_by_tags("under_voltage").value = False
+        board = self._d.env_by_tags("board_name").value
+        if board and board.startswith("Raspberry"):
+            try:
+                # yes, the except / else is a bit unintuitive, but that seemed the easiest way to do this;
+                # if we don't find the text (the good case) we get an exception
+                # ... on my kernels the message seems to be "Undervoltage", but on the web I find references to "under-voltage"
+                subprocess.check_call(
+                    "dmesg | grep -iE under.?voltage",
+                    shell=True,
+                    stdout=subprocess.DEVNULL,
+                )
+            except subprocess.CalledProcessError:
+                pass
+            else:
+                self._d.env_by_tags("under_voltage").value = True
+
+
+    def monitor_dmesg(self):
+        while True:
+            try:
+                # --follow-new: Wait and print only new messages.
+                proc = subprocess.Popen(
+                    ["dmesg", "--follow-new"],
+                    stderr=subprocess.STDOUT,
+                    stdout=subprocess.PIPE,
+                    stdin=subprocess.PIPE,
+                    text=True,
+                )
+
+                while True:
+                    line = proc.stdout.readline()
+                    if "New USB device found" in line or "USB disconnect" in line:
+                        self._sdrdevices._ensure_populated()
+                    if "Undervoltage" in line or "under-voltage" in line:
+                        self._d.env_by_tags("under_voltage").value = True
+                        self.undervoltage_epoch = time.time()
+                    # print_err(f"dmesg: {line.rstrip()}")
+
+            except:
+                print_err(traceback.format_exc())
+
+            # this shouldn't happen
+            print_err("monitor_dmesg: unexpected exit")
+            time.sleep(10)
 
     def set_tz(self, timezone):
         # timezones don't have spaces, only underscores
@@ -2943,23 +3000,10 @@ class AdsbIm:
             self.zerotier_address = result
         else:
             self.zerotier_address = ""
-        # next check if there were under-voltage events (this is likely only relevant on an RPi)
-        self._d.env_by_tags("under_voltage").value = False
-        board = self._d.env_by_tags("board_name").value
-        if board and board.startswith("Raspberry"):
-            try:
-                # yes, the except / else is a bit unintuitive, but that seemed the easiest way to do this;
-                # if we don't find the text (the good case) we get an exception
-                # ... on my kernels the message seems to be "Undervoltage", but on the web I find references to "under-voltage"
-                subprocess.check_call(
-                    "dmesg | grep -iE under.?voltage",
-                    shell=True,
-                    stdout=subprocess.DEVNULL,
-                )
-            except subprocess.CalledProcessError:
-                pass
-            else:
-                self._d.env_by_tags("under_voltage").value = True
+
+        # reset undervoltage warning after 2h
+        if self._d.env_by_tags("under_voltage").value and time.time() - self.undervoltage_epoch > 2 * 3600:
+            self._d.env_by_tags("under_voltage").value = False
 
         # now let's check for disk space
         self._d.env_by_tags("low_disk").value = shutil.disk_usage("/").free < 1024 * 1024 * 1024
