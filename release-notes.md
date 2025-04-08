@@ -1,4 +1,5 @@
 Changes since v2.3.2 include:
+- refinement of detection of SDR plug/unplug events as well as under-voltage events
 - include netdog reboots in support info and shared diagnostics
 - SDR setup page: improve logic for automatically showing SDR setup page when SDRs are not yet configured
 - beta changelog: sdrmap update: fix cpu model displayed for rpi
