@@ -2803,11 +2803,18 @@ class AdsbIm:
 
         # check if any of the SDRs aren't configured
         configured_serials = [self._d.env_by_tags(purpose).value for purpose in self._sdrdevices.purposes()]
+        configured_serials = [serial for serial in configured_serials if serial != ""]
         available_serials = [sdr._serial for sdr in self._sdrdevices.sdrs]
         if any([serial not in configured_serials for serial in available_serials]):
             print_err(f"configured serials: {configured_serials}")
             print_err(f"available serials: {available_serials}")
             print_err("director redirecting to sdr_setup: unconfigured devices present")
+            return self.sdr_setup()
+
+        if any([serial not in available_serials for serial in configured_serials]):
+            print_err(f"configured serials: {configured_serials}")
+            print_err(f"available serials: {available_serials}")
+            print_err("director redirecting to sdr_setup: at least one configured device is not present")
             return self.sdr_setup()
 
         # if the user chose to individually pick aggregators but hasn't done so,
