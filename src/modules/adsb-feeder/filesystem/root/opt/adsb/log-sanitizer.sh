@@ -44,7 +44,7 @@ dmesg | grep -iE under.?voltage:
 $(dmesg | grep -iE under.?voltage || true)
 ${SEPARATOR}
 Netdog reboots:
-$(tail -n 10 /opt/adsb/logs/netdog.log 2>/dev/null)
+$([[ -f /opt/adsb/logs/netdog.log ]] && tail -n50 /opt/adsb/logs/netdog.log)
 ${SEPARATOR}
 df:
 $(df -h | grep -v overlay)
