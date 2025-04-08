@@ -1956,6 +1956,14 @@ class AdsbIm:
             # for regular feeders or micro feeders a max range of 300nm seem reasonable
             self._d.env_by_tags("max_range").list_set(0, 300)
 
+        # fix up airspy installs without proper serial number configuration
+        if self._d.is_enabled("airspy"):
+            if self._d.env_by_tags("1090serial").value == "" or self._d.env_by_tags("1090serial").value.startswith("AIRSPY SN:"):
+                self._sdrdevices._ensure_populated()
+                airspy_serials = [sdr._serial for sdr in self._sdrdevices.sdrs if sdr._type == "airspy"]
+                if len(airspy_serials) == 1:
+                    self._d.env_by_tags("1090serial").value = airspy_serials[0]
+
         # make all the smart choices for plugged in SDRs - unless we are a stage2 that hasn't explicitly requested SDR support
         # only run this for initial setup or when the SDR setup is requested via the interface
         if (not self._d.is_enabled("stage2") or self._d.is_enabled("stage2_nano")) and not self._d.env_by_tags(
