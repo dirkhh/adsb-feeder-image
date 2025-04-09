@@ -1,4 +1,5 @@
 Changes since v2.3.2 include:
+- beta changelog: don't show SDR setup when SDRs configured as 'other' are removed
 - beta changelog: correctly restart netdog if script changed
 - beta changelog: address unnecessary SDR Setup when upgrading and using an Airspy
 - refinement of detection of SDR plug/unplug events as well as under-voltage events
