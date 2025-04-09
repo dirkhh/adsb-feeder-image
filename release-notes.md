@@ -1,4 +1,5 @@
 Changes since v2.3.2 include:
+- Show waiting app on second boot of DietPi on initial install
 - Update Raspberry Pi OS Lite base image
 - beta changelog: don't show SDR setup when SDRs configured as 'other' are removed
 - beta changelog: correctly restart netdog if script changed
