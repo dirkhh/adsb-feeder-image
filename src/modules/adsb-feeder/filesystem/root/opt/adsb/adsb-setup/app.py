@@ -2058,10 +2058,9 @@ class AdsbIm:
                 print_err(f"SDRplay container is {self._d.is_enabled(['sdrplay'])}")
                 print_err(f"dump978 container {self._d.list_is_enabled(['uat978'], 0)}")
 
-            # if we have at least one SDR configured and the base config is
-            # completed, lock down further SDR changes so they only happen on
+            # if the base config is completed, lock down further SDR changes so they only happen on
             # user request
-            if (env1090.value or env978.value) and self.base_is_configured():
+            if self.base_is_configured():
                 self._d.env_by_tags("sdrs_locked").value = True
 
         if self._d.env_by_tags("stage2_nano").value:
