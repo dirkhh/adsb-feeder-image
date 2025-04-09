@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# start waiting app in case this is after a kernel upgrade reboot during first boot
+# if it's already running because the kernel wasn't updated,
+# it will simply fail to grab the port and exit
+python3 /opt/adsb/adsb-setup/waiting-app.py 80 /var/tmp/dietpi/logs/dietpi-firstrun-setup.log "Second boot of" &>>/run/adsb-feeder-image.log &
+
 # make sure the VPN services are stopped and disabled
 systemctl disable --now zerotier-one.service tailscaled.service
 systemctl mask zerotier-one tailscaled
