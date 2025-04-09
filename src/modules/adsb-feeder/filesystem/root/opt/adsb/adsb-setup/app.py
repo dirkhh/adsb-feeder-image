@@ -189,6 +189,7 @@ class AdsbIm:
             self._d.ultrafeeder.append(UltrafeederConfig(data=self._d, micro=i))
 
         self.last_dns_check = 0
+        self.undervoltage_epoch = 0
 
         self._current_site_name = None
         self._agg_status_instances = dict()
@@ -565,12 +566,10 @@ class AdsbIm:
             threading.Thread(target=self.stage2_checks).start()
             self._stage2_checks = Background(600, self.stage2_checks)
 
-
-        threading.Thread(target=self.monitor_dmesg).start()
-
         # reset undervoltage indicator
         self._d.env_by_tags("under_voltage").value = False
-        self.undervoltage_epoch = 0
+
+        threading.Thread(target=self.monitor_dmesg).start()
 
         self.app.run(
             host="0.0.0.0",
