@@ -83,15 +83,15 @@
         <div class="row gx-0">
           <p class="col-2 bg-info mr-2">SDR #</p>
           <p class="col-2 bg-info mr-2">Type</p>
-          <p class="col-2 bg-info mr-2">Serial</p>
-          <p class="col-6 bg-info mr-2">Used for</p>
+          <p class="col-3 bg-info mr-2">Serial</p>
+          <p class="col-5 bg-info mr-2">Used for</p>
         </div>
         {% for sdr in [ "0", "1", "2", "3"] %}
         <div class="row" id="sdr{{ sdr }}" style="display: none">
           <p class="col-2" id="sdr{{ sdr }}-tag">SDR {{ sdr }}</p>
           <p class="col-2" id="sdr{{ sdr }}-type"></p>
-          <p class="col-2 text-break" id="sdr{{ sdr }}-serial"></p>
-          <p class="col-6 small" id="sdr{{ sdr }}-puprpose">
+          <p class="col-3 text-break" id="sdr{{ sdr }}-serial"></p>
+          <p class="col-5 small" id="sdr{{ sdr }}-puprpose">
             <label class="checkbox-inline mr-2">
               <input type="radio" id="1090-{{ sdr }}" name="1090serial" value="">
               1090
