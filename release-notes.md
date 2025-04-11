@@ -1,38 +1,30 @@
 Changes since v2.3.2 include:
-- Show waiting app on second boot of DietPi on initial install
-- Update Raspberry Pi OS Lite base image
-- beta changelog: don't show SDR setup when SDRs configured as 'other' are removed
-- beta changelog: correctly restart netdog if script changed
-- beta changelog: address unnecessary SDR Setup when upgrading and using an Airspy
+- add UI capability to change WiFi network (only for feeder image, not for app installs)
+- experimental support for sdrmap.org
+- feeder-update: various speedups
 - refinement of detection of SDR plug/unplug events as well as under-voltage events
-- include netdog reboots in support info and shared diagnostics
 - SDR setup page: improve logic for automatically showing SDR setup page when SDRs are not yet configured
-- beta changelog: sdrmap update: fix cpu model displayed for rpi
-- beta changelog: small but important adjustment to the changes in beta.10
 - add network and system watchdogs that should restart networking / reboot system when networking goes down (or the system hangs for boards with hardware watchdog)
-- beta changelog: another new ultrafeeder with small readsb improvements
-- beta changelog: send sysinfo to sdrmap
+- include netdog reboots in support info and shared diagnostics
 - ultrafeeder: readsb: avoid data loops when pihole returns :: or 0.0.0.0
+- readsb bandwith reduction: will not throttle all aggregators if there is a bad connection to one of them
 - plane count statistics: more robust / keep stats when system off over midnight
 - address some odd DNS edge cases
-- beta changelog: update ultrafeeder / sdrmap containers
-- experimental support for sdrmap.org (updated)
-- readsb bandwith reduction: will not throttle all aggregators if there is a bad connection to one of them
 - fix rare FR24 connection issues (docker incorrectly using DNS search domain, fr24 mishandling DNS replies)
 - fix several network related issues on DietPi, speeding up reboot and enabling switching to Ethernet once WiFi was enabled
-- add UI capability to change WiFi network (only for feeder image, not for app installs)
+- update Raspberry Pi OS Lite base image
+- show waiting app on second boot of DietPi on initial install
 - update containers to latest versions
 - make ADS-B Feeder Image logo slightly higher contrast
 - webinterface: fix potential hang in the chart code for the feeder homepage
 - webinterface: more consistent handling of task suspension
+- webinterface: fix shading of top bar for 'please wait' screen
+- webinterface: restarting / streamlog: improve consistency
+- system managent page: add spinners for various actions, load page faster
 - chrony: always step the clock for offsets > 0.5s, not only on startup (helps with suspended VMs)
 - tailscale: improve handling of unlikely states / webinterface consistency
 - share diagnostics / log-sanitizer: remove stray curl error due to IPv6 check
 - explain how to disable secure image mode when it is enabled
-- feeder-update: various speedups
-- webinterface: fix shading of top bar for 'please wait' screen
-- system managent page: add spinners for various actions, load page faster
-- webinterface: restarting / streamlog: improve consistency
 
 
 > [!NOTE]
