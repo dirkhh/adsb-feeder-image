@@ -1,31 +1,5 @@
-Changes since v2.3.2 include:
-- add UI capability to change WiFi network (only for feeder image, not for app installs)
-- experimental support for sdrmap.org
-- feeder-update: various speedups
-- refinement of detection of SDR plug/unplug events as well as under-voltage events
-- SDR setup page: improve logic for automatically showing SDR setup page when SDRs are not yet configured
-- add network and system watchdogs that should restart networking / reboot system when networking goes down (or the system hangs for boards with hardware watchdog)
-- include netdog reboots in support info and shared diagnostics
-- ultrafeeder: readsb: avoid data loops when pihole returns :: or 0.0.0.0
-- readsb bandwith reduction: will not throttle all aggregators if there is a bad connection to one of them
-- plane count statistics: more robust / keep stats when system off over midnight
-- address some odd DNS edge cases
-- fix rare FR24 connection issues (docker incorrectly using DNS search domain, fr24 mishandling DNS replies)
-- fix several network related issues on DietPi, speeding up reboot and enabling switching to Ethernet once WiFi was enabled
-- update Raspberry Pi OS Lite base image
-- show waiting app on second boot of DietPi on initial install
-- update containers to latest versions
-- make ADS-B Feeder Image logo slightly higher contrast
-- webinterface: fix potential hang in the chart code for the feeder homepage
-- webinterface: more consistent handling of task suspension
-- webinterface: fix shading of top bar for 'please wait' screen
-- webinterface: restarting / streamlog: improve consistency
-- system managent page: add spinners for various actions, load page faster
-- chrony: always step the clock for offsets > 0.5s, not only on startup (helps with suspended VMs)
-- tailscale: improve handling of unlikely states / webinterface consistency
-- share diagnostics / log-sanitizer: remove stray curl error due to IPv6 check
-- explain how to disable secure image mode when it is enabled
-
+Changes since v2.3.3:
+- revert a change to the Raspbian base image that broke hotspot
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)
