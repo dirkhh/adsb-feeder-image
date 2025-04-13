@@ -18,6 +18,9 @@ apt-get clean -y
 find  /var/lib/apt/lists | grep -v InRelease | xargs rm -rf
 rm -rf /tmp/* /var/log/* /var/cache/debconf/templates.dat* /var/lib/dpkg/status-old
 
+# remove pycache, nothing found doesn't mean failure thus always return true
+find /usr | grep -E "/__pycache__$" | xargs rm -rf || true
+
 # not sure where this binary comes from, remove it!
 rm -f /usr/bin/qemu-aarch64-static
 
