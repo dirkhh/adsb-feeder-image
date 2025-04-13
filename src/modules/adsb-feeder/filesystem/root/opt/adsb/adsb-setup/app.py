@@ -611,8 +611,7 @@ class AdsbIm:
                     text=True,
                 )
 
-                while True:
-                    line = proc.stdout.readline()
+                while line := proc.stdout.readline():
                     if "New USB device found" in line or "USB disconnect" in line:
                         self._sdrdevices._ensure_populated()
                     if "Undervoltage" in line or "under-voltage" in line:
@@ -625,7 +624,7 @@ class AdsbIm:
 
             # this shouldn't happen
             print_err("monitor_dmesg: unexpected exit")
-            time.sleep(10)
+            time.sleep(3600)
 
     def set_tz(self, timezone):
         # timezones don't have spaces, only underscores
