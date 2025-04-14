@@ -91,10 +91,14 @@ ${SEPARATOR}
 .env:
 $(cat /opt/adsb/config/.env 2>&1)
 ${SEPARATOR}
+"
+if [ -f /opt/adsb/os.adsb.feeder.image ] ; then
+SANITIZED_LOG+="
 journalctl -e -n3000:
 $(journalctl -e -n3000 2>&1)
 ${SEPARATOR}
 "
+fi
 
 for oldlog in $(find /opt/adsb/logs -name adsb-setup.log.\*zst | sort | tail -n2); do
 
