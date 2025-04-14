@@ -63,10 +63,10 @@ if grep -q "_IS_BASE_CONFIG_FINISHED=True" /opt/adsb/config/.env 2> /dev/null ; 
         $docker_compose "${COMPOSE_FILES[@]}" "$@" && success="true" && break
     done
     if [ "$1" = "up" ] ; then
-        if [[ "$docker_compose" == "docker-compose" ]]; then
+        if [[ $success != true && "$docker_compose" == "docker-compose" ]]; then
             # last ditch effort if we're dealing with the older docker-compose
             $docker_compose "${COMPOSE_FILES[@]}" down
-            $docker_compose "${COMPOSE_FILES[@]}" "$@" && success="true" && break
+            $docker_compose "${COMPOSE_FILES[@]}" "$@" && success="true"
         fi
         if [[ $success == true ]]; then
             rm -f /opt/adsb/state/compose_up_failed
