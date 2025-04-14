@@ -129,23 +129,28 @@
       </div>
     </form>
   </div>
+  <!-- FULL_IMAGE_ONLY_END -->
   <div class="col-12 col-lg-6">
     <h5 class="mt-3">System update settings</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
       <div class="row align-items-center">
+  <!-- FULL_IMAGE_ONLY_START -->
         <div class="col-8 mb-3"><span class="ms-3">Manual OS update</span>
         </div>
         <div class="col-4 mb-3">
           <button type="submit" class="btn btn-primary mx-auto w-100" name="os_update" value="go">Trigger OS Update
             Now</button>
         </div>
+  <!-- FULL_IMAGE_ONLY_END -->
         <div class="col-8">
           <div class="row align-items-center ms-1">
+  <!-- FULL_IMAGE_ONLY_START -->
             <input type="checkbox" class="col-1 mb-3" name="nightly_base_update--is_enabled"
                    id="nightly_base_update--is_enabled" {% if is_enabled("nightly_base_update") %} checked {%
                             endif %}>
             <label for="nightly_base_update--is_enabled" class="col-11 mb-3">Update base OS every
               night</label>
+  <!-- FULL_IMAGE_ONLY_END -->
             <input type="checkbox" class="col-1" name="nightly_feeder_update--is_enabled"
                    id="nightly_feeder_update--is_enabled" {% if is_enabled("nightly_feeder_update") %} checked
                    {% endif %}>
@@ -160,7 +165,6 @@
       </div>
     </form>
   </div>
-  <!-- FULL_IMAGE_ONLY_END -->
   <div class="col-12 col-lg-6">
     <h5 class="mt-3">Update feeder applications</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
