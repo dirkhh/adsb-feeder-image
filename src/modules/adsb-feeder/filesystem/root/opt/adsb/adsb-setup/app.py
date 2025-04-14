@@ -1170,6 +1170,32 @@ class AdsbIm:
     def stage2_stats(self):
         ret = []
         for i in [0] + self.micro_indices():
+            if i == 0 and not self._d.is_enabled("stage2"):
+                # if this is supposed to be a feeder by itself, make sure it actually
+                # has a source of data...
+                print_err("check an actual feeder that is not a stage2")
+                configured_serials = [
+                    self._d.env_by_tags(purpose).value
+                    for purpose in self._sdrdevices.purposes()
+                    if self._d.env_by_tags(purpose).value != ""
+                ]
+                print_err(
+                    f"configured serials: {configured_serials} remote_sdr: {self._d.env_by_tags('remote_sdr').value}"
+                )
+                if len(configured_serials) == 0:
+                    if self._d.env_by_tags("remote_sdr").value == "":
+                        print_err("neither an SDR nor a remote SDR is configured")
+                        ret.append(
+                            {
+                                "pps": 0,
+                                "mps": 0,
+                                "uptime": 0,
+                                "planes": 0,
+                                "tplanes": 0,
+                                "nosdr": 1,
+                            }
+                        )
+                        continue
             tplanes = len(self.planes_seen_per_day[i])
             ip = self._d.env_by_tags("mf_ip").list_get(i)
             ip, triplet = mf_get_ip_and_triplet(ip)

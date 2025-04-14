@@ -1,4 +1,5 @@
 Changes since v2.3.4:
+- notify user if a feeder has no data source and point them to the SDR Setup page to address the issue
 - refuse to do OS updates unless this is acually an ADS-B Feeder Image
 - avoid potential fast spinning infinite loop when installed in unsupported environments where dmesg is non-functional
 
