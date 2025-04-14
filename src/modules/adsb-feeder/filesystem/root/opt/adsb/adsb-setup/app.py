@@ -598,7 +598,6 @@ class AdsbIm:
             else:
                 self._d.env_by_tags("under_voltage").value = True
 
-
     def monitor_dmesg(self):
         while True:
             try:
@@ -1170,50 +1169,49 @@ class AdsbIm:
 
     def stage2_stats(self):
         ret = []
-        if True:
-            for i in [0] + self.micro_indices():
-                tplanes = len(self.planes_seen_per_day[i])
-                ip = self._d.env_by_tags("mf_ip").list_get(i)
-                ip, triplet = mf_get_ip_and_triplet(ip)
-                suffix = self.uf_suffix(i)
-                try:
-                    with open(f"/run/adsb-feeder-{suffix}/readsb/stats.prom") as f:
-                        uptime = 0
-                        found = 0
-                        for line in f:
-                            if "position_count_total" in line:
-                                pps = int(line.split()[1]) / 60
-                                # show precise position rate if less than 1
-                                pps = round(pps, 1) if pps < 1 else round(pps)
-                                found |= 1
-                            if "readsb_messages_valid" in line:
-                                mps = round(int(line.split()[1]) / 60)
-                                found |= 4
-                            if "readsb_aircraft_with_position" in line:
-                                planes = int(line.split()[1])
-                                found |= 8
-                            if i != 0 and f'readsb_net_connector_status{{host="{ip}"' in line:
-                                uptime = int(line.split()[1])
-                                found |= 2
-                            if i == 0 and "readsb_uptime" in line:
-                                uptime = int(int(line.split()[1]) / 1000)
-                                found |= 2
-                            if found == 15:
-                                break
-                        ret.append(
-                            {
-                                "pps": pps,
-                                "mps": mps,
-                                "uptime": uptime,
-                                "planes": planes,
-                                "tplanes": tplanes,
-                            }
-                        )
-                except FileNotFoundError:
-                    ret.append({"pps": 0, "mps": 0, "uptime": 0, "planes": 0, "tplanes": tplanes})
-                except:
-                    print_err(traceback.format_exc())
-                    ret.append({"pps": 0, "mps": 0, "uptime": 0, "planes": 0, "tplanes": tplanes})
+        for i in [0] + self.micro_indices():
+            tplanes = len(self.planes_seen_per_day[i])
+            ip = self._d.env_by_tags("mf_ip").list_get(i)
+            ip, triplet = mf_get_ip_and_triplet(ip)
+            suffix = self.uf_suffix(i)
+            try:
+                with open(f"/run/adsb-feeder-{suffix}/readsb/stats.prom") as f:
+                    uptime = 0
+                    found = 0
+                    for line in f:
+                        if "position_count_total" in line:
+                            pps = int(line.split()[1]) / 60
+                            # show precise position rate if less than 1
+                            pps = round(pps, 1) if pps < 1 else round(pps)
+                            found |= 1
+                        if "readsb_messages_valid" in line:
+                            mps = round(int(line.split()[1]) / 60)
+                            found |= 4
+                        if "readsb_aircraft_with_position" in line:
+                            planes = int(line.split()[1])
+                            found |= 8
+                        if i != 0 and f'readsb_net_connector_status{{host="{ip}"' in line:
+                            uptime = int(line.split()[1])
+                            found |= 2
+                        if i == 0 and "readsb_uptime" in line:
+                            uptime = int(int(line.split()[1]) / 1000)
+                            found |= 2
+                        if found == 15:
+                            break
+                    ret.append(
+                        {
+                            "pps": pps,
+                            "mps": mps,
+                            "uptime": uptime,
+                            "planes": planes,
+                            "tplanes": tplanes,
+                        }
+                    )
+            except FileNotFoundError:
+                ret.append({"pps": 0, "mps": 0, "uptime": 0, "planes": 0, "tplanes": tplanes})
+            except:
+                print_err(traceback.format_exc())
+                ret.append({"pps": 0, "mps": 0, "uptime": 0, "planes": 0, "tplanes": tplanes})
         return Response(json.dumps(ret), mimetype="application/json")
 
     def stage2_connection(self):
@@ -1956,7 +1954,9 @@ class AdsbIm:
 
         # fix up airspy installs without proper serial number configuration
         if self._d.is_enabled("airspy"):
-            if self._d.env_by_tags("1090serial").value == "" or self._d.env_by_tags("1090serial").value.startswith("AIRSPY SN:"):
+            if self._d.env_by_tags("1090serial").value == "" or self._d.env_by_tags("1090serial").value.startswith(
+                "AIRSPY SN:"
+            ):
                 self._sdrdevices._ensure_populated()
                 airspy_serials = [sdr._serial for sdr in self._sdrdevices.sdrs if sdr._type == "airspy"]
                 if len(airspy_serials) == 1:
@@ -2816,7 +2816,7 @@ class AdsbIm:
             print_err("director redirecting to sdr_setup: unconfigured devices present")
             return self.sdr_setup()
 
-        used_serials = [self._d.env_by_tags(purpose).value for purpose in ["978serial","1090serial"]]
+        used_serials = [self._d.env_by_tags(purpose).value for purpose in ["978serial", "1090serial"]]
         used_serials = [serial for serial in used_serials if serial != ""]
         if any([serial not in available_serials for serial in used_serials]):
             print_err(f"used serials: {used_serials}")
