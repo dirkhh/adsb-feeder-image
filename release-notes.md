@@ -1,4 +1,5 @@
 Changes since v2.3.4:
+- address container name confusion for the uk1090 service which prevented restarting that container from the web UI
 - show the option to do nightly feeder software updates in the case of an app install
 - notify user if a feeder has no data source and point them to the SDR Setup page to address the issue
 - refuse to do OS updates unless this is acually an ADS-B Feeder Image

@@ -3,7 +3,7 @@ services:
     image: ${TNUK_CONTAINER}
     healthcheck:
       disable: true
-    container_name: radar1090uk
+    container_name: 1090uk
     restart: unless-stopped
     cpu_period: 50000
     cpu_quota: 7500

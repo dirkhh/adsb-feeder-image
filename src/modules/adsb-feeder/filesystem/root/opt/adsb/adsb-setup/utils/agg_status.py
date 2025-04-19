@@ -166,7 +166,7 @@ class AggStatus:
                 "planefinder": "pfclient",
                 "flightaware": "piaware",
                 "radarvirtuel": "radarvirtuel",
-                "1090uk": "radar1090uk",
+                "1090uk": "1090uk",
                 "flightradar": "fr24feed",
                 "opensky": "opensky",
                 "adsbhub": "adsbhub",
