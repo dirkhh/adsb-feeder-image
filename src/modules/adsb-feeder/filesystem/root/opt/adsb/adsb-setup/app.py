@@ -995,6 +995,9 @@ class AdsbIm:
         self.handle_implied_settings()
         self.write_envfile()
 
+        # adjust the planes per day stuff to potentially more / less microsites
+        self.load_planes_seen_per_day()
+
         try:
             subprocess.call("/opt/adsb/docker-compose-start", timeout=180.0, shell=True)
         except subprocess.TimeoutExpired:
