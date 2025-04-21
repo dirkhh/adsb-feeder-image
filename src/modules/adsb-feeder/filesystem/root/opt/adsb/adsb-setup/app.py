@@ -2873,14 +2873,26 @@ class AdsbIm:
             with gzip.open("/opt/adsb/adsb_planes_seen_per_day.json.gz", "r") as f:
                 planes = json.load(f)
                 ts = planes.get("timestamp", 0)
+
+                planelists = planes.get("planes")
+                planestats = planes.get("stats")
+
+                while len(planelists) < len([0] + self.micro_indices()):
+                    print_err("load_planes: WEIRD or backup restore: padding planelists")
+                    planelists.append([])
+                while len(planestats) < len([0] + self.micro_indices()):
+                    print_err("load_planes: WEIRD or backup restore: padding planestats")
+                    planestats.append([])
+
+                #print_err(planelists)
+                #print_err(planestats)
+
                 if ts >= start_of_day.timestamp():
                     # ok, this dump is from today
-                    planelists = planes.get("planes")
                     for i in [0] + self.micro_indices():
                         # json can't store sets, so we use list on disk, but sets in memory
                         self.planes_seen_per_day[i] = set(planelists[i])
 
-                planestats = planes.get("stats")
                 for i in [0] + self.micro_indices():
                     self.plane_stats[i] = planestats[i]
 
@@ -2890,7 +2902,6 @@ class AdsbIm:
                     days = math.ceil(diff / (24 * 60 * 60))
                     if days > 0:
                         days -= 1
-                        planelists = planes.get("planes")
                         for i in [0] + self.micro_indices():
                             self.plane_stats[i].insert(0, len(planelists[i]))
                     if days > 0:
