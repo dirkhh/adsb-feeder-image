@@ -2568,6 +2568,8 @@ class AdsbIm:
                 if not success:
                     report_issue(f"failed to enable ssh - check the logs for details")
                     print_err(f"failed to enable ssh: {output}")
+                if success:
+                    report_issue(f"added ssh key: {value}")
                 continue
             e = self._d.env_by_tags(key.split("--"))
             if e:
