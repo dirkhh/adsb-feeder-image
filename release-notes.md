@@ -1,4 +1,6 @@
 Changes since v2.3.4:
+- clarify UI for setting ssh key and switching to 'secure' mode
+- minor changes for corner cases in the daily reported planes statistics
 - update containers to their current versions
 - address container name confusion for the uk1090 service which prevented restarting that container from the web UI
 - show the option to do nightly feeder software updates in the case of an app install
