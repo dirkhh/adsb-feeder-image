@@ -1,0 +1,21 @@
+services:
+  acarsdec:
+    image: ${ACARSDEC_CONTAINER}
+    container_name: acarsdec
+    restart: always
+    environment:
+      # - QUIET_LOGS=true
+      - TZ=${FEEDER_TZ}
+      - SOAPYSDR=${ACARS_SDR_STRING}
+      - GAIN=${ACARS_GAIN}
+      # the default frequencies are 'lower frequencies up to 130.85MHz' in acarsdec, higher ones in acarsdec2
+      - FREQUENCIES=${ACARS_FREQUENCIES:-129.125;130.025;130.425;130.450;130.85;130.825;130.55;130.45;130.425}
+      - FEED_ID=${ACARS_FEED_ID}
+      - OUTPUT_SERVER=acars_router
+    tmpfs:
+      - /run:exec,size=64M
+      - /var/log:size=64M
+    device_cgroup_rules:
+      - "c 189:* rwm"
+    volumes:
+      - /dev/bus/usb:/dev/bus/usb:ro

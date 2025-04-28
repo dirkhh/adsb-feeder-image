@@ -1,0 +1,142 @@
+receivers:
+  web888:
+    receiver: web888
+    client:
+      # change the address below to your web888 device's ip address
+
+
+      address: 192.168.66.164  # <<-- replace by token that gets updated at runtime
+
+
+
+
+
+      port: 8073
+      recorder_path: kiwiclient/kiwirecorder.py
+dumphfdl:
+  default:
+    # please set a station id here
+    station_id: DND_KHIO_HFDL
+    # set this to false if you feed airframes hfdl data from acars router. Otherwise, leave this as true
+    airframes_enabled: false
+    # statsd_server: 10.10.10.63:8125
+    # other settings
+    #
+    # These are the outputs, or, where you'll send your HFDL data
+
+    output:
+      # If you run acars hub, you likely have acars router as part of your config
+      # uncomment the lines below of acasrs router. The only line you'll need to change
+      # should be the address. If acars router is on the same machine, you can use "acars_router" (no quotes)
+      # as the address. Otherwise, use the IP of that machine and make sure, under ports: for acars router you have
+      # 5556:5556
+
+      # -- UNCOMMENT THE LINES BELOW FOR ACARS ROUTER --
+      # - format: json
+      #   protocol: tcp
+      #   address: 127.0.0.1
+      #   port: 5556
+      # -- LEAVE THIS LINE COMMENTED OUT
+      # acarsrouter
+      - format: json
+        protocol: tcp
+        address: acars_router
+        port: 5556
+
+      # If you have tar1090 and want to feed it position data from hfdl, uncomment the lines below.
+      # Please note that if tar1090 is running in a container, make sure to open the appropriate ports if tar1090
+      # is not on the same machine, as well as adjust the address as you did with acars router
+
+      # -- UNCOMMENT THE LINES BELOW FOR TAR1090
+      # # TAR1090
+      # - format: basestation
+      #   protocol: tcp
+      #   address: 127.0.0.1
+      #   port: 32009
+      # -- LEAVE THIS LINE COMMENTED OUT
+
+      # These are examples of other outputs. You probably don't need them.
+      # # text
+      # - format: text
+      #   protocol: udp
+      #   address:
+      #   port: 2259
+      # a text output over tcp
+      # - format: text
+      #   protocol: udp
+      #   address: 127.0.0.1
+      #   port: 5000
+      #observer feed
+      # - output: hfdl_observer
+
+# unless you have a specific setup, leave most of this alone
+
+observer:
+  all_receivers:
+    - name: web888-01
+      receiver: web888
+    - name: web888-02
+      receiver: web888
+    - name: web888-03
+      receiver: web888
+    - name: web888-04
+      receiver: web888
+    - name: web888-05
+      receiver: web888
+    - name: web888-06
+      receiver: web888
+    - name: web888-07
+      receiver: web888
+    - name: web888-08
+      receiver: web888
+    - name: web888-09
+      receiver: web888
+    - name: web888-10
+      receiver: web888
+    - name: web888-11
+      receiver: web888
+    - name: web888-12
+      receiver: web888
+    - name: web888-13
+      receiver: web888
+  conductor:
+    # if you want to ignore frequencies, use this
+    #ignored_frequencies: [[0,2000],[22000,30000]]
+
+    # the last section you will want to mess with is this. This section tells
+    # hfdlobserver what frequencies to prioritize.
+    # the numbers in the list correspond to the following stations
+    # │ 1 - San Francisco, California                                                                                                                                                                        │
+    # │ 2 - Molokai, Hawaii                                                                                                                                                                                  │
+    # │ 3 - Reykjavik, Iceland                                                                                                                                                                               │
+    # │ 4 - Riverhead, New York                                                                                                                                                                              │
+    # │ 5 - Auckland, New Zealand                                                                                                                                                                            │
+    # │ 6 - Hat Yai, Thailand                                                                                                                                                                                │
+    # │ 7 - Shannon, Ireland                                                                                                                                                                                 │
+    # │ 8 - Johannesburg, South Africa                                                                                                                                                                       │
+    # │ 9 - Barrow, Alaska                                                                                                                                                                                   │
+    # │ 10 - Muan, South Korea                                                                                                                                                                               │
+    # │ 11 - Albrook, Panama                                                                                                                                                                                 │
+    # │ 13 - Santa Cruz, Bolivia                                                                                                                                                                             │
+    # │ 14 - Krasnoyarsk, Russia                                                                                                                                                                             │
+    # │ 15 - Al Muharraq, Bahrain                                                                                                                                                                            │
+    # │ 16 - Agana, Guam                                                                                                                                                                                     │
+    # │ 17 - Canarias, Spain
+    # you should, ideally, be picking stations in order of what is closest to you and
+    # moving further away
+    # if you want to have the container do it's best guess for you, run the following command:
+    # docker run -it -e SKIP_CHECKS=true ghcr.io/sdr-enthusiasts/docker-hfdlobserver:latest /scripts/freq_picker.sh <lat> <lon>
+    # and check the output. You will see something like:
+    # docker run -it -e SKIP_CHECKS=true ghcr.io/sdr-enthusiasts/docker-hfdlobserver:latest /scripts/freq_picker.sh 35.6 -106.5
+    # <snip>
+    # This line can be used in settings.yaml (indent it properly):
+    # ranked_stations: [1, 4, 11, 9, 2, 3, 7, 13, 17, 14, 10, 16, 5, 15, 6, 8]
+    ranked_stations: [1, 4, 11, 9, 2, 3, 7, 13, 17, 14, 10, 16, 5, 15, 6, 8]
+cui:
+  ticker:
+    show_all_active: no
+    show_active_line: yes
+    show_targetting: no
+    show_confidence: yes
+    show_quiet: no
+    display_mode: frequency

@@ -1,0 +1,12 @@
+services:
+  acars2pos:
+    container_name: acars2pos
+    hostname: acars2pos
+    image: ${ACARS2POS_CONTAINER}
+    restart: always
+    environment:
+      #- JSON_IN=planeslxc:15550;planeslxc:15555;planeslxc:15556
+      - SBS_OUT=ultrafeeder:32009
+      - LOG_FILE=true
+    volumes:
+      - ./logs:/log

@@ -1,0 +1,23 @@
+services:
+  dumpvdl2:
+    image: ${DUMPVDL2_CONTAINER}
+    container_name: dumpvdl2
+    restart: always
+    environment:
+      #    - QUIET_LOGS=true
+      - TZ=${FEEDER_TZ}
+      - SOAPYSDR=${VDLM_SDR_STRING}
+      - GAIN=${VDLM_GAIN}
+      - FREQUENCIES=${VDLM_FREQUENCIES:-136975000 136945000 136925000 136825000 136800000 136775000}
+      - FEED_ID=${VDLM_FEED_ID}
+      - VDLM_FILTER_ENABLE=true
+      - ZMQ_MODE=server
+      - ZMQ_ENDPOINT=tcp://0.0.0.0:45555
+      - SERVER=
+    tmpfs:
+      - /run:exec,size=64M
+      - /var/log:size=64M
+    device_cgroup_rules:
+      - "c 189:* rwm"
+    volumes:
+      - /dev/bus/usb:/dev/bus/usb:ro

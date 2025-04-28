@@ -1,0 +1,7 @@
+services:
+  hfdlobserver:
+    image: ${HFDLOBSERVER_CONTAINER}
+    container_name: hfdlobserver
+    restart: always
+    volumes:
+      - /opt/adsb/hfdlobserver/compose:/run/hfdlobserver

@@ -1,0 +1,30 @@
+services:
+  acars_router:
+    image: ${ACARSROUTER_CONTAINER}
+    ports:
+      - 55556:15556
+      - 55555:15555
+      - 55550:15550
+      - 5556:5556
+    container_name: acars_router
+    restart: always
+    environment:
+      - AR_STATS_VERBOSE=true
+      - TZ=${FEEDER_TZ}
+      # The line below should be uncommented if you are receiving acars data from acarsdec AND do not want to feed
+      # - AR_SEND_UDP_ACARS=acarshub:5550
+      # The line below should be uncommented if you are receiving acars data from acarsdec AND want to feed airframes
+      - AR_SEND_UDP_ACARS=acarshub:5550;feed.airframes.io:5550
+      # The line below should uncommented if you are receiving VDLM and DO NOT want to feed aiframes
+      #- AR_SEND_UDP_VDLM2=acarshub:5555
+      # The line below should uncommented if you are receiving VDLM, using dumpvdl2 AND want to feed airframes
+      - AR_SEND_UDP_VDLM2=acarshub:5555;feed.airframes.io:5552
+      # The line below should uncommented if you are receiving VDLM, using vdlm2dec AND want to feed airframes
+      #- AR_SEND_UDP_VDLM2=acarshub:5555;feed.airframes.io:5555
+      # The line below should uncommented if you are receiving dumpvdl2 AND using ZMQ (recommended)
+      - AR_RECV_ZMQ_VDLM2=dumpvdl2:45555
+      - AR_SEND_TCP_HFDL=feed.airframes.io:5556
+      - AR_SEND_UDP_HFDL=acarshub:5556
+    tmpfs:
+      - /run:exec,size=64M
+      - /var/log
