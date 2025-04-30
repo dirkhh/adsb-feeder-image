@@ -1,0 +1,37 @@
+#!/bin/bash
+
+USAGE="
+ $0 [-m tag-message] version
+    # version needs to follow the vM.m.p[-beta.b] format
+"
+
+# simple way to provide a message and exit with an error code
+croak() {
+    echo "$1"
+    exit 1
+}
+
+cd "$(dirname "${BASH_SOURCE[0]}")"/../.. || croak "cannot cd to top-level directory"
+
+while (( $# ))
+do
+    case $1 in
+        'v*') TAG=$1
+            ;;
+        '-m') shift; MSG=$1
+            ;;
+        *) croak "$USAGE"
+    esac
+    shift
+done
+
+if [[ $MSG != "" ]] ; then
+    git tag -a "$TAG" -m "$MSG"
+else
+    git tag -a "$TAG" -m "default message for $TAG"
+fi
+
+# next make new secrets / passwords
+./src/tools/update-secrets.sh
+
+echo "now you need to git push && git push --tags"
