@@ -218,7 +218,7 @@
     <div class "small">
       {% if is_enabled('stage2') %}
         {% if env_value_by_tag('num_micro_sites') > 0 %}
-          To configure aggregators, target a MicroSite at the top of the page and select the Data Sharing menu.
+          To configure aggregators, select a target MicroSite at the top of the page and select the Data Sharing menu.
         {% endif %}
       {% else %}
         {% if (aggregators | length) == 0 %}
