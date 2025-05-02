@@ -1611,6 +1611,8 @@ class AdsbIm:
             "docker",
             "run",
             "--rm",
+            "--add-host",
+            "host.docker.internal:host-gateway",
             "--entrypoint",
             "/usr/local/bin/readsb",
             f"{uf}",
