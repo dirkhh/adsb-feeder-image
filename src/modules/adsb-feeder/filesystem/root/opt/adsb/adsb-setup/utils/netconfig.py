@@ -96,6 +96,8 @@ class UltrafeederConfig:
         if is_stage2 and self._micro > 0:
             mf_ip = self._d.env_by_tags("mf_ip").list_get(self._micro)
             ip, triplet = mf_get_ip_and_triplet(mf_ip)
+            # is_user_triplet: microfeeder was specified by user as triplet
+            is_user_triplet = (mf_ip != ip)
             if mf_ip == ip and self._d.env_by_tags("mf_brofm").list_get(self._micro):
                 ret.add(f"adsb,{ip},30006,beast_in")
             else:
@@ -110,7 +112,7 @@ class UltrafeederConfig:
                 # or the UAT port on the micro feeder
                 ret.add(f"adsb,{ip},30978,uat_in")
 
-            if mf_ip != "local":
+            if mf_ip != "local" and not is_user_triplet:
                 # while a rare usecase, people might run feed clients on the
                 # microfeeder (technically not a microfeeder then) and then use
                 # stage2 just for aggregation of the data
