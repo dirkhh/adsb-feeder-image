@@ -1565,9 +1565,13 @@ class AdsbIm:
 
     def check_remote_feeder(self, ip):
         print_err(f"check_remote_feeder({ip})")
+        check_ports = ["80", "1099"]
+        if "," in ip:
+            # if the user specifies a specific port, assume it's not an adsb.im install
+            check_ports = []
         ip, triplet = mf_get_ip_and_triplet(ip)
         json_dict = {}
-        for port in ["80", "1099"]:
+        for port in check_ports:
             url = f"http://{ip}:{port}/api/base_info"
             print_err(f"checking remote feeder {url}")
             try:
