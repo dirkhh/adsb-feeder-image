@@ -63,6 +63,9 @@ if [ -f /opt/adsb/config/.env ] ; then
             if grep "AF_STAGE2_NANOFEEDER=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
                 COMPOSE_FILES+=( "-f" "/opt/adsb/config/nanofeeder.yml" )
             fi
+            if grep "AF_STAGE2_NANOFEEDER_2=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
+                COMPOSE_FILES+=( "-f" "/opt/adsb/config/nanofeeder_2.yml" )
+            fi
             # stage 2 feeder, look through the various containers
             NUM=$(grep AF_NUM_MICRO_SITES= /opt/adsb/config/.env | sed -n 's/.*=\([0-9]\+\).*/\1/p')
             for ((i = 1; i <= NUM; i++)); do

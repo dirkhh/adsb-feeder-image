@@ -163,6 +163,11 @@ def mf_get_ip_and_triplet(ip):
             triplet = f"nanofeeder,30005,beast_in"
             # this ip is used to talk to the python running on the host, use host.docker.internal
             ip = "host.docker.internal"
+        elif ip == "local2":
+            # container to container connections we do directly, use nanofeeder
+            triplet = f"nanofeeder_2,30005,beast_in"
+            # this ip is used to talk to the python running on the host, use host.docker.internal
+            ip = "host.docker.internal"
         else:
             triplet = f"{ip},30005,beast_in"
 

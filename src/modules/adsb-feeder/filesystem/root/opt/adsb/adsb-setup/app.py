@@ -1043,7 +1043,7 @@ class AdsbIm:
         # and then update with the actual settings
         serial_guess: Dict[str, str] = self._sdrdevices.addresses_per_frequency
         print_err(f"serial guess: {serial_guess}")
-        serials: Dict[str, str] = {f: self._d.env_by_tags(f"{f}serial").value for f in [978, 1090]}
+        serials: Dict[str, str] = {f: self._d.env_by_tags(f"{f}serial").value for f in [978, 1090, "1090_2"]}
         configured_serials = {self._d.env_by_tags(f).value for f in self._sdrdevices.purposes()}
         available_serials = [sdr._serial for sdr in self._sdrdevices.sdrs]
         for f in [978, 1090]:
@@ -1480,11 +1480,11 @@ class AdsbIm:
         return name
 
     def get_base_info(self, n, do_import=False):
-        ip = self._d.env_by_tags("mf_ip").list_get(n)
+        mf_ip = self._d.env_by_tags("mf_ip").list_get(n)
         port = self._d.env_by_tags("mf_port").list_get(n)
         if not port:
             port = "80"
-        ip, triplet = mf_get_ip_and_triplet(ip)
+        ip, triplet = mf_get_ip_and_triplet(mf_ip)
 
         print_err(f"getting info from {ip}:{port} with do_import={do_import}", level=8)
         timeout = 2.0
@@ -1526,6 +1526,10 @@ class AdsbIm:
                 # only accept the remote name if this is our initial import
                 # after that the user may have overwritten it
                 self._d.env_by_tags("site_name").list_set(n, self.unique_site_name(base_info["name"], n))
+            if mf_ip == "local":
+                self._d.env_by_tags("site_name").list_set(n, self.unique_site_name(f"{base_info['name']} local", n))
+            if mf_ip == "local2":
+                self._d.env_by_tags("site_name").list_set(n, self.unique_site_name(f"{base_info['name']} local2", n))
             self._d.env_by_tags("lat").list_set(n, base_info["lat"])
             # deal with backwards compatibility
             lon = base_info.get("lon", None)
@@ -1552,7 +1556,10 @@ class AdsbIm:
                 dump978url = f"http://{ip}:{dap}/skyaware978"
 
             self._d.env_by_tags("airspyurl").list_set(n, airspyurl)
-            self._d.env_by_tags("rtlsdrurl").list_set(n, rtlsdrurl)
+            if mf_ip == "local2":
+                self._d.env_by_tags("rtlsdrurl").list_set(n, "http://host.docker.internal:8075")
+            else:
+                self._d.env_by_tags("rtlsdrurl").list_set(n, rtlsdrurl)
             self._d.env_by_tags("978url").list_set(n, dump978url)
 
             self._d.env_by_tags("mf_brofm_capable").list_set(n, bool(base_info.get("brofm_capable")))
@@ -1924,6 +1931,12 @@ class AdsbIm:
             self._d.env_by_tags("nano_beast_port").value = "30005"
             self._d.env_by_tags("nano_beastreduce_port").value = "30006"
 
+
+        if self._d.is_enabled("stage2") and self._d.env_by_tags("1090_2serial").value:
+            self._d.env_by_tags("stage2_nano_2").value = True
+        else:
+            self._d.env_by_tags("stage2_nano_2").value = False
+
         for sitenum in [0] + self.micro_indices():
             site_name = self._d.env_by_tags("site_name").list_get(sitenum)
             sanitized = "".join(c if c.isalnum() or c in "-_." else "_" for c in site_name)
@@ -2087,6 +2100,7 @@ class AdsbIm:
             if verbose & 1:
                 print_err(f"in the end we have")
                 print_err(f"1090serial {env1090.value}")
+                print_err(f"1090_2serial {self._d.env_by_tags('1090_2serial').value}")
                 print_err(f"978serial {env978.value}")
                 print_err(f"airspy container is {self._d.is_enabled(['airspy'])}")
                 print_err(f"SDRplay container is {self._d.is_enabled(['sdrplay'])}")
@@ -2115,6 +2129,21 @@ class AdsbIm:
             for i in self.micro_indices():
                 if self._d.env_by_tags("mf_ip").list_get(i) == "local":
                     self._d.env_by_tags(["uat978", "is_enabled"]).list_set(i, do978)
+            log_consistency_warning(True)
+            read_values_from_config_json(check_integrity=True)
+
+        if self._d.env_by_tags("stage2_nano_2").value:
+            # this code is here and not further up so get_base_info knows
+            # about the various URLs for 978 / airspy / 1090
+            log_consistency_warning(False)
+            self.setup_new_micro_site(
+                "local2",
+                uat=False,
+                is_adsbim=True,
+                brofm=False,
+                do_import=True,
+                do_restore=False,
+            )
             log_consistency_warning(True)
             read_values_from_config_json(check_integrity=True)
 
@@ -2600,6 +2629,9 @@ class AdsbIm:
                         value = "autogain"
                 if key == "gain":
                     if value == "":
+                        value = "auto"
+                if key == "gain_2":
+                    if value == "" or value == "autogain":
                         value = "auto"
                 # deal with the micro feeder and stage2 initial setup
                 if key == "aggregator_choice" and value in ["micro", "nano"]:

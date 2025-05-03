@@ -92,9 +92,11 @@ class UltrafeederConfig:
 
         # now we need to add the inbound links (if needed)
 
+        mf_ip = None
         # add primary data input for microproxy
         if is_stage2 and self._micro > 0:
             mf_ip = self._d.env_by_tags("mf_ip").list_get(self._micro)
+            stage2_nano = mf_ip in [ "local", "local2" ]
             ip, triplet = mf_get_ip_and_triplet(mf_ip)
             # is_user_triplet: microfeeder was specified by user as triplet
             is_user_triplet = (mf_ip != ip)
@@ -108,11 +110,11 @@ class UltrafeederConfig:
             # but that shouldn't cause issues besides double 978 message rate in the graphs
             # a possible fix would be not to ingest the 978 into ultrafeeder on the microfeeder
             # but that would mean the local microfeeder display / graphs will be lacking 978
-            if self._d.list_is_enabled("uat978", self._micro) and mf_ip != "local":
+            if self._d.list_is_enabled("uat978", self._micro) and not stage2_nano:
                 # or the UAT port on the micro feeder
                 ret.add(f"adsb,{ip},30978,uat_in")
 
-            if mf_ip != "local" and not is_user_triplet:
+            if not stage2_nano and not is_user_triplet:
                 # while a rare usecase, people might run feed clients on the
                 # microfeeder (technically not a microfeeder then) and then use
                 # stage2 just for aggregation of the data
@@ -138,7 +140,7 @@ class UltrafeederConfig:
                 ret.add(f"adsb,{remote_sdr.replace(' ', '')},beast_in")
 
         # bypass nanofeeder for stage2_nano, ingest airspy / sdrplay / 978 data directly into the local microsite
-        if is_stage2 and self._micro > 0 and self._d.env_by_tags("mf_ip").list_get(self._micro) == "local":
+        if mf_ip == "local":
             if self._d.is_enabled("airspy"):
                 ret.add("adsb,airspy_adsb,30005,beast_in")
             elif self._d.is_enabled("sdrplay"):

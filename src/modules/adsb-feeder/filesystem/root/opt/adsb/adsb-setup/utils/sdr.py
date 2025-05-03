@@ -85,6 +85,7 @@ class SDRDevices:
         return (
             "978serial",
             "1090serial",
+            "1090_2serial",
             "other-0",
             "other-1",
             "other-2",
