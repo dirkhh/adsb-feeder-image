@@ -1931,7 +1931,6 @@ class AdsbIm:
             self._d.env_by_tags("nano_beast_port").value = "30005"
             self._d.env_by_tags("nano_beastreduce_port").value = "30006"
 
-
         if self._d.is_enabled("stage2") and self._d.env_by_tags("1090_2serial").value:
             self._d.env_by_tags("stage2_nano_2").value = True
         else:
@@ -2927,8 +2926,8 @@ class AdsbIm:
                     print_err("load_planes: WEIRD or backup restore: padding planestats")
                     planestats.append([])
 
-                #print_err(planelists)
-                #print_err(planestats)
+                # print_err(planelists)
+                # print_err(planestats)
 
                 if ts >= start_of_day.timestamp():
                     # ok, this dump is from today

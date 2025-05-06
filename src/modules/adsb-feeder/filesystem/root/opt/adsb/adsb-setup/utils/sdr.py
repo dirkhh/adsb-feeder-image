@@ -122,48 +122,48 @@ class SDRDevices:
         # lots of these are likely not gonna work / work well but it's still better
         # for them to be selectable by the user at least so they can see if it works or not
         rtlsdr_pv_list = [
-            "0bda:2832", # Generic RTL2832U
-            "0bda:2838", # Generic RTL2832U OEM
-            "0413:6680", # DigitalNow Quad DVB-T PCI-E card
-            "0413:6f0f", # Leadtek WinFast DTV Dongle mini D
-            "0458:707f", # Genius TVGo DVB-T03 USB dongle (Ver. B)
-            "0ccd:00a9", # Terratec Cinergy T Stick Black (rev 1)
-            "0ccd:00b3", # Terratec NOXON DAB/DAB+ USB dongle (rev 1)
-            "0ccd:00b4", # Terratec Deutschlandradio DAB Stick
-            "0ccd:00b5", # Terratec NOXON DAB Stick - Radio Energy
-            "0ccd:00b7", # Terratec Media Broadcast DAB Stick
-            "0ccd:00b8", # Terratec BR DAB Stick
-            "0ccd:00b9", # Terratec WDR DAB Stick
-            "0ccd:00c0", # Terratec MuellerVerlag DAB Stick
-            "0ccd:00c6", # Terratec Fraunhofer DAB Stick
-            "0ccd:00d3", # Terratec Cinergy T Stick RC (Rev.3)
-            "0ccd:00d7", # Terratec T Stick PLUS
-            "0ccd:00e0", # Terratec NOXON DAB/DAB+ USB dongle (rev 2)
-            "1554:5020", # PixelView PV-DT235U(RN)
-            "15f4:0131", # Astrometa DVB-T/DVB-T2
-            "15f4:0133", # HanfTek DAB+FM+DVB-T
-            "185b:0620", # Compro Videomate U620F
-            "185b:0650", # Compro Videomate U650F
-            "185b:0680", # Compro Videomate U680F
-            "1b80:d393", # GIGABYTE GT-U7300
-            "1b80:d394", # DIKOM USB-DVBT HD
-            "1b80:d395", # Peak 102569AGPK
-            "1b80:d397", # KWorld KW-UB450-T USB DVB-T Pico TV
-            "1b80:d398", # Zaapa ZT-MINDVBZP
-            "1b80:d39d", # SVEON STV20 DVB-T USB & FM
-            "1b80:d3a4", # Twintech UT-40
-            "1b80:d3a8", # ASUS U3100MINI_PLUS_V2
-            "1b80:d3af", # SVEON STV27 DVB-T USB & FM
-            "1b80:d3b0", # SVEON STV21 DVB-T USB & FM
-            "1d19:1101", # Dexatek DK DVB-T Dongle (Logilink VG0002A)
-            "1d19:1102", # Dexatek DK DVB-T Dongle (MSI DigiVox mini II V3.0)
-            "1d19:1103", # Dexatek Technology Ltd. DK 5217 DVB-T Dongle
-            "1d19:1104", # MSI DigiVox Micro HD
-            "1f4d:a803", # Sweex DVB-T USB
-            "1f4d:b803", # GTek T803
-            "1f4d:c803", # Lifeview LV5TDeluxe
-            "1f4d:d286", # MyGica TD312
-            "1f4d:d803", # PROlectrix DV107669
+            "0bda:2832",  # Generic RTL2832U
+            "0bda:2838",  # Generic RTL2832U OEM
+            "0413:6680",  # DigitalNow Quad DVB-T PCI-E card
+            "0413:6f0f",  # Leadtek WinFast DTV Dongle mini D
+            "0458:707f",  # Genius TVGo DVB-T03 USB dongle (Ver. B)
+            "0ccd:00a9",  # Terratec Cinergy T Stick Black (rev 1)
+            "0ccd:00b3",  # Terratec NOXON DAB/DAB+ USB dongle (rev 1)
+            "0ccd:00b4",  # Terratec Deutschlandradio DAB Stick
+            "0ccd:00b5",  # Terratec NOXON DAB Stick - Radio Energy
+            "0ccd:00b7",  # Terratec Media Broadcast DAB Stick
+            "0ccd:00b8",  # Terratec BR DAB Stick
+            "0ccd:00b9",  # Terratec WDR DAB Stick
+            "0ccd:00c0",  # Terratec MuellerVerlag DAB Stick
+            "0ccd:00c6",  # Terratec Fraunhofer DAB Stick
+            "0ccd:00d3",  # Terratec Cinergy T Stick RC (Rev.3)
+            "0ccd:00d7",  # Terratec T Stick PLUS
+            "0ccd:00e0",  # Terratec NOXON DAB/DAB+ USB dongle (rev 2)
+            "1554:5020",  # PixelView PV-DT235U(RN)
+            "15f4:0131",  # Astrometa DVB-T/DVB-T2
+            "15f4:0133",  # HanfTek DAB+FM+DVB-T
+            "185b:0620",  # Compro Videomate U620F
+            "185b:0650",  # Compro Videomate U650F
+            "185b:0680",  # Compro Videomate U680F
+            "1b80:d393",  # GIGABYTE GT-U7300
+            "1b80:d394",  # DIKOM USB-DVBT HD
+            "1b80:d395",  # Peak 102569AGPK
+            "1b80:d397",  # KWorld KW-UB450-T USB DVB-T Pico TV
+            "1b80:d398",  # Zaapa ZT-MINDVBZP
+            "1b80:d39d",  # SVEON STV20 DVB-T USB & FM
+            "1b80:d3a4",  # Twintech UT-40
+            "1b80:d3a8",  # ASUS U3100MINI_PLUS_V2
+            "1b80:d3af",  # SVEON STV27 DVB-T USB & FM
+            "1b80:d3b0",  # SVEON STV21 DVB-T USB & FM
+            "1d19:1101",  # Dexatek DK DVB-T Dongle (Logilink VG0002A)
+            "1d19:1102",  # Dexatek DK DVB-T Dongle (MSI DigiVox mini II V3.0)
+            "1d19:1103",  # Dexatek Technology Ltd. DK 5217 DVB-T Dongle
+            "1d19:1104",  # MSI DigiVox Micro HD
+            "1f4d:a803",  # Sweex DVB-T USB
+            "1f4d:b803",  # GTek T803
+            "1f4d:c803",  # Lifeview LV5TDeluxe
+            "1f4d:d286",  # MyGica TD312
+            "1f4d:d803",  # PROlectrix DV107669
         ]
 
         check_pidvid(pv_list=rtlsdr_pv_list, sdr_type="rtlsdr")
@@ -198,7 +198,6 @@ class SDRDevices:
         if self.last_debug_out != self.debug_out:
             self.last_debug_out = self.debug_out
             print_err(self.debug_out.rstrip("\n"))
-
 
     def _ensure_populated(self):
         with self.lock:
