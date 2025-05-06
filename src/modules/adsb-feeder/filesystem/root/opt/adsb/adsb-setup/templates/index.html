@@ -186,7 +186,7 @@
       {% endfor %}
       <div class="col-12 mb-4">
         Enabled indicates feeding the aggregator. <span class="text-success">&#x2714;</span> feed is in good state,
-        <span class="text-danger">&#x237B;</span> feed is down,
+        <span class="text-danger">&#x2717;</span> feed is down,
         <span class="text-warning">&#x237B;</span> feed is degraded,
         <span class="text-muted">&#x2713;</span> feed state is not supported
         <br />
@@ -789,7 +789,7 @@
             $("#" + agg + "span" + idx).html("&#x2714;");
           } else if (data["beast"] == "☒") {
             $("#" + agg + "span" + idx).attr("class", "text-danger");
-            $("#" + agg + "span" + idx).html("&#x237B;");
+            $("#" + agg + "span" + idx).html("&#x2717;");
           } else if (beast_broken || mlat_broken) {
             $("#" + agg + "span" + idx).attr("class", "text-warning");
             $("#" + agg + "span" + idx).html("&#x237B;");
