@@ -13,10 +13,12 @@ croak() {
 
 cd "$(dirname "${BASH_SOURCE[0]}")"/../.. || croak "cannot cd to top-level directory"
 
+[[ $# == 0 ]] && croak "$USAGE"
+
 while (( $# ))
 do
     case $1 in
-        'v*') TAG=$1
+        v*) TAG=$1
             ;;
         '-m') shift; MSG=$1
             ;;
