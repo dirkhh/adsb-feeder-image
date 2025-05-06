@@ -1,4 +1,9 @@
 Changes since v2.3.4:
+- additional improvement of readsb memory consumption
+- visual changes to make the checkmarks in the aggregator grid more easily distinguishable
+- support wifi networks with an empty password
+- experimental support for running two SDRs for ADS-B on the same device (for low/high sensitivity corner cases, mainly)
+- beta-notes: update to latest containers
 - clarify UI for setting ssh key and switching to 'secure' mode
 - minor changes for corner cases in the daily reported planes statistics
 - update containers to their current versions
