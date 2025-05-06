@@ -176,10 +176,6 @@ class Data:
         Env("FEEDER_SERIAL_1090_2", tags=["1090_2serial"]),
         Env("FEEDER_SERIAL_978", tags=["978serial"]),
         Env("FEEDER_UAT_DEVICE_TYPE", default="rtlsdr", tags=["uat_device_type"]),
-        Env("FEEDER_UNUSED_SERIAL_0", tags=["other-0"]),
-        Env("FEEDER_UNUSED_SERIAL_1", tags=["other-1"]),
-        Env("FEEDER_UNUSED_SERIAL_2", tags=["other-2"]),
-        Env("FEEDER_UNUSED_SERIAL_3", tags=["other-3"]),
         Env("READSB_NET_BR_OPTIMIZE_FOR_MLAT", tags=["beast-reduce-optimize-for-mlat"]),
         Env("FEEDER_MAX_RANGE", default=[300], tags=["max_range"]),
         Env("FEEDER_USE_GPSD", default=False, tags=["use_gpsd", "is_enabled"]),
@@ -609,6 +605,8 @@ class Data:
         Env("AF_FEEDER_VERSION", default=[""], tags=["mf_version"]),
         Env("AF_FEEDER_INITIAL_VERSION", default="", tags=["initial_version"]),
     }
+    for i in range(16):
+        _env.add(Env(f"FEEDER_UNUSED_SERIAL_{i}", tags=[f"other-{i}"]))
 
     # Container images
     # -- these names are magic and are used in yaml files and the structure
