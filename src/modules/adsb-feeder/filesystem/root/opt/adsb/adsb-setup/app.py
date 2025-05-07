@@ -990,7 +990,7 @@ class AdsbIm:
                     timeout=30.0,
                 )
             except subprocess.TimeoutExpired:
-                report_issue("timeout expired joining Zerotier network... trying to continue...")
+                print_err("timeout expired joining Zerotier network... trying to continue...")
 
         self.handle_implied_settings()
         self.write_envfile()
@@ -1001,7 +1001,7 @@ class AdsbIm:
         try:
             subprocess.call("/opt/adsb/docker-compose-start", timeout=180.0, shell=True)
         except subprocess.TimeoutExpired:
-            report_issue("timeout expired re-starting docker... trying to continue...")
+            print_err("timeout expired re-starting docker... trying to continue...")
 
     def base_is_configured(self):
         base_config: set[Env] = {env for env in self._d._env if env.is_mandatory}
