@@ -127,4 +127,7 @@ if [ -f /opt/adsb/config/.env ] ; then
     if grep "AF_IS_HFDLOBSERVER_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
         COMPOSE_FILES+=( "-f" "/opt/adsb/config/hfdlobserver.yml" )
     fi
+    if grep "AF_IS_SHIPFEEDER_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
+        COMPOSE_FILES+=( "-f" "/opt/adsb/config/shipfeeder.yml" )
+    fi
 fi
