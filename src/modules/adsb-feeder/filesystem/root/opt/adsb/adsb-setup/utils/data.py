@@ -153,6 +153,7 @@ class Data:
         Env("FEEDER_SDRS_LOCKED", default=False, tags=["sdrs_locked"]),
         # misnomer, FEEDER_RTL_SDR is used as follows: READSB_DEVICE_TYPE=${FEEDER_RTL_SDR}
         Env("FEEDER_RTL_SDR", default="rtlsdr", tags=["readsb_device_type"]),
+        Env("FEEDER_READSB_DEVICE", default="", tags=["readsb_device"]),
         Env(
             "FEEDER_ENABLE_BIASTEE",
             default=False,

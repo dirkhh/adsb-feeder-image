@@ -2071,10 +2071,13 @@ class AdsbIm:
 
             if rtlsdr:
                 self._d.env_by_tags("readsb_device_type").value = "rtlsdr"
+                self._d.env_by_tags("readsb_device").value = env1090.value
             elif modesbeast:
                 self._d.env_by_tags("readsb_device_type").value = "modesbeast"
+                self._d.env_by_tags("readsb_device").value = ""
             else:
                 self._d.env_by_tags("readsb_device_type").value = ""
+                self._d.env_by_tags("readsb_device").value = ""
 
             if rtlsdr:
                 # set rtl-sdr 1090 gain, bit hacky but means we don't have to restart the bulky ultrafeeder for gain changes
