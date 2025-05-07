@@ -254,6 +254,7 @@ class AdsbIm:
         self.agg_structure = None
         self.last_cache_agg_status = 0
         self.cache_agg_status_lock = threading.Lock()
+        self.miscLock = threading.Lock()
         self.last_aggregator_debug_print = None
         self.microfeeder_setting_tags = (
             "site_name", "lat", "lon", "alt", "tz", "mf_version", "max_range",
@@ -3110,22 +3111,23 @@ class AdsbIm:
     def index(self):
         # if we get to show the feeder homepage, the user should have everything figured out
         # and we can remove the pre-installed ssh-keys and password
-        if os.path.exists("/opt/adsb/adsb.im.passwd.and.keys"):
-            print_err("removing pre-installed ssh-keys, overwriting root password")
-            authkeys = "/root/.ssh/authorized_keys"
-            shutil.copyfile(authkeys, authkeys + ".bak")
-            with open("/root/.ssh/adsb.im.installkey", "r") as installkey_file:
-                installkey = installkey_file.read().strip()
-            with open(authkeys + ".bak", "r") as org_authfile:
-                with open(authkeys, "w") as new_authfile:
-                    for line in org_authfile.readlines():
-                        if "adsb.im" not in line and installkey not in line:
-                            new_authfile.write(line)
-            # now overwrite the root password with something random
-            alphabet = string.ascii_letters + string.digits
-            self.rpw = "".join(secrets.choice(alphabet) for i in range(12))
-            self.set_rpw()
-            os.remove("/opt/adsb/adsb.im.passwd.and.keys")
+        with self.miscLock:
+            if os.path.exists("/opt/adsb/adsb.im.passwd.and.keys"):
+                print_err("removing pre-installed ssh-keys, overwriting root password")
+                authkeys = "/root/.ssh/authorized_keys"
+                shutil.copyfile(authkeys, authkeys + ".bak")
+                with open("/root/.ssh/adsb.im.installkey", "r") as installkey_file:
+                    installkey = installkey_file.read().strip()
+                with open(authkeys + ".bak", "r") as org_authfile:
+                    with open(authkeys, "w") as new_authfile:
+                        for line in org_authfile.readlines():
+                            if "adsb.im" not in line and installkey not in line:
+                                new_authfile.write(line)
+                # now overwrite the root password with something random
+                alphabet = string.ascii_letters + string.digits
+                self.rpw = "".join(secrets.choice(alphabet) for i in range(12))
+                self.set_rpw()
+                os.remove("/opt/adsb/adsb.im.passwd.and.keys")
 
         board = self._d.env_by_tags("board_name").value
         # there are many other boards I should list here - but Pi 3 and Pi Zero are probably the most common
