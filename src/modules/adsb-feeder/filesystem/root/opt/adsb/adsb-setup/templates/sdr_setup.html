@@ -198,8 +198,11 @@
           }
           // don't show the 978 checkbox for non-rtlsdr SDRs as they can't be used for 978
           document.getElementById("978-" + i).parentNode.style.display = (type != "rtlsdr") ? "none" : "";
+          // don't show the 1090_2 checkbox for non-rtlsdr, it's not supported due to the annoyance
+          // of having to implement more containers
+          document.getElementById("1090_2-" + i).parentNode.style.display = (type != "rtlsdr") ? "none" : "";
         }
-        for (let i = num; i < 4; i++) {
+        for (let i = num; i < 16; i++) {
           let id = 'sdr' + i;
           document.getElementById(id).style.display = 'none';
         }
@@ -215,7 +218,7 @@
         $("input[type=radio]").click(function () {
           myid = this.id;
           let components = myid.split("-");
-          for (const usage of ["1090", "978", "other"]) {
+          for (const usage of consumers) {
             otherid = usage + "-" + components[1];
             if (otherid != myid) {
               document.getElementById(otherid).checked = false;
