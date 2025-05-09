@@ -2080,13 +2080,10 @@ class AdsbIm:
 
             if rtlsdr:
                 self._d.env_by_tags("readsb_device_type").value = "rtlsdr"
-                self._d.env_by_tags("readsb_device").value = env1090.value
             elif modesbeast:
                 self._d.env_by_tags("readsb_device_type").value = "modesbeast"
-                self._d.env_by_tags("readsb_device").value = ""
             else:
                 self._d.env_by_tags("readsb_device_type").value = ""
-                self._d.env_by_tags("readsb_device").value = ""
 
             if rtlsdr:
                 # set rtl-sdr 1090 gain, bit hacky but means we don't have to restart the bulky ultrafeeder for gain changes
@@ -2119,6 +2116,13 @@ class AdsbIm:
             # user request
             if self.base_is_configured():
                 self._d.env_by_tags("sdrs_locked").value = True
+
+        # needs to happen even for locked SDRs due to readsb_device env var not existing before 2.3.5
+        if self._d.env_by_tags("readsb_device_type").value == "rtlsdr":
+            self._d.env_by_tags("readsb_device").value = self._d.env_by_tags("1090serial").value
+        else:
+            self._d.env_by_tags("readsb_device").value = ""
+
 
         if self._d.env_by_tags("stage2_nano").value:
             do978 = bool(self._d.env_by_tags("978serial").value)

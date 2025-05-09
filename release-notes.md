@@ -1,4 +1,5 @@
 Changes since v2.3.4:
+- beta-notes: fix readsb_device env var not getting set as 1090 serial on update
 - beta-notes: fix SDR setup page error
 - fix issues on systems with more than 4 SDRs present
 - stage2: better decode ground positions far from stage2 center (readsb change)
