@@ -114,12 +114,10 @@
               <input type="radio" id="1090-{{ sdr }}" name="1090serial" value="">
               1090
             </label>
-            {% if is_enabled('stage2') %}
             <label class="checkbox-inline mr-2">
               <input type="radio" id="1090_2-{{ sdr }}" name="1090_2serial" value="">
               1090_2
             </label>
-            {% endif %}
             <label class="checkbox-inline mr-2">
               <input type="radio" id="978-{{ sdr }}" name="978serial" value="">
               978
@@ -200,7 +198,12 @@
           document.getElementById("978-" + i).parentNode.style.display = (type != "rtlsdr") ? "none" : "";
           // don't show the 1090_2 checkbox for non-rtlsdr, it's not supported due to the annoyance
           // of having to implement more containers
-          document.getElementById("1090_2-" + i).parentNode.style.display = (type != "rtlsdr") ? "none" : "";
+          let hide2 = (type != "rtlsdr");
+          // always hide it if this is not a stage2 install
+          {% if not is_enabled('stage2') %}
+          hide2 = true;
+          {% endif %}
+          document.getElementById("1090_2-" + i).parentNode.style.display = hide2 ? "none" : "";
         }
         for (let i = num; i < 16; i++) {
           let id = 'sdr' + i;

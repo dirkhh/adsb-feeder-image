@@ -1,4 +1,5 @@
 Changes since v2.3.4:
+- beta-notes: fix SDR setup page error
 - fix issues on systems with more than 4 SDRs present
 - stage2: better decode ground positions far from stage2 center (readsb change)
 - beta-notes: fix stage2 nano being automatically renamed when it already exists
