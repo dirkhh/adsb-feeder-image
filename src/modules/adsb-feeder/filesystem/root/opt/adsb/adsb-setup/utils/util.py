@@ -60,7 +60,10 @@ def print_err(*args, **kwargs):
 
 def report_issue(msg):
     print_err(msg, level=1)
-    flash(msg)
+    try:
+        flash(msg)
+    except:
+        print_err(traceback.format_exc())
 
 
 # this is based on https://www.regular-expressions.info/email.html
