@@ -1126,10 +1126,7 @@ class AdsbIm:
         lat, lon, alt = self.get_lat_lon_alt()
         rtlsdr_at_port = 0
         if self._d.env_by_tags("readsb_device_type").value == "rtlsdr":
-            if self._d.is_enabled("stage2_nano"):
-                rtlsdr_at_port = self._d.env_by_tags("nanotar1090portadjusted").value
-            else:
-                rtlsdr_at_port = self._d.env_by_tags("tar1090port").value
+            rtlsdr_at_port = self._d.env_by_tags("tar1090port").value
         response = make_response(
             json.dumps(
                 {
@@ -1555,10 +1552,21 @@ class AdsbIm:
                 dump978url = f"http://{ip}:{dap}/skyaware978"
 
             self._d.env_by_tags("airspyurl").list_set(n, airspyurl)
-            if mf_ip == "local2":
-                self._d.env_by_tags("rtlsdrurl").list_set(n, "http://host.docker.internal:8075")
+
+            # stage2 nanofeeder / nanofeeder_2 are local and local2
+            if mf_ip == "local":
+                if self._d.is_enabled("airspy"):
+                    self._d.env_by_tags("airspyurl").list_set(n, "http://airspy_adsb")
+                if self._d.env_by_tags("readsb_device_type").value == "rtlsdr":
+                    self._d.env_by_tags("rtlsdrurl").list_set(n, "http://nanofeeder")
+            elif mf_ip == "local2":
+                # local2 only supports rtl-sdr as the primary use case is 2 rtl-sdr with differing
+                # gain. otherwise would need setting up more code to run a 2nd airspy container for
+                # example
+                self._d.env_by_tags("rtlsdrurl").list_set(n, "http://nanofeeder_2")
             else:
                 self._d.env_by_tags("rtlsdrurl").list_set(n, rtlsdrurl)
+
             self._d.env_by_tags("978url").list_set(n, dump978url)
 
             self._d.env_by_tags("mf_brofm_capable").list_set(n, bool(base_info.get("brofm_capable")))
