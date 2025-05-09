@@ -2085,10 +2085,6 @@ class AdsbIm:
             else:
                 self._d.env_by_tags("readsb_device_type").value = ""
 
-            if rtlsdr:
-                # set rtl-sdr 1090 gain, bit hacky but means we don't have to restart the bulky ultrafeeder for gain changes
-                self.setRtlGain()
-
             if airspy:
                 # make sure airspy gain is within bounds
                 gain = self._d.env_by_tags(["gain"]).value
@@ -2120,6 +2116,8 @@ class AdsbIm:
         # needs to happen even for locked SDRs due to readsb_device env var not existing before 2.3.5
         if self._d.env_by_tags("readsb_device_type").value == "rtlsdr":
             self._d.env_by_tags("readsb_device").value = self._d.env_by_tags("1090serial").value
+            # set rtl-sdr 1090 gain, bit hacky but means we don't have to restart the bulky ultrafeeder for gain changes
+            self.setRtlGain()
         else:
             self._d.env_by_tags("readsb_device").value = ""
 
