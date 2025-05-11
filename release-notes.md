@@ -1,4 +1,5 @@
 Changes since v2.3.4:
+- beta-notes: update Ultrafeeder and Radar1090 container; the Ultrafeeder update brings an updated readsb with a per plane message counting improvement for stage 2
 - beta-notes: fix readsb_device env var not getting set as 1090 serial on update
 - beta-notes: fix SDR setup page error
 - fix issues on systems with more than 4 SDRs present
