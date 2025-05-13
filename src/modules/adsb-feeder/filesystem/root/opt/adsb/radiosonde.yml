@@ -1,0 +1,14 @@
+services:
+  radiosonde:
+    image: ${RADIOSONDE_CONTAINER}
+    container_name: radiosonde
+    restart: always
+    tmpfs:
+      - /run:exec,size=64M
+      - /var/log:size=64M
+    device_cgroup_rules:
+      - "c 189:* rwm"
+    volumes:
+      - /opt/adsb/radiosonde/station.cfg:/opt/auto_rx/station.cfg:ro
+      - /opt/adsb/radiosonde/log/:/opt/auto_rx/log
+      - /dev/bus/usb:/dev/bus/usb:ro

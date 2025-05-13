@@ -664,6 +664,8 @@ class Data:
         Env("AIS_SX_UDP_FEEDS", default="", tags=["ais_sx_udp_feeds"]),
         Env("AISCATCHER_UDP_INPUTS", default="", tags=["aiscatcher_udp_inputs"]),
         Env("AIS_WEB_PORT", default="", tags=["ais_web_port"]),
+        # Radiosonde related stuff
+        Env("AF_IS_RADIOSONDE_ENABLED", default=False, tags=["radiosonde", "is_enabled"]),
     }
     for i in range(16):
         _env.add(Env(f"FEEDER_UNUSED_SERIAL_{i}", tags=[f"other-{i}"]))
