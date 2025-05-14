@@ -2427,6 +2427,7 @@ class AdsbIm:
                     if e:
                         e.value = False
                         print_err(f"disabled {tags}")
+                        self._next_url_from_director = request.url
                         continue
                 if key.endswith("--enable") and value == "go":
                     tags = [t.replace("enable", "is_enabled") for t in key.split("--")]
@@ -2434,6 +2435,7 @@ class AdsbIm:
                     if e:
                         e.value = True
                         print_err(f"enabled {tags}")
+                        self._next_url_from_director = request.url
                         continue
                 if allow_insecure and key == "tailscale_disable_go" and form.get("tailscale_disable") == "disable":
                     success, output = run_shell_captured(

@@ -242,6 +242,84 @@
     </form>
   </div>
   {% endif %}
-
+  <div class="col-12 col-lg-6">
+    <h5 class="mt-3">Enable non-ADS-B containers</h5>
+    <form method="POST" onsubmit="show_spinner(); return true;">
+      <div class="row align-items-center">
+        <div class="col-12 mb-2">
+          While this may not be interesting to most users, it is possible to enable a number of others
+          SDR-based tracking containers in this image. Contrary to the ADS-B experience, those (so far)
+          do not have a configuration UI, so this is a lot more manual work to get working, and several
+          actually need you to log into the image and manually edit config files. However, having a way
+          to at least enable these containers and continue to have a single Docker network for all of
+          them to coexist in is quite useful for those who want to explore more than just ADS-B (and UAT)
+          tracking.
+        </div>
+        <div class="col-12 mt-2">
+          <div class="row border">
+            <!-- first ACARS -->
+            {% if not is_enabled('acarsdec') %}
+            <div class="col-8 my-1">
+              <label for="acarsdec--enable">
+                Enable first analog ACARS decoder.
+              </label>
+            </div>
+            <div class="col-4 my-1">
+              <button type="submit" class="btn btn-primary mx-auto w-100" name="acarsdec--enable"
+                      value="go">Enable</button>
+            </div>
+            {% else %}
+            <div class="col-8 my-1">
+              <label for="acarsdec--disable">
+                Disable first analog ACARS decoder.
+              </label>
+            </div>
+            <div class="col-4 my-1">
+              <button type="submit" class="btn btn-primary mx-auto w-100" name="acarsdec--disable"
+                      value="go">Disable</button>
+            </div>
+            <div class="col-4 mb-1">
+              <label for="acars_feed_id">
+                ACARS feed ID
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input type="text" class="mx-auto w-100" name="acars_feed_id" id="acars_feed_id"
+                     value="{{ env_value_by_tag('acars_feed_id') }}">
+            </div>
+            <div class="col-4 mb-1">
+              <label for="acars_sdr_string">
+                ACARS SDR string
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input type="text" class="mx-auto w-100" name="acars_sdr_string" id="acars_sdr_string"
+                     value="{{ env_value_by_tag('acars_sdr_string') }}">
+            </div>
+            <div class="col-4 mb-1">
+              <label for="acars_gain">
+                ACARS gain
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input type="text" class="mx-auto w-100" name="acars_gain" id="acars_gain"
+                     value="{{ env_value_by_tag('acars_gain') }}">
+            </div>
+            <div class="col-4 mb-1">
+              <label for="acars_frequencies">
+                ACARS frequencies
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input type="text" class="mx-auto w-100" name="acars_frequencies" id="acars_frequencies"
+                     placeholder="129.125;130.025;130.425;130.450;130.85;130.825;130.55;130.45;130.425"
+                     value="{{ env_value_by_tag('acars_frequencies') }}">
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
 </div>
 {% endblock %}
