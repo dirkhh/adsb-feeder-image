@@ -25,3 +25,6 @@ for container_line in $(grep "_CONTAINER=" /opt/adsb/config/.env); do
         fi
     })
 done
+
+echo
+echo "DONE. WARNING: the container versions API is only updated every 60 MINUTES!"
