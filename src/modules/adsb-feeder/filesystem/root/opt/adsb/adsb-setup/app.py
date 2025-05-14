@@ -1527,8 +1527,10 @@ class AdsbIm:
                 # only accept the remote name if this is our initial import
                 # after that the user may have overwritten it
                 self._d.env_by_tags("site_name").list_set(n, self.unique_site_name(base_info["name"], n))
-                if mf_ip in [ "local", "local2" ]:
-                    self._d.env_by_tags("site_name").list_set(n, self.unique_site_name(f"{base_info['name']} {mf_ip}", n))
+                if mf_ip in ["local", "local2"]:
+                    self._d.env_by_tags("site_name").list_set(
+                        n, self.unique_site_name(f"{base_info['name']} {mf_ip}", n)
+                    )
             self._d.env_by_tags("lat").list_set(n, base_info["lat"])
             # deal with backwards compatibility
             lon = base_info.get("lon", None)
@@ -2123,7 +2125,6 @@ class AdsbIm:
             self.setRtlGain()
         else:
             self._d.env_by_tags("readsb_device").value = ""
-
 
         if self._d.env_by_tags("stage2_nano").value:
             do978 = bool(self._d.env_by_tags("978serial").value)
