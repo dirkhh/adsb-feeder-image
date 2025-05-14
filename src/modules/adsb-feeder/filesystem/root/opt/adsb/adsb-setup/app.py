@@ -2420,6 +2420,21 @@ class AdsbIm:
                     self._system._restart.bg_run(func=self._system.os_update)
                     self._next_url_from_director = request.url
                     return render_template("/restarting.html")
+                # generic pattern to use buttons to enable or disable 'is_enabled' style env vars
+                if key.endswith("--disable") and value == "go":
+                    tags = [t.replace("disable", "is_enabled") for t in key.split("--")]
+                    e = self._d.env_by_tags(tags)
+                    if e:
+                        e.value = False
+                        print_err(f"disabled {tags}")
+                        continue
+                if key.endswith("--enable") and value == "go":
+                    tags = [t.replace("enable", "is_enabled") for t in key.split("--")]
+                    e = self._d.env_by_tags(tags)
+                    if e:
+                        e.value = True
+                        print_err(f"enabled {tags}")
+                        continue
                 if allow_insecure and key == "tailscale_disable_go" and form.get("tailscale_disable") == "disable":
                     success, output = run_shell_captured(
                         "systemctl disable --now tailscaled && systemctl mask tailscaled", timeout=30
