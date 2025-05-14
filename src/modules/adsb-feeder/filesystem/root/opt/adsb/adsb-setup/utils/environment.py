@@ -122,7 +122,7 @@ class Env:
         # we get "1" from .env files and "on" from checkboxes in HTML
         if self.is_bool:
             value = is_true(value)
-        # stupid Python with it's complex data types... modifying a list in the app
+        # stupid Python with its complex data types... modifying a list in the app
         # already modifies the existing object in memory - so we need to force a comparison
         # to the value in the file
         if type(self._value) == list:
