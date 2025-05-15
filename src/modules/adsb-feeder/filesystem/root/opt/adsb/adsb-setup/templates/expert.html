@@ -439,6 +439,30 @@
             </div>
             {% endif %}
           </div>
+          <div class="row border">
+            {% if not is_enabled('radiosonde') %}
+            <div class="col-8 my-1">
+              <label for="radiosonde--enable">
+                Enable Radio Sonde support. All configuration needs to be done manually editing
+                <tt>/opt/adsb/radiosonde/station.cfg</tt> on the feeder device.
+              </label>
+            </div>
+            <div class="col-4 my-1">
+              <button type="submit" class="btn btn-primary mx-auto w-100" name="radiosonde--enable"
+                      value="go">Enable</button>
+            </div>
+            {% else %}
+            <div class="col-8 my-1">
+              <label for="radiosonde--disable">
+                Disable Radio Sonde support.
+              </label>
+            </div>
+            <div class="col-4 my-1">
+              <button type="submit" class="btn btn-primary mx-auto w-100" name="radiosonde--disable"
+                      value="go">Disable</button>
+            </div>
+            {% endif %}
+          </div>
         </div>
       </div>
     </form>
