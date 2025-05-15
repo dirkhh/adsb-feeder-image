@@ -440,6 +440,66 @@
             {% endif %}
           </div>
           <div class="row border">
+            {% if not is_enabled('shipfeeder') %}
+            <!-- AIS -->
+            <div class="col-8 my-1">
+              <label for="shipfeeder--enable">
+                Enable AIS / Shipfeeder.
+              </label>
+            </div>
+            <div class="col-4 my-1">
+              <button type="submit" class="btn btn-primary mx-auto w-100" name="shipfeeder--enable"
+                      value="go">Enable</button>
+            </div>
+            {% else %}
+            <div class="col-8 my-1">
+              <label for="shipfeeder--disable">
+                Disable AIS / Shipfeeder.
+              </label>
+            </div>
+            <div class="col-4 my-1">
+              <button type="submit" class="btn btn-primary mx-auto w-100" name="shipfeeder--disable"
+                      value="go">Disable</button>
+            </div>
+            <div class="col-4 mb-1">
+              <label for="ais_station_name">
+                AIS station name
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input type="text" class="mx-auto w-100" name="ais_station_name" id="ais_station_name"
+                     value="{{ env_value_by_tag('ais_station_name') }}">
+            </div>
+            <div class="col-4 mb-1">
+              <label for="ais_rtlsdr_device_serial">
+                AIS RTLSDR serial
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input type="text" class="mx-auto w-100" name="ais_rtlsdr_device_serial" id="ais_rtlsdr_device_serial"
+                     value="{{ env_value_by_tag('ais_rtlsdr_device_serial') }}">
+            </div>
+            <div class="col-4 mb-1">
+              <label for="ais_rtlsdr_device_gain">
+                AIS RTLSDR gain
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input type="text" class="mx-auto w-100" name="ais_rtlsdr_device_gain" id="ais_rtlsdr_device_gain"
+                     value="{{ env_value_by_tag('ais_rtlsdr_device_gain') }}">
+            </div>
+            <div class="col-4 mb-1">
+              <label for="ais_rtlsdr_device_biastee">
+                AIS RTLSDR biastee
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input type="text" class="mx-auto w-100" name="ais_rtlsdr_device_biastee" id="ais_rtlsdr_device_biastee"
+                     value="{{ env_value_by_tag('ais_rtlsdr_device_biastee') }}">
+            </div>
+            {% endif %}
+          </div>
+          <div class="row border">
             {% if not is_enabled('radiosonde') %}
             <div class="col-8 my-1">
               <label for="radiosonde--enable">
