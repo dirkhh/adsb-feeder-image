@@ -378,6 +378,67 @@
             </div>
             {% endif %}
           </div>
+          <div class="row border">
+            {% if not is_enabled('dumpvdl2') %}
+            <!-- VDLM -->
+            <div class="col-8 my-1">
+              <label for="dumpvdl2--enable">
+                Enable VDL Mode 2 decoder.
+              </label>
+            </div>
+            <div class="col-4 my-1">
+              <button type="submit" class="btn btn-primary mx-auto w-100" name="dumpvdl2--enable"
+                      value="go">Enable</button>
+            </div>
+            {% else %}
+            <div class="col-8 my-1">
+              <label for="dumpvdl2--disable">
+                Disable VDL Mode 2 decoder.
+              </label>
+            </div>
+            <div class="col-4 my-1">
+              <button type="submit" class="btn btn-primary mx-auto w-100" name="dumpvdl2--disable"
+                      value="go">Disable</button>
+            </div>
+            <div class="col-4 mb-1">
+              <label for="vdlm_feed_id">
+                VDL2 feed ID
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input type="text" class="mx-auto w-100" name="vdlm_feed_id" id="vdlm_feed_id"
+                     value="{{ env_value_by_tag('vdlm_feed_id') }}">
+            </div>
+            <div class="col-4 mb-1">
+              <label for="vdlm_sdr_string">
+                VDL2 SDR string
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input type="text" class="mx-auto w-100" name="vdlm_sdr_string" id="vdlm_sdr_string"
+                     value="{{ env_value_by_tag('vdlm_sdr_string') }}">
+            </div>
+            <div class="col-4 mb-1">
+              <label for="vdlm_gain">
+                VDL2 gain
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input type="text" class="mx-auto w-100" name="vdlm_gain" id="vdlm_gain"
+                     value="{{ env_value_by_tag('vdlm_gain') }}">
+            </div>
+            <div class="col-4 mb-1">
+              <label for="vdlm_frequencies">
+                VDL2 frequencies
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input type="text" class="mx-auto w-100" name="vdlm_frequencies" id="vdlm_frequencies"
+                     placeholder="136975000 136945000 136925000 136825000 136800000 136775000"
+                     value="{{ env_value_by_tag('vdlm_frequencies') }}">
+            </div>
+            {% endif %}
+          </div>
         </div>
       </div>
     </form>
