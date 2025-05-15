@@ -2437,6 +2437,9 @@ class AdsbIm:
                         print_err(f"enabled {tags}")
                         self._next_url_from_director = request.url
                         continue
+                if key.endswith("--update") and value == "go":
+                    self._next_url_from_director = request.url
+                    continue
                 if allow_insecure and key == "tailscale_disable_go" and form.get("tailscale_disable") == "disable":
                     success, output = run_shell_captured(
                         "systemctl disable --now tailscaled && systemctl mask tailscaled", timeout=30

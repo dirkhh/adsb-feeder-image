@@ -261,7 +261,7 @@
             {% if not is_enabled('acarsdec') %}
             <div class="col-8 my-1">
               <label for="acarsdec--enable">
-                Enable first analog ACARS decoder.
+                Enable first analog ACARS decoder
               </label>
             </div>
             <div class="col-4 my-1">
@@ -269,14 +269,18 @@
                       value="go">Enable</button>
             </div>
             {% else %}
-            <div class="col-8 my-1">
+            <div class="col-6 my-1">
               <label for="acarsdec--disable">
-                Disable first analog ACARS decoder.
+                First analog ACARS decoder
               </label>
             </div>
-            <div class="col-4 my-1">
-              <button type="submit" class="btn btn-primary mx-auto w-100" name="acarsdec--disable"
+            <div class="col-3 my-1">
+              <button type="submit" class="btn btn-secondary mx-auto w-100" name="acarsdec--disable"
                       value="go">Disable</button>
+            </div>
+            <div class="col-3 my-1">
+              <button type="submit" class="btn btn-primary mx-auto w-100" name="acarsdec--update"
+                      value="go">Update</button>
             </div>
             <div class="col-4 mb-1">
               <label for="acars_feed_id">
@@ -322,7 +326,7 @@
             <!-- second ACARS -->
             <div class="col-8 my-1">
               <label for="acarsdec2--enable">
-                Enable second analog ACARS decoder (to allow covering all frequencies).
+                Enable second analog ACARS decoder (to allow covering all frequencies)
               </label>
             </div>
             <div class="col-4 my-1">
@@ -330,14 +334,18 @@
                       value="go">Enable</button>
             </div>
             {% else %}
-            <div class="col-8 my-1">
+            <div class="col-6 my-1">
               <label for="acarsdec2--disable">
-                Disable second analog ACARS decoder.
+                Second analog ACARS decoder
               </label>
             </div>
-            <div class="col-4 my-1">
-              <button type="submit" class="btn btn-primary mx-auto w-100" name="acarsdec2--disable"
+            <div class="col-3 my-1">
+              <button type="submit" class="btn btn-secondary mx-auto w-100" name="acarsdec2--disable"
                       value="go">Disable</button>
+            </div>
+            <div class="col-3 my-1">
+              <button type="submit" class="btn btn-primary mx-auto w-100" name="acarsdec2--update"
+                      value="go">Update</button>
             </div>
             <div class="col-4 mb-1">
               <label for="acars2_feed_id">
@@ -383,7 +391,7 @@
             <!-- VDLM -->
             <div class="col-8 my-1">
               <label for="dumpvdl2--enable">
-                Enable VDL Mode 2 decoder.
+                Enable VDL Mode 2 decoder
               </label>
             </div>
             <div class="col-4 my-1">
@@ -391,14 +399,18 @@
                       value="go">Enable</button>
             </div>
             {% else %}
-            <div class="col-8 my-1">
+            <div class="col-6 my-1">
               <label for="dumpvdl2--disable">
-                Disable VDL Mode 2 decoder.
+                VDL Mode 2 decoder
               </label>
             </div>
-            <div class="col-4 my-1">
-              <button type="submit" class="btn btn-primary mx-auto w-100" name="dumpvdl2--disable"
+            <div class="col-3 my-1">
+              <button type="submit" class="btn btn-secondary mx-auto w-100" name="dumpvdl2--disable"
                       value="go">Disable</button>
+            </div>
+            <div class="col-3 my-1">
+              <button type="submit" class="btn btn-primary mx-auto w-100" name="dumpvdl2--update"
+                      value="go">Update</button>
             </div>
             <div class="col-4 mb-1">
               <label for="vdlm_feed_id">
@@ -444,7 +456,7 @@
             <!-- AIS -->
             <div class="col-8 my-1">
               <label for="shipfeeder--enable">
-                Enable AIS / Shipfeeder.
+                Enable AIS / Shipfeeder
               </label>
             </div>
             <div class="col-4 my-1">
@@ -452,14 +464,18 @@
                       value="go">Enable</button>
             </div>
             {% else %}
-            <div class="col-8 my-1">
+            <div class="col-6 my-1">
               <label for="shipfeeder--disable">
-                Disable AIS / Shipfeeder.
+                AIS / Shipfeeder
               </label>
             </div>
-            <div class="col-4 my-1">
-              <button type="submit" class="btn btn-primary mx-auto w-100" name="shipfeeder--disable"
+            <div class="col-3 my-1">
+              <button type="submit" class="btn btn-secondary mx-auto w-100" name="shipfeeder--disable"
                       value="go">Disable</button>
+            </div>
+            <div class="col-3 my-1">
+              <button type="submit" class="btn btn-primary mx-auto w-100" name="shipfeeder--update"
+                      value="go">Update</button>
             </div>
             <div class="col-4 mb-1">
               <label for="ais_station_name">
@@ -518,7 +534,7 @@
               </label>
             </div>
             <div class="col-4 my-1">
-              <button type="submit" class="btn btn-primary mx-auto w-100" name="radiosonde--disable"
+              <button type="submit" class="btn btn-secondary mx-auto w-100" name="radiosonde--disable"
                       value="go">Disable</button>
             </div>
             {% endif %}
