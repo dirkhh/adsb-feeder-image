@@ -317,6 +317,67 @@
             </div>
             {% endif %}
           </div>
+          <div class="row border">
+            {% if not is_enabled('acarsdec2') %}
+            <!-- second ACARS -->
+            <div class="col-8 my-1">
+              <label for="acarsdec2--enable">
+                Enable second analog ACARS decoder (to allow covering all frequencies).
+              </label>
+            </div>
+            <div class="col-4 my-1">
+              <button type="submit" class="btn btn-primary mx-auto w-100" name="acarsdec2--enable"
+                      value="go">Enable</button>
+            </div>
+            {% else %}
+            <div class="col-8 my-1">
+              <label for="acarsdec2--disable">
+                Disable second analog ACARS decoder.
+              </label>
+            </div>
+            <div class="col-4 my-1">
+              <button type="submit" class="btn btn-primary mx-auto w-100" name="acarsdec2--disable"
+                      value="go">Disable</button>
+            </div>
+            <div class="col-4 mb-1">
+              <label for="acars2_feed_id">
+                ACARS2 feed ID
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input type="text" class="mx-auto w-100" name="acars2_feed_id" id="acars2_feed_id"
+                     value="{{ env_value_by_tag('acars2_feed_id') }}">
+            </div>
+            <div class="col-4 mb-1">
+              <label for="acars2_sdr_string">
+                ACARS2 SDR string
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input type="text" class="mx-auto w-100" name="acars2_sdr_string" id="acars2_sdr_string"
+                     value="{{ env_value_by_tag('acars2_sdr_string') }}">
+            </div>
+            <div class="col-4 mb-1">
+              <label for="acars2_gain">
+                ACARS2 gain
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input type="text" class="mx-auto w-100" name="acars2_gain" id="acars2_gain"
+                     value="{{ env_value_by_tag('acars2_gain') }}">
+            </div>
+            <div class="col-4 mb-1">
+              <label for="acars2_frequencies">
+                ACARS2 frequencies
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input type="text" class="mx-auto w-100" name="acars2_frequencies" id="acars2_frequencies"
+                     placeholder="131.85;131.825;131.725;131.65;131.55;131.525;131.475;131.45;131.425;131.25;131.125"
+                     value="{{ env_value_by_tag('acars2_frequencies') }}">
+            </div>
+            {% endif %}
+          </div>
         </div>
       </div>
     </form>
