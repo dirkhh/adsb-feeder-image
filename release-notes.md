@@ -1,17 +1,10 @@
 Changes since v2.3.4:
-- beta-notes: update ultrafeeder (hopefully the last time, the previous update didn't bring in the correct readsb version to fix the ModeS beast bug)
-- beta-notes: update ultrafeeder container to fix readsb ModeS Beast bug
-- beta-notes: update Ultrafeeder and Radar1090 container; the Ultrafeeder update brings an updated readsb with a per plane message counting improvement for stage 2
-- beta-notes: fix readsb_device env var not getting set as 1090 serial on update
-- beta-notes: fix SDR setup page error
 - fix issues on systems with more than 4 SDRs present
 - stage2: better decode ground positions far from stage2 center (readsb change)
-- beta-notes: fix stage2 nano being automatically renamed when it already exists
 - additional improvement of readsb memory consumption
 - visual changes to make the checkmarks in the aggregator grid more easily distinguishable
 - support wifi networks with an empty password
 - support for running two SDRs for ADS-B on the same device (usually low + high gain, requires stage2)
-- beta-notes: update to latest containers
 - clarify UI for setting ssh key and switching to 'secure' mode
 - minor changes for corner cases in the daily reported planes statistics
 - update containers to their current versions
