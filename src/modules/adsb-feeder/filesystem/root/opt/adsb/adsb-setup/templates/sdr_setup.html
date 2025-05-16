@@ -109,7 +109,7 @@
           <p class="col-2" id="sdr{{ sdr }}-tag">SDR {{ sdr }}</p>
           <p class="col-2" id="sdr{{ sdr }}-type"></p>
           <p class="col-3 text-break" id="sdr{{ sdr }}-serial"></p>
-          <p class="col-5 small" id="sdr{{ sdr }}-puprpose">
+          <p class="col-5 small" id="sdr{{ sdr }}-purpose">
             <label class="checkbox-inline mr-2">
               <input type="radio" id="1090-{{ sdr }}" name="1090serial" value="">
               1090
@@ -121,6 +121,18 @@
             <label class="checkbox-inline mr-2">
               <input type="radio" id="978-{{ sdr }}" name="978serial" value="">
               978
+            </label>
+            <label class="checkbox-inline mr-2">
+              <input type="radio" id="acars-{{ sdr }}" name="acarsserial" value="">
+              ACARS
+            </label>
+            <label class="checkbox-inline mr-2">
+              <input type="radio" id="acars2-{{ sdr }}" name="acars2serial" value="">
+              ACARS2
+            </label>
+            <label class="checkbox-inline mr-2">
+              <input type="radio" id="vdlm2-{{ sdr }}" name="vdlm2serial" value="">
+              VDLM2
             </label>
             <label class="checkbox-inline mr-2">
               <input type="radio" id="other-{{ sdr }}" name="other-{{ sdr }}" value="" checked>
@@ -168,6 +180,7 @@
       .then(response => response.json())
       .then(data => {
         let num = data['sdrdevices'].length;
+        console.log("num sdrs: " + num);
         if (num == 0) {
           document.getElementById('multipleSdrs').style.display = 'none';
           document.getElementById('noSdrs').style.display = 'block';
@@ -176,7 +189,7 @@
         document.getElementById("lsusb_text").innerHTML = data.lsusb_output;
         let sdrs = data['sdrdevices'];
         let use = data['frequencies'];
-        let consumers = ["1090", "978", "other" {% if is_enabled('stage2') %}, "1090_2"{% endif %} ]
+        let consumers = ["1090", "978", "other" {% if is_enabled('stage2') %}, "1090_2"{% endif %}, "acars", "acars2", "vdlm2"];
         for (let i = 0; i < num; i++) {
           let id = 'sdr' + i;
           let serial = sdrs[i]['serial'];
@@ -204,6 +217,16 @@
           hide2 = true;
           {% endif %}
           document.getElementById("1090_2-" + i).parentNode.style.display = hide2 ? "none" : "";
+          // don't show ACARS or VDLM2 if they aren't enabled
+          let hide_acars = {% if is_enabled('acarsdec') %} false; {% else %} true; {% endif %}
+          let hide_acars2 = {% if is_enabled('acarsdec2') %}false; {% else %} true; {% endif %}
+          let hide_vdlm = {% if is_enabled('dumpvdl2') %}false;{% else %}true;{% endif %}
+          if (type == "airspy") {
+            hide_vdlm = true;
+          }
+          document.getElementById("acars-" + i).parentNode.style.display = hide_acars ? "none" : "";
+          document.getElementById("acars2-" + i).parentNode.style.display = hide_acars2 ? "none" : "";
+          document.getElementById("vdlm2-" + i).parentNode.style.display = hide_vdlm ? "none" : "";
         }
         for (let i = num; i < 16; i++) {
           let id = 'sdr' + i;
@@ -221,6 +244,7 @@
         $("input[type=radio]").click(function () {
           myid = this.id;
           let components = myid.split("-");
+          console.log("components: " + components + " consumers: " + consumers);
           for (const usage of consumers) {
             otherid = usage + "-" + components[1];
             if (otherid != myid) {
