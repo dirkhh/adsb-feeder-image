@@ -646,7 +646,7 @@ class Data:
         Env("AF_IS_SHIPFEEDER_ENABLED", default=False, tags=["shipfeeder", "is_enabled"]),
         Env("AIS_SX_EXTRA_OPTIONS", default="", tags=["ais_sx_extra_options"]),
         Env("AIS_STATION_NAME", default="", tags=["ais_station_name"]),
-        Env("AIS_RTLSDR_DEVICE_SERIAL", default="", tags=["ais_rtlsdr_device_serial"]),
+        Env("AIS_RTLSDR_DEVICE_SERIAL", default="", tags=["aisserial"]),
         Env("AIS_RTLSDR_DEVICE_GAIN", default="", tags=["ais_rtlsdr_device_gain"]),
         Env("AIS_RTLSDR_DEVICE_PPM", default="", tags=["ais_rtlsdr_device_ppm"]),
         Env("AIS_RTLSDR_DEVICE_BIASTEE", default="", tags=["ais_rtlsdr_device_biastee"]),

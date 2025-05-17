@@ -1048,7 +1048,7 @@ class AdsbIm:
         serial_guess: Dict[str, str] = self._sdrdevices.addresses_per_frequency
         print_err(f"serial guess: {serial_guess}")
         serials: Dict[str, str] = {
-            f: self._d.env_by_tags(f"{f}serial").value for f in [978, 1090, "1090_2", "acars", "acars2", "vdl2"]
+            f: self._d.env_by_tags(f"{f}serial").value for f in [978, 1090, "1090_2", "acars", "acars2", "vdl2", "ais"]
         }
         configured_serials = {self._d.env_by_tags(f).value for f in self._sdrdevices.purposes()}
         available_serials = [sdr._serial for sdr in self._sdrdevices.sdrs]
