@@ -2167,6 +2167,19 @@ class AdsbIm:
         # set all of the ultrafeeder config data up
         self.setup_ultrafeeder_args()
 
+        # create the ACARS and VDLM2 SDR strings
+        acarsserial = self._d.env_by_tags("acarsserial").value
+        acarssdr = self._sdrdevices.get_sdr_by_serial(acarsserial)
+        acarsstring = "" if acarssdr is None else f"driver={acarssdr._type},serial={acarsserial}"
+        acars2serial = self._d.env_by_tags("acars2serial").value
+        acars2sdr = self._sdrdevices.get_sdr_by_serial(acars2serial)
+        acars2string = "" if acars2sdr is None else f"driver={acars2sdr._type},serial={acars2serial}"
+        vdlm2serial = self._d.env_by_tags("vdlm2serial").value
+        vdlm2sdr = self._sdrdevices.get_sdr_by_serial(vdlm2serial)
+        vdlm2string = "" if vdlm2sdr is None else f"driver={vdlm2sdr._type},serial={vdlm2serial}"
+        self._d.env_by_tags("acars_sdr_string").value = acarsstring
+        self._d.env_by_tags("acars2_sdr_string").value = acars2string
+        self._d.env_by_tags("vdlm_sdr_string").value = vdlm2string
         # finally, check if this has given us enough configuration info to
         # start the containers
         if self.base_is_configured() or self._d.is_enabled("stage2"):

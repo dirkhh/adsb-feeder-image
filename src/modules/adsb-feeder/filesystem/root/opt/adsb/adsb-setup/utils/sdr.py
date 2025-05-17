@@ -194,6 +194,12 @@ class SDRDevices:
             self.last_debug_out = self.debug_out
             print_err(self.debug_out.rstrip("\n"))
 
+    def get_sdr_by_serial(self, serial: str):
+        self._ensure_populated()
+        for sdr in self.sdrs:
+            if sdr._serial == serial:
+                return sdr
+
     def _ensure_populated(self):
         with self.lock:
             if time.time() - self.last_probe < 1:
