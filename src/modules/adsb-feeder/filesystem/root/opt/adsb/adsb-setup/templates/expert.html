@@ -370,7 +370,7 @@
           </div>
           <div class="row border">
             {% if not is_enabled('dumpvdl2') %}
-            <!-- VDLM -->
+            <!-- VDL Mode 2 -->
             <div class="col-8 my-1">
               <label for="dumpvdl2--enable">
                 Enable VDL Mode 2 decoder
@@ -395,32 +395,32 @@
                       value="go">Update</button>
             </div>
             <div class="col-4 mb-1">
-              <label for="vdlm_feed_id">
+              <label for="vdl2_feed_id">
                 VDL2 feed ID
               </label>
             </div>
             <div class="col-8 mb-1">
-              <input type="text" class="mx-auto w-100" name="vdlm_feed_id" id="vdlm_feed_id"
-                     value="{{ env_value_by_tag('vdlm_feed_id') }}">
+              <input type="text" class="mx-auto w-100" name="vdl2_feed_id" id="vdl2_feed_id"
+                     value="{{ env_value_by_tag('vdl2_feed_id') }}">
             </div>
             <div class="col-4 mb-1">
-              <label for="vdlm_gain">
+              <label for="vdl2_gain">
                 VDL2 gain
               </label>
             </div>
             <div class="col-8 mb-1">
-              <input type="text" class="mx-auto w-100" name="vdlm_gain" id="vdlm_gain"
-                     value="{{ env_value_by_tag('vdlm_gain') }}">
+              <input type="text" class="mx-auto w-100" name="vdl2_gain" id="vdl2_gain"
+                     value="{{ env_value_by_tag('vdl2_gain') }}">
             </div>
             <div class="col-4 mb-1">
-              <label for="vdlm_frequencies">
+              <label for="vdl2_frequencies">
                 VDL2 frequencies
               </label>
             </div>
             <div class="col-8 mb-1">
-              <input type="text" class="mx-auto w-100" name="vdlm_frequencies" id="vdlm_frequencies"
+              <input type="text" class="mx-auto w-100" name="vdl2_frequencies" id="vdl2_frequencies"
                      placeholder="136975000 136945000 136925000 136825000 136800000 136775000"
-                     value="{{ env_value_by_tag('vdlm_frequencies') }}">
+                     value="{{ env_value_by_tag('vdl2_frequencies') }}">
             </div>
             {% endif %}
           </div>

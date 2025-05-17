@@ -131,8 +131,8 @@
               ACARS2
             </label>
             <label class="checkbox-inline mr-2">
-              <input type="radio" id="vdlm2-{{ sdr }}" name="vdlm2serial" value="">
-              VDLM2
+              <input type="radio" id="vdl2-{{ sdr }}" name="vdl2serial" value="">
+              VDL Mode 2
             </label>
             <label class="checkbox-inline mr-2">
               <input type="radio" id="other-{{ sdr }}" name="other-{{ sdr }}" value="" checked>
@@ -189,7 +189,7 @@
         document.getElementById("lsusb_text").innerHTML = data.lsusb_output;
         let sdrs = data['sdrdevices'];
         let use = data['frequencies'];
-        let consumers = ["1090", "978", "other" {% if is_enabled('stage2') %}, "1090_2"{% endif %}, "acars", "acars2", "vdlm2"];
+        let consumers = ["1090", "978", "other" {% if is_enabled('stage2') %}, "1090_2"{% endif %}, "acars", "acars2", "vdl2"];
         for (let i = 0; i < num; i++) {
           let id = 'sdr' + i;
           let serial = sdrs[i]['serial'];
@@ -217,16 +217,16 @@
           hide2 = true;
           {% endif %}
           document.getElementById("1090_2-" + i).parentNode.style.display = hide2 ? "none" : "";
-          // don't show ACARS or VDLM2 if they aren't enabled
+          // don't show ACARS or VDL Mode 2 if they aren't enabled
           let hide_acars = {% if is_enabled('acarsdec') %} false; {% else %} true; {% endif %}
           let hide_acars2 = {% if is_enabled('acarsdec2') %}false; {% else %} true; {% endif %}
-          let hide_vdlm = {% if is_enabled('dumpvdl2') %}false;{% else %}true;{% endif %}
+          let hide_vdl2 = {% if is_enabled('dumpvdl2') %}false;{% else %}true;{% endif %}
           if (type == "airspy") {
-            hide_vdlm = true;
+            hide_vdl2 = true;
           }
           document.getElementById("acars-" + i).parentNode.style.display = hide_acars ? "none" : "";
           document.getElementById("acars2-" + i).parentNode.style.display = hide_acars2 ? "none" : "";
-          document.getElementById("vdlm2-" + i).parentNode.style.display = hide_vdlm ? "none" : "";
+          document.getElementById("vdl2-" + i).parentNode.style.display = hide_vdl2 ? "none" : "";
         }
         for (let i = num; i < 16; i++) {
           let id = 'sdr' + i;

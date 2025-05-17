@@ -1048,7 +1048,7 @@ class AdsbIm:
         serial_guess: Dict[str, str] = self._sdrdevices.addresses_per_frequency
         print_err(f"serial guess: {serial_guess}")
         serials: Dict[str, str] = {
-            f: self._d.env_by_tags(f"{f}serial").value for f in [978, 1090, "1090_2", "acars", "acars2", "vdlm2"]
+            f: self._d.env_by_tags(f"{f}serial").value for f in [978, 1090, "1090_2", "acars", "acars2", "vdl2"]
         }
         configured_serials = {self._d.env_by_tags(f).value for f in self._sdrdevices.purposes()}
         available_serials = [sdr._serial for sdr in self._sdrdevices.sdrs]
@@ -2167,19 +2167,19 @@ class AdsbIm:
         # set all of the ultrafeeder config data up
         self.setup_ultrafeeder_args()
 
-        # create the ACARS and VDLM2 SDR strings
+        # create the ACARS and VDL2 SDR strings
         acarsserial = self._d.env_by_tags("acarsserial").value
         acarssdr = self._sdrdevices.get_sdr_by_serial(acarsserial)
         acarsstring = "" if acarssdr is None else f"driver={acarssdr._type},serial={acarsserial}"
         acars2serial = self._d.env_by_tags("acars2serial").value
         acars2sdr = self._sdrdevices.get_sdr_by_serial(acars2serial)
         acars2string = "" if acars2sdr is None else f"driver={acars2sdr._type},serial={acars2serial}"
-        vdlm2serial = self._d.env_by_tags("vdlm2serial").value
-        vdlm2sdr = self._sdrdevices.get_sdr_by_serial(vdlm2serial)
-        vdlm2string = "" if vdlm2sdr is None else f"driver={vdlm2sdr._type},serial={vdlm2serial}"
+        vdl2serial = self._d.env_by_tags("vdl2serial").value
+        vdl2sdr = self._sdrdevices.get_sdr_by_serial(vdl2serial)
+        vdl2string = "" if vdl2sdr is None else f"driver={vdl2sdr._type},serial={vdl2serial}"
         self._d.env_by_tags("acars_sdr_string").value = acarsstring
         self._d.env_by_tags("acars2_sdr_string").value = acars2string
-        self._d.env_by_tags("vdlm_sdr_string").value = vdlm2string
+        self._d.env_by_tags("vdl2_sdr_string").value = vdl2string
 
         # sort out if we need the acarsrouter and acarshub
         self._d.env_by_tags("acarsrouter").value = (
@@ -2187,20 +2187,20 @@ class AdsbIm:
         )
         self._d.env_by_tags("acarshub").value = self._d.is_enabled("acarsrouter")
         feed_acars = ""
-        feed_vdlm2 = ""
+        feed_vdl2 = ""
         feed_hfdl = ""
         if self._d.is_enabled("feed_acars_airframes"):
             feed_acars += ";feed.airframes.io:5550"
-            feed_vdlm2 += ";feed.airframes.io:5552"
+            feed_vdl2 += ";feed.airframes.io:5552"
             feed_hfdl += "feed.airframes.io:5556"
         if self._d.is_enabled("feed_acars_acarsdrama"):
             feed_acars += ";feedthe.acarsdrama.com:5550"
-            feed_vdlm2 += ";feedthe.acarsdrama.com:5555"
+            feed_vdl2 += ";feedthe.acarsdrama.com:5555"
         if self._d.is_enabled("feed_acars_avdelphi"):
             feed_acars += ";data.avdelphi.com:5555"
-            feed_vdlm2 += ";data.avdelphi.com:5600"
+            feed_vdl2 += ";data.avdelphi.com:5600"
         self._d.env_by_tags("feed_string_acars").value = feed_acars
-        self._d.env_by_tags("feed_string_vdlm2").value = feed_vdlm2
+        self._d.env_by_tags("feed_string_vdl2").value = feed_vdl2
         self._d.env_by_tags("feed_string_hfdl").value = feed_hfdl
         # finally, check if this has given us enough configuration info to
         # start the containers
