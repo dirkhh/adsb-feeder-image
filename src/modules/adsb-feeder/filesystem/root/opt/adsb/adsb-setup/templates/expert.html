@@ -516,5 +516,43 @@
       </div>
     </form>
   </div>
+  {% if is_enabled('acarsdec') or is_enabled('acarsdec2') or is_enabled('dumpvdl2') %}
+  <!-- set up acarsrouter -->
+  <div class="col-12 col-lg-6">
+    <h5 class="mt-3">Data sharing of ACARS and related data</h5>
+    <form method="POST" onsubmit="show_spinner(); return true;">
+      <div class="row align-items-center">
+        <div class="col-1">
+          <input type="checkbox" name="feed_acars_airframes" id="feed_acars_airframes" {% if is_enabled("feed_acars_airframes") %} checked {% endif %}>
+        </div>
+        <div class="col-11 mb-2">
+          <a href="https://airframes.io/">Airframes.io</a> is an unbiased and unfiltered transportation aggregation service
+          for data sources such as ACARS, VDL, HFDL, and SATCOM.
+          Most people interested in tracking this kind of data want to feed this aggregator.
+        </div>
+        <div class="col-1">
+          <input type="checkbox" name="feed_acars_avdelphi" id="feed_acars_avdelphi" {% if is_enabled("feed_acars_avdelphi") %}
+                 checked {% endif %}>
+        </div>
+        <div class="col-11 mb-2">
+          <a href="https://avdelphi.com/">AVDelphi</a> is another aggregator for ACARS data. Note that you need to claim your
+          feed on their <a href="https://www.avdelphi.com/claim_feed.html">website</a> before you are allowed to feed them.
+        </div>
+        <div class="col-1">
+          <input type="checkbox" name="feed_acars_acarsdrama" id="feed_acars_acarsframa" {% if is_enabled("feed_acars_acarsdrama") %}
+                 checked {% endif %}>
+        </div>
+        <div class="col-11 mb-2">
+          <a href="https://acarsdrama.com/">AcarsDrama</a> is a rather different type of aggregator. They are mainly focused
+          on picking out things that are funny (or drama) from the large amount of ACARS data that's available.
+        </div>
+        <div class="col-12 mb-2">
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="acarsrouter--update"
+                  value="go">Update</button>
+        </div>
+      </div>
+    </form>
+  </div>
+  {% endif %}
 </div>
 {% endblock %}

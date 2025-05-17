@@ -2180,6 +2180,28 @@ class AdsbIm:
         self._d.env_by_tags("acars_sdr_string").value = acarsstring
         self._d.env_by_tags("acars2_sdr_string").value = acars2string
         self._d.env_by_tags("vdlm_sdr_string").value = vdlm2string
+
+        # sort out if we need the acarsrouter and acarshub
+        self._d.env_by_tags("acarsrouter").value = (
+            self._d.is_enabled("acarsdec") or self._d.is_enabled("acarsdec2") or self._d.is_enabled("dumpvdl2")
+        )
+        self._d.env_by_tags("acarshub").value = self._d.is_enabled("acarsrouter")
+        feed_acars = ""
+        feed_vdlm2 = ""
+        feed_hfdl = ""
+        if self._d.is_enabled("feed_acars_airframes"):
+            feed_acars += ";feed.airframes.io:5550"
+            feed_vdlm2 += ";feed.airframes.io:5552"
+            feed_hfdl += "feed.airframes.io:5556"
+        if self._d.is_enabled("feed_acars_acarsdrama"):
+            feed_acars += ";feedthe.acarsdrama.com:5550"
+            feed_vdlm2 += ";feedthe.acarsdrama.com:5555"
+        if self._d.is_enabled("feed_acars_avdelphi"):
+            feed_acars += ";data.avdelphi.com:5555"
+            feed_vdlm2 += ";data.avdelphi.com:5600"
+        self._d.env_by_tags("feed_string_acars").value = feed_acars
+        self._d.env_by_tags("feed_string_vdlm2").value = feed_vdlm2
+        self._d.env_by_tags("feed_string_hfdl").value = feed_hfdl
         # finally, check if this has given us enough configuration info to
         # start the containers
         if self.base_is_configured() or self._d.is_enabled("stage2"):

@@ -635,6 +635,13 @@ class Data:
         Env("ACARS2_FEED_ID", default="", tags=["acars2_feed_id"]),
         Env("VDLM_FEED_ID", default="", tags=["vdlm_feed_id"]),
         Env("HFDL_FEED_ID", default="", tags=["hfdl_feed_id"]),
+        Env("FEED_ACARS_AIRFRAMES", default=True, tags=["feed_acars_airframes", "is_enabled"]),
+        Env("FEED_ACARS_AVDELPHI", default=True, tags=["feed_acars_avdelphi", "is_enabled"]),
+        Env("FEED_ACARS_ACARSDRAMA", default=True, tags=["feed_acars_acarsdrama", "is_enabled"]),
+        # note that the ACARS and VDLM2 strings start with a semicolon but HFDL does not -- see acarsrouter.yml
+        Env("FEED_STRING_ACARS", default="", tags=["feed_string_acars"]),
+        Env("FEED_STRING_VDLM2", default="", tags=["feed_string_vdlm2"]),
+        Env("FEED_STRING_HFDL", default="", tags=["feed_string_hfdl"]),
         # AIS related stuff
         Env("AF_IS_SHIPFEEDER_ENABLED", default=False, tags=["shipfeeder", "is_enabled"]),
         Env("AIS_SX_EXTRA_OPTIONS", default="", tags=["ais_sx_extra_options"]),
