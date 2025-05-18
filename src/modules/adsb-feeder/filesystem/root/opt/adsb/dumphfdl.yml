@@ -12,6 +12,7 @@ services:
       - GAIN=${HFDL_GAIN}
       - SOAPYSAMPLERATE=${HFDL_SAMPLERATE}
       - FEED_ID=${HFDL_FEED_ID}
+      - FREQUENCIES=${HFDL_FREQUENCIES}
       - ZMQ_MODE=server
       - ZMQ_ENDPOINT=tcp://0.0.0.0:45555
       - SERVER=acars_router

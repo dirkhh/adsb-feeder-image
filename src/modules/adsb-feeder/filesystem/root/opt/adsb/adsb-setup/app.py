@@ -2178,9 +2178,13 @@ class AdsbIm:
         vdl2serial = self._d.env_by_tags("vdl2serial").value
         vdl2sdr = self._sdrdevices.get_sdr_by_serial(vdl2serial)
         vdl2string = "" if vdl2sdr is None else f"driver={vdl2sdr._type},serial={vdl2serial}"
+        hfdlserial = self._d.env_by_tags("hfdlserial").value
+        hfdlsdr = self._sdrdevices.get_sdr_by_serial(hfdlserial)
+        hfdlstring = "" if hfdlsdr is None else f"driver={hfdlsdr._type},serial={hfdlserial}"
         self._d.env_by_tags("acars_sdr_string").value = acarsstring
         self._d.env_by_tags("acars2_sdr_string").value = acars2string
         self._d.env_by_tags("vdl2_sdr_string").value = vdl2string
+        self._d.env_by_tags("hfdl_sdr_string").value = hfdlstring
 
         # sort out if we need the acarsrouter and acarshub
         self._d.env_by_tags("acarsrouter").value = (
