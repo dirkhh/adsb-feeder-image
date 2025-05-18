@@ -2202,6 +2202,12 @@ class AdsbIm:
         self._d.env_by_tags("feed_string_acars").value = feed_acars
         self._d.env_by_tags("feed_string_vdl2").value = feed_vdl2
         self._d.env_by_tags("feed_string_hfdl").value = feed_hfdl
+
+        # AIS stuff
+        self._d.env_by_tags("ais_airframes_station_id").value = (
+            self._d.env_by_tags("ais_station_name").value if self._d.is_enabled("ais_feed_airframes") else ""
+        )
+
         # finally, check if this has given us enough configuration info to
         # start the containers
         if self.base_is_configured() or self._d.is_enabled("stage2"):

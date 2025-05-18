@@ -507,11 +507,13 @@
       </div>
     </form>
   </div>
-  {% if is_enabled('acarsdec') or is_enabled('acarsdec2') or is_enabled('dumpvdl2') %}
+  {% if is_enabled('acarsdec') or is_enabled('acarsdec2') or is_enabled('dumpvdl2') or is_enabled('shipfeeder') %}
   <!-- set up acarsrouter -->
   <div class="col-12 col-lg-6">
-    <h5 class="mt-3">Data sharing of ACARS and related data</h5>
+    <h5 class="mt-3">Data sharing of non-ADS-B data</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
+      {% if is_enabled('acarsdec') or is_enabled('acarsdec2') or is_enabled('dumpvdl2') %}
+      <h6 class="mt-3">ACARS / VDL Mode 2 / HFDL</h6>
       <div class="row align-items-center">
         <div class="col-1">
           <input type="checkbox" name="feed_acars_airframes" id="feed_acars_airframes" {% if is_enabled("feed_acars_airframes") %} checked {% endif %}>
@@ -542,6 +544,50 @@
                   value="go">Update</button>
         </div>
       </div>
+      {% endif %}
+      {% if is_enabled('shipfeeder') %}
+      <h6 class="mt-3">AIS</h6>
+      <div class="row align-items-center">
+        <div class="col-1">
+          <input type="checkbox" name="ais_feed_airframes" id="ais_feed_airframes"
+                 {% if is_enabled("ais_feed_airframes") %} checked {% endif %}>
+        </div>
+        <div class="col-11 mb-2">
+          <a href="https://airframes.io/">Airframes.io</a> is an unbiased and unfiltered transportation aggregation service
+          that also supports AIS.
+          Most people interested in tracking this kind of data want to feed this aggregator.
+        </div>
+      </div>
+      <div class="row align-items-center">
+        <div class="col-1">
+          <input type="checkbox" name="ais_feed_adsbnetwork" id="ais_feed_adsbnetwork" {% if is_enabled("ais_feed_adsbnetwork") %}
+                 checked {% endif %}>
+        </div>
+        <div class="col-11 mb-2">
+          <a href="http://adsbnetwork.com/">ADS-B Network</a> is an oddly named French aggregator that also collects AIS data. Email <a href="mailto:adsbnetwork@adsbnetwork">support@adsbnetwork.com</a> with your request to join.
+        </div>
+      </div>
+      <div class="row align-items-center">
+        <div class="col-1">
+          <input type="checkbox" name="ais_feed_aiscatcher" id="ais_feed_aiscatcher"
+                 {% if is_enabled("ais_feed_aiscatcher") %} checked {% endif %}>
+        </div>
+        <div class="col-11 mb-2">
+          <a href="https://aiscatcher.org/">AIS Catcher</a> is a community of AIS enthusiasts dedicated to maritime tracking. Get a Sharing Key by <a href="https://aiscatcher.org/addstation">registering your station</a>.
+        </div>
+        {% if is_enabled("ais_feed_aiscatcher") %}
+        <div class="col-2 mb-2"></div>
+        <div class="col-10 mb-2">
+          <input type="text" class="form-control" name="aiscatcher_feeder_key" id="aiscatcher_feeder_key"
+                 placeholder="Sharing Key"
+                 value="{{ env_value_by_tag('aiscatcher_feeder_key') }}">
+        </div>
+        {% endif %}
+        <div class="col-4">
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="aiscatcher--update" value="go">Update</button>
+        </div>
+      </div>
+      {% endif %}
     </form>
   </div>
   {% endif %}
