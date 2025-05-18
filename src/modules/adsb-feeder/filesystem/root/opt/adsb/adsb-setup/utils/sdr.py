@@ -82,7 +82,16 @@ class SDRDevices:
         return f"SDRDevices({','.join([s for s in self.sdrs])})"
 
     def purposes(self):
-        p = ("1090serial", "978serial", "1090_2serial", "acarsserial", "acars2serial", "vdl2serial", "aisserial")
+        p = (
+            "1090serial",
+            "978serial",
+            "1090_2serial",
+            "acarsserial",
+            "acars2serial",
+            "vdl2serial",
+            "hfdlserial",
+            "aisserial",
+        )
         for i in range(16):
             p += (f"other-{i}",)
         return p

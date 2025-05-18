@@ -425,6 +425,77 @@
             {% endif %}
           </div>
           <div class="row border">
+            {% if not is_enabled('dumphfdl') %}
+            <!-- HFDL -->
+            <div class="col-8 my-1">
+              <label for="dumphfdl--enable">
+                Enable HFDL support
+              </label>
+            </div>
+            <div class="col-4 my-1">
+              <button type="submit" class="btn btn-primary mx-auto w-100" name="dumphfdl--enable" value="go">Enable</button>
+            </div>
+            {% else %}
+            <div class="col-6 my-1">
+              <label for="dumphfdl--disable">
+                HFDL support
+              </label>
+            </div>
+            <div class="col-3 my-1">
+              <button type="submit" class="btn btn-secondary mx-auto w-100" name="dumphfdl--disable" value="go">Disable</button>
+            </div>
+            <div class="col-3 my-1">
+              <button type="submit" class="btn btn-primary mx-auto w-100" name="dumpvhfdl--update" value="go">Update</button>
+            </div>
+            <div class="col-4 mb-1">
+              <label for="hfdl_feed_id">
+                HFDL feed ID
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input type="text" class="mx-auto w-100" name="hfdl_feed_id" id="hfdl_feed_id"
+                     value="{{ env_value_by_tag('hfdl_feed_id') }}">
+            </div>
+            <div class="col-4 mb-1">
+              <label for="hfdl_gaintype">
+                HFDL gain type
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input type="text" class="mx-auto w-100" name="hfdl_gaintype" id="hfdl_gaintype" value="{{ env_value_by_tag('hfdl_gaintype') }}">
+            </div>
+            <div class="col-4 mb-1">
+              <label for="hfdl_gain">
+                HFDL gain
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input type="text" class="mx-auto w-100" name="hfdl_gain" id="hfdl_gain"
+                     value="{{ env_value_by_tag('hfdl_gain') }}">
+            </div>
+            <div class="col-4 mb-1">
+              <label for="hfdl_samplerate">
+                SDR sample rate
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input type="text" class="mx-auto w-100" name="hfdl_samplerate" id="hfdl_samplerate"
+                     placeholder="SDR specific sample rate in Hz"
+                     value="{{ env_value_by_tag('hfdl_samplerate') }}">
+            </div>
+            <div class="col-4 mb-1">
+              <label for="hfdl_frequencies">
+                HFDL frequencies
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input type="text" class="mx-auto w-100" name="hfdl_frequencies" id="hfdl_frequencies"
+                     placeholder="recomended to leave empty to use frequency scanner"
+                     value="{{ env_value_by_tag('hfdl_frequencies') }}">
+            </div>
+            {% endif %}
+          </div>
+          <div class="row border">
             {% if not is_enabled('shipfeeder') %}
             <!-- AIS -->
             <div class="col-8 my-1">

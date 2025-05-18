@@ -18,6 +18,7 @@ ACARSDEC_CONTAINER=ghcr.io/sdr-enthusiasts/docker-acarsdec:latest-build-435
 ACARSROUTER_CONTAINER=ghcr.io/sdr-enthusiasts/acars_router:latest-build-522
 DUMPVDL2_CONTAINER=ghcr.io/sdr-enthusiasts/docker-dumpvdl2:latest-build-371
 HFDLOBSERVER_CONTAINER=ghcr.io/sdr-enthusiasts/docker-hfdlobserver:latest-build-3
+DUMPHFDL_CONTAINER=ghcr.io/sdr-enthusiasts/docker-dumphfdl:latest-build-153
 ACARS2POS_CONTAINER=ghcr.io/rpatel3001/docker-acars2pos:23-81a896ea3cbde25b430df1773265e37e0a02ed39
 SHIPFEEDER_CONTAINER=ghcr.io/sdr-enthusiasts/docker-shipfeeder:latest-build-1692
 RADIOSONDE_CONTAINER=ghcr.io/projecthorus/radiosonde_auto_rx:v1.8.1

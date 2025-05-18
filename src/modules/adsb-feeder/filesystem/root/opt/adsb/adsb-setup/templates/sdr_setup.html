@@ -135,6 +135,10 @@
               VDL Mode 2
             </label>
             <label class="checkbox-inline mr-2">
+              <input type="radio" id="hfdl-{{ sdr }}" name="hfdlserial" value="">
+              HFDL
+            </label>
+            <label class="checkbox-inline mr-2">
               <input type="radio" id="ais-{{ sdr }}" name="aisserial" value="">
               AIS
             </label>
@@ -193,7 +197,7 @@
         document.getElementById("lsusb_text").innerHTML = data.lsusb_output;
         let sdrs = data['sdrdevices'];
         let use = data['frequencies'];
-        let consumers = ["1090", "978", "other" {% if is_enabled('stage2') %}, "1090_2"{% endif %}, "acars", "acars2", "vdl2", "ais"];
+        let consumers = ["1090", "978", "other" {% if is_enabled('stage2') %}, "1090_2"{% endif %}, "acars", "acars2", "vdl2", "hfdl", "ais"];
         for (let i = 0; i < num; i++) {
           let id = 'sdr' + i;
           let serial = sdrs[i]['serial'];
@@ -225,6 +229,7 @@
           let hide_acars = {% if is_enabled('acarsdec') %} false; {% else %} true; {% endif %}
           let hide_acars2 = {% if is_enabled('acarsdec2') %}false; {% else %} true; {% endif %}
           let hide_vdl2 = {% if is_enabled('dumpvdl2') %}false;{% else %}true;{% endif %}
+          let hide_hfdl = {% if is_enabled('dumphfdl') %}false;{% else %}true;{% endif %}
           let hide_ais = {% if is_enabled('shipfeeder') %}false;{% else %}true;{% endif %}
           if (type == "airspy") {
             hide_vdl2 = true;
@@ -232,6 +237,7 @@
           document.getElementById("acars-" + i).parentNode.style.display = hide_acars ? "none" : "";
           document.getElementById("acars2-" + i).parentNode.style.display = hide_acars2 ? "none" : "";
           document.getElementById("vdl2-" + i).parentNode.style.display = hide_vdl2 ? "none" : "";
+          document.getElementById("hfdl-" + i).parentNode.style.display = hide_hfdl ? "none" : "";
           document.getElementById("ais-" + i).parentNode.style.display = hide_ais ? "none" : "";
         }
         for (let i = num; i < 16; i++) {

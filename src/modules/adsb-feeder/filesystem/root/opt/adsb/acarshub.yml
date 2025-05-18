@@ -4,7 +4,7 @@ services:
     container_name: acarshub
     restart: always
     ports:
-      - ${ACARSHUB_WEB:-8080}:80
+      - ${ACARSHUB_WEB:-8090}:80
       - 5550:5550/udp
       - 5555:5555/udp
       - 15550:15550

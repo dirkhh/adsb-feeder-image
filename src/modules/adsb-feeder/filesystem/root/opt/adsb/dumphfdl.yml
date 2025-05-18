@@ -1,0 +1,26 @@
+services:
+  dumphfdl:
+    image: ${DUMPVDL2_CONTAINER}
+    container_name: dumphfdl
+    restart: always
+    device_cgroup_rules:
+      - "c 189:* rwm"
+    environment:
+      - TZ=${FEEDER_TZ}
+      - SOAPYSDRDRIVER=${HFDL_SDR_STRING}
+      - GAIN_TYPE=${HFDL_GAIN_TYPE}
+      - GAIN=${HFDL_GAIN}
+      - SOAPYSAMPLERATE=${HFDL_SAMPLERATE}
+      - FEED_ID=${HFDL_FEED_ID}
+      - ZMQ_MODE=server
+      - ZMQ_ENDPOINT=tcp://0.0.0.0:45555
+      - SERVER=acars_router
+      - SERVER_PORT=5556
+    tmpfs:
+      - /run:exec,size=64M
+      - /var/log
+      - /tmp
+    volumes:
+      - /dev:/dev:ro
+      - /opt/adsb/data/dumphfdl-data:/opt/dumphfdl
+      - /opt/adsb/data/dumphfdl-scanner:/opt/scanner
