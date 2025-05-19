@@ -3,6 +3,21 @@
 #
 # This is based on the sample station.cfg file - it will need hand editing
 # A lot of options have been removed or simplified to keep things manageable
+#
+# Anything of the format %env-name% is a magic value that the UI will replace.
+# If you change any of these, please don't be surprised if things break and
+# the UI appears to malfunction
+
+# Updates to the ADS-B Feeder Image will likely overwrite any edits that you
+# make in this file.
+# If you prefer to manually edit this file, that's ok. In that case please
+# set the following entry to 1 (yes, this is commented out, it's parsed
+# by the UI app, not the radiosonde container)
+#
+# %LOCAL_EDITS_DONT_MANAGE%=0
+#
+# Setting this to 0 means that the UI will manage the file, setting it to 1
+# means you are doing this yourself
 
 ################
 # SDR SETTINGS #
@@ -13,7 +28,7 @@
 #
 # RTLSDR - Use one or more RTLSDRs
 #
-sdr_type = RTLSDR
+sdr_type = %sonde_sdr_type%
 sdr_quantity = 1
 
 # Individual RTLSDR Settings
@@ -24,24 +39,25 @@ sdr_quantity = 1
 [sdr_1]
 # Device Index / Serial
 # the name is confusing - this is the serial of your RTLSDR
-device_idx = SONDE
+device_idx = %sondeserial%
 
 # Frequency Correction (ppm offset)
 # 	Refer here for a method of determining this correction using LTE signals: https://gist.github.com/darksidelemm/b517e6a9b821c50c170f1b9b7d65b824
-ppm = 0
+ppm = %sonde_device_ppm%
 
 # SDR Gain Setting
 #   Gain settings can generally range between 0dB and 40dB depending on the tuner in use.
 #   Run rtl_test to confirm what gain settings are available, or use a value of -1 to use hardware automatic gain control (AGC).
 #   Note that this is an overall gain value, not an individual mixer/tuner gain. This is a limitation of the rtl_power/rtl_fm utils.
-gain = -1
+gain = %sonde_device_gain%
 
 # Bias Tee - Enable the bias tee in the RTLSDR v3 Dongles.
-bias = False
+bias = %sonde_device_biastee%
 
 [sdr_2]
-# As above, for the next SDR, if used. Note the warning about serial numbers.
-device_idx = 00000002
+# The ADS-B Feeder UI doesn't support using more than one SDR here. So if you need that, you need to manually edit
+# this file and not use the UI
+device_idx = 00000000
 ppm = 0
 gain = -1
 bias = False
@@ -66,8 +82,8 @@ bias = False
 #	the sondes are often off-frequency. For now, check in something like GQRX to get an idea of what offset is required.
 #
 
-min_freq = 400.05
-max_freq = 403.0
+min_freq = %sonde_min_freq%
+max_freq = %sonde_max_freq%
 
 # After rx_timeout seconds of no valid data from a decoder, stop the decoder and go back to scanning (if a SDR is available)
 rx_timeout = 180
@@ -104,9 +120,9 @@ always_decode = []
 # 'upload_listener_position' in the section below. Mobile station positions should be uploaded using
 # ChaseMapper.
 [location]
-station_lat = 0.0
-station_lon = 0.0
-station_alt = 0.0
+station_lat = %lat%
+station_lon = %lon%
+station_alt = %alt%
 
 # Station Position from GPSD
 # If your station is likely to move, then you may wish to have your station position updated from GPSD.
@@ -131,8 +147,8 @@ gpsd_port = 2947
 # available at https://tracker.sondehub.org/
 [habitat]
 # the settings here are used for Sondehub below
-uploader_callsign = YOURCALLSIGN
-upload_listener_position = False
+uploader_callsign = %sonde_callsign%
+upload_listener_position = %sonde_share_position%
 uploader_antenna = None
 
 [sondehub]
@@ -155,7 +171,7 @@ sondehub_upload_rate = 15
 sondehub_contact_email = none@none.com
 
 [aprs]
-# DISABLED (but required) FIXME!!!
+# DISABLED (but required)
 aprs_enabled = False
 aprs_user = N0CALL
 aprs_pass = 00000
@@ -171,7 +187,7 @@ aprs_use_custom_object_id = False
 aprs_custom_comment = Clb=<vel_v> t=<temp> h=<humidity> p=<pressure> <freq> Type=<type> ser=<id> Radiosonde
 
 [rotator]
-# DISABLED (but required) FIXME!!!
+# DISABLED (but required)
 rotator_enabled = False
 update_rate = 30
 rotation_threshold = 5.0

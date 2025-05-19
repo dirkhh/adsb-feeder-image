@@ -1049,7 +1049,7 @@ class AdsbIm:
         print_err(f"serial guess: {serial_guess}")
         serials: Dict[str, str] = {
             f: self._d.env_by_tags(f"{f}serial").value
-            for f in [978, 1090, "1090_2", "acars", "acars2", "vdl2", "hfdl", "ais"]
+            for f in [978, 1090, "1090_2", "acars", "acars2", "vdl2", "hfdl", "ais", "sonde"]
         }
         configured_serials = {self._d.env_by_tags(f).value for f in self._sdrdevices.purposes()}
         available_serials = [sdr._serial for sdr in self._sdrdevices.sdrs]
@@ -1912,6 +1912,53 @@ class AdsbIm:
             self._d.env_by_tags("rb978host").list_set(sitenum, "")
             self._d.env_by_tags("978piaware").list_set(sitenum, "")
 
+    def update_sonde_config(self):
+        # is this enabled and configured?
+        if (
+            self._d.is_enabled("sonde")
+            and self._d.env_by_tags("sondeserial").value
+            and self._d.env_by_tags("sonde_sdr_type").value
+        ):
+            config_template = pathlib.Path("/opt/adsb/radiosonde/station.cfg.template")
+            config_lines = config_template.read_text().splitlines()
+            if "%LOCAL_EDITS_DONT_MANAGE%=1" in config_lines:
+                # the user told us not to mess with their changes
+                print_err("user requested not to manage radiosonde config")
+                return
+            placeholders = [
+                "sonde_sdr_type",
+                "sondeserial",
+                "sonde_device_ppm",
+                "sonde_device_gain",
+                "sonde_device_biastee",
+                "sonde_min_freq",
+                "sonde_max_freq",
+                "sonde_callsign",
+                "sonde_share_position",
+            ]
+            for p in placeholders:
+                config_lines = [l.replace("%" + p + "%", self._d.env_by_tags(p).value) for l in config_lines]
+            placeholders = [
+                "lat",
+                "lon",
+                "alt",
+            ]
+            for p in placeholders:
+                config_lines = [l.replace("%" + p + "%", self._d.env_by_tags(p).list_get(0)) for l in config_lines]
+
+            config = pathlib.Path("/opt/adsb/radiosonde/station.cfg")
+            config_backup = pathlib.Path("/opt/adsb/radiosonde/station.cfg.bak")
+            if config.exists():
+                config.rename(config_backup)
+            with open(config, "w") as f:
+                f.write("\n".join(config_lines))
+            config.chmod(0o644)
+            print_err("radiosonde config updated")
+        else:
+            print_err(
+                f"{self._d.is_enabled("sonde")},{self._d.env_by_tags("sondeserial").value},{self._d.env_by_tags("sonde_sdr_type").value}"
+            )
+
     def handle_implied_settings(self):
         if self._d.env_by_tags("aggregator_choice").value in ["micro", "nano"]:
             ac_db = False
@@ -2181,10 +2228,14 @@ class AdsbIm:
         hfdlserial = self._d.env_by_tags("hfdlserial").value
         hfdlsdr = self._sdrdevices.get_sdr_by_serial(hfdlserial)
         hfdlstring = "" if hfdlsdr is None else f"driver={hfdlsdr._type},serial={hfdlserial}"
+        sondeserial = self._d.env_by_tags("sondeserial").value
+        sondesdr = self._sdrdevices.get_sdr_by_serial(sondeserial)
+        sonde_sdr_type = "" if sondesdr is None else sondesdr._type
         self._d.env_by_tags("acars_sdr_string").value = acarsstring
         self._d.env_by_tags("acars2_sdr_string").value = acars2string
         self._d.env_by_tags("vdl2_sdr_string").value = vdl2string
         self._d.env_by_tags("hfdl_sdr_string").value = hfdlstring
+        self._d.env_by_tags("sonde_sdr_type").value = sonde_sdr_type.upper()
 
         # sort out if we need the acarsrouter and acarshub
         self._d.env_by_tags("acarsrouter").value = (
@@ -2212,6 +2263,11 @@ class AdsbIm:
         self._d.env_by_tags("ais_airframes_station_id").value = (
             self._d.env_by_tags("ais_station_name").value if self._d.is_enabled("ais_feed_airframes") else ""
         )
+
+        # SONDE stuff
+        # sadly, that's configured through an annoying yml config file
+        # we're trying to be clever and edit this from a template
+        self.update_sonde_config()
 
         # finally, check if this has given us enough configuration info to
         # start the containers

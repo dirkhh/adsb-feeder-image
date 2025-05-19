@@ -561,27 +561,82 @@
             {% endif %}
           </div>
           <div class="row border">
-            {% if not is_enabled('radiosonde') %}
+            {% if not is_enabled('sonde') %}
             <div class="col-8 my-1">
-              <label for="radiosonde--enable">
+              <label for="sonde--enable">
                 Enable Radio Sonde support. All configuration needs to be done manually editing
                 <tt>/opt/adsb/radiosonde/station.cfg</tt> on the feeder device.
               </label>
             </div>
             <div class="col-4 my-1">
-              <button type="submit" class="btn btn-primary mx-auto w-100" name="radiosonde--enable"
+              <button type="submit" class="btn btn-primary mx-auto w-100" name="sonde--enable"
                       value="go">Enable</button>
             </div>
             {% else %}
             <div class="col-8 my-1">
-              <label for="radiosonde--disable">
+              <label for="sonde--disable">
                 Disable Radio Sonde support.
               </label>
             </div>
             <div class="col-4 my-1">
-              <button type="submit" class="btn btn-secondary mx-auto w-100" name="radiosonde--disable"
+              <button type="submit" class="btn btn-secondary mx-auto w-100" name="sonde--disable"
                       value="go">Disable</button>
             </div>
+            <div class="col-4 mb-1">
+              <label for="sonde_device_gain">
+                Sonde SDR gain
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input type="text" class="mx-auto w-100" name="sonde_device_gain" id="sonde_device_gain"
+                     value="{{ env_value_by_tag('sonde_device_gain') }}">
+            </div>
+            <div class="col-4 mb-1">
+              <label for="sonde_device_biastee">
+                Sonde SDR biastee (if supported)
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input type="text" class="mx-auto w-100" name="sonde_device_biastee" id="sonde_device_biastee"
+                     value="{{ env_value_by_tag('sonde_device_biastee') }}">
+            </div>
+            <div class="col-4 mb-1">
+              <label for="sonde_min_freq">
+                Sonde minimum frequency (this is region specific)
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input type="text" class="mx-auto w-100" name="sonde_min_freq" id="sonde_min_freq"
+                     value="{{ env_value_by_tag('sonde_min_freq') }}">
+            </div>
+            <div class="col-4 mb-1">
+              <label for="sonde_max_freq">
+                Sonde maximum frequency (this is region specific)
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input type="text" class="mx-auto w-100" name="sonde_max_freq" id="sonde_max_freq"
+                     value="{{ env_value_by_tag('sonde_max_freq') }}">
+            </div>
+            <div class="col-4 mb-1">
+              <label for="sonde_callsign">
+                Sondehub callsign
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input type="text" class="mx-auto w-100" name="sonde_callsign" id="sonde_callsign"
+                     value="{{ env_value_by_tag('sonde_callsign') }}">
+            </div>
+            <div class="col-4 mb-1">
+              <label for="sonde_share_position">
+                Sondehub share station location
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input type="text" class="mx-auto w-100" name="sonde_share_position" id="sonde_share_position"
+                     value="{{ env_value_by_tag('sonde_share_position') }}">
+            </div>
+
             {% endif %}
           </div>
         </div>

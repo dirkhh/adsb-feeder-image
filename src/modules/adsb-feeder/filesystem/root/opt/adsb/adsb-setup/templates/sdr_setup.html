@@ -143,6 +143,10 @@
               AIS
             </label>
             <label class="checkbox-inline mr-2">
+              <input type="radio" id="sonde-{{ sdr }}" name="sondeserial" value="">
+              Sonde
+            </label>
+            <label class="checkbox-inline mr-2">
               <input type="radio" id="other-{{ sdr }}" name="other-{{ sdr }}" value="" checked>
               Other
             </label>
@@ -197,7 +201,7 @@
         document.getElementById("lsusb_text").innerHTML = data.lsusb_output;
         let sdrs = data['sdrdevices'];
         let use = data['frequencies'];
-        let consumers = ["1090", "978", "other" {% if is_enabled('stage2') %}, "1090_2"{% endif %}, "acars", "acars2", "vdl2", "hfdl", "ais"];
+        let consumers = ["1090", "978", "other" {% if is_enabled('stage2') %}, "1090_2"{% endif %}, "acars", "acars2", "vdl2", "hfdl", "ais", "sonde"];
         for (let i = 0; i < num; i++) {
           let id = 'sdr' + i;
           let serial = sdrs[i]['serial'];
@@ -231,6 +235,7 @@
           let hide_vdl2 = {% if is_enabled('dumpvdl2') %}false;{% else %}true;{% endif %}
           let hide_hfdl = {% if is_enabled('dumphfdl') %}false;{% else %}true;{% endif %}
           let hide_ais = {% if is_enabled('shipfeeder') %}false;{% else %}true;{% endif %}
+          let hide_sonde = {% if is_enabled('sonde') %}false;{% else %}true;{% endif %}
           if (type == "airspy") {
             hide_vdl2 = true;
           }
@@ -239,6 +244,7 @@
           document.getElementById("vdl2-" + i).parentNode.style.display = hide_vdl2 ? "none" : "";
           document.getElementById("hfdl-" + i).parentNode.style.display = hide_hfdl ? "none" : "";
           document.getElementById("ais-" + i).parentNode.style.display = hide_ais ? "none" : "";
+          document.getElementById("sonde-" + i).parentNode.style.display = hide_sonde ? "none" : "";
         }
         for (let i = num; i < 16; i++) {
           let id = 'sdr' + i;
