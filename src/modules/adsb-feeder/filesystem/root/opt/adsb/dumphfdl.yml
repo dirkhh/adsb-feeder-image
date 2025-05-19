@@ -1,6 +1,6 @@
 services:
   dumphfdl:
-    image: ${DUMPVDL2_CONTAINER}
+    image: ${DUMPHFDL_CONTAINER}
     container_name: dumphfdl
     restart: always
     device_cgroup_rules:
@@ -10,7 +10,7 @@ services:
       - SOAPYSDRDRIVER=${HFDL_SDR_STRING}
       - GAIN_TYPE=${HFDL_GAIN_TYPE}
       - GAIN=${HFDL_GAIN}
-      - SOAPYSAMPLERATE=${HFDL_SAMPLERATE}
+      - SOAPYSAMPLERATE=${HFDL_SAMPLERATE:-768000}
       - FEED_ID=${HFDL_FEED_ID}
       - FREQUENCIES=${HFDL_FREQUENCIES}
       - ZMQ_MODE=server
