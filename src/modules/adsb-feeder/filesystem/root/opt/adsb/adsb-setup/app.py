@@ -1954,10 +1954,6 @@ class AdsbIm:
                 f.write("\n".join(config_lines))
             config.chmod(0o644)
             print_err("radiosonde config updated")
-        else:
-            print_err(
-                f"{self._d.is_enabled("sonde")},{self._d.env_by_tags("sondeserial").value},{self._d.env_by_tags("sonde_sdr_type").value}"
-            )
 
     def handle_implied_settings(self):
         if self._d.env_by_tags("aggregator_choice").value in ["micro", "nano"]:
