@@ -16,6 +16,10 @@ class SDR:
         self.lsusb_output = ""
         # probe serial to popuplate lsusb_output right now
         self._serial
+        # store the settings for the SDR in its own dict
+        self.purpose = ""
+        self.gain = ""
+        self.biastee = False
 
     @property
     def _serial(self) -> str:
@@ -54,6 +58,9 @@ class SDR:
             "type": self._type,
             "address": self._address,
             "serial": self._serial,
+            "purpose": self.purpose,
+            "gain": self.gain,
+            "biastee": self.biastee,
         }
 
     # a magic method to compare two objects
@@ -63,12 +70,16 @@ class SDR:
         return False
 
     def __repr__(self):
-        return f"SDR(type: '{self._type}' address: '{self._address}', serial: '{self._serial}')"
+        return f"SDR(type: '{self._type}' address: '{self._address}', serial: '{self._serial}', purpose: '{self.purpose}', gain: '{self.gain}', biastee: {self.biastee})"
 
 
 class SDRDevices:
     def __init__(self):
+        # these are the SDRs that we keep re-populating from lsusb
         self.sdrs: List[SDR] = []
+        # this is the dict that contains the data of what we are doing with the SDRs, accessed by serial number
+        self.sdr_settings: dict[str, SDR] = {}
+        self.null_sdr: SDR = SDR("unknown", "unknown")
         self.duplicates: Set[str] = set()
         self.lsusb_output = ""
         self.last_probe = 0
@@ -108,17 +119,35 @@ class SDRDevices:
 
         output = lsusb_text.split("\n")
         self.sdrs = []
+        found_serials = set()
+        self.duplicates = set()
 
         def check_pidvid(pv_list=[], sdr_type=None):
             if not sdr_type:
                 print_err("WARNING: bad code in check_pidvid")
+                return
 
             for pidvid in pv_list:
                 # print_err(f"checking {sdr_type} with pidvid {pidvid}")
                 for line in output:
                     address = self._get_address_for_pid_vid(pidvid, line)
                     if address:
+                        # we found an SDR - we want a way to store the settings for each SDR in a way that doesnt
+                        # get reset every tome we probe for SDRs. So we have the list of SDRs based on the lsusb which
+                        # we recreate every time - and we have a dict that contains the settings for each SDR based on
+                        # serial number.
+                        # This of course causes pain if multiple SDRs have the same serial number. We address that later
+                        # in the code.
                         new_sdr = SDR(sdr_type, address)
+                        if new_sdr._serial in self.sdr_settings:
+                            if address == self.sdr_settings[new_sdr._serial]._address:
+                                # we already have an SDR object for this SDR
+                                new_sdr = self.sdr_settings[new_sdr._serial]
+                            else:
+                                self.duplicates.add(new_sdr._serial)
+                        else:
+                            # add this SDR to the settings dict
+                            self.sdr_settings[new_sdr._serial] = new_sdr
                         self.sdrs.append(new_sdr)
                         self.debug_out += f"sdr_info: type: {sdr_type} serial: {new_sdr._serial} address: {address} pidvid: {pidvid}\n"
 
@@ -186,11 +215,10 @@ class SDRDevices:
 
         check_pidvid(pv_list=sdrplay_pv_list, sdr_type="sdrplay")
 
-        found_serials = set()
-        self.duplicates = set()
         for sdr in self.sdrs:
             self.lsusb_output += f"\nSDR detected with serial: {sdr._serial}\n"
             self.lsusb_output += sdr.lsusb_output
+            # we should have detected all of the duplicates already, but just in case, we make sure
             if sdr._serial in found_serials:
                 self.duplicates.add(sdr._serial)
             else:
@@ -207,7 +235,9 @@ class SDRDevices:
         self._ensure_populated()
         for sdr in self.sdrs:
             if sdr._serial == serial:
+                print_err(f"found SDR by serial: id: {id(sdr)} sdr: {sdr}")
                 return sdr
+        return self.null_sdr
 
     def _ensure_populated(self):
         with self.lock:

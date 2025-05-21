@@ -2211,22 +2211,50 @@ class AdsbIm:
         # set all of the ultrafeeder config data up
         self.setup_ultrafeeder_args()
 
+        # ensure that our 1090 and 978 SDRs have the correct purpose set
+        sdr1090 = self._sdrdevices.get_sdr_by_serial(self._d.env_by_tags("1090serial").value)
+        sdr978 = self._sdrdevices.get_sdr_by_serial(self._d.env_by_tags("978serial").value)
+        if not sdr1090 is self._sdrdevices.null_sdr:
+            sdr1090.purpose = "1090"
+        if not sdr978 is self._sdrdevices.null_sdr:
+            sdr978.purpose = "978"
+
         # create the ACARS and VDL2 SDR strings
         acarsserial = self._d.env_by_tags("acarsserial").value
         acarssdr = self._sdrdevices.get_sdr_by_serial(acarsserial)
-        acarsstring = "" if acarssdr is None else f"driver={acarssdr._type},serial={acarsserial}"
+        if acarssdr:
+            acarssdr.purpose = "acars"
+            acarsstring = f"driver={acarssdr._type},serial={acarsserial}"
+        else:
+            acarsstring = ""
         acars2serial = self._d.env_by_tags("acars2serial").value
         acars2sdr = self._sdrdevices.get_sdr_by_serial(acars2serial)
-        acars2string = "" if acars2sdr is None else f"driver={acars2sdr._type},serial={acars2serial}"
+        if acars2sdr:
+            acars2sdr.purpose = "acars2"
+            acars2string = f"driver={acars2sdr._type},serial={acars2serial}"
+        else:
+            acars2string = ""
         vdl2serial = self._d.env_by_tags("vdl2serial").value
         vdl2sdr = self._sdrdevices.get_sdr_by_serial(vdl2serial)
-        vdl2string = "" if vdl2sdr is None else f"driver={vdl2sdr._type},serial={vdl2serial}"
+        if vdl2sdr:
+            vdl2sdr.purpose = "vdl2"
+            vdl2string = f"driver={vdl2sdr._type},serial={vdl2serial}"
+        else:
+            vdl2string = ""
         hfdlserial = self._d.env_by_tags("hfdlserial").value
         hfdlsdr = self._sdrdevices.get_sdr_by_serial(hfdlserial)
-        hfdlstring = "" if hfdlsdr is None else f"driver={hfdlsdr._type},serial={hfdlserial}"
+        if hfdlsdr:
+            hfdlsdr.purpose = "hfdl"
+            hfdlstring = f"driver={hfdlsdr._type},serial={hfdlserial}"
+        else:
+            hfdlstring = ""
         sondeserial = self._d.env_by_tags("sondeserial").value
         sondesdr = self._sdrdevices.get_sdr_by_serial(sondeserial)
-        sonde_sdr_type = "" if sondesdr is None else sondesdr._type
+        if sondesdr:
+            sondesdr.purpose = "sonde"
+            sonde_sdr_type = sondesdr._type
+        else:
+            sonde_sdr_type = ""
         self._d.env_by_tags("acars_sdr_string").value = acarsstring
         self._d.env_by_tags("acars2_sdr_string").value = acars2string
         self._d.env_by_tags("vdl2_sdr_string").value = vdl2string
