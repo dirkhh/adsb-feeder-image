@@ -1,5 +1,5 @@
 # dataclass
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from .environment import Env
@@ -21,7 +21,8 @@ class Data:
     version_file = data_path / "adsb.im.version"
     secure_image_path = data_path / "adsb.im.secure_image"
     is_feeder_image = True
-    _env_by_tags_dict = dict()
+    _env_by_tags_dict: dict[tuple[str, ...], Env] = field(default_factory=dict[tuple[str, ...], Env])
+
     ultrafeeder = []
     previous_version = ""
 
@@ -857,7 +858,7 @@ class Data:
         else:
             raise Exception(f"env_by_tags called with invalid argument {_tags} of type {type(_tags)}")
         if not tags:
-            return None
+            raise Exception(f"env_by_tags called with no tags")
 
         # make the list a tuple so it's hashable
         tags = tuple(tags)
@@ -872,7 +873,7 @@ class Data:
             if all(t in e.tags for t in tags):
                 matches.append(e)
         if len(matches) == 0:
-            return None
+            raise Exception(f"No Env for tags {tags}")
         if len(matches) > 1:
             print_err(f"More than one match for tags {tags}")
             for e in matches:
