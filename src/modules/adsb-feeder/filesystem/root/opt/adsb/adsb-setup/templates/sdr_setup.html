@@ -91,7 +91,7 @@
       <div class="col-sm-12 mt-5 mb-3" style="display: block;" id="noduptext">
         In most cases the assignment below is correct. If it isn't, please update.
       </div>
-      <div class="col-sm-3 no-gutters">
+      <div class="col-sm-3 mb-2">
         <button class="btn btn-secondary btn-rounded" type="button" name="update_sdr_info" onclick="sdr_info()">Check
           SDRs</button>
       </div>
@@ -101,55 +101,19 @@
         <div class="row gx-0">
           <p class="col-2 bg-info mr-2">SDR #</p>
           <p class="col-2 bg-info mr-2">Type</p>
-          <p class="col-3 bg-info mr-2">Serial</p>
-          <p class="col-5 bg-info mr-2">Used for</p>
+          <p class="col-2 bg-info mr-2">Serial</p>
+          <p class="col-2 bg-info mr-2">Gain</p>
+          <p class="col-2 bg-info mr-2">bias-T</p>
+          <p class="col-2 bg-info mr-2">Used for</p>
         </div>
         {% for sdr in [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15" ] %}
         <div class="row" id="sdr{{ sdr }}" style="display: none">
-          <p class="col-2" id="sdr{{ sdr }}-tag">SDR {{ sdr }}</p>
+          <p class="col-2" onclick="sdr_setup({{ sdr }})"><button type="button" class="btn btn-light" data-mdb-ripple-init data-mdb-ripple-color="dark">SDR {{ sdr }}</button></p>
           <p class="col-2" id="sdr{{ sdr }}-type"></p>
-          <p class="col-3 text-break" id="sdr{{ sdr }}-serial"></p>
-          <p class="col-5 small" id="sdr{{ sdr }}-purpose">
-            <label class="checkbox-inline mr-2">
-              <input type="radio" id="1090-{{ sdr }}" name="1090serial" value="">
-              1090
-            </label>
-            <label class="checkbox-inline mr-2">
-              <input type="radio" id="1090_2-{{ sdr }}" name="1090_2serial" value="">
-              1090_2
-            </label>
-            <label class="checkbox-inline mr-2">
-              <input type="radio" id="978-{{ sdr }}" name="978serial" value="">
-              978
-            </label>
-            <label class="checkbox-inline mr-2">
-              <input type="radio" id="acars-{{ sdr }}" name="acarsserial" value="">
-              ACARS
-            </label>
-            <label class="checkbox-inline mr-2">
-              <input type="radio" id="acars2-{{ sdr }}" name="acars2serial" value="">
-              ACARS2
-            </label>
-            <label class="checkbox-inline mr-2">
-              <input type="radio" id="vdl2-{{ sdr }}" name="vdl2serial" value="">
-              VDL Mode 2
-            </label>
-            <label class="checkbox-inline mr-2">
-              <input type="radio" id="hfdl-{{ sdr }}" name="hfdlserial" value="">
-              HFDL
-            </label>
-            <label class="checkbox-inline mr-2">
-              <input type="radio" id="ais-{{ sdr }}" name="aisserial" value="">
-              AIS
-            </label>
-            <label class="checkbox-inline mr-2">
-              <input type="radio" id="sonde-{{ sdr }}" name="sondeserial" value="">
-              Sonde
-            </label>
-            <label class="checkbox-inline mr-2">
-              <input type="radio" id="other-{{ sdr }}" name="other-{{ sdr }}" value="" checked>
-              Other
-            </label>
+          <p class="col-2 text-break" id="sdr{{ sdr }}-serial" onclick="sdr_setup({{ sdr }})"></p>
+          <p class="col-2" id="sdr{{ sdr }}-gain"></p>
+          <p class="col-2" id="sdr{{ sdr }}-biastee"></p>
+          <p class="col-2" id="sdr{{ sdr }}-purpose">
           </p>
         </div>
         {% endfor %}
@@ -185,7 +149,54 @@
   <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3 mt-3" name="sdr_setup"
           value="go">apply settings - take me to the feeder homepage</button>
 </form>
+
+<!-- Modal -->
+<div class="modal fade" id="sdrsetup_dialog" tabindex="-1" aria-labelledby="sdrsetup_label" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="sdrsetup_label">Set up SDR #<span id="sdr_num"></span> serial <span id="sdr_serial"></span></h5>
+        <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismiss="modal"
+                aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-12 d-flex">
+            <label class="flex-grow-1">Used for</label>
+            <label class="mx-1"><input id="usage1090" type="radio" name="usage" value="1090"> 1090</label>
+            {% if is_enabled('stage2') %}<label class="mx-1"><input id="usage1090_2" type="radio" name="usage" value="1090_2"> 1090_2</label>{% endif %}
+            <label class="mx-1"><input id="usage978" type="radio" name="usage" value="978"> 978</label>
+            {% if is_enabled('acarsdec') %}<label class="mx-1"><input id="usageacars" type="radio" name="usage" value="acars"> ACARS</label>{% endif %}
+            {% if is_enabled('dumpvdl2') %}<label class="mx-1"><input id="usagevdl2" type="radio" name="usage" value="vdl2"> VDL Mode 2</label>{% endif %}
+            {% if is_enabled('dumphfdl') %}<label class="mx-1"><input id="usagehfdl" type="radio" name="usage" value="hfdl"> HFDL</label>{% endif %}
+            {% if is_enabled('shipfeeder') %}<label class="mx-1"><input id="usageais" type="radio" name="usage" value="ais"> AIS</label>{% endif %}
+            {% if is_enabled('sonde') %}<label class="mx-1"><input id="usagesonde" type="radio" name="usage" value="sonde"> Sonde</label>{% endif %}
+            <label class="mx-1"><input id="usageother" type="radio" name="usage" value="other"> Other</label>
+          </div>
+          <label class="col-12 mt-2">Gain</label>
+          <label for="gain" class="col-12 col-sm-9">
+            Possible values depend on the SDR type. For the most common RTL SDR dongle,
+            enter a value between 0 and 50 or "auto".
+            For other SDRs, please check the documentation.
+          </label>
+          <input class="col-10 col-sm-2 ms-3" id="sdrgain" name="gain" type="text" style="height: 2rem;" value="" />
+          <div class="col-12 form-check mt-3 ms-3">
+            <input class="form-check-input me-1" type="checkbox" name="enable_biastee" id="enable_biastee" />
+            <label for="enable_biastee" class="form-check-label">Enable biastee (if supported)</label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-mdb-ripple-init data-mdb-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" data-mdb-ripple-init onclick="save_sdr_setup()">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
 <script>
+  let sdrs = [];
+  let sdr_setup_dialog = $("#sdrsetup_dialog");
+  let modal = new mdb.Modal(sdr_setup_dialog)
 
   function sdr_info() {
     fetch("/api/sdr_info", { signal: AbortSignal.timeout(15000) })
@@ -199,52 +210,22 @@
           document.getElementById('1090biast').style.display = 'none';
         }
         document.getElementById("lsusb_text").innerHTML = data.lsusb_output;
-        let sdrs = data['sdrdevices'];
+        sdrs = data['sdrdevices'];
+        console.log("Got the following SDRs from the API: " + JSON.stringify(sdrs));
         let use = data['frequencies'];
         let consumers = ["1090", "978", "other" {% if is_enabled('stage2') %}, "1090_2"{% endif %}, "acars", "acars2", "vdl2", "hfdl", "ais", "sonde"];
         for (let i = 0; i < num; i++) {
-          let id = 'sdr' + i;
-          let serial = sdrs[i]['serial'];
-          let type = sdrs[i]['type'];
-          document.getElementById(id).style.display = 'flex';
-          document.getElementById(id + "-serial").innerHTML = serial;
-          document.getElementById(id + "-type").innerHTML = type;
-          let used = false;
-          for (const c of consumers) {
-            document.getElementById(c + '-' + i).value = serial;
-            document.getElementById(c + '-' + i).checked = (use[c] == serial);
-            used |= (use[c] == serial)
+          let id = '#sdr' + i;
+          $(id).css({ 'display': 'flex' });
+          $(id + "-serial").html(sdrs[i]['serial']);
+          $(id + "-type").html(sdrs[i]['type']);
+          $(id + "-gain").html(sdrs[i]['gain']);
+          if (sdrs[i]['biastee']) {
+            $(id + "-biastee").html("\u2713");
+          } else {
+            $(id + "-biastee").html("");
           }
-          // if not explicitely used, check box for other
-          if (!used) {
-            document.getElementById('other' + '-' + i).checked = true;
-          }
-          // don't show the 978 checkbox for non-rtlsdr SDRs as they can't be used for 978
-          document.getElementById("978-" + i).parentNode.style.display = (type != "rtlsdr") ? "none" : "";
-          // don't show the 1090_2 checkbox for non-rtlsdr, it's not supported due to the annoyance
-          // of having to implement more containers
-          let hide2 = (type != "rtlsdr");
-          // always hide it if this is not a stage2 install
-          {% if not is_enabled('stage2') %}
-          hide2 = true;
-          {% endif %}
-          document.getElementById("1090_2-" + i).parentNode.style.display = hide2 ? "none" : "";
-          // don't show ACARS or VDL Mode 2 if they aren't enabled
-          let hide_acars = {% if is_enabled('acarsdec') %} false; {% else %} true; {% endif %}
-          let hide_acars2 = {% if is_enabled('acarsdec2') %}false; {% else %} true; {% endif %}
-          let hide_vdl2 = {% if is_enabled('dumpvdl2') %}false;{% else %}true;{% endif %}
-          let hide_hfdl = {% if is_enabled('dumphfdl') %}false;{% else %}true;{% endif %}
-          let hide_ais = {% if is_enabled('shipfeeder') %}false;{% else %}true;{% endif %}
-          let hide_sonde = {% if is_enabled('sonde') %}false;{% else %}true;{% endif %}
-          if (type == "airspy") {
-            hide_vdl2 = true;
-          }
-          document.getElementById("acars-" + i).parentNode.style.display = hide_acars ? "none" : "";
-          document.getElementById("acars2-" + i).parentNode.style.display = hide_acars2 ? "none" : "";
-          document.getElementById("vdl2-" + i).parentNode.style.display = hide_vdl2 ? "none" : "";
-          document.getElementById("hfdl-" + i).parentNode.style.display = hide_hfdl ? "none" : "";
-          document.getElementById("ais-" + i).parentNode.style.display = hide_ais ? "none" : "";
-          document.getElementById("sonde-" + i).parentNode.style.display = hide_sonde ? "none" : "";
+          $(id + "-purpose").html(sdrs[i]['purpose']);
         }
         for (let i = num; i < 16; i++) {
           let id = 'sdr' + i;
@@ -259,20 +240,66 @@
           document.getElementById("noduptext").style.display = 'block';
         }
 
-        $("input[type=radio]").click(function () {
-          myid = this.id;
-          let components = myid.split("-");
-          console.log("components: " + components + " consumers: " + consumers);
-          for (const usage of consumers) {
-            otherid = usage + "-" + components[1];
-            if (otherid != myid) {
-              document.getElementById(otherid).checked = false;
-            }
-          }
-        });
+//        $("input[type=radio]").click(function () {
+//          myid = this.id;
+//          let components = myid.split("-");
+//          console.log("components: " + components + " consumers: " + consumers);
+//          for (const usage of consumers) {
+//            otherid = usage + "-" + components[1];
+//            if (otherid != myid) {
+//              document.getElementById(otherid).checked = false;
+//            }
+//          }
+//        });
       });
   }
 
   sdr_info();
+
+  function sdr_setup(sdr) {
+    $(document).ready(function() {
+      let sdrnum = $("#sdr_num");
+      let sdrserial = $("#sdr_serial");
+      sdrnum.text(sdr);
+      sdrserial.text(sdrs[sdr]['serial']);
+      let sdrgain = $("#sdrgain");
+      sdrgain.val(sdrs[sdr]['gain']);
+      if (sdrs[sdr]['type'] != "rtlsdr") {
+        usage978 = $("#usage978");
+        usage978.style.display = "none";
+      }
+      let usage = "#usage" + sdrs[sdr]['purpose'];
+      $(usage).prop('checked', true);
+      modal.show();
+    });
+  }
+  function save_sdr_setup() {
+    let sdr = $("#sdr_num").text();
+    let gain = $("#sdrgain").val();
+    let biastee = $("#enable_biastee").is(":checked");
+    sdrs[sdr]['gain'] = gain;
+    sdrs[sdr]['biastee'] = biastee;
+    sdrs[sdr]['purpose'] = $('input[name="usage"]:checked').val();
+    console.log("save_sdr_setup: " + JSON.stringify(sdrs[sdr]));
+    modal.hide();
+    let id = '#sdr' + sdr;
+    $(id + "-gain").html(gain);
+    if (biastee) {
+      $(id + "-biastee").html("\u2713");
+    } else {
+      $(id + "-biastee").html("");
+    }
+    $(id + "-purpose").html(sdrs[sdr]['purpose']);
+    fetch('/api/sdr_config', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(sdrs[sdr])
+    })
+      .then(response => response.json())
+      .then(data => console.log(data))
+      .catch(error => console.error(error));
+  }
 </script>
 {% endblock %}

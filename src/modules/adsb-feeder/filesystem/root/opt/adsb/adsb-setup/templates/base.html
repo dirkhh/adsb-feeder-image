@@ -6,6 +6,7 @@
 {% else %}
 <html lang="en" data-mdb-theme="auto">
 {% endif %}
+import "mdb-ui-kit"
 
 <head>
   <!-- Required meta tags -->
@@ -17,6 +18,7 @@
   <link rel="stylesheet" id="css-theme" href="{{ url_for('static', filename='css/mdb.min.css') }}" />
   {% if not ((env_value_by_tag("css_theme") == 'light') or (env_value_by_tag("css_theme") == 'dark')) %}
   <script>
+
     ; (function () {
       const htmlElement = document.querySelector("html")
       if (htmlElement.getAttribute("data-mdb-theme") === 'auto') {
