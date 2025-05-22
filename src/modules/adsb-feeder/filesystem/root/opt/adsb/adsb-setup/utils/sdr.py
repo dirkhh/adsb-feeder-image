@@ -280,3 +280,44 @@ class SDRDevices:
         if not ret[1090] and not ret[978] and len(self.sdrs) == 1:
             ret[1090] = self.sdrs[0]._serial
         return ret
+
+    # currently not all containers support biastee
+    # and of course there are many SDRs that don't support it, either, but that's not something we can detect
+    def sdr_field_mapping(self, field: str, purpose: str, sdr_type: str):
+        mapping = {
+            "gain": {
+                "1090": "gain",
+                "1090_2": "gain_2",
+                "978": "uatgain",
+                "acars": "acars_gain",
+                "acars_2": "acars2_gain",
+                "vdl2": "vdl2_gain",
+                "hfdl": "hfdl_gain",
+                "ais": "ais_device_gain",
+                "sonde": "sonde_device_gain",
+            },
+            "biastee": {
+                "1090": "biast",
+                "1090_2": "biast_2",
+                "978": "uatbiast",
+                "acars": "",
+                "acars_2": "",
+                "vdl2": "",
+                "hfdl": "",
+                "ais": "ais_device_biastee",
+                "sonde": "sonde_device_biastee",
+            },
+        }
+        if purpose == "1090" and field == "gain" and sdr_type == "airspy":
+            return "gain_airspy"
+        else:
+            return mapping[field][purpose]
+
+    def set_sdr_data(self, sdr: SDR, sdr_data):
+        sdr.purpose = sdr_data["purpose"]
+        sdr.gain = sdr_data["gain"]
+        sdr.biastee = sdr_data["biastee"]
+        return (
+            self.sdr_field_mapping("gain", sdr.purpose, sdr._type),
+            self.sdr_field_mapping("biastee", sdr.purpose, sdr._type),
+        )

@@ -312,6 +312,7 @@ class AdsbIm:
         self.app.add_url_rule("/sdplay_license", "sdrplay_license", self.sdrplay_license, methods=["GET", "POST"])
         self.app.add_url_rule("/api/ip_info", "ip_info", self.ip_info)
         self.app.add_url_rule("/api/sdr_info", "sdr_info", self.sdr_info)
+        self.app.add_url_rule("/api/sdr_config", "sdr_config", self.sdr_config, methods=["POST"])
         self.app.add_url_rule("/api/base_info", "base_info", self.base_info)
         self.app.add_url_rule("/api/stage2_info", "stage2_info", self.stage2_info)
         self.app.add_url_rule("/api/stage2_stats", "stage2_stats", self.stage2_stats)
@@ -1154,6 +1155,30 @@ class AdsbIm:
         )
         response.headers.add("Access-Control-Allow-Origin", "*")
         return response
+
+    def sdr_config(self):
+        sdr_data = request.get_json()
+        print_err(f"got {sdr_data}")
+        if "serial" in sdr_data:
+            sdr = self._sdrdevices.get_sdr_by_serial(sdr_data["serial"])
+            if sdr is not self._sdrdevices.null_sdr:
+                print_err(f"modifying SDR id: {id(sdr)} sdr: {sdr}")
+                if sdr_data["purpose"] != sdr.purpose:
+                    # remove the SDR from the old purpose and add for the new one
+                    self._d.env_by_tags(f"{sdr.purpose}serial").value = ""
+                    self._d.env_by_tags(f"{sdr_data['purpose']}serial").value = sdr_data["serial"]
+                gainenv, biasteeenv = self._sdrdevices.set_sdr_data(sdr, sdr_data)
+                print_err(
+                    f"got env names {gainenv} and {biasteeenv} to set gain {sdr_data['gain']} and biastee {sdr_data['biastee']}"
+                )
+                if gainenv:
+                    self._d.env_by_tags(gainenv).value = sdr_data["gain"]
+                if biasteeenv:
+                    self._d.env_by_tags(biasteeenv).value = sdr_data["biastee"]
+                print_err(f"modified SDR id: {id(sdr)} sdr: {sdr}")
+                return Response(json.dumps("[ok]"), mimetype="application/json", status=200)
+            return Response(json.dumps("[wrong serial]"), mimetype="application/json", status=404)
+        return Response(json.dumps("[no serial]"), mimetype="application/json", status=400)
 
     def uf_suffix(self, i):
         suffix = f"uf_{i}" if i != 0 else "ultrafeeder"
