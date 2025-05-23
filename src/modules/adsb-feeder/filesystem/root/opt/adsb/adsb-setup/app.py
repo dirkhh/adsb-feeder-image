@@ -1954,7 +1954,7 @@ class AdsbIm:
                 "sonde_sdr_type",
                 "sondeserial",
                 "sonde_device_ppm",
-                "sonde_device_gain",
+                "sondegain",
                 "sonde_device_biastee",
                 "sonde_min_freq",
                 "sonde_max_freq",

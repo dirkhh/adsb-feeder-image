@@ -294,7 +294,7 @@ class SDRDevices:
                 "vdl2": "vdl2gain",
                 "hfdl": "hfdlgain",
                 "ais": "aisgain",
-                "sonde": "sonde_device_gain",
+                "sonde": "sondegain",
             },
             "biastee": {
                 "1090": "biast",
