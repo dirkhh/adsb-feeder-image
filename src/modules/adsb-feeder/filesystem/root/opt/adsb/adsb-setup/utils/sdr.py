@@ -293,7 +293,7 @@ class SDRDevices:
                 "acars_2": "acars_2gain",
                 "vdl2": "vdl2gain",
                 "hfdl": "hfdlgain",
-                "ais": "ais_device_gain",
+                "ais": "aisgain",
                 "sonde": "sonde_device_gain",
             },
             "biastee": {
