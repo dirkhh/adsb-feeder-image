@@ -1169,10 +1169,10 @@ class AdsbIm:
                     self._d.env_by_tags(f"{sdr_data['purpose']}serial").value = sdr_data["serial"]
                 gainenv, biasteeenv = self._sdrdevices.set_sdr_data(sdr, sdr_data)
                 print_err(
-                    f"got env names {gainenv} and {biasteeenv} to set gain {sdr_data['gain']} and biastee {sdr_data['biastee']}"
+                    f"got env names {gainenv} and {biasteeenv} to set gain {sdr_data['1090gain']} and biastee {sdr_data['biastee']}"
                 )
                 if gainenv:
-                    self._d.env_by_tags(gainenv).value = sdr_data["gain"]
+                    self._d.env_by_tags(gainenv).value = sdr_data["1090gain"]
                 if biasteeenv:
                     self._d.env_by_tags(biasteeenv).value = sdr_data["biastee"]
                 print_err(f"modified SDR id: {id(sdr)} sdr: {sdr}")
@@ -1901,7 +1901,7 @@ class AdsbIm:
             gaindir.mkdir(exist_ok=True, parents=True)
         except:
             pass
-        gain = self._d.env_by_tags(["gain"]).value
+        gain = self._d.env_by_tags(["1090gain"]).value
 
         # autogain is configured via the container env vars to be always enabled
         # so we can change gain on the fly without changing env vars
@@ -1918,7 +1918,7 @@ class AdsbIm:
             (gaindir / "suspend").touch(exist_ok=True)
 
             # this file sets the gain on readsb start
-            string2file(path=(gaindir / "gain"), string=f"{gain}\n")
+            string2file(path=(gaindir / "1090gain"), string=f"{gain}\n")
 
             # this adjusts the gain while readsb is running
             self.waitSetGainRace()
@@ -2163,15 +2163,15 @@ class AdsbIm:
 
             if airspy:
                 # make sure airspy gain is within bounds
-                gain = self._d.env_by_tags(["gain"]).value
+                gain = self._d.env_by_tags(["1090gain"]).value
                 if gain.startswith("auto"):
                     self._d.env_by_tags(["gain_airspy"]).value = "auto"
                 elif make_int(gain) > 21:
                     self._d.env_by_tags(["gain_airspy"]).value = "21"
-                    self._d.env_by_tags(["gain"]).value = "21"
+                    self._d.env_by_tags(["1090gain"]).value = "21"
                 elif make_int(gain) < 0:
                     self._d.env_by_tags(["gain_airspy"]).value = "0"
-                    self._d.env_by_tags(["gain"]).value = "0"
+                    self._d.env_by_tags(["1090gain"]).value = "0"
                 else:
                     self._d.env_by_tags(["gain_airspy"]).value = gain
 
@@ -2827,7 +2827,7 @@ class AdsbIm:
                 if key == "uatgain":
                     if value == "" or value == "auto":
                         value = "autogain"
-                if key == "gain":
+                if key == "1090gain":
                     if value == "":
                         value = "auto"
                 if key == "gain_2":

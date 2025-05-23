@@ -170,7 +170,7 @@ class Data:
             default=False,
             tags=["uatbiast", "is_enabled", "false_is_empty"],
         ),
-        Env("FEEDER_READSB_GAIN", default="autogain", tags=["gain"]),
+        Env("FEEDER_READSB_GAIN", default="autogain", tags=["1090gain"]),
         Env("FEEDER_READSB_GAIN_2", default="auto", tags=["gain_2"]),
         Env("FEEDER_AIRSPY_GAIN", default="auto", tags=["gain_airspy"]),
         Env("UAT_SDR_GAIN", default="autogain", tags=["uatgain"]),

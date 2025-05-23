@@ -59,7 +59,7 @@ class SDR:
             "address": self._address,
             "serial": self._serial,
             "purpose": self.purpose,
-            "gain": self.gain,
+            "1090gain": self.gain,
             "biastee": self.biastee,
         }
 
@@ -285,8 +285,8 @@ class SDRDevices:
     # and of course there are many SDRs that don't support it, either, but that's not something we can detect
     def sdr_field_mapping(self, field: str, purpose: str, sdr_type: str):
         mapping = {
-            "gain": {
-                "1090": "gain",
+            "1090gain": {
+                "1090": "1090gain",
                 "1090_2": "gain_2",
                 "978": "uatgain",
                 "acars": "acars_gain",
@@ -308,16 +308,16 @@ class SDRDevices:
                 "sonde": "sonde_device_biastee",
             },
         }
-        if purpose == "1090" and field == "gain" and sdr_type == "airspy":
+        if purpose == "1090" and field == "1090gain" and sdr_type == "airspy":
             return "gain_airspy"
         else:
             return mapping[field][purpose]
 
     def set_sdr_data(self, sdr: SDR, sdr_data):
         sdr.purpose = sdr_data["purpose"]
-        sdr.gain = sdr_data["gain"]
+        sdr.gain = sdr_data["1090gain"]
         sdr.biastee = sdr_data["biastee"]
         return (
-            self.sdr_field_mapping("gain", sdr.purpose, sdr._type),
+            self.sdr_field_mapping("1090gain", sdr.purpose, sdr._type),
             self.sdr_field_mapping("biastee", sdr.purpose, sdr._type),
         )
