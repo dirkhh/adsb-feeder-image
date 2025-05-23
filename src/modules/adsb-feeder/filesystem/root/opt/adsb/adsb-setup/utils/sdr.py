@@ -98,7 +98,7 @@ class SDRDevices:
             "978serial",
             "1090_2serial",
             "acarsserial",
-            "acars2serial",
+            "acars_2serial",
             "vdl2serial",
             "hfdlserial",
             "aisserial",
