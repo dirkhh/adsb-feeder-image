@@ -1170,10 +1170,10 @@ class AdsbIm:
                     self._d.env_by_tags(f"{sdr_data['purpose']}serial").value = sdr_data["serial"]
                 gainenv, biasteeenv = self._sdrdevices.set_sdr_data(sdr, sdr_data)
                 print_err(
-                    f"got env names {gainenv} and {biasteeenv} to set gain {sdr_data['1090gain']} and biastee {sdr_data['biastee']}"
+                    f"got env names {gainenv} and {biasteeenv} to set gain {sdr_data['gain']} and biastee {sdr_data['biastee']}"
                 )
                 if gainenv:
-                    self._d.env_by_tags(gainenv).value = sdr_data["1090gain"]
+                    self._d.env_by_tags(gainenv).value = sdr_data["gain"]
                 if biasteeenv:
                     self._d.env_by_tags(biasteeenv).value = sdr_data["biastee"]
                 print_err(f"modified SDR id: {id(sdr)} sdr: {sdr}")
