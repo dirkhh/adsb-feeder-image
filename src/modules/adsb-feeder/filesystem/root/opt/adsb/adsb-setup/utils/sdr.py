@@ -297,15 +297,15 @@ class SDRDevices:
                 "sonde": "sondegain",
             },
             "biastee": {
-                "1090": "biast",
-                "1090_2": "biast_2",
-                "978": "uatbiast",
+                "1090": "1090biast",
+                "1090_2": "1090_2biast",
+                "978": "978biast",
                 "acars": "",
                 "acars_2": "",
                 "vdl2": "",
                 "hfdl": "",
-                "ais": "ais_device_biastee",
-                "sonde": "sonde_device_biastee",
+                "ais": "aisbiastee",
+                "sonde": "sondebiast",
             },
         }
         if purpose == "1090" and field == "1090gain" and sdr_type == "airspy":

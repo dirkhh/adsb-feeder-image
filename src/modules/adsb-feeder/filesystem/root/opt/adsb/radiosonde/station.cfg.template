@@ -52,7 +52,7 @@ ppm = %sonde_device_ppm%
 gain = %sondegain%
 
 # Bias Tee - Enable the bias tee in the RTLSDR v3 Dongles.
-bias = %sonde_device_biastee%
+bias = %sondebiastee%
 
 [sdr_2]
 # The ADS-B Feeder UI doesn't support using more than one SDR here. So if you need that, you need to manually edit

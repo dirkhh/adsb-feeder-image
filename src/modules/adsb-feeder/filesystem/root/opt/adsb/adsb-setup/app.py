@@ -1956,7 +1956,7 @@ class AdsbIm:
                 "sondeserial",
                 "sonde_device_ppm",
                 "sondegain",
-                "sonde_device_biastee",
+                "sondebiast",
                 "sonde_min_freq",
                 "sonde_max_freq",
                 "sonde_callsign",
@@ -2349,10 +2349,10 @@ class AdsbIm:
 
         self.generate_agg_structure()
 
-    # this will definitely be needed the first time the app starts after converting to the updated
-    # SDR object that holds purpose, gain, and biastee settings
+    # we store the purpose specific information differently because that's how the
+    # yml files can get access to the correct data based on adsb/uat/ais/etc
     #
-    # FIXME -- we need to do the same "smart thing" with the env var names for gain and biastee
+    # so we need to collect this data and store it in the SDR objects
     def populate_sdr_settings(self):
         # loop over all the purpose serials
         for purpose_serial in self._sdrdevices.purposes():
@@ -2360,6 +2360,15 @@ class AdsbIm:
             sdr = self._sdrdevices.get_sdr_by_serial(serial)
             if sdr != self._sdrdevices.null_sdr:
                 sdr.purpose = purpose_serial.replace("serial", "")
+                gain = self._d.env_by_tags(purpose_serial.replace("serial", "gain")).value
+                sdr.gain = str(gain)
+                # careful - we don't have biast support in all the containers
+                try:
+                    biastee = self._d.env_by_tags(purpose_serial.replace("serial", "biastee")).value
+                except:
+                    biastee = None
+                else:
+                    sdr.biastee = bool(biastee)
 
     def set_docker_concurrent(self, value):
         self._d.env_by_tags("docker_concurrent").value = value
