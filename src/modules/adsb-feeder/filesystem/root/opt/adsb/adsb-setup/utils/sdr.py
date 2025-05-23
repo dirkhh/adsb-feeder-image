@@ -287,7 +287,7 @@ class SDRDevices:
         mapping = {
             "1090gain": {
                 "1090": "1090gain",
-                "1090_2": "gain_2",
+                "1090_2": "1090_2gain",
                 "978": "uatgain",
                 "acars": "acars_gain",
                 "acars_2": "acars2_gain",

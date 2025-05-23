@@ -37,13 +37,13 @@
   <div class="col-12 {% if env_value_by_tag('1090_2serial') == ''  %}d-none{% endif %}">
     <h5 class="mt-3">Set 1090_2 SDR gain</h5>
     <div class="row">
-      <label for="gain_2" class="col-12 col-sm-6">
+      <label for="1090_2gain" class="col-12 col-sm-6">
         Normally the feeder will settle on a good gain value very quickly. If you want to override that "autogain"
         behavior, you can set an explicit gain value here.
       </label>
-      <input class="col-6 col-sm-3 ms-3" id="gain_2" name="gain_2" type="text" style="height: 2rem;"
+      <input class="col-6 col-sm-3 ms-3" id="1090_2gain" name="gain_2" type="text" style="height: 2rem;"
              pattern="(^auto.*|\d+(?:.\d+)?)" title="A number between 0 and 50 or starting with the word 'auto'"
-             value="{{ env_value_by_tag('gain_2') }}" />
+             value="{{ env_value_by_tag('1090_2gain') }}" />
     </div>
   </div>
   <div class="col-12 {% if not is_enabled('uat978') %}d-none{% endif %}">
