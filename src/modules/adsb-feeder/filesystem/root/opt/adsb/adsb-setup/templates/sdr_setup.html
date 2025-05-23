@@ -21,13 +21,13 @@
   <div class="col-12 {% if (env_value_by_tag('1090serial') == '' and not is_enabled('airspy')) %}d-none{% endif %}">
     <h5 class="mt-3">Set ADS-B SDR gain</h5>
     <div class="row">
-      <label for="gain" class="col-12 col-sm-6">
+      <label for="1090gain" class="col-12 col-sm-6">
         Normally the feeder will settle on a good gain value very quickly. If you want to override that "autogain"
         behavior, you can set an explicit gain value here.
       </label>
-      <input class="col-6 col-sm-3 ms-3" id="gain" name="gain" type="text" style="height: 2rem;"
+      <input class="col-6 col-sm-3 ms-3" id="1090gain" name="1090gain" type="text" style="height: 2rem;"
              pattern="(^auto.*|\d+(?:.\d+)?)" title="A number between 0 and 50 or starting with the word 'auto'"
-             value="{{ env_value_by_tag('gain') }}" />
+             value="{{ env_value_by_tag('1090gain') }}" />
       <div class="col-12 form-check mt-3 ms-3{% if True %} d-none{% endif %}">
         <input class=" form-check-input me-1" type="checkbox" name="resetgain" id="resetgain" />
         <label for="resetgain" class="form-check-label">Check to reset autogain</label>
@@ -174,12 +174,12 @@
             <label class="mx-1"><input id="usageother" type="radio" name="usage" value="other"> Other</label>
           </div>
           <label class="col-12 mt-2">Gain</label>
-          <label for="gain" class="col-12 col-sm-9">
+          <label for="1090gain" class="col-12 col-sm-9">
             Possible values depend on the SDR type. For the most common RTL SDR dongle,
             enter a value between 0 and 50 or "auto".
             For other SDRs, please check the documentation.
           </label>
-          <input class="col-10 col-sm-2 ms-3" id="sdrgain" name="gain" type="text" style="height: 2rem;" value="" />
+          <input class="col-10 col-sm-2 ms-3" id="sdrgain" name="1090gain" type="text" style="height: 2rem;" value="" />
           <div class="col-12 form-check mt-3 ms-3">
             <input class="form-check-input me-1" type="checkbox" name="enable_biastee" id="enable_biastee" />
             <label for="enable_biastee" class="form-check-label">Enable biastee (if supported)</label>
@@ -219,7 +219,7 @@
           $(id).css({ 'display': 'flex' });
           $(id + "-serial").html(sdrs[i]['serial']);
           $(id + "-type").html(sdrs[i]['type']);
-          $(id + "-gain").html(sdrs[i]['gain']);
+          $(id + "-gain").html(sdrs[i]['1090gain']);
           if (sdrs[i]['biastee']) {
             $(id + "-biastee").html("\u2713");
           } else {
@@ -263,7 +263,7 @@
       sdrnum.text(sdr);
       sdrserial.text(sdrs[sdr]['serial']);
       let sdrgain = $("#sdrgain");
-      sdrgain.val(sdrs[sdr]['gain']);
+      sdrgain.val(sdrs[sdr]['1090gain']);
       if (sdrs[sdr]['type'] != "rtlsdr") {
         usage978 = $("#usage978");
         usage978.style.display = "none";
@@ -277,7 +277,7 @@
     let sdr = $("#sdr_num").text();
     let gain = $("#sdrgain").val();
     let biastee = $("#enable_biastee").is(":checked");
-    sdrs[sdr]['gain'] = gain;
+    sdrs[sdr]['1090gain'] = gain;
     sdrs[sdr]['biastee'] = biastee;
     sdrs[sdr]['purpose'] = $('input[name="usage"]:checked').val();
     console.log("save_sdr_setup: " + JSON.stringify(sdrs[sdr]));
