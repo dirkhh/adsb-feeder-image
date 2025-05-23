@@ -654,7 +654,7 @@ class Data:
         Env("AIS_SX_EXTRA_OPTIONS", default="", tags=["ais_sx_extra_options"]),
         Env("AIS_STATION_NAME", default="", tags=["ais_station_name"]),
         Env("AIS_DEVICE_SERIAL", default="", tags=["aisserial"]),
-        Env("AIS_DEVICE_GAIN", default="", tags=["ais_device_gain"]),
+        Env("AIS_DEVICE_GAIN", default="", tags=["aisgain"]),
         Env("AIS_DEVICE_PPM", default="", tags=["ais_device_ppm"]),
         Env("AIS_DEVICE_BIASTEE", default="", tags=["ais_device_biastee"]),
         Env("AIS_DEVICE_BANDWIDTH", default="", tags=["ais_device_bandwidth"]),
