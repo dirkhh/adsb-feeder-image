@@ -288,7 +288,7 @@ class SDRDevices:
             "1090gain": {
                 "1090": "1090gain",
                 "1090_2": "1090_2gain",
-                "978": "uatgain",
+                "978": "978gain",
                 "acars": "acars_gain",
                 "acars_2": "acars2_gain",
                 "vdl2": "vdl2_gain",

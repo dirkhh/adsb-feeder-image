@@ -2824,7 +2824,7 @@ class AdsbIm:
                 if key == "tz":
                     self.set_tz(value)
                     continue
-                if key == "uatgain":
+                if key == "978gain":
                     if value == "" or value == "auto":
                         value = "autogain"
                 if key == "1090gain":
