@@ -1049,12 +1049,12 @@ class AdsbIm:
         serial_guess: Dict[str, str] = self._sdrdevices.addresses_per_frequency
         print_err(f"serial guess: {serial_guess}")
         serials: Dict[str, str] = {
-            f: self._d.env_by_tags(f"{f}serial").value
-            for f in [978, 1090, "1090_2", "acars", "acars2", "vdl2", "hfdl", "ais", "sonde"]
+            f: str(self._d.env_by_tags(f"{f}serial").value)
+            for f in ["978", "1090", "1090_2", "acars", "acars2", "vdl2", "hfdl", "ais", "sonde"]
         }
-        configured_serials = {self._d.env_by_tags(f).value for f in self._sdrdevices.purposes()}
+        configured_serials = {str(self._d.env_by_tags(f).value) for f in self._sdrdevices.purposes()}
         available_serials = [sdr._serial for sdr in self._sdrdevices.sdrs]
-        for f in [978, 1090]:
+        for f in ["978", "1090"]:
             if (not serials[f] or serials[f] not in available_serials) and serial_guess[f] not in configured_serials:
                 serials[f] = serial_guess[f]
 
