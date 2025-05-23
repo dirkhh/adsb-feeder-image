@@ -2830,7 +2830,7 @@ class AdsbIm:
                 if key == "1090gain":
                     if value == "":
                         value = "auto"
-                if key == "gain_2":
+                if key == "1090_2gain":
                     if value == "" or value == "autogain":
                         value = "auto"
                 # deal with the micro feeder and stage2 initial setup
