@@ -173,7 +173,7 @@ class Data:
         Env("FEEDER_READSB_GAIN", default="autogain", tags=["1090gain"]),
         Env("FEEDER_READSB_GAIN_2", default="auto", tags=["1090_2gain"]),
         Env("FEEDER_AIRSPY_GAIN", default="auto", tags=["gain_airspy"]),
-        Env("UAT_SDR_GAIN", default="autogain", tags=["uatgain"]),
+        Env("UAT_SDR_GAIN", default="autogain", tags=["978gain"]),
         Env("FEEDER_SERIAL_1090", tags=["1090serial"]),
         Env("FEEDER_SERIAL_1090_2", tags=["1090_2serial"]),
         Env("FEEDER_SERIAL_978", tags=["978serial"]),
