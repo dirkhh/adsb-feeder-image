@@ -2834,15 +2834,6 @@ class AdsbIm:
                 if key == "tz":
                     self.set_tz(value)
                     continue
-                if key == "978gain":
-                    if value == "" or value == "auto":
-                        value = "autogain"
-                if key == "1090gain":
-                    if value == "":
-                        value = "auto"
-                if key == "1090_2gain":
-                    if value == "" or value == "autogain":
-                        value = "auto"
                 # deal with the micro feeder and stage2 initial setup
                 if key == "aggregator_choice" and value in ["micro", "nano"]:
                     self._d.env_by_tags("aggregators_chosen").value = True
