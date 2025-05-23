@@ -49,7 +49,7 @@ ppm = %sonde_device_ppm%
 #   Gain settings can generally range between 0dB and 40dB depending on the tuner in use.
 #   Run rtl_test to confirm what gain settings are available, or use a value of -1 to use hardware automatic gain control (AGC).
 #   Note that this is an overall gain value, not an individual mixer/tuner gain. This is a limitation of the rtl_power/rtl_fm utils.
-gain = %sonde_device_gain%
+gain = %sondegain%
 
 # Bias Tee - Enable the bias tee in the RTLSDR v3 Dongles.
 bias = %sonde_device_biastee%

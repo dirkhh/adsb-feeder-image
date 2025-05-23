@@ -688,7 +688,7 @@ class Data:
         Env("AF_IS_RADIOSONDE_ENABLED", default=False, tags=["sonde", "is_enabled"]),
         Env("SONDE_SDR_TYPE", default="", tags=["sonde_sdr_type"]),
         Env("SONDE_SDR_SERIAL", default="", tags=["sondeserial"]),
-        Env("SONDE_SDR_GAIN", default="-1", tags=["sonde_device_gain"]),
+        Env("SONDE_SDR_GAIN", default="-1", tags=["sondegain"]),
         Env("SONDE_SDR_PPM", default="0", tags=["sonde_device_ppm"]),
         Env("SONDE_SDR_BIASTEE", default="False", tags=["sonde_device_biastee"]),
         Env("SONDE_MIN_FREQ", default="400.05", tags=["sonde_min_freq"]),
