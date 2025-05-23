@@ -150,7 +150,7 @@
         sdrs = data['sdrdevices'];
         console.log("Got the following SDRs from the API: " + JSON.stringify(sdrs));
         let use = data['frequencies'];
-        let consumers = ["1090", "978", "other" {% if is_enabled('stage2') %}, "1090_2"{% endif %}, "acars", "acars2", "vdl2", "hfdl", "ais", "sonde"];
+        let consumers = ["1090", "978", "other" {% if is_enabled('stage2') %}, "1090_2"{% endif %}, "acars", "acars_2", "vdl2", "hfdl", "ais", "sonde"];
         for (let i = 0; i < num; i++) {
           let id = '#sdr' + i;
           $(id).css({ 'display': 'flex' });

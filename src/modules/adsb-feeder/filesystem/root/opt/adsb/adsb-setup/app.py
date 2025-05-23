@@ -1051,7 +1051,7 @@ class AdsbIm:
         print_err(f"serial guess: {serial_guess}")
         serials: Dict[str, str] = {
             f: str(self._d.env_by_tags(f"{f}serial").value)
-            for f in ["978", "1090", "1090_2", "acars", "acars2", "vdl2", "hfdl", "ais", "sonde"]
+            for f in ["978", "1090", "1090_2", "acars", "acars_2", "vdl2", "hfdl", "ais", "sonde"]
         }
         configured_serials = {str(self._d.env_by_tags(f).value) for f in self._sdrdevices.purposes()}
         available_serials = [sdr._serial for sdr in self._sdrdevices.sdrs]
@@ -2253,13 +2253,13 @@ class AdsbIm:
             acarsstring = f"driver={acarssdr._type},serial={acarsserial}"
         else:
             acarsstring = ""
-        acars2serial = self._d.env_by_tags("acars2serial").value
-        acars2sdr = self._sdrdevices.get_sdr_by_serial(acars2serial)
-        if acars2sdr:
-            acars2sdr.purpose = "acars2"
-            acars2string = f"driver={acars2sdr._type},serial={acars2serial}"
+        acars_2serial = self._d.env_by_tags("acars_2serial").value
+        acars_2sdr = self._sdrdevices.get_sdr_by_serial(acars_2serial)
+        if acars_2sdr:
+            acars_2sdr.purpose = "acars_2"
+            acars_2string = f"driver={acars_2sdr._type},serial={acars_2serial}"
         else:
-            acars2string = ""
+            acars_2string = ""
         vdl2serial = self._d.env_by_tags("vdl2serial").value
         vdl2sdr = self._sdrdevices.get_sdr_by_serial(vdl2serial)
         if vdl2sdr:
@@ -2282,7 +2282,7 @@ class AdsbIm:
         else:
             sonde_sdr_type = ""
         self._d.env_by_tags("acars_sdr_string").value = acarsstring
-        self._d.env_by_tags("acars2_sdr_string").value = acars2string
+        self._d.env_by_tags("acars_2_sdr_string").value = acars_2string
         self._d.env_by_tags("vdl2_sdr_string").value = vdl2string
         self._d.env_by_tags("hfdl_sdr_string").value = hfdlstring
         self._d.env_by_tags("sonde_sdr_type").value = sonde_sdr_type.upper()
