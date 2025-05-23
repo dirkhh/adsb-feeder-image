@@ -330,6 +330,7 @@ class AdsbIm:
         self.update_version()
         self.update_meminfo()
         self.update_journal_state()
+        self.populate_sdr_settings()
 
         self._d.previous_version = self.get_previous_version()
 
