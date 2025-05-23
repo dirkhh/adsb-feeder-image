@@ -2348,6 +2348,18 @@ class AdsbIm:
 
         self.generate_agg_structure()
 
+    # this will definitely be needed the first time the app starts after converting to the updated
+    # SDR object that holds purpose, gain, and biastee settings
+    #
+    # FIXME -- we need to do the same "smart thing" with the env var names for gain and biastee
+    def populate_sdr_settings(self):
+        # loop over all the purpose serials
+        for purpose_serial in self._sdrdevices.purposes():
+            serial = str(self._d.env_by_tags(purpose_serial).value)
+            sdr = self._sdrdevices.get_sdr_by_serial(serial)
+            if sdr != self._sdrdevices.null_sdr:
+                sdr.purpose = purpose_serial.replace("serial", "")
+
     def set_docker_concurrent(self, value):
         self._d.env_by_tags("docker_concurrent").value = value
         if not os.path.exists("/etc/docker/daemon.json") and value:
