@@ -2111,13 +2111,13 @@ class AdsbIm:
 
             # if we have an actual asignment, that overrides the auto-assignment,
             # delete the auto-assignment
-            for frequency in [978, 1090]:
+            for frequency in ["978", "1090"]:
                 if any(auto_assignment[frequency] == self._d.env_by_tags(purpose).value for purpose in purposes):
                     auto_assignment[frequency] = ""
-            if not env1090.value and auto_assignment[1090]:
-                env1090.value = auto_assignment[1090]
-            if not env978.value and auto_assignment[978]:
-                env978.value = auto_assignment[978]
+            if not env1090.value and auto_assignment["1090"]:
+                env1090.value = auto_assignment["1090"]
+            if not env978.value and auto_assignment["978"]:
+                env978.value = auto_assignment["978"]
 
             stratuxv3 = any(
                 [sdr._serial == env978.value and sdr._type == "stratuxv3" for sdr in self._sdrdevices.sdrs]
