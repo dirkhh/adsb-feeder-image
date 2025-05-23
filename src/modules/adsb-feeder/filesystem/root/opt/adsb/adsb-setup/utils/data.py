@@ -630,7 +630,7 @@ class Data:
         Env("AF_IS_DUMPHFDL_ENABLED", default=False, tags=["dumphfdl", "is_enabled"]),
         Env("AF_IS_HFDLOBSERVER_ENABLED", default=False, tags=["hfdlobserver", "is_enabled"]),
         Env("HFDL_SDR_STRING", default="", tags=["hfdl_sdr_string"]),
-        Env("HFDL_GAIN_TYPE", default="--gain", tags=["hfdl_gain_type"]),
+        Env("HFDL_GAIN_TYPE", default="--gain", tags=["hfdlgaintype"]),
         Env("HFDL_GAIN", default="", tags=["hfdlgain"]),
         Env("HFDL_SAMPLERATE", default="", tags=["hfdl_samplerate"]),
         Env("HFDL_FREQUENCIES", default="", tags=["hfdl_frequencies"]),

@@ -285,7 +285,7 @@ class SDRDevices:
     # and of course there are many SDRs that don't support it, either, but that's not something we can detect
     def sdr_field_mapping(self, field: str, purpose: str, sdr_type: str):
         mapping = {
-            "1090gain": {
+            "gain": {
                 "1090": "1090gain",
                 "1090_2": "1090_2gain",
                 "978": "978gain",
