@@ -1963,14 +1963,16 @@ class AdsbIm:
                 "sonde_share_position",
             ]
             for p in placeholders:
-                config_lines = [l.replace("%" + p + "%", self._d.env_by_tags(p).value) for l in config_lines]
+                config_lines = [l.replace("%" + p + "%", str(self._d.env_by_tags(p).value)) for l in config_lines]
             placeholders = [
                 "lat",
                 "lon",
                 "alt",
             ]
             for p in placeholders:
-                config_lines = [l.replace("%" + p + "%", self._d.env_by_tags(p).list_get(0)) for l in config_lines]
+                config_lines = [
+                    l.replace("%" + p + "%", str(self._d.env_by_tags(p).list_get(0))) for l in config_lines
+                ]
 
             config = pathlib.Path("/opt/adsb/radiosonde/station.cfg")
             config_backup = pathlib.Path("/opt/adsb/radiosonde/station.cfg.bak")
