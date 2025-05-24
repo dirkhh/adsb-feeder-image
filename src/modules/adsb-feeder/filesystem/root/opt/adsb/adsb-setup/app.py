@@ -1819,7 +1819,7 @@ class AdsbIm:
                         )
                     try:
                         subprocess.run(
-                            f"/opt/adsb/docker-compose-adsb rm --force --stop uf_{num} -t 20",
+                            f"/opt/adsb/docker-compose-adsb down uf_{num} -t 20",
                             shell=True,
                         )
                     except:
