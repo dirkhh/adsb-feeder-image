@@ -999,6 +999,9 @@ class AdsbIm:
         # adjust the planes per day stuff to potentially more / less microsites
         self.load_planes_seen_per_day()
 
+        # make sure the cpuinfo files for stage2 exist before calling compose up
+        create_fake_info([0] + self.micro_indices())
+
         try:
             subprocess.call("/opt/adsb/docker-compose-start", timeout=180.0, shell=True)
         except subprocess.TimeoutExpired:
