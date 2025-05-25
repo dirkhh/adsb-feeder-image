@@ -836,7 +836,9 @@
   }
 
   registerTask(check_mf_task);
-  registerTask(startPageTask);
-
+  if (context) {
+    // only do this if we show a chart on the page
+    registerTask(startPageTask);
+  }
 </script>
 {% endblock %}
