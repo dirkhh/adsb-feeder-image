@@ -90,7 +90,7 @@ class SDRDevices:
         return len(self.sdrs)
 
     def __repr__(self):
-        return f"SDRDevices({',\n'.join([s.__repr__() for s in self.sdrs])})"
+        return f"SDRDevices({', '.join([s.__repr__() for s in self.sdrs])})"
 
     def purposes(self):
         p = (
