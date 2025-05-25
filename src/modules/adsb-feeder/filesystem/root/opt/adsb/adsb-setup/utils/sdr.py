@@ -305,7 +305,7 @@ class SDRDevices:
                 "acars_2": "",
                 "vdl2": "",
                 "hfdl": "",
-                "ais": "aisbiastee",
+                "ais": "aisbiast",
                 "sonde": "sondebiast",
             },
         }

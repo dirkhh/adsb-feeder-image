@@ -656,7 +656,7 @@ class Data:
         Env("AIS_DEVICE_SERIAL", default="", tags=["aisserial"]),
         Env("AIS_DEVICE_GAIN", default="", tags=["aisgain"]),
         Env("AIS_DEVICE_PPM", default="", tags=["ais_device_ppm"]),
-        Env("AIS_DEVICE_BIASTEE", default="", tags=["aisbiastee"]),
+        Env("AIS_DEVICE_BIASTEE", default="", tags=["aisbiast"]),
         Env("AIS_DEVICE_BANDWIDTH", default="", tags=["ais_device_bandwidth"]),
         Env("AISCATCHER_DECODER_AFC_WIDE", default="", tags=["aiscatcher_decoder_afc_wide"]),
         Env("AIS_FEED_AIRFRAMES", default=False, tags=["ais_feed_airframes", "is_enabled"]),
