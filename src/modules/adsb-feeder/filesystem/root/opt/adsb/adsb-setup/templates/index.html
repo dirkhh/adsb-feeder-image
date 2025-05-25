@@ -69,7 +69,7 @@
       {{ zerotier_address}}{% endif %} will work as the IP address for this {{ env_value_by_tag('aggregator_choice') }} feeder.
     </div>
   </div>
-  <div class="col-12 mb-3 {% if is_enabled('stage2') %} d-none {% endif %}">
+  <div class="col-12 mb-3 {% if not adsb or is_enabled('stage2') %} d-none {% endif %}">
     Position / Message rate: <a {% if env_value_by_tag('aggregator_choice') != 'nano' %} href="/stats_0/" {% endif %}><span id="{% if not is_enabled('stage2') %}mf_status_0{% endif %}"></span> &mdash;
       <span id="{% if not is_enabled('stage2') %}mf_stats_0{% endif %}"></span></a>
   </div>
@@ -116,7 +116,7 @@
       </div>{% endif %}
     </div>
   </div>
-  {% if not is_enabled('stage2') %}
+  {% if not is_enabled('stage2') and adsb %}
   <div class="col-xl-5 col-lg-6 col-md-8 col-sm-10 col-12">
     <div style="position: relative; width: 100%; height: 100%;" id="chart-wrapper">
       <canvas id="plane-history-chart"></canvas>

@@ -3359,6 +3359,9 @@ class AdsbIm:
         self.cache_agg_status()
 
         channel, current_branch = self.extract_channel()
+
+        # take a look at the SDRs configured so that the index page can be adjusted accordingly
+        adsb = len([sdr for sdr in self._sdrdevices.sdrs if sdr.purpose in ["1090", "1090_2", "978"]]) > 0
         return render_template(
             "index.html",
             aggregators=self.agg_structure,
@@ -3370,6 +3373,7 @@ class AdsbIm:
             matrix=self.agg_matrix,
             compose_up_failed=compose_up_failed,
             channel=channel,
+            adsb=adsb,
         )
 
     @check_restart_lock
