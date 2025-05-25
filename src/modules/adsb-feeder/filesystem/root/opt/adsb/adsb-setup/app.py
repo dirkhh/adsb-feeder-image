@@ -185,6 +185,8 @@ class AdsbIm:
             self.setup_app_ports()
 
         self._sdrdevices = SDRDevices()
+        self.populate_sdr_settings()
+
         for i in [0] + self.micro_indices():
             self._d.ultrafeeder.append(UltrafeederConfig(data=self._d, micro=i))
 
@@ -330,7 +332,6 @@ class AdsbIm:
         self.update_version()
         self.update_meminfo()
         self.update_journal_state()
-        self.populate_sdr_settings()
 
         self._d.previous_version = self.get_previous_version()
 
@@ -1166,7 +1167,8 @@ class AdsbIm:
                 print_err(f"modifying SDR id: {id(sdr)} sdr: {sdr}")
                 if sdr_data["purpose"] != sdr.purpose:
                     # remove the SDR from the old purpose and add for the new one
-                    self._d.env_by_tags(f"{sdr.purpose}serial").value = ""
+                    if sdr.purpose != "":
+                        self._d.env_by_tags(f"{sdr.purpose}serial").value = ""
                     self._d.env_by_tags(f"{sdr_data['purpose']}serial").value = sdr_data["serial"]
                 gainenv, biasteeenv = self._sdrdevices.set_sdr_data(sdr, sdr_data)
                 print_err(
@@ -2358,6 +2360,7 @@ class AdsbIm:
     def populate_sdr_settings(self):
         # loop over all the purpose serials
         for purpose_serial in self._sdrdevices.purposes():
+            # updating the SDR config data
             serial = str(self._d.env_by_tags(purpose_serial).value)
             sdr = self._sdrdevices.get_sdr_by_serial(serial)
             if sdr != self._sdrdevices.null_sdr:

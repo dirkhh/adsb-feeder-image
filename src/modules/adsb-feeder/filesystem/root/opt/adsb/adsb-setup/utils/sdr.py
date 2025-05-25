@@ -90,7 +90,7 @@ class SDRDevices:
         return len(self.sdrs)
 
     def __repr__(self):
-        return f"SDRDevices({','.join([s for s in self.sdrs])})"
+        return f"SDRDevices({',\n'.join([s.__repr__() for s in self.sdrs])})"
 
     def purposes(self):
         p = (
@@ -102,6 +102,7 @@ class SDRDevices:
             "vdl2serial",
             "hfdlserial",
             "aisserial",
+            "sondeserial",
         )
         for i in range(16):
             p += (f"other-{i}",)
@@ -235,7 +236,7 @@ class SDRDevices:
         self._ensure_populated()
         for sdr in self.sdrs:
             if sdr._serial == serial:
-                print_err(f"found SDR by serial: id: {id(sdr)} sdr: {sdr}")
+                print_err(f"found SDR for serial: {serial}: id: {id(sdr)} sdr: {sdr}")
                 return sdr
         return self.null_sdr
 
