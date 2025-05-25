@@ -16,7 +16,7 @@
     {% endwith %}
   </div>
 <form class="row gy-2 gx-3 align-items-center" method="post">
-  <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="sdr_setup" value="go">
+  <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="sdr_setup" value="go" onclick="changes_to_apply = false; return true;">
     apply settings - take me to the feeder homepage</button>
 
   <div class="col-12">
@@ -85,7 +85,7 @@
            placeholder="IP-address[,port]" value="{{ env_value_by_tag("remote_sdr") }}" />
   </div>
   <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3 mt-3" name="sdr_setup"
-          value="go">apply settings - take me to the feeder homepage</button>
+          value="go" onclick="changes_to_apply = false; return true;">apply settings - take me to the feeder homepage</button>
 </form>
 
 <!-- Modal -->
@@ -136,6 +136,14 @@
   let sdrs = [];
   let sdr_setup_dialog = $("#sdrsetup_dialog");
   let modal = new mdb.Modal(sdr_setup_dialog)
+
+  // slightly unintuitive - while we save data back to the data structures in the close function
+  // for the modal dialog - the user still needs to click the apply button before the changes
+  // really take effect. So this is the slightly annoying way to remind them to do so.
+  let changes_to_apply = false;
+  window.onbeforeunload = function () {
+    return changes_to_apply ? "You have changes that hadn't been applied. This will result in inconsistent behavior." : null;
+  }
 
   function sdr_info() {
     fetch("/api/sdr_info", { signal: AbortSignal.timeout(15000) })
@@ -199,13 +207,23 @@
       modal.show();
     });
   }
+
+  // mildly pointless convenience function - this makes it easier to write the assignment in
+  // the save_sdr_setup function as a single line
+  function set_change_flag(old_value, new_value) {
+    if (old_value != new_value) {
+      changes_to_apply = true;
+    }
+    return new_value;
+  }
+
   function save_sdr_setup() {
     let sdr = $("#sdr_num").text();
     let gain = $("#sdrgain").val();
     let biastee = $("#enable_biastee").is(":checked");
-    sdrs[sdr]['gain'] = gain;
-    sdrs[sdr]['biastee'] = biastee;
-    sdrs[sdr]['purpose'] = $('input[name="usage"]:checked').val();
+    sdrs[sdr]['gain'] = set_change_flag(sdrs[sdr]['gain'], gain);
+    sdrs[sdr]['biastee'] = set_change_flag(sdrs[sdr]['biastee'], biastee);
+    sdrs[sdr]['purpose'] = set_change_flag(sdrs[sdr]['purpose'], $('input[name="usage"]:checked').val());
     console.log("save_sdr_setup: " + JSON.stringify(sdrs[sdr]));
     modal.hide();
     let id = '#sdr' + sdr;
