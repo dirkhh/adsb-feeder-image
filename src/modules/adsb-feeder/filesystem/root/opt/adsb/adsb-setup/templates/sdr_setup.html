@@ -46,9 +46,9 @@
         </div>
         {% for sdr in [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15" ] %}
         <div class="row" id="sdr{{ sdr }}" style="display: none">
-          <p class="col-2" onclick="sdr_setup({{ sdr }})"><button type="button" class="btn btn-light" data-mdb-ripple-init data-mdb-ripple-color="dark">SDR {{ sdr }}</button></p>
+          <p class="col-2" onclick="sdr_setup_show_dialog({{ sdr }})"><button type="button" class="btn btn-light" data-mdb-ripple-init data-mdb-ripple-color="dark">SDR {{ sdr }}</button></p>
           <p class="col-2" id="sdr{{ sdr }}-type"></p>
-          <p class="col-4 text-break" id="sdr{{ sdr }}-serial" onclick="sdr_setup({{ sdr }})"></p>
+          <p class="col-4 text-break" id="sdr{{ sdr }}-serial" onclick="sdr_setup_show_dialog({{ sdr }})"></p>
           <p class="col-1" id="sdr{{ sdr }}-gain"></p>
           <p class="col-1" id="sdr{{ sdr }}-biastee"></p>
           <p class="col-2" id="sdr{{ sdr }}-purpose">
@@ -181,8 +181,9 @@
 
   sdr_info();
 
-  function sdr_setup(sdr_idx) {
+  function sdr_setup_show_dialog(sdr_idx) {
     $(document).ready(function() {
+      console.log("sdr_setup_show_dialog(" + sdr_idx + ") called");
       let sdr = sdrs[sdr_idx];
       $("#sdr_num").text(sdr_idx);
       $("#sdr_serial").text(sdr['serial']);
@@ -194,6 +195,7 @@
         usage978 = $("#usage978");
         usage978.style.display = "none";
       }
+      console.log("using sdr" + JSON.stringify(sdr));
       modal.show();
     });
   }
