@@ -2293,7 +2293,10 @@ class AdsbIm:
 
         # sort out if we need the acarsrouter and acarshub
         self._d.env_by_tags("acarsrouter").value = (
-            self._d.is_enabled("acarsdec") or self._d.is_enabled("acarsdec2") or self._d.is_enabled("dumpvdl2")
+            self._d.is_enabled("acarsdec")
+            or self._d.is_enabled("acarsdec2")
+            or self._d.is_enabled("dumpvdl2")
+            or self._d.is_enabled("dumphfdl")
         )
         self._d.env_by_tags("acarshub").value = self._d.is_enabled("acarsrouter")
         feed_acars = ""
