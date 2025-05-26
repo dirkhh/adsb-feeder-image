@@ -2106,9 +2106,13 @@ class AdsbIm:
             self._sdrdevices._ensure_populated()
             env978 = self._d.env_by_tags("978serial")
             env1090 = self._d.env_by_tags("1090serial")
-            if env978.value != "" and not any([sdr._serial == env978.value for sdr in self._sdrdevices.sdrs]):
+            if env978.value != "" and not any(
+                [(sdr._serial == env978.value and sdr.purpose == "uat") for sdr in self._sdrdevices.sdrs]
+            ):
                 env978.value = ""
-            if env1090.value != "" and not any([sdr._serial == env1090.value for sdr in self._sdrdevices.sdrs]):
+            if env1090.value != "" and not any(
+                [(sdr._serial == env1090.value and sdr.purpose == "1090") for sdr in self._sdrdevices.sdrs]
+            ):
                 env1090.value = ""
             auto_assignment = self._sdrdevices.addresses_per_frequency
 
