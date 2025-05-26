@@ -140,6 +140,16 @@
   let sdrs = [];
   let sdr_setup_dialog = $("#sdrsetup_dialog");
   let modal = new mdb.Modal(sdr_setup_dialog)
+  let consumers = ["1090",
+      "978", "other"
+      {% if is_enabled('stage2') %}, "1090_2"{% endif %}
+      {% if is_enabled('acarsdec') %}, "acars"{% endif %}
+      {% if is_enabled('acarsdec2') %}, "acars_2"{% endif %}
+      {% if is_enabled('dumpvdl2') %}, "vdl2"{% endif %}
+      {% if is_enabled('dumphfdl') %}, "hfdl"{% endif %}
+      {% if is_enabled('shipfeeder') %}, "ais"{% endif %}
+      {% if is_enabled('sonde') %}, "sonde"{% endif %}
+    ];
 
   // slightly unintuitive - while we save data back to the data structures in the close function
   // for the modal dialog - the user still needs to click the apply button before the changes
@@ -163,7 +173,6 @@
         sdrs = data['sdrdevices'];
         console.log("Got the following SDRs from the API: " + JSON.stringify(sdrs));
         let use = data['frequencies'];
-        let consumers = ["1090", "978", "other" {% if is_enabled('stage2') %}, "1090_2"{% endif %}, "acars", "acars_2", "vdl2", "hfdl", "ais", "sonde"];
         for (let i = 0; i < num; i++) {
           let id = '#sdr' + i;
           $(id).css({ 'display': 'flex' });
@@ -196,25 +205,30 @@
 
   function sdr_setup_show_dialog(sdr_idx) {
     $(document).ready(function() {
-      console.log("sdr_setup_show_dialog(" + sdr_idx + ") called");
       let sdr = sdrs[sdr_idx];
+      console.log("sdr_setup_show_dialog(" + sdr_idx + ") called for " + JSON.stringify(sdr));
+      if (!consumers.includes(sdr['purpose'])) {
+        sdr['purpose'] = 'other';
+      }
       $("#sdr_num").text(sdr_idx);
       $("#sdr_serial").text(sdr['serial']);
       $("#usage" + sdr['purpose']).prop('checked', true);
-      // hide gain and biastee where not needed, but set the values anyway
-      // so they are correct when the user switches to a usage that supports them
-      $("#gain_container").toggle(sdr['purpose'] != 'hfdl' && sdr['purpose'] != 'other');
-      $("#biastee_container").toggle(sdr['purpose'] != 'other');
+      $("#usage" + sdr['purpose']).trigger('change');
       $("#sdrgain").val(sdr['gain']);
       $("#enable_biastee").prop('checked', sdrs[sdr_idx]['biastee']);
       if (sdr['type'] != "rtlsdr") {
         // we only support RTLSDR for UAT
         $("#usage978").parent().hide();
       }
-      console.log("using sdr" + JSON.stringify(sdr));
       modal.show();
     });
   }
+
+  $('input[name="usage"][type="radio"]').on('change', function () {
+    console.log("usage changed to " + this.value);
+    $("#gain_container").toggle(this.value != "hfdl" && this.value != "other");
+    $("#biastee_container").toggle(this.value != "other");
+  });
 
   // mildly pointless convenience function - this makes it easier to write the assignment in
   // the save_sdr_setup function as a single line
@@ -254,9 +268,5 @@
       .catch(error => console.error(error));
   }
 
-  $('input[name="usage"][type="radio"]').on('click', function() {
-    $("#gain_container").toggle(this.value != "hfdl" && this.value != "other");
-    $("#biastee_container").toggle(this.value != "other");
-  });
 </script>
 {% endblock %}
