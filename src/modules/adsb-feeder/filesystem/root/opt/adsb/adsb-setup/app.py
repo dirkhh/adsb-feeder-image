@@ -2821,83 +2821,86 @@ class AdsbIm:
                 if success:
                     report_issue(f"added ssh key: {value}")
                 continue
-            e = self._d.env_by_tags(key.split("--"))
-            if e:
-                if allow_insecure and key == "zerotierid":
+            try:
+                e = self._d.env_by_tags(key.split("--"))
+            except:
+                # if the key isn't creating a valid tag, just skip it
+                continue
+            if allow_insecure and key == "zerotierid":
+                try:
+                    subprocess.call("/usr/bin/systemctl unmask zerotier-one", shell=True)
+                    subprocess.call("/usr/bin/systemctl enable --now zerotier-one", shell=True)
+                    sleep(5.0)  # this gives the service enough time to get ready
+                    subprocess.call(
+                        ["/usr/sbin/zerotier-cli", "join", f"{value}"],
+                    )
+                except:
+                    report_issue("exception trying to set up zerorier - giving up")
+            if key in {"lat", "lon"}:
+                # remove letters, spaces, degree symbols
+                value = str(float(re.sub("[a-zA-Z° ]", "", value)))
+            if key == "tz":
+                self.set_tz(value)
+                continue
+            # deal with the micro feeder and stage2 initial setup
+            if key == "aggregator_choice" and value in ["micro", "nano"]:
+                self._d.env_by_tags("aggregators_chosen").value = True
+                # disable all the aggregators in micro mode
+                for ev in self._d._env:
+                    if "is_enabled" in ev.tags:
+                        if "other_aggregator" in ev.tags or "ultrafeeder" in ev.tags:
+                            ev.list_set(0, False)
+                if value == "nano" and self._d.is_feeder_image:
+                    # make sure we don't log to disk at all
                     try:
-                        subprocess.call("/usr/bin/systemctl unmask zerotier-one", shell=True)
-                        subprocess.call("/usr/bin/systemctl enable --now zerotier-one", shell=True)
-                        sleep(5.0)  # this gives the service enough time to get ready
-                        subprocess.call(
-                            ["/usr/sbin/zerotier-cli", "join", f"{value}"],
-                        )
+                        subprocess.call("bash /opt/adsb/scripts/journal-set-volatile.sh", shell=True, timeout=5)
+                        print_err("switched to volatile journal")
                     except:
-                        report_issue("exception trying to set up zerorier - giving up")
-                if key in {"lat", "lon"}:
-                    # remove letters, spaces, degree symbols
-                    value = str(float(re.sub("[a-zA-Z° ]", "", value)))
-                if key == "tz":
-                    self.set_tz(value)
-                    continue
-                # deal with the micro feeder and stage2 initial setup
-                if key == "aggregator_choice" and value in ["micro", "nano"]:
-                    self._d.env_by_tags("aggregators_chosen").value = True
-                    # disable all the aggregators in micro mode
-                    for ev in self._d._env:
-                        if "is_enabled" in ev.tags:
-                            if "other_aggregator" in ev.tags or "ultrafeeder" in ev.tags:
-                                ev.list_set(0, False)
-                    if value == "nano" and self._d.is_feeder_image:
-                        # make sure we don't log to disk at all
-                        try:
-                            subprocess.call("bash /opt/adsb/scripts/journal-set-volatile.sh", shell=True, timeout=5)
-                            print_err("switched to volatile journal")
-                        except:
-                            print_err("exception trying to switch to volatile journal - ignoring")
-                if key == "aggregator_choice" and value == "stage2":
-                    next_url = url_for("stage2")
-                    self._d.env_by_tags("stage2").value = True
-                    if not self._multi_outline_bg:
-                        self.push_multi_outline()
-                        self._multi_outline_bg = Background(60, self.push_multi_outline)
-                    unique_name = self.unique_site_name(form.get("site_name"), 0)
-                    self._d.env_by_tags("site_name").list_set(0, unique_name)
-                # if this is a regular feeder and the user is changing to 'individual' selection
-                # (either in initial setup or when coming back to that setting later), show them
-                # the aggregator selection page next
-                if (
-                    key == "aggregator_choice"
-                    and not self._d.is_enabled("stage2")
-                    and value == "individual"
-                    and self._d.env_by_tags("aggregator_choice").value != "individual"
-                ):
-                    # show the aggregator selection
-                    next_url = url_for("aggregators")
-                # finally, painfully ensure that we remove explicitly asigned SDRs from other asignments
-                # this relies on the web page to ensure that each SDR is only asigned on purpose
-                # the key in quesiton will be explicitely set and does not need clearing
-                # empty string means no SDRs assigned to that purpose
-                purposes = self._sdrdevices.purposes()
-                if key in purposes and value != "":
-                    for clear_key in purposes:
-                        if clear_key != key and value == self._d.env_by_tags(clear_key).value:
-                            print_err(f"clearing: {str(clear_key)} old value: {value}")
-                            self._d.env_by_tags(clear_key).value = ""
-                # when dealing with micro feeder aggregators, we need to keep the site number
-                # in mind
-                tags = key.split("--")
-                if sitenum > 0 and "is_enabled" in tags:
-                    print_err(f"setting up stage2 micro site number {sitenum}: {key}")
-                    self._d.env_by_tags("aggregators_chosen").value = True
-                    self._d.env_by_tags(tags).list_set(sitenum, is_true(value))
+                        print_err("exception trying to switch to volatile journal - ignoring")
+            if key == "aggregator_choice" and value == "stage2":
+                next_url = url_for("stage2")
+                self._d.env_by_tags("stage2").value = True
+                if not self._multi_outline_bg:
+                    self.push_multi_outline()
+                    self._multi_outline_bg = Background(60, self.push_multi_outline)
+                unique_name = self.unique_site_name(form.get("site_name"), 0)
+                self._d.env_by_tags("site_name").list_set(0, unique_name)
+            # if this is a regular feeder and the user is changing to 'individual' selection
+            # (either in initial setup or when coming back to that setting later), show them
+            # the aggregator selection page next
+            if (
+                key == "aggregator_choice"
+                and not self._d.is_enabled("stage2")
+                and value == "individual"
+                and self._d.env_by_tags("aggregator_choice").value != "individual"
+            ):
+                # show the aggregator selection
+                next_url = url_for("aggregators")
+            # finally, painfully ensure that we remove explicitly asigned SDRs from other asignments
+            # this relies on the web page to ensure that each SDR is only asigned on purpose
+            # the key in quesiton will be explicitely set and does not need clearing
+            # empty string means no SDRs assigned to that purpose
+            purposes = self._sdrdevices.purposes()
+            if key in purposes and value != "":
+                for clear_key in purposes:
+                    if clear_key != key and value == self._d.env_by_tags(clear_key).value:
+                        print_err(f"clearing: {str(clear_key)} old value: {value}")
+                        self._d.env_by_tags(clear_key).value = ""
+            # when dealing with micro feeder aggregators, we need to keep the site number
+            # in mind
+            tags = key.split("--")
+            if sitenum > 0 and "is_enabled" in tags:
+                print_err(f"setting up stage2 micro site number {sitenum}: {key}")
+                self._d.env_by_tags("aggregators_chosen").value = True
+                self._d.env_by_tags(tags).list_set(sitenum, is_true(value))
+            else:
+                if type(e._value) == list:
+                    e.list_set(sitenum, value)
                 else:
-                    if type(e._value) == list:
-                        e.list_set(sitenum, value)
-                    else:
-                        e.value = value
-                if key == "site_name":
-                    unique_name = self.unique_site_name(value, sitenum)
-                    self._d.env_by_tags("site_name").list_set(sitenum, unique_name)
+                    e.value = value
+            if key == "site_name":
+                unique_name = self.unique_site_name(value, sitenum)
+                self._d.env_by_tags("site_name").list_set(sitenum, unique_name)
         # done handling the input data
         # what implied settings do we have (and could we simplify them?)
 

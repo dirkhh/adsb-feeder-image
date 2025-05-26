@@ -866,7 +866,7 @@ class Data:
         if cached:
             return cached
 
-        matches = []
+        matches: list[Env] = []
         for e in self._env:
             if not e.tags:
                 print_err(f"{e} has no tags")
