@@ -301,6 +301,11 @@
                      placeholder="129.125;130.025;130.425;130.450;130.85;130.825;130.55;130.45;130.425"
                      value="{{ env_value_by_tag('acars_frequencies') }}">
             </div>
+            {% if env_value_by_tag('acarsserial') == '' %}
+            <div class="col-12 mb-1 text-warning">
+              <p>No SDR is assigned for ACARS - you can change that on the <a href="/sdr_setup">SDR Setup</a> page.</p>
+            </div>
+            {% endif %}
             {% endif %}
           </div>
           <div class="row border">
@@ -348,6 +353,11 @@
                      placeholder="131.85;131.825;131.725;131.65;131.55;131.525;131.475;131.45;131.425;131.25;131.125"
                      value="{{ env_value_by_tag('acars_2_frequencies') }}">
             </div>
+            {% if env_value_by_tag('acars_2serial') == '' %}
+            <div class="col-12 mb-1 text-warning">
+              <p>No SDR is assigned for ACARS_2 - you can change that on the <a href="/sdr_setup">SDR Setup</a> page.</p>
+            </div>
+            {% endif %}
             {% endif %}
           </div>
           <div class="row border">
@@ -395,6 +405,11 @@
                      placeholder="136975000 136945000 136925000 136825000 136800000 136775000"
                      value="{{ env_value_by_tag('vdl2_frequencies') }}">
             </div>
+            {% if env_value_by_tag('vdl2serial') == '' %}
+            <div class="col-12 mb-1 text-warning">
+              <p>No SDR is assigned for VDL2 - you can change that on the <a href="/sdr_setup">SDR Setup</a> page.</p>
+            </div>
+            {% endif %}
             {% endif %}
           </div>
           <div class="row border">
@@ -466,6 +481,11 @@
                      placeholder="recomended to leave empty to use frequency scanner"
                      value="{{ env_value_by_tag('hfdl_frequencies') }}">
             </div>
+            {% if env_value_by_tag('hfdlserial') == '' %}
+            <div class="col-12 mb-1 text-warning">
+              <p>No SDR is assigned for HFDL - you can change that on the <a href="/sdr_setup">SDR Setup</a> page.</p>
+            </div>
+            {% endif %}
             {% endif %}
           </div>
           <div class="row border">
@@ -512,7 +532,11 @@
               <input type="text" class="mx-auto w-100" name="ais_sx_extra_options" id="ais_sx_extra_options"
                      value="{{ env_value_by_tag('ais_sx_extra_options') }}">
             </div>
-
+            {% if env_value_by_tag('aisserial') == '' %}
+            <div class="col-12 mb-1 text-warning">
+              <p>No SDR is assigned for AIS - you can change that on the <a href="/sdr_setup">SDR Setup</a> page.</p>
+            </div>
+            {% endif %}
             {% endif %}
           </div>
           <div class="row border">
@@ -572,7 +596,11 @@
               <input type="text" class="mx-auto w-100" name="sonde_share_position" id="sonde_share_position"
                      value="{{ env_value_by_tag('sonde_share_position') }}">
             </div>
-
+            {% if env_value_by_tag('sondeserial') == '' %}
+            <div class="col-12 mb-1 text-warning">
+              <p>No SDR is assigned for Sonde - you can change that on the <a href="/sdr_setup">SDR Setup</a> page.</p>
+            </div>
+            {% endif %}
             {% endif %}
           </div>
         </div>
