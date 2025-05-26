@@ -106,10 +106,10 @@ if [ -f /opt/adsb/config/.env ] ; then
     if grep "AF_IS_ACARSHUB_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
         COMPOSE_FILES+=( "-f" "/opt/adsb/config/acarshub.yml" )
     fi
-    if grep "AF_IS_ACARSDEC_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
+    if grep "AF_RUN_ACARSDEC=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
         COMPOSE_FILES+=( "-f" "/opt/adsb/config/acarsdec.yml" )
     fi
-    if grep "AF_IS_ACARSDEC2_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
+    if grep "AF_RUN_ACARSDEC2=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
         COMPOSE_FILES+=( "-f" "/opt/adsb/config/acarsdec2.yml" )
     fi
     if grep "AF_IS_ACARSROUTER_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
@@ -118,19 +118,19 @@ if [ -f /opt/adsb/config/.env ] ; then
     if grep "AF_IS_ACARS2POS_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
         COMPOSE_FILES+=( "-f" "/opt/adsb/config/acars2pos.yml" )
     fi
-    if grep "AF_IS_DUMPVDL2_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
+    if grep "AF_RUN_DUMPVDL2=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
         COMPOSE_FILES+=( "-f" "/opt/adsb/config/dumpvdl2.yml" )
     fi
-    if grep "AF_IS_DUMPHFDL_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
+    if grep "AF_RUN_DUMPHFDL=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
         COMPOSE_FILES+=( "-f" "/opt/adsb/config/dumphfdl.yml" )
     fi
-    if grep "AF_IS_HFDLOBSERVER_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
+    if grep "AF_RUN_HFDLOBSERVER=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
         COMPOSE_FILES+=( "-f" "/opt/adsb/config/hfdlobserver.yml" )
     fi
-    if grep "AF_IS_SHIPFEEDER_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
+    if grep "AF_RUN_SHIPFEEDER=True" /opt/adsb/config/.env > /dev/null 2>&1 ; then
         COMPOSE_FILES+=( "-f" "/opt/adsb/config/shipfeeder.yml" )
     fi
-    if grep "AF_IS_RADIOSONDE_ENABLED=True" /opt/adsb/config/.env > /dev/null 2>&1 && [ -f /opt/adsb/radiosonde/station.cfg ] ; then
+    if grep "AF_RUN_RADIOSONDE=True" /opt/adsb/config/.env > /dev/null 2>&1 && [ -f /opt/adsb/radiosonde/station.cfg ] ; then
         COMPOSE_FILES+=( "-f" "/opt/adsb/config/radiosonde.yml" )
     fi
 fi

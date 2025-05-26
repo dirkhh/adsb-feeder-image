@@ -2253,42 +2253,61 @@ class AdsbIm:
         if not sdr978 is self._sdrdevices.null_sdr:
             sdr978.purpose = "978"
 
-        # create the ACARS and VDL2 SDR strings
+        # create the non-ADS-B SDR strings
         acarsserial = self._d.env_by_tags("acarsserial").value
         acarssdr = self._sdrdevices.get_sdr_by_serial(acarsserial)
-        if acarssdr:
+        if acarssdr != self._sdrdevices.null_sdr:
             acarssdr.purpose = "acars"
             acarsstring = f"driver={acarssdr._type},serial={acarsserial}"
+            self._d.env_by_tags("run_acarsdec").value = self._d.is_enabled(["acarsdec"])
         else:
             acarsstring = ""
+            self._d.env_by_tags("run_acarsdec").value = False
         acars_2serial = self._d.env_by_tags("acars_2serial").value
         acars_2sdr = self._sdrdevices.get_sdr_by_serial(acars_2serial)
-        if acars_2sdr:
+        if acars_2sdr != self._sdrdevices.null_sdr:
             acars_2sdr.purpose = "acars_2"
             acars_2string = f"driver={acars_2sdr._type},serial={acars_2serial}"
+            self._d.env_by_tags("run_acarsdec2").value = self._d.is_enabled(["acarsdec2"])
         else:
             acars_2string = ""
+            self._d.env_by_tags("run_acarsdec2").value = False
         vdl2serial = self._d.env_by_tags("vdl2serial").value
         vdl2sdr = self._sdrdevices.get_sdr_by_serial(vdl2serial)
-        if vdl2sdr:
+        if vdl2sdr != self._sdrdevices.null_sdr:
             vdl2sdr.purpose = "vdl2"
             vdl2string = f"driver={vdl2sdr._type},serial={vdl2serial}"
+            self._d.env_by_tags("run_dumpvdl2").value = self._d.is_enabled(["dumpvdl2"])
         else:
             vdl2string = ""
+            self._d.env_by_tags("run_dumpvdl2").value = False
         hfdlserial = self._d.env_by_tags("hfdlserial").value
         hfdlsdr = self._sdrdevices.get_sdr_by_serial(hfdlserial)
-        if hfdlsdr:
+        if hfdlsdr != self._sdrdevices.null_sdr:
             hfdlsdr.purpose = "hfdl"
             hfdlstring = f"driver={hfdlsdr._type},serial={hfdlserial}"
+            self._d.env_by_tags("run_dumphfdl").value = self._d.is_enabled(["dumphfdl"])
         else:
             hfdlstring = ""
+            self._d.env_by_tags("run_dumphfdl").value = False
         sondeserial = self._d.env_by_tags("sondeserial").value
         sondesdr = self._sdrdevices.get_sdr_by_serial(sondeserial)
-        if sondesdr:
+        if sondesdr != self._sdrdevices.null_sdr:
             sondesdr.purpose = "sonde"
             sonde_sdr_type = sondesdr._type
+            self._d.env_by_tags("run_sonde").value = self._d.is_enabled(["sonde"])
         else:
             sonde_sdr_type = ""
+            self._d.env_by_tags("run_sonde").value = False
+        aisserial = self._d.env_by_tags("aisserial").value
+        aissdr = self._sdrdevices.get_sdr_by_serial(aisserial)
+        if aissdr != self._sdrdevices.null_sdr:
+            aissdr.purpose = "ais"
+            self._d.env_by_tags("run_shipfeeder").value = self._d.is_enabled(["shipfeeder"])
+        else:
+            self._d.env_by_tags("run_shipfeeder").value = False
+
+        # set the non-ADS-B SDR strings
         self._d.env_by_tags("acars_sdr_string").value = acarsstring
         self._d.env_by_tags("acars_2_sdr_string").value = acars_2string
         self._d.env_by_tags("vdl2_sdr_string").value = vdl2string
@@ -2297,10 +2316,10 @@ class AdsbIm:
 
         # sort out if we need the acarsrouter and acarshub
         self._d.env_by_tags("acarsrouter").value = (
-            self._d.is_enabled("acarsdec")
-            or self._d.is_enabled("acarsdec2")
-            or self._d.is_enabled("dumpvdl2")
-            or self._d.is_enabled("dumphfdl")
+            self._d.is_enabled("run_acarsdec")
+            or self._d.is_enabled("run_acarsdec2")
+            or self._d.is_enabled("run_dumpvdl2")
+            or self._d.is_enabled("run_dumphfdl")
         )
         self._d.env_by_tags("acarshub").value = self._d.is_enabled("acarsrouter")
         feed_acars = ""
@@ -2329,6 +2348,14 @@ class AdsbIm:
         # sadly, that's configured through an annoying yml config file
         # we're trying to be clever and edit this from a template
         self.update_sonde_config()
+
+        if verbose or 1:
+            print_err(f"ACARS container {self._d.is_enabled(['run_acarsdec'])}")
+            print_err(f"ACARS2 container {self._d.is_enabled(['run_acarsdec2'])}")
+            print_err(f"VDL2 container {self._d.is_enabled(['run_dumpvdl2'])}")
+            print_err(f"HFDL container {self._d.is_enabled(['run_dumphfdl'])}")
+            print_err(f"AIS container {self._d.is_enabled(['run_shipfeeder'])}")
+            print_err(f"SONDE container {self._d.is_enabled(['run_sonde'])}")
 
         # finally, check if this has given us enough configuration info to
         # start the containers
