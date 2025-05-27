@@ -1,4 +1,9 @@
 Changes since v2.3.5:
+=======
+- core: warn user when they navigate away from SDR setup without applying the changes
+- core: redesign of the SDR setup page with clickable SDR entries that open a modal dialog to edit all the SDR settings in one place
+- non-adsb: initial support for additional SDR use cases: ACARS, VDLM2, HFDL, AIS, SONDE
+- core: many internal changes to Env variable handling and related code cleanup
 - hotspot: make hotspot RFC7710 compliant and fix a bug where it would respond to random web requests, making it hard to use if your computer / phone sends out a lot of web requests once you connect (and before you can enter the SSID/password)
 - stage2: additional ultrafeeder arguments: replace SITENUM magic string
 - stage2: fix microfeeder edit with old docker compose version
