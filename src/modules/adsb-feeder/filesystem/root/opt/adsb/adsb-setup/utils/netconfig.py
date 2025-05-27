@@ -159,7 +159,7 @@ class UltrafeederConfig:
                     ret.add(ultrafeeder_extra_args)
         if ultrafeeder_extra_args_microsites:
             if is_stage2 and self._micro != 0:
-                ret.add(ultrafeeder_extra_args_microsites)
+                ret.add(ultrafeeder_extra_args_microsites.replace("SITENUM", f"{self._micro:02}"))
 
         if self._micro > 0:
             # this is one of the proxies - so it also should feed the aggregate map
