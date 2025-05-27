@@ -543,7 +543,7 @@
             {% if not is_enabled('sonde') %}
             <div class="col-8 my-1">
               <label for="sonde--enable">
-                Enable Radio Sonde support
+                Enable Radio Sonde
               </label>
             </div>
             <div class="col-4 my-1">
@@ -551,14 +551,18 @@
                       value="go">Enable</button>
             </div>
             {% else %}
-            <div class="col-8 my-1">
+            <div class="col-6 my-1">
               <label for="sonde--disable">
-                Disable Radio Sonde support.
+                Radio Sonde
               </label>
             </div>
-            <div class="col-4 my-1">
+            <div class="col-3 my-1">
               <button type="submit" class="btn btn-secondary mx-auto w-100" name="sonde--disable"
                       value="go">Disable</button>
+            </div>
+            <div class="col-3 my-1">
+              <button type="submit" class="btn btn-primary mx-auto w-100" name="sonde--update"
+                      value="go">Update</button>
             </div>
             <div class="col-4 mb-1">
               <label for="sonde_callsign">
