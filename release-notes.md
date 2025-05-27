@@ -1,18 +1,8 @@
-Changes since v2.3.4:
-- fix issues on systems with more than 4 SDRs present
-- stage2: better decode ground positions far from stage2 center (readsb change)
-- additional improvement of readsb memory consumption
-- visual changes to make the checkmarks in the aggregator grid more easily distinguishable
-- support wifi networks with an empty password
-- support for running two SDRs for ADS-B on the same device (usually low + high gain, requires stage2)
-- clarify UI for setting ssh key and switching to 'secure' mode
-- minor changes for corner cases in the daily reported planes statistics
-- update containers to their current versions
-- address container name confusion for the uk1090 service which prevented restarting that container from the web UI
-- show the option to do nightly feeder software updates in the case of an app install
-- notify user if a feeder has no data source and point them to the SDR Setup page to address the issue
-- refuse to do OS updates unless this is acually an ADS-B Feeder Image
-- avoid potential fast spinning infinite loop when installed in unsupported environments where dmesg is non-functional
+Changes since v2.3.5:
+- stage2: additional ultrafeeder arguments: replace SITENUM magic string
+- stage2: fix microfeeder edit with old docker compose version
+- stage2: fix restore issue connected to rbfeeder cpuinfo files
+- better instructions on how to handle compose failure
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)
