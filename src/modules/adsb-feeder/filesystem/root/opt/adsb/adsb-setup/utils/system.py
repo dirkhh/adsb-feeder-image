@@ -16,7 +16,7 @@ class Lock:
     def __init__(self):
         self.lock = threading.Lock()
 
-    def acquire(self, blocking=True, timeout=-1):
+    def acquire(self, blocking=True, timeout=-1.0):
         return self.lock.acquire(blocking=blocking, timeout=timeout)
 
     def release(self):
@@ -72,7 +72,7 @@ class Restart:
 
         return True
 
-    def wait_restart_done(self, timeout=-1):
+    def wait_restart_done(self, timeout=-1.0):
         # acquire and release the lock immediately
         if self.lock.acquire(blocking=True, timeout=timeout):
             self.lock.release()
@@ -105,9 +105,9 @@ class System:
         return self._restart
 
     def shutdown_action(self, action="", delay=0):
-        if (action == "shutdown"):
+        if action == "shutdown":
             cmd = "shutdown now"
-        elif (action == "reboot"):
+        elif action == "reboot":
             cmd = "reboot"
         else:
             print_err(f"unknown shutdown action: {action}")
@@ -129,14 +129,16 @@ class System:
 
         threading.Thread(target=do_action).start()
 
-    def shutdown(self, delay=0) -> None:
+    def shutdown(self, delay=0.0) -> None:
         self.shutdown_action(action="shutdown", delay=delay)
 
-    def reboot(self, delay=0) -> None:
+    def reboot(self, delay=0.0) -> None:
         self.shutdown_action(action="reboot", delay=delay)
 
     def os_update(self) -> None:
-        subprocess.call("systemd-run --wait -u adsb-feeder-update-os /bin/bash /opt/adsb/scripts/update-os", shell=True)
+        subprocess.call(
+            "systemd-run --wait -u adsb-feeder-update-os /bin/bash /opt/adsb/scripts/update-os", shell=True
+        )
 
     def check_dns(self):
         try:
@@ -254,7 +256,9 @@ class System:
         print_err(f"recreating {containers}")
         try:
             subprocess.run(["/opt/adsb/docker-compose-adsb", "down", "--remove-orphans"] + containers)
-            subprocess.run(["/opt/adsb/docker-compose-adsb", "up", "-d", "--force-recreate", "--remove-orphans"] + containers)
+            subprocess.run(
+                ["/opt/adsb/docker-compose-adsb", "up", "-d", "--force-recreate", "--remove-orphans"] + containers
+            )
         except:
             print_err("docker compose recreate failed")
 

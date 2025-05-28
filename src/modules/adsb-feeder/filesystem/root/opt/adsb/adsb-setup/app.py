@@ -253,7 +253,7 @@ class AdsbIm:
             ["sdrmap", "sdrmap", "https://sdrmap.org/", [""], 1],
         ]
         self.agg_matrix = None
-        self.agg_structure = None
+        self.agg_structure = []
         self.last_cache_agg_status = 0
         self.cache_agg_status_lock = threading.Lock()
         self.miscLock = threading.Lock()
@@ -365,25 +365,25 @@ class AdsbIm:
                 if virt and virt != "none":
                     board = f"Virtualized {platform.machine()} environment under {virt}"
                 else:
-                    prod = ""
-                    manufacturer = ""
+                    manufacturer: str = ""
+                    prod: str = ""
                     try:
                         prod = subprocess.run(
                             "dmidecode -s system-product-name",
                             shell=True,
                             capture_output=True,
                             text=True,
-                        )
+                        ).stdout.strip()
                         manufacturer = subprocess.run(
                             "dmidecode -s system-manufacturer",
                             shell=True,
                             capture_output=True,
                             text=True,
-                        )
+                        ).stdout.strip()
                     except:
                         pass
                     if prod or manufacturer:
-                        board = f"Native on {manufacturer.stdout.strip()} {prod.stdout.strip()} {platform.machine()} system"
+                        board = f"Native on {manufacturer} {prod} {platform.machine()} system"
                     else:
                         board = f"Native on {platform.machine()} system"
         if board == "":
@@ -395,7 +395,7 @@ class AdsbIm:
         self._d.env_by_tags("board_name").value = board
 
     def update_version(self):
-        conf_version = self._d.env_by_tags("base_version").value
+        conf_version = self._d.env_by_tags("base_version").valuestr
         if pathlib.Path(self._d.version_file).exists():
             with open(self._d.version_file, "r") as f:
                 file_version = f.read().strip()
@@ -462,7 +462,7 @@ class AdsbIm:
             "cv": self.agg_matrix,
         }
         if self._d.env_by_tags("initial_version").value == "":
-            self._d.env_by_tags("initial_version").value == self._d.env_by_tags("base_version").value
+            self._d.env_by_tags("initial_version").value = self._d.env_by_tags("base_version").value
         return b64encode(compress(pickle.dumps(image))).decode("utf-8")
 
     def check_secure_image(self):
@@ -541,7 +541,7 @@ class AdsbIm:
 
         # hopefully very temporary hack to deal with a broken container that
         # doesn't run on Raspberry Pi 5 boards
-        board = self._d.env_by_tags("board_name").value
+        board = self._d.env_by_tags("board_name").valuestr
         if board.startswith("Raspberry Pi 5"):
             self._d.env_by_tags(["container", "planefinder"]).value = (
                 "ghcr.io/sdr-enthusiasts/docker-planefinder:5.0.161_arm64"
@@ -577,7 +577,7 @@ class AdsbIm:
 
         self.app.run(
             host="0.0.0.0",
-            port=int(self._d.env_by_tags("webport").value),
+            port=self._d.env_by_tags("webport").valueint,
             debug=debug,
         )
 
@@ -586,7 +586,7 @@ class AdsbIm:
     def check_undervoltage(self):
         # next check if there were under-voltage events (this is likely only relevant on an RPi)
         self._d.env_by_tags("under_voltage").value = False
-        board = self._d.env_by_tags("board_name").value
+        board = self._d.env_by_tags("board_name").valuestr
         if board and board.startswith("Raspberry"):
             try:
                 # yes, the except / else is a bit unintuitive, but that seemed the easiest way to do this;
@@ -613,14 +613,14 @@ class AdsbIm:
                     stdin=subprocess.PIPE,
                     text=True,
                 )
-
-                while line := proc.stdout.readline():
-                    if "New USB device found" in line or "USB disconnect" in line:
-                        self._sdrdevices._ensure_populated()
-                    if "Undervoltage" in line or "under-voltage" in line:
-                        self._d.env_by_tags("under_voltage").value = True
-                        self.undervoltage_epoch = time.time()
-                    # print_err(f"dmesg: {line.rstrip()}")
+                if proc.stdout != None:
+                    while line := proc.stdout.readline():
+                        if "New USB device found" in line or "USB disconnect" in line:
+                            self._sdrdevices._ensure_populated()
+                        if "Undervoltage" in line or "under-voltage" in line:
+                            self._d.env_by_tags("under_voltage").value = True
+                            self.undervoltage_epoch = time.time()
+                        # print_err(f"dmesg: {line.rstrip()}")
 
             except:
                 print_err(traceback.format_exc())
@@ -781,7 +781,9 @@ class AdsbIm:
                         if microIndex == 0:
                             uf_path = adsb_path / "ultrafeeder"
                         else:
-                            uf_path = adsb_path / "ultrafeeder" / self._d.env_by_tags("mf_ip").list_get(microIndex)
+                            uf_path = (
+                                adsb_path / "ultrafeeder" / str(self._d.env_by_tags("mf_ip").list_get(microIndex))
+                            )
 
                         gh_path = uf_path / "globe_history"
                         if include_heatmap and gh_path.is_dir():
@@ -986,7 +988,7 @@ class AdsbIm:
         self.set_tz(self._d.env("FEEDER_TZ").list_get(0))
 
         # make sure we are connected to the right Zerotier network
-        zt_network = self._d.env_by_tags("zerotierid").value
+        zt_network = self._d.env_by_tags("zerotierid").valuestr
         if zt_network and len(zt_network) == 16:  # that's the length of a valid network id
             try:
                 subprocess.call(
@@ -1239,6 +1241,9 @@ class AdsbIm:
                 with open(f"/run/adsb-feeder-{suffix}/readsb/stats.prom") as f:
                     uptime = 0
                     found = 0
+                    pps = 0
+                    mps = 0
+                    planes = 0
                     for line in f:
                         if "position_count_total" in line:
                             pps = int(line.split()[1]) / 60
@@ -1377,7 +1382,7 @@ class AdsbIm:
                 agg,
                 idx,
                 self._d,
-                f"http://127.0.0.1:{self._d.env_by_tags('webport').value}",
+                f"http://127.0.0.1:{self._d.env_by_tags('webport').valueint}",
                 self._system,
             )
 
@@ -1441,8 +1446,8 @@ class AdsbIm:
         with open(self._d.data_path / "update-channel", "w") as update_channel:
             print(channel, file=update_channel)
 
-    def extract_channel(self) -> str:
-        channel = self._d.env_by_tags("base_version").value
+    def extract_channel(self) -> tuple[str, str]:
+        channel = self._d.env_by_tags("base_version").valuestr
         if channel:
             match = re.search(r"\((.*?)\)", channel)
             if match:
@@ -1506,7 +1511,7 @@ class AdsbIm:
         # make sure that a site name is unique - if the idx is given that's
         # the current value and excluded from the check
         existing_names = self._d.env_by_tags("site_name")
-        names = [existing_names.list_get(n) for n in range(0, len(existing_names.value)) if n != idx]
+        names = [existing_names.list_get(n) for n in range(0, len(existing_names.valuestr)) if n != idx]
         while name in names:
             name += "_"
         return name
@@ -1746,7 +1751,7 @@ class AdsbIm:
             print_err(f"IP address {key} already listed as a micro site")
             return (False, f"IP address {key} already listed as a micro site")
         print_err(f"setting up a new micro site at {key} do_import={do_import} do_restore={do_restore}")
-        n = self._d.env_by_tags("num_micro_sites").value
+        n = self._d.env_by_tags("num_micro_sites").valueint
 
         # store the IP address so that get_base_info works
         # and assume port is 80 (get_base_info will fix that if it's wrong)
@@ -1806,7 +1811,7 @@ class AdsbIm:
         print_err(f"removing micro site {num}")
 
         # deal with plane stats
-        for i in range(num, self._d.env_by_tags("num_micro_sites").value):
+        for i in range(num, self._d.env_by_tags("num_micro_sites").valueint):
             self.plane_stats[i] = self.plane_stats[i + 1]
             self.planes_seen_per_day[i] = self.planes_seen_per_day[i + 1]
 
@@ -1817,11 +1822,11 @@ class AdsbIm:
         log_consistency_warning(False)
         for e in self._d.stage2_envs:
             print_err(f"shifting {e.name} down and deleting last element {e._value}")
-            for i in range(num, self._d.env_by_tags("num_micro_sites").value):
+            for i in range(num, self._d.env_by_tags("num_micro_sites").valueint):
                 e.list_set(i, e.list_get(i + 1))
-            while len(e._value) > self._d.env_by_tags("num_micro_sites").value:
+            while len(e._value) > self._d.env_by_tags("num_micro_sites").valueint:
                 e.list_remove()
-        self._d.env_by_tags("num_micro_sites").value -= 1
+        self._d.env_by_tags("num_micro_sites").value = self._d.env_by_tags("num_micro_sites").valueint - 1
         log_consistency_warning(True)
         # now read them in to get a consistency warning if needed
         read_values_from_config_json(check_integrity=True)
@@ -1832,10 +1837,10 @@ class AdsbIm:
             + f"{self._d.env_by_tags('mf_ip').list_get(num)} to {site_name} at {ip}"
             + (f" (new index {new_idx})" if new_idx != num else "")
         )
-        if new_idx < 0 or new_idx > self._d.env_by_tags("num_micro_sites").value:
+        if new_idx < 0 or new_idx > self._d.env_by_tags("num_micro_sites").valueint:
             print_err(f"invalid new index {new_idx}, ignoring")
             new_idx = num
-        old_ip = self._d.env_by_tags("mf_ip").list_get(num)
+        old_ip = str(self._d.env_by_tags("mf_ip").list_get(num))
         if old_ip != ip:
             if any([s in ip for s in ["/", "\\", ":", "*", "?", '"', "<", ">", "|", "..", "$"]]):
                 print_err(f"found suspicious characters in IP address {ip} - let's not use this in a command")
@@ -2025,7 +2030,7 @@ class AdsbIm:
             self._d.env_by_tags("stage2_nano_2").value = False
 
         for sitenum in [0] + self.micro_indices():
-            site_name = self._d.env_by_tags("site_name").list_get(sitenum)
+            site_name = str(self._d.env_by_tags("site_name").list_get(sitenum))
             sanitized = "".join(c if c.isalnum() or c in "-_." else "_" for c in site_name)
             self._d.env_by_tags("site_name_sanitized").list_set(sitenum, sanitized)
 
@@ -2089,9 +2094,9 @@ class AdsbIm:
 
         # fix up airspy installs without proper serial number configuration
         if self._d.is_enabled("airspy"):
-            if self._d.env_by_tags("1090serial").value == "" or self._d.env_by_tags("1090serial").value.startswith(
-                "AIRSPY SN:"
-            ):
+            if self._d.env_by_tags("1090serial").valuestr == "" or self._d.env_by_tags(
+                "1090serial"
+            ).valuestr.startswith("AIRSPY SN:"):
                 self._sdrdevices._ensure_populated()
                 airspy_serials = [sdr._serial for sdr in self._sdrdevices.sdrs if sdr._type == "airspy"]
                 if len(airspy_serials) == 1:
@@ -2172,7 +2177,7 @@ class AdsbIm:
 
             if airspy:
                 # make sure airspy gain is within bounds
-                gain = self._d.env_by_tags(["1090gain"]).value
+                gain = self._d.env_by_tags(["1090gain"]).valuestr
                 if gain.startswith("auto"):
                     self._d.env_by_tags(["gain_airspy"]).value = "auto"
                 elif make_int(gain) > 21:
@@ -2246,15 +2251,15 @@ class AdsbIm:
         self.setup_ultrafeeder_args()
 
         # ensure that our 1090 and 978 SDRs have the correct purpose set
-        sdr1090 = self._sdrdevices.get_sdr_by_serial(self._d.env_by_tags("1090serial").value)
-        sdr978 = self._sdrdevices.get_sdr_by_serial(self._d.env_by_tags("978serial").value)
+        sdr1090 = self._sdrdevices.get_sdr_by_serial(self._d.env_by_tags("1090serial").valuestr)
+        sdr978 = self._sdrdevices.get_sdr_by_serial(self._d.env_by_tags("978serial").valuestr)
         if not sdr1090 is self._sdrdevices.null_sdr:
             sdr1090.purpose = "1090"
         if not sdr978 is self._sdrdevices.null_sdr:
             sdr978.purpose = "978"
 
         # create the non-ADS-B SDR strings
-        acarsserial = self._d.env_by_tags("acarsserial").value
+        acarsserial = self._d.env_by_tags("acarsserial").valuestr
         acarssdr = self._sdrdevices.get_sdr_by_serial(acarsserial)
         if acarssdr != self._sdrdevices.null_sdr:
             acarssdr.purpose = "acars"
@@ -2263,7 +2268,7 @@ class AdsbIm:
         else:
             acarsstring = ""
             self._d.env_by_tags("run_acarsdec").value = False
-        acars_2serial = self._d.env_by_tags("acars_2serial").value
+        acars_2serial = self._d.env_by_tags("acars_2serial").valuestr
         acars_2sdr = self._sdrdevices.get_sdr_by_serial(acars_2serial)
         if acars_2sdr != self._sdrdevices.null_sdr:
             acars_2sdr.purpose = "acars_2"
@@ -2272,7 +2277,7 @@ class AdsbIm:
         else:
             acars_2string = ""
             self._d.env_by_tags("run_acarsdec2").value = False
-        vdl2serial = self._d.env_by_tags("vdl2serial").value
+        vdl2serial = self._d.env_by_tags("vdl2serial").valuestr
         vdl2sdr = self._sdrdevices.get_sdr_by_serial(vdl2serial)
         if vdl2sdr != self._sdrdevices.null_sdr:
             vdl2sdr.purpose = "vdl2"
@@ -2281,7 +2286,7 @@ class AdsbIm:
         else:
             vdl2string = ""
             self._d.env_by_tags("run_dumpvdl2").value = False
-        hfdlserial = self._d.env_by_tags("hfdlserial").value
+        hfdlserial = self._d.env_by_tags("hfdlserial").valuestr
         hfdlsdr = self._sdrdevices.get_sdr_by_serial(hfdlserial)
         if hfdlsdr != self._sdrdevices.null_sdr:
             hfdlsdr.purpose = "hfdl"
@@ -2290,7 +2295,7 @@ class AdsbIm:
         else:
             hfdlstring = ""
             self._d.env_by_tags("run_dumphfdl").value = False
-        sondeserial = self._d.env_by_tags("sondeserial").value
+        sondeserial = self._d.env_by_tags("sondeserial").valuestr
         sondesdr = self._sdrdevices.get_sdr_by_serial(sondeserial)
         if sondesdr != self._sdrdevices.null_sdr:
             sondesdr.purpose = "sonde"
@@ -2299,7 +2304,7 @@ class AdsbIm:
         else:
             sonde_sdr_type = ""
             self._d.env_by_tags("run_sonde").value = False
-        aisserial = self._d.env_by_tags("aisserial").value
+        aisserial = self._d.env_by_tags("aisserial").valuestr
         aissdr = self._sdrdevices.get_sdr_by_serial(aisserial)
         if aissdr != self._sdrdevices.null_sdr:
             aissdr.purpose = "ais"
@@ -2790,15 +2795,15 @@ class AdsbIm:
                             print_err(f"found other aggregator {key} for site {l_site} sitenum {l_sitenum}")
                     is_successful = False
                     base = key.replace("--submit", "")
-                    aggregator_argument = form.get(f"{base}--key", None)
+                    aggregator_argument = form.get(f"{base}--key", "")
                     if base == "flightradar":
-                        uat_arg = form.get(f"{base}_uat--key", None)
+                        uat_arg = form.get(f"{base}_uat--key", "")
                         aggregator_argument += f"::{uat_arg}"
                     if base == "opensky":
-                        user = form.get(f"{base}--user", None)
+                        user = form.get(f"{base}--user", "")
                         aggregator_argument += f"::{user}"
                     if base == "sdrmap":
-                        user = form.get(f"{base}--user", None)
+                        user = form.get(f"{base}--user", "")
                         aggregator_argument += f"::{user}"
                     aggregator_object = self._other_aggregators[key]
                     print_err(f"got aggregator object {aggregator_object} -- activating for sitenum {l_sitenum}")
@@ -3263,6 +3268,8 @@ class AdsbIm:
             self.planes_seen_per_day[i] |= self.get_current_planes(i)
 
     def update_net_dev(self):
+        dev = ""
+        addr = ""
         try:
             result = subprocess.run(
                 "ip route get 1 | head -1  | cut -d' ' -f5,7",
@@ -3371,7 +3378,7 @@ class AdsbIm:
                 self.set_rpw()
                 os.remove("/opt/adsb/adsb.im.passwd.and.keys")
 
-        board = self._d.env_by_tags("board_name").value
+        board = self._d.env_by_tags("board_name").valuestr
         # there are many other boards I should list here - but Pi 3 and Pi Zero are probably the most common
         stage2_suggestion = board.startswith("Raspberry") and not (
             board.startswith("Raspberry Pi 4") or board.startswith("Raspberry Pi 5")
@@ -3426,10 +3433,10 @@ class AdsbIm:
         self.update_dns_state()
         return render_template("setup.html", mem=self._memtotal)
 
-    def micro_indices(self):
+    def micro_indices(self) -> List[int]:
         if self._d.is_enabled("stage2"):
             # micro proxies start at 1
-            return list(range(1, self._d.env_by_tags("num_micro_sites").value + 1))
+            return list(range(1, self._d.env_by_tags("num_micro_sites").valueint + 1))
         else:
             return []
 

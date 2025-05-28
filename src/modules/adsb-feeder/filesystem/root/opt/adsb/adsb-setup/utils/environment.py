@@ -116,6 +116,20 @@ class Env:
             return self._default
         return ""
 
+    @property
+    def valuestr(self):
+        v = self.value
+        if type(v) != str:
+            print_err(f"{self._name} is not a string: {v}")
+        return str(self.value)
+
+    @property
+    def valueint(self):
+        v = self.value
+        if type(v) != int:
+            print_err(f"{self._name} is not an int: {v}")
+        return make_int(v)
+
     @value.setter
     def value(self, value):
         # mess with value in case we are a bool
