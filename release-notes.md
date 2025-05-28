@@ -1,4 +1,5 @@
 Changes since v2.3.5:
+- hotspot: make hotspot RFC7710 compliant and fix a bug where it would respond to random web requests, making it hard to use if your computer / phone sends out a lot of web requests once you connect (and before you can enter the SSID/password)
 - stage2: additional ultrafeeder arguments: replace SITENUM magic string
 - stage2: fix microfeeder edit with old docker compose version
 - stage2: fix restore issue connected to rbfeeder cpuinfo files
