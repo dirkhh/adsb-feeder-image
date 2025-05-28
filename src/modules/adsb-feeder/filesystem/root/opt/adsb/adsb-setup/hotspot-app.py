@@ -56,6 +56,7 @@ class Hotspot:
             if len(self.wifi.ssids) > 0:
                 break
 
+        self.app.add_url_rule("/hotspot", view_func=self.hotspot, methods=["GET"])
         self.app.add_url_rule("/restarting", view_func=self.restarting)
 
         self.app.add_url_rule("/restart", view_func=self.restart, methods=["POST", "GET"])
@@ -71,11 +72,21 @@ class Hotspot:
     def restart(self):
         return self.restart_state
 
+    def hotspot(self):
+        return render_template(
+            "hotspot.html", version=self.version, comment=self.comment,
+            ssids=self.wifi.ssids)
+
     def catch_all(self, path):
+        # Catch all requests not explicitly handled. Since our fake DNS server
+        # resolves all names to us, this may literally be any request the
+        # client tries to make to anyone. If it looks like they're sending us
+        # wifi credentials, try those and restart. In all other cases, render
+        # the /hotspot page.
         if self.restart_state == "restarting":
             return redirect("/restarting")
 
-        if request.method == "POST":
+        if self._request_looks_like_wifi_credentials():
             self.lastUserInput = time.monotonic()
             self.restart_state = "restarting"
 
@@ -87,7 +98,12 @@ class Hotspot:
 
             return redirect("/restarting")
 
-        return render_template("hotspot.html", version=self.version, comment=self.comment, ssids=self.wifi.ssids)
+        return self.hotspot()
+
+    def _request_looks_like_wifi_credentials(self):
+        return (
+            request.method == "POST" and "ssid" in request.form
+            and "passwd" in request.form)
 
     def restarting(self):
         return render_template("hotspot-restarting.html")
