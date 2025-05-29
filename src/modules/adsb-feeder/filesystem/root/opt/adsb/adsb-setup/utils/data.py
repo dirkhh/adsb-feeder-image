@@ -689,7 +689,8 @@ class Data:
         Env("AIS_VESSELTRACKER_UDP_PORT", default="", tags=["ais_vesseltracker_udp_port"]),
         Env("AIS_SX_UDP_FEEDS", default="", tags=["ais_sx_udp_feeds"]),
         Env("AISCATCHER_UDP_INPUTS", default="", tags=["aiscatcher_udp_inputs"]),
-        Env("AIS_WEB_PORT", default="", tags=["ais_web_port"]),
+        Env("AIS_WEB_PORT", default=9990, tags=["ais_webport"]),
+        Env("TAR1090_AISCATCHER_URL", default="", tags=["tar1090_aiscatcher_url"]),
         # Radiosonde related stuff
         Env("AF_IS_RADIOSONDE_ENABLED", default=False, tags=["sonde", "is_enabled"]),
         Env("AF_RUN_RADIOSONDE", default=False, tags=["run_sonde", "is_enabled"]),

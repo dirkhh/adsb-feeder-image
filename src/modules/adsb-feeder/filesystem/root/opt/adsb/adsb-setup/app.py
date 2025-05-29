@@ -286,6 +286,8 @@ class AdsbIm:
         )
 
         self._routemanager.add_proxy_routes(self._d.proxy_routes)
+        self.app.add_url_rule("/geojson", "geojson", self.geojson)
+        self.app.add_url_rule("/icons.png", "iconspng", self.iconspng)
         self.app.add_url_rule("/hotspot_test", "hotspot_test", self.hotspot_test)
         self.app.add_url_rule("/restarting", "restarting", self.restarting)
         self.app.add_url_rule("/shutdownpage", "shutdownpage", self.shutdownpage)
@@ -681,6 +683,37 @@ class AdsbIm:
         for i in self.micro_indices():
             if self._d.env_by_tags("mf_version").list_get(i) != "not an adsb.im feeder":
                 self.get_base_info(i)
+
+    def geojson(self):
+        print_err("got geojson request")
+        return self.ais_file("geojson")
+
+    def iconspng(self):
+        print_err("got icons.png request")
+        return self.ais_file("icons.png")
+
+    # get the requested file from the ais_catcher running in the shipfeeder docker container
+    def ais_file(self, file):
+        res = requests.request(
+            method="GET",
+            url=f"http://localhost:{self._d.env_by_tags('ais_webport').valueint}/{file}",
+            headers={k: v for k, v in request.headers if k.lower() != "host"},  # exclude 'host' header
+            data=request.get_data(),
+            cookies=request.cookies,
+            allow_redirects=False,
+        )
+        print_err(f"got geojson response: {res.status_code}")
+
+        excluded_headers = [
+            "content-encoding",
+            "content-length",
+            "transfer-encoding",
+            "connection",
+        ]
+        headers = [(k, v) for k, v in res.raw.headers.items() if k.lower() not in excluded_headers]
+
+        response = Response(res.content, res.status_code, headers=headers)
+        return response
 
     def hotspot_test(self):
         return render_template("hotspot.html", version="123", comment="comment", ssids=list(range(20)))
@@ -2069,7 +2102,7 @@ class AdsbIm:
 
         if self._d.env_by_tags("tar1090_image_config_link").value != "":
             self._d.env_by_tags("tar1090_image_config_link").value = (
-                f"http://HOSTNAME:{self._d.env_by_tags('webport').value}/"
+                f"http://HOSTNAME:{self._d.env_by_tags('webport').valueint}/"
             )
 
         if self._d.is_enabled("stage2"):
@@ -2309,6 +2342,11 @@ class AdsbIm:
         if aissdr != self._sdrdevices.null_sdr:
             aissdr.purpose = "ais"
             self._d.env_by_tags("run_shipfeeder").value = self._d.is_enabled(["shipfeeder"])
+            self._d.env_by_tags("tar1090_aiscatcher_url").value = (
+                f"http://HOSTNAME:{self._d.env_by_tags('webport').value}/"
+                if self._d.is_enabled(["shipfeeder"])
+                else ""
+            )
         else:
             self._d.env_by_tags("run_shipfeeder").value = False
 
