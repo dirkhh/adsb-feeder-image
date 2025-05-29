@@ -184,7 +184,12 @@
           } else {
             $(id + "-biastee").html("");
           }
-          $(id + "-purpose").html(sdrs[i]['purpose']);
+          let purpose = sdrs[i]['purpose'];
+          // we have other-0 .. other-15, but that's an implementation detail that we hide from the user
+          if (purpose.startsWith('other')) {
+            purpose = 'other';
+          }
+          $(id + "-purpose").html(purpose);
         }
         for (let i = num; i < 16; i++) {
           let id = 'sdr' + i;
@@ -244,9 +249,13 @@
     let sdr = $("#sdr_num").text();
     let gain = $("#sdrgain").val();
     let biastee = $("#enable_biastee").is(":checked");
+    let purpose = $('input[name="usage"]:checked').val();
+    if (purpose == 'other') {
+      purpose = 'other-' + sdr;
+    }
     sdrs[sdr]['gain'] = set_change_flag(sdrs[sdr]['gain'], gain);
     sdrs[sdr]['biastee'] = set_change_flag(sdrs[sdr]['biastee'], biastee);
-    sdrs[sdr]['purpose'] = set_change_flag(sdrs[sdr]['purpose'], $('input[name="usage"]:checked').val());
+    sdrs[sdr]['purpose'] = set_change_flag(sdrs[sdr]['purpose'], purpose);
     console.log("save_sdr_setup: " + JSON.stringify(sdrs[sdr]));
     modal.hide();
     let id = '#sdr' + sdr;

@@ -1203,8 +1203,8 @@ class AdsbIm:
                 if sdr_data["purpose"] != sdr.purpose:
                     # remove the SDR from the old purpose and add for the new one
                     if sdr.purpose != "":
-                        self._d.env_by_tags(f"{sdr.purpose}serial").value = ""
-                    self._d.env_by_tags(f"{sdr_data['purpose']}serial").value = sdr_data["serial"]
+                        self._d.env_by_tags(self._sdrdevices.purpose_env(sdr.purpose)).value = ""
+                    self._d.env_by_tags(self._sdrdevices.purpose_env(sdr_data["purpose"])).value = sdr_data["serial"]
                 gainenv, biasteeenv = self._sdrdevices.set_sdr_data(sdr, sdr_data)
                 print_err(
                     f"got env names {gainenv} and {biasteeenv} to set gain {sdr_data['gain']} and biastee {sdr_data['biastee']}"

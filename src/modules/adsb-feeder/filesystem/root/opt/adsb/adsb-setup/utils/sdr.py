@@ -108,6 +108,12 @@ class SDRDevices:
             p += (f"other-{i}",)
         return p
 
+    def purpose_env(self, purpose: str):
+        purpose_env = purpose
+        if not purpose_env.startswith("other-"):
+            purpose_env += "serial"
+        return purpose_env
+
     def get_sdr_info(self):
         self.debug_out = "get_sdr_info() found:\n"
         try:
@@ -311,6 +317,8 @@ class SDRDevices:
         }
         if purpose == "1090" and field == "gain" and sdr_type == "airspy":
             return "gain_airspy"
+        elif purpose.startswith("other"):
+            return ""
         else:
             return mapping[field][purpose]
 
