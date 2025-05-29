@@ -262,6 +262,20 @@ class System:
         except:
             print_err("docker compose recreate failed")
 
+    def stop_containers(self, containers: list[str]):
+        print_err(f"stopping {containers}")
+        try:
+            subprocess.run(["/opt/adsb/docker-compose-adsb", "down"] + containers)
+        except:
+            print_err(f"docker compose down {containers} failed")
+
+    def start_containers(self):
+        print_err("starting all containers")
+        try:
+            subprocess.run(["/opt/adsb/docker-compose-start"])
+        except:
+            print_err("docker compose start failed")
+
     def refreshDockerPs(self):
         with self.containerCheckLock:
             now = time.time()
