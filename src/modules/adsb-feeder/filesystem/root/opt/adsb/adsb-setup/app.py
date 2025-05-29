@@ -288,6 +288,8 @@ class AdsbIm:
         self._routemanager.add_proxy_routes(self._d.proxy_routes)
         self.app.add_url_rule("/geojson", "geojson", self.geojson)
         self.app.add_url_rule("/icons.png", "iconspng", self.iconspng)
+        self.app.add_url_rule("/change_sdr_serial/<oldserial>/<newserial>", "change_sdr_serial", self.change_sdr_serial)
+        self.app.add_url_rule("/change_sdr_serial_ui", "change_sdr_serial_ui", self.change_sdr_serial_ui)
         self.app.add_url_rule("/hotspot_test", "hotspot_test", self.hotspot_test)
         self.app.add_url_rule("/restarting", "restarting", self.restarting)
         self.app.add_url_rule("/shutdownpage", "shutdownpage", self.shutdownpage)
@@ -3011,6 +3013,22 @@ class AdsbIm:
         # make sure we only show the gpsd option if gpsd is correctly configured and running
         self._d.env_by_tags("has_gpsd").value = self._system.check_gpsd()
         return render_template("expert.html")
+
+    def change_sdr_serial_ui(self):
+        return render_template("change_sdr_serial_ui.html")
+
+    def change_sdr_serial(self, oldserial, newserial):
+        print_err(f"request to change SDR serial from {oldserial} to {newserial}")
+        if self._sdrdevices.get_sdr_by_serial(oldserial) is self._sdrdevices.null_sdr:
+            print_err("no SDR with serial " + oldserial + " found")
+            return f"[ERROR] no SDR with serial {oldserial} found"
+        containers = self._system.list_containers()
+        containers = [c for c in containers if c not in {"dozzle", "adsb-setup-proxy", "acars_router", "acarshub"}]
+        print_err(f"stopping containers potentially accessing SDRs ({containers}) in order to be able to access SDRs")
+        self._system.stop_containers(containers)
+        result = self._sdrdevices.change_sdr_serial(oldserial, newserial)
+        self._system.start_containers()
+        return result
 
     @check_restart_lock
     def systemmgmt(self):

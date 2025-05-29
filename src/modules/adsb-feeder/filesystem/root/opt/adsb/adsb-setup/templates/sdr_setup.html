@@ -22,8 +22,11 @@
   <div class="col-12">
     <div class="row" id="multipleSdrs">
       <div class="col-sm-12 mt-5 mb-3 text-danger" style="display: none;" id="duptext">
-        There are multiple SDRs with serial number <span id="duplicates"></span>. This will not work correctly. Please
-        ensure that all SDRs have distinct serial numbers.
+        <p>There are multiple SDRs with serial number <span id="duplicates"></span>. This will not work correctly. Please
+          ensure that all SDRs have distinct serial numbers.</p>
+        <p>We have added a somewhat experimental feature to allow you to change the serial number of an RTLSDR from this
+          UI, but that process isn't automatic and requires access to the system that you are working on. If you want to
+          try this, please go to the <a href="/change_sdr_serial_ui">change SDR serial number</a> page.</p>
       </div>
       <div class="col-sm-12 mt-4 mb-3" style="display: block;" id="noduptext">
         If the table of SDRs isn't consistent with your hardware, click on CHECK SDRS. To edit the properties of an SDR,

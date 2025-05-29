@@ -330,3 +330,63 @@ class SDRDevices:
             self.sdr_field_mapping("gain", sdr.purpose, sdr._type),
             self.sdr_field_mapping("biastee", sdr.purpose, sdr._type),
         )
+
+    def change_sdr_serial(self, oldserial: str, newserial: str):
+        self.get_sdr_info()
+        rtlsdrs = [s for s in self.sdrs if s._type == "rtlsdr"]
+        if len(rtlsdrs) != 1:
+            print_err(f"there must be exactly one rtlsdr, but we found {len(rtlsdrs)}")
+            return "[ERROR] there must be exactly one rtlsdr"
+        sdr = rtlsdrs[0]
+        if sdr._serial != oldserial:
+            print_err(f"found rtlsdr serial {sdr._serial} but expected {oldserial}")
+            return f"[ERROR] did not find RTLSDR with serial {oldserial}"
+        try:
+            result = subprocess.run(
+                "rtl_eeprom -d 0", shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+            )
+        except subprocess.SubprocessError:
+            print_err("rtl_eeprom -d 0 failed")
+            return f"[ERROR] rtl_eeprom -d 0 failed"
+        rtl_eeprom_text = result.stdout
+        if "usb_claim_interface error" in rtl_eeprom_text:
+            print_err("usb_claim_interface error in rtl_eeprom output")
+            return f"[ERROR] the SDR is in use, did you stop all containers?"
+        match = re.search(r"Serial number:\s*(\w+)", rtl_eeprom_text)
+        if not match:
+            print_err(f"could not find serial number in rtl_eeprom output '{rtl_eeprom_text}'")
+            return f"[ERROR] could not find serial number in rtl_eeprom output"
+        if match.group(1) != oldserial:
+            print_err(f"rtl_eeprom found serial number {match.group(1)} but expected {oldserial}")
+            return f"[ERROR] rtl_eeprom found serial number {match.group(1)} but expected {oldserial}"
+        # ok, this looks all good. fingers crossed
+        try:
+            result = subprocess.run(
+                f"echo 'y' | rtl_eeprom -d 0 -s {newserial}",
+                shell=True,
+                text=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+            )
+        except subprocess.SubprocessError:
+            print_err(f"rtl_eeprom -d 0 -s {newserial} failed")
+            return f"[ERROR] rtl_eeprom -d 0 -s {newserial} failed"
+        print_err(f"rtl_eeprom -d 0 -s {newserial} output: {result.stdout}")
+
+        # because we are paranoid, let's check
+        try:
+            result = subprocess.run(
+                "rtl_eeprom -d 0", shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+            )
+        except subprocess.SubprocessError:
+            print_err("verify success: rtl_eeprom -d 0 failed")
+            return f"[ERROR] verify success: rtl_eeprom -d 0 failed"
+        rtl_eeprom_text = result.stdout
+        match = re.search(r"Serial number:\s*(\w+)", rtl_eeprom_text)
+        if not match:
+            print_err("verify success: could not find serial number in rtl_eeprom output")
+            return f"[ERROR] verify successs: could not find serial number in rtl_eeprom output"
+        if match.group(1) != newserial:
+            print_err(f"verify success: rtl_eepromfound serial number {match.group(1)} but expected {newserial}")
+            return f"[ERROR] verify success: rtl_eeprom found serial number {match.group(1)} but expected {newserial}"
+        return "[OK] success"

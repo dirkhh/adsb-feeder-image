@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- core: add UI to allow changing the serial number of an RTLSDR; right now this is only made available if there's a duplicate serial number.
 - core: warn user when they navigate away from SDR setup without applying the changes
 - core: redesign of the SDR setup page with clickable SDR entries that open a modal dialog to edit all the SDR settings in one place
 - non-adsb: initial support for additional SDR use cases: ACARS, VDLM2, HFDL, AIS, SONDE

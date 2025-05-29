@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% set active_page = "change_sdr_serial_ui" %}
+
+{% block content %}
+<h1 class="mt-3 text-center text-danger">{% block title %} Change RTLSDR serial number {% endblock %}</h1>
+<div>
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+  {% for message in messages %}
+  <div class="alert alert-warning">
+    {{ message }}
+  </div>
+  {% endfor %}
+  {% endif %}
+  {% endwith %}
+</div>
+<div class="row">
+  <div class="col-12 text-warning" style="display: none;" id="noRTLSdrs">
+    You don't appear to have any RTLSDR devices connected. Please check that they are plugged in and reload this page.
+  </div>
+  <div class="col-12" style="display: none;" id="have1RTLSdr">
+    <p>
+      There appears to be a single RTLSDR device with serial number '<span id="sdr0-serial"></span>' connected.
+    </p>
+    <label for="new_serial">Please enter the new serial number for this device</label>
+    <input type="text" id="new_serial" name="new_serial" />
+    <button type="submit" class="btn btn-primary" name="change_serial" onclick="change_serial(); return false;">Change serial number</button>
+  </div>
+  <div class="col-12" style="display: none;" id="haveMoreRTLSdrs">
+    <p>
+      In order to be able to use this UI tochange the serial number of an RTLSDR, you must first disconnect all other RTLSDR devices.
+      Right now the following RTLSDRs appear to be connected. Please disconnect all of them except for the one for which you want to change the serial number and then reload this page.
+    </p>
+    <p>
+      <ol class="ml-2">
+      {% for sdr in [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15" ] %}
+      <li id="sdrlist{{ sdr }}" style="display: none"><span id="sdrlist{{ sdr }}-serial"></span> <span id="sdrlist{{ sdr }}-purpose"></span></li>
+      {% endfor %}
+      </ol>
+    </p>
+  </div>
+</div>
+<script>
+  let rtlsdrs = [];
+  let sdrs = [];
+  function sdr_info() {
+      fetch("/api/sdr_info", { signal: AbortSignal.timeout(15000) })
+        .then(response => response.json())
+        .then(data => {
+          sdrs = data['sdrdevices'];
+          console.log("Got the following sdrs from the API: " + JSON.stringify(sdrs));
+          rtlsdrs = sdrs.filter(s => s.type == 'rtlsdr');
+          console.log("Got the following RTLSDRs from the API: " + JSON.stringify(rtlsdrs));
+          let num = rtlsdrs.length;
+          if (num == 0) {
+            $('#have1RTLSdr').hide();
+            $('#haveMoreRTLSdrs').hide();
+            $('#noRTLSdrs').show();
+          } else if (num == 1) {
+            $('#have1RTLSdr').show();
+            $('#haveMoreRTLSdrs').hide();
+            $('#noRTLSdrs').hide();
+            $('#sdr0-serial').html(rtlsdrs[0]['serial']);
+          } else {
+            $('#have1RTLSdr').hide();
+            $('#haveMoreRTLSdrs').show();
+            $('#noRTLSdrs').hide();
+            for (let i = 0; i < num; i++) {
+              let id = '#sdrlist' + i;
+              $(id).show();
+              $(id + "-serial").html("RTL SDR with serial number '" + rtlsdrs[i]['serial'] + "'");
+              let purpose = rtlsdrs[i]['purpose'];
+              // we have other-0 .. other-15, but that's an implementation detail that we hide from the user
+              if (purpose.startsWith('other')) {
+                purpose = 'other';
+              }
+              if (purpose != "") {
+                $(id + "-purpose").html("(" + purpose + ")");
+              }
+            }
+          }
+        });
+    }
+
+    sdr_info();
+
+    function change_serial() {
+      let new_serial = $('#new_serial').val();
+      let old_serial = $('#sdr0-serial').html();
+      console.log("old serial: " + old_serial + "new serial: " + new_serial);
+      fetch("/change_sdr_serial/" + old_serial + "/" + new_serial, { signal: AbortSignal.timeout(15000) })
+      .then(response => response.text())
+      .then(data => {
+        console.log(data);
+        if (data.startsWith("[OK]")) {
+          alert("Serial number changed from " + old_serial + " to " + new_serial + "\nYou need to disconnect and reconnect the SDR in order for the software to pick up the new serial number.\nThen click OK to reload this page.");
+          $('#new_serial').val("")
+          location.reload();
+        } else if (data.startsWith("[ERROR]")) {
+          if (data == "[ERROR] rtl_eeprom found serial number " + new_serial + " but expected " + old_serial) {
+            alert("Serial number already changed to " + new_serial + "\nHowever, you need to disconnect and reconnect the SDR in order for the software to pick up the new serial number.\nThen click OK to reload this page.");
+          } else {
+            alert("Failed to change serial number from " + old_serial + " to " + new_serial + "\n" + data);
+            $('#new_serial').val("")
+            location.reload();
+          }
+        }
+      })
+      .catch(error => {
+        console.log(error);
+        alert("Failed to change serial number from " + old_serial + " to " + new_serial + "\n" + error);
+      });
+    }
+</script>
+{% endblock %}
