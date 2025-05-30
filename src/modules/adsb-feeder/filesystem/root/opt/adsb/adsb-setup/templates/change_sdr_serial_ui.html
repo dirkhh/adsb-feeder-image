@@ -22,6 +22,11 @@
     <p>
       There appears to be a single RTLSDR device with serial number '<span id="sdr0-serial"></span>' connected.
     </p>
+    <p>
+      You can enter a new serial number below and click 'Change serial number' to change it. Please note that this
+      can take about 30 seconds to complete. You'll get a dialog that tells you if the change was successful.
+      Please be patient until that dialog pops up.
+    </p>
     <label for="new_serial">Please enter the new serial number for this device</label>
     <input type="text" id="new_serial" name="new_serial" />
     <button type="submit" class="btn btn-primary" name="change_serial" onclick="change_serial(); return false;">Change serial number</button>
@@ -88,7 +93,7 @@
       let new_serial = $('#new_serial').val();
       let old_serial = $('#sdr0-serial').html();
       console.log("old serial: " + old_serial + "new serial: " + new_serial);
-      fetch("/change_sdr_serial/" + old_serial + "/" + new_serial, { signal: AbortSignal.timeout(15000) })
+      fetch("/change_sdr_serial/" + old_serial + "/" + new_serial, { signal: AbortSignal.timeout(30000) })
       .then(response => response.text())
       .then(data => {
         console.log(data);
