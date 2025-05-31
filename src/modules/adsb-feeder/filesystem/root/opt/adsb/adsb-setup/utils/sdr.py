@@ -114,8 +114,16 @@ class SDRDevices:
             purpose_env += "serial"
         return purpose_env
 
-    def get_sdr_info(self):
-        self.debug_out = "get_sdr_info() found:\n"
+    def ensure_populated(self):
+        with self.lock:
+            if time.time() - self.last_probe < 1:
+                return
+            self.last_probe = time.time()
+            self._get_sdr_info()
+
+    # don't use this directly call ensure_populated instead
+    def _get_sdr_info(self):
+        self.debug_out = "_get_sdr_info() found:\n"
         try:
             result = subprocess.run("lsusb", shell=True, capture_output=True)
         except subprocess.SubprocessError:
@@ -239,19 +247,12 @@ class SDRDevices:
             print_err(self.debug_out.rstrip("\n"))
 
     def get_sdr_by_serial(self, serial: str):
-        self._ensure_populated()
+        self.ensure_populated()
         for sdr in self.sdrs:
             if sdr._serial == serial:
                 print_err(f"found SDR for serial: {serial}: id: {id(sdr)} sdr: {sdr}")
                 return sdr
         return self.null_sdr
-
-    def _ensure_populated(self):
-        with self.lock:
-            if time.time() - self.last_probe < 1:
-                return
-            self.last_probe = time.time()
-            self.get_sdr_info()
 
     def _get_address_for_pid_vid(self, pidvid: str, line: str):
         address = ""
@@ -262,7 +263,7 @@ class SDRDevices:
 
     @property
     def addresses_per_frequency(self, frequencies: list[str] = ["1090", "978"]) -> dict[str, str]:
-        self._ensure_populated()
+        self.ensure_populated()
         # - if we find an airspy, that's for 1090
         # - if we find an stratuxv3, that's for 978
         # - if we find an RTL SDR with serial 1090 or 00001090 - well, that's for 1090 (unless you have an airspy)
@@ -332,7 +333,7 @@ class SDRDevices:
         )
 
     def change_sdr_serial(self, oldserial: str, newserial: str):
-        self.get_sdr_info()
+        self.ensure_populated()
         rtlsdrs = [s for s in self.sdrs if s._type == "rtlsdr"]
         if len(rtlsdrs) != 1:
             print_err(f"there must be exactly one rtlsdr, but we found {len(rtlsdrs)}")

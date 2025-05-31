@@ -620,7 +620,7 @@ class AdsbIm:
                 if proc.stdout != None:
                     while line := proc.stdout.readline():
                         if "New USB device found" in line or "USB disconnect" in line:
-                            self._sdrdevices._ensure_populated()
+                            self._sdrdevices.ensure_populated()
                         if "Undervoltage" in line or "under-voltage" in line:
                             self._d.env_by_tags("under_voltage").value = True
                             self.undervoltage_epoch = time.time()
@@ -1197,7 +1197,7 @@ class AdsbIm:
 
     def sdr_config(self):
         sdr_data = request.get_json()
-        print_err(f"got {sdr_data}")
+        print_err(f"sdr_config: got {sdr_data}")
         if "serial" in sdr_data:
             sdr = self._sdrdevices.get_sdr_by_serial(sdr_data["serial"])
             if sdr is not self._sdrdevices.null_sdr:
@@ -2132,7 +2132,7 @@ class AdsbIm:
             if self._d.env_by_tags("1090serial").valuestr == "" or self._d.env_by_tags(
                 "1090serial"
             ).valuestr.startswith("AIRSPY SN:"):
-                self._sdrdevices._ensure_populated()
+                self._sdrdevices.ensure_populated()
                 airspy_serials = [sdr._serial for sdr in self._sdrdevices.sdrs if sdr._type == "airspy"]
                 if len(airspy_serials) == 1:
                     self._d.env_by_tags("1090serial").value = airspy_serials[0]
@@ -2143,7 +2143,7 @@ class AdsbIm:
             "sdrs_locked"
         ).value:
             # first grab the SDRs plugged in and check if we have one identified for UAT
-            self._sdrdevices._ensure_populated()
+            self._sdrdevices.ensure_populated()
             env978 = self._d.env_by_tags("978serial")
             env1090 = self._d.env_by_tags("1090serial")
             if env978.value != "" and not any(
@@ -3370,7 +3370,7 @@ class AdsbIm:
         if time.time() - self.last_dns_check > 300:
             self.update_dns_state()
 
-        self._sdrdevices._ensure_populated()
+        self._sdrdevices.ensure_populated()
 
         self.update_net_dev()
 
