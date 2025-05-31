@@ -11,7 +11,6 @@ services:
     environment:
       - AR_STATS_VERBOSE=true
       - TZ=${FEEDER_TZ}
-      - AR_RECV_ZMQ_VDLM2=dumpvdl2:45555
       - AR_SEND_UDP_ACARS=acarshub:5550${FEED_STRING_ACARS}
       - AR_SEND_UDP_VDLM2=acarshub:5555${FEED_STRING_VDL2}
       - AR_SEND_TCP_HFDL=${FEED_STRING_HFDL}

@@ -11,9 +11,8 @@ services:
       - FREQUENCIES=${VDL2_FREQUENCIES:-136975000 136945000 136925000 136825000 136800000 136775000}
       - FEED_ID=${VDL2_FEED_ID}
       - VDL2_FILTER_ENABLE=true
-      - ZMQ_MODE=server
-      - ZMQ_ENDPOINT=tcp://0.0.0.0:45555
-      - SERVER=
+      - ZMQ_MODE=client
+      - ZMQ_ENDPOINT=tcp://acars_router:35555
     tmpfs:
       - /run:exec,size=64M
       - /var/log:size=64M
