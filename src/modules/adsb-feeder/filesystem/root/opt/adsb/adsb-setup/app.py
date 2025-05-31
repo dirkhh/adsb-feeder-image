@@ -2386,14 +2386,14 @@ class AdsbIm:
         self._d.env_by_tags("hfdl_sdr_string").value = hfdlstring
         self._d.env_by_tags("sonde_sdr_type").value = sonde_sdr_type.upper()
 
-        # sort out if we need the acarsrouter and acarshub
-        self._d.env_by_tags("acarsrouter").value = (
+        # sort out if we need the acars_router and acarshub
+        self._d.env_by_tags("acars_router").value = (
             self._d.is_enabled("run_acarsdec")
             or self._d.is_enabled("run_acarsdec2")
             or self._d.is_enabled("run_dumpvdl2")
             or self._d.is_enabled("run_dumphfdl")
         )
-        self._d.env_by_tags("acarshub").value = self._d.is_enabled("acarsrouter")
+        self._d.env_by_tags("acarshub").value = self._d.is_enabled("acars_router")
         feed_acars = ""
         feed_vdl2 = ""
         feed_hfdl = ""

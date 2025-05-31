@@ -625,7 +625,7 @@ class Data:
         Env("ACARS2_SDR_STRING", default="", tags=["acars_2_sdr_string"]),
         Env("ACARS2_GAIN", default="", tags=["acars_2gain"]),
         Env("ACARS2_FREQUENCIES", default="", tags=["acars_2_frequencies"]),
-        Env("AF_IS_ACARSROUTER_ENABLED", default=False, tags=["acarsrouter", "is_enabled"]),
+        Env("AF_IS_ACARS_ROUTER_ENABLED", default=False, tags=["acars_router", "is_enabled"]),
         Env("AF_IS_ACARS2POS_ENABLED", default=False, tags=["acars2pos", "is_enabled"]),
         Env("AF_IS_DUMPVDL2_ENABLED", default=False, tags=["dumpvdl2", "is_enabled"]),
         Env("AF_RUN_DUMPVDL2", default=False, tags=["run_dumpvdl2", "is_enabled"]),
@@ -652,7 +652,7 @@ class Data:
         Env("FEED_ACARS_AIRFRAMES", default=False, tags=["feed_acars_airframes", "is_enabled"]),
         Env("FEED_ACARS_AVDELPHI", default=False, tags=["feed_acars_avdelphi", "is_enabled"]),
         Env("FEED_ACARS_ACARSDRAMA", default=False, tags=["feed_acars_acarsdrama", "is_enabled"]),
-        # note that the ACARS and VDL Mode 2 strings start with a semicolon but HFDL does not -- see acarsrouter.yml
+        # note that the ACARS and VDL Mode 2 strings start with a semicolon but HFDL does not -- see acars_router.yml
         Env("FEED_STRING_ACARS", default="", tags=["feed_string_acars"]),
         Env("FEED_STRING_VDL2", default="", tags=["feed_string_vdl2"]),
         Env("FEED_STRING_HFDL", default="", tags=["feed_string_hfdl"]),

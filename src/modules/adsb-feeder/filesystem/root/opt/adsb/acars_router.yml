@@ -1,6 +1,6 @@
 services:
   acars_router:
-    image: ${ACARSROUTER_CONTAINER}
+    image: ${ACARS_ROUTER_CONTAINER}
     ports:
       - 55556:15556
       - 55555:15555

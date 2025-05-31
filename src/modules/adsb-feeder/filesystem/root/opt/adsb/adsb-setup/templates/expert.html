@@ -613,7 +613,7 @@
     </form>
   </div>
   {% if is_enabled('acarsdec') or is_enabled('acarsdec2') or is_enabled('dumpvdl2') or is_enabled('shipfeeder') %}
-  <!-- set up acarsrouter -->
+  <!-- set up acars_router -->
   <div class="col-12 col-lg-6">
     <h5 class="mt-3">Data sharing of non-ADS-B data</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
@@ -645,7 +645,7 @@
           on picking out things that are funny (or drama) from the large amount of ACARS data that's available.
         </div>
         <div class="col-12 mb-2">
-          <button type="submit" class="btn btn-primary mx-auto w-100" name="acarsrouter--update"
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="acars_router--update"
                   value="go">Update</button>
         </div>
       </div>
