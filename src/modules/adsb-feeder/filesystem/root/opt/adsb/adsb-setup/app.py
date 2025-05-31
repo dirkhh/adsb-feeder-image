@@ -27,7 +27,7 @@ from base64 import b64encode
 from datetime import datetime, timezone
 from os import urandom
 from time import sleep
-from typing import Dict, List
+from typing import Dict, List, Tuple
 from zlib import compress
 from copy import deepcopy
 
@@ -184,7 +184,7 @@ class AdsbIm:
             # the case, then insert them into the settings
             self.setup_app_ports()
 
-        self._sdrdevices = SDRDevices(data=self._d)
+        self._sdrdevices = SDRDevices(assignment_function=self.sdr_assignments)
 
         for i in [0] + self.micro_indices():
             self._d.ultrafeeder.append(UltrafeederConfig(data=self._d, micro=i))
@@ -2449,6 +2449,22 @@ class AdsbIm:
             self._multi_outline_bg = None
 
         self.generate_agg_structure()
+
+    def sdr_assignments(self) -> Dict[str, Tuple[str, str, bool]]:
+        assignments = {}
+        for purpose in self._sdrdevices.purposes():
+            serial = self._d.env_by_tags(self.sdr_serial_name_from_purpose(purpose)).valuestr
+            # careful - env tags might not exist
+            try:
+                gain = self._d.env_by_tags(f"{purpose}gain").valuestr
+            except:
+                gain = ""
+            try:
+                biastee = bool(self._d.env_by_tags(f"{purpose}biastee").value)
+            except:
+                biastee = False
+            assignments[purpose] = (serial, gain, biastee)
+        return assignments
 
     def set_docker_concurrent(self, value):
         self._d.env_by_tags("docker_concurrent").value = value

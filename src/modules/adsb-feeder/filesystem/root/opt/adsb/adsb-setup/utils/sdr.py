@@ -4,7 +4,7 @@ import subprocess
 import sys
 import time
 from threading import Lock
-from typing import List, Set
+from typing import Dict, List, Set, Tuple
 from .util import print_err
 
 
@@ -74,8 +74,8 @@ class SDR:
 
 
 class SDRDevices:
-    def __init__(self, data):
-        self._d = data
+    def __init__(self, assignment_function):
+        self.assignment_function = assignment_function
         # these are the SDRs that we keep re-populating from lsusb
         self.sdrs: List[SDR] = []
         # this is the dict that contains the data of what we are doing with the SDRs, accessed by serial number
@@ -242,36 +242,14 @@ class SDRDevices:
         # yml files can get access to the correct data based on adsb/uat/ais/etc
         #
         # so we need to collect this data and store it in the SDR objects
-        # loop over all the purpose serials
-        for purpose_serial in self.purposes():
-            # THIS CODE IS NOW BROKEN -- BUT THEN THIS CODE SHOULDN'T BE HERE
-            # I'LL FIX THAT IN THE NEXT COMMITS
-            # updating the SDR config data
-            serial = str(self._d.env_by_tags(purpose_serial).value)
+        assignments: Dict[str, Tuple[str, str, bool]] = self.assignment_function()
+        for purpose in assignments.keys():
+            serial, gain, biastee = assignments[purpose]
             sdr = self.sdr_settings.get(serial)
             if sdr:
-                if "serial" not in purpose_serial:
-                    purpose_serial += "serial"
-
-                sdr.purpose = purpose_serial.replace("serial", "")
-
-                # careful - env tags might not exist
-
-                try:
-                    tag = purpose_serial.replace("serial", "gain")
-                    gain = self._d.env_by_tags(tag).value
-                except:
-                    gain = ""
-
-                sdr.gain = str(gain)
-
-                try:
-                    tag = purpose_serial.replace("serial", "biastee")
-                    biastee = self._d.env_by_tags(tag).value
-                except:
-                    biastee = False
-
-                sdr.biastee = bool(biastee)
+                sdr.purpose = purpose
+                sdr.gain = gain
+                sdr.biastee = biastee
 
     def get_sdr_by_serial(self, serial: str):
         self.ensure_populated()
