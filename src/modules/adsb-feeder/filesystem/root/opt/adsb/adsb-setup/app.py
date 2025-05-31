@@ -2395,8 +2395,8 @@ class AdsbIm:
         )
 
         self._d.env_by_tags("acarshub_acars").value = "external" if self._d.is_enabled("run_acarsdec") else "false"
-        self._d.env_by_tags("acarshub_acarsvdl2").value = "external" if self._d.is_enabled("run_dumpvdl2") else "false"
-        self._d.env_by_tags("acarshub_acarshfdl").value = "external" if self._d.is_enabled("run_dumphfdl") else "false"
+        self._d.env_by_tags("acarshub_vdl2").value = "external" if self._d.is_enabled("run_dumpvdl2") else "false"
+        self._d.env_by_tags("acarshub_hfdl").value = "external" if self._d.is_enabled("run_dumphfdl") else "false"
 
         self._d.env_by_tags("acarshub").value = self._d.is_enabled("acars_router")
         feed_acars = ""
