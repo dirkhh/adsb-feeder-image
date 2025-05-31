@@ -1221,6 +1221,15 @@ class AdsbIm:
                     # remove the SDR from the old purpose and add for the new one
                     if sdr.purpose != "":
                         self._d.env_by_tags(self._sdrdevices.purpose_env(sdr.purpose)).value = ""
+                    # if another SDR had that purpose, remove that and switch it to unsassigned
+                    exist_serial = self._d.env_by_tags(self._sdrdevices.purpose_env(sdr_data["purpose"])).valuestr
+                    if exist_serial != "":
+                        previous_sdr = self._sdrdevices.get_sdr_by_serial(exist_serial)
+                        if previous_sdr is not self._sdrdevices.null_sdr:
+                            print_err(
+                                f"SDR serial {exist_serial} was previously assigned for purpose {sdr_data['purpose']}"
+                            )
+                            previous_sdr.purpose = ""
                     self._d.env_by_tags(self._sdrdevices.purpose_env(sdr_data["purpose"])).value = sdr_data["serial"]
                 gainenv, biasteeenv = self._sdrdevices.set_sdr_data(sdr, sdr_data)
                 print_err(

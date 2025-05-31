@@ -277,7 +277,10 @@
       body: JSON.stringify(sdrs[sdr])
     })
       .then(response => response.json())
-      .then(data => console.log(data))
+      .then(data => {
+        console.log(data);
+        sdr_info();
+      })
       .catch(error => console.error(error));
   }
 
