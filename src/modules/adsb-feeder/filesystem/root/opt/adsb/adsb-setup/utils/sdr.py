@@ -74,7 +74,8 @@ class SDR:
 
 
 class SDRDevices:
-    def __init__(self):
+    def __init__(self, data):
+        self._d = data
         # these are the SDRs that we keep re-populating from lsusb
         self.sdrs: List[SDR] = []
         # this is the dict that contains the data of what we are doing with the SDRs, accessed by serial number
@@ -134,6 +135,7 @@ class SDRDevices:
 
         output = lsusb_text.split("\n")
         self.sdrs = []
+        self.sdr_settings = {}
         found_serials = set()
         self.duplicates = set()
 
@@ -147,19 +149,9 @@ class SDRDevices:
                 for line in output:
                     address = self._get_address_for_pid_vid(pidvid, line)
                     if address:
-                        # we found an SDR - we want a way to store the settings for each SDR in a way that doesnt
-                        # get reset every tome we probe for SDRs. So we have the list of SDRs based on the lsusb which
-                        # we recreate every time - and we have a dict that contains the settings for each SDR based on
-                        # serial number.
-                        # This of course causes pain if multiple SDRs have the same serial number. We address that later
-                        # in the code.
                         new_sdr = SDR(sdr_type, address)
                         if new_sdr._serial in self.sdr_settings:
-                            if address == self.sdr_settings[new_sdr._serial]._address:
-                                # we already have an SDR object for this SDR
-                                new_sdr = self.sdr_settings[new_sdr._serial]
-                            else:
-                                self.duplicates.add(new_sdr._serial)
+                            self.duplicates.add(new_sdr._serial)
                         else:
                             # add this SDR to the settings dict
                             self.sdr_settings[new_sdr._serial] = new_sdr
@@ -245,6 +237,40 @@ class SDRDevices:
         if self.last_debug_out != self.debug_out:
             self.last_debug_out = self.debug_out
             print_err(self.debug_out.rstrip("\n"))
+
+        # we store the purpose specific information differently because that's how the
+        # yml files can get access to the correct data based on adsb/uat/ais/etc
+        #
+        # so we need to collect this data and store it in the SDR objects
+        # loop over all the purpose serials
+        for purpose_serial in self.purposes():
+            # updating the SDR config data
+            serial = str(self._d.env_by_tags(purpose_serial).value)
+            sdr = self.sdr_settings.get(serial)
+            if sdr:
+                if "serial" not in purpose_serial:
+                    purpose_serial += "serial"
+
+                sdr.purpose = purpose_serial.replace("serial", "")
+
+                # careful - env tags might not exist
+
+                try:
+                    tag = purpose_serial.replace("serial", "gain")
+                    gain = self._d.env_by_tags(tag).value
+                except:
+                    gain = ""
+
+                sdr.gain = str(gain)
+
+                try:
+                    tag = purpose_serial.replace("serial", "biastee")
+                    biastee = self._d.env_by_tags(tag).value
+                except:
+                    biastee = False
+
+                sdr.biastee = bool(biastee)
+
 
     def get_sdr_by_serial(self, serial: str):
         self.ensure_populated()

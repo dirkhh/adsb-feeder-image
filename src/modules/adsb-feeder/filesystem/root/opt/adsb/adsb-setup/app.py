@@ -184,8 +184,7 @@ class AdsbIm:
             # the case, then insert them into the settings
             self.setup_app_ports()
 
-        self._sdrdevices = SDRDevices()
-        self.populate_sdr_settings()
+        self._sdrdevices = SDRDevices(data=self._d)
 
         for i in [0] + self.micro_indices():
             self._d.ultrafeeder.append(UltrafeederConfig(data=self._d, micro=i))
@@ -2143,11 +2142,10 @@ class AdsbIm:
             "sdrs_locked"
         ).value:
             # first grab the SDRs plugged in and check if we have one identified for UAT
-            self._sdrdevices.ensure_populated()
             env978 = self._d.env_by_tags("978serial")
             env1090 = self._d.env_by_tags("1090serial")
             if env978.value != "" and not any(
-                [(sdr._serial == env978.value and sdr.purpose == "uat") for sdr in self._sdrdevices.sdrs]
+                [(sdr._serial == env978.value and sdr.purpose == "978") for sdr in self._sdrdevices.sdrs]
             ):
                 env978.value = ""
             if env1090.value != "" and not any(
@@ -2223,6 +2221,14 @@ class AdsbIm:
                     self._d.env_by_tags(["1090gain"]).value = "0"
                 else:
                     self._d.env_by_tags(["gain_airspy"]).value = gain
+            else:
+                gain = self._d.env_by_tags(["1090gain"]).valuestr
+                if gain == "":
+                    self._d.env_by_tags(["1090gain"]).value = "auto"
+
+            gain = self._d.env_by_tags(["978gain"]).valuestr
+            if gain == "" or gain == "auto":
+                self._d.env_by_tags(["978gain"]).value = "autogain"
 
             if verbose & 1:
                 print_err(f"in the end we have")
@@ -2431,28 +2437,6 @@ class AdsbIm:
             self._multi_outline_bg = None
 
         self.generate_agg_structure()
-
-    # we store the purpose specific information differently because that's how the
-    # yml files can get access to the correct data based on adsb/uat/ais/etc
-    #
-    # so we need to collect this data and store it in the SDR objects
-    def populate_sdr_settings(self):
-        # loop over all the purpose serials
-        for purpose_serial in self._sdrdevices.purposes():
-            # updating the SDR config data
-            serial = str(self._d.env_by_tags(purpose_serial).value)
-            sdr = self._sdrdevices.get_sdr_by_serial(serial)
-            if sdr != self._sdrdevices.null_sdr:
-                sdr.purpose = purpose_serial.replace("serial", "")
-                gain = self._d.env_by_tags(purpose_serial.replace("serial", "gain")).value
-                sdr.gain = str(gain)
-                # careful - we don't have biast support in all the containers
-                try:
-                    biastee = self._d.env_by_tags(purpose_serial.replace("serial", "biastee")).value
-                except:
-                    biastee = None
-                else:
-                    sdr.biastee = bool(biastee)
 
     def set_docker_concurrent(self, value):
         self._d.env_by_tags("docker_concurrent").value = value
