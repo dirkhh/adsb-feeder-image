@@ -3,6 +3,8 @@ services:
     image: ${RADIOSONDE_CONTAINER}
     container_name: radiosonde
     restart: always
+    healthcheck:
+      disable: true
     tmpfs:
       - /run:exec,size=64M
       - /var/log:size=64M

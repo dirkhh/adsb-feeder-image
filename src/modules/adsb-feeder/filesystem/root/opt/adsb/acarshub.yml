@@ -2,6 +2,8 @@ services:
   acarshub:
     image: ${ACARSHUB_CONTAINER}
     container_name: acarshub
+    healthcheck:
+      disable: true
     restart: always
     ports:
       - ${ACARSHUB_WEB:-8090}:80

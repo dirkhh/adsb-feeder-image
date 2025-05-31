@@ -2,6 +2,8 @@ services:
   acarsdec:
     image: ${ACARSDEC_CONTAINER}
     container_name: acarsdec
+    healthcheck:
+      disable: true
     restart: always
     environment:
       # - QUIET_LOGS=true

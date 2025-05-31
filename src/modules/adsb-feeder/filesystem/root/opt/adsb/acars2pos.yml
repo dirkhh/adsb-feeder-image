@@ -3,6 +3,8 @@ services:
     container_name: acars2pos
     hostname: acars2pos
     image: ${ACARS2POS_CONTAINER}
+    healthcheck:
+      disable: true
     restart: always
     environment:
       #- JSON_IN=planeslxc:15550;planeslxc:15555;planeslxc:15556

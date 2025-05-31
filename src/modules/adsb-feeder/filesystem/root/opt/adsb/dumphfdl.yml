@@ -2,6 +2,8 @@ services:
   dumphfdl:
     image: ${DUMPHFDL_CONTAINER}
     container_name: dumphfdl
+    healthcheck:
+      disable: true
     restart: always
     device_cgroup_rules:
       - "c 189:* rwm"

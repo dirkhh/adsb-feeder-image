@@ -1,6 +1,8 @@
 services:
   acars_router:
     image: ${ACARS_ROUTER_CONTAINER}
+    healthcheck:
+      disable: true
     ports:
       - 55556:15556
       - 55555:15555

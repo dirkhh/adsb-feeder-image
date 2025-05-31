@@ -3,6 +3,8 @@ services:
     image: ${DUMPVDL2_CONTAINER}
     container_name: dumpvdl2
     restart: always
+    healthcheck:
+      disable: true
     environment:
       #    - QUIET_LOGS=true
       - TZ=${FEEDER_TZ}

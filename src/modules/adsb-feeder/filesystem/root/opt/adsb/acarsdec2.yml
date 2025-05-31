@@ -3,6 +3,8 @@ services:
     image: ${ACARSDEC_CONTAINER}
     container_name: acarsdec2
     restart: always
+    healthcheck:
+      disable: true
     environment:
       # - QUIET_LOGS=true
       - TZ=${FEEDER_TZ}

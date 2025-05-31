@@ -1,6 +1,8 @@
 services:
   hfdlobserver:
     image: ${HFDLOBSERVER_CONTAINER}
+    healthcheck:
+      disable: true
     container_name: hfdlobserver
     restart: always
     volumes:
