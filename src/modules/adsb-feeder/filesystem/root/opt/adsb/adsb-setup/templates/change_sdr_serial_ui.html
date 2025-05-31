@@ -90,6 +90,7 @@
     sdr_info();
 
     function change_serial() {
+      show_spinner();
       let new_serial = $('#new_serial').val();
       let old_serial = $('#sdr0-serial').html();
       console.log("old serial: " + old_serial + "new serial: " + new_serial);
@@ -110,10 +111,13 @@
             location.reload();
           }
         }
+
+        hide_spinner();
       })
       .catch(error => {
         console.log(error);
         alert("Failed to change serial number from " + old_serial + " to " + new_serial + "\n" + error);
+        hide_spinner();
       });
     }
 </script>

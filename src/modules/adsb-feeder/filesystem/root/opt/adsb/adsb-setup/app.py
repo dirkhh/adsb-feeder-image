@@ -3017,17 +3017,22 @@ class AdsbIm:
     def change_sdr_serial_ui(self):
         return render_template("change_sdr_serial_ui.html")
 
+    @check_restart_lock
     def change_sdr_serial(self, oldserial, newserial):
         print_err(f"request to change SDR serial from {oldserial} to {newserial}")
         if self._sdrdevices.get_sdr_by_serial(oldserial) is self._sdrdevices.null_sdr:
             print_err("no SDR with serial " + oldserial + " found")
             return f"[ERROR] no SDR with serial {oldserial} found"
-        containers = self._system.list_containers()
-        containers = [c for c in containers if c not in {"dozzle", "adsb-setup-proxy", "acars_router", "acarshub"}]
-        print_err(f"stopping containers potentially accessing SDRs ({containers}) in order to be able to access SDRs")
-        self._system.stop_containers(containers)
-        result = self._sdrdevices.change_sdr_serial(oldserial, newserial)
-        self._system.start_containers()
+
+        with self._system._restart_lock:
+            containers = self._system.list_containers()
+            containers = [c for c in containers if c not in {"dozzle", "adsb-setup-proxy", "acars_router", "acarshub"}]
+
+            print_err(f"stopping containers potentially accessing SDRs ({containers}) in order to be able to access SDRs")
+            self._system.stop_containers(containers)
+            result = self._sdrdevices.change_sdr_serial(oldserial, newserial)
+            self._system.start_containers()
+
         return result
 
     @check_restart_lock
