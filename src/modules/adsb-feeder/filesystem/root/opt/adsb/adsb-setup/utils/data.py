@@ -44,6 +44,7 @@ class Data:
         ["/logs/", "DAZZLE", "/"],
         ["/dozzle/<sub_path>", "DAZZLE", "/"],
         ["/config/", "DAZZLE", "/setup"],
+        ["/acarshub/", "ACARSHUB", "/"],
     ]
 
     @property
@@ -340,6 +341,7 @@ class Data:
         # ports used by our proxy system
         Env("AF_WEBPORT", default=80, tags=["webport", "norestore"]),
         Env("AF_DAZZLE_PORT", default=9999, tags=["dazzleport", "norestore"]),
+        Env("AF_ACARSHUB_PORT", default=8090, tags=["acarshubport", "norestore"]),
         Env("AF_TAR1090_PORT", default=8080, tags=["tar1090port", "norestore"]),
         Env("AF_TAR1090_PORT_ADJUSTED", default=8080, tags=["tar1090portadjusted"]),
         Env("AF_NANO_TAR1090_PORT_ADJUSTED", default=8080, tags=["nanotar1090portadjusted"]),
