@@ -1,6 +1,7 @@
 services:
   dozzle:
     container_name: dozzle
+    hostname: dozzle
     image: ${DOZZLE_CONTAINER}
     healthcheck:
       disable: true

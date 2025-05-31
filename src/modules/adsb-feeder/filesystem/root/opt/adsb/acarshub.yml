@@ -2,6 +2,7 @@ services:
   acarshub:
     image: ${ACARSHUB_CONTAINER}
     container_name: acarshub
+    hostname: acarshub
     healthcheck:
       disable: true
     restart: unless-stopped

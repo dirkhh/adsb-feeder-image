@@ -2,6 +2,7 @@ services:
   dumpvdl2:
     image: ${DUMPVDL2_CONTAINER}
     container_name: dumpvdl2
+    hostname: dumpvdl2
     restart: unless-stopped
     healthcheck:
       disable: true

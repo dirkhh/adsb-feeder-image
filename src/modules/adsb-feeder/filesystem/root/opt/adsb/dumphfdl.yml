@@ -2,6 +2,7 @@ services:
   dumphfdl:
     image: ${DUMPHFDL_CONTAINER}
     container_name: dumphfdl
+    hostname: dumphfdl
     healthcheck:
       disable: true
     restart: unless-stopped

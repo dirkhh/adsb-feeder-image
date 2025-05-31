@@ -2,6 +2,7 @@ services:
   radiosonde:
     image: ${RADIOSONDE_CONTAINER}
     container_name: radiosonde
+    hostname: radiosonde
     restart: unless-stopped
     healthcheck:
       disable: true

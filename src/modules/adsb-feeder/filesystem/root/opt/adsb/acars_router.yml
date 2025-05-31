@@ -9,6 +9,7 @@ services:
       - 55550:15550
       - 5556:5556
     container_name: acars_router
+    hostname: acars_router
     restart: unless-stopped
     environment:
       - AR_STATS_VERBOSE=true
