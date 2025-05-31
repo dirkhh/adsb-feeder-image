@@ -95,15 +95,15 @@ class SDRDevices:
 
     def purposes(self):
         p = (
-            "1090serial",
-            "978serial",
-            "1090_2serial",
-            "acarsserial",
-            "acars_2serial",
-            "vdl2serial",
-            "hfdlserial",
-            "aisserial",
-            "sondeserial",
+            "1090",
+            "978",
+            "1090_2",
+            "acars",
+            "acars_2",
+            "vdl2",
+            "hfdl",
+            "ais",
+            "sonde",
         )
         for i in range(16):
             p += (f"other-{i}",)
@@ -244,6 +244,8 @@ class SDRDevices:
         # so we need to collect this data and store it in the SDR objects
         # loop over all the purpose serials
         for purpose_serial in self.purposes():
+            # THIS CODE IS NOW BROKEN -- BUT THEN THIS CODE SHOULDN'T BE HERE
+            # I'LL FIX THAT IN THE NEXT COMMITS
             # updating the SDR config data
             serial = str(self._d.env_by_tags(purpose_serial).value)
             sdr = self.sdr_settings.get(serial)
@@ -270,7 +272,6 @@ class SDRDevices:
                     biastee = False
 
                 sdr.biastee = bool(biastee)
-
 
     def get_sdr_by_serial(self, serial: str):
         self.ensure_populated()

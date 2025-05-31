@@ -1081,17 +1081,33 @@ class AdsbIm:
         )
         return Response(jsonString, mimetype="application/json")
 
+    # to avoid compatibility issues and migration issues when upgrading, we use a rather
+    # inconsistent naming scheme for the serial number Env variables
+    def sdr_serial_name_from_purpose(self, purpose):
+        if "other" not in purpose:
+            return f"{purpose}serial"
+        return purpose
+
+    def serial_env_names(self):
+        return {self.sdr_serial_name_from_purpose(p) for p in self._sdrdevices.purposes()}
+
+    def configured_serials(self):
+        return {
+            serial for serial in {self._d.env_by_tags(e).valuestr for e in self.serial_env_names()} if serial != ""
+        }
+
     def sdr_info(self):
         # get our guess for the right SDR to frequency mapping
         # and then update with the actual settings
         serial_guess: Dict[str, str] = self._sdrdevices.addresses_per_frequency
         print_err(f"serial guess: {serial_guess}")
         serials: Dict[str, str] = {
-            f: str(self._d.env_by_tags(f"{f}serial").value)
-            for f in ["978", "1090", "1090_2", "acars", "acars_2", "vdl2", "hfdl", "ais", "sonde"]
+            f: self._d.env_by_tags(self.sdr_serial_name_from_purpose(f)).valuestr
+            for f in self._sdrdevices.purposes()
+            if "other" not in f
         }
-        configured_serials = {str(self._d.env_by_tags(f).value) for f in self._sdrdevices.purposes()}
-        available_serials = [sdr._serial for sdr in self._sdrdevices.sdrs]
+        configured_serials = self.configured_serials()
+        available_serials: list[str] = [sdr._serial for sdr in self._sdrdevices.sdrs]
         for f in ["978", "1090"]:
             if (not serials[f] or serials[f] not in available_serials) and serial_guess[f] not in configured_serials:
                 serials[f] = serial_guess[f]
@@ -1245,11 +1261,7 @@ class AdsbIm:
                 # if this is supposed to be a feeder by itself, make sure it actually
                 # has a source of data...
                 # print_err("check an actual feeder that is not a stage2")
-                configured_serials = [
-                    self._d.env_by_tags(purpose).value
-                    for purpose in self._sdrdevices.purposes()
-                    if self._d.env_by_tags(purpose).value != ""
-                ]
+                configured_serials = self.configured_serials()
                 # print_err(
                 #     f"configured serials: {configured_serials} remote_sdr: {self._d.env_by_tags('remote_sdr').value}"
                 # )
@@ -2154,12 +2166,12 @@ class AdsbIm:
                 env1090.value = ""
             auto_assignment = self._sdrdevices.addresses_per_frequency
 
-            purposes = self._sdrdevices.purposes()
+            configured_serials = self.configured_serials()
 
             # if we have an actual asignment, that overrides the auto-assignment,
             # delete the auto-assignment
             for frequency in ["978", "1090"]:
-                if any(auto_assignment[frequency] == self._d.env_by_tags(purpose).value for purpose in purposes):
+                if auto_assignment[frequency] in configured_serials:
                     auto_assignment[frequency] = ""
             if not env1090.value and auto_assignment["1090"]:
                 env1090.value = auto_assignment["1090"]
@@ -2943,9 +2955,9 @@ class AdsbIm:
             # this relies on the web page to ensure that each SDR is only asigned on purpose
             # the key in quesiton will be explicitely set and does not need clearing
             # empty string means no SDRs assigned to that purpose
-            purposes = self._sdrdevices.purposes()
-            if key in purposes and value != "":
-                for clear_key in purposes:
+            serial_envs = self.serial_env_names()
+            if key in serial_envs and value != "":
+                for clear_key in serial_envs:
                     if clear_key != key and value == self._d.env_by_tags(clear_key).value:
                         print_err(f"clearing: {str(clear_key)} old value: {value}")
                         self._d.env_by_tags(clear_key).value = ""
@@ -3012,7 +3024,9 @@ class AdsbIm:
             containers = self._system.list_containers()
             containers = [c for c in containers if c not in {"dozzle", "adsb-setup-proxy", "acars_router", "acarshub"}]
 
-            print_err(f"stopping containers potentially accessing SDRs ({containers}) in order to be able to access SDRs")
+            print_err(
+                f"stopping containers potentially accessing SDRs ({containers}) in order to be able to access SDRs"
+            )
             self._system.stop_containers(containers)
             result = self._sdrdevices.change_sdr_serial(oldserial, newserial)
             self._system.start_containers()
@@ -3169,8 +3183,7 @@ class AdsbIm:
             # return self.sdr_setup()
 
         # check if any of the SDRs aren't configured
-        configured_serials = [self._d.env_by_tags(purpose).value for purpose in self._sdrdevices.purposes()]
-        configured_serials = [serial for serial in configured_serials if serial != ""]
+        configured_serials = self.configured_serials()
         available_serials = [sdr._serial for sdr in self._sdrdevices.sdrs]
         if any([serial not in configured_serials for serial in available_serials]):
             print_err(f"configured serials: {configured_serials}")
