@@ -7,7 +7,7 @@ services:
       disable: true
     restart: unless-stopped
     ports:
-      - ${ACARSHUB_WEB:-8090}:80
+      - ${AF_ACARSHUB_PORT:-8090}:80
       - 5550:5550/udp
       - 5555:5555/udp
       - 15550:15550
