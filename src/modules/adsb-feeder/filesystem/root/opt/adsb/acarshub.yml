@@ -4,7 +4,7 @@ services:
     container_name: acarshub
     healthcheck:
       disable: true
-    restart: always
+    restart: unless-stopped
     ports:
       - ${ACARSHUB_WEB:-8090}:80
       - 5550:5550/udp

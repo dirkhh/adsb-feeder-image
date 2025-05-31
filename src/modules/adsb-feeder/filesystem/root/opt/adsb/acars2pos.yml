@@ -5,7 +5,7 @@ services:
     image: ${ACARS2POS_CONTAINER}
     healthcheck:
       disable: true
-    restart: always
+    restart: unless-stopped
     environment:
       #- JSON_IN=planeslxc:15550;planeslxc:15555;planeslxc:15556
       - SBS_OUT=ultrafeeder:32009

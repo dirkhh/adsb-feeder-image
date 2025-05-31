@@ -2,7 +2,7 @@ services:
   radiosonde:
     image: ${RADIOSONDE_CONTAINER}
     container_name: radiosonde
-    restart: always
+    restart: unless-stopped
     healthcheck:
       disable: true
     tmpfs:

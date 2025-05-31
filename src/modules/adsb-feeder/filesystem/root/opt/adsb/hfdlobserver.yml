@@ -4,6 +4,6 @@ services:
     healthcheck:
       disable: true
     container_name: hfdlobserver
-    restart: always
+    restart: unless-stopped
     volumes:
       - /opt/adsb/hfdlobserver/compose:/run/hfdlobserver

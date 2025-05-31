@@ -5,7 +5,7 @@ services:
       disable: true
     container_name: shipfeeder
     hostname: shipfeeder
-    restart: always
+    restart: unless-stopped
     environment:
 #     general parameters:
       - VERBOSE_LOGGING=

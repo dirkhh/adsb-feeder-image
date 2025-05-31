@@ -9,7 +9,7 @@ services:
       - 55550:15550
       - 5556:5556
     container_name: acars_router
-    restart: always
+    restart: unless-stopped
     environment:
       - AR_STATS_VERBOSE=true
       - TZ=${FEEDER_TZ}

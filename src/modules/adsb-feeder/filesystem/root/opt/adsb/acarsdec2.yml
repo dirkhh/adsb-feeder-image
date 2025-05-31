@@ -2,7 +2,7 @@ services:
   acarsdec2:
     image: ${ACARSDEC_CONTAINER}
     container_name: acarsdec2
-    restart: always
+    restart: unless-stopped
     healthcheck:
       disable: true
     environment:

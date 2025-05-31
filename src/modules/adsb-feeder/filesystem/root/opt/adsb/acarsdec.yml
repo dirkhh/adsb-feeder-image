@@ -4,7 +4,7 @@ services:
     container_name: acarsdec
     healthcheck:
       disable: true
-    restart: always
+    restart: unless-stopped
     environment:
       # - QUIET_LOGS=true
       - TZ=${FEEDER_TZ}
