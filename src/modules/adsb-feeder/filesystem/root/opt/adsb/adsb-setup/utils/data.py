@@ -643,7 +643,7 @@ class Data:
         Env("HFDL_FREQUENCIES", default="", tags=["hfdl_frequencies"]),
         Env("FEEDER_ACARSHUB_EXTERNAL_ACARS", default="external", tags=["acarshub_acars"]),
         Env("FEEDER_ACARSHUB_EXTERNAL_ACARSVDL2", default="external", tags=["acarshub_acarsvdl2"]),
-        Env("FEEDER_ACARSHUB_EXTERNAL_ACARSHFDL", default="external", tags=["acarshub_acarsvhfdl"]),
+        Env("FEEDER_ACARSHUB_EXTERNAL_ACARSHFDL", default="external", tags=["acarshub_acarshfdl"]),
         Env("FEEDER_ACARS_ENABLE_ADSB", default=True, tags=["acars_adsb", "is_enabled"]),
         Env("ACARS_FEED_ID", default="", tags=["acars_feed_id"]),
         Env("ACARS2_FEED_ID", default="", tags=["acars_2_feed_id"]),
