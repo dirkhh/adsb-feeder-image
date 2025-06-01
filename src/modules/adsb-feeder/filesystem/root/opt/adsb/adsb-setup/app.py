@@ -1820,10 +1820,11 @@ class AdsbIm:
         if not is_adsbim:
             # well that's unfortunate
             # we might get asked to create a UI for this at some point. Not today, though
-            print_err(f"Micro feeder at {key} is not an adsb.im feeder")
             n += 1
+            name = self.unique_site_name(micro_data.get("micro_site_name", ""))
+            print_err(f"Micro feeder at {key} is not an adsb.im feeder, adding with index {n}, using name {name}")
             self._d.env_by_tags("num_micro_sites").value = n
-            self._d.env_by_tags("site_name").list_set(n, self.unique_site_name(micro_data.get("micro_site_name", "")))
+            self._d.env_by_tags("site_name").list_set(n, name)
             self._d.env_by_tags("lat").list_set(n, micro_data.get("micro_lat", ""))
             self._d.env_by_tags("lon").list_set(n, micro_data.get("micro_lon", ""))
             self._d.env_by_tags("alt").list_set(n, micro_data.get("micro_alt", ""))
