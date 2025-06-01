@@ -499,11 +499,15 @@
 <script src="/static/js/chart.js" integrity="sha256-QvTb/nDEMP/CLHEo82yujVmcrJC4zTfI9CpZ5WXl3rc="
           crossorigin="anonymous"></script>
 <script>
-  let context = document.getElementById("plane-history-chart");
+  let chartContext = document.getElementById("plane-history-chart");
   let shownIndices = new Set();
   let chartGlobal = undefined;
 
-  function getStatsData() {
+  function updateChart() {
+    if (!chartContext) {
+      // if the chartContext doesn't exist the charts don't exist, nothing to do
+      return;
+    }
     function elaborateUpdateChart(chart, datasets, labels) {
       // get the length of chart.data.labels
       let days = chart.data.labels.length;
@@ -549,7 +553,7 @@
     }
 
     function createChart(todayString, ar, len) {
-      chart = new Chart(context, {
+      chart = new Chart(chartContext, {
         type: 'line',
         data: {
           labels: [],
@@ -764,7 +768,7 @@
     {% endfor %}
     get_status("{{ agg }}");
     {% endfor %}
-    getStatsData()
+    updateChart();
   }
 
   function reset_status(agg, idx) {
