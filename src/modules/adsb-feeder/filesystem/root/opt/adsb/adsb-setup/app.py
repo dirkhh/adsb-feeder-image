@@ -1620,10 +1620,10 @@ class AdsbIm:
             if do_import or not self._d.env_by_tags("site_name").list_get(n):
                 # only accept the remote name if this is our initial import
                 # after that the user may have overwritten it
-                self._d.env_by_tags("site_name").list_set(n, self.unique_site_name(base_info["name"], n))
+                self._d.env_by_tags("site_name").list_set(n, self.unique_site_name(base_info["name"], idx=n))
                 if mf_ip in ["local", "local2"]:
                     self._d.env_by_tags("site_name").list_set(
-                        n, self.unique_site_name(f"{base_info['name']} {mf_ip}", n)
+                        n, self.unique_site_name(f"{base_info['name']} {mf_ip}", idx=n)
                     )
             self._d.env_by_tags("lat").list_set(n, base_info["lat"])
             # deal with backwards compatibility
@@ -1821,7 +1821,7 @@ class AdsbIm:
             # well that's unfortunate
             # we might get asked to create a UI for this at some point. Not today, though
             n += 1
-            name = self.unique_site_name(micro_data.get("micro_site_name", ""))
+            name = self.unique_site_name(micro_data.get("micro_site_name"))
             print_err(f"Micro feeder at {key} is not an adsb.im feeder, adding with index {n}, using name {name}")
             self._d.env_by_tags("num_micro_sites").value = n
             self._d.env_by_tags("site_name").list_set(n, name)
@@ -2974,7 +2974,7 @@ class AdsbIm:
                 if not self._multi_outline_bg:
                     self.push_multi_outline()
                     self._multi_outline_bg = Background(60, self.push_multi_outline)
-                unique_name = self.unique_site_name(form.get("site_name"), 0)
+                unique_name = self.unique_site_name(form.get("site_name"), idx=0)
                 self._d.env_by_tags("site_name").list_set(0, unique_name)
             # if this is a regular feeder and the user is changing to 'individual' selection
             # (either in initial setup or when coming back to that setting later), show them
@@ -3010,7 +3010,7 @@ class AdsbIm:
                 else:
                     e.value = value
             if key == "site_name":
-                unique_name = self.unique_site_name(value, sitenum)
+                unique_name = self.unique_site_name(value, idx=sitenum)
                 self._d.env_by_tags("site_name").list_set(sitenum, unique_name)
         # done handling the input data
         # what implied settings do we have (and could we simplify them?)
