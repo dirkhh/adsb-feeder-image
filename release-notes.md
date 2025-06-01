@@ -1,5 +1,7 @@
 Changes since v2.3.5:
 =======
+- beta-notes: fix homepage refresh failure in cases with no ADSB SDRs
+- beta-notes: fix bug that sometimes prevented turning on biastee in the UI
 - beta-notes: add UI link to change RTLSDR serial number
 - beta-notes: fix bug when adding stage2 site
 - beta-notes: sdr serial change: use longer timeout to stop containers
