@@ -321,9 +321,7 @@ class SDRDevices:
                 "sonde": "sondebiast",
             },
         }
-        if purpose == "1090" and field == "gain" and sdr_type == "airspy":
-            return "gain_airspy"
-        elif purpose.startswith("other"):
+        if purpose.startswith("other"):
             return ""
         else:
             return mapping[field][purpose]

@@ -1235,7 +1235,11 @@ class AdsbIm:
                     f"got env names {gainenv} and {biasteeenv} to set gain {sdr_data['gain']} and biastee {sdr_data['biastee']}"
                 )
                 if gainenv:
-                    self._d.env_by_tags(gainenv).value = sdr_data["gain"]
+                    gain = sdr_data["gain"]
+                    if sdr._type == "airspy" and sdr.purpose == "1090":
+                        gain = self.adjust_airspy_gain(gain)
+                        self._d.env_by_tags("gain_airspy").value = gain
+                    self._d.env_by_tags(gainenv).value = gain
                 if biasteeenv:
                     self._d.env_by_tags(biasteeenv).value = sdr_data["biastee"]
                 print_err(f"modified SDR id: {id(sdr)} sdr: {sdr}")
@@ -2044,6 +2048,15 @@ class AdsbIm:
             config.chmod(0o644)
             print_err("radiosonde config updated")
 
+    def adjust_airspy_gain(self, gain):
+        if gain.startswith("auto"):
+            return "auto"
+        elif make_int(gain) > 21:
+            return "21"
+        elif make_int(gain) < 0:
+            return "0"
+        return gain
+
     def handle_implied_settings(self):
         if self._d.env_by_tags("aggregator_choice").value in ["micro", "nano"]:
             ac_db = False
@@ -2231,16 +2244,9 @@ class AdsbIm:
             if airspy:
                 # make sure airspy gain is within bounds
                 gain = self._d.env_by_tags(["1090gain"]).valuestr
-                if gain.startswith("auto"):
-                    self._d.env_by_tags(["gain_airspy"]).value = "auto"
-                elif make_int(gain) > 21:
-                    self._d.env_by_tags(["gain_airspy"]).value = "21"
-                    self._d.env_by_tags(["1090gain"]).value = "21"
-                elif make_int(gain) < 0:
-                    self._d.env_by_tags(["gain_airspy"]).value = "0"
-                    self._d.env_by_tags(["1090gain"]).value = "0"
-                else:
-                    self._d.env_by_tags(["gain_airspy"]).value = gain
+                airspy_gain = self.adjust_airspy_gain(gain)
+                self._d.env_by_tags(["gain_airspy"]).value = airspy_gain
+                self._d.env_by_tags(["1090gain"]).value = airspy_gain
             else:
                 gain = self._d.env_by_tags(["1090gain"]).valuestr
                 if gain == "":
