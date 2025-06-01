@@ -45,6 +45,7 @@ class Data:
         ["/dozzle/<sub_path>", "DAZZLE", "/"],
         ["/config/", "DAZZLE", "/setup"],
         ["/acarshub/", "ACARSHUB", "/"],
+        ["/aiscatcher/", "AISCATCHER", "/"],
     ]
 
     @property
@@ -342,6 +343,7 @@ class Data:
         Env("AF_WEBPORT", default=80, tags=["webport", "norestore"]),
         Env("AF_DAZZLE_PORT", default=9999, tags=["dazzleport", "norestore"]),
         Env("AF_ACARSHUB_PORT", default=8090, tags=["acarshubport", "norestore"]),
+        Env("AF_AISCATCHER_PORT", default=9990, tags=["aiscatcherport", "norestore"]),
         Env("AF_TAR1090_PORT", default=8080, tags=["tar1090port", "norestore"]),
         Env("AF_TAR1090_PORT_ADJUSTED", default=8080, tags=["tar1090portadjusted"]),
         Env("AF_NANO_TAR1090_PORT_ADJUSTED", default=8080, tags=["nanotar1090portadjusted"]),
@@ -691,7 +693,6 @@ class Data:
         Env("AIS_VESSELTRACKER_UDP_PORT", default="", tags=["ais_vesseltracker_udp_port"]),
         Env("AIS_SX_UDP_FEEDS", default="", tags=["ais_sx_udp_feeds"]),
         Env("AISCATCHER_UDP_INPUTS", default="", tags=["aiscatcher_udp_inputs"]),
-        Env("AIS_WEB_PORT", default=9990, tags=["ais_webport"]),
         Env("TAR1090_AISCATCHER_URL", default="", tags=["tar1090_aiscatcher_url"]),
         # Radiosonde related stuff
         Env("AF_IS_RADIOSONDE_ENABLED", default=False, tags=["sonde", "is_enabled"]),

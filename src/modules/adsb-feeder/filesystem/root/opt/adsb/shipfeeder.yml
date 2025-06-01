@@ -49,7 +49,7 @@ services:
 #     incoming UDP data related parameters:
       - AISCATCHER_UDP_INPUTS=${AISCATCHER_UDP_INPUTS}
     ports:
-      - ${AIS_WEB_PORT:-9990}:80
+      - ${AF_AISCATCHER_PORT:-9990}:80
       - 9988:9988/udp
     device_cgroup_rules:
       - 'c 189:* rwm'

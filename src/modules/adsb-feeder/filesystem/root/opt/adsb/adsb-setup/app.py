@@ -697,13 +697,12 @@ class AdsbIm:
     def ais_file(self, file):
         res = requests.request(
             method="GET",
-            url=f"http://localhost:{self._d.env_by_tags('ais_webport').valueint}/{file}",
+            url=f"http://localhost:{self._d.env_by_tags('aiscatcherport').valueint}/{file}",
             headers={k: v for k, v in request.headers if k.lower() != "host"},  # exclude 'host' header
             data=request.get_data(),
             cookies=request.cookies,
             allow_redirects=False,
         )
-        print_err(f"got geojson response: {res.status_code}")
 
         excluded_headers = [
             "content-encoding",
