@@ -1569,7 +1569,7 @@ class AdsbIm:
         # make sure that a site name is unique - if the idx is given that's
         # the current value and excluded from the check
         existing_names = self._d.env_by_tags("site_name")
-        names = [existing_names.list_get(n) for n in range(0, len(existing_names.valuestr)) if n != idx]
+        names = [existing_names.list_get(n) for n in range(0, len(existing_names.value)) if n != idx]
         while name in names:
             name += "_"
         return name
