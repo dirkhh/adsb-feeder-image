@@ -2022,7 +2022,7 @@ class AdsbIm:
                 "sondeserial",
                 "sonde_device_ppm",
                 "sondegain",
-                "sondebiast",
+                "sondebiastee",
                 "sonde_min_freq",
                 "sonde_max_freq",
                 "sonde_callsign",
@@ -2480,7 +2480,7 @@ class AdsbIm:
             except:
                 gain = ""
             try:
-                biastee = bool(self._d.env_by_tags(f"{purpose}biast").value)
+                biastee = bool(self._d.env_by_tags(f"{purpose}biastee").value)
             except:
                 biastee = False
             assignments[purpose] = (serial, gain, biastee)

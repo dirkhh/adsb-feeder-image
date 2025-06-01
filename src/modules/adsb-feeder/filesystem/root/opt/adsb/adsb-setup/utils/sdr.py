@@ -310,15 +310,15 @@ class SDRDevices:
                 "sonde": "sondegain",
             },
             "biastee": {
-                "1090": "1090biast",
-                "1090_2": "1090_2biast",
-                "978": "978biast",
+                "1090": "1090biastee",
+                "1090_2": "1090_2biastee",
+                "978": "978biastee",
                 "acars": "",
                 "acars_2": "",
                 "vdl2": "",
                 "hfdl": "",
-                "ais": "aisbiast",
-                "sonde": "sondebiast",
+                "ais": "aisbiastee",
+                "sonde": "sondebiastee",
             },
         }
         if purpose.startswith("other"):
