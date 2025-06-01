@@ -18,6 +18,7 @@ services:
       - /database:exec,size=64M
       - /run:exec,size=64M
       - /var/log:size=64M
+      - /tmp:size=64M
     environment:
       - TZ=${FEEDER_TZ}
       - ENABLE_VDLM=${FEEDER_ACARSHUB_EXTERNAL_VDL2}
