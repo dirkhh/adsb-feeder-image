@@ -31,7 +31,7 @@
       Some examples of practical serials: 1090, 978, rtlv3, nesdr, fablue, acars, ais
     </p>
     <label for="new_serial">Please enter the new serial number for this device</label>
-    <input type="text" id="new_serial" name="new_serial" maxlength="8"/>
+    <input type="text" id="new_serial" name="new_serial" minlength="2" maxlength="8"/>
     <button type="submit" class="btn btn-primary" name="change_serial" onclick="change_serial(); return false;">Change serial number</button>
   </div>
   <div class="col-12" style="display: none;" id="haveMoreRTLSdrs">
@@ -93,10 +93,18 @@
     sdr_info();
 
     function change_serial() {
-      show_spinner();
       let new_serial = $('#new_serial').val();
       let old_serial = $('#sdr0-serial').html();
-      console.log("old serial: " + old_serial + "new serial: " + new_serial);
+      if (new_serial.length < 2) {
+        alert("Serial number must be at least 2 characters long");
+        return;
+      }
+      if (new_serial == old_serial) {
+        alert("New serial number must be different from the old serial number");
+        return;
+      }
+      console.log("old serial: " + old_serial + " new serial: " + new_serial);
+      show_spinner();
       fetch("/change_sdr_serial/" + old_serial + "/" + new_serial, { signal: AbortSignal.timeout(90000) })
       .then(response => response.text())
       .then(data => {
