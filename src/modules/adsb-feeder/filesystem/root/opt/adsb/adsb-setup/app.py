@@ -967,7 +967,7 @@ class AdsbIm:
         restore_path = adsb_path / "restore"
         restore_path.mkdir(mode=0o755, exist_ok=True)
         try:
-            subprocess.call("/opt/adsb/docker-compose-adsb down -t 20", timeout=40.0, shell=True)
+            subprocess.call("/opt/adsb/docker-compose-adsb down -t 30", timeout=40.0, shell=True)
         except subprocess.TimeoutExpired:
             print_err("timeout expired stopping docker... trying to continue...")
         for name, value in form.items():
@@ -1915,7 +1915,7 @@ class AdsbIm:
                         )
                     try:
                         subprocess.run(
-                            f"/opt/adsb/docker-compose-adsb down uf_{num} -t 20",
+                            f"/opt/adsb/docker-compose-adsb down uf_{num} -t 30",
                             shell=True,
                         )
                     except:

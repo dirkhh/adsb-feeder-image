@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- beta-notes: sdr serial change: use longer timeout to stop containers
 - update all of the containers to the current releases
 - core: add UI to allow changing the serial number of an RTLSDR; right now this is only made available if there's a duplicate serial number.
 - core: warn user when they navigate away from SDR setup without applying the changes

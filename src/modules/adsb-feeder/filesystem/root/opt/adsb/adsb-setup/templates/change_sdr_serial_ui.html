@@ -94,7 +94,7 @@
       let new_serial = $('#new_serial').val();
       let old_serial = $('#sdr0-serial').html();
       console.log("old serial: " + old_serial + "new serial: " + new_serial);
-      fetch("/change_sdr_serial/" + old_serial + "/" + new_serial, { signal: AbortSignal.timeout(30000) })
+      fetch("/change_sdr_serial/" + old_serial + "/" + new_serial, { signal: AbortSignal.timeout(90000) })
       .then(response => response.text())
       .then(data => {
         console.log(data);

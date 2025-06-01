@@ -255,7 +255,7 @@ class System:
     def recreate_containers(self, containers):
         print_err(f"recreating {containers}")
         try:
-            subprocess.run(["/opt/adsb/docker-compose-adsb", "down", "--remove-orphans"] + containers)
+            subprocess.run(["/opt/adsb/docker-compose-adsb", "down", "--remove-orphans", "-t", "30"] + containers)
             subprocess.run(
                 ["/opt/adsb/docker-compose-adsb", "up", "-d", "--force-recreate", "--remove-orphans"] + containers
             )
@@ -265,7 +265,7 @@ class System:
     def stop_containers(self, containers: list[str]):
         print_err(f"stopping {containers}")
         try:
-            subprocess.run(["/opt/adsb/docker-compose-adsb", "down"] + containers)
+            subprocess.run(["/opt/adsb/docker-compose-adsb", "down", "-t", "30"] + containers)
         except:
             print_err(f"docker compose down {containers} failed")
 
