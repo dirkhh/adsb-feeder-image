@@ -128,7 +128,11 @@ class AdsbIm:
         def env_functions():
             def get_value(tags):
                 e = self._d.env_by_tags(tags)
-                return e.value if e else ""
+                if not e:
+                    return ""
+                if type(e._value) == list:
+                    return e.list_get(idx=0)
+                return e.value
 
             def list_value_by_tags(tags, idx):
                 e = self._d.env_by_tags(tags)

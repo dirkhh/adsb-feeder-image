@@ -1,5 +1,7 @@
 Changes since v2.3.5:
 =======
+- beta-notes: add more AIS aggregators
+- beta-notes: make ACARS data survive a controlled reboot (but not power failure)
 - beta-notes: better ACARS default frequencies for acarsdec (with less common ones mostly in acarsdec2)
 - beta-notes: fix homepage refresh failure in cases with no ADSB SDRs
 - beta-notes: fix bug that sometimes prevented turning on biastee in the UI
