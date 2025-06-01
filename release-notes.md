@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- beta-notes: better ACARS default frequencies for acarsdec (with less common ones mostly in acarsdec2)
 - beta-notes: fix homepage refresh failure in cases with no ADSB SDRs
 - beta-notes: fix bug that sometimes prevented turning on biastee in the UI
 - beta-notes: enforce new serial to be at least two and at most eight characters
