@@ -2480,7 +2480,7 @@ class AdsbIm:
             except:
                 gain = ""
             try:
-                biastee = bool(self._d.env_by_tags(f"{purpose}biastee").value)
+                biastee = bool(self._d.env_by_tags(f"{purpose}biast").value)
             except:
                 biastee = False
             assignments[purpose] = (serial, gain, biastee)
