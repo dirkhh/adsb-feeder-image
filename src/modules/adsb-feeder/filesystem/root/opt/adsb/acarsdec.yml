@@ -12,7 +12,7 @@ services:
       - SOAPYSDR=${ACARS_SDR_STRING}
       - GAIN=${ACARS_GAIN}
       # the default frequencies are 'acarsdec has the the more common frequencies above 130MHz, acarsdec2 has the less common frequencies starting at 128.975MHz'
-      - FREQUENCIES=${ACARS_FREQUENCIES:-130.025 130.450 131.125 131.450 131.475 131.525 131.550 131.725}
+      - FREQUENCIES=${ACARS_FREQUENCIES:-130.025 130.450 131.125 131.450 131.475 131.525 131.550 131.725 130.425 130.825 130.850 131.200 131.075}
       - FEED_ID=${ACARS_FEED_ID}
       - OUTPUT_SERVER=acars_router
     tmpfs:
