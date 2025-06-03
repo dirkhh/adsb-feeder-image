@@ -6,7 +6,9 @@
 {% set ns.site_indices = [] %}
 {% if is_enabled('stage2') %}
 {% for site in range(env_value_by_tag('num_micro_sites') + 1) %}
+{% if loop.index0 > 0 %}
 {% set ns.site_indices = ns.site_indices + [loop.index0] %}
+{% endif %}
 {% endfor %}
 {% else %}
 {% set ns.site_indices = [0] %}
