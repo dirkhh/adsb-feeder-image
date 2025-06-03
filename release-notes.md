@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- beta-notes: unbreak stage 2 (bug introduced in beta.4)
 - beta-notes: validate the given frequency ranges for ACARS and VDLM2 to make sure they fit in 2MHz
 - beta-notes: add more AIS aggregators
 - beta-notes: make ACARS data survive a controlled reboot (but not power failure)
