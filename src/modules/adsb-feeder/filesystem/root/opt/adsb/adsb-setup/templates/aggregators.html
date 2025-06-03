@@ -326,11 +326,6 @@
           value={{go}}>apply settings - take me to the website</button>
 </form>
 <script>
-  function show_or_hide(b, f) {
-    if (b.checked) f.style.display = "block";
-    else f.style.display = "none";
-  }
-
   const box_fields = [
     ["flightradar--is_enabled", "FR_FIELDS", ["flightradar--key"]],
     ["planewatch--is_enabled", "PW_FIELDS", ["planewatch--key"]],
@@ -344,16 +339,16 @@
     ["sdrmap--is_enabled", "SM_FIELDS", ["sdrmap--user", "sdrmap--key"]],
   ];
   for (const ids of box_fields) {
-    let box = document.getElementById(ids[0]);
-    let fields = document.getElementById(ids[1]);
-    box.addEventListener("click", function () {
-      show_or_hide(box, fields);
+    let box = $(`#${ids[0]}`);
+    let fields = $(`#${ids[1]}`);
+    box.on("click", function () {
+      fields.toggle(box.prop("checked"));
       for (const input_field of ids[2]) {
-        elem = document.getElementById(input_field);
-        if (elem) elem.required = box.checked;
+        elem = $(`#${input_field}`);
+        if (elem) elem.prop("required", box.prop("checked"));
       }
     });
-    show_or_hide(box, fields);
+    fields.toggle(box.prop("checked"));
   }
 </script>
 {% endblock %}
