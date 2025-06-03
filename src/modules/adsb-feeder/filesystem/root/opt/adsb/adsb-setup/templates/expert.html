@@ -294,11 +294,12 @@
             </div>
             <div class="col-4 mb-1">
               <label for="acars_frequencies">
-                ACARS frequencies
+                ACARS frequencies <span class="text-danger" id="acars_frequencies_error"
+                style="display: none;"><br>values must fit in 2MHz</span>
               </label>
             </div>
-            <div class="col-8 mb-1">
-              <input type="text" class="mx-auto w-100" name="acars_frequencies" id="acars_frequencies"
+            <div class="col-8 mb-1" data-update="acarsdec--update">
+              <input type="text" class="mx-auto w-100 two_mhz" name="acars_frequencies" id="acars_frequencies"
                      placeholder="130.025 130.450 131.125 131.450 131.475 131.525 131.550 131.725"
                      value="{{ env_value_by_tag('acars_frequencies') }}">
             </div>
@@ -346,11 +347,12 @@
             </div>
             <div class="col-4 mb-1">
               <label for="acars_2_frequencies">
-                ACARS2 frequencies
+                ACARS2 frequencies <span class="text-danger" id="acars_2_frequencies_error"
+                style="display: none;"><br>values must fit in 2MHz</span>
               </label>
             </div>
-            <div class="col-8 mb-1">
-              <input type="text" class="mx-auto w-100" name="acars_2_frequencies" id="acars_2_frequencies"
+            <div class="col-8 mb-1" data-update="acarsdec2--update">
+              <input type="text" class="mx-auto w-100 two_mhz" name="acars_2_frequencies" id="acars_2_frequencies"
                      placeholder="128.975 129.000 129.125 129.350 129.525 130.425 130.825 130.850"
                      value="{{ env_value_by_tag('acars_2_frequencies') }}">
             </div>
@@ -398,11 +400,12 @@
             </div>
             <div class="col-4 mb-1">
               <label for="vdl2_frequencies">
-                VDL2 frequencies
+                VDL2 frequencies<span class="text-danger" id="vdl2_frequencies_error"
+                style="display: none;"><br>values must fit in 2MHz</span>
               </label>
             </div>
-            <div class="col-8 mb-1">
-              <input type="text" class="mx-auto w-100" name="vdl2_frequencies" id="vdl2_frequencies"
+            <div class="col-8 mb-1" data-update="dumpvdl2--update">
+              <input type="text" class="mx-auto w-100 two_mhz" name="vdl2_frequencies" id="vdl2_frequencies"
                      placeholder="136975000 136945000 136925000 136825000 136800000 136775000"
                      value="{{ env_value_by_tag('vdl2_frequencies') }}">
             </div>
@@ -851,6 +854,30 @@
         $(this).toggle(checked);
       })
     });
+    function validate_two_mhz() {
+      let value = $(this).val();
+      value = value.replaceAll(";", " ").replaceAll(",", " ").replaceAll("  ", " ");
+      let freq_array = value.split(" ").sort();
+      // compare the first and last element of the sorted array and scale correctly for Hz/kHz/MHz
+      let delta = freq_array[freq_array.length - 1] - freq_array[0];
+      if (freq_array[0] < 200) {
+        range = 2;
+      } else if (freq_array[0] < 200000) {
+        range = 2000;
+      } else {
+        range = 2000000;
+      }
+      // toggle the error message and set the button disabled (or not)
+      $("#" + $(this).attr('id') + "_error").toggle(delta > range);
+      $('button[name=' + $(this).parent().data('update') + ']').prop("disabled", delta > range);
+    }
+    $('input[type="text"]').each(function () {
+      if ($(this).attr('class').includes("two_mhz")) {
+        validate_two_mhz.call(this);
+        $(this).on('change', validate_two_mhz);
+      }
+    });
+
   });
 </script>
 {% endblock %}
