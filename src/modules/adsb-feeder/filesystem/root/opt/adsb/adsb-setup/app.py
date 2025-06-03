@@ -2428,9 +2428,14 @@ class AdsbIm:
         self._d.env_by_tags("feed_string_vdl2").value = feed_vdl2
         self._d.env_by_tags("feed_string_hfdl").value = feed_hfdl
 
-        # AIS stuff
-        self._d.env_by_tags("ais_airframes_station_id").value = (
-            self._d.env_by_tags("ais_station_name").value if self._d.is_enabled("ais_feed_airframes") else ""
+        # AIS stuff -- this needs to be extended for stage 2
+        self._d.env_by_tags("ais_airframes_station_id").list_set(
+            0,
+            (
+                self._d.env_by_tags("ais_station_name").value
+                if self._d.list_is_enabled(["ais_feed_airframes"], idx=0)
+                else ""
+            ),
         )
 
         # SONDE stuff
