@@ -24,6 +24,9 @@
       onsubmit="show_spinner(); return true;">
   <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="aggregators"
           value={{go}}>apply settings - take me to the website</button>
+
+  <!-- ADS-B related aggregators -->
+  {% if is_enabled('base_config') and not env_value_by_tag('aggregator_choice') in ['micro', 'nano'] %}
   <div class="col-12 form-check {% if env_value_by_tag('aggregator_choice') in ['micro', 'nano'] %}d-none{% endif %}">
     <input class="form-check-input me-1" type="checkbox" name="mlat_privacy--is_enabled" id="mlat_privacy--is_enabled"
            {% if list_is_enabled("mlat_privacy", m) %}checked{% endif %} />
@@ -322,7 +325,274 @@
         </div>
     </label>
   </div>
-  <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="aggregators"
+  {% endif %}
+  <!-- end of the ADS-B section -->
+
+  <!-- ACARS section -->
+  {% if is_enabled('acarsdec') or is_enabled('acarsdec2') or is_enabled('dumpvdl2') %}
+  <div class="col-12 mt-3 mb-1 h5">Select the ACARS (including VDL2 / HFDL) aggregators you want to feed:</div>
+  <div class="ol-12 form-check">
+    <input type="checkbox" class="form-check-input me-1" name="feed_acars_airframes--is_enabled" id="feed_acars_airframes--is_enabled" {{ nonadsb_enabled("feed_acars_airframes", m) }} />
+    <label class="mx-1 w-auto" for="feed_acars_airframes--is_enabled">
+      <a href="https://airframes.io/">Airframes.io</a> is an unbiased and unfiltered transportation aggregation service
+      for data sources such as ACARS, VDL, HFDL, and SATCOM.
+      Most people interested in tracking this kind of data want to feed this aggregator.
+    </label>
+  </div>
+  <div class="ol-12 form-check">
+    <input type="checkbox" class="form-check-input me-1" name="feed_acars_avdelphi--is_enabled" id="feed_acars_avdelphi--is_enabled" {{ nonadsb_enabled("feed_acars_avdelphi", m) }} />
+    <label class="mx-1 w-auto" for="feed_acars_avdelphi--is_enabled">
+      <a href="https://avdelphi.com/">AVDelphi</a> is another aggregator for ACARS data. Note that you need to claim your
+      feed on their <a href="https://www.avdelphi.com/claim_feed.html">website</a> before you are allowed to feed them.
+    </label>
+  </div>
+  <div class="ol-12 form-check">
+    <input type="checkbox" class="form-check-input me-1" name="feed_acars_acarsdrama--is_enabled" id="feed_acars_acarsdrama--is_enabled" {{ nonadsb_enabled("feed_acars_acarsdrama", m) }} />
+    <label class="mx-1 w-auto" for="feed_acars_acarsdrama--is_enabled">
+      <a href="https://acarsdrama.com/">AcarsDrama</a> is a rather different type of aggregator. They are mainly focused
+      on picking out things that are funny (or drama) from the large amount of ACARS data that's available.
+    </label>
+  </div>
+
+
+<!--
+  <div class="col-12 mt-4">
+    <h6 class="mt-3">ACARS / VDL Mode 2 / HFDL</h6>
+    <div class="row align-items-center">
+      <div class="col-1">
+        <input type="checkbox" name="feed_acars_airframes" id="feed_acars_airframes"
+              {% if is_enabled("feed_acars_airframes") %} checked {% endif %}>
+      </div>
+      <div class="col-11 mb-2">
+        <a href="https://airframes.io/">Airframes.io</a> is an unbiased and unfiltered transportation aggregation service
+        for data sources such as ACARS, VDL, HFDL, and SATCOM.
+        Most people interested in tracking this kind of data want to feed this aggregator.
+      </div>
+      <div class="col-1">
+        <input type="checkbox" name="feed_acars_avdelphi" id="feed_acars_avdelphi"
+              {% if is_enabled("feed_acars_avdelphi") %} checked {% endif %}>
+      </div>
+      <div class="col-11 mb-2">
+        <a href="https://avdelphi.com/">AVDelphi</a> is another aggregator for ACARS data. Note that you need to claim your
+        feed on their <a href="https://www.avdelphi.com/claim_feed.html">website</a> before you are allowed to feed them.
+      </div>
+      <div class="col-1">
+        <input type="checkbox" name="feed_acars_acarsdrama" id="feed_acars_acarsframa"
+              {% if is_enabled("feed_acars_acarsdrama") %} checked {% endif %}>
+      </div>
+      <div class="col-11 mb-2">
+        <a href="https://acarsdrama.com/">AcarsDrama</a> is a rather different type of aggregator. They are mainly focused
+        on picking out things that are funny (or drama) from the large amount of ACARS data that's available.
+      </div>
+      <div class="col-12 mb-2">
+        <button type="submit" class="btn btn-primary mx-auto w-100" name="acars_router--update" value="go">Update</button>
+      </div>
+    </div>
+  </div>
+-->
+  {% endif %}
+  <!-- end of the ACARS section -->
+
+  <!-- AIS section -->
+  {% if is_enabled('shipfeeder') %}
+  <div class="col-12 mt-3 mb-1 h5">Select the AIS aggregators you want to feed:</div>
+  <!-- Airframes.io -->
+  <div class="ol-12 form-check mb-2">
+    <input type="checkbox" class="form-check-input me-1" name="ais_feed_airframes--is_enabled"
+           id="ais_feed_airframes--is_enabled" {{ nonadsb_enabled("ais_feed_airframes", m) }} />
+    <label class="mx-1 w-auto" for="ais_feed_airframes--is_enabled">
+      <a href="https://airframes.io/">Airframes.io</a> is an unbiased and unfiltered transportation aggregation service
+      that also supports AIS.
+    </label>
+  </div>
+  <!-- AIS Catcher -->
+  <div class="ol-12 form-check">
+    <input type="checkbox" class="form-check-input me-1" name="ais_feed_aiscatcher--is_enabled"
+           id="ais_feed_aiscatcher--is_enabled" {{ nonadsb_enabled("ais_feed_aiscatcher", m) }} />
+    <label class="mx-1 w-auto" for="ais_feed_aiscatcher--is_enabled">
+      <a href="https://aiscatcher.org/">AIS Catcher</a> is a community of AIS enthusiasts dedicated to maritime tracking.
+
+      <div class="form-group" id="AISCATCHER_FIELDS">
+        <label for="aiscatcher_feeder_key">Get a Sharing Key by <a href="https://aiscatcher.org/addstation">registering your station.</a>
+        </label>
+        <input type="text" id="aiscatcher_feeder_key" name="aiscatcher_feeder_key" class="form-control w-75"
+               placeholder="AIS Catcher Sharing Key" value="{{ list_value_by_tags('aiscatcher_feeder_key',m) }}" />
+      </div>
+    </label>
+  </div>
+  <!-- AIS Friends -->
+  <div class="ol-12 form-check">
+    <input type="checkbox" class="form-check-input me-1" name="ais_feed_aisfriends--is_enabled"
+           id="ais_feed_aisfriends--is_enabled" {{ nonadsb_enabled("ais_feed_aisfriends", m) }} />
+    <label class="mx-1 w-auto" for="ais_feed_aisfriends--is_enabled">
+      <a href="https://aisfriends.com/">AIS Friends</a> is volunteer AIS network aggregating data.
+      <div class="form-group" id="AISFRIENDS_FIELDS">
+        <label for="aisfriends_udp_port">Get a dedicated UDP port assigned by
+          <a href="https://www.aisfriends.com/register">registering your station</a> and enter
+          the UDP port you receive here.
+        </label>
+        <input type="text" id="aisfriends_udp_port" name="aisfriends_udp_port" class="form-control w-75"
+               placeholder="AIS Friends UDP Port" value="{{ list_value_by_tags('aisfriends_udp_port',m) }}" />
+      </div>
+    </label>
+  </div>
+  <!-- AISHub -->
+  <div class="ol-12 form-check">
+    <input type="checkbox" class="form-check-input me-1" name="ais_feed_aishub--is_enabled"
+           id="ais_feed_aishub--is_enabled" {{ nonadsb_enabled("ais_feed_aishub", m) }} />
+    <label class="mx-1 w-auto" for="ais_feed_aishub--is_enabled">
+      <a href="https://www.aishub.net/">AISHub</a> is a free AIS data sharing community.
+      <div class="form-group" id="AISHUB_FIELDS">
+        <label for="aishub_udp_port">Get a dedicated UDP port assigned by
+          <a href="https://www.aishub.net/join-us">registering your station</a>
+          and enter the UDP port you receive here.
+        </label>
+        <input type="text" id="aishub_udp_port" name="aishub_udp_port" class="form-control w-75"
+               placeholder="AISHub UDP Port" value="{{ list_value_by_tags('aishub_udp_port',m) }}" />
+      </div>
+    </label>
+  </div>
+  <!--     HPRadar    -->
+  <div class="ol-12 form-check mb-2">
+    <input type="checkbox" class="form-check-input me-1" name="ais_feed_ais_hpradar--is_enabled"
+           id="ais_feed_ais_hpradar--is_enabled" {{ nonadsb_enabled("ais_feed_ais_hpradar", m) }} />
+    <label class="mx-1 w-auto" for="ais_feed_ais_hpradar--is_enabled">
+      <a href="https://sea.hpradar.com/">HPRadar</a> is a free aggregator for AIS (and ADS-B) data.
+    </label>
+  </div>
+  <!--     sdrmap    -->
+  <div class="ol-12 form-check">
+    <input type="checkbox" class="form-check-input me-1" name="ais_feed_sdrmap--is_enabled"
+           id="ais_feed_sdrmap--is_enabled" {{ nonadsb_enabled("ais_feed_sdrmap", m) }} />
+    <label class="mx-1 w-auto" for="ais_feed_sdrmap--is_enabled">
+      <a href="https://sdrmap.org/">sdrmap</a> is a German community aggregator for AIS (and ADS-B) data.
+      <div class="form-group" id="SDRMAP_FIELDS">
+        <label for="sdrmap--user">
+          You need an sdrmap username and password. Please send an email to <a href="mailto:feed@sdrmap.org">feed@sdrmap.org</a> and request an account. To make things easier, include your broad location (city/state/country) in the email.
+          In case you are feeding both ADS-B and AIS, you will use the same credentials.
+        </label>
+        <input type="text" id="sdrmap--user" name="sdrmap--user" class="form-control w-75"
+               {{ nonadsb_enabled("ais_feed_sdrmap", m) | replace("checked", "required" ) }} placeholder=" sdrmap username"
+               value="{{ list_value_by_tags(['sdrmap','user'], 0) }}">
+        <input type="text" id="sdrmap--key" name="sdrmap--key" class="form-control w-75"
+               {{ nonadsb_enabled("ais_feed_sdrmap", m) | replace("checked", "required" ) }} placeholder=" sdrmap password"
+               value="{{ list_value_by_tags(['sdrmap', 'key'], m) }}" />
+      </div>
+    </label>
+  </div>
+  <!--     MarineTraffic    -->
+  <div class="ol-12 form-check">
+    <input type="checkbox" class="form-check-input me-1" name="ais_feed_marinetraffic--is_enabled"
+            id="ais_feed_marinetraffic--is_enabled" {{ nonadsb_enabled("ais_feed_marinetraffic", m) }} />
+    <label class="mx-1 w-auto" for="ais_feed_marinetraffic--is_enabled">
+      <a href="https://www.marinetraffic.com/">MarineTraffic</a> is is a British commercial aggregator for AIS data.
+      <div class="form-group" id="MARINETRAFFIC_FIELDS">
+        <label for="ais_marinetraffic_udp_port">Get a dedicated UDP port assigned by
+          by <a href="https://www.marinetraffic.com/en/join-us/cover-your-area">registering your station</a> and enter
+          the UDP port you receive here.
+        </label>
+        <input type="text" id="ais_marinetraffic_udp_port" name="ais_marinetraffic_udp_port" class="form-control w-75"
+                placeholder="MarineTraffic UDP Port" value="{{ list_value_by_tags('ais_marinetraffic_udp_port',m) }}" />
+      </div>
+    </label>
+  </div>
+  <!--     MyShipTracking    -->
+  <div class="ol-12 form-check">
+    <input type="checkbox" class="form-check-input me-1" name="ais_feed_myshiptracking--is_enabled"
+            id="ais_feed_myshiptracking--is_enabled" {{ nonadsb_enabled("ais_feed_myshiptracking", m) }} />
+    <label class="mx-1 w-auto" for="ais_feed_myshiptracking--is_enabled">
+      <a href="https://www.myshiptracking.com/">MyShipTracking</a> is is a Greek commercial aggregator for AIS data.
+      <div class="form-group" id="MYSHIPTRACKING_FIELDS">
+        <label for="ais_myshiptracking_udp_port">Get a dedicated UDP port assigned by
+          by <a href="https://www.myshiptracking.com/help-center/contributors/add-your-station">registering your
+            station</a> and enter
+          the UDP port you receive here.
+        </label>
+        <input type="text" id="ais_myshiptracking_udp_port" name="ais_myshiptracking_udp_port" class="form-control w-75"
+                placeholder="MyShipTracking UDP Port" value="{{ list_value_by_tags('ais_myshiptracking_udp_port',m) }}" />
+      </div>
+    </label>
+  </div>
+  <!--     pocketmariner / Boatbeacon    -->
+  <div class="ol-12 form-check">
+    <input type="checkbox" class="form-check-input me-1" name="ais_feed_boatbeacon--is_enabled"
+            id="ais_feed_boatbeacon--is_enabled" {{ nonadsb_enabled("ais_feed_boatbeacon", m) }} />
+    <label class="mx-1 w-auto" for="ais_feed_boatbeacon--is_enabled">
+      <a href="https://www.aishub.net/">pocketmariner / BoatBeacon</a> is a British commercial AIS data sharing company.
+      <div class="form-group" id="BOATBEACON_FIELDS">
+        <label for="ais_boatbeacon_udp_port">Get a dedicated UDP port assigned by sending an email to
+          <a href="mailto:support@pocketmariner.com">support@pocketmariner.com</a> registering your station
+          and enter the UDP port you receive here.
+        </label>
+        <input type="text" id="ais_boatbeacon_udp_port" name="ais_boatbeacon_udp_port" class="form-control w-75"
+                placeholder="BoatBeacon UDP Port" value="{{ list_value_by_tags('ais_boatbeacon_udp_port',m) }}" />
+      </div>
+    </label>
+  </div>
+  <!--     shipfinder    -->
+  <div class="ol-12 form-check mb-2">
+    <input type="checkbox" class="form-check-input me-1" name="ais_feed_shipfinder--is_enabled"
+           id="ais_feed_shipfinder--is_enabled" {{ nonadsb_enabled("ais_feed_shipfinder", m) }} />
+    <label class="mx-1 w-auto" for="ais_feed_shipfinder--is_enabled">
+      <a href="https://shipfinder.co/about">shipfinder</a> is a British commercial aggregator for AIS data and pictures.
+    </label>
+  </div>
+  <!--     ShippingExplorer    -->
+  <div class="ol-12 form-check">
+    <input type="checkbox" class="form-check-input me-1" name="ais_feed_shippingexplorer--is_enabled"
+           id="ais_feed_shippingexplorer--is_enabled" {{ nonadsb_enabled("ais_feed_shippingexplorer", m) }} />
+    <label class="mx-1 w-auto" for="ais_feed_shippingexplorer--is_enabled">
+      <a href="https://www.shippingexplorer.net/">ShippingExplorer</a> is a Spanish commercial aggregator for AIS data.
+      <div class="form-group" id="SHIPPINGEXPLORER_FIELDS">
+        <label for="ais_shippingexplorer_udp_port">Get a dedicated UDP port assigned by
+          by <a href="https://www.shippingexplorer.net/en/contact">registering your station</a> and enter
+          the UDP port you receive here.
+        </label>
+        <input type="text" id="ais_shippingexplorer_udp_port" name="ais_shippingexplorer_udp_port" class="form-control w-75"
+               placeholder="ShippingExplorer UDP Port" value="{{ list_value_by_tags('ais_shippingexplorer_udp_port',m) }}" />
+      </div>
+    </label>
+  </div>
+  <!--     ShipXplorer    -->
+  <div class="ol-12 form-check">
+    <input type="checkbox" class="form-check-input me-1" name="ais_feed_shipxplorer--is_enabled"
+           id="ais_feed_shipxplorer--is_enabled" {{ nonadsb_enabled("ais_feed_shipxplorer", m) }} />
+    <label class="mx-1 w-auto" for="ais_feed_shipxplorer--is_enabled">
+      <a href="https://www.shipxplorer.com//">ShipXplorer</a> is a US commercial aggregator for AIS data, part of AirNav Radar.
+      <div class="form-group" id="SHIPXPLORER_FIELDS">
+        <label for="ais_shipxplorer_udp_port">Get a dedicated UDP port assigned by
+          by <a href="https://www.shipxplorer.com/addcoverage">registering your station</a> and enter
+          the UDP port you receive here.
+        </label>
+        <input type="text" id="ais_shipxplorer_udp_port" name="ais_shipxplorer_udp_port"
+               class="form-control w-75" placeholder="ShipXplorer UDP Port"
+               value="{{ list_value_by_tags('ais_shipxplorer_udp_port',m) }}" />
+      </div>
+    </label>
+  </div>
+  <!--     VesselFinder    -->
+  <div class="ol-12 form-check">
+    <input type="checkbox" class="form-check-input me-1" name="ais_feed_vesselfinder--is_enabled"
+           id="ais_feed_vesselfinder--is_enabled" {{ nonadsb_enabled("ais_feed_vesselfinder", m) }} />
+    <label class="mx-1 w-auto" for="ais_feed_vesselfinder--is_enabled">
+      <a href="https://stations.vesselfinder.com/">VesserFinder</a> is is a Bulgarian commercial aggregator for AIS data.
+      <div class="form-group" id="VESSELFINDER_FIELDS">
+        <label for="ais_vesselfinder_udp_port">Get a dedicated UDP port assigned by
+          by <a href="https://stations.vesselfinder.com/become-partner">registering your station</a> and enter
+          the UDP port you receive here.
+        </label>
+        <input type="text" id="ais_vesselfinder_udp_port" name="ais_vesselfinder_udp_port"
+               class="form-control w-75" placeholder="VesselFinder UDP Port"
+               value="{{ list_value_by_tags('ais_vesselfinder_udp_port',m) }}" />
+      </div>
+    </label>
+  </div>
+
+
+  {% endif %}
+  <!-- end of the AIS section -->
+
+  <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3 my-5" name="aggregators"
           value={{go}}>apply settings - take me to the website</button>
 </form>
 <script>
@@ -337,6 +607,16 @@
     ["radarvirtuel--is_enabled", "RV_FIELDS", ["radarvirtuel--key"]],
     ["1090uk--is_enabled", "TNUK_FIELDS", ["1090uk--key"]],
     ["sdrmap--is_enabled", "SM_FIELDS", ["sdrmap--user", "sdrmap--key"]],
+    ["ais_feed_aiscatcher--is_enabled", "AISCATCHER_FIELDS", ["aiscatcher_feeder_key"]],
+    ["ais_feed_aisfriends--is_enabled", "AISFRIENDS_FIELDS", ["aisfriends_udp_port"]],
+    ["ais_feed_aishub--is_enabled", "AISHUB_FIELDS", ["aishub_udp_port"]],
+    ["ais_feed_boatbeacon--is_enabled", "BOATBEACON_FIELDS", ["ais_boatbeacon_udp_port"]],
+    ["ais_feed_sdrmap--is_enabled", "SDRMAP_FIELDS", ["ais_sdrmap_udp_port"]],
+    ["ais_feed_shippingexplorer--is_enabled", "SHIPPINGEXPLORER_FIELDS", ["ais_shippingexplorer_udp_port"]],
+    ["ais_feed_vesselfinder--is_enabled", "VESSELFINDER_FIELDS", ["ais_vesselfinder_udp_port"]],
+    ["ais_feed_marinetraffic--is_enabled", "MARINETRAFFIC_FIELDS", ["ais_marinetraffic_udp_port"]],
+    ["ais_feed_myshiptracking--is_enabled", "MYSHIPTRACKING_FIELDS", ["ais_myshiptracking_udp_port"]],
+    ["ais_feed_shipxplorer--is_enabled", "SHIPXPLORER_FIELDS", ["ais_shipxplorer_udp_port"]],
   ];
   for (const ids of box_fields) {
     let box = $(`#${ids[0]}`);
