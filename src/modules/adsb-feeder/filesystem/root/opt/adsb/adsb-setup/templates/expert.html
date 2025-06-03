@@ -775,12 +775,12 @@
         <div class="col-5 mb-2 ais_feed_sdrmap_dependent" {% if not is_enabled("ais_feed_sdrmap") %}style="display: none;"
              {% endif %}>
           <input type="text" class="form-control" name="sdrmap--user" id="sdrmap--user" placeholder="sdrmap user"
-                 value="{{ env_value_by_tags(['sdrmap','user']) }}">
+                 value="{{ list_value_by_tags(['sdrmap','user'], 0) }}">
         </div>
         <div class="col-5 mb-2 ais_feed_sdrmap_dependent" {% if not is_enabled("ais_feed_sdrmap") %}style="display: none;"
              {% endif %}>
           <input type="text" class="form-control" name="sdrmap--key" id="sdrmap--key" placeholder="sdrmap key"
-                 value="{{ env_value_by_tags(['sdrmap','key']) }}">
+                 value="{{ list_value_by_tags(['sdrmap','key'], 0) }}">
         </div>
       </div>
       <div class="row align-items-center">
