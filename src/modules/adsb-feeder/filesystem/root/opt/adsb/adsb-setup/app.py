@@ -3157,6 +3157,14 @@ class AdsbIm:
                 print_err(f"PROBLEM::: tag is {type(tag)}")
             return "checked" if self._d.list_is_enabled(["other_aggregator"] + tag, idx=m) else ""
 
+        def nonadsb_enabled(tag, m=0):
+            # stack_info(f"tags are {type(tag)} {tag}")
+            if type(tag) == str:
+                tag = [tag]
+            if type(tag) != list:
+                print_err(f"PROBLEM::: tag is {type(tag)}")
+            return "checked" if self._d.list_is_enabled(tag, idx=m) else ""
+
         # is this a stage2 site and you are looking at an individual micro feeder,
         # or is this a regular feeder? If we have a query argument m that is a non-negative
         # number, then yes it is
@@ -3183,6 +3191,7 @@ class AdsbIm:
             "aggregators.html",
             uf_enabled=uf_enabled,
             others_enabled=others_enabled,
+            nonadsb_enabled=nonadsb_enabled,
             site=site,
             m=str(m),
             piastatport=str(m * 1000 + make_int(self._d.env_by_tags("piastatport").value)),
