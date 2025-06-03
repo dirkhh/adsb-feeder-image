@@ -5,10 +5,8 @@
 {% set ns = namespace() %}
 {% set ns.site_indices = [] %}
 {% if is_enabled('stage2') %}
-{% for site in env_value_by_tag('site_name') %}
-{% if loop.index0 > 0 %}
+{% for site in range(env_value_by_tag('num_micro_sites') + 1) %}
 {% set ns.site_indices = ns.site_indices + [loop.index0] %}
-{% endif %}
 {% endfor %}
 {% else %}
 {% set ns.site_indices = [0] %}
@@ -499,6 +497,9 @@
 <script src="/static/js/chart.js" integrity="sha256-QvTb/nDEMP/CLHEo82yujVmcrJC4zTfI9CpZ5WXl3rc="
           crossorigin="anonymous"></script>
 <script>
+
+  console.log("num_micro_sites {{ num_micro_sites }}");
+
   let chartContext = document.getElementById("plane-history-chart");
   let shownIndices = new Set();
   let chartGlobal = undefined;
