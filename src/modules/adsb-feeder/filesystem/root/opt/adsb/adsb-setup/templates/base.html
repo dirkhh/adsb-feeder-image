@@ -6,7 +6,7 @@
 {% else %}
 <html lang="en" data-mdb-theme="auto">
 {% endif %}
-import "mdb-ui-kit"
+<!-- import "mdb-ui-kit" -->
 
 <head>
   <!-- Required meta tags -->
@@ -32,16 +32,16 @@ import "mdb-ui-kit"
     })()
   </script>
   {% endif %}
-  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" />
+  <link rel="shortcut icon" href="/static/favicon{% if env_value_by_tag('aggregator_choice') == 'nonadsb' %}-sdr{% endif %}.ico" />
   <!-- Spinner -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <link rel="stylesheet" href="/static/css/style.css" />
   <title>
     {{ list_value_by_tag("site_name", 0) }}{% if list_value_by_tag("site_name", 0) != "" %}:
     {% endif %}{% block title %}{% endblock %}
   </title>
   <nav class="navbar fixed-top bg-body {% if is_enabled('stage2') %} navbar-expand-lg {% else %} navbar-expand-md {% endif %}">
     <div class="container-fluid">
-      <a class="navbar-brand ms-0 me-1 me-sm-3" href="{{ url_for("director") }}">ADS-B Feeder</a>
+      <a class="navbar-brand ms-0 me-1 me-sm-3" href="{{ url_for("director") }}">{% if env_value_by_tag("aggregator_choice") == 'nonadsb' %}SDR{% else %}ADS-B{% endif %} Feeder</a>
       <a class="btn btn-primary mx-0 mx-sm-1 {% if not is_enabled('base_config') %}d-none{% endif %}"
         id="livemap-navbar-button"
         href="/map/{{ env_value_by_tag('tar1090_query_params') }}">Live Map</a>
