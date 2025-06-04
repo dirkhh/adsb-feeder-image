@@ -34,10 +34,14 @@
   </script>
   {% endif %}
   {% endif %}
-  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" />
+  {% if env_value_by_tag('aggregator_choice') == 'nonadsb' %}
+  <link rel="shortcut icon" href="/static/favicon-sdr.ico" />
+  {% else %}
+  <link rel="shortcut icon" href="/static/favicon.ico" />
+  {% endif %}
   <!-- Spinner -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
-  <title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+<title>
     {{ title }}
   </title>
 </head>
@@ -52,7 +56,11 @@
     </div>
   </div>
   <div class="bgimage">
+    {% if env_value_by_tag('aggregator_choice') == 'nonadsb' %}
+    <img src="/static/images/sdrim-background-transparent-4k.png" alt="">
+    {% else %}
     <img src="/static/images/adsbim-background-transparent-4k.png" alt="">
+    {% endif %}
   </div>
   <div class="container pt-5 mt-3">
     <h1>{{ title }}</h1>
