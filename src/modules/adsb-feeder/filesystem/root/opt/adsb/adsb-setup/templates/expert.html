@@ -242,378 +242,388 @@
     </form>
   </div>
   {% endif %}
-  <div class="col-12"><!-- ensure that the next row is on a new line --> </div>
-  <div class="col-12 col-lg-6">
-    <h5 class="mt-3">Enable non-ADS-B containers</h5>
-    <form method="POST" onsubmit="show_spinner(); return true;">
-      <div class="row align-items-center">
-        <div class="col-12 mb-2">
-          While this may not be interesting to most users, it is possible to enable a number of others
-          SDR-based tracking containers in this image. Contrary to the ADS-B experience, those (so far)
-          do not have a configuration UI, so this is a lot more manual work to get working, and several
-          actually need you to log into the image and manually edit config files. However, having a way
-          to at least enable these containers and continue to have a single Docker network for all of
-          them to coexist in is quite useful for those who want to explore more than just ADS-B (and UAT)
-          tracking.
+  <!-- the rest of this will create its own spread across two columns on wider screens -->
+  <div class="col-12">
+    <div class="row">
+      <h5 class="mt-3 col-12">Enable non-ADS-B containers</h5>
+      <form class="col-12" method="POST" onsubmit="show_spinner(); return true;">
+        <div class="row align-items-center">
+          <div class="col-12 mb-2">
+            In addition to tracking ADS-B data, it is possible to enable a number of others
+            SDR-based tracking containers in this image. The SDRs can be assigned on the
+            <a href="/sdr-setup">SDR Setup page</a> once the protocols are enabled here.
+            Similarly, data sharing can be configured on the main
+            <a href="/aggregators">Data Sharing page</a>.
+          </div>
+          <div class="col-12 col-lg-6 mt-2">
+            <div class="row border my-2">
+              <!-- first ACARS -->
+              {% if not is_enabled('acarsdec') %}
+              <div class="col-8 my-1">
+                <label for="acarsdec--enable">
+                  Enable first analog ACARS decoder
+                </label>
+              </div>
+              <div class="col-4 my-1">
+                <button type="submit" class="btn btn-primary mx-auto w-100" name="acarsdec--enable"
+                        value="go">Enable</button>
+              </div>
+              {% else %}
+              <div class="col-6 my-1">
+                <label for="acarsdec--disable">
+                  First analog ACARS decoder
+                </label>
+              </div>
+              <div class="col-3 my-1">
+                <button type="submit" class="btn btn-secondary mx-auto w-100" name="acarsdec--disable"
+                        value="go">Disable</button>
+              </div>
+              <div class="col-3 my-1">
+                <button type="submit" class="btn btn-primary mx-auto w-100" name="acarsdec--update"
+                        value="go">Update</button>
+              </div>
+              <div class="col-4 mb-1">
+                <label for="acars_feed_id">
+                  ACARS feed ID
+                </label>
+              </div>
+              <div class="col-8 mb-1">
+                <input type="text" class="mx-auto w-100" name="acars_feed_id" id="acars_feed_id"
+                      value="{{ env_value_by_tag('acars_feed_id') }}">
+              </div>
+              <div class="col-4 mb-1">
+                <label for="acars_frequencies">
+                  ACARS frequencies <span class="text-danger" id="acars_frequencies_error"
+                  style="display: none;"><br>values must fit in 2MHz</span>
+                </label>
+              </div>
+              <div class="col-8 mb-1" data-update="acarsdec--update">
+                <input type="text" class="mx-auto w-100 two_mhz" name="acars_frequencies" id="acars_frequencies"
+                      placeholder="130.025 130.450 131.125 131.450 131.475 131.525 131.550 131.725"
+                      value="{{ env_value_by_tag('acars_frequencies') }}">
+              </div>
+              {% if env_value_by_tag('acarsserial') == '' %}
+              <div class="col-12 mb-1 text-warning">
+                <p>No SDR is assigned for ACARS - you can change that on the <a href="/sdr_setup">SDR Setup</a> page.</p>
+              </div>
+              {% endif %}
+              {% endif %}
+            </div>
+          </div>
+          <div class="col-12 col-lg-6 mt-2">
+            <div class="row border my-2">
+              {% if not is_enabled('acarsdec2') %}
+              <!-- second ACARS -->
+              <div class="col-8 my-1">
+                <label for="acarsdec2--enable">
+                  Enable second analog ACARS decoder (to allow covering the rarely used frequencies below 130MHz - which is rarely useful outside of the US)
+                </label>
+              </div>
+              <div class="col-4 my-1">
+                <button type="submit" class="btn btn-primary mx-auto w-100" name="acarsdec2--enable"
+                        value="go">Enable</button>
+              </div>
+              {% else %}
+              <div class="col-6 my-1">
+                <label for="acarsdec2--disable">
+                  Second analog ACARS decoder
+                </label>
+              </div>
+              <div class="col-3 my-1">
+                <button type="submit" class="btn btn-secondary mx-auto w-100" name="acarsdec2--disable"
+                        value="go">Disable</button>
+              </div>
+              <div class="col-3 my-1">
+                <button type="submit" class="btn btn-primary mx-auto w-100" name="acarsdec2--update"
+                        value="go">Update</button>
+              </div>
+              <div class="col-4 mb-1">
+                <label for="acars_2_feed_id">
+                  ACARS2 feed ID
+                </label>
+              </div>
+              <div class="col-8 mb-1">
+                <input type="text" class="mx-auto w-100" name="acars_2_feed_id" id="acars_2_feed_id"
+                      value="{{ env_value_by_tag('acars_2_feed_id') }}">
+              </div>
+              <div class="col-4 mb-1">
+                <label for="acars_2_frequencies">
+                  ACARS2 frequencies <span class="text-danger" id="acars_2_frequencies_error"
+                  style="display: none;"><br>values must fit in 2MHz</span>
+                </label>
+              </div>
+              <div class="col-8 mb-1" data-update="acarsdec2--update">
+                <input type="text" class="mx-auto w-100 two_mhz" name="acars_2_frequencies" id="acars_2_frequencies"
+                      placeholder="128.975 129.000 129.125 129.350 129.525 130.425 130.825 130.850"
+                      value="{{ env_value_by_tag('acars_2_frequencies') }}">
+              </div>
+              {% if env_value_by_tag('acars_2serial') == '' %}
+              <div class="col-12 mb-1 text-warning">
+                <p>No SDR is assigned for ACARS_2 - you can change that on the <a href="/sdr_setup">SDR Setup</a> page.</p>
+              </div>
+              {% endif %}
+              {% endif %}
+            </div>
+          </div>
+          <div class="col-12 col-lg-6 mt-2">
+            <div class="row border my-2">
+              {% if not is_enabled('dumpvdl2') %}
+              <!-- VDL Mode 2 -->
+              <div class="col-8 my-1">
+                <label for="dumpvdl2--enable">
+                  Enable VDL Mode 2 decoder
+                </label>
+              </div>
+              <div class="col-4 my-1">
+                <button type="submit" class="btn btn-primary mx-auto w-100" name="dumpvdl2--enable"
+                        value="go">Enable</button>
+              </div>
+              {% else %}
+              <div class="col-6 my-1">
+                <label for="dumpvdl2--disable">
+                  VDL Mode 2 decoder
+                </label>
+              </div>
+              <div class="col-3 my-1">
+                <button type="submit" class="btn btn-secondary mx-auto w-100" name="dumpvdl2--disable"
+                        value="go">Disable</button>
+              </div>
+              <div class="col-3 my-1">
+                <button type="submit" class="btn btn-primary mx-auto w-100" name="dumpvdl2--update"
+                        value="go">Update</button>
+              </div>
+              <div class="col-4 mb-1">
+                <label for="vdl2_feed_id">
+                  VDL2 feed ID
+                </label>
+              </div>
+              <div class="col-8 mb-1">
+                <input type="text" class="mx-auto w-100" name="vdl2_feed_id" id="vdl2_feed_id"
+                      value="{{ env_value_by_tag('vdl2_feed_id') }}">
+              </div>
+              <div class="col-4 mb-1">
+                <label for="vdl2_frequencies">
+                  VDL2 frequencies<span class="text-danger" id="vdl2_frequencies_error"
+                  style="display: none;"><br>values must fit in 2MHz</span>
+                </label>
+              </div>
+              <div class="col-8 mb-1" data-update="dumpvdl2--update">
+                <input type="text" class="mx-auto w-100 two_mhz" name="vdl2_frequencies" id="vdl2_frequencies"
+                      placeholder="136975000 136945000 136925000 136825000 136800000 136775000"
+                      value="{{ env_value_by_tag('vdl2_frequencies') }}">
+              </div>
+              {% if env_value_by_tag('vdl2serial') == '' %}
+              <div class="col-12 mb-1 text-warning">
+                <p>No SDR is assigned for VDL2 - you can change that on the <a href="/sdr_setup">SDR Setup</a> page.</p>
+              </div>
+              {% endif %}
+              {% endif %}
+            </div>
+          </div>
+          <div class="col-12 col-lg-6 mt-2">
+            <div class="row border my-2">
+              {% if not is_enabled('dumphfdl') %}
+              <!-- HFDL -->
+              <div class="col-8 my-1">
+                <label for="dumphfdl--enable">
+                  Enable HFDL support
+                </label>
+              </div>
+              <div class="col-4 my-1">
+                <button type="submit" class="btn btn-primary mx-auto w-100" name="dumphfdl--enable" value="go">Enable</button>
+              </div>
+              {% else %}
+              <div class="col-6 my-1">
+                <label for="dumphfdl--disable">
+                  HFDL support
+                </label>
+              </div>
+              <div class="col-3 my-1">
+                <button type="submit" class="btn btn-secondary mx-auto w-100" name="dumphfdl--disable" value="go">Disable</button>
+              </div>
+              <div class="col-3 my-1">
+                <button type="submit" class="btn btn-primary mx-auto w-100" name="dumpvhfdl--update" value="go">Update</button>
+              </div>
+              <div class="col-4 mb-1">
+                <label for="hfdl_feed_id">
+                  HFDL feed ID
+                </label>
+              </div>
+              <div class="col-8 mb-1">
+                <input type="text" class="mx-auto w-100" name="hfdl_feed_id" id="hfdl_feed_id"
+                      value="{{ env_value_by_tag('hfdl_feed_id') }}">
+              </div>
+              <div class="col-4 mb-1">
+                <label for="hfdlgaintype">
+                  HFDL gain type
+                </label>
+              </div>
+              <div class="col-8 mb-1">
+                <input type="text" class="mx-auto w-100" name="hfdlgaintype" id="hfdlgaintype" value="{{ env_value_by_tag('hfdlgaintype') }}">
+              </div>
+              <div class="col-4 mb-1">
+                <label for="hfdlgain">
+                  HFDL gain
+                </label>
+              </div>
+              <div class="col-8 mb-1">
+                <input type="text" class="mx-auto w-100" name="hfdlgain" id="hfdlgain"
+                      value="{{ env_value_by_tag('hfdlgain') }}">
+              </div>
+              <div class="col-4 mb-1">
+                <label for="hfdl_samplerate">
+                  SDR sample rate
+                </label>
+              </div>
+              <div class="col-8 mb-1">
+                <input type="text" class="mx-auto w-100" name="hfdl_samplerate" id="hfdl_samplerate"
+                      placeholder="3000000 for Airspy"
+                      value="{{ env_value_by_tag('hfdl_samplerate') }}">
+              </div>
+              <div class="col-4 mb-1">
+                <label for="hfdl_frequencies">
+                  HFDL frequencies
+                </label>
+              </div>
+              <div class="col-8 mb-1">
+                <input type="text" class="mx-auto w-100" name="hfdl_frequencies" id="hfdl_frequencies"
+                      placeholder="recomended to leave empty to use frequency scanner"
+                      value="{{ env_value_by_tag('hfdl_frequencies') }}">
+              </div>
+              {% if env_value_by_tag('hfdlserial') == '' %}
+              <div class="col-12 mb-1 text-warning">
+                <p>No SDR is assigned for HFDL - you can change that on the <a href="/sdr_setup">SDR Setup</a> page.</p>
+              </div>
+              {% endif %}
+              {% endif %}
+            </div>
+          </div>
+          <div class="col-12 col-lg-6 mt-2">
+            <div class="row border my-2">
+              {% if not is_enabled('shipfeeder') %}
+              <!-- AIS -->
+              <div class="col-8 my-1">
+                <label for="shipfeeder--enable">
+                  Enable AIS / Shipfeeder
+                </label>
+              </div>
+              <div class="col-4 my-1">
+                <button type="submit" class="btn btn-primary mx-auto w-100" name="shipfeeder--enable"
+                        value="go">Enable</button>
+              </div>
+              {% else %}
+              <div class="col-6 my-1">
+                <label for="shipfeeder--disable">
+                  AIS / Shipfeeder
+                </label>
+              </div>
+              <div class="col-3 my-1">
+                <button type="submit" class="btn btn-secondary mx-auto w-100" name="shipfeeder--disable"
+                        value="go">Disable</button>
+              </div>
+              <div class="col-3 my-1">
+                <button type="submit" class="btn btn-primary mx-auto w-100" name="shipfeeder--update"
+                        value="go">Update</button>
+              </div>
+              <div class="col-4 mb-1">
+                <label for="ais_station_name">
+                  AIS station name
+                </label>
+              </div>
+              <div class="col-8 mb-1">
+                <input type="text" class="mx-auto w-100" name="ais_station_name" id="ais_station_name"
+                      value="{{ env_value_by_tag('ais_station_name') }}">
+              </div>
+              <div class="col-4 mb-1">
+                <label for="ais_sx_extra_options">
+                  AIS extra options
+                </label>
+              </div>
+              <div class="col-8 mb-1">
+                <input type="text" class="mx-auto w-100" name="ais_sx_extra_options" id="ais_sx_extra_options"
+                      value="{{ env_value_by_tag('ais_sx_extra_options') }}">
+              </div>
+              {% if env_value_by_tag('aisserial') == '' %}
+              <div class="col-12 mb-1 text-warning">
+                <p>No SDR is assigned for AIS - you can change that on the <a href="/sdr_setup">SDR Setup</a> page.</p>
+              </div>
+              {% endif %}
+              {% endif %}
+            </div>
+          </div>
+          <div class="col-12 col-lg-6 mt-2">
+            <div class="row border my-2">
+              {% if not is_enabled('sonde') %}
+              <div class="col-8 my-1">
+                <label for="sonde--enable">
+                  Enable Radio Sonde
+                </label>
+              </div>
+              <div class="col-4 my-1">
+                <button type="submit" class="btn btn-primary mx-auto w-100" name="sonde--enable"
+                        value="go">Enable</button>
+              </div>
+              {% else %}
+              <div class="col-6 my-1">
+                <label for="sonde--disable">
+                  Radio Sonde
+                </label>
+              </div>
+              <div class="col-3 my-1">
+                <button type="submit" class="btn btn-secondary mx-auto w-100" name="sonde--disable"
+                        value="go">Disable</button>
+              </div>
+              <div class="col-3 my-1">
+                <button type="submit" class="btn btn-primary mx-auto w-100" name="sonde--update"
+                        value="go">Update</button>
+              </div>
+              <div class="col-4 mb-1">
+                <label for="sonde_callsign">
+                  Sondehub callsign
+                </label>
+              </div>
+              <div class="col-8 mb-1">
+                <input type="text" class="mx-auto w-100" name="sonde_callsign" id="sonde_callsign"
+                      value="{{ env_value_by_tag('sonde_callsign') }}">
+              </div>
+              <div class="col-4 mb-1">
+                <label for="sonde_min_freq">
+                  Sonde minimum frequency (this is region specific)
+                </label>
+              </div>
+              <div class="col-8 mb-1">
+                <input type="text" class="mx-auto w-100" name="sonde_min_freq" id="sonde_min_freq"
+                      value="{{ env_value_by_tag('sonde_min_freq') }}">
+              </div>
+              <div class="col-4 mb-1">
+                <label for="sonde_max_freq">
+                  Sonde maximum frequency (this is region specific)
+                </label>
+              </div>
+              <div class="col-8 mb-1">
+                <input type="text" class="mx-auto w-100" name="sonde_max_freq" id="sonde_max_freq"
+                      value="{{ env_value_by_tag('sonde_max_freq') }}">
+              </div>
+              <div class="col-4 mb-1">
+                <label for="sonde_share_position">
+                  Sondehub share station location
+                </label>
+              </div>
+              <div class="col-8 mb-1">
+                <input type="text" class="mx-auto w-100" name="sonde_share_position" id="sonde_share_position"
+                      value="{{ env_value_by_tag('sonde_share_position') }}">
+              </div>
+              {% if env_value_by_tag('sondeserial') == '' %}
+              <div class="col-12 mb-1 text-warning">
+                <p>No SDR is assigned for Sonde - you can change that on the <a href="/sdr_setup">SDR Setup</a> page.</p>
+              </div>
+              {% endif %}
+              {% endif %}
+            </div>
+          </div>
         </div>
-        <div class="col-12 mt-2">
-          <div class="row border">
-            <!-- first ACARS -->
-            {% if not is_enabled('acarsdec') %}
-            <div class="col-8 my-1">
-              <label for="acarsdec--enable">
-                Enable first analog ACARS decoder
-              </label>
-            </div>
-            <div class="col-4 my-1">
-              <button type="submit" class="btn btn-primary mx-auto w-100" name="acarsdec--enable"
-                      value="go">Enable</button>
-            </div>
-            {% else %}
-            <div class="col-6 my-1">
-              <label for="acarsdec--disable">
-                First analog ACARS decoder
-              </label>
-            </div>
-            <div class="col-3 my-1">
-              <button type="submit" class="btn btn-secondary mx-auto w-100" name="acarsdec--disable"
-                      value="go">Disable</button>
-            </div>
-            <div class="col-3 my-1">
-              <button type="submit" class="btn btn-primary mx-auto w-100" name="acarsdec--update"
-                      value="go">Update</button>
-            </div>
-            <div class="col-4 mb-1">
-              <label for="acars_feed_id">
-                ACARS feed ID
-              </label>
-            </div>
-            <div class="col-8 mb-1">
-              <input type="text" class="mx-auto w-100" name="acars_feed_id" id="acars_feed_id"
-                     value="{{ env_value_by_tag('acars_feed_id') }}">
-            </div>
-            <div class="col-4 mb-1">
-              <label for="acars_frequencies">
-                ACARS frequencies <span class="text-danger" id="acars_frequencies_error"
-                style="display: none;"><br>values must fit in 2MHz</span>
-              </label>
-            </div>
-            <div class="col-8 mb-1" data-update="acarsdec--update">
-              <input type="text" class="mx-auto w-100 two_mhz" name="acars_frequencies" id="acars_frequencies"
-                     placeholder="130.025 130.450 131.125 131.450 131.475 131.525 131.550 131.725"
-                     value="{{ env_value_by_tag('acars_frequencies') }}">
-            </div>
-            {% if env_value_by_tag('acarsserial') == '' %}
-            <div class="col-12 mb-1 text-warning">
-              <p>No SDR is assigned for ACARS - you can change that on the <a href="/sdr_setup">SDR Setup</a> page.</p>
-            </div>
-            {% endif %}
-            {% endif %}
-          </div>
-          <div class="row border">
-            {% if not is_enabled('acarsdec2') %}
-            <!-- second ACARS -->
-            <div class="col-8 my-1">
-              <label for="acarsdec2--enable">
-                Enable second analog ACARS decoder (to allow covering the rarely used frequencies below 130MHz - which is rarely useful outside of the US)
-              </label>
-            </div>
-            <div class="col-4 my-1">
-              <button type="submit" class="btn btn-primary mx-auto w-100" name="acarsdec2--enable"
-                      value="go">Enable</button>
-            </div>
-            {% else %}
-            <div class="col-6 my-1">
-              <label for="acarsdec2--disable">
-                Second analog ACARS decoder
-              </label>
-            </div>
-            <div class="col-3 my-1">
-              <button type="submit" class="btn btn-secondary mx-auto w-100" name="acarsdec2--disable"
-                      value="go">Disable</button>
-            </div>
-            <div class="col-3 my-1">
-              <button type="submit" class="btn btn-primary mx-auto w-100" name="acarsdec2--update"
-                      value="go">Update</button>
-            </div>
-            <div class="col-4 mb-1">
-              <label for="acars_2_feed_id">
-                ACARS2 feed ID
-              </label>
-            </div>
-            <div class="col-8 mb-1">
-              <input type="text" class="mx-auto w-100" name="acars_2_feed_id" id="acars_2_feed_id"
-                     value="{{ env_value_by_tag('acars_2_feed_id') }}">
-            </div>
-            <div class="col-4 mb-1">
-              <label for="acars_2_frequencies">
-                ACARS2 frequencies <span class="text-danger" id="acars_2_frequencies_error"
-                style="display: none;"><br>values must fit in 2MHz</span>
-              </label>
-            </div>
-            <div class="col-8 mb-1" data-update="acarsdec2--update">
-              <input type="text" class="mx-auto w-100 two_mhz" name="acars_2_frequencies" id="acars_2_frequencies"
-                     placeholder="128.975 129.000 129.125 129.350 129.525 130.425 130.825 130.850"
-                     value="{{ env_value_by_tag('acars_2_frequencies') }}">
-            </div>
-            {% if env_value_by_tag('acars_2serial') == '' %}
-            <div class="col-12 mb-1 text-warning">
-              <p>No SDR is assigned for ACARS_2 - you can change that on the <a href="/sdr_setup">SDR Setup</a> page.</p>
-            </div>
-            {% endif %}
-            {% endif %}
-          </div>
-          <div class="row border">
-            {% if not is_enabled('dumpvdl2') %}
-            <!-- VDL Mode 2 -->
-            <div class="col-8 my-1">
-              <label for="dumpvdl2--enable">
-                Enable VDL Mode 2 decoder
-              </label>
-            </div>
-            <div class="col-4 my-1">
-              <button type="submit" class="btn btn-primary mx-auto w-100" name="dumpvdl2--enable"
-                      value="go">Enable</button>
-            </div>
-            {% else %}
-            <div class="col-6 my-1">
-              <label for="dumpvdl2--disable">
-                VDL Mode 2 decoder
-              </label>
-            </div>
-            <div class="col-3 my-1">
-              <button type="submit" class="btn btn-secondary mx-auto w-100" name="dumpvdl2--disable"
-                      value="go">Disable</button>
-            </div>
-            <div class="col-3 my-1">
-              <button type="submit" class="btn btn-primary mx-auto w-100" name="dumpvdl2--update"
-                      value="go">Update</button>
-            </div>
-            <div class="col-4 mb-1">
-              <label for="vdl2_feed_id">
-                VDL2 feed ID
-              </label>
-            </div>
-            <div class="col-8 mb-1">
-              <input type="text" class="mx-auto w-100" name="vdl2_feed_id" id="vdl2_feed_id"
-                     value="{{ env_value_by_tag('vdl2_feed_id') }}">
-            </div>
-            <div class="col-4 mb-1">
-              <label for="vdl2_frequencies">
-                VDL2 frequencies<span class="text-danger" id="vdl2_frequencies_error"
-                style="display: none;"><br>values must fit in 2MHz</span>
-              </label>
-            </div>
-            <div class="col-8 mb-1" data-update="dumpvdl2--update">
-              <input type="text" class="mx-auto w-100 two_mhz" name="vdl2_frequencies" id="vdl2_frequencies"
-                     placeholder="136975000 136945000 136925000 136825000 136800000 136775000"
-                     value="{{ env_value_by_tag('vdl2_frequencies') }}">
-            </div>
-            {% if env_value_by_tag('vdl2serial') == '' %}
-            <div class="col-12 mb-1 text-warning">
-              <p>No SDR is assigned for VDL2 - you can change that on the <a href="/sdr_setup">SDR Setup</a> page.</p>
-            </div>
-            {% endif %}
-            {% endif %}
-          </div>
-          <div class="row border">
-            {% if not is_enabled('dumphfdl') %}
-            <!-- HFDL -->
-            <div class="col-8 my-1">
-              <label for="dumphfdl--enable">
-                Enable HFDL support
-              </label>
-            </div>
-            <div class="col-4 my-1">
-              <button type="submit" class="btn btn-primary mx-auto w-100" name="dumphfdl--enable" value="go">Enable</button>
-            </div>
-            {% else %}
-            <div class="col-6 my-1">
-              <label for="dumphfdl--disable">
-                HFDL support
-              </label>
-            </div>
-            <div class="col-3 my-1">
-              <button type="submit" class="btn btn-secondary mx-auto w-100" name="dumphfdl--disable" value="go">Disable</button>
-            </div>
-            <div class="col-3 my-1">
-              <button type="submit" class="btn btn-primary mx-auto w-100" name="dumpvhfdl--update" value="go">Update</button>
-            </div>
-            <div class="col-4 mb-1">
-              <label for="hfdl_feed_id">
-                HFDL feed ID
-              </label>
-            </div>
-            <div class="col-8 mb-1">
-              <input type="text" class="mx-auto w-100" name="hfdl_feed_id" id="hfdl_feed_id"
-                     value="{{ env_value_by_tag('hfdl_feed_id') }}">
-            </div>
-            <div class="col-4 mb-1">
-              <label for="hfdlgaintype">
-                HFDL gain type
-              </label>
-            </div>
-            <div class="col-8 mb-1">
-              <input type="text" class="mx-auto w-100" name="hfdlgaintype" id="hfdlgaintype" value="{{ env_value_by_tag('hfdlgaintype') }}">
-            </div>
-            <div class="col-4 mb-1">
-              <label for="hfdlgain">
-                HFDL gain
-              </label>
-            </div>
-            <div class="col-8 mb-1">
-              <input type="text" class="mx-auto w-100" name="hfdlgain" id="hfdlgain"
-                     value="{{ env_value_by_tag('hfdlgain') }}">
-            </div>
-            <div class="col-4 mb-1">
-              <label for="hfdl_samplerate">
-                SDR sample rate
-              </label>
-            </div>
-            <div class="col-8 mb-1">
-              <input type="text" class="mx-auto w-100" name="hfdl_samplerate" id="hfdl_samplerate"
-                     placeholder="3000000 for Airspy"
-                     value="{{ env_value_by_tag('hfdl_samplerate') }}">
-            </div>
-            <div class="col-4 mb-1">
-              <label for="hfdl_frequencies">
-                HFDL frequencies
-              </label>
-            </div>
-            <div class="col-8 mb-1">
-              <input type="text" class="mx-auto w-100" name="hfdl_frequencies" id="hfdl_frequencies"
-                     placeholder="recomended to leave empty to use frequency scanner"
-                     value="{{ env_value_by_tag('hfdl_frequencies') }}">
-            </div>
-            {% if env_value_by_tag('hfdlserial') == '' %}
-            <div class="col-12 mb-1 text-warning">
-              <p>No SDR is assigned for HFDL - you can change that on the <a href="/sdr_setup">SDR Setup</a> page.</p>
-            </div>
-            {% endif %}
-            {% endif %}
-          </div>
-          <div class="row border">
-            {% if not is_enabled('shipfeeder') %}
-            <!-- AIS -->
-            <div class="col-8 my-1">
-              <label for="shipfeeder--enable">
-                Enable AIS / Shipfeeder
-              </label>
-            </div>
-            <div class="col-4 my-1">
-              <button type="submit" class="btn btn-primary mx-auto w-100" name="shipfeeder--enable"
-                      value="go">Enable</button>
-            </div>
-            {% else %}
-            <div class="col-6 my-1">
-              <label for="shipfeeder--disable">
-                AIS / Shipfeeder
-              </label>
-            </div>
-            <div class="col-3 my-1">
-              <button type="submit" class="btn btn-secondary mx-auto w-100" name="shipfeeder--disable"
-                      value="go">Disable</button>
-            </div>
-            <div class="col-3 my-1">
-              <button type="submit" class="btn btn-primary mx-auto w-100" name="shipfeeder--update"
-                      value="go">Update</button>
-            </div>
-            <div class="col-4 mb-1">
-              <label for="ais_station_name">
-                AIS station name
-              </label>
-            </div>
-            <div class="col-8 mb-1">
-              <input type="text" class="mx-auto w-100" name="ais_station_name" id="ais_station_name"
-                     value="{{ env_value_by_tag('ais_station_name') }}">
-            </div>
-            <div class="col-4 mb-1">
-              <label for="ais_sx_extra_options">
-                AIS extra options
-              </label>
-            </div>
-            <div class="col-8 mb-1">
-              <input type="text" class="mx-auto w-100" name="ais_sx_extra_options" id="ais_sx_extra_options"
-                     value="{{ env_value_by_tag('ais_sx_extra_options') }}">
-            </div>
-            {% if env_value_by_tag('aisserial') == '' %}
-            <div class="col-12 mb-1 text-warning">
-              <p>No SDR is assigned for AIS - you can change that on the <a href="/sdr_setup">SDR Setup</a> page.</p>
-            </div>
-            {% endif %}
-            {% endif %}
-          </div>
-          <div class="row border">
-            {% if not is_enabled('sonde') %}
-            <div class="col-8 my-1">
-              <label for="sonde--enable">
-                Enable Radio Sonde
-              </label>
-            </div>
-            <div class="col-4 my-1">
-              <button type="submit" class="btn btn-primary mx-auto w-100" name="sonde--enable"
-                      value="go">Enable</button>
-            </div>
-            {% else %}
-            <div class="col-6 my-1">
-              <label for="sonde--disable">
-                Radio Sonde
-              </label>
-            </div>
-            <div class="col-3 my-1">
-              <button type="submit" class="btn btn-secondary mx-auto w-100" name="sonde--disable"
-                      value="go">Disable</button>
-            </div>
-            <div class="col-3 my-1">
-              <button type="submit" class="btn btn-primary mx-auto w-100" name="sonde--update"
-                      value="go">Update</button>
-            </div>
-            <div class="col-4 mb-1">
-              <label for="sonde_callsign">
-                Sondehub callsign
-              </label>
-            </div>
-            <div class="col-8 mb-1">
-              <input type="text" class="mx-auto w-100" name="sonde_callsign" id="sonde_callsign"
-                     value="{{ env_value_by_tag('sonde_callsign') }}">
-            </div>
-            <div class="col-4 mb-1">
-              <label for="sonde_min_freq">
-                Sonde minimum frequency (this is region specific)
-              </label>
-            </div>
-            <div class="col-8 mb-1">
-              <input type="text" class="mx-auto w-100" name="sonde_min_freq" id="sonde_min_freq"
-                     value="{{ env_value_by_tag('sonde_min_freq') }}">
-            </div>
-            <div class="col-4 mb-1">
-              <label for="sonde_max_freq">
-                Sonde maximum frequency (this is region specific)
-              </label>
-            </div>
-            <div class="col-8 mb-1">
-              <input type="text" class="mx-auto w-100" name="sonde_max_freq" id="sonde_max_freq"
-                     value="{{ env_value_by_tag('sonde_max_freq') }}">
-            </div>
-            <div class="col-4 mb-1">
-              <label for="sonde_share_position">
-                Sondehub share station location
-              </label>
-            </div>
-            <div class="col-8 mb-1">
-              <input type="text" class="mx-auto w-100" name="sonde_share_position" id="sonde_share_position"
-                     value="{{ env_value_by_tag('sonde_share_position') }}">
-            </div>
-            {% if env_value_by_tag('sondeserial') == '' %}
-            <div class="col-12 mb-1 text-warning">
-              <p>No SDR is assigned for Sonde - you can change that on the <a href="/sdr_setup">SDR Setup</a> page.</p>
-            </div>
-            {% endif %}
-            {% endif %}
-          </div>
-        </div>
-      </div>
-    </form>
+      </form>
+    </div>
   </div>
 </div>
 <script>
