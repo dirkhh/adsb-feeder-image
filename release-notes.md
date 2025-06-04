@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- beta-notes: improvements to the non-ADS-B user experience, trying to make things less ADS-B centric
 - beta-notes: move non-ADS-B aggregators to Data Sharing page and add more aggregators
 - beta-notes: stage2: aggregator display fix for main page (introduced in beta.6)
 - beta-notes: stage2: fixup config for bug in beta.4

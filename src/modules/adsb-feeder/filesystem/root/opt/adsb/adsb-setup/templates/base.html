@@ -101,11 +101,11 @@ import "mdb-ui-kit"
             <ul class="dropdown-menu" aria-labelledby="navbarDropdownMaps">
               <li><a id="live_traffic" class="dropdown-item" href="/map/{{ env_value_by_tag('tar1090_query_params') }}">Live Traffic</a>
               </li>
-              {% if env_value_by_tag("aggregator_choice") != 'nano' %}
+              {% if env_value_by_tag("aggregator_choice") != 'nano' and env_value_by_tag("aggregator_choice") != 'nonadsb' %}
               <li><a id="heatmap" class="dropdown-item" href="/map/?heatmap">Heatmap</a></li>
               {% endif %}
               <li><a id="tracks" class="dropdown-item" href="/map/?pTracks">Tracks</a></li>
-              {% if env_value_by_tag("aggregator_choice") != 'nano' %}
+              {% if env_value_by_tag("aggregator_choice") != 'nano' and env_value_by_tag("aggregator_choice") != 'nonadsb' %}
               <li><a id="replay" class="dropdown-item" href="/map/?replay">Replay</a></li>
               {% endif %}
               <li><a id="options" class="dropdown-item" href="/visualization">Options</a></li>
@@ -147,7 +147,7 @@ import "mdb-ui-kit"
               <li><a class="dropdown-item" href="/systemmgmt">Management</a></li>
               <li><a class="dropdown-item" href="/backup">Backup</a></li>
               <li><a class="dropdown-item" href="/restore">Restore</a></li>
-              {% if env_value_by_tag("aggregator_choice") != 'nano' %}
+              {% if env_value_by_tag("aggregator_choice") != 'nano' and env_value_by_tag("aggregator_choice") != 'nonadsb' %}
               <li><a class="dropdown-item" href="/stats/">{%if is_enabled('stage2')%}Combined {%endif%}Stats</a></li>
               {% if is_enabled('stage2') %}
               <li><a id="stats_current" class="dropdown-item" href="/stats_1/">Current Stats</a></li>

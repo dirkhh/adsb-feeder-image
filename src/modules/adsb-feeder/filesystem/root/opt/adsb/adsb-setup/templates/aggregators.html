@@ -26,8 +26,8 @@
           value={{go}}>apply settings - take me to the website</button>
 
   <!-- ADS-B related aggregators -->
-  {% if is_enabled('base_config') and not env_value_by_tag('aggregator_choice') in ['micro', 'nano'] %}
-  <div class="col-12 form-check {% if env_value_by_tag('aggregator_choice') in ['micro', 'nano'] %}d-none{% endif %}">
+  {% if is_enabled('base_config') and not env_value_by_tag('aggregator_choice') in ['micro', 'nano', 'nonadsb'] %}
+  <div class="col-12 form-check">
     <input class="form-check-input me-1" type="checkbox" name="mlat_privacy--is_enabled" id="mlat_privacy--is_enabled"
            {% if list_is_enabled("mlat_privacy", m) %}checked{% endif %} />
     <label for="mlat_privacy--is_enabled">

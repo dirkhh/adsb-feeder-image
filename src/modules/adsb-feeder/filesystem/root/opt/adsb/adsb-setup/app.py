@@ -2065,7 +2065,7 @@ class AdsbIm:
         return gain
 
     def handle_implied_settings(self):
-        if self._d.env_by_tags("aggregator_choice").value in ["micro", "nano"]:
+        if self._d.env_by_tags("aggregator_choice").value in ["micro", "nano", "nonadsb"]:
             ac_db = False
             self._d.env_by_tags(["mlathub_disable"]).value = True
         else:
@@ -2965,7 +2965,7 @@ class AdsbIm:
                 self.set_tz(value)
                 continue
             # deal with the micro feeder and stage2 initial setup
-            if key == "aggregator_choice" and value in ["micro", "nano"]:
+            if key == "aggregator_choice" and value in ["micro", "nano", "nonadsb"]:
                 self._d.env_by_tags("aggregators_chosen").value = True
                 # disable all the aggregators in micro mode
                 for ev in self._d._env:

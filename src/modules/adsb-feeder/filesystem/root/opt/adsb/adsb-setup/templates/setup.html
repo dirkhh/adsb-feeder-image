@@ -80,11 +80,13 @@
   </div>
   <div class="form-group mt-3">
     <label>
-      Which
+      <strong>ADS-B:</strong> Which
       <a href="#"
          title="aggregators that don't require you to create an account or provide an email address">account-less
       </a>
       aggregators do you want to feed? There is a separate data sharing page for aggregators that require an account.
+      <br>
+      If you only want to share <strong>ACARS / AIS / SONDE</strong> data, please check "None (no ADS-B)"
     </label>
     <br />
     <div>
@@ -103,6 +105,9 @@
       <input type="radio" name="aggregator_choice" id="nano" value="nano"
              {% if env_value_by_tag("aggregator_choice")=="nano" %} checked {% endif %}>
       <label class="form-check-label mr-3" for="nano">None (nano feeder)</label>
+      <input type="radio" name="aggregator_choice" id="nonadsb" value="nonadsb"
+             {% if env_value_by_tag("aggregator_choice")=="nonadsb" %} checked {% endif %}>
+      <label class="form-check-label mr-3" for="nonadsb">None (no ADS-B)</label>
       <input type="radio" name="aggregator_choice" id="stage2" value="stage2"
              {% if env_value_by_tag("aggregator_choice")=="stage2" %} checked {% endif %}>
       <label class="form-check-label mr-3" for="stage2">Stage 2 setup (select these later)</label>
@@ -159,6 +164,11 @@
       {% if mem < 1800000 %} WARNING: Stage 2 setup with only {{ (mem / 1024) | int }} MB of memory
       (400 to 600MB per microsite recommended){% endif %}
     </div>
+    <div id="explain-nonadsb" style="display: {% if env_value_by_tag('aggregator_choice')=='nonadsb' %} block {% else %}
+                    none {% endif %}; font-size: normal;">
+      With this option the image will be set up as a feeder for non-ADS-B data, such as ACARS, AIS, SONDE. The selection
+      of services is available under Setup -> Expert. Please click Submit below before going there.
+    </div>
   </div>
   <br>
   <div class="form-group">
@@ -208,6 +218,7 @@
   const explainMicro = document.getElementById("explain-micro");
   const explainNano = document.getElementById("explain-nano");
   const explainStage2 = document.getElementById("explain-stage2");
+  const explainNonadsb = document.getElementById("explain-nonadsb");
   function aggregatorClick() {
     if (document.getElementById("all").checked) {
       explainAll.style.display = "block";
@@ -216,6 +227,7 @@
       explainMicro.style.display = "none";
       explainNano.style.display = "none";
       explainStage2.style.display = "none";
+      explainNonadsb.style.display = "none";
     } else if (document.getElementById("privacy").checked) {
       explainAll.style.display = "none";
       explainPriv.style.display = "block";
@@ -223,6 +235,7 @@
       explainMicro.style.display = "none";
       explainNano.style.display = "none";
       explainStage2.style.display = "none";
+      explainNonadsb.style.display = "none";
     } else if (document.getElementById("individual").checked) {
       explainAll.style.display = "none";
       explainPriv.style.display = "none";
@@ -230,6 +243,7 @@
       explainMicro.style.display = "none";
       explainNano.style.display = "none";
       explainStage2.style.display = "none";
+      explainNonadsb.style.display = "none";
     } else if (document.getElementById("micro").checked) {
       explainAll.style.display = "none";
       explainPriv.style.display = "none";
@@ -237,6 +251,7 @@
       explainMicro.style.display = "block";
       explainNano.style.display = "none";
       explainStage2.style.display = "none";
+      explainNonadsb.style.display = "none";
     } else if (document.getElementById("nano").checked) {
       explainAll.style.display = "none";
       explainPriv.style.display = "none";
@@ -244,6 +259,15 @@
       explainMicro.style.display = "none";
       explainNano.style.display = "block";
       explainStage2.style.display = "none";
+      explainNonadsb.style.display = "none";
+    } else if (document.getElementById("nonadsb").checked) {
+      explainAll.style.display = "none";
+      explainPriv.style.display = "none";
+      explainInd.style.display = "none";
+      explainMicro.style.display = "none";
+      explainNano.style.display = "none";
+      explainStage2.style.display = "none";
+      explainNonadsb.style.display = "block";
     } else if (document.getElementById("stage2").checked) {
       explainAll.style.display = "none";
       explainPriv.style.display = "none";
@@ -251,6 +275,7 @@
       explainMicro.style.display = "none";
       explainNano.style.display = "none";
       explainStage2.style.display = "block";
+      explainNonadsb.style.display = "none";
     }
   }
   const aggregatorBtns = document.querySelectorAll('input[name="aggregator_choice"]');

@@ -269,7 +269,7 @@
     </div>
   </div>
   <div class="col-12">
-    <div id="UF" class="row {% if env_value_by_tag('aggregator_choice') == 'nano' %}d-none{%endif%}">
+    <div id="UF" class="row {% if env_value_by_tag('aggregator_choice') in ['nano', 'nonadsb'] %}d-none{%endif%}">
       <div class="col-12">
         <h5>{% if env_value_by_tag('aggregator_choice') == 'micro' %}Local {%endif%}TAR1090 Mapping Interface</h5>
       </div>
@@ -488,7 +488,7 @@
     </div>
   </div>
   <div
-       class="col-12 {% if not stage2_suggestion or env_value_by_tag('aggregator_choice') in ['micro', 'nano'] %} d-none {% endif %}">
+       class="col-12 {% if not stage2_suggestion or env_value_by_tag('aggregator_choice') in ['micro', 'nano', 'nonadsb'] %} d-none {% endif %}">
     <br>
     Running the containers for the account-based aggregators on systems with 1GB of RAM or less can cause problems - it
     certainly is possible, but many users have observed random issues like MLAT errors or generally issues reliably
