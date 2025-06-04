@@ -90,27 +90,27 @@
     </label>
     <br />
     <div>
-      <input type="radio" name="aggregator_choice" id="all" value="all" required {% if env_value_by_tag("aggregator_choice")=="all"
+      <div class="d-inline-block me-2"><input type="radio" name="aggregator_choice" id="all" value="all" required {% if env_value_by_tag("aggregator_choice")=="all"
       %} checked {% endif %}>
-      <label class="form-check-label mr-3" for="all">All</label>
-      <input type="radio" name="aggregator_choice" id="privacy" value="privacy" {% if
+      <label class="form-check-label mr-3" for="all">All</label></div>
+      <div class="d-inline-block me-2"><input type="radio" name="aggregator_choice" id="privacy" value="privacy" {% if
       env_value_by_tag("aggregator_choice")=="privacy" %} checked {% endif %}>
-      <label class="form-check-label mr-3" for="privacy">Aggregators with privacy policy</label>
-      <input type="radio" name="aggregator_choice" id="individual" value="individual" {% if
+      <label class="form-check-label mr-3" for="privacy">Aggregators with privacy policy</label></div>
+      <div class="d-inline-block me-2"><input type="radio" name="aggregator_choice" id="individual" value="individual" {% if
       env_value_by_tag("aggregator_choice")=="individual" %} checked {% endif %}>
-      <label class="form-check-label" for="individual">Pick individually</label>
-      <input type="radio" name="aggregator_choice" id="micro" value="micro"
+      <label class="form-check-label" for="individual">Pick individually</label></div>
+      <div class="d-inline-block me-2"><input type="radio" name="aggregator_choice" id="micro" value="micro"
              {% if env_value_by_tag("aggregator_choice")=="micro" %} checked {% endif %}>
-      <label class="form-check-label mr-3" for="micro">None (micro feeder)</label>
-      <input type="radio" name="aggregator_choice" id="nano" value="nano"
+      <label class="form-check-label mr-3" for="micro">None (micro feeder)</label></div>
+      <div class="d-inline-block me-2"><input type="radio" name="aggregator_choice" id="nano" value="nano"
              {% if env_value_by_tag("aggregator_choice")=="nano" %} checked {% endif %}>
-      <label class="form-check-label mr-3" for="nano">None (nano feeder)</label>
-      <input type="radio" name="aggregator_choice" id="nonadsb" value="nonadsb"
+      <label class="form-check-label mr-3" for="nano">None (nano feeder)</label></div>
+      <div class="d-inline-block me-2"><input type="radio" name="aggregator_choice" id="nonadsb" value="nonadsb"
              {% if env_value_by_tag("aggregator_choice")=="nonadsb" %} checked {% endif %}>
-      <label class="form-check-label mr-3" for="nonadsb">None (no ADS-B)</label>
-      <input type="radio" name="aggregator_choice" id="stage2" value="stage2"
+      <label class="form-check-label mr-3" for="nonadsb">None (no ADS-B)</label></div>
+      <div class="d-inline-block me-2"><input type="radio" name="aggregator_choice" id="stage2" value="stage2"
              {% if env_value_by_tag("aggregator_choice")=="stage2" %} checked {% endif %}>
-      <label class="form-check-label mr-3" for="stage2">Stage 2 setup (select these later)</label>
+      <label class="form-check-label mr-3" for="stage2">Stage 2 setup (select these later)</label></div>
     </div>
     <br>
     <div id="explain-all" style="display: {% if env_value_by_tag('aggregator_choice')=='all' %} block {% else %} none {%
