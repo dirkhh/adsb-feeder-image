@@ -629,9 +629,15 @@
     function validate_two_mhz() {
       let value = $(this).val();
       value = value.replaceAll(";", " ").replaceAll(",", " ").replaceAll("  ", " ");
-      let freq_array = value.split(" ").sort();
+      let freq_array = value.split(" ").filter(function (i) { return i }).sort();
       // compare the first and last element of the sorted array and scale correctly for Hz/kHz/MHz
-      let delta = freq_array[freq_array.length - 1] - freq_array[0];
+      last = freq_array.length - 1;
+      if (last == -1) {
+        $("#" + $(this).attr('id') + "_error").hide();
+        $('button[name=' + $(this).parent().data('update') + ']').prop("disabled", false);
+        return;
+      }
+      let delta = freq_array[last] - freq_array[0];
       if (freq_array[0] < 200) {
         range = 2;
       } else if (freq_array[0] < 200000) {
