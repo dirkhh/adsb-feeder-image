@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- beta-notes: fix acars2pos to ingest VDL2 and HFDL as well
 - beta-notes: fix feeding AIS to sdrmap.org and PocketMariner/BoatBeacon
 - beta-notes: improvements to the non-ADS-B user experience, trying to make things less ADS-B centric
 - beta-notes: move non-ADS-B aggregators to Data Sharing page and add more aggregators

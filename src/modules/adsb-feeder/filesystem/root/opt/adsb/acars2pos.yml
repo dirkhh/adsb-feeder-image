@@ -7,7 +7,7 @@ services:
       disable: true
     restart: unless-stopped
     environment:
-      #- JSON_IN=planeslxc:15550;planeslxc:15555;planeslxc:15556
+      - JSON_IN=acars_router:15550;acars_router:15555;acars_router:15556
       - SBS_OUT=ultrafeeder:32009
       - LOG_FILE=true
     volumes:
