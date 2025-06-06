@@ -2101,8 +2101,6 @@ class AdsbIm:
         # make sure the avahi alias service runs on an adsb.im image
         self.set_hostname(self._d.env_by_tags("site_name").list_get(0))
 
-        stage2_nano = False
-
         if self._d.is_enabled("stage2") and (
             self._d.env_by_tags("1090serial").value or self._d.env_by_tags("978serial").value
         ):
