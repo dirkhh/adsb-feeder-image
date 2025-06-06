@@ -2064,7 +2064,27 @@ class AdsbIm:
             return "0"
         return gain
 
+    def handle_non_adsb(self):
+        # if the user explicitly says they don't want ADS-B, then don't
+        # assign any SDRs to ADS-B functions
+        if self._d.env_by_tags("aggregator_choice").value == "nonadsb":
+            print_err("nonadsb selected, disabling ADS-B")
+            self._d.env_by_tags("1090serial").value = ""
+            self._d.env_by_tags("978serial").value = ""
+            self._d.env_by_tags("1090_2serial").value = ""
+            self._d.env_by_tags("mlathub_disable").value = True
+            for sdr in self._sdrdevices.sdrs:
+                if sdr.purpose in ["1090", "1090_2", "978"]:
+                    sdr.purpose = ""
+            # while these SDRs can be used by other containers, these two containers
+            # are specifically for ADS-B
+            self._d.env_by_tags("airspy").value = False
+            self._d.env_by_tags("sdrplay").value = False
+        else:
+            print_err("no action on ADS-B functions")
+
     def handle_implied_settings(self):
+        self.handle_non_adsb()
         if self._d.env_by_tags("aggregator_choice").value in ["micro", "nano", "nonadsb"]:
             ac_db = False
             self._d.env_by_tags(["mlathub_disable"]).value = True
@@ -2991,6 +3011,8 @@ class AdsbIm:
             if key == "tz":
                 self.set_tz(value)
                 continue
+            if key == "aggregator_choice" and value == "nonadsb":
+                self.handle_non_adsb()
             # deal with the micro feeder and stage2 initial setup
             if key == "aggregator_choice" and value in ["micro", "nano", "nonadsb"]:
                 self._d.env_by_tags("aggregators_chosen").value = True
