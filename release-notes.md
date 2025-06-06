@@ -1,5 +1,7 @@
 Changes since v2.3.5:
 =======
+- beta-notes: make the feed IDs for the various non-ADS-B services required
+- beta-notes: improve the setup flow for non-ADS-B users
 - beta-notes: fix acars2pos to ingest VDL2 and HFDL as well
 - beta-notes: fix feeding AIS to sdrmap.org and PocketMariner/BoatBeacon
 - beta-notes: improvements to the non-ADS-B user experience, trying to make things less ADS-B centric
