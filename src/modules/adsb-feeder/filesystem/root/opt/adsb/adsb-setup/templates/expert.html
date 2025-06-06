@@ -289,6 +289,8 @@
               </div>
               <div class="col-8 mb-1">
                 <input type="text" class="mx-auto w-100" name="acars_feed_id" id="acars_feed_id"
+                      {% if is_enabled('acarsdec') %} required {% endif %}
+                      placeholder="required ACARS feed ID"
                       value="{{ env_value_by_tag('acars_feed_id') }}">
               </div>
               <div class="col-4 mb-1">
@@ -344,6 +346,8 @@
               </div>
               <div class="col-8 mb-1">
                 <input type="text" class="mx-auto w-100" name="acars_2_feed_id" id="acars_2_feed_id"
+                      {% if is_enabled('acarsdec2') %} required {% endif %}
+                      placeholder="required ACARS2 feed ID"
                       value="{{ env_value_by_tag('acars_2_feed_id') }}">
               </div>
               <div class="col-4 mb-1">
@@ -399,6 +403,8 @@
               </div>
               <div class="col-8 mb-1">
                 <input type="text" class="mx-auto w-100" name="vdl2_feed_id" id="vdl2_feed_id"
+                      {% if is_enabled('dumpvdl2') %} required {% endif %}
+                      placeholder="required VDL2 feed ID"
                       value="{{ env_value_by_tag('vdl2_feed_id') }}">
               </div>
               <div class="col-4 mb-1">
@@ -451,6 +457,8 @@
               </div>
               <div class="col-8 mb-1">
                 <input type="text" class="mx-auto w-100" name="hfdl_feed_id" id="hfdl_feed_id"
+                      {% if is_enabled('dumphfdl') %} required {% endif %}
+                      placeholder="required HFDL feed ID"
                       value="{{ env_value_by_tag('hfdl_feed_id') }}">
               </div>
               <div class="col-4 mb-1">
@@ -532,6 +540,8 @@
               </div>
               <div class="col-8 mb-1">
                 <input type="text" class="mx-auto w-100" name="ais_station_name" id="ais_station_name"
+                      {% if is_enabled('shipfeeder') %} required {% endif %}
+                      placeholder="required AIS station name"
                       value="{{ env_value_by_tag('ais_station_name') }}">
               </div>
               <div class="col-4 mb-1">
@@ -584,6 +594,8 @@
               </div>
               <div class="col-8 mb-1">
                 <input type="text" class="mx-auto w-100" name="sonde_callsign" id="sonde_callsign"
+                      {% if is_enabled('sonde') %} required {% endif %}
+                      placeholder="required sondehub callsign"
                       value="{{ env_value_by_tag('sonde_callsign') }}">
               </div>
               <div class="col-4 mb-1">

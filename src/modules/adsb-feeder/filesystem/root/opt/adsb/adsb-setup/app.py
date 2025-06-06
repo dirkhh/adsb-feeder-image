@@ -2521,6 +2521,33 @@ class AdsbIm:
             if not success:
                 print_err(f"failed to reload docker config: {output}")
 
+    def nonadsb_is_correctly_configured(self):
+        # this will return true if at least one of the non-ADS-B protocols is enabled and all
+        # of the enabled ones have their feed ID set;
+        # once one of the non-ADS-B protocols is enabled, the expert page goes through the
+        # update() flow and we need to ensure that the required feed IDs are set as well
+        non_adsb_enabled = any(
+            {
+                self._d.is_enabled(["acarsdec"]),
+                self._d.is_enabled(["acarsdec2"]),
+                self._d.is_enabled(["dumpvdl2"]),
+                self._d.is_enabled(["dumphfdl"]),
+                self._d.is_enabled(["sonde"]),
+                self._d.is_enabled(["shipfeeder"]),
+            }
+        )
+        inconsistent_non_adsb_config = any(
+            {
+                self._d.is_enabled(["acarsdec"]) and self._d.env_by_tags("acars_feed_id").value == "",
+                self._d.is_enabled(["acarsdec2"]) and self._d.env_by_tags("acars_2_feed_id").value == "",
+                self._d.is_enabled(["dumpvdl2"]) and self._d.env_by_tags("vdl2_feed_id").value == "",
+                self._d.is_enabled(["dumphfdl"]) and self._d.env_by_tags("hfdl_feed_id").value == "",
+                self._d.is_enabled(["sonde"]) and self._d.env_by_tags("sonde_callsign").value == "",
+                self._d.is_enabled(["shipfeeder"]) and self._d.env_by_tags("ais_station_name").value == "",
+            }
+        )
+        return non_adsb_enabled and not inconsistent_non_adsb_config
+
     @check_restart_lock
     def update(self):
         description = """
@@ -3239,17 +3266,7 @@ class AdsbIm:
             # return self.sdr_setup()
 
         # check if we need SDRs and any of the SDRs aren't configured
-        if any(
-            {
-                self._d.env_by_tags("aggregator_choice").value != "nonadsb",
-                self._d.is_enabled(["acarsdec"]),
-                self._d.is_enabled(["acarsdec2"]),
-                self._d.is_enabled(["dumpvdl2"]),
-                self._d.is_enabled(["dumphfdl"]),
-                self._d.is_enabled(["sonde"]),
-                self._d.is_enabled(["shipfeeder"]),
-            }
-        ):
+        if self._d.env_by_tags("aggregator_choice").value != "nonadsb" or self.nonadsb_is_correctly_configured():
             configured_serials = self.configured_serials()
             available_serials = [sdr._serial for sdr in self._sdrdevices.sdrs]
             if any([serial not in configured_serials for serial in available_serials]):
