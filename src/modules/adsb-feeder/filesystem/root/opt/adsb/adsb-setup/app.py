@@ -3238,22 +3238,37 @@ class AdsbIm:
             print_err("duplicate SDR serials detected")
             # return self.sdr_setup()
 
-        # check if any of the SDRs aren't configured
-        configured_serials = self.configured_serials()
-        available_serials = [sdr._serial for sdr in self._sdrdevices.sdrs]
-        if any([serial not in configured_serials for serial in available_serials]):
-            print_err(f"configured serials: {configured_serials}")
-            print_err(f"available serials: {available_serials}")
-            print_err("director redirecting to sdr_setup: unconfigured devices present")
-            return self.sdr_setup()
+        # check if we need SDRs and any of the SDRs aren't configured
+        if any(
+            {
+                self._d.env_by_tags("aggregator_choice").value != "nonadsb",
+                self._d.is_enabled(["acarsdec"]),
+                self._d.is_enabled(["acarsdec2"]),
+                self._d.is_enabled(["dumpvdl2"]),
+                self._d.is_enabled(["dumphfdl"]),
+                self._d.is_enabled(["sonde"]),
+                self._d.is_enabled(["shipfeeder"]),
+            }
+        ):
+            configured_serials = self.configured_serials()
+            available_serials = [sdr._serial for sdr in self._sdrdevices.sdrs]
+            if any([serial not in configured_serials for serial in available_serials]):
+                print_err(f"configured serials: {configured_serials}")
+                print_err(f"available serials: {available_serials}")
+                print_err("director redirecting to sdr_setup: unconfigured devices present")
+                return self.sdr_setup()
 
-        used_serials = [self._d.env_by_tags(purpose).value for purpose in ["978serial", "1090serial"]]
-        used_serials = [serial for serial in used_serials if serial != ""]
-        if any([serial not in available_serials for serial in used_serials]):
-            print_err(f"used serials: {used_serials}")
-            print_err(f"available serials: {available_serials}")
-            print_err("director redirecting to sdr_setup: at least one used device is not present")
-            return self.sdr_setup()
+            used_serials = [self._d.env_by_tags(purpose).value for purpose in ["978serial", "1090serial"]]
+            used_serials = [serial for serial in used_serials if serial != ""]
+            if any([serial not in available_serials for serial in used_serials]):
+                print_err(f"used serials: {used_serials}")
+                print_err(f"available serials: {available_serials}")
+                print_err("director redirecting to sdr_setup: at least one used device is not present")
+                return self.sdr_setup()
+        elif not self._d.is_enabled("stage2"):
+            # we don't do ADS-B, we don't do any of the other protocols, and this isn't a stage 2
+            # let's send the user to the non-ADS-B setup
+            return self.expert()
 
         # if the user chose to individually pick aggregators but hasn't done so,
         # they need to go to the aggregator page
