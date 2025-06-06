@@ -2196,9 +2196,10 @@ class AdsbIm:
 
         # make all the smart choices for plugged in SDRs - unless we are a stage2 that hasn't explicitly requested SDR support
         # only run this for initial setup or when the SDR setup is requested via the interface
-        if (not self._d.is_enabled("stage2") or self._d.is_enabled("stage2_nano")) and not self._d.env_by_tags(
-            "sdrs_locked"
-        ).value:
+        if (
+            not (self._d.is_enabled("stage2") or self._d.env_by_tags("aggregator_choice").value == "nonadsb")
+            or self._d.is_enabled("stage2_nano")
+        ) and not self._d.env_by_tags("sdrs_locked").value:
             # first grab the SDRs plugged in and check if we have one identified for UAT
             env978 = self._d.env_by_tags("978serial")
             env1090 = self._d.env_by_tags("1090serial")
