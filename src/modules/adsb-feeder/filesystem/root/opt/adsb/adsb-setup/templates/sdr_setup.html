@@ -108,9 +108,11 @@
         <div class="row">
           <div class="col-12 d-flex">
             <label class="flex-grow-1">Used for</label>
+            {% if env_value_by_tag('aggregator_choice') != 'nonadsb' %}
             <label class="mx-1"><input id="usage1090" type="radio" name="usage" value="1090"> 1090</label>
             {% if is_enabled('stage2') %}<label class="mx-1"><input id="usage1090_2" type="radio" name="usage" value="1090_2"> 1090_2</label>{% endif %}
             <label class="mx-1"><input id="usage978" type="radio" name="usage" value="978"> 978</label>
+            {% endif %}
             {% if is_enabled('acarsdec') %}<label class="mx-1"><input id="usageacars" type="radio" name="usage" value="acars"> ACARS</label>{% endif %}
             {% if is_enabled('acarsdec2') %}<label class="mx-1"><input id="usageacars_2" type="radio" name="usage" value="acars_2"> ACARS_2</label>{% endif %}
             {% if is_enabled('dumpvdl2') %}<label class="mx-1"><input id="usagevdl2" type="radio" name="usage" value="vdl2"> VDLM2</label>{% endif %}
