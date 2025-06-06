@@ -2540,6 +2540,23 @@ class AdsbIm:
             if not success:
                 print_err(f"failed to reload docker config: {output}")
 
+    def enabled_purposes(self):
+        ep = set() if self._d.env_by_tags("aggregator_choice").value == "nonadsb" else {"1090", "978"}
+        if self._d.env_by_tags("aggregator_choice").value == "stage2":
+            ep.add("1090_2")
+        purpose_pairs = {
+            ("acars", "acarsdec"),
+            ("acars_2", "acarsdec2"),
+            ("vdl2", "dumpvdl2"),
+            ("hfdl", "dumphfdl"),
+            ("ais", "shipfeeder"),
+            ("sonde", "sonde"),
+        }
+        for purpose, tag in purpose_pairs:
+            if self._d.is_enabled([tag]):
+                ep.add(purpose)
+        return ep
+
     def nonadsb_is_correctly_configured(self):
         # this will return true if at least one of the non-ADS-B protocols is enabled and all
         # of the enabled ones have their feed ID set;
@@ -3288,13 +3305,17 @@ class AdsbIm:
 
         # check if we need SDRs and any of the SDRs aren't configured
         if self._d.env_by_tags("aggregator_choice").value != "nonadsb" or self.nonadsb_is_correctly_configured():
-            configured_serials = self.configured_serials()
-            available_serials = [sdr._serial for sdr in self._sdrdevices.sdrs]
-            if any([serial not in configured_serials for serial in available_serials]):
-                print_err(f"configured serials: {configured_serials}")
-                print_err(f"available serials: {available_serials}")
-                print_err("director redirecting to sdr_setup: unconfigured devices present")
-                return self.sdr_setup()
+            # do we have purposes that have been enabled that don't have an SDR assigned?
+            enabled_purposes = self.enabled_purposes()
+            assigned_purposes = {s.purpose for s in self._sdrdevices.sdrs if s.purpose not in ["other", ""]}
+            if any([purpose not in assigned_purposes for purpose in enabled_purposes]):
+                configured_serials = self.configured_serials()
+                available_serials = [sdr._serial for sdr in self._sdrdevices.sdrs]
+                if any([serial not in configured_serials for serial in available_serials]):
+                    print_err(f"configured serials: {configured_serials}")
+                    print_err(f"available serials: {available_serials}")
+                    print_err("director redirecting to sdr_setup: unconfigured devices present")
+                    return self.sdr_setup()
 
             used_serials = [self._d.env_by_tags(purpose).value for purpose in ["978serial", "1090serial"]]
             used_serials = [serial for serial in used_serials if serial != ""]
