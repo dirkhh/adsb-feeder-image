@@ -2441,7 +2441,7 @@ class AdsbIm:
             feed_acars += ";feedthe.acarsdrama.com:5550"
             feed_vdl2 += ";feedthe.acarsdrama.com:5555"
         if self._d.list_is_enabled("feed_acars_avdelphi", 0):
-            feed_acars += ";data.avdelphi.com:5555"
+            feed_acars += ";data.avdelphi.com:5556"
             feed_vdl2 += ";data.avdelphi.com:5600"
         self._d.env_by_tags("feed_string_acars").value = feed_acars
         self._d.env_by_tags("feed_string_vdl2").value = feed_vdl2
