@@ -2728,6 +2728,8 @@ class AdsbIm:
                         self._d.env_by_tags("ais_aggregators_chosen").value = True
 
                 if key == "sdr_setup" and value == "go":
+                    # user has clicked Submit on the SDR Setup page -- let's send them back there
+                    self._next_url_from_director = request.url
                     self._d.env_by_tags("sdrs_locked").value = False
 
                 if allow_insecure and key == "shutdown":

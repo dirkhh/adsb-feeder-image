@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- beta-notes: return to the SDR Setup page after making changes
 - beta-notes: add user configurable Env variables to the non-ADS-B containers
 - beta-notes: fix main page error when non-adsb option is enabled
 - beta-notes: handle aggregator choices for the various protocols accordingly and notify the user when a protocol is enabled with no aggregators
