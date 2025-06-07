@@ -19,6 +19,7 @@ services:
       - SITESHOW=on
       - REALTIME=on
 #     ais-catcher receiver-related parameters
+      - SDR_TYPE=${AIS_SDR_TYPE}
       - RTLSDR_DEVICE_SERIAL=${AIS_DEVICE_SERIAL}
       - RTLSDR_DEVICE_GAIN=${AIS_DEVICE_GAIN}
       - RTLSDR_DEVICE_PPM=${AIS_DEVICE_PPM}
