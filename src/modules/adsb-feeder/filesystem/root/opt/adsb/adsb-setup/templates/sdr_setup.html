@@ -123,10 +123,7 @@
           </div>
           <div class="col-12" id="gain_container">
             <label class="col-12 mt-2">Gain</label>
-            <label for="sdrgain" class="col-12 col-sm-9">
-              Possible values depend on the SDR type. For the most common RTL SDR dongle,
-              enter a value between 0 and 50 or "auto".
-              For other SDRs, please check the documentation.
+            <label for="sdrgain" id="gain_label"class="col-12 col-sm-9">
             </label>
             <input class="col-10 col-sm-2 ms-3" id="sdrgain" name="sdrgain" type="text" style="height: 2rem;" value="" />
           </div>
@@ -222,6 +219,49 @@
 
   sdr_info();
 
+  const gain_text = {
+    '1090': {
+      'rtlsdr': 'enter a value between 0 and 50 or "auto"',
+      'airspy': 'enter a value between 0 and 21 or "auto"',
+      'sdrplay': 'leave empty as this is auto-configured',
+    },
+    '1090_2': {
+      'rtlsdr': 'enter a value between 0 and 50 or "auto"',
+      'airspy': 'enter a value between 0 and 21 or "auto"',
+      'sdrplay': 'leave empty as this is auto-configured',
+    },
+    '978': {
+      'rtlsdr': 'enter a value between 0 and 50 or "auto"',
+    },
+    'acars': {
+      'rtlsdr': 'enter a value between 0 and 50; use -10 for agc',
+      'airspy': 'enter a value between 0 and 21',
+      'sdrplay': 'enter a value between 20 and 59; use -10 for agc',
+
+    },
+    'acars_2': {
+      'rtlsdr': 'enter a value between 0 and 50; use -10 for agc',
+      'airspy': 'enter a value between 0 and 21',
+      'sdrplay': 'enter a value between 20 and 59; use -10 for agc',
+    },
+    'vdl2': {
+      'rtlsdr': 'enter a value between 0 and 50',
+      'airspy': 'enter a value between 0 and 21',
+      'sdrplay': 'enter a value between 20 and 59, leave empty for agc',
+    },
+    'hfdl': {
+      'rtlsdr': 'enter a value between 0 and 50',
+      'airspy': 'enter a value between 0 and 21',
+      'sdrplay': 'enter a value between 20 and 59',
+    },
+    'ais': {
+      'rtlsdr': 'enter a value between 0 and 50',
+      'airspy': 'enter a value between 0 and 21',
+    },
+    'sonde': {
+      'rtlsdr': 'enter a value between 0 and 50',
+    }
+  }
   function sdr_setup_show_dialog(sdr_idx) {
     $(document).ready(function() {
       let sdr = sdrs[sdr_idx];
@@ -235,6 +275,13 @@
       $("#usage" + sdr['purpose']).trigger('change');
       $("#sdrgain").val(sdr['gain']);
       $("#enable_biastee").prop('checked', sdrs[sdr_idx]['biastee']);
+      $("#gain_label").text("please check the docs for valid gain values");
+      if (Object.keys(gain_text).includes(sdr['purpose']) &&Object.keys(gain_text[sdr['purpose']]).includes(sdr['type'])) {
+          console.log("gain_text for " + sdr['purpose'] + " and " + sdr['type'] + " is " + gain_text[sdr['purpose']][sdr['type']]);
+          $("#gain_label").text(gain_text[sdr['purpose']][sdr['type']]);
+      } else {
+          $("#gain_label").text("please check the docs for valid gain values");
+      }
       if (sdr['type'] != "rtlsdr") {
         // we only support RTLSDR for UAT and Sonde
         $("#usage978").parent().hide();
@@ -246,7 +293,7 @@
 
   $('input[name="usage"][type="radio"]').on('change', function () {
     console.log("usage changed to " + this.value);
-    $("#gain_container").toggle(this.value != "hfdl" && this.value != "other");
+    $("#gain_container").toggle(this.value != "other");
     $("#biastee_container").toggle(this.value != "other");
   });
 
