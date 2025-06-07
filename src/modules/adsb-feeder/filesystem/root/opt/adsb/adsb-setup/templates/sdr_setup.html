@@ -219,47 +219,79 @@
 
   sdr_info();
 
+  function validate_0_50_auto(text) {
+    return text == 'auto' || (text >= 0 && text <= 50);
+  }
+
+  function validate_0_21_auto(text) {
+    return text == 'auto' || (text >= 0 && text <= 21);
+  }
+
+  function validate_0_21(text) {
+    return text >= 0 && text <= 21;
+  }
+
+  function validate_0_50(text) {
+    return text >= 0 && text <= 50;
+  }
+
+  function validate_0_50_minus10(text) {
+    return text == -10 || (text >= 0 && text <= 50);
+  }
+
+  function validate_20_59(text) {
+    return text >= 20 && text <= 59;
+  }
+
+  function validate_20_59_minus10(text) {
+    return text == -10 || (text >= 20 && text <= 59);
+  }
+
+  function validate_20_59_empty(text) {
+    return text == '' || (text >= 20 && text <= 59);
+  }
   const gain_text = {
     '1090': {
-      'rtlsdr': 'enter a value between 0 and 50 or "auto"',
-      'airspy': 'enter a value between 0 and 21 or "auto"',
+      'rtlsdr': ['enter a value between 0 and 50 or "auto"', validate_0_50_auto],
+      'airspy': ['enter a value between 0 and 21 or "auto"', validate_0_21_auto],
       'sdrplay': 'leave empty as this is auto-configured',
     },
     '1090_2': {
-      'rtlsdr': 'enter a value between 0 and 50 or "auto"',
-      'airspy': 'enter a value between 0 and 21 or "auto"',
+      'rtlsdr': ['enter a value between 0 and 50 or "auto"', validate_0_50_auto],
+      'airspy': ['enter a value between 0 and 21 or "auto"', validate_0_21_auto],
       'sdrplay': 'leave empty as this is auto-configured',
     },
     '978': {
-      'rtlsdr': 'enter a value between 0 and 50 or "auto"',
+      'rtlsdr': ['enter a value between 0 and 50 or "auto"', validate_0_50_auto],
     },
     'acars': {
-      'rtlsdr': 'enter a value between 0 and 50; use -10 for agc',
-      'airspy': 'enter a value between 0 and 21',
-      'sdrplay': 'enter a value between 20 and 59; use -10 for agc',
+      'rtlsdr': ['enter a value between 0 and 50; use -10 for agc', validate_0_50_minus10],
+      'airspy': ['enter a value between 0 and 21', validate_0_21],
+      'sdrplay': ['enter a value between 20 and 59; use -10 for agc', validate_20_59_minus10],
 
     },
     'acars_2': {
-      'rtlsdr': 'enter a value between 0 and 50; use -10 for agc',
-      'airspy': 'enter a value between 0 and 21',
-      'sdrplay': 'enter a value between 20 and 59; use -10 for agc',
+      'rtlsdr': ['enter a value between 0 and 50; use -10 for agc', validate_0_50_minus10],
+      'airspy': ['enter a value between 0 and 21', validate_0_21],
+      'sdrplay': ['enter a value between 20 and 59; use -10 for agc', validate_20_59_minus10],
     },
     'vdl2': {
-      'rtlsdr': 'enter a value between 0 and 50',
-      'airspy': 'enter a value between 0 and 21',
-      'sdrplay': 'enter a value between 20 and 59, leave empty for agc',
+      'rtlsdr': ['enter a value between 0 and 50', validate_0_50],
+      'airspy': ['enter a value between 0 and 21', validate_0_21],
+      'sdrplay': ['enter a value between 20 and 59, leave empty for agc', validate_20_59_empty],
     },
     'hfdl': {
-      'rtlsdr': 'enter a value between 0 and 50',
-      'airspy': 'enter a value between 0 and 21',
-      'sdrplay': 'enter a value between 20 and 59',
+      'rtlsdr': ['enter a value between 0 and 50', validate_0_50],
+      'airspy': ['enter a value between 0 and 21', validate_0_21],
+      'sdrplay': ['enter a value between 20 and 59', validate_20_59],
     },
     'ais': {
-      'rtlsdr': 'enter a value between 0 and 50',
-      'airspy': 'enter a value between 0 and 21',
+      'rtlsdr': ['enter a value between 0 and 50', validate_0_50],
+      'airspy': ['enter a value between 0 and 21', validate_0_21],
+      'sdrplay': ['enter a value between 20 and 59', validate_20_59],
     },
     'sonde': {
-      'rtlsdr': 'enter a value between 0 and 50',
+      'rtlsdr': ['enter a value between 0 and 50', validate_0_50],
     }
   }
   function update_gain_text() {
@@ -267,7 +299,7 @@
     let sdr = sdrs[$("#sdr_num").text()];
     if (Object.keys(gain_text).includes(purpose) && Object.keys(gain_text[purpose]).includes(sdr['type'])) {
       console.log("gain_text for " + purpose + " and " + sdr['type'] + " is " + gain_text[purpose][sdr['type']]);
-      $("#gain_label").text(gain_text[purpose][sdr['type']]);
+      $("#gain_label").text(gain_text[purpose][sdr['type']][0]);
     } else {
       $("#gain_label").text("please check the docs for valid gain values");
     }
@@ -316,6 +348,14 @@
     let gain = $("#sdrgain").val();
     let biastee = $("#enable_biastee").is(":checked");
     let purpose = $('input[name="usage"]:checked').val();
+    let type = sdrs[sdr]['type'];
+    if (Object.keys(gain_text).includes(purpose) && Object.keys(gain_text[purpose]).includes(type)) {
+      let v = gain_text[purpose][type][1];
+      if (!v(gain)) {
+        alert(gain_text[purpose][type][0]);
+        return false;
+      }
+    }
     if (purpose == 'other') {
       purpose = 'other-' + sdr;
     }
