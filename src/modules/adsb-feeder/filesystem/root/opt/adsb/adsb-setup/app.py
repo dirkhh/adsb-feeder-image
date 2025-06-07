@@ -1242,9 +1242,30 @@ class AdsbIm:
                 )
                 if gainenv:
                     gain = sdr_data["gain"]
+                    # all this SHOULD have been validated already client-side
+                    # let's make sure we don't have 'auto' in there for containers that
+                    # don't support it
+                    if not sdr.purpose in ["1090", "1090_2", "978"] and "auto" in gain:
+                        if sdr.purpose in ["acars", "acars_2"] and sdr._type != "airspy":
+                            gain = "-10"
+                        else:
+                            gain = "0"
                     if sdr._type == "airspy" and sdr.purpose == "1090":
                         gain = self.adjust_airspy_gain(gain)
                         self._d.env_by_tags("gain_airspy").value = gain
+                    if sdr._type == "rtlsdr":
+                        numgain = make_int(gain)
+                        if numgain < 0:
+                            gain = "0"
+                        elif numgain >= 50:
+                            gain = "49.6"
+                    elif sdr._type == "sdrplay" and gain != "" and gain != "-10":
+                        numgain = make_int(gain)
+                        if numgain < 20:
+                            gain = "20"
+                        elif numgain > 59:
+                            gain = "59"
+                    sdr.gain = gain
                     self._d.env_by_tags(gainenv).value = gain
                 if biasteeenv:
                     self._d.env_by_tags(biasteeenv).value = sdr_data["biastee"]
