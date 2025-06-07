@@ -2715,9 +2715,13 @@ class AdsbIm:
 
                 if key == "aggregators":
                     # user has clicked Submit on Aggregator page
-                    self._d.env_by_tags("aggregators_chosen").value = True
-                    # set this to individual so if people have set "all" before can still deselect individual aggregators
-                    self._d.env_by_tags("aggregator_choice").value = "individual"
+                    # let's check if they enabled any of the ADS-B aggregators
+                    for agg in self.all_aggregators:
+                        if any([form.get(aggkey) == "1" for aggkey in [f"is_enabled--{agg}", f"{agg}--is_enabled"]]):
+                            self._d.env_by_tags("aggregators_chosen").value = True
+                            # set this to individual so if people have set "all" before can still deselect individual aggregators
+                            self._d.env_by_tags("aggregator_choice").value = "individual"
+                            break
 
                 if key == "sdr_setup" and value == "go":
                     self._d.env_by_tags("sdrs_locked").value = False
