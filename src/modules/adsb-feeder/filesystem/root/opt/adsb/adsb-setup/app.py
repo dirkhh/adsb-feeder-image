@@ -317,7 +317,6 @@ class AdsbIm:
         self.app.add_url_rule("/sdplay_license", "sdrplay_license", self.sdrplay_license, methods=["GET", "POST"])
         self.app.add_url_rule("/api/ip_info", "ip_info", self.ip_info)
         self.app.add_url_rule("/api/sdr_info", "sdr_info", self.sdr_info)
-        self.app.add_url_rule("/api/sdr_config", "sdr_config", self.sdr_config, methods=["POST"])
         self.app.add_url_rule("/api/base_info", "base_info", self.base_info)
         self.app.add_url_rule("/api/stage2_info", "stage2_info", self.stage2_info)
         self.app.add_url_rule("/api/stage2_stats", "stage2_stats", self.stage2_stats)
@@ -1215,12 +1214,28 @@ class AdsbIm:
         response.headers.add("Access-Control-Allow-Origin", "*")
         return response
 
-    def sdr_config(self):
-        sdr_data = request.get_json()
-        print_err(f"sdr_config: got {sdr_data}")
-        if "serial" in sdr_data:
-            sdr = self._sdrdevices.get_sdr_by_serial(sdr_data["serial"])
+    def sdr_config(self, value):
+        try:
+            sdr_data_list = json.loads(value)
+        except:
+            print_err(f"sdr_config: got {value} and can't parse as JSON")
+            return
+        if not type(sdr_data_list) == list:
+            print_err(f"sdr_config: got {sdr_data_list} and not a list")
+            return
+        print_err(f"sdr_config: got {sdr_data_list}")
+        for sdr_data in sdr_data_list:
+            sdr = self._sdrdevices.get_sdr_by_serial(sdr_data.get("serial"))
             if sdr is not self._sdrdevices.null_sdr:
+                if all(
+                    {
+                        sdr_data.get("serial") == sdr._serial,
+                        sdr_data.get("purpose") == sdr.purpose,
+                        sdr_data.get("gain") == sdr.gain,
+                        sdr_data.get("biastee") == sdr.biastee,
+                    }
+                ):
+                    continue
                 print_err(f"modifying SDR id: {id(sdr)} sdr: {sdr}")
                 if sdr_data["purpose"] != sdr.purpose:
                     # remove the SDR from the old purpose and add for the new one
@@ -1270,9 +1285,10 @@ class AdsbIm:
                 if biasteeenv:
                     self._d.env_by_tags(biasteeenv).value = sdr_data["biastee"]
                 print_err(f"modified SDR id: {id(sdr)} sdr: {sdr}")
-                return Response(json.dumps("[ok]"), mimetype="application/json", status=200)
-            return Response(json.dumps("[wrong serial]"), mimetype="application/json", status=404)
-        return Response(json.dumps("[no serial]"), mimetype="application/json", status=400)
+            else:
+                print_err(f"SDR with serial {sdr_data['serial']} not found")
+        print_err(f"updated SDRs: {self._sdrdevices.sdrs}")
+        return
 
     def uf_suffix(self, i):
         suffix = f"uf_{i}" if i != 0 else "ultrafeeder"
@@ -2999,6 +3015,9 @@ class AdsbIm:
 
                 continue
             # now handle other form input
+            if key == "sdr_setup_data" and value != "":
+                self.sdr_config(value)
+                continue
             if key == "clear_range" and value == "1":
                 self.clear_range_outline(sitenum)
                 continue

@@ -16,7 +16,7 @@
     {% endwith %}
   </div>
 <form class="row gy-2 gx-3 align-items-center" method="post">
-  <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="sdr_setup" value="go" onclick="changes_to_apply = false; return true;">
+  <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="sdr_setup" value="go" onclick="submit_sdr_changes(); return true;">
     apply settings</button>
 
   <div class="col-12">
@@ -92,7 +92,8 @@
            placeholder="IP-address[,port]" value="{{ env_value_by_tag("remote_sdr") }}" />
   </div>
   <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3 mt-3" name="sdr_setup"
-          value="go" onclick="changes_to_apply = false; return true;">apply settings</button>
+          value="go" onclick="submit_sdr_changes(); return true;">apply settings</button>
+  <input type="hidden" id="sdr_setup_data" name="sdr_setup_data" value="" />
 </form>
 
 <!-- Modal -->
@@ -137,7 +138,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-mdb-ripple-init data-mdb-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" data-mdb-ripple-init onclick="save_sdr_setup()">Save changes</button>
+        <button type="button" class="btn btn-primary" data-mdb-ripple-init onclick="save_sdr_setup()">OK</button>
       </div>
     </div>
   </div>
@@ -161,9 +162,6 @@
   // for the modal dialog - the user still needs to click the apply button before the changes
   // really take effect. So this is the slightly annoying way to remind them to do so.
   let changes_to_apply = false;
-  window.onbeforeunload = function () {
-    return changes_to_apply ? "You have changes that hadn't been applied. This will result in inconsistent behavior." : null;
-  }
 
   function sdr_info() {
     fetch("/api/sdr_info", { signal: AbortSignal.timeout(15000) })
@@ -362,7 +360,6 @@
     sdrs[sdr]['gain'] = set_change_flag(sdrs[sdr]['gain'], gain);
     sdrs[sdr]['biastee'] = set_change_flag(sdrs[sdr]['biastee'], biastee);
     sdrs[sdr]['purpose'] = set_change_flag(sdrs[sdr]['purpose'], purpose);
-    console.log("save_sdr_setup: " + JSON.stringify(sdrs[sdr]));
     modal.hide();
     let id = '#sdr' + sdr;
     $(id + "-gain").html(gain);
@@ -372,20 +369,15 @@
       $(id + "-biastee").html("");
     }
     $(id + "-purpose").html(sdrs[sdr]['purpose']);
-    fetch('/api/sdr_config', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(sdrs[sdr])
-    })
-      .then(response => response.json())
-      .then(data => {
-        console.log(data);
-        sdr_info();
-      })
-      .catch(error => console.error(error));
   }
 
+  function submit_sdr_changes() {
+    if (changes_to_apply) {
+      console.log("submit_sdr_changes: " + JSON.stringify(sdrs));
+      $('#sdr_setup_data').val(JSON.stringify(sdrs));
+    } else {
+      console.log("submit_sdr_changes: no changes to apply");
+    }
+  }
 </script>
 {% endblock %}

@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- beta-notes: change SDR Setup user experience; clicking OK in the modal dialog only stores the updates in the browser; only after clicking Apply Settings are all the changes handed to the backend
 - beta-notes: show better gain guidance in the SDR Settings UI - depending on the SDR model and the decoder used
 - beta-notes: return to the SDR Setup page after making changes
 - beta-notes: add user configurable Env variables to the non-ADS-B containers
