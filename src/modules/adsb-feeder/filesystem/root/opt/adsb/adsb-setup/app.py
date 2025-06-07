@@ -2422,6 +2422,7 @@ class AdsbIm:
         aissdr = self._sdrdevices.get_sdr_by_serial(aisserial)
         if aissdr != self._sdrdevices.null_sdr:
             aissdr.purpose = "ais"
+            self._d.env_by_tags("ais_sdr_type").value = aissdr._type
             self._d.env_by_tags("run_shipfeeder").value = self._d.is_enabled(["shipfeeder"])
             self._d.env_by_tags("tar1090_aiscatcher_url").value = (
                 f"http://HOSTNAME:{self._d.env_by_tags('webport').value}/"

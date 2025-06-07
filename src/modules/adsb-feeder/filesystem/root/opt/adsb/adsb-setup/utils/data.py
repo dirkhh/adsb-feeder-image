@@ -665,6 +665,7 @@ class Data:
         Env("AF_RUN_SHIPFEEDER", default=False, tags=["run_shipfeeder", "is_enabled"]),
         Env("AIS_SX_EXTRA_OPTIONS", default="", tags=["ais_sx_extra_options"]),
         Env("AIS_STATION_NAME", default="", tags=["ais_station_name"]),
+        Env("AIS_SDR_TYPE", default="", tags=["ais_sdr_type"]),
         Env("AIS_DEVICE_SERIAL", default="", tags=["aisserial"]),
         Env("AIS_DEVICE_GAIN", default="", tags=["aisgain"]),
         Env("AIS_DEVICE_PPM", default="", tags=["ais_device_ppm"]),
