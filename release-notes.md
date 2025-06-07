@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- beta-notes: show better gain guidance in the SDR Settings UI - depending on the SDR model and the decoder used
 - beta-notes: return to the SDR Setup page after making changes
 - beta-notes: add user configurable Env variables to the non-ADS-B containers
 - beta-notes: fix main page error when non-adsb option is enabled
