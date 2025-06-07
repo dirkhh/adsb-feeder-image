@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- beta-notes: fix main page error when non-adsb option is enabled
 - beta-notes: handle aggregator choices for the various protocols accordingly and notify the user when a protocol is enabled with no aggregators
 - beta-notes: make the feed IDs for the various non-ADS-B services required
 - beta-notes: improve the setup flow for non-ADS-B users

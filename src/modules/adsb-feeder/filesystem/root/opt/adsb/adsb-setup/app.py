@@ -3316,9 +3316,9 @@ class AdsbIm:
             # do we have purposes that have been enabled that don't have an SDR assigned?
             enabled_purposes = self.enabled_purposes()
             assigned_purposes = {s.purpose for s in self._sdrdevices.sdrs if s.purpose not in ["other", ""]}
+            available_serials = [sdr._serial for sdr in self._sdrdevices.sdrs]
             if any([purpose not in assigned_purposes for purpose in enabled_purposes]):
                 configured_serials = self.configured_serials()
-                available_serials = [sdr._serial for sdr in self._sdrdevices.sdrs]
                 if any([serial not in configured_serials for serial in available_serials]):
                     print_err(f"configured serials: {configured_serials}")
                     print_err(f"available serials: {available_serials}")
