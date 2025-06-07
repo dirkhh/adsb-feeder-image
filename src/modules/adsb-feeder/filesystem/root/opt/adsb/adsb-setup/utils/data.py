@@ -457,6 +457,8 @@ class Data:
             default=False,
             tags=["aggregators_chosen"],
         ),
+        Env("_ADSBIM_STATE_ACARS_AGGREGATORS_CHOSEN", default=False, tags=["acars_aggregators_chosen", "is_enabled"]),
+        Env("_ADSBIM_STATE_AIS_AGGREGATORS_CHOSEN", default=False, tags=["ais_aggregators_chosen", "is_enabled"]),
         Env(
             "AF_IS_NIGHTLY_BASE_UPDATE_ENABLED",
             tags=["nightly_base_update", "is_enabled"],

@@ -221,7 +221,7 @@
           To configure aggregators, select a target MicroSite at the top of the page and select the Data Sharing menu.
         {% endif %}
       {% else %}
-        {% if (aggregators | length) == 0 %}
+        {% if ((env_value_by_tag('aggregator_choice') != 'nonadsb') and (aggregators | length) == 0) or (is_enabled('acarshub') and not is_enabled('acars_aggregators_chosen')) or (is_enabled('shipfeeder') and not is_enabled('ais_aggregators_chosen')) %}
           No aggregators configured. Add aggregators:
         {% else %}
           Add or remove aggregators:

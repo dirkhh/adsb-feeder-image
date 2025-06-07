@@ -2722,6 +2722,10 @@ class AdsbIm:
                             # set this to individual so if people have set "all" before can still deselect individual aggregators
                             self._d.env_by_tags("aggregator_choice").value = "individual"
                             break
+                    if any([form.get(key) == "1" for key in form.keys() if "feed_acars" in key]):
+                        self._d.env_by_tags("acars_aggregators_chosen").value = True
+                    if any([form.get(key) == "1" for key in form.keys() if "ais_feed" in key]):
+                        self._d.env_by_tags("ais_aggregators_chosen").value = True
 
                 if key == "sdr_setup" and value == "go":
                     self._d.env_by_tags("sdrs_locked").value = False
