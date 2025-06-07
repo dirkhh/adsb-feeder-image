@@ -176,34 +176,7 @@
         document.getElementById("lsusb_text").innerHTML = data.lsusb_output;
         sdrs = data['sdrdevices'];
         console.log("Got the following SDRs from the API: " + JSON.stringify(sdrs));
-        let use = data['frequencies'];
-        let have_rtlsdr = false;
-        for (let i = 0; i < num; i++) {
-          if (sdrs[i]['type'] == 'rtlsdr') {
-            have_rtlsdr = true;
-          }
-          let id = '#sdr' + i;
-          $(id).css({ 'display': 'flex' });
-          $(id + "-serial").html(sdrs[i]['serial']);
-          $(id + "-type").html(sdrs[i]['type']);
-          $(id + "-gain").html(sdrs[i]['gain']);
-          if (sdrs[i]['biastee']) {
-            $(id + "-biastee").html("\u2713");
-          } else {
-            $(id + "-biastee").html("");
-          }
-          let purpose = sdrs[i]['purpose'];
-          // we have other-0 .. other-15, but that's an implementation detail that we hide from the user
-          if (purpose.startsWith('other')) {
-            purpose = 'other';
-          }
-          $(id + "-purpose").html(purpose);
-        }
-        $("#rtl_serial_change").toggle(have_rtlsdr);
-        for (let i = num; i < 16; i++) {
-          let id = 'sdr' + i;
-          document.getElementById(id).style.display = 'none';
-        }
+        update_ui();
         if (data['duplicates'] != '') {
           document.getElementById('duplicates').innerText = data['duplicates'];
           document.getElementById("duptext").style.display = 'block';
@@ -212,7 +185,41 @@
           document.getElementById("duptext").style.display = 'none';
           document.getElementById("noduptext").style.display = 'block';
         }
+      })
+      .catch(error => {
+        console.error('API Error for /api/sdr_info:', error);
       });
+  }
+
+  function update_ui() {
+    let have_rtlsdr = false;
+    let num = sdrs.length;
+    for (let i = 0; i < num; i++) {
+      if (sdrs[i]['type'] == 'rtlsdr') {
+        have_rtlsdr = true;
+      }
+      let id = '#sdr' + i;
+      $(id).css({ 'display': 'flex' });
+      $(id + "-serial").html(sdrs[i]['serial']);
+      $(id + "-type").html(sdrs[i]['type']);
+      $(id + "-gain").html(sdrs[i]['gain']);
+      if (sdrs[i]['biastee']) {
+        $(id + "-biastee").html("\u2713");
+      } else {
+        $(id + "-biastee").html("");
+      }
+      let purpose = sdrs[i]['purpose'];
+      // we have other-0 .. other-15, but that's an implementation detail that we hide from the user
+      if (purpose.startsWith('other')) {
+        purpose = 'other';
+      }
+      $(id + "-purpose").html(purpose);
+    }
+    $("#rtl_serial_change").toggle(have_rtlsdr);
+    for (let i = num; i < 16; i++) {
+      let id = 'sdr' + i;
+      document.getElementById(id).style.display = 'none';
+    }
   }
 
   sdr_info();
@@ -359,16 +366,18 @@
     }
     sdrs[sdr]['gain'] = set_change_flag(sdrs[sdr]['gain'], gain);
     sdrs[sdr]['biastee'] = set_change_flag(sdrs[sdr]['biastee'], biastee);
-    sdrs[sdr]['purpose'] = set_change_flag(sdrs[sdr]['purpose'], purpose);
-    modal.hide();
-    let id = '#sdr' + sdr;
-    $(id + "-gain").html(gain);
-    if (biastee) {
-      $(id + "-biastee").html("\u2713");
-    } else {
-      $(id + "-biastee").html("");
+    if (purpose != sdrs[sdr]['purpose']) {
+      // if another SDR already had this purpose, switch that to 'other'
+      for (let i = 0; i < sdrs.length; i++) {
+        if (sdrs[i]['purpose'] == purpose) {
+          sdrs[i]['purpose'] = 'other' + i;
+        }
+      }
+      changes_to_apply = true;
+      sdrs[sdr]['purpose'] = purpose;
     }
-    $(id + "-purpose").html(sdrs[sdr]['purpose']);
+    modal.hide();
+    update_ui();
   }
 
   function submit_sdr_changes() {
