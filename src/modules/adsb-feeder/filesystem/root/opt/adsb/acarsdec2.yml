@@ -15,6 +15,8 @@ services:
       - FREQUENCIES=${ACARS2_FREQUENCIES:-128.975 129.000 129.125 129.350 129.525}
       - FEED_ID=${ACARS2_FEED_ID}
       - OUTPUT_SERVER=acars_router
+      # USER_PROVIDED_ENV_START
+      # USER_PROVIDED_ENV_END
     tmpfs:
       - /run:exec,size=64M
       - /var/log:size=64M

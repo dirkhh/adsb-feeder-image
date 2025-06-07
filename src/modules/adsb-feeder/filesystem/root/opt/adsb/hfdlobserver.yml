@@ -8,3 +8,7 @@ services:
     restart: unless-stopped
     volumes:
       - /opt/adsb/hfdlobserver/compose:/run/hfdlobserver
+    environment:
+      - PLACEHOLDER_ENV_VAR_42=true
+      # USER_PROVIDED_ENV_START
+      # USER_PROVIDED_ENV_END

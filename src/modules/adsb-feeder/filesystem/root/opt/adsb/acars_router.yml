@@ -18,6 +18,8 @@ services:
       - AR_SEND_UDP_VDLM2=acarshub:5555${FEED_STRING_VDL2}
       - AR_SEND_TCP_HFDL=${FEED_STRING_HFDL}
       - AR_SEND_UDP_HFDL=acarshub:5556
+      # USER_PROVIDED_ENV_START
+      # USER_PROVIDED_ENV_END
     tmpfs:
       - /run:exec,size=64M
       - /var/log

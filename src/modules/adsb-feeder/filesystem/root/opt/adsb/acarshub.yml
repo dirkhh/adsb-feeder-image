@@ -31,4 +31,6 @@ services:
       - ADSB_URL=http://ultrafeeder/data/aircraft.json
       - ADSB_LAT=${FEEDER_LAT}
       - ADSB_LON=${FEEDER_LONG}
+      # USER_PROVIDED_ENV_START
+      # USER_PROVIDED_ENV_END
 

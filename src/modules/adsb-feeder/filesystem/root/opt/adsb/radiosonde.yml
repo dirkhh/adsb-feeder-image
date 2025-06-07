@@ -15,3 +15,7 @@ services:
       - /opt/adsb/radiosonde/station.cfg:/opt/auto_rx/station.cfg:ro
       - /opt/adsb/radiosonde/log/:/opt/auto_rx/log
       - /dev/bus/usb:/dev/bus/usb:ro
+    environment:
+      - PLACEHOLDER_ENV_VAR_42=true
+      # USER_PROVIDED_ENV_START
+      # USER_PROVIDED_ENV_END

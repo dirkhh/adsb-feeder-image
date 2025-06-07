@@ -47,6 +47,8 @@ services:
       - UDP_FEEDS=${AIS_SX_UDP_FEEDS}
 #     incoming UDP data related parameters:
       - AISCATCHER_UDP_INPUTS=${AISCATCHER_UDP_INPUTS}
+      # USER_PROVIDED_ENV_START
+      # USER_PROVIDED_ENV_END
     ports:
       - ${AF_AISCATCHER_PORT:-9990}:80
       - 9988:9988/udp
