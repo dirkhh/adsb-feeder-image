@@ -409,6 +409,10 @@ if [ -f /opt/adsb/os.adsb.feeder.image ] ; then
     if [[ -f /etc/dhcp/dhclient.conf ]] && ! grep -qs /etc/dhcp/dhclient.conf -e '^timeout 30;'; then
         echo "timeout 30;" >> /etc/dhcp/dhclient.conf
     fi
+
+    # adsb-docker.service will set this as well but let's also do it on update so a reboot is not
+    # required
+    echo 128 > /sys/module/usbcore/parameters/usbfs_memory_mb
 fi
 
 # shellcheck disable=SC2164
