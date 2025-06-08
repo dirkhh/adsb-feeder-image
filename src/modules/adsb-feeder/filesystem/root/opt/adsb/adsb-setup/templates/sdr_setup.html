@@ -20,6 +20,16 @@
     apply settings</button>
 
   <div class="col-12">
+    <div id="max_sdrs" class="my-3" style="display: none;">
+      <p class="text-warning">The number of SDRs connected to your system may be too much for your hardware.</p>
+      <p id="max_sdrs_text"></p>
+      <p>It's hard to give any specific hard limits, but generally speaking, most single board computers (maybe with
+        the exception of the RPi5) can't handle more than 3 SDRs, possibly only 2 if one of them is an Airspy.
+        An RPi5 appears to be able to handle 4 SDRs as long as they are split across the two USB controllers.
+        For PCs the number depends on a lot of factors, including on how many separate USB controllers you can use.
+        We have seen users run into no issues with 6 SDRs on one controller (with a powered hub), but other
+        reports show issues with as few as 3 SDRs on a single controller.</p>
+    </div>
     <div class="row" id="multipleSdrs">
       <div class="col-sm-12 mt-5 mb-3 text-danger" style="display: none;" id="duptext">
         <p>There are multiple SDRs with serial number <span id="duplicates"></span>. This will not work correctly. Please
@@ -184,6 +194,10 @@
         } else {
           document.getElementById("duptext").style.display = 'none';
           document.getElementById("noduptext").style.display = 'block';
+        }
+        if (data['sdr_warning'] != '') {
+          $("#max_sdrs_text").html(data['sdr_warning']);
+          $("#max_sdrs").show();
         }
       })
       .catch(error => {

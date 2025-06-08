@@ -1117,9 +1117,18 @@ class AdsbIm:
                 serials[f] = serial_guess[f]
 
         print_err(f"sdr_info->frequencies: {str(serials)}")
+        sdr_warning = ""
+        max_sdr_per_bus = 4 if "x86" in self._d.env_by_tags("board_name").valuestr else 3
+        buscount: Dict[str, int] = {}
+        for sdr in self._sdrdevices.sdrs:
+            buscount[sdr._address[:3]] = buscount.get(sdr._address[:3], 0) + 1
+            if buscount[sdr._address[:3]] > max_sdr_per_bus:
+                sdr_warning += f"There are possibly too many SDRs on bus {sdr._address[:3]}. "
+                break
         jsonString = json.dumps(
             {
                 "sdrdevices": [sdr._json for sdr in self._sdrdevices.sdrs],
+                "sdr_warning": sdr_warning,
                 "frequencies": serials,
                 "duplicates": ", ".join(self._sdrdevices.duplicates),
                 "lsusb_output": self._sdrdevices.lsusb_output,
