@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- beta-notes: improve comments and placeholders on expert page based on user feedback
 - beta-notes: feed VDLM2 to airframes.io on TCP
 - beta-notes: show warning about potentially too many SDRs
 - beta-notes: update Shipfeeder container
