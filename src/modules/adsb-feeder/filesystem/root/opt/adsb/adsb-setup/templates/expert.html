@@ -301,7 +301,7 @@
               </div>
               <div class="col-8 mb-1" data-update="acarsdec--update">
                 <input type="text" class="mx-auto w-100 two_mhz" name="acars_frequencies" id="acars_frequencies"
-                      placeholder="130.025 130.450 131.125 131.450 131.475 131.525 131.550 131.725"
+                      placeholder="default values should work as a starting point"
                       value="{{ env_value_by_tag('acars_frequencies') }}">
               </div>
               {% if env_value_by_tag('acarsserial') == '' %}
@@ -358,7 +358,7 @@
               </div>
               <div class="col-8 mb-1" data-update="acarsdec2--update">
                 <input type="text" class="mx-auto w-100 two_mhz" name="acars_2_frequencies" id="acars_2_frequencies"
-                      placeholder="128.975 129.000 129.125 129.350 129.525 130.425 130.825 130.850"
+                      placeholder="default values should be a good starting point"
                       value="{{ env_value_by_tag('acars_2_frequencies') }}">
               </div>
               {% if env_value_by_tag('acars_2serial') == '' %}
@@ -415,7 +415,7 @@
               </div>
               <div class="col-8 mb-1" data-update="dumpvdl2--update">
                 <input type="text" class="mx-auto w-100 two_mhz" name="vdl2_frequencies" id="vdl2_frequencies"
-                      placeholder="136975000 136945000 136925000 136825000 136800000 136775000"
+                      placeholder="default values should be a good starting point"
                       value="{{ env_value_by_tag('vdl2_frequencies') }}">
               </div>
               {% if env_value_by_tag('vdl2serial') == '' %}
