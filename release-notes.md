@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- beta-notes: feed VDLM2 to airframes.io on TCP
 - beta-notes: show warning about potentially too many SDRs
 - beta-notes: update Shipfeeder container
 - beta-notes: change SDR Setup user experience; clicking OK in the modal dialog only stores the updates in the browser; only after clicking Apply Settings are all the changes handed to the backend

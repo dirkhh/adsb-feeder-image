@@ -2478,20 +2478,22 @@ class AdsbIm:
 
         self._d.env_by_tags("acarshub").value = self._d.is_enabled("acars_router")
         feed_acars = ""
-        feed_vdl2 = ""
+        feed_vdl2_udp = ""
+        feed_vdl2_tcp = ""
         feed_hfdl = ""
         if self._d.list_is_enabled("feed_acars_airframes", 0):
+            feed_vdl2_tcp = "feed.airframes.io:5553"
             feed_acars += ";feed.airframes.io:5550"
-            feed_vdl2 += ";feed.airframes.io:5552"
             feed_hfdl += "feed.airframes.io:5556"
         if self._d.list_is_enabled("feed_acars_acarsdrama", 0):
             feed_acars += ";feedthe.acarsdrama.com:5550"
-            feed_vdl2 += ";feedthe.acarsdrama.com:5555"
+            feed_vdl2_udp += ";feedthe.acarsdrama.com:5555"
         if self._d.list_is_enabled("feed_acars_avdelphi", 0):
             feed_acars += ";data.avdelphi.com:5556"
-            feed_vdl2 += ";data.avdelphi.com:5600"
+            feed_vdl2_udp += ";data.avdelphi.com:5600"
         self._d.env_by_tags("feed_string_acars").value = feed_acars
-        self._d.env_by_tags("feed_string_vdl2").value = feed_vdl2
+        self._d.env_by_tags("feed_string_vdl2_udp").value = feed_vdl2_udp
+        self._d.env_by_tags("feed_string_vdl2_tcp").value = feed_vdl2_tcp
         self._d.env_by_tags("feed_string_hfdl").value = feed_hfdl
 
         # AIS stuff -- this needs to be extended for stage 2
