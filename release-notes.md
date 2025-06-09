@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- beta-notes: only show biastee option if the underlying container supports that for this SDR type
 - beta-notes: fixup ACARS feeds / more consistently handle acars_router feed strings
 - beta-notes: improve matching of acars notifications on the live map
 - beta-notes: improve comments and placeholders on expert page based on user feedback

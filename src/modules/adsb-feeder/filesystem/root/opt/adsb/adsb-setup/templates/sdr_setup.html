@@ -141,7 +141,7 @@
           <div class="col-12" id="biastee_container">
             <div class="col-12 form-check mt-3 ms-3">
               <input class="form-check-input me-1" type="checkbox" name="enable_biastee" id="enable_biastee" />
-              <label for="enable_biastee" class="form-check-label">Enable biastee (if supported)</label>
+              <label for="enable_biastee" class="form-check-label">Enable biastee</label>
             </div>
           </div>
         </div>
@@ -313,9 +313,9 @@
       'rtlsdr': ['enter a value between 0 and 50', validate_0_50],
     }
   }
-  function update_gain_text() {
+  function update_gain_text(sdr_given) {
     let purpose = $('input[name="usage"]:checked').val();
-    let sdr = sdrs[$("#sdr_num").text()];
+    let sdr = sdr_given || sdrs[$("#sdr_num").text()];
     if (Object.keys(gain_text).includes(purpose) && Object.keys(gain_text[purpose]).includes(sdr['type'])) {
       console.log("gain_text for " + purpose + " and " + sdr['type'] + " is " + gain_text[purpose][sdr['type']]);
       $("#gain_label").text(gain_text[purpose][sdr['type']][0]);
@@ -323,6 +323,20 @@
       $("#gain_label").text("please check the docs for valid gain values");
     }
   }
+
+  function update_biastee(sdr_given, purpose_given) {
+    let sdr = sdr_given || sdrs[$("#sdr_num").text()];
+    let purpose = purpose_given || sdr['purpose'];
+    let show_biastee = purpose == 'ais' && sdr['type'] == 'rtlsdr';
+    show_biastee |= purpose == '1090' || purpose == '1090_2' || purpose == 'uat' || purpose == 'sonde';
+    if (show_biastee) {
+      $("#biastee_container").show();
+      $("#enable_biastee").prop('checked', sdr['biastee']);
+    } else {
+      $("#biastee_container").hide();
+    }
+  }
+
   function sdr_setup_show_dialog(sdr_idx) {
     $(document).ready(function() {
       let sdr = sdrs[sdr_idx];
@@ -335,8 +349,8 @@
       $("#usage" + sdr['purpose']).prop('checked', true);
       $("#usage" + sdr['purpose']).trigger('change');
       $("#sdrgain").val(sdr['gain']);
-      $("#enable_biastee").prop('checked', sdrs[sdr_idx]['biastee']);
-      update_gain_text();
+      update_biastee(sdr);
+      update_gain_text(sdr);
       if (sdr['type'] != "rtlsdr") {
         // we only support RTLSDR for UAT and Sonde
         $("#usage978").parent().hide();
@@ -349,8 +363,8 @@
   $('input[name="usage"][type="radio"]').on('change', function () {
     console.log("usage changed to " + this.value);
     $("#gain_container").toggle(this.value != "other");
-    $("#biastee_container").toggle(this.value != "other");
     update_gain_text();
+    update_biastee(sdrs[$("#sdr_num").text()], this.value);
   });
 
   // mildly pointless convenience function - this makes it easier to write the assignment in

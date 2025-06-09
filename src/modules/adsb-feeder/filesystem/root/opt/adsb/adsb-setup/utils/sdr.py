@@ -309,6 +309,7 @@ class SDRDevices:
                 "ais": "aisgain",
                 "sonde": "sondegain",
             },
+            # note -- the UI has to know where we don't support biastee
             "biastee": {
                 "1090": "1090biastee",
                 "1090_2": "1090_2biastee",
