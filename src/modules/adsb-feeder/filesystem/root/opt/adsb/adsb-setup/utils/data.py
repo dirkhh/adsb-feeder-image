@@ -657,10 +657,12 @@ class Data:
         Env("FEED_ACARS_AVDELPHI", default=[False], tags=["feed_acars_avdelphi", "is_enabled"]),
         Env("FEED_ACARS_ACARSDRAMA", default=[False], tags=["feed_acars_acarsdrama", "is_enabled"]),
         # note that the ACARS and VDL Mode 2 strings start with a semicolon but HFDL does not -- see acars_router.yml
-        Env("FEED_STRING_ACARS", default="", tags=["feed_string_acars"]),
-        Env("FEED_STRING_VDL2", default="", tags=["feed_string_vdl2_udp"]),
+        Env("FEED_STRING_ACARS_UDP", default="", tags=["feed_string_acars_udp"]),
+        Env("FEED_STRING_ACARS_TCP", default="", tags=["feed_string_acars_tcp"]),
+        Env("FEED_STRING_VDL2_UDP", default="", tags=["feed_string_vdl2_udp"]),
         Env("FEED_STRING_VDL2_TCP", default="", tags=["feed_string_vdl2_tcp"]),
-        Env("FEED_STRING_HFDL", default="", tags=["feed_string_hfdl"]),
+        Env("FEED_STRING_HFDL_UDP", default="", tags=["feed_string_hfdl_udp"]),
+        Env("FEED_STRING_HFDL_TCP", default="", tags=["feed_string_hfdl_tcp"]),
         # AIS related stuff
         Env("AF_IS_SHIPFEEDER_ENABLED", default=False, tags=["shipfeeder", "is_enabled"]),
         Env("AF_RUN_SHIPFEEDER", default=False, tags=["run_shipfeeder", "is_enabled"]),

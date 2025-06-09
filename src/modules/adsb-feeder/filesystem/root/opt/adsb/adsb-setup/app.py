@@ -2477,24 +2477,29 @@ class AdsbIm:
         self._d.env_by_tags("acarshub_hfdl").value = "external" if self._d.is_enabled("run_dumphfdl") else "false"
 
         self._d.env_by_tags("acarshub").value = self._d.is_enabled("acars_router")
-        feed_acars = ""
-        feed_vdl2_udp = ""
+        feed_acars_udp = "acarshub:5550;"
+        feed_acars_tcp = ""
+        feed_vdl2_udp = "acarshub:5555;"
         feed_vdl2_tcp = ""
-        feed_hfdl = ""
+        feed_hfdl_udp = "acarshub:5556;"
+        feed_hfdl_tcp = ""
         if self._d.list_is_enabled("feed_acars_airframes", 0):
-            feed_vdl2_tcp = "feed.airframes.io:5553"
-            feed_acars += ";feed.airframes.io:5550"
-            feed_hfdl += "feed.airframes.io:5556"
+            feed_vdl2_tcp += "feed.airframes.io:5553;"
+            feed_acars_udp += "feed.airframes.io:5550;"
+            feed_hfdl_udp += "feed.airframes.io:5556;"
         if self._d.list_is_enabled("feed_acars_acarsdrama", 0):
-            feed_acars += ";feedthe.acarsdrama.com:5550"
-            feed_vdl2_udp += ";feedthe.acarsdrama.com:5555"
+            feed_acars_udp += "feedthe.acarsdrama.com:5550;"
+            feed_vdl2_udp += "feedthe.acarsdrama.com:5555;"
         if self._d.list_is_enabled("feed_acars_avdelphi", 0):
-            feed_acars += ";data.avdelphi.com:5556"
-            feed_vdl2_udp += ";data.avdelphi.com:5600"
-        self._d.env_by_tags("feed_string_acars").value = feed_acars
-        self._d.env_by_tags("feed_string_vdl2_udp").value = feed_vdl2_udp
-        self._d.env_by_tags("feed_string_vdl2_tcp").value = feed_vdl2_tcp
-        self._d.env_by_tags("feed_string_hfdl").value = feed_hfdl
+            feed_acars_udp += "data.avdelphi.com:5556;"
+            feed_vdl2_udp += "data.avdelphi.com:5600;"
+
+        self._d.env_by_tags("feed_string_acars_udp").value = feed_acars_udp.rstrip(";")
+        self._d.env_by_tags("feed_string_acars_tcp").value = feed_acars_tcp.rstrip(";")
+        self._d.env_by_tags("feed_string_vdl2_udp").value = feed_vdl2_udp.rstrip(";")
+        self._d.env_by_tags("feed_string_vdl2_tcp").value = feed_vdl2_tcp.rstrip(";")
+        self._d.env_by_tags("feed_string_hfdl_udp").value = feed_hfdl_udp.rstrip(";")
+        self._d.env_by_tags("feed_string_hfdl_tcp").value = feed_hfdl_tcp.rstrip(";")
 
         # AIS stuff -- this needs to be extended for stage 2
         self._d.env_by_tags("ais_airframes_station_id").list_set(
