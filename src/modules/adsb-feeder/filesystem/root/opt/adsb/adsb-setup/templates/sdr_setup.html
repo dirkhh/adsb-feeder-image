@@ -398,7 +398,7 @@
       // if another SDR already had this purpose, switch that to 'other'
       for (let i = 0; i < sdrs.length; i++) {
         if (sdrs[i]['purpose'] == purpose) {
-          sdrs[i]['purpose'] = 'other' + i;
+          sdrs[i]['purpose'] = 'other-' + i;
         }
       }
       changes_to_apply = true;
