@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- add SDR feature matrix README
 - beta-notes: allow disabling non-adsb protocols without first setting a feed ID
 - beta-notes: image only: increase usbfs memory to 128M to accomodate more SDRs
 - beta-notes: only show biastee option if the underlying container supports that for this SDR type
