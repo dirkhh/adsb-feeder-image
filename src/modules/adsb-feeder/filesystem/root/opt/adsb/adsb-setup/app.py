@@ -1269,7 +1269,7 @@ class AdsbIm:
                     # all this SHOULD have been validated already client-side
                     # let's make sure we don't have 'auto' in there for containers that
                     # don't support it
-                    if not sdr.purpose in ["1090", "1090_2", "978"] and "auto" in gain:
+                    if not sdr.purpose in ["1090", "1090_2", "978", "ais"] and "auto" in gain:
                         if sdr.purpose in ["acars", "acars_2"] and sdr._type != "airspy":
                             gain = "-10"
                         else:
