@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- beta-notes: support -10 for RTLSDR autogain in ACARS
 - add SDR feature matrix README
 - beta-notes: allow disabling non-adsb protocols without first setting a feed ID
 - beta-notes: image only: increase usbfs memory to 128M to accomodate more SDRs

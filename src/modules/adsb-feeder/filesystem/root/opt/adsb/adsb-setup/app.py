@@ -1277,7 +1277,7 @@ class AdsbIm:
                     if sdr._type == "airspy" and sdr.purpose == "1090":
                         gain = self.adjust_airspy_gain(gain)
                         self._d.env_by_tags("gain_airspy").value = gain
-                    if sdr._type == "rtlsdr":
+                    if sdr._type == "rtlsdr" and not (sdr.purpose in ["acars", "acars_2"] and gain == "-10"):
                         numgain = make_int(gain)
                         if numgain < 0:
                             gain = "0"
