@@ -269,6 +269,11 @@
   function validate_20_59_empty(text) {
     return text == '' || (text >= 20 && text <= 59);
   }
+
+  function validate_empty(text) {
+    return text == '';
+  }
+
   const gain_text = {
     '1090': {
       'rtlsdr': ['enter a value between 0 and 50 or "auto"', validate_0_50_auto],
@@ -297,16 +302,19 @@
     'vdl2': {
       'rtlsdr': ['enter a value between 0 and 50', validate_0_50],
       'airspy': ['enter a value between 0 and 21', validate_0_21],
+      'airspyhf': ['enter a value between 0 and 21', validate_0_21],
       'sdrplay': ['enter a value between 20 and 59, leave empty for agc', validate_20_59_empty],
     },
     'hfdl': {
       'rtlsdr': ['enter a value between 0 and 50', validate_0_50],
       'airspy': ['enter a value between 0 and 21', validate_0_21],
+      'airspyhf': ['enter a value between 0 and 21', validate_0_21],
       'sdrplay': ['enter a value between 20 and 59', validate_20_59],
     },
     'ais': {
       'rtlsdr': ['enter a value between 0 and 50 or auto', validate_0_50_auto],
       'airspy': ['enter a value between 0 and 21', validate_0_21],
+      'airspyhf': ['always uses agc - leave empty', validate_empty],
       'sdrplay': ['enter a value between 20 and 59', validate_20_59],
     },
     'sonde': {

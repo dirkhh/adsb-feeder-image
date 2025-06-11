@@ -209,6 +209,7 @@ class SDRDevices:
         check_pidvid(pv_list=rtlsdr_pv_list, sdr_type="rtlsdr")
         check_pidvid(pv_list=["0403:7028"], sdr_type="stratuxv3")
         check_pidvid(pv_list=["1d50:60a1"], sdr_type="airspy")
+        check_pidvid(pv_list=["03eb:800c"], sdr_type="airspyhf")
         check_pidvid(pv_list=["0403:6001"], sdr_type="modesbeast")
 
         sdrplay_pv_list = [

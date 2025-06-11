@@ -9,6 +9,7 @@ Regardless of what your SDR can do, some of the containers that are used for thi
 |:-------:|:-------------:|:-------------------:|:------------------:|
 | RTLSDR  | 0 - 49.6      |  auto               | :heavy_check_mark: |
 | Airspy  | 0 - 21        |  auto               | :heavy_check_mark: |
+| AirspyHF| :x:           | :x:                 | :x:                |
 | SDRplay | leave empty   | :heavy_check_mark:  | :x:                |
 
 ## ADS-B (UAT)
@@ -16,6 +17,7 @@ Regardless of what your SDR can do, some of the containers that are used for thi
 |:-------:|:-------------:|:--------:|:------------------:|
 | RTLSDR  | 0 - 49.6      |  auto    | :heavy_check_mark: |
 | Airspy  | :x:           | :x:      | :x:                |
+| AirspyHF| :x:           | :x:      | :x:                |
 | SDRplay | :x:           | :x:      | :x:                |
 
 ## ACARS (and ACARS_2)
@@ -23,13 +25,15 @@ Regardless of what your SDR can do, some of the containers that are used for thi
 |:-------:|:-------------:|:--------:|:-------:|
 | RTLSDR  | 0 - 49.6      |  -10     | :x:     |
 | Airspy  | 0 - 21        | :x:      | :x:     |
+| AirspyHF| :x:           | :x:      | :x:     |
 | SDRplay | 20 - 59       | -10      | :x:     |
 
 ## VDLM2
 | SDR     | gain          | autogain   | biastee |
 |:-------:|:-------------:|:----------:|:-------:|
 | RTLSDR  | 0 - 49.6      | :x:        | :x:     |
-| Airspy  | 0 - 21        | :x:        |
+| Airspy  | 0 - 21        | :x:        |         |
+| AirspyHF| 0 - 21        | :x:        | :x:     |
 | SDRplay | 20 - 59       | leave empty| :x:     |
 
 ## HFDL
@@ -37,18 +41,21 @@ Regardless of what your SDR can do, some of the containers that are used for thi
 |:-------:|:-------------:|:--------:|:-------:|
 | RTLSDR  | 0 - 49.6      | :x:      | :x:     |
 | Airspy  | 0 - 21        | :x:      | :x:     |
+| AirspyHF| 0 - 21        | :x:      | :x:     |
 | SDRplay | 20 - 59       | :x:      | :x:     |
 
 ## AIS
-| SDR     | gain          | autogain | biastee           |
-|:-------:|:-------------:|:--------:|:-----------------:|
-| RTLSDR  | 0 - 49.6      | auto     | :heavy_check_mark |
-| Airspy  | 0 - 21        | :x:      | :x:               |
-| SDRplay | 20 - 59       | :x:      | :x:               |
+| SDR     | gain          | autogain   | biastee           |
+|:-------:|:-------------:|:----------:|:-----------------:|
+| RTLSDR  | 0 - 49.6      | auto       | :heavy_check_mark |
+| Airspy  | 0 - 21        | :x:        | :x:               |
+| AirspyHF| always agc    | leave empty| :x:               |
+| SDRplay | 20 - 59       | :x:        | :x:               |
 
 ## SONDE
 | SDR     | gain          | autogain | biastee            |
 |:-------:|:-------------:|:--------:|:------------------:|
 | RTLSDR  | 0 - 49.6      |  auto    | :heavy_check_mark: |
 | Airspy  | :x:           | :x:      | :x:                |
+| AirspyHF| 0 - 21        | :x:      | :x:                |
 | SDRplay | :x:           | :x:      | :x:                |
