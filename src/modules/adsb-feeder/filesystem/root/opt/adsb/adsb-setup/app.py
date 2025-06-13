@@ -3877,7 +3877,7 @@ class AdsbIm:
         )
 
     def waiting(self):
-        return render_template("waiting.html", title="ADS-B Feeder performing requested actions")
+        return render_template("waiting.html", title="ADS-B Feeder is performing requested actions")
 
     def stream_log(self):
         logfile = "/run/adsb-feeder-image.log"

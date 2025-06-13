@@ -17,12 +17,12 @@
 <div class="row small">
   <!-- FULL_IMAGE_ONLY_START -->
   <div class="col-12 col-lg-6 {% if is_enabled('secure_image') %} d-none {% endif %}">
-    <h5 class="mt-3">Install ssh credentials</h5>
+    <h5 class="mt-3">Install SSH Credentials</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
       <div class="row align-items-center">
         <div class="col-12 mb-2">
           <label for="ssh_pub">
-            Enter or paste your public key below. This will allow you to then log in as root on the feeder SBC.
+            Enter or paste your public key below. This will allow you to then log in as root on the feeder.
           </label>
         </div>
         <div class="col-8">
@@ -36,14 +36,14 @@
     </form>
   </div>
   <div class="col-12 col-lg-6 {% if is_enabled('secure_image') %} d-none {% endif %}">
-    <h5 class="mt-3">Create new random root password</h5>
+    <h5 class="mt-3">Generate New Root Password</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
       <div class="row align-items-center">
         <div class="col-12 mb-2">
           <label for="root_password">
             If you need to be able to log into the image as root user (and really, you almost never should need to),
-            click on 'Show Password Option', copy the random password shown, and then click 'Accept'.<br/>
-            After that you'll be able to log in as root using an ssh client (e.g. putty on Windows or ssh on macOS or Linux).
+            click on 'Show Password', copy the random password shown, and then click 'Accept'.<br/>
+            After that you'll be able to log in as root using an SSH client (e.g. PuTTY on Windows or SSH on macOS or Linux).
           </label>
         </div>
         <div class="row fw-light collapse align-right" id="showrpw">
@@ -53,7 +53,7 @@
         </div>
       </div>
       <button class="btn btn-secondary btn-rounded" type="button" data-mdb-toggle="collapse" data-mdb-target="#showrpw"
-              aria-expanded="false" aria-controls="showrpw">show password option</button>
+              aria-expanded="false" aria-controls="showrpw">Show Password</button>
     </form>
   </div>
   <div class="col-12 col-lg-6 {% if not is_enabled('secure_image') %} d-none {% endif %}">
@@ -68,7 +68,7 @@
       </div>
   </div>
   <div class="col-12 col-lg-6 {% if is_enabled('secure_image') %} d-none {% endif %}">
-    <h5 class="mt-3">Secure feeder system</h5>
+    <h5 class="mt-3">Secure Feeder System</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
       <div class="row align-items-center">
         <div class="col-8">
@@ -83,7 +83,7 @@
         </div>
         <div class="col-4">
           <button type="submit" class="btn btn-primary mx-auto w-100" name="secure_image" value="go">
-            Yes, SSH is working.<br>Secure the image
+            SSH is working.<br>Secure the image.
           </button>
         </div>
       </div>
@@ -101,7 +101,7 @@
           <button type="submit" class="btn btn-primary mx-auto w-100" name="shutdown" value="wait">Shutdown</button>
         </div>
         <div class="col-8">
-          <label for="reboot">Reboot the feeder. Please note that some boards are not able to reboot
+          <label for="reboot">Reboot the feeder. Some boards are not able to reboot
             without manually power cycling.
           </label>
         </div>
@@ -112,7 +112,7 @@
     </form>
   </div>
   <div class="col-12 col-lg-6">
-    <h5 class="mt-3">System log persistence toggle</h5>
+    <h5 class="mt-3">System Log Persistence Toggle</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
       <div class="row align-items-center">
         <div class="col-8">
@@ -131,11 +131,11 @@
   </div>
   <!-- FULL_IMAGE_ONLY_END -->
   <div class="col-12 col-lg-6">
-    <h5 class="mt-3">System update settings</h5>
+    <h5 class="mt-3">System Update Settings</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
       <div class="row align-items-center">
   <!-- FULL_IMAGE_ONLY_START -->
-        <div class="col-8 mb-3"><span class="ms-3">Manual OS update</span>
+        <div class="col-8 mb-3"><span class="ms-3">Manual OS Update</span>
         </div>
         <div class="col-4 mb-3">
           <button type="submit" class="btn btn-primary mx-auto w-100" name="os_update" value="go">Trigger OS Update
@@ -154,7 +154,7 @@
             <input type="checkbox" class="col-1" name="nightly_feeder_update--is_enabled"
                    id="nightly_feeder_update--is_enabled" {% if is_enabled("nightly_feeder_update") %} checked
                    {% endif %}>
-            <label for="nightly_feeder_update--is_enabled" class="col-11">Update Feeder software every
+            <label for="nightly_feeder_update--is_enabled" class="col-11">Update feeder software every
               night, based on the branch used at the last manual update - currently '{{ current_branch }}'.</label>
           </div>
         </div>
@@ -166,7 +166,7 @@
     </form>
   </div>
   <div class="col-12 col-lg-6">
-    <h5 class="mt-3">Update feeder applications</h5>
+    <h5 class="mt-3">Update Feeder Applications</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
       <div class="row align-items-center">
         <div class="col-8">
