@@ -157,7 +157,7 @@
               </td>
               {% for idx in ns.site_indices %}
               <td class="text-center">
-                <span id="{{ agg ~ 'span' ~ idx }}" width="3em">{% if list_is_enabled(agg, idx)%}&#10003;
+                <span id="{{ agg ~ 'span' ~ idx }}" width="3em">{% if list_is_enabled(agg, idx)%}<span class="icon-placeholder" data-icon="overall-good"></span>
                   {% endif %}</span>
               </td>
               {% endfor %}
@@ -185,10 +185,10 @@
       </div>
       {% endfor %}
       <div class="col-12 mb-4">
-        Enabled indicates feeding the aggregator. <span class="text-success">&#x2714;</span> feed is in good state,
-        <span class="text-danger">&#x2717;</span> feed is down,
-        <span class="text-warning">&#x237B;</span> feed is degraded,
-        <span class="text-muted">&#x2713;</span> feed state is not supported
+        Enabled indicates feeding the aggregator. <span class="text-success"><span class="icon-placeholder" data-icon="overall-good"></span></span> feed is in good state,
+        <span class="text-danger"><span class="icon-placeholder" data-icon="feed-disconnected"></span></span> feed is down,
+        <span class="text-warning"><span class="icon-placeholder" data-icon="feed-warning"></span></span> feed is degraded,
+        <span class="text-muted"><span class="icon-placeholder" data-icon="overall-good"></span></span> feed state is not supported
         <br />
         <span onclick="$('#extra_legend').toggleClass('d-none'); return false;">
           <a href="">Toggle detailed legend</a>
@@ -196,20 +196,20 @@
         <span>| Last status update: <span id=last_status_update></span></span>
         <br />
         <span class="d-none" id="extra_legend">
-          '+': feed/mlat is connected; '&#x2612;': feed/mlat is not connected
+          '<span class="icon-placeholder" data-icon="feed-connected"></span>': feed/mlat is connected; '<span class="icon-placeholder" data-icon="feed-disconnected"></span>': feed/mlat is not connected
           <br />
-          '&#x2639;': mlat sync errors (if this persists for hours, check <a
+          '<span class="icon-placeholder" data-icon="mlat-sync-error"></span>': mlat sync errors (if this persists for hours, check <a
              href="https://github.com/wiedehopf/adsb-wiki/wiki/mlat-check">this page</a>)
           <br />
-          '&#x26a0;': feed is intermittent / degraded
+          '<span class="icon-placeholder" data-icon="feed-warning"></span>': feed is intermittent / degraded
           <br />
-          '&#x26a0;': mlat sync warning (intermittent sync issue / lack of traffic / no other receivers in the area)
+          '<span class="icon-placeholder" data-icon="feed-warning"></span>': mlat sync warning (intermittent sync issue / lack of traffic / no other receivers in the area)
           <br />
-          '&#x27f3;': container is up for less than a 30 seconds, not checking status
+          '<span class="icon-placeholder" data-icon="container-starting"></span>': container is up for less than a 30 seconds, not checking status
           <br />
-          '&#x2608;': container is down
+          '<span class="icon-placeholder" data-icon="container-down"></span>': container is down
           <br />
-          '.': status information is not available at this time or not supported
+          '<span class="icon-placeholder" data-icon="status-unknown"></span>': status information is not available at this time or not supported
         </span>
       </div>
     </div>
@@ -774,35 +774,96 @@
     updateChart();
   }
 
-  function reset_status(agg, idx) {
-    $("#" + agg + "beast" + idx).text(".");
-    $("#" + agg + "mlat" + idx).text(".");
+  // SVG icon loader with caching
+  const iconCache = {};
+  
+  async function loadIcon(iconName) {
+    if (iconCache[iconName]) {
+      return iconCache[iconName];
+    }
+    
+    try {
+      const response = await fetch(`/static/icons/${iconName}.svg`);
+      if (response.ok) {
+        const svgContent = await response.text();
+        iconCache[iconName] = svgContent;
+        return svgContent;
+      }
+    } catch (error) {
+      console.warn(`Failed to load icon: ${iconName}`, error);
+    }
+    
+    // Fallback to empty string if icon fails to load
+    return iconName;
+  }
+
+  // Preload all icons
+  async function preloadIcons() {
+    const iconNames = ['status-unknown', 'feed-connected', 'feed-disconnected', 'mlat-sync-error', 'feed-warning', 'overall-good', 'container-starting', 'container-down'];
+    const promises = iconNames.map(name => loadIcon(name));
+    await Promise.all(promises);
+  }
+
+  // Replace all icon placeholders with loaded SVGs
+  async function populateIconPlaceholders() {
+    const placeholders = document.querySelectorAll('.icon-placeholder');
+    for (const placeholder of placeholders) {
+      const iconName = placeholder.getAttribute('data-icon');
+      if (iconName) {
+        const iconSvg = await loadIcon(iconName);
+        placeholder.innerHTML = iconSvg;
+        placeholder.classList.remove('icon-placeholder');
+      }
+    }
+  }
+
+  async function reset_status(agg, idx) {
+    const loadingIcon = await loadIcon('status-unknown');
+    $("#" + agg + "beast" + idx).html(loadingIcon);
+    $("#" + agg + "mlat" + idx).html(loadingIcon);
     $("#" + agg + "span" + idx).attr("class", "text-muted");
   }
   function get_status(agg) {
     fetch(`/api/status/${agg}`, { signal: AbortSignal.timeout(15000) })
       .then(response => response.json())
-      .then(dict => {
-        Object.keys(dict).forEach(idx => {
+      .then(async dict => {
+        // Load all icons we might need
+        const icons = {
+          '+': await loadIcon('feed-connected'),
+          '☒': await loadIcon('feed-disconnected'),
+          '☹': await loadIcon('mlat-sync-error'),
+          '⚠': await loadIcon('feed-warning'),
+          '.': await loadIcon('status-unknown')
+        };
+        
+        const statusOkIcon = await loadIcon('overall-good');
+        const fallbackIcon = await loadIcon('status-unknown');
+        
+        for (const idx of Object.keys(dict)) {
           const data = dict[idx];
-          // now use the idx to do something clever about what is shown there...
-          // right now this is broken and just overwrites things
-          $("#" + agg + "beast" + idx).text(data["beast"]);
-          $("#" + agg + "mlat" + idx).text(data["mlat"]);
+          
+          // Update beast and mlat status with loaded icons
+          const beastIcon = (data["beast"] === "" || data["beast"] === " ") ? "" : (icons[data["beast"]] || fallbackIcon);
+          const mlatIcon = (data["mlat"] === "" || data["mlat"] === " ") ? "" : (icons[data["mlat"]] || fallbackIcon);
+          
+          $("#" + agg + "beast" + idx).html(beastIcon);
+          $("#" + agg + "mlat" + idx).html(mlatIcon);
+          
           const mlat_broken = !(data["mlat"] == "+" || data["mlat"] == "." || data["mlat"] == " ");
           const beast_broken = !(data["beast"] == "+" || data["beast"] == "." || data["beast"] == " ");
+          
           if (data["beast"] == "+" && !mlat_broken) {
             $("#" + agg + "span" + idx).attr("class", "text-success");
-            $("#" + agg + "span" + idx).html("&#x2714;");
+            $("#" + agg + "span" + idx).html(statusOkIcon);
           } else if (data["beast"] == "☒") {
             $("#" + agg + "span" + idx).attr("class", "text-danger");
-            $("#" + agg + "span" + idx).html("&#x2717;");
+            $("#" + agg + "span" + idx).html(icons['☒']);
           } else if (beast_broken || mlat_broken) {
             $("#" + agg + "span" + idx).attr("class", "text-warning");
-            $("#" + agg + "span" + idx).html("&#x237B;");
+            $("#" + agg + "span" + idx).html(icons['⚠']);
           } else {
             $("#" + agg + "span" + idx).attr("class", "text-muted");
-            $("#" + agg + "span" + idx).html("&#x2713;");
+            $("#" + agg + "span" + idx).html(statusOkIcon);
           }
           if (agg == "adsblol") {
             // console.log("set adsblol-link" + idx + " to " + data["adsblollink"])
@@ -821,7 +882,7 @@
               $("#adsbxmaplink_" + idx).attr("href", "https://globe.adsbexchange.com/?feed=" + data["adsbxfeederid"]);
             }
           }
-        });
+        }
       });
   }
   function get_stage2_connection_status() {
@@ -844,6 +905,11 @@
 
   registerTask(check_mf_task);
   registerTask(startPageTask);
+
+  // Preload icons and populate placeholders when page loads
+  preloadIcons().then(() => {
+    populateIconPlaceholders();
+  });
 
 </script>
 {% endblock %}
