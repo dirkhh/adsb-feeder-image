@@ -656,6 +656,7 @@ class Data:
         Env("FEED_ACARS_AIRFRAMES", default=[False], tags=["feed_acars_airframes", "is_enabled"]),
         Env("FEED_ACARS_AVDELPHI", default=[False], tags=["feed_acars_avdelphi", "is_enabled"]),
         Env("FEED_ACARS_ACARSDRAMA", default=[False], tags=["feed_acars_acarsdrama", "is_enabled"]),
+        Env("FEED_ACARS_ADSBLOL", default=[False], tags=["feed_acars_adsblol", "is_enabled"]),
         # note that the ACARS and VDL Mode 2 strings start with a semicolon but HFDL does not -- see acars_router.yml
         Env("FEED_STRING_ACARS_UDP", default="", tags=["feed_string_acars_udp"]),
         Env("FEED_STRING_ACARS_TCP", default="", tags=["feed_string_acars_tcp"]),

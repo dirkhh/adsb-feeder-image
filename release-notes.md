@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- beta-notes: add acars feed option for adsb.lol
 - beta-notes: attempt to support AirspyHF - this is untested, especially the gain values supported are unclear
 - beta-notes: fix HFDL feeding to airframes.io
 - beta-notes: write acarshub data to disk every hour

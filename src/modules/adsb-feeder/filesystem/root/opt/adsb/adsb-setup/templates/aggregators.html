@@ -353,6 +353,12 @@
       on picking out things that are funny (or drama) from the large amount of ACARS data that's available.
     </label>
   </div>
+  <div class="ol-12 form-check">
+    <input type="checkbox" class="form-check-input me-1" name="feed_acars_adsblol--is_enabled" id="feed_acars_adsblol--is_enabled" {{ nonadsb_enabled("feed_acars_adsblol", m) }} />
+    <label class="mx-1 w-auto" for="feed_acars_adsblol--is_enabled">
+      <a href="https://www.adsb.lol/docs/open-data/aircraft-data-links/">adsb.lol</a> is focused on dumping the raw data into a publicly available github repository.
+    </label>
+  </div>
 
 
   {% endif %}

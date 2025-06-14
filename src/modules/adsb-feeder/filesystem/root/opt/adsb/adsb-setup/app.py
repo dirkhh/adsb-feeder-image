@@ -2493,6 +2493,10 @@ class AdsbIm:
         if self._d.list_is_enabled("feed_acars_avdelphi", 0):
             feed_acars_udp += "data.avdelphi.com:5556;"
             feed_vdl2_udp += "data.avdelphi.com:5600;"
+        if self._d.list_is_enabled("feed_acars_adsblol", 0):
+            feed_acars_tcp += "feed.adsb.lol:5550;"
+            feed_vdl2_tcp += "feed.adsb.lol:5552;"
+            feed_hfdl_tcp += "feed.adsb.lol:5551;"
 
         self._d.env_by_tags("feed_string_acars_udp").value = feed_acars_udp.rstrip(";")
         self._d.env_by_tags("feed_string_acars_tcp").value = feed_acars_tcp.rstrip(";")
