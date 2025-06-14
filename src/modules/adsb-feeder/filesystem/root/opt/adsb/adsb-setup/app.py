@@ -2498,6 +2498,16 @@ class AdsbIm:
             feed_vdl2_tcp += "feed.adsb.lol:5552;"
             feed_hfdl_tcp += "feed.adsb.lol:5551;"
 
+        if not self._d.is_enabled(["acarsdec"]):
+            feed_acars_udp = ""
+            feed_acars_tcp = ""
+        if not self._d.is_enabled(["dumpvdl2"]):
+            feed_vdl2_udp = ""
+            feed_vdl2_tcp = ""
+        if not self._d.is_enabled(["dumphfdl"]):
+            feed_hfdl_udp = ""
+            feed_hfdl_tcp = ""
+
         self._d.env_by_tags("feed_string_acars_udp").value = feed_acars_udp.rstrip(";")
         self._d.env_by_tags("feed_string_acars_tcp").value = feed_acars_tcp.rstrip(";")
         self._d.env_by_tags("feed_string_vdl2_udp").value = feed_vdl2_udp.rstrip(";")
