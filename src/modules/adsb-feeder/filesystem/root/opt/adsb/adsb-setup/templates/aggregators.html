@@ -340,13 +340,6 @@
     </label>
   </div>
   <div class="ol-12 form-check">
-    <input type="checkbox" class="form-check-input me-1" name="feed_acars_avdelphi--is_enabled" id="feed_acars_avdelphi--is_enabled" {{ nonadsb_enabled("feed_acars_avdelphi", m) }} />
-    <label class="mx-1 w-auto" for="feed_acars_avdelphi--is_enabled">
-      <a href="https://avdelphi.com/">AVDelphi</a> is another aggregator for ACARS data. Note that you need to claim your
-      feed on their <a href="https://www.avdelphi.com/claim_feed.html">website</a> before you are allowed to feed them.
-    </label>
-  </div>
-  <div class="ol-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="feed_acars_acarsdrama--is_enabled" id="feed_acars_acarsdrama--is_enabled" {{ nonadsb_enabled("feed_acars_acarsdrama", m) }} />
     <label class="mx-1 w-auto" for="feed_acars_acarsdrama--is_enabled">
       <a href="https://acarsdrama.com/">AcarsDrama</a> is a rather different type of aggregator. They are mainly focused
@@ -357,6 +350,14 @@
     <input type="checkbox" class="form-check-input me-1" name="feed_acars_adsblol--is_enabled" id="feed_acars_adsblol--is_enabled" {{ nonadsb_enabled("feed_acars_adsblol", m) }} />
     <label class="mx-1 w-auto" for="feed_acars_adsblol--is_enabled">
       <a href="https://www.adsb.lol/docs/open-data/aircraft-data-links/">adsb.lol</a> is focused on dumping the raw data into a publicly available github repository.
+    </label>
+  </div>
+  <div class="ol-12 form-check">
+    <input type="checkbox" class="form-check-input me-1" name="feed_acars_avdelphi--is_enabled"
+           id="feed_acars_avdelphi--is_enabled" {{ nonadsb_enabled("feed_acars_avdelphi", m) }} />
+    <label class="mx-1 w-auto" for="feed_acars_avdelphi--is_enabled">
+      <a href="https://avdelphi.com/">AVDelphi</a> is another aggregator for ACARS data. Note that you need to claim your
+      feed on their <a href="https://www.avdelphi.com/claim_feed.html">website</a> before you are allowed to feed them.
     </label>
   </div>
 
