@@ -2498,13 +2498,13 @@ class AdsbIm:
             feed_vdl2_tcp += "feed-acars.adsb.lol:5552;"
             feed_hfdl_tcp += "feed-acars.adsb.lol:5551;"
 
-        if not self._d.is_enabled(["acarsdec"]):
+        if not self._d.is_enabled(["run_acarsdec"]):
             feed_acars_udp = ""
             feed_acars_tcp = ""
-        if not self._d.is_enabled(["dumpvdl2"]):
+        if not self._d.is_enabled(["run_dumpvdl2"]):
             feed_vdl2_udp = ""
             feed_vdl2_tcp = ""
-        if not self._d.is_enabled(["dumphfdl"]):
+        if not self._d.is_enabled(["run_dumphfdl"]):
             feed_hfdl_udp = ""
             feed_hfdl_tcp = ""
 
