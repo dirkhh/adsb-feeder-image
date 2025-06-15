@@ -117,7 +117,7 @@ class SDRDevices:
 
     def ensure_populated(self):
         with self.lock:
-            if time.time() - self.last_probe < 1:
+            if time.time() - self.last_probe < 10:
                 return
             self.last_probe = time.time()
             self._get_sdr_info()
