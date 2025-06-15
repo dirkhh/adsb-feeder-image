@@ -354,16 +354,22 @@
       }
       $("#sdr_num").text(sdr_idx);
       $("#sdr_serial").text(sdr['serial']);
+      // this feels convoluted
+      // only an AirspyHF doesn't support 1090 or ACARS
+      $("#usage1090").parent().toggle(sdr['type'] != "airspyhf");
+      $("#usage1090_2").parent().toggle(sdr['type'] != "airspyhf");
+      $("#usageacars").parent().toggle(sdr['type'] != "airspyhf");
+      $("#usageacars_2").parent().toggle(sdr['type'] != "airspyhf");
+      // only an RTLSDR supports 978 or Sonde
+      $("#usage978").parent().toggle(sdr['type'] == "rtlsdr");
+      $("#usagesonde").parent().toggle(sdr['type'] == "rtlsdr");
+      // all the other containers support all SDRs (that can't be right?)
+
       $("#usage" + sdr['purpose']).prop('checked', true);
       $("#usage" + sdr['purpose']).trigger('change');
       $("#sdrgain").val(sdr['gain']);
       update_biastee(sdr);
       update_gain_text(sdr);
-      if (sdr['type'] != "rtlsdr") {
-        // we only support RTLSDR for UAT and Sonde
-        $("#usage978").parent().hide();
-        $("#usagesonde").parent().hide();
-      }
       modal.show();
     });
   }
