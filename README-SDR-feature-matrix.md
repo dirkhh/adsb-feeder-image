@@ -57,5 +57,5 @@ Regardless of what your SDR can do, some of the containers that are used for thi
 |:-------:|:-------------:|:--------:|:------------------:|
 | RTLSDR  | 0 - 49.6      |  auto    | :heavy_check_mark: |
 | Airspy  | :x:           | :x:      | :x:                |
-| AirspyHF| 0 - 21        | :x:      | :x:                |
+| AirspyHF| :x:           | :x:      | :x:                |
 | SDRplay | :x:           | :x:      | :x:                |
