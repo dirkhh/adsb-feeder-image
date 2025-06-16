@@ -301,8 +301,6 @@
     },
     'vdl2': {
       'rtlsdr': ['enter a value between 0 and 50', validate_0_50],
-      'airspy': ['enter a value between 0 and 21', validate_0_21],
-      'airspyhf': ['enter a value between 0 and 21', validate_0_21],
       'sdrplay': ['enter a value between 20 and 59, leave empty for agc', validate_20_59_empty],
     },
     'hfdl': {
@@ -363,6 +361,8 @@
       // only an RTLSDR supports 978 or Sonde
       $("#usage978").parent().toggle(sdr['type'] == "rtlsdr");
       $("#usagesonde").parent().toggle(sdr['type'] == "rtlsdr");
+      // Airspy devices aren't supported for VDL
+      $("#usagevdl2").parent().toggle(!sdr['type'].startsWith("airspy"));
       // all the other containers support all SDRs (that can't be right?)
 
       $("#usage" + sdr['purpose']).prop('checked', true);
