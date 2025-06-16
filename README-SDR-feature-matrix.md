@@ -40,8 +40,8 @@ Regardless of what your SDR can do, some of the containers that are used for thi
 | SDR     | gain          | autogain | biastee |
 |:-------:|:-------------:|:--------:|:-------:|
 | RTLSDR  | 0 - 49.6      | :x:      | :x:     |
-| Airspy  | 0 - 21        | :x:      | :x:     |
-| AirspyHF| 0 - 21        | :x:      | :x:     |
+| Airspy  | 0 - 21        | leave empty| :x:     |
+| AirspyHF| 0 - 21        | leave empty| :x:     |
 | SDRplay | 20 - 59       | :x:      | :x:     |
 
 ## AIS
