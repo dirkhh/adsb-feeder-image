@@ -1245,10 +1245,23 @@ class AdsbIm:
                     }
                 ):
                     continue
-                print_err(f"modifying SDR id: {id(sdr)} sdr: {sdr}")
+                idx = -1
+                for i in range(len(self._sdrdevices.sdrs)):
+                    if sdr == self._sdrdevices.sdrs[i]:
+                        idx = i
+                        break
+                print_err(f"modifying SDR #{idx} id: {id(sdr)} sdr: {sdr}")
+                if sdr_data["purpose"] == "other":
+                    sdr_data["purpose"] = f"other-{idx}"
                 if sdr_data["purpose"] != sdr.purpose:
                     # remove the SDR from the old purpose and add for the new one
                     if sdr.purpose != "":
+                        if sdr.purpose.startswith("other"):
+                            for i in range(16):
+                                if self._d.env_by_tags(f"other-{i}").value == sdr._serial:
+                                    self._d.env_by_tags(f"other-{i}").value = ""
+                        else:
+                            self._d.env_by_tags(self._sdrdevices.purpose_env(sdr.purpose)).value = ""
                         self._d.env_by_tags(self._sdrdevices.purpose_env(sdr.purpose)).value = ""
                     # if another SDR had that purpose, remove that and switch it to unsassigned
                     exist_serial = self._d.env_by_tags(self._sdrdevices.purpose_env(sdr_data["purpose"])).valuestr
