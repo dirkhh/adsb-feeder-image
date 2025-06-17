@@ -835,6 +835,13 @@
           '⚠': await loadIcon('feed-warning'),
           '.': await loadIcon('status-unknown')
         };
+        const colors = {
+          '+': 'text-success',
+          '☒': 'text-danger',
+          '☹': 'text-danger',
+          '⚠': 'text-warning',
+          '.': 'text-muted'
+        };
 
         const statusOkIcon = await loadIcon('overall-good');
         const fallbackIcon = await loadIcon('status-unknown');
@@ -845,9 +852,15 @@
           // Update beast and mlat status with loaded icons
           const beastIcon = (data["beast"] === "" || data["beast"] === " ") ? "" : (icons[data["beast"]] || fallbackIcon);
           const mlatIcon = (data["mlat"] === "" || data["mlat"] === " ") ? "" : (icons[data["mlat"]] || fallbackIcon);
+          // pick the colors
+          const beastColor = (data["beast"] === "" || data["beast"] === " ") ? "text-muted" : (colors[data["beast"]] || "text-muted");
+          const mlatColor = (data["mlat"] === "" || data["mlat"] === " ") ? "text-muted" : (colors[data["mlat"]] || "text-muted");
 
           $("#" + agg + "beast" + idx).html(beastIcon);
           $("#" + agg + "mlat" + idx).html(mlatIcon);
+
+          $("#" + agg + "beast" + idx).attr("class", beastColor);
+          $("#" + agg + "mlat" + idx).attr("class", mlatColor);
 
           const mlat_broken = !(data["mlat"] == "+" || data["mlat"] == "." || data["mlat"] == " ");
           const beast_broken = !(data["beast"] == "+" || data["beast"] == "." || data["beast"] == " ");
