@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- rework the navigation bar to be smarter about which buttons to show, depending on screen width
 - add custom status icons for feeder home page
 - beta-notes: correct the protocols offered for each SDR type -- this continues to be WIP
 - beta-notes: support autogain for Airspy and HFDL

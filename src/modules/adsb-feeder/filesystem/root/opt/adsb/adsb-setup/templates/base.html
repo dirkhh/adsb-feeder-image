@@ -168,13 +168,15 @@
   <script type="text/javascript" src="{{ url_for('static', filename='js/mdb.min.js') }}"></script>
   <script>
     let verbose = true;
-    // oneMap and twoMap are the bit values for the maps that are visible if we can show only one or two maps
+    // oneMap, twoMap, and threeMap are the bit values for the maps that are visible if we can show only one or two maps
     // where bit 0 is ADS-B, bit 1 is ACARS, bit 2 is SHIPFEEDER
     let oneMap = 0;
     let twoMap = 0;
+    let threeMap = 0;
     {% if env_value_by_tag("aggregator_choice") != 'nonadsb' %}
     oneMap = 1;
     twoMap = 1;
+    threeMap = 1;
     {% endif %}
     {% if is_enabled('acarshub') %}
     if (oneMap == 0) {
@@ -183,6 +185,7 @@
     } else {
       twoMap = 3;
     }
+    threeMap = threeMap | 2;
     {% endif %}
     {% if is_enabled('run_shipfeeder') %}
     if (oneMap == 0) {
@@ -191,7 +194,9 @@
     } else if (twoMap != 3) {
       twoMap = twoMap | 4;
     }
+    threeMap = threeMap | 4;
     {% endif %}
+    console.log(`oneMap: ${oneMap}, twoMap: ${twoMap}`);
     let smallButtons = window.matchMedia("(max-width: 950px)");
     smallButtons.addEventListener("change", ({ matches }) => smallButtonsSet(matches));
     let twoMapButtons = window.matchMedia("(max-width: 850px)");
@@ -209,6 +214,10 @@
       noButton(true)
     } else if (oneMapButton.matches) {
       oneButton(true)
+    } else if (mobileTwoButtons.matches) {
+      twoButtons(true)
+    } else if (mobileThreeButtons.matches) {
+      twoButtons(false)
     } else if (twoMapButtons.matches) {
       twoButtons(true)
     } else {
@@ -236,9 +245,9 @@
         $("#acarshub-navbar-button").toggleClass("d-none", (twoMap & 2) == 0);
         $("#aiscatcher-navbar-button").toggleClass("d-none", (twoMap & 4) == 0);
       } else {
-        $("#livemap-navbar-button").removeClass("d-none");
-        $("#acarshub-navbar-button").removeClass("d-none");
-        $("#aiscatcher-navbar-button").removeClass("d-none");
+        $("#livemap-navbar-button").toggleClass("d-none", (threeMap & 1) == 0);
+        $("#acarshub-navbar-button").toggleClass("d-none", (threeMap & 2) == 0);
+        $("#aiscatcher-navbar-button").toggleClass("d-none", (threeMap & 4) == 0);
       }
     }
     function oneButton(matches) {
