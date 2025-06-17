@@ -109,6 +109,12 @@
               <li><a id="replay" class="dropdown-item" href="/map/?replay">Replay</a></li>
               {% endif %}
               <li><a id="options" class="dropdown-item" href="/visualization">Options</a></li>
+              {% if is_enabled('acarshub') %}
+              <li><a class="dropdown-item" href="/acarshub">ACARS Hub</a></li>
+              {% endif %}
+              {% if is_enabled('run_shipfeeder') %}
+              <a class="dropdown-item" href="/aiscatcher">AIS Catcher</a>
+              {% endif %}
             </ul>
           </li>
           <!-- Data Sharing -->
