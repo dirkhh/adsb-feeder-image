@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- beta-notes: actually enable acars2pos
 - rework the navigation bar to be smarter about which buttons to show, depending on screen width
 - add custom status icons for feeder home page
 - beta-notes: correct the protocols offered for each SDR type -- this continues to be WIP
