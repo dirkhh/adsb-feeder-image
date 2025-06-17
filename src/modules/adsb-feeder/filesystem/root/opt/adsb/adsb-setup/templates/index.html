@@ -776,12 +776,12 @@
 
   // SVG icon loader with caching
   const iconCache = {};
-  
+
   async function loadIcon(iconName) {
     if (iconCache[iconName]) {
       return iconCache[iconName];
     }
-    
+
     try {
       const response = await fetch(`/static/icons/${iconName}.svg`);
       if (response.ok) {
@@ -792,7 +792,7 @@
     } catch (error) {
       console.warn(`Failed to load icon: ${iconName}`, error);
     }
-    
+
     // Fallback to empty string if icon fails to load
     return iconName;
   }
@@ -835,23 +835,23 @@
           '⚠': await loadIcon('feed-warning'),
           '.': await loadIcon('status-unknown')
         };
-        
+
         const statusOkIcon = await loadIcon('overall-good');
         const fallbackIcon = await loadIcon('status-unknown');
-        
+
         for (const idx of Object.keys(dict)) {
           const data = dict[idx];
-          
+
           // Update beast and mlat status with loaded icons
           const beastIcon = (data["beast"] === "" || data["beast"] === " ") ? "" : (icons[data["beast"]] || fallbackIcon);
           const mlatIcon = (data["mlat"] === "" || data["mlat"] === " ") ? "" : (icons[data["mlat"]] || fallbackIcon);
-          
+
           $("#" + agg + "beast" + idx).html(beastIcon);
           $("#" + agg + "mlat" + idx).html(mlatIcon);
-          
+
           const mlat_broken = !(data["mlat"] == "+" || data["mlat"] == "." || data["mlat"] == " ");
           const beast_broken = !(data["beast"] == "+" || data["beast"] == "." || data["beast"] == " ");
-          
+
           if (data["beast"] == "+" && !mlat_broken) {
             $("#" + agg + "span" + idx).attr("class", "text-success");
             $("#" + agg + "span" + idx).html(statusOkIcon);
