@@ -108,11 +108,8 @@ td.stickycolumn {
 }
 
 /* hide some navbar buttons for very small screens */
-@media (max-width: 360px) {
+@media (max-width: 520px) {
     #kofi-navbar-button { display: none; }
-}
-@media (max-width: 322px) {
-    #livemap-navbar-button { display: none; }
 }
 
 /* Status icon SVG styles */

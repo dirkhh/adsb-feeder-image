@@ -40,129 +40,127 @@
     {% endif %}{% block title %}{% endblock %}
   </title>
   <nav class="navbar fixed-top bg-body {% if is_enabled('stage2') %} navbar-expand-lg {% else %} navbar-expand-md {% endif %}">
-    <div class="container-fluid">
-      <a class="navbar-brand ms-0 me-1 me-sm-3" href="{{ url_for("director") }}">{% if env_value_by_tag("aggregator_choice") == 'nonadsb' %}SDR{% else %}ADS-B{% endif %} Feeder</a>
-      <a class="btn btn-primary mx-0 mx-sm-1 {% if not is_enabled('base_config') %}d-none{% endif %}"
-        id="livemap-navbar-button"
-        href="/map/{{ env_value_by_tag('tar1090_query_params') }}">Live Map</a>
-      <a class="btn btn-primary mx-0 mx-sm-1 {% if not is_enabled('acarshub') %}d-none{% endif %}"
-        id="acarshub-navbar-button"
-        href="/acarshub">ACARS Hub</a>
-      <a class="btn btn-primary mx-0 mx-sm-1 {% if not is_enabled('run_shipfeeder') %}d-none{% endif %}"
-        id="aiscatcher-navbar-button"
-        href="/aiscatcher">AIS Catcher</a>
-      <div id="temperature_block" style="width: 4em; height:auto;" class="d-none d-sm-block">
-        <span id="cpu" class="d-none"
-              style="float:left;width:45%;height:1em;font-size:0.6em;margin-left: 1px;">CPU</span>
-        <span id="ext" class=" d-none"
-              style="float:left;width:45%;height:1em;font-size:0.6em;margin-left: 1px;">EXT</span>
-        <span id="cpu_temp" class=" d-none"
-              style="float:left;width:45%;height:1em;font-size:0.6em;margin-left: 1px;"></span>
-        <span id="ext_temp" class="d-none"
-              style="float:left;width:45%;height:1em;font-size:0.6em;margin-left: 1px;"></span>
-      </div>
-      <div class="mx-auto"><!-- filler element --></div>
-      <div class="mx-1"><a href="https://ko-fi.com/H2H2H3JS5" target="_blank"><img height="2em" style="border:0.1em;height:1.8em;"
-                   src="/static/images/kofi_button_stroke_small.png" border="0" id="kofi-navbar-button"
-                   alt="Help sustain this project at ko-fi.com" /></a></div>
-      <button class="navbar-toggler" type="button" data-mdb-toggle="collapse" data-mdb-target="#navbarNav"
-              aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <svg viewBox="-5 0 10 8" width="1.5em">
-          <line y2="8" stroke="#000" stroke-width="8" stroke-dasharray="1.6 1.4"></line>
-        </svg>
-      </button>
-      <div class="collapse navbar-collapse" style="flex-grow: 0" id="navbarNav">
-        <ul class="navbar-nav ms-1 mb-2 mb-lg-0">
-          {% if is_enabled('stage2') %}
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownFeederSelection" role="button"
-               data-mdb-toggle="dropdown" aria-expanded="false">Target: </a>
-            <ul class="dropdown-menu" aria-labelledby="navbarDropdownFeederSelection" style="width: 18em">
-              <div class="row mx-2 g-1">
-                <div class="col-12 my-1 text-secondary">Select the target for maps/sharing</div>
-                <div class="col-6 my-1">
-                  <button type="submit" class="btn-sm btn-outline-secondary btn-rounded btn-block"
-                          onclick="stage2_feeder_target_submit(0);return false;">Combined</button>
-                </div>
-                {% for i in range(env_value_by_tag('num_micro_sites')) %}
-                <div class="col-3 my-1">
-                  <button type="submit" class="btn-sm btn-outline-secondary btn-rounded btn-block"
-                          onclick="stage2_feeder_target_submit({{ i + 1 }});return false;"><span width="2em">{{ i + 1 }}</span></button>
-                </div>
-                {% endfor %}
+    <a class="navbar-brand ms-0 ms-sm-1 me-1 me-sm-3" href="{{ url_for("director") }}">{% if env_value_by_tag("aggregator_choice") == 'nonadsb' %}SDR{% else %}ADS-B{% endif %} Feeder</a>
+    <a class="btn btn-primary mx-0 mx-sm-1 {% if not is_enabled('base_config') %}d-none{% endif %}"
+      id="livemap-navbar-button"
+      href="/map/{{ env_value_by_tag('tar1090_query_params') }}">Live Map</a>
+    <a class="btn btn-primary mx-0 mx-sm-1 {% if not is_enabled('acarshub') %}d-none{% endif %}"
+      id="acarshub-navbar-button"
+      href="/acarshub">ACARS Hub</a>
+    <a class="btn btn-primary mx-0 mx-sm-1 {% if not is_enabled('run_shipfeeder') %}d-none{% endif %}"
+      id="aiscatcher-navbar-button"
+      href="/aiscatcher">AIS Catcher</a>
+    <div id="temperature_block" style="height:auto;" class="d-none d-sm-block">
+      <span id="cpu" class="d-none"
+            style="float:left;width:45%;height:1em;font-size:0.6em;margin-left: 1px;">CPU</span>
+      <span id="ext" class=" d-none"
+            style="float:left;width:45%;height:1em;font-size:0.6em;margin-left: 1px;">EXT</span>
+      <span id="cpu_temp" class=" d-none"
+            style="float:left;width:45%;height:1em;font-size:0.6em;margin-left: 1px;"></span>
+      <span id="ext_temp" class="d-none"
+            style="float:left;width:45%;height:1em;font-size:0.6em;margin-left: 1px;"></span>
+    </div>
+    <div class="mx-auto"><!-- filler element --></div>
+    <div class="mt-1 mx-1"><a href="https://ko-fi.com/H2H2H3JS5" target="_blank"><img height="2em" style="border:0.1em;height:1.8em;"
+         src="/static/images/kofi_button_stroke_small.png" border="0" id="kofi-navbar-button"
+         alt="Help sustain this project at ko-fi.com" /></a></div>
+    <button class="navbar-toggler" type="button" data-mdb-toggle="collapse" data-mdb-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <svg viewBox="-5 0 10 8" width="1.5em">
+        <line y2="8" stroke="#000" stroke-width="8" stroke-dasharray="1.6 1.4"></line>
+      </svg>
+    </button>
+    <div class="collapse navbar-collapse justify-content-end" style="flex-grow: 0" id="navbarNav">
+      <ul class="navbar-nav ms-1 mb-2 mb-lg-0">
+        {% if is_enabled('stage2') %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownFeederSelection" role="button"
+              data-mdb-toggle="dropdown" aria-expanded="false">Target: </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdownFeederSelection" style="width: 18em">
+            <div class="row mx-2 g-1">
+              <div class="col-12 my-1 text-secondary">Select the target for maps/sharing</div>
+              <div class="col-6 my-1">
+                <button type="submit" class="btn-sm btn-outline-secondary btn-rounded btn-block"
+                        onclick="stage2_feeder_target_submit(0);return false;">Combined</button>
               </div>
-            </ul>
-          </li>
-          {% endif %}
-          <!-- Maps -->
-          <li class="nav-item dropdown {% if not is_enabled('base_config') %}d-none{% endif %}">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMaps" role="button"
-               data-mdb-toggle="dropdown" aria-expanded="false">Maps</a>
-            <ul class="dropdown-menu" aria-labelledby="navbarDropdownMaps">
-              <li><a id="live_traffic" class="dropdown-item" href="/map/{{ env_value_by_tag('tar1090_query_params') }}">Live Traffic</a>
-              </li>
-              {% if env_value_by_tag("aggregator_choice") != 'nano' and env_value_by_tag("aggregator_choice") != 'nonadsb' %}
-              <li><a id="heatmap" class="dropdown-item" href="/map/?heatmap">Heatmap</a></li>
-              {% endif %}
-              <li><a id="tracks" class="dropdown-item" href="/map/?pTracks">Tracks</a></li>
-              {% if env_value_by_tag("aggregator_choice") != 'nano' and env_value_by_tag("aggregator_choice") != 'nonadsb' %}
-              <li><a id="replay" class="dropdown-item" href="/map/?replay">Replay</a></li>
-              {% endif %}
-              <li><a id="options" class="dropdown-item" href="/visualization">Options</a></li>
-              {% if is_enabled('acarshub') %}
-              <li><a class="dropdown-item" href="/acarshub">ACARS Hub</a></li>
-              {% endif %}
-              {% if is_enabled('run_shipfeeder') %}
-              <a class="dropdown-item" href="/aiscatcher">AIS Catcher</a>
-              {% endif %}
-            </ul>
-          </li>
-          <!-- Data Sharing -->
-          {% if not is_enabled('stage2') %}
-          <li class="nav-item"><a
-               class="nav-link" id="data_sharing_link"
-               {% if (not is_enabled('base_config') or env_value_by_tag('aggregator_choice') in ['micro', 'nano']) and not is_enabled('shipfeeder') and not is_enabled('acarshub') %}style="display: none;{% endif %}
-               href="/aggregators">Data Sharing</a>
-          </li>
-          {% else %}
-          <li id="data_sharing_current" class="nav-item">
-            <a class="nav-link" href="#" id="data_sharing_current_link">Data Sharing</a>
-          </li>
-          {% endif %}
-          <!-- Setup -->
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownSetup" role="button"
-               data-mdb-toggle="dropdown" aria-expanded="false">Setup</a>
-            <ul class="dropdown-menu" aria-labelledby="navbarDropdownSetup">
-              <li><a class="dropdown-item" href="/setup">{% if is_enabled('stage2') %}Stage
-                  2{% else %}Basic{% endif %}</a></li>
-              <li><a class="dropdown-item {% if not is_enabled('base_config') %}d-none{% endif %}"
-                   href="/sdr_setup">SDR</a></li>
-              <li><a class="dropdown-item {% if not is_enabled('base_config') %}d-none{% endif %}"
-                   href="/expert">Expert</a></li>
-            </ul>
-          </li>
-          <!-- System -->
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownLogs" role="button"
-               data-mdb-toggle="dropdown" aria-expanded="false">System</a>
-            <ul class="dropdown-menu" aria-labelledby="navbarDropdownLogs">
-              <li><a class="dropdown-item" href="/logs/">Logs</a></li>
-              <li><a class="dropdown-item" href="/info">Support Info</a></li>
-              <li><a class="dropdown-item" href="/support">Share Diagnostics</a></li>
-              <li><a class="dropdown-item" href="/systemmgmt">Management</a></li>
-              <li><a class="dropdown-item" href="/backup">Backup</a></li>
-              <li><a class="dropdown-item" href="/restore">Restore</a></li>
-              {% if env_value_by_tag("aggregator_choice") != 'nano' and env_value_by_tag("aggregator_choice") != 'nonadsb' %}
-              <li><a class="dropdown-item" href="/stats/">{%if is_enabled('stage2')%}Combined {%endif%}Stats</a></li>
-              {% if is_enabled('stage2') %}
-              <li><a id="stats_current" class="dropdown-item" href="/stats_1/">Current Stats</a></li>
-              {% endif %}
-              {% endif %}
-            </ul>
-          </li>
-        </ul>
-      </div>
+              {% for i in range(env_value_by_tag('num_micro_sites')) %}
+              <div class="col-3 my-1">
+                <button type="submit" class="btn-sm btn-outline-secondary btn-rounded btn-block"
+                        onclick="stage2_feeder_target_submit({{ i + 1 }});return false;"><span width="2em">{{ i + 1 }}</span></button>
+              </div>
+              {% endfor %}
+            </div>
+          </ul>
+        </li>
+        {% endif %}
+        <!-- Maps -->
+        <li class="nav-item dropdown {% if not is_enabled('base_config') %}d-none{% endif %}">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMaps" role="button"
+              data-mdb-toggle="dropdown" aria-expanded="false">Maps</a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdownMaps">
+            <li><a id="live_traffic" class="dropdown-item" href="/map/{{ env_value_by_tag('tar1090_query_params') }}">Live Traffic</a>
+            </li>
+            {% if env_value_by_tag("aggregator_choice") != 'nano' and env_value_by_tag("aggregator_choice") != 'nonadsb' %}
+            <li><a id="heatmap" class="dropdown-item" href="/map/?heatmap">Heatmap</a></li>
+            {% endif %}
+            <li><a id="tracks" class="dropdown-item" href="/map/?pTracks">Tracks</a></li>
+            {% if env_value_by_tag("aggregator_choice") != 'nano' and env_value_by_tag("aggregator_choice") != 'nonadsb' %}
+            <li><a id="replay" class="dropdown-item" href="/map/?replay">Replay</a></li>
+            {% endif %}
+            <li><a id="options" class="dropdown-item" href="/visualization">Options</a></li>
+            {% if is_enabled('acarshub') %}
+            <li><a class="dropdown-item" href="/acarshub">ACARS Hub</a></li>
+            {% endif %}
+            {% if is_enabled('run_shipfeeder') %}
+            <a class="dropdown-item" href="/aiscatcher">AIS Catcher</a>
+            {% endif %}
+          </ul>
+        </li>
+        <!-- Data Sharing -->
+        {% if not is_enabled('stage2') %}
+        <li class="nav-item"><a
+              class="nav-link" id="data_sharing_link"
+              {% if (not is_enabled('base_config') or env_value_by_tag('aggregator_choice') in ['micro', 'nano']) and not is_enabled('shipfeeder') and not is_enabled('acarshub') %}style="display: none;{% endif %}
+              href="/aggregators">Data Sharing</a>
+        </li>
+        {% else %}
+        <li id="data_sharing_current" class="nav-item">
+          <a class="nav-link" href="#" id="data_sharing_current_link">Data Sharing</a>
+        </li>
+        {% endif %}
+        <!-- Setup -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownSetup" role="button"
+              data-mdb-toggle="dropdown" aria-expanded="false">Setup</a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdownSetup">
+            <li><a class="dropdown-item" href="/setup">{% if is_enabled('stage2') %}Stage
+                2{% else %}Basic{% endif %}</a></li>
+            <li><a class="dropdown-item {% if not is_enabled('base_config') %}d-none{% endif %}"
+                  href="/sdr_setup">SDR</a></li>
+            <li><a class="dropdown-item {% if not is_enabled('base_config') %}d-none{% endif %}"
+                  href="/expert">Expert</a></li>
+          </ul>
+        </li>
+        <!-- System -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownLogs" role="button"
+              data-mdb-toggle="dropdown" aria-expanded="false">System</a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdownLogs">
+            <li><a class="dropdown-item" href="/logs/">Logs</a></li>
+            <li><a class="dropdown-item" href="/info">Support Info</a></li>
+            <li><a class="dropdown-item" href="/support">Share Diagnostics</a></li>
+            <li><a class="dropdown-item" href="/systemmgmt">Management</a></li>
+            <li><a class="dropdown-item" href="/backup">Backup</a></li>
+            <li><a class="dropdown-item" href="/restore">Restore</a></li>
+            {% if env_value_by_tag("aggregator_choice") != 'nano' and env_value_by_tag("aggregator_choice") != 'nonadsb' %}
+            <li><a class="dropdown-item" href="/stats/">{%if is_enabled('stage2')%}Combined {%endif%}Stats</a></li>
+            {% if is_enabled('stage2') %}
+            <li><a id="stats_current" class="dropdown-item" href="/stats_1/">Current Stats</a></li>
+            {% endif %}
+            {% endif %}
+          </ul>
+            </li>
+      </ul>
     </div>
   </nav>
   <script src="/static/js/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8="
@@ -170,10 +168,103 @@
   <script type="text/javascript" src="{{ url_for('static', filename='js/mdb.min.js') }}"></script>
   <script>
     let verbose = true;
-
+    // oneMap and twoMap are the bit values for the maps that are visible if we can show only one or two maps
+    // where bit 0 is ADS-B, bit 1 is ACARS, bit 2 is SHIPFEEDER
+    let oneMap = 0;
+    let twoMap = 0;
+    {% if env_value_by_tag("aggregator_choice") != 'nonadsb' %}
+    oneMap = 1;
+    twoMap = 1;
+    {% endif %}
+    {% if is_enabled('acarshub') %}
+    if (oneMap == 0) {
+      oneMap = 2;
+      twoMap = 2;
+    } else {
+      twoMap = 3;
+    }
+    {% endif %}
+    {% if is_enabled('run_shipfeeder') %}
+    if (oneMap == 0) {
+      oneMap = 4;
+      twoMap =  4;
+    } else if (twoMap != 3) {
+      twoMap = twoMap | 4;
+    }
+    {% endif %}
+    let smallButtons = window.matchMedia("(max-width: 950px)");
+    smallButtons.addEventListener("change", ({ matches }) => smallButtonsSet(matches));
+    let twoMapButtons = window.matchMedia("(max-width: 850px)");
+    twoMapButtons.addEventListener("change", ({ matches }) => twoButtons(matches));
+    let mobileThreeButtons = window.matchMedia("(max-width:767px) and (min-width: 480px)");
+    mobileThreeButtons.addEventListener("change", ({ matches }) => twoButtons(!matches));
+    let mobileTwoButtons = window.matchMedia("(max-width:479px) and (min-width: 401px)");
+    mobileTwoButtons.addEventListener("change", ({ matches }) => twoButtons(matches));
+    let oneMapButton = window.matchMedia("(max-width: 400px)");
+    oneMapButton.addEventListener("change", ({ matches }) => oneButton(matches));
+    let noMapButton = window.matchMedia("(max-width: 320px)");
+    noMapButton.addEventListener("change", ({ matches }) => noButton(matches));
+    smallButtonsSet(smallButtons.matches);
+    if (noMapButton.matches) {
+      noButton(true)
+    } else if (oneMapButton.matches) {
+      oneButton(true)
+    } else if (twoMapButtons.matches) {
+      twoButtons(true)
+    } else {
+      twoButtons(false)
+    }
     let tasks = [];
     let timersActive = false;
     let lastVisChange = 0;
+    function smallButtonsSet(matches) {
+      console.log("under950: " + matches);
+      if (matches) {
+        $("#livemap-navbar-button").addClass("btn-sm");
+        $("#acarshub-navbar-button").addClass("btn-sm");
+        $("#aiscatcher-navbar-button").addClass("btn-sm");
+      } else {
+        $("#livemap-navbar-button").removeClass("btn-sm");
+        $("#acarshub-navbar-button").removeClass("btn-sm");
+        $("#aiscatcher-navbar-button").removeClass("btn-sm");
+      }
+    }
+    function twoButtons(matches) {
+      console.log("twoButtons: " + matches);
+      if (matches) {
+        $("#livemap-navbar-button").toggleClass("d-none", (twoMap & 1) == 0);
+        $("#acarshub-navbar-button").toggleClass("d-none", (twoMap & 2) == 0);
+        $("#aiscatcher-navbar-button").toggleClass("d-none", (twoMap & 4) == 0);
+      } else {
+        $("#livemap-navbar-button").removeClass("d-none");
+        $("#acarshub-navbar-button").removeClass("d-none");
+        $("#aiscatcher-navbar-button").removeClass("d-none");
+      }
+    }
+    function oneButton(matches) {
+      console.log("oneButton: " + matches);
+      if (matches) {
+        $("#livemap-navbar-button").toggleClass("d-none", (oneMap & 1) == 0);
+        $("#acarshub-navbar-button").toggleClass("d-none", (oneMap & 2) == 0);
+        $("#aiscatcher-navbar-button").toggleClass("d-none", (oneMap & 4) == 0);
+      } else {
+        $("#livemap-navbar-button").toggleClass("d-none", (twoMap & 1) == 0);
+        $("#acarshub-navbar-button").toggleClass("d-none", (twoMap & 2) == 0);
+        $("#aiscatcher-navbar-button").toggleClass("d-none", (twoMap & 4) == 0);
+      }
+    }
+    function noButton(matches) {
+      console.log("noButton: " + matches);
+      if (matches) {
+        $("#livemap-navbar-button").addClass("d-none");
+        $("#acarshub-navbar-button").addClass("d-none");
+        $("#aiscatcher-navbar-button").addClass("d-none");
+      } else {
+        $("#livemap-navbar-button").toggleClass("d-none", (oneMap & 1) == 0);
+        $("#acarshub-navbar-button").toggleClass("d-none", (oneMap & 2) == 0);
+        $("#aiscatcher-navbar-button").toggleClass("d-none", (oneMap & 4) == 0);
+      }
+    }
     function handleVisibilityChange() {
       if (document.hidden && timersActive) {
         verbose && console.log(new Date().toLocaleTimeString() + " visibility change: stopping tasks");
@@ -315,6 +406,7 @@
     function update_temp_block(cpu, ext, age) {
       if (cpu == null && ext == null) {
         $("#temperature_block").addClass('d-none');
+        $("#temperature_block").css('width', 0);
         return;
       }
       if (isNaN(age - 0)) {
@@ -323,6 +415,7 @@
       opacity = Math.min(1, 30 / (1 + age));
       $("#temperature_block").css('opacity', opacity);
       $("#temperature_block").removeClass('d-none');
+      $("#temperature_block").css('width', '4em');
       if (cpu != null) {
         $("#cpu").removeClass('d-none');
         $("#cpu_temp").removeClass('d-none');
