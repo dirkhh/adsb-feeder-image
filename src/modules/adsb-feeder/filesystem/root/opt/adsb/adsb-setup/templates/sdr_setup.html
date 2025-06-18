@@ -337,7 +337,7 @@
   function update_biastee(sdr_given, purpose_given) {
     let sdr = sdr_given || sdrs[$("#sdr_num").text()];
     let purpose = purpose_given || sdr['purpose'];
-    let show_biastee = purpose == 'ais' && sdr['type'] == 'rtlsdr';
+    let show_biastee = purpose == 'ais' && (sdr['type'] == 'rtlsdr' || sdr['type'] == 'airspy');
     show_biastee |= purpose == '1090' || purpose == '1090_2' || purpose == 'uat' || purpose == 'sonde';
     if (show_biastee) {
       $("#biastee_container").show();
