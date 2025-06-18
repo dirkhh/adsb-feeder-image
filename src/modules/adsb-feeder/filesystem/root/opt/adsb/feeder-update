@@ -141,14 +141,15 @@ else
         TARGET="$1"
     fi
     [ -z "$BRANCH" ] && BRANCH="$TARGET"
-    # 'stable' and 'beta' are special, they refer to tags.
+    # 'stable', 'oldstable' and 'beta' are channels.
+    # a channel translates to the last tag in the corresponding branch
     # everything else is interpreted as a branch or a hash
     if [[ "$TARGET" == "beta" ]] ; then
-        # for the beta channel, grab the last beta tag
         TARGET=$(git tag --merged origin/beta --sort=version:refname | grep '^v[0-9]' | tr - \~ | sort -V | tr \~ - | tail -1) || exit_with_message "error finding tag, giving up"
     elif [[ "$TARGET" == "stable" ]] ; then
-        # for the stable channel, grab the last non-beta tag
         TARGET=$(git tag --merged origin/stable --sort=version:refname | grep '^v[0-9]'| tr - \~ | sort -V | tr \~ - | tail -1) || exit_with_message "error finding tag, giving up"
+    elif [[ "$TARGET" == "oldstable" ]] ; then
+        TARGET=$(git tag --merged origin/oldstable --sort=version:refname | grep '^v[0-9]'| tr - \~ | sort -V | tr \~ - | tail -1) || exit_with_message "error finding tag, giving up"
     fi
     git reset --hard "$TARGET" || exit_with_message "git reset --hard $TARGET failed, giving up"
     echo "restarting with feeder-update from $TARGET"

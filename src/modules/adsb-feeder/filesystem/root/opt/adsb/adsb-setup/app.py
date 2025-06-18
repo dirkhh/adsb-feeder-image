@@ -3903,8 +3903,8 @@ class AdsbIm:
 
     @check_restart_lock
     def feeder_update(self, channel):
-        if channel not in ["stable", "beta"]:
-            return "This update functionality is only available for stable and beta"
+        if channel not in ["stable", "beta", "oldstable"]:
+            return "This update functionality is only available for stable, beta and oldstable"
         return self.do_feeder_update(channel)
 
     # internal helper function to start the feeder update
