@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- update almost all containers to their current version
 - rework UI to change button style and font size to support even smaller screen sizes
 - /feeder-update-<channel> endpoint: add oldstable option -- this allows downgrade to an earlier, known good 'stable' version after a release
 - beta-notes: actually enable acars2pos
