@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- beta-notes: instead of auto-enabling acars2pos, make this a user selectable option on the expert screen
 - add Discord link to the footer
 - update almost all containers to their current version
 - rework UI to change button style and font size to support even smaller screen sizes

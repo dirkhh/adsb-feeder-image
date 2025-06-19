@@ -2484,7 +2484,6 @@ class AdsbIm:
             or self._d.is_enabled("run_dumpvdl2")
             or self._d.is_enabled("run_dumphfdl")
         )
-        self._d.env_by_tags("acars2pos").value = self._d.is_enabled("acars_router")
 
         self._d.env_by_tags("acarshub_acars").value = "external" if self._d.is_enabled("run_acarsdec") else "false"
         self._d.env_by_tags("acarshub_vdl2").value = "external" if self._d.is_enabled("run_dumpvdl2") else "false"

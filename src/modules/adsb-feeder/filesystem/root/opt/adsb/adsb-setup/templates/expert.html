@@ -495,6 +495,33 @@
           </div>
           <div class="col-12 col-lg-6 mt-2">
             <div class="row border my-2">
+              {% if not is_enabled('acars2pos') %}
+              <!-- ACARS2POS -->
+              <div class="col-8 my-1">
+                <label for="acars2pos--enable">
+                  Enable acars2pos <small>(showing ACARS/VDL2/HFDL positions on the ADS-B live map)</small>
+                </label>
+              </div>
+              <div class="col-4 my-1">
+                <button type="submit" class="btn btn-primary mx-auto w-100" name="acars2pos--enable" value="go"
+                {% if not (is_enabled('acarsdec') or is_enabled('acarsdec2') or is_enabled('dumpvdl2') or is_enabled('dumphfdl')) %} disabled {% endif %}>Enable</button>
+              </div>
+              {% else %}
+              <div class="col-6 my-1">
+                <label for="shipfeeder--disable">
+                  acars2pos <small>(showing ACARS/VDL2/HFDL positions on the ADS-B live map)</small>
+                </label>
+              </div>
+              <div class="col-6 my-1">
+                <button type="submit" class="btn btn-secondary mx-auto w-100" name="acars2pos--disable" formnovalidate
+                        value="go">Disable</button>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-6 mt-2">
+            <div class="row border my-2">
               {% if not is_enabled('shipfeeder') %}
               <!-- AIS -->
               <div class="col-8 my-1">
