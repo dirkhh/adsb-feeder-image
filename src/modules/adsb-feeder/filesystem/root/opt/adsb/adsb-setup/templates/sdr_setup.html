@@ -239,11 +239,11 @@
   sdr_info();
 
   function validate_0_50_auto(text) {
-    return text == 'auto' || (text >= 0 && text <= 50);
+    return text.startsWith('auto') || (text >= 0 && text <= 50);
   }
 
   function validate_0_21_auto(text) {
-    return text == 'auto' || (text >= 0 && text <= 21);
+    return text.startsWith('auto') || (text >= 0 && text <= 21);
   }
 
   function validate_0_21_empty(text) {
