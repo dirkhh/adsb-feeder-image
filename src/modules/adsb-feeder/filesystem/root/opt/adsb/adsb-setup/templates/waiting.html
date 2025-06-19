@@ -160,6 +160,18 @@
 
     console.log("starting stream");
     stream();
+
+    let tinyScreen = window.matchMedia("(max-width: 480px)");
+    tinyScreen.addEventListener("change", ({ matches }) => adjustFont(matches));
+    function adjustFont(matches) {
+      if (matches) {
+        $("#log").css("font-size", "30%");
+      } else {
+        $("#log").css("font-size", "50%");
+      }
+    }
+    adjustFont(tinyScreen.matches);
+
   </script>
 </body>
 
