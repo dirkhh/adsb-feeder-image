@@ -1,6 +1,7 @@
 Changes since v2.3.5:
 =======
-- beta-notes: /feeder-update-<channel> endpoint: add oldstable option
+- rework UI to change button style and font size to support even smaller screen sizes
+- /feeder-update-<channel> endpoint: add oldstable option -- this allows downgrade to an earlier, known good 'stable' version after a release
 - beta-notes: actually enable acars2pos
 - rework the navigation bar to be smarter about which buttons to show, depending on screen width
 - add custom status icons for feeder home page
