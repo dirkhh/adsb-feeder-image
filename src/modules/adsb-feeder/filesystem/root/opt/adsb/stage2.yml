@@ -58,6 +58,7 @@ services:
       - TAR1090_ROUTEAPIURL="https://adsb.im/api/0/routeset"
       - TAR1090_IMAGE_CONFIG_LINK="${FEEDER_TAR1090_IMAGE_CONFIG_LINK}"
       - TAR1090_IMAGE_CONFIG_TEXT="ADS-B Feeder Image Configuration"
+      - TAR1090_JAEROLABEL=ACARS
       - TAR1090_ENABLE_AC_DB=true
       # --------------------------------------------------
       # GRAPHS1090 (Decoder and System Status Web Page) parameters:
