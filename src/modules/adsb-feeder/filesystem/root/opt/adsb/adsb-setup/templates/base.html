@@ -196,9 +196,6 @@
     }
     threeMap = threeMap | 4;
     {% endif %}
-    console.log(`oneMap: ${oneMap}, twoMap: ${twoMap}`);
-    let smallButtons = window.matchMedia("(max-width: 950px)");
-    smallButtons.addEventListener("change", ({ matches }) => smallButtonsSet(matches));
     let twoMapButtons = window.matchMedia("(max-width: 850px)");
     twoMapButtons.addEventListener("change", ({ matches }) => twoButtons(matches));
     let mobileThreeButtons = window.matchMedia("(max-width:767px) and (min-width: 480px)");
@@ -209,35 +206,42 @@
     oneMapButton.addEventListener("change", ({ matches }) => oneButton(matches));
     let noMapButton = window.matchMedia("(max-width: 320px)");
     noMapButton.addEventListener("change", ({ matches }) => noButton(matches));
-    smallButtonsSet(smallButtons.matches);
-    if (noMapButton.matches) {
-      noButton(true)
-    } else if (oneMapButton.matches) {
-      oneButton(true)
-    } else if (mobileTwoButtons.matches) {
-      twoButtons(true)
-    } else if (mobileThreeButtons.matches) {
-      twoButtons(false)
-    } else if (twoMapButtons.matches) {
-      twoButtons(true)
-    } else {
-      twoButtons(false)
-    }
-    let tasks = [];
-    let timersActive = false;
-    let lastVisChange = 0;
-    function smallButtonsSet(matches) {
-      console.log("under950: " + matches);
+
+    let smallButtons = window.matchMedia("(max-width: 950px)");
+    let tinyScreen = window.matchMedia("(max-width: 480px)");
+    smallButtons.addEventListener("change", ({ matches }) => adjustButtonSize(matches));
+    tinyScreen.addEventListener("change", ({ matches }) => adjustButtonFont(matches));
+
+    function adjustButton(button, matches) {
       if (matches) {
-        $("#livemap-navbar-button").addClass("btn-sm");
-        $("#acarshub-navbar-button").addClass("btn-sm");
-        $("#aiscatcher-navbar-button").addClass("btn-sm");
+        button.addClass("btn-sm");
       } else {
-        $("#livemap-navbar-button").removeClass("btn-sm");
-        $("#acarshub-navbar-button").removeClass("btn-sm");
-        $("#aiscatcher-navbar-button").removeClass("btn-sm");
+        button.removeClass("btn-sm");
       }
     }
+    function adjustButtonSize(matches) {
+      console.log("adjustButtonSize: " + matches);
+      // find all buttons and adjust their size accordingly
+      $('button').each(function () {
+        adjustButton($(this), matches);
+      });
+      $('.btn').each(function () {
+        adjustButton($(this), matches);
+      })
+    }
+    function adjustButtonFont(matches) {
+      // loop over all submit buttons and add css font-size of 70% and smaller horizontal padding
+      $('button[type="submit"]').each(function () {
+        if (matches) {
+          $(this).css('font-size', '70%');
+          $(this).css('--mdb-btn-padding-x', '0.25rem')
+        } else {
+          $(this).css('font-size', '');
+          $(this).css('--mdb-btn-padding-x', '1.5rem')
+        }
+      });
+    }
+
     function twoButtons(matches) {
       console.log("twoButtons: " + matches);
       if (matches) {
@@ -274,6 +278,29 @@
         $("#aiscatcher-navbar-button").toggleClass("d-none", (oneMap & 4) == 0);
       }
     }
+
+    $(document).ready(function () {
+      if (noMapButton.matches) {
+        noButton(true)
+      } else if (oneMapButton.matches) {
+        oneButton(true)
+      } else if (mobileTwoButtons.matches) {
+        twoButtons(true)
+      } else if (mobileThreeButtons.matches) {
+        twoButtons(false)
+      } else if (twoMapButtons.matches) {
+        twoButtons(true)
+      } else {
+        twoButtons(false)
+      }
+      adjustButtonSize(smallButtons.matches);
+      adjustButtonFont(tinyScreen.matches);
+    });
+
+    let tasks = [];
+    let timersActive = false;
+    let lastVisChange = 0;
+
     function handleVisibilityChange() {
       if (document.hidden && timersActive) {
         verbose && console.log(new Date().toLocaleTimeString() + " visibility change: stopping tasks");
