@@ -1,5 +1,8 @@
 Changes since v2.3.5:
 =======
+- beta-notes: label acars2pos 'white planes' as ACARS in tar1090
+- beta-notes: even more improvements for small and very small screens
+- beta-notes; allow 'auto-verbose' for ads-b RTLSDR autogain with logging
 - beta-notes: instead of auto-enabling acars2pos, make this a user selectable option on the expert screen
 - add Discord link to the footer
 - update almost all containers to their current version
