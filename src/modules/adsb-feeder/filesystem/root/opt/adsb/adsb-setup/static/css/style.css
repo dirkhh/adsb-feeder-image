@@ -107,11 +107,6 @@ td.stickycolumn {
   z-index: -1;
 }
 
-/* hide some navbar buttons for very small screens */
-@media (max-width: 520px) {
-    #kofi-navbar-button { display: none; }
-}
-
 /* Status icon SVG styles */
 .status-icon {
     width: 16px;

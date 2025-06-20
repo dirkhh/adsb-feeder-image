@@ -39,8 +39,14 @@
     {{ list_value_by_tag("site_name", 0) }}{% if list_value_by_tag("site_name", 0) != "" %}:
     {% endif %}{% block title %}{% endblock %}
   </title>
-  <nav class="navbar fixed-top bg-body {% if is_enabled('stage2') %} navbar-expand-lg {% else %} navbar-expand-md {% endif %}">
-    <a class="navbar-brand ms-0 ms-sm-1 me-1 me-sm-3" href="{{ url_for("director") }}">{% if env_value_by_tag("aggregator_choice") == 'nonadsb' %}SDR{% else %}ADS-B{% endif %} Feeder</a>
+  <nav class="navbar fixed-top bg-body navbar-expand" id="navbar">
+    {% if env_value_by_tag("aggregator_choice") != 'nonadsb' %}
+    <a class="navbar-brand mx-1 me-sm-3" href="{{ url_for("director") }}"><img style="height:2em;"
+      src="/static/images/adsbim-logo-64.png" alt="adsb.im"><span class="d-none {% if not is_enabled('stage2') %}d-md-inline{%endif%}">ADS-B Feeder</span></a>
+    {% else %}
+    <a class="navbar-brand mx-1 me-sm-3" href="{{ url_for("director") }}"><img style="height:2em;"
+           src="/static/images/sdrim-logo-64.png" alt="adsb.im"><span class="d-none {% if not is_enabled('stage2') %}d-md-inline{%endif%}">SDR Feeder</span></a>
+    {% endif %}
     <a class="btn btn-primary ms-0 me-1 mx-sm-1 {% if not is_enabled('base_config') %}d-none{% endif %}"
       id="livemap-navbar-button"
       href="/map/{{ env_value_by_tag('tar1090_query_params') }}">Live Map</a>
@@ -196,16 +202,20 @@
     }
     threeMap = threeMap | 4;
     {% endif %}
-    let twoMapButtons = window.matchMedia("(max-width: 300px)");
+    let noKofi = window.matchMedia("(max-width: 280px)");
+    noKofi.addEventListener("change", ({ matches }) => removeKofi(matches));
+    let twoMapButtons = window.matchMedia("(max-width: 250px)");
     twoMapButtons.addEventListener("change", ({ matches }) => twoButtons(matches));
-    let oneMapButton = window.matchMedia("(max-width: 275px)");
+    let oneMapButton = window.matchMedia("(max-width: 225px)");
     oneMapButton.addEventListener("change", ({ matches }) => oneButton(matches));
-    let noMapButton = window.matchMedia("(max-width: 250px)");
+    let noMapButton = window.matchMedia("(max-width: 200px)");
     noMapButton.addEventListener("change", ({ matches }) => noButton(matches));
 
-    let smallButtons = window.matchMedia("(max-width: 920px)");
+    let smallButtons = window.matchMedia("(max-width: {% if is_enabled('stage2') %}1050px{% else %}930px{% endif %})");
+    let navCollapse = window.matchMedia("(max-width: {% if is_enabled('stage2') %}900px{% else %}650px{% endif %})");
     let tinyScreen = window.matchMedia("(max-width: 400px)");
     smallButtons.addEventListener("change", ({ matches }) => adjustButtonSize(matches));
+    navCollapse.addEventListener("change", ({ matches }) => navButtonCollapse(matches));
     tinyScreen.addEventListener("change", ({ matches }) => adjustButtonFont(matches));
 
     function adjustButtonSize(matches) {
@@ -226,6 +236,9 @@
         $('#aiscatcher-navbar-button').html('AIS CATCHER');
       }
     }
+    function navButtonCollapse(matches) {
+      $("#navbar").toggleClass("navbar-expand", ! matches)
+    }
     function adjustButtonFont(matches) {
       // loop over all submit buttons and add css font-size of 70% and smaller horizontal padding
       $('.btn').each(function () {
@@ -239,6 +252,9 @@
       });
     }
 
+    function removeKofi(matches) {
+      $("#kofi-navbar-button").toggleClass("d-none", matches);
+    }
     function twoButtons(matches) {
       console.log("twoButtons: " + matches);
       if (matches) {
@@ -288,6 +304,8 @@
       }
       adjustButtonSize(smallButtons.matches);
       adjustButtonFont(tinyScreen.matches);
+      navButtonCollapse(navCollapse.matches);
+      removeKofi(noKofi.matches);
     });
 
     let tasks = [];
