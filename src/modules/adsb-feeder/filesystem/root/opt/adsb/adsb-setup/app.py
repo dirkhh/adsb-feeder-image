@@ -1291,17 +1291,23 @@ class AdsbIm:
                         gain = self.adjust_airspy_gain(gain)
                         self._d.env_by_tags("gain_airspy").value = gain
                     if sdr._type == "rtlsdr" and not (sdr.purpose in ["acars", "acars_2"] and gain == "-10"):
-                        numgain = make_int(gain)
-                        if numgain < 0:
-                            gain = "0"
-                        elif numgain >= 50:
-                            gain = "49.6"
+                        if "auto" in gain:
+                            pass
+                        else:
+                            numgain = make_int(gain)
+                            if numgain < 0:
+                                gain = "0"
+                            elif numgain >= 50:
+                                gain = "49.6"
                     elif sdr._type == "sdrplay" and gain != "" and gain != "-10":
-                        numgain = make_int(gain)
-                        if numgain < 20:
-                            gain = "20"
-                        elif numgain > 59:
-                            gain = "59"
+                        if "auto" in gain:
+                            pass
+                        else:
+                            numgain = make_int(gain)
+                            if numgain < 20:
+                                gain = "20"
+                            elif numgain > 59:
+                                gain = "59"
                     sdr.gain = gain
                     self._d.env_by_tags(gainenv).value = gain
                 if biasteeenv:
