@@ -1,5 +1,5 @@
-<svg class="status-icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
- <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width=".5">
+<svg class="status-icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="width: 1.5em; height: 1.5em;">
+ <g fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width=".8">
   <path d="m10.34 10.717c0.40768 0.1646 0.66088 0.64965 0.56724 1.078l-0.1927 0.8756c-0.3313 1.5064-1.5094 2.5798-3.2064 2.5798h-2.2314c-1.697 0-2.8737-1.0733-3.2064-2.5798l-0.19269-0.8756c-0.09465-0.42839 0.15888-0.91326 0.56724-1.078l0.66561-0.2684 2.583-1.0404c0.44994-0.1788 0.94687-0.1788 1.3971 0l2.583 1.0404z"/>
   <path d="m6.3933 15.25v-5.6491"/>
   <path d="m9.6748 8.6594v1.7889l-2.583-1.0404c-0.44994-0.1788-0.94687-0.1788-1.3971 0l-2.583 1.0404v-1.7889c0-0.77673 0.63282-1.4123 1.4063-1.4123h3.7503c0.77345 0 1.4063 0.63552 1.4063 1.4123z"/>
