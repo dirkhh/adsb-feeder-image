@@ -202,7 +202,9 @@
     }
     threeMap = threeMap | 4;
     {% endif %}
-    let noKofi = window.matchMedia("(max-width: 300px)");
+    let tinyBreakpoint = threeMap == 7 ? "410px" : "370px";
+    let noKofiBreakpoint = threeMap == 7 ? "300px" : "260px";
+    let noKofi = window.matchMedia(`(max-width: ${noKofiBreakpoint})`);
     noKofi.addEventListener("change", ({ matches }) => removeKofi(matches));
     let twoMapButtons = window.matchMedia("(max-width: 260px)");
     twoMapButtons.addEventListener("change", ({ matches }) => twoButtons(matches));
@@ -213,7 +215,7 @@
 
     let smallButtons = window.matchMedia("(max-width: {% if is_enabled('stage2') %}1050px{% else %}930px{% endif %})");
     let navCollapse = window.matchMedia("(max-width: {% if is_enabled('stage2') %}900px{% else %}650px{% endif %})");
-    let tinyScreen = window.matchMedia("(max-width: 410px)");
+    let tinyScreen = window.matchMedia(`(max-width: ${tinyBreakpoint})`);
     smallButtons.addEventListener("change", ({ matches }) => adjustButtonSize(matches));
     navCollapse.addEventListener("change", ({ matches }) => navButtonCollapse(matches));
     tinyScreen.addEventListener("change", ({ matches }) => adjustButtonFont(matches));

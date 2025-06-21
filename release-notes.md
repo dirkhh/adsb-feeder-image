@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- beta-notes: show icon and text on even smaller screens if the user doesn't have all three (ADS-B, ACARS, AIS) enabled.
 - beta-notes: add custom icons for the nav buttons
 - beta-notes: fix status icons for container starting / container down
 - add support for web-888 SDR via hfdlobserver
