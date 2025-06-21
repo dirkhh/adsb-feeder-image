@@ -254,6 +254,7 @@ class AdsbIm:
         self.agg_matrix = None
         self.agg_structure = []
         self.last_cache_agg_status = 0
+        self.ci = False
         self.cache_agg_status_lock = threading.Lock()
         self.miscLock = threading.Lock()
         self.last_aggregator_debug_print = None
@@ -3538,15 +3539,12 @@ class AdsbIm:
             self.plane_stats_day = start_of_day.timestamp()
             print_err("planes_seen_per_day: new day!")
             # it's a new day, store and then reset the data
+            self.ci = True
             for i in ultrafeeders:
                 self.plane_stats[i].insert(0, len(self.planes_seen_per_day[i]))
                 if len(self.plane_stats[i]) > self.plane_stats_limit:
                     self.plane_stats[i].pop()
             self.reset_planes_seen_per_day()
-            pv = self._d.previous_version
-            self._d.previous_version = "check-in"
-            self._im_status.check(True)
-            self._d.previous_version = pv
         if now.minute == 0:
             # this function is called once every minute - so this triggers once an hour
             # write the data to disk every hour
@@ -3554,6 +3552,13 @@ class AdsbIm:
         for i in ultrafeeders:
             # using sets it's really easy to keep track of what we've seen
             self.planes_seen_per_day[i] |= self.get_current_planes(i)
+        if self.ci:
+            pv = self._d.previous_version
+            self._d.previous_version = "check-in"
+            r = self._im_status.check(True)
+            self._d.previous_version = pv
+            if r.get("latest_tag", "unknown") != "unknown":
+                self.ci = False
 
     def update_net_dev(self):
         dev = ""

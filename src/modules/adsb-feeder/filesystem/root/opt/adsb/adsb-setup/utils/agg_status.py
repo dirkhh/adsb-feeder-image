@@ -572,7 +572,7 @@ class ImStatus:
                 if status == 200:
                     # good result, no need to update this sooner than in a minute
                     self._next_check = time.time() + 60
-                    if self._d.previous_version:
+                    if self._d.previous_version and not check:
                         self._d.previous_version = ""
                         pathlib.Path("/opt/adsb/adsb.im.previous-version").unlink(missing_ok=True)
                 else:
