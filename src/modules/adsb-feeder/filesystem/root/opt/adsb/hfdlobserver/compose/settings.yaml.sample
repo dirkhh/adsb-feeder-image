@@ -1,73 +1,35 @@
+# Updates to the ADS-B Feeder Image will likely overwrite any edits that you
+# make in this file.
+# If you prefer to manually edit this file, that's ok. In that case please
+# set the following entry to 1 (yes, this is commented out, it's parsed
+# by the UI app, not the radiosonde container)
+#
+# %LOCAL_EDITS_DONT_MANAGE%=0
+#
+# Setting this to 0 means that the UI will manage the file, setting it to 1
+# means you are doing this yourself
+
 receivers:
   web888:
     receiver: web888
     client:
       # change the address below to your web888 device's ip address
-
-
-      address: 192.168.66.164  # <<-- replace by token that gets updated at runtime
-
-
-
-
-
+      address: %hfdlobserver_ip%  # <<-- replace by token that gets updated at runtime
       port: 8073
       recorder_path: kiwiclient/kiwirecorder.py
 dumphfdl:
   default:
     # please set a station id here
-    station_id: DND_KHIO_HFDL
-    # set this to false if you feed airframes hfdl data from acars router. Otherwise, leave this as true
+    station_id: %hfdlobserver_feed_id%
+    # set this to false if you feed airframes hfdl data from acars ROUTER
     airframes_enabled: false
-    # statsd_server: 10.10.10.63:8125
-    # other settings
-    #
-    # These are the outputs, or, where you'll send your HFDL data
 
     output:
-      # If you run acars hub, you likely have acars router as part of your config
-      # uncomment the lines below of acasrs router. The only line you'll need to change
-      # should be the address. If acars router is on the same machine, you can use "acars_router" (no quotes)
-      # as the address. Otherwise, use the IP of that machine and make sure, under ports: for acars router you have
-      # 5556:5556
-
-      # -- UNCOMMENT THE LINES BELOW FOR ACARS ROUTER --
-      # - format: json
-      #   protocol: tcp
-      #   address: 127.0.0.1
-      #   port: 5556
-      # -- LEAVE THIS LINE COMMENTED OUT
       # acarsrouter
       - format: json
         protocol: tcp
         address: acars_router
         port: 5556
-
-      # If you have tar1090 and want to feed it position data from hfdl, uncomment the lines below.
-      # Please note that if tar1090 is running in a container, make sure to open the appropriate ports if tar1090
-      # is not on the same machine, as well as adjust the address as you did with acars router
-
-      # -- UNCOMMENT THE LINES BELOW FOR TAR1090
-      # # TAR1090
-      # - format: basestation
-      #   protocol: tcp
-      #   address: 127.0.0.1
-      #   port: 32009
-      # -- LEAVE THIS LINE COMMENTED OUT
-
-      # These are examples of other outputs. You probably don't need them.
-      # # text
-      # - format: text
-      #   protocol: udp
-      #   address:
-      #   port: 2259
-      # a text output over tcp
-      # - format: text
-      #   protocol: udp
-      #   address: 127.0.0.1
-      #   port: 5000
-      #observer feed
-      # - output: hfdl_observer
 
 # unless you have a specific setup, leave most of this alone
 

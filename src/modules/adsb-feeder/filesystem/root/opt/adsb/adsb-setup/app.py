@@ -2076,6 +2076,41 @@ class AdsbIm:
             self._d.env_by_tags("rb978host").list_set(sitenum, "")
             self._d.env_by_tags("978piaware").list_set(sitenum, "")
 
+    def update_hfdlobserver_config(self):
+        if self._d.is_enabled("hfdlobserver"):
+            config_template = pathlib.Path("/opt/adsb/hfdlobserver/compose/settings.yaml.sample")
+            config_lines = config_template.read_text().splitlines()
+            local_config = "%LOCAL_EDITS_DONT_MANAGE%=1" in config_lines
+            # we have config settings or the user has edited the file themselves - etiher way we want to run the container
+            self._d.env_by_tags("run_hfdlobserver").value = local_config or (
+                self._d.env_by_tags("hfdlobserver_feed_id").value != ""
+                and self._d.env_by_tags("hfdlobserver_ip").value != ""
+            )
+            if local_config:
+                print_err("user requested not to manage hfdlobserver config")
+                return
+            if not self._d.env_by_tags("run_hfdlobserver").value:
+                print_err(
+                    f"hfdlobserver not enabled {self._d.env_by_tags('hfdlobserver_feed_id').value} / {self._d.env_by_tags('hfdlobserver_ip').value}"
+                )
+                return
+            placeholders = [
+                "hfdlobserver_feed_id",
+                "hfdlobserver_ip",
+            ]
+            for p in placeholders:
+                config_lines = [l.replace("%" + p + "%", str(self._d.env_by_tags(p).value)) for l in config_lines]
+            config = pathlib.Path("/opt/adsb/hfdlobserver/compose/settings.yaml")
+            config_backup = pathlib.Path("/opt/adsb/hfdlobserver/compose/settings.yaml.bak")
+            if config.exists():
+                config.rename(config_backup)
+            with open(config, "w") as f:
+                f.write("\n".join(config_lines))
+            config.chmod(0o644)
+            print_err("hfdlobserver config updated")
+        else:
+            self._d.env_by_tags("run_hfdlobserver").value = False
+
     def update_sonde_config(self):
         # is this enabled and configured?
         if (
@@ -2477,6 +2512,9 @@ class AdsbIm:
         else:
             self._d.env_by_tags("run_shipfeeder").value = False
 
+        # hfdlobserver is a bit different -- all we need to do is check if it's enabled
+        self.update_hfdlobserver_config()
+
         # set the non-ADS-B SDR strings
         self._d.env_by_tags("acars_sdr_string").value = acarsstring
         self._d.env_by_tags("acars_2_sdr_string").value = acars_2string
@@ -2490,6 +2528,7 @@ class AdsbIm:
             or self._d.is_enabled("run_acarsdec2")
             or self._d.is_enabled("run_dumpvdl2")
             or self._d.is_enabled("run_dumphfdl")
+            or self._d.is_enabled("hfdlobserver")
         )
 
         self._d.env_by_tags("acarshub_acars").value = "external" if self._d.is_enabled("run_acarsdec") else "false"

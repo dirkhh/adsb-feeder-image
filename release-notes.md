@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- add support for web-888 SDR via hfdlobserver
 - beta-notes: label acars2pos 'white planes' as ACARS in tar1090
 - beta-notes: even more improvements for small and very small screens
 - beta-notes; allow 'auto-verbose' for ads-b RTLSDR autogain with logging

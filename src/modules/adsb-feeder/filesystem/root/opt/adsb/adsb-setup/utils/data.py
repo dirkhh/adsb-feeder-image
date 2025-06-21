@@ -640,6 +640,8 @@ class Data:
         Env("AF_RUN_DUMPHFDL", default=False, tags=["run_dumphfdl", "is_enabled"]),
         Env("AF_IS_HFDLOBSERVER_ENABLED", default=False, tags=["hfdlobserver", "is_enabled"]),
         Env("AF_RUN_HFDLOBSERVER", default=False, tags=["run_hfdlobserver", "is_enabled"]),
+        Env("HFDLOBSERVER_FEED_ID", default="", tags=["hfdlobserver_feed_id"]),
+        Env("HFDLOBSERVER_IP", default="", tags=["hfdlobserver_ip"]),
         Env("HFDL_SDR_STRING", default="", tags=["hfdl_sdr_string"]),
         Env("HFDL_GAIN_TYPE", default="--gain", tags=["hfdlgaintype"]),
         Env("HFDL_GAIN", default="", tags=["hfdlgain"]),
