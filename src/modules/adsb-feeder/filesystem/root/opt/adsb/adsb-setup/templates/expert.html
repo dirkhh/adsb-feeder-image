@@ -495,6 +495,53 @@
           </div>
           <div class="col-12 col-lg-6 mt-2">
             <div class="row border my-2">
+              {% if not is_enabled('hfdlobserver') %}
+              <!-- HFDLOBSERVER -->
+              <div class="col-8 my-1">
+                <label for="hfdlobserver--enable">
+                  Enable hfdlobserver <small>(this requires a web-888 SDR on your network)</small>
+                </label>
+              </div>
+              <div class="col-4 my-1">
+                <button type="submit" class="btn btn-primary mx-auto w-100" name="hfdlobserver--enable" value="go">Enable</button>
+              </div>
+              {% else %}
+              <div class="col-6 my-1">
+                <label for="hfdlobserver--disable">
+                  hfdlobserver <small>(this requires a web-888 SDR on your network)</small>
+                </label>
+              </div>
+              <div class="col-3 my-1">
+                <button type="submit" class="btn btn-secondary mx-auto w-100" name="hfdlobserver--disable" formnovalidate
+                        value="go">Disable</button>
+              </div>
+              <div class="col-3 my-1">
+                <button type="submit" class="btn btn-primary mx-auto w-100" name="hfdlobserver--update"
+                        value="go">Update</button>
+              </div>
+              <div class="col-4 mb-1">
+                <label for="hfdl_feed_id">
+                  HFDLOBSERVER feed ID (see above)
+                </label>
+              </div>
+              <div class="col-8 mb-1">
+                <input type="text" class="mx-auto w-100" name="hfdlobserver_feed_id" id="hfdl_feed_id" {% if is_enabled('hfdlobserver') %}
+                       required {% endif %} placeholder="required HFDLOBSERVER feed ID" value="{{ env_value_by_tag('hfdlobserver_feed_id') }}">
+              </div>
+              <div class="col-4 mb-1">
+                <label for="hfdlobserver_ip">
+                  SDR sample rate
+                </label>
+              </div>
+              <div class="col-8 mb-1">
+                <input type="text" class="mx-auto w-100" name="hfdlobserver_ip" id="hfdlobserver_ip" placeholder="IP address of the web-888 SDR"
+                       value="{{ env_value_by_tag('hfdlobserver_ip') }}">
+              </div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="col-12 col-lg-6 mt-2">
+            <div class="row border my-2">
               {% if not is_enabled('acars2pos') %}
               <!-- ACARS2POS -->
               <div class="col-8 my-1">
@@ -504,11 +551,11 @@
               </div>
               <div class="col-4 my-1">
                 <button type="submit" class="btn btn-primary mx-auto w-100" name="acars2pos--enable" value="go"
-                {% if not (is_enabled('acarsdec') or is_enabled('acarsdec2') or is_enabled('dumpvdl2') or is_enabled('dumphfdl')) %} disabled {% endif %}>Enable</button>
+                {% if not is_enabled('acarshub') %} disabled {% endif %}>Enable</button>
               </div>
               {% else %}
               <div class="col-6 my-1">
-                <label for="shipfeeder--disable">
+                <label for="acars2pos--disable">
                   acars2pos <small>(showing ACARS/VDL2/HFDL positions on the ADS-B live map)</small>
                 </label>
               </div>
