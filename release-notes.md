@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- beta-notes: set jaero-timeout to 37 minutes (acars position duration on tar1090)
 - beta-notes: add custom icons for the nav buttons
 - beta-notes: fix status icons for container starting / container down
 - add support for web-888 SDR via hfdlobserver

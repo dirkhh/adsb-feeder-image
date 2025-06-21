@@ -61,6 +61,8 @@ services:
       # options for the µImage:
       - MLATHUB_DISABLE=true
       - READSB_NET_BR_OPTIMIZE_FOR_MLAT=${READSB_NET_BR_OPTIMIZE_FOR_MLAT}
+      - TAR1090_JAEROLABEL=ACARS
+      - READSB_JAERO_TIMEOUT=37
       # --------------------------------------------------
       # GRAPHS1090 (Decoder and System Status Web Page) parameters:
       # The two 978 related parameters should only be included if you are running dump978 for UAT reception (USA only)

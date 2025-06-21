@@ -69,6 +69,7 @@ services:
       - TAR1090_IMAGE_CONFIG_LINK="${FEEDER_TAR1090_IMAGE_CONFIG_LINK}"
       - TAR1090_IMAGE_CONFIG_TEXT="ADS-B Feeder Image Configuration"
       - TAR1090_JAEROLABEL=ACARS
+      - READSB_JAERO_TIMEOUT=37
       - GZIP_LVL=1 # minor CPU reduction from default of 3
       # options for the µImage:
       - TAR1090_ENABLE_AC_DB=${FEEDER_TAR1090_ENABLE_AC_DB}
