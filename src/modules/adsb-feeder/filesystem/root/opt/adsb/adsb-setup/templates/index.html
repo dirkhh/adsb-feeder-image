@@ -15,7 +15,7 @@
 {% endif %}
 {% set num_micro_sites = (ns.site_indices | length) %}
 <h1 class="mt-3 text-center text-danger">
-  {% block title %}ADS-B Feeder Homepage for {{ list_value_by_tag("site_name", 0) }}{% endblock %}
+  {% block title %}{% if env_value_by_tag('aggregator_choice') != 'nonadsb' %}ADS-B{% else %}SDR{% endif %} Feeder Homepage for {{ list_value_by_tag("site_name", 0) }}{% endblock %}
 </h1>
   <div>
     {% with messages = get_flashed_messages() %}
@@ -232,7 +232,7 @@
   </div>
   <div class="col-12 mb-4">
     <h5>
-      ADS-B Feeder <small class="ml-1">running {{ env_value_by_tag("base_version")|replace('(beta)', '')|replace('(stable)', '') }}</small>
+      {% if env_value_by_tag('aggregator_choice') != 'nonadsb' %}ADS-B{% else %}SDR{% endif %} Feeder <small class="ml-1">running {{ env_value_by_tag("base_version")|replace('(beta)', '')|replace('(stable)', '') }}</small>
     </h5>
     <div class="mb-4">
       Latest version: <span id="latest_tag"></span> - <span id="version_update"></span>
