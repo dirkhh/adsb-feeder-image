@@ -872,7 +872,7 @@
           if (data["beast"] == "+" && !mlat_broken) {
             $("#" + agg + "span" + idx).attr("class", "text-success");
             $("#" + agg + "span" + idx).html(statusOkIcon);
-          } else if (data["beast"] == "☒") {
+          } else if (data["beast"] == "☒" || data["beast"] == "☈") {
             $("#" + agg + "span" + idx).attr("class", "text-danger");
             $("#" + agg + "span" + idx).html(icons['☒']);
           } else if (beast_broken || mlat_broken) {
