@@ -42,10 +42,10 @@
   <nav class="navbar fixed-top bg-body navbar-expand" id="navbar">
     {% if env_value_by_tag("aggregator_choice") != 'nonadsb' %}
     <a class="navbar-brand mx-1 me-sm-3" href="{{ url_for("director") }}"><img style="height:2em;"
-      src="/static/images/adsbim-logo-64.png" alt="adsb.im"><span class="d-none {% if not is_enabled('stage2') %}d-md-inline{%endif%}">ADS-B Feeder</span></a>
+      src="/static/images/adsbim-logo-64.png" alt="adsb.im"><span class="d-none {% if is_enabled('stage2') %}d-xl-inline{%else%}d-md-inline{%endif%}">ADS-B Feeder</span></a>
     {% else %}
     <a class="navbar-brand mx-1 me-sm-3" href="{{ url_for("director") }}"><img style="height:2em;"
-           src="/static/images/sdrim-logo-64.png" alt="adsb.im"><span class="d-none {% if not is_enabled('stage2') %}d-md-inline{%endif%}">SDR Feeder</span></a>
+           src="/static/images/sdrim-logo-64.png" alt="adsb.im"><span class="d-none {% if is_enabled('stage2') %}d-xl-inline{%else%}d-md-inline{%endif%}">SDR Feeder</span></a>
     {% endif %}
     <a class="btn btn-primary ms-0 me-1 mx-sm-1 {% if not is_enabled('base_config') %}d-none{% endif %}"
       id="livemap-navbar-button"
