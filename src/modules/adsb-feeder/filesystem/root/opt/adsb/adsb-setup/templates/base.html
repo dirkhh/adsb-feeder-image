@@ -351,6 +351,11 @@
     }
 
     $(document).ready(function () {
+      // Preload icons and populate placeholders when page loads
+      preloadIcons().then(() => {
+        populateIconPlaceholders();
+      });
+
       if (noMapButton.matches) {
         noButton(true)
       } else if (oneMapButton.matches) {
