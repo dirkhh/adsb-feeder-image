@@ -202,20 +202,23 @@
     }
     threeMap = threeMap | 4;
     {% endif %}
-    let tinyBreakpoint = threeMap == 7 ? "410px" : "370px";
-    let noKofiBreakpoint = threeMap == 7 ? "300px" : "260px";
-    let noKofi = window.matchMedia(`(max-width: ${noKofiBreakpoint})`);
+    let breakpoints3 = [ "410px", "300px", "260px", "215px", "180px" ];
+    let breakpoints2 = [ "350px", "260px", "260px", "215px", "180px" ];
+    let breakpoints1 = [ "250px", "200px", "200px", "200px", "180px" ];
+    let breakpoints = threeMap == 7 ? breakpoints3 : (oneMap != twoMap ? breakpoints2 : breakpoints1);
+
+    let noKofi = window.matchMedia(`(max-width: ${breakpoints[1]})`);
     noKofi.addEventListener("change", ({ matches }) => removeKofi(matches));
-    let twoMapButtons = window.matchMedia("(max-width: 260px)");
+    let twoMapButtons = window.matchMedia(`(max-width: ${breakpoints[2]})`);
     twoMapButtons.addEventListener("change", ({ matches }) => twoButtons(matches));
-    let oneMapButton = window.matchMedia("(max-width: 225px)");
+    let oneMapButton = window.matchMedia(`(max-width: ${breakpoints[3]})`);
     oneMapButton.addEventListener("change", ({ matches }) => oneButton(matches));
-    let noMapButton = window.matchMedia("(max-width: 200px)");
+    let noMapButton = window.matchMedia(`(max-width: ${breakpoints[4]})`);
     noMapButton.addEventListener("change", ({ matches }) => noButton(matches));
 
     let smallButtons = window.matchMedia("(max-width: {% if is_enabled('stage2') %}1050px{% else %}930px{% endif %})");
     let navCollapse = window.matchMedia("(max-width: {% if is_enabled('stage2') %}900px{% else %}650px{% endif %})");
-    let tinyScreen = window.matchMedia(`(max-width: ${tinyBreakpoint})`);
+    let tinyScreen = window.matchMedia(`(max-width: ${breakpoints[0]})`);
     smallButtons.addEventListener("change", ({ matches }) => adjustButtonSize(matches));
     navCollapse.addEventListener("change", ({ matches }) => navButtonCollapse(matches));
     tinyScreen.addEventListener("change", ({ matches }) => adjustButtonFont(matches));
