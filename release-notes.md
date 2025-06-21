@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- beta-notes: add custom icons for the nav buttons
 - beta-notes: fix status icons for container starting / container down
 - add support for web-888 SDR via hfdlobserver
 - beta-notes: label acars2pos 'white planes' as ACARS in tar1090

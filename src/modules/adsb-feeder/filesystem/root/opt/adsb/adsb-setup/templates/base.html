@@ -47,15 +47,15 @@
     <a class="navbar-brand mx-1 me-sm-3" href="{{ url_for("director") }}"><img style="height:2em;"
            src="/static/images/sdrim-logo-64.png" alt="adsb.im"><span class="d-none {% if is_enabled('stage2') %}d-xl-inline{%else%}d-md-inline{%endif%}">SDR Feeder</span></a>
     {% endif %}
-    <a class="btn btn-primary ms-0 me-1 mx-sm-1 {% if not is_enabled('base_config') %}d-none{% endif %}"
+    <a class="btn btn-primary ms-0 me-1 mx-sm-1 nb-btn {% if not is_enabled('base_config') %}d-none{% endif %}"
       id="livemap-navbar-button"
-      href="/map/{{ env_value_by_tag('tar1090_query_params') }}">Live Map</a>
-    <a class="btn btn-primary ms-0 me-1 mx-sm-1 {% if not is_enabled('acarshub') %}d-none{% endif %}"
+      href="/map/{{ env_value_by_tag('tar1090_query_params') }}"><span class="icon-placeholder" data-icon="adsb" style="height: 2em;"></span><span id="livemap-navbar-button-text">Live Map</span></a>
+    <a class="btn btn-primary ms-0 me-1 mx-sm-1 nb-btn {% if not is_enabled('acarshub') %}d-none{% endif %}"
       id="acarshub-navbar-button"
-      href="/acarshub">ACARS Hub</a>
-    <a class="btn btn-primary ms-0 me-1 mx-sm-1 {% if not is_enabled('run_shipfeeder') %}d-none{% endif %}"
+      href="/acarshub"><span class="icon-placeholder" data-icon="acars"></span><span id="acarshub-navbar-button-text">ACARS Hub</span></a>
+    <a class="btn btn-primary ms-0 me-1 mx-sm-1 nb-btn {% if not is_enabled('run_shipfeeder') %}d-none{% endif %}"
       id="aiscatcher-navbar-button"
-      href="/aiscatcher">AIS Catcher</a>
+      href="/aiscatcher"><span class="icon-placeholder" data-icon="ais"></span><span id="aiscatcher-navbar-button-text">AIS Catcher</span></a>
     <div id="temperature_block" style="height:auto;" class="d-none d-sm-block">
       <span id="cpu" class="d-none"
             style="float:left;width:45%;height:1em;font-size:0.6em;margin-left: 1px;">CPU</span>
@@ -202,9 +202,9 @@
     }
     threeMap = threeMap | 4;
     {% endif %}
-    let noKofi = window.matchMedia("(max-width: 280px)");
+    let noKofi = window.matchMedia("(max-width: 300px)");
     noKofi.addEventListener("change", ({ matches }) => removeKofi(matches));
-    let twoMapButtons = window.matchMedia("(max-width: 250px)");
+    let twoMapButtons = window.matchMedia("(max-width: 260px)");
     twoMapButtons.addEventListener("change", ({ matches }) => twoButtons(matches));
     let oneMapButton = window.matchMedia("(max-width: 225px)");
     oneMapButton.addEventListener("change", ({ matches }) => oneButton(matches));
@@ -213,7 +213,7 @@
 
     let smallButtons = window.matchMedia("(max-width: {% if is_enabled('stage2') %}1050px{% else %}930px{% endif %})");
     let navCollapse = window.matchMedia("(max-width: {% if is_enabled('stage2') %}900px{% else %}650px{% endif %})");
-    let tinyScreen = window.matchMedia("(max-width: 400px)");
+    let tinyScreen = window.matchMedia("(max-width: 410px)");
     smallButtons.addEventListener("change", ({ matches }) => adjustButtonSize(matches));
     navCollapse.addEventListener("change", ({ matches }) => navButtonCollapse(matches));
     tinyScreen.addEventListener("change", ({ matches }) => adjustButtonFont(matches));
@@ -227,13 +227,13 @@
         $(this).css('--mdb-btn-padding-x', matches ? '0.75rem' : '1.5rem' );
       })
       if (matches) {
-        $('#livemap-navbar-button').html('MAP');
-        $('#acarshub-navbar-button').html('ACARS');
-        $('#aiscatcher-navbar-button').html('AIS');
+        $('#livemap-navbar-button-text').html('MAP');
+        $('#acarshub-navbar-button-text').html('ACARS');
+        $('#aiscatcher-navbar-button-text').html('AIS');
       } else {
-        $('#livemap-navbar-button').html('LIVE MAP');
-        $('#acarshub-navbar-button').html('ACARS HUB');
-        $('#aiscatcher-navbar-button').html('AIS CATCHER');
+        $('#livemap-navbar-button-text').html('LIVE MAP');
+        $('#acarshub-navbar-button-text').html('ACARS HUB');
+        $('#aiscatcher-navbar-button-text').html('AIS CATCHER');
       }
     }
     function navButtonCollapse(matches) {
@@ -242,12 +242,23 @@
     function adjustButtonFont(matches) {
       // loop over all submit buttons and add css font-size of 70% and smaller horizontal padding
       $('.btn').each(function () {
+        if (! $(this).hasClass('nb-btn')) {
+          if (matches) {
+            $(this).css('font-size', '70%');
+            $(this).css('--mdb-btn-padding-x', '0.25rem')
+          } else {
+            $(this).css('font-size', '85%');
+            $(this).css('--mdb-btn-padding-x', '0.75rem')
+          }
+        }
         if (matches) {
-          $(this).css('font-size', '70%');
-          $(this).css('--mdb-btn-padding-x', '0.25rem')
+          $('#livemap-navbar-button-text').html('');
+          $('#acarshub-navbar-button-text').html('');
+          $('#aiscatcher-navbar-button-text').html('');
         } else {
-          $(this).css('font-size', '85%');
-          $(this).css('--mdb-btn-padding-x', '0.75rem')
+          $('#livemap-navbar-button-text').html('MAP');
+          $('#acarshub-navbar-button-text').html('ACARS');
+          $('#aiscatcher-navbar-button-text').html('AIS');
         }
       });
     }
