@@ -774,49 +774,6 @@
     updateChart();
   }
 
-  // SVG icon loader with caching
-  const iconCache = {};
-
-  async function loadIcon(iconName) {
-    if (iconCache[iconName]) {
-      return iconCache[iconName];
-    }
-
-    try {
-      const response = await fetch(`/static/icons/${iconName}.svg`);
-      if (response.ok) {
-        const svgContent = await response.text();
-        iconCache[iconName] = svgContent;
-        return svgContent;
-      }
-    } catch (error) {
-      console.warn(`Failed to load icon: ${iconName}`, error);
-    }
-
-    // Fallback to empty string if icon fails to load
-    return iconName;
-  }
-
-  // Preload all icons
-  async function preloadIcons() {
-    const iconNames = ['status-unknown', 'feed-connected', 'feed-disconnected', 'mlat-sync-error', 'feed-warning', 'overall-good', 'container-starting', 'container-down'];
-    const promises = iconNames.map(name => loadIcon(name));
-    await Promise.all(promises);
-  }
-
-  // Replace all icon placeholders with loaded SVGs
-  async function populateIconPlaceholders() {
-    const placeholders = document.querySelectorAll('.icon-placeholder');
-    for (const placeholder of placeholders) {
-      const iconName = placeholder.getAttribute('data-icon');
-      if (iconName) {
-        const iconSvg = await loadIcon(iconName);
-        placeholder.innerHTML = iconSvg;
-        placeholder.classList.remove('icon-placeholder');
-      }
-    }
-  }
-
   async function reset_status(agg, idx) {
     const loadingIcon = await loadIcon('status-unknown');
     $("#" + agg + "beast" + idx).html(loadingIcon);
