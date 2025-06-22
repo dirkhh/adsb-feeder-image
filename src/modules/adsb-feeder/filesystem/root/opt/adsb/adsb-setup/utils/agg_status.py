@@ -575,6 +575,9 @@ class ImStatus:
                     if self._d.previous_version and not check:
                         self._d.previous_version = ""
                         pathlib.Path("/opt/adsb/adsb.im.previous-version").unlink(missing_ok=True)
+                elif status == 201:
+                    # successful check-in
+                    return {"latest_tag": "success", "latest_commit": "", "advice": ""}
                 else:
                     # check again no earlier than 10 seconds from now
                     self._next_check = time.time() + 10
