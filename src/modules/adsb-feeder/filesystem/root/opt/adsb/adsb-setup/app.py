@@ -3457,6 +3457,7 @@ class AdsbIm:
                     print_err(f"configured serials: {configured_serials}")
                     print_err(f"available serials: {available_serials}")
                     print_err("director redirecting to sdr_setup: unconfigured devices present")
+                    report_issue(f"New SDR detected, please check / adjust the configuration and apply the changes!")
                     return self.sdr_setup()
 
             used_serials = [self._d.env_by_tags(purpose).value for purpose in ["978serial", "1090serial"]]
@@ -3465,6 +3466,7 @@ class AdsbIm:
                 print_err(f"used serials: {used_serials}")
                 print_err(f"available serials: {available_serials}")
                 print_err("director redirecting to sdr_setup: at least one used device is not present")
+                report_issue(f"Missing SDR detected, please check / adjust the configuration and apply the changes!")
                 return self.sdr_setup()
         elif not self._d.is_enabled("stage2"):
             # we don't do ADS-B, we don't do any of the other protocols, and this isn't a stage 2
