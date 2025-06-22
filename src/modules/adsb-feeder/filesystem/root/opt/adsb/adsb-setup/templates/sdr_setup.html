@@ -209,20 +209,21 @@
     let have_rtlsdr = false;
     let num = sdrs.length;
     for (let i = 0; i < num; i++) {
-      if (sdrs[i]['type'] == 'rtlsdr') {
+      let sdr = sdrs[i];
+      if (sdr['type'] == 'rtlsdr') {
         have_rtlsdr = true;
       }
       let id = '#sdr' + i;
       $(id).css({ 'display': 'flex' });
-      $(id + "-serial").html(sdrs[i]['serial']);
-      $(id + "-type").html(sdrs[i]['type']);
-      $(id + "-gain").html(sdrs[i]['gain']);
-      if (sdrs[i]['biastee']) {
+      $(id + "-serial").html(sdr['serial']);
+      $(id + "-type").html(sdr['type']);
+      $(id + "-gain").html(sdr['gain']);
+      if (sdr['biastee']) {
         $(id + "-biastee").html("\u2713");
       } else {
         $(id + "-biastee").html("");
       }
-      let purpose = sdrs[i]['purpose'];
+      let purpose = sdr['purpose'];
       // we have other-0 .. other-15, but that's an implementation detail that we hide from the user
       if (purpose.startsWith('other')) {
         purpose = 'other';
