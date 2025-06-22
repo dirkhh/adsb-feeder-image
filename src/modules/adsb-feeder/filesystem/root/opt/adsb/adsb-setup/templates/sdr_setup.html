@@ -155,6 +155,7 @@
 </div>
 <script>
   let sdrs = [];
+  let frequencies = {};
   let sdr_setup_dialog = $("#sdrsetup_dialog");
   let modal = new mdb.Modal(sdr_setup_dialog)
   let consumers = ["1090",
@@ -185,6 +186,7 @@
         }
         document.getElementById("lsusb_text").innerHTML = data.lsusb_output;
         sdrs = data['sdrdevices'];
+        frequencies = data['frequencies'];
         console.log("Got the following SDRs from the API: " + JSON.stringify(sdrs));
         update_ui();
         if (data['duplicates'] != '') {
@@ -224,6 +226,11 @@
         $(id + "-biastee").html("");
       }
       let purpose = sdr['purpose'];
+      for (const [freq, serial] of Object.entries(frequencies)) {
+        if (serial == sdr['serial']) {
+          purpose = freq;
+        }
+      }
       // we have other-0 .. other-15, but that's an implementation detail that we hide from the user
       if (purpose.startsWith('other')) {
         purpose = 'other';
