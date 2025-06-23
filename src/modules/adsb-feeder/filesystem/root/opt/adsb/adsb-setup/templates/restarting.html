@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1 class="mt-3 text-center text-danger">{% block title %} Restarting the ADS-B Feeder system {% endblock %}</h1>
+<h1 class="mt-3 text-center text-danger">{% block title %} Restarting the {% if env_value_by_tag('aggregator_choice') == 'nonadsb' %}SDR{% else %}ADS-B{% endif %} Feeder system {% endblock %}</h1>
 
 <body>
   <script>

@@ -632,8 +632,12 @@
       <section class="d-flex justify-content-between border-bottom small">
         <div class="me-5 d-block">
           <span>
-            Running <a href="https://adsb.im/home">ADS-B Feeder Image</a> {{ env_value_by_tag("base_version") }},
-            running on {{ env_value_by_tag("board_name") }}.
+            {% if env_value_by_tag('aggregator_choice') == 'nonadsb' %}
+            Running <a href="https://sdre.im/home">SDR Feeder Image</a>
+            {% else %}
+            Running <a href="https://adsb.im/home">ADS-B Feeder Image</a>
+            {% endif %}
+            {{ env_value_by_tag("base_version") }}, running on {{ env_value_by_tag("board_name") }}.
             <br />
             {{ env_value_by_tag("image_name") }}
             <br />
