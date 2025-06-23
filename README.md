@@ -1,11 +1,11 @@
-# ADS-B Feeder Image
+# ADS-B / SDR Feeder Image
 
 <a href="https://www.youtube.com/@adsb">intro videos</a> &nbsp;&nbsp;&nbsp;
 <a href="https://adsb.im/home"><img src="https://adsb.im/static/images/adsb.im.logo.png" height="30" alt="adsb.im homepage"></a>
 
-## The easiest way to track nearby aircraft with your own hardware and share with others
+## The easiest way to track nearby aircraft, ships, and weather balloons with your own hardware and share with others
 
-Track aircraft around you broadcasting ADS-B messages on 1090 MHz (and, in the US, UAT messages on 978 MHz). Show the planes on a map, including recent tracks, altitude, speed, and in case of many commercial flights even the route that they are on. For some reason some of the commercial vendors call this 'aircraft radar', even though radar is definitely not involved - it's all UHF radio waves.
+Track aircraft around you broadcasting ADS-B messages on 1090 MHz (and, in the US, UAT messages on 978 MHz). Show the planes on a map, including recent tracks, altitude, speed, and in case of many commercial flights even the route that they are on. For some reason some of the commercial vendors call this 'aircraft radar', even though radar is definitely not involved - it's all UHF radio waves. Similarly, track the data messages sent out by these planes via ACARS, VDL2, and HFDL - and track ships sending AIS and weather balloons using the RadioSonde data.
 
 This project provides an easy to use turn-key SD card image for a number of single board computers (or to run in an x86 VM).
 Currently we are building the following images:
@@ -23,17 +23,18 @@ Currently we are building the following images:
 This setup can work on many other systems - if there is enough demand, we can easily add more boards (as long as they have reasonably well supported versions of ideally DietPi or also Armbian available).
 Additionally, this software stack (with some differences in the user experience) can be installed on any DietPi board and even on most generic Linux systems running a Debian based distribution.
 
-The idea is to create a "complete" ADS-B feeder that feeds pretty much all of the ADS-B flight trackers / aggregators.
+The idea is to create a "complete" ADS-B / SDR feeder that feeds pretty much all of the ADS-B flight trackers / aggregators (as well as ACARS, AIS, and Sonde aggreagators).
 
-These aggregators have a comittment to open data ([daily release of the data](https://github.com/adsblol/globe_history)); they also share with each other the data fed to them (in order to improve mlat coverage, it still makes sense to feed all of them):
+These ADS-B aggregators have a comittment to open data ([daily release of the data](https://github.com/adsblol/globe_history)); they also share with each other the data fed to them (in order to improve mlat coverage, it still makes sense to feed all of them):
 - [adsb.lol](https://adsb.lol)
 - [Fly Italy Adsb](https://flyitalyadsb.com)
 - [TheAirTraffic](http://theairtraffic.com)
 
-These aggregators are also supported:
+These ADS-B aggregators are also supported:
 - [adsb.fi](https://adsb.fi)
 - [ADS-B Exchange](https://adsbexchange.com)
 - [ADSBHub](https://adsbhub.org)
+- [sdrmap](https://sdrmap.org/)
 - [airplanes.live](https://airplanes.live)
 - [AVDelphi](https://www.avdelphi.com)
 - [FlightAware](https://flightaware.com)
@@ -45,6 +46,28 @@ These aggregators are also supported:
 - [Planespotters.net](http://planespotters.net)
 - [AirNav Radar](https://www.airnavradar.com)
 - [Radar Virtuel](https://www.radarvirtuel.com)
+
+For ACARS / VDL2 / HFDL the image currently supports
+- [aiframes.io](https://airframes.io)
+- [ACARS Drama](https://acarsdrama.com/)
+- [adsb.lol](https://www.adsb.lol/docs/open-data/aircraft-data-links/)
+- [AVDelphi](https://avdelphi.com/)
+
+For AIS, the image currently supports these community aggregators
+- [aiframes.io](https://airframes.io)
+- [AIS Catcher](https://aiscatcher.org/)
+- [AIS Friends](https://aisfriends.com/)
+- [AISHub](https://www.aishub.net/)
+- [HPRadar](https://sea.hpradar.com/)
+- [sdrmap](https://sdrmap.org/)
+
+As well as a number of commercial AIS aggregators
+- [MarineTraffic](https://www.marinetraffic.com/)
+- [MyShipTracking](https://www.myshiptracking.com/)
+- [shipfinder](https://shipfinder.co/about)
+- [ShippingExplorer](https://www.shippingexplorer.net/)
+- [ShipXplorer](https://www.shipxplorer.com/)
+- [VesselFinder](https://stations.vesselfinder.com/)
 
 ### Home page of an installed ADS-B Feeder Image
 
@@ -58,16 +81,16 @@ These aggregators are also supported:
 - get an SDR and antenna. There are many many choices. Availability may differ depending on where you are. But often a generic SDR and
 an indoor or (much better) outdoor antenna is all you need. More detail on the [ADSB.im website](https://adsb.im/supported).
 - download the current release from the [Release section](https://github.com/dirkhh/adsb-feeder-image/releases/latest)
-- use a tool like the [Raspberry Pi Imager](https://github.com/raspberrypi/rpi-imager/releases) to write the image to a µSD card on your computer
+- use a tool like the [Raspberry Pi Imager](https://github.com/raspberrypi/rpi-imager/releases) to write the image to a µSD card on your computer (if you are using a Raspberry Pi board, you can skip the previous download step as the ADS-B / SDR Feeder Image is available as an option as part of the Raspberry Pi Imager).
 - the standard Raspbian based images for Raspberry Pis allow configuring WiFi during image write with the Pi Imager, but in most cases it is easier to simply use the Hotspot method to connect to the image after boot and then set up the WiFi from a web browser. Simply wait after the first boot until you see a WiFi network called `adsb-feeder-image` - mode details at the [adsb.im Hotspot page](https://adsb.im/hotspot)
 - boot from the image
 - wait a couple of minutes for the initial boot to complete (with the DietPi based images that can mean quite a while, sometimes up to 10+ minutes if your internet is slow), then connect to the [ADSB-PI Setup Page](http://adsb-feeder.local) -- this link _should_ work to find the freshly booted system on your local network - assuming you have a reasonably standard setup with mDNS enabled. If this fails. got to the [adsb.im redirector](http://my.adsb.im) - which should forward you to the right local address on your network. In the rare case where this fails as well you'll need to manually find the board's IP address - either using a connected keyboard / monitor, or via your router or other source of local IP addresses.
 Please note: if you have more than one ADSB.im feeder on the same network, they will be assigned names like `adsb-feeder-2.local`, etc. So please pay attention which of the different systems you are connecting to in that case.
 - on the setup website enter the latitude, longitude, and elevation of your receiver as well as a name.
-- finally there's a quick selection of the 'account-less' aggregators to submit data to - the ones where you need accounts are on a separate config page
+- finally there's a quick selection of the 'account-less' aggregators to submit data to - the ones where you need accounts are on a separate config page -- or you can opt not to feed ADS-B at all if you are using the image for ACARS, AIS, etc
 - click on Submit and then be patient while everything gets installed and setup - depending on your internet speed this could again take several minutes
 - there are a few more pages to choose options for the live map, the SDR, a number of system administration topics, and finally to decide which aggregators to feed
-- once the setup is completed, you'll be forwarded to your feeder home page from where you can go to all of the various pages that your feeder offers. Usually a good one to start with is the TAR1090 Map at the top.
+- once the setup is completed, you'll be forwarded to your feeder home page from where you can go to all of the various pages that your feeder offers. Usually a good one to start with is the TAR1090 Map at the top. Or the ACARS Hub or AIS Catcher app if you enabled either of those features.
 
 ## Feed from an x86 virtual machine
 
