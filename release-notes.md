@@ -1,5 +1,7 @@
 Changes since v2.3.5:
 =======
+- beta-notes: improve SDR handling and explain why a user might get sent back to the SDR Setup page when all they want is the Feeder Homepage
+- beta-notes: mention SDR Feeder instead of just ADS-B Feeder in a few more places
 - beta-notes: fix incorrect return value handling when connecting to status API
 - beta-notes: fix bug where icons weren't shown on the nav buttons on UI pages other than the home page
 - beta-notes: set jaero-timeout to 37 minutes (acars position duration on tar1090)
