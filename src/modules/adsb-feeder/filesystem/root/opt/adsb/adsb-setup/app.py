@@ -693,7 +693,9 @@ class AdsbIm:
 
     def geojson(self):
         print_err("got geojson request")
-        return self.ais_file("geojson")
+        if self._d.is_enabled("run_shipfeeder"):
+            return self.ais_file("geojson")
+        return ("{}", 204)  # HTTPStatus.NO_CONTENT
 
     def iconspng(self):
         print_err("got icons.png request")
