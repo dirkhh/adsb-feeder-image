@@ -2059,7 +2059,7 @@ class AdsbIm:
             (gaindir / "suspend").touch(exist_ok=True)
 
             # this file sets the gain on readsb start
-            string2file(path=(gaindir / "1090gain"), string=f"{gain}\n")
+            string2file(path=(gaindir / "gain"), string=f"{gain}\n")
 
             # this adjusts the gain while readsb is running
             self.waitSetGainRace()

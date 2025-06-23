@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- beta-notes: fix 1090 rtl-sdr gain setting not persisting
 - beta-notes: improve SDR handling and explain why a user might get sent back to the SDR Setup page when all they want is the Feeder Homepage
 - beta-notes: mention SDR Feeder instead of just ADS-B Feeder in a few more places
 - beta-notes: fix incorrect return value handling when connecting to status API
