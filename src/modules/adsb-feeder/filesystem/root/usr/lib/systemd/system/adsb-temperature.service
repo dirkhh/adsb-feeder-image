@@ -1,6 +1,7 @@
 [Unit]
 Description=ADS-B Feeder Temperature Service
-After=adsb-setup.service
+Requires=pigpiod.service
+After=adsb-setup.service pigpiod.service
 
 [Service]
 SyslogIdentifier=adsb-temperature

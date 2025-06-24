@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- add support for DHT22 temperature sensor on Raspberry Pi boards
 - beta-notes: SDR setup page: unhide 978 biastee checkbox
 - beta-notes: fix 1090 rtl-sdr gain setting not persisting
 - beta-notes: improve SDR handling and explain why a user might get sent back to the SDR Setup page when all they want is the Feeder Homepage

@@ -2186,6 +2186,27 @@ class AdsbIm:
         else:
             print_err("no action on ADS-B functions")
 
+    def handle_dht22(self):
+        dht22 = self._d.env_by_tags("has_dht22")
+        print_err(f"handling dht22: {dht22.value}")
+        if dht22.value:
+            success, output = run_shell_captured(
+                "systemctl is-active adsb-temperature.service || systemctl enable --now adsb-temperature.service",
+                timeout=20,
+            )
+            if not success:
+                report_issue(f"failed to enable adsb-temperature.service - check the logs for details")
+                print_err(f"failed to enable adsb-temperature.service: {output}")
+                dht22.value = False
+            else:
+                self._d.env_by_tags("temperature_block").value = True
+        else:
+            _, output = run_shell_captured(
+                "systemctl is-enabled adsb-temperature.service && systemctl is-active adsb-temperature.service && systemctl disable --now adsb-temperature.service",
+                timeout=20,
+            )
+            self._d.env_by_tags("temperature_block").value = False
+
     def handle_implied_settings(self):
         self.handle_non_adsb()
         if self._d.env_by_tags("aggregator_choice").value in ["micro", "nano", "nonadsb"]:
@@ -2934,6 +2955,8 @@ class AdsbIm:
                         e.value = False
                         print_err(f"disabled {tags}")
                         self._next_url_from_director = request.url
+                        if key.startswith("has_dht22"):
+                            self.handle_dht22()
                         continue
                 if key.endswith("--enable") and value == "go":
                     tags = [t.replace("enable", "is_enabled") for t in key.split("--")]
@@ -2942,6 +2965,8 @@ class AdsbIm:
                         e.value = True
                         print_err(f"enabled {tags}")
                         self._next_url_from_director = request.url
+                        if key.startswith("has_dht22"):
+                            self.handle_dht22()
                         continue
                 if key.endswith("--update") and value == "go":
                     self._next_url_from_director = request.url
