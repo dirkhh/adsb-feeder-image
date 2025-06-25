@@ -126,7 +126,7 @@
         {% if not is_enabled('stage2') %}
         <li class="nav-item"><a
               class="nav-link" id="data_sharing_link"
-              {% if (not is_enabled('base_config') or env_value_by_tag('aggregator_choice') in ['micro', 'nano']) and not is_enabled('shipfeeder') and not is_enabled('acarshub') %}style="display: none;{% endif %}
+              {% if (not is_enabled('base_config') or env_value_by_tag('aggregator_choice') in ['micro', 'nano']) and not is_enabled('shipfeeder') and not is_enabled('acarshub') %}style="display: none;"{% endif %}
               href="/aggregators">Data Sharing</a>
         </li>
         {% else %}
