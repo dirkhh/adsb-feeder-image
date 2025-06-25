@@ -17,6 +17,20 @@ fi
 cp -T -f -a "$ORIG/static" /opt/adsb/adsb-setup/static-staging
 cp -T -f -a "$ORIG/templates" /opt/adsb/adsb-setup/templates-staging
 
+# generate icon cache
+nl="
+"
+icons="const iconCache = {"
+for file in /opt/adsb/adsb-setup/static-staging/icons/*.svg; do
+    name=$(basename -s .svg $file)
+    icons+="$nl'$name':$nl\`"
+    icons+=$(cat $file)
+    icons+="\`,"
+done
+icons+="$nl};"
+
+echo "$icons" > /opt/adsb/adsb-setup/static-staging/js/iconCache.js
+
 # ignore woff2 files they should not change anyhow, this makes this code simpler as the woff2 files
 # are referred to from a css file
 STATIC="$(find /opt/adsb/adsb-setup/static-staging/ -type f |  grep -v -e '\.License$' -e '\.ico$' -e '\.map$' -e '\.woff2$' -e '\.svg$')"
