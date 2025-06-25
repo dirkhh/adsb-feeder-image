@@ -46,6 +46,7 @@ These ADS-B aggregators are also supported:
 - [Planespotters.net](http://planespotters.net)
 - [AirNav Radar](https://www.airnavradar.com)
 - [Radar Virtuel](https://www.radarvirtuel.com)
+- [virtualradar.nl](https://www.virtualradar.nl)
 
 For ACARS / VDL2 / HFDL the image currently supports
 - [aiframes.io](https://airframes.io)

@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- add virtualradar.nl as accountless aggregator
 - add support for DHT22 temperature sensor on Raspberry Pi boards
 - beta-notes: SDR setup page: unhide 978 biastee checkbox
 - beta-notes: fix 1090 rtl-sdr gain setting not persisting

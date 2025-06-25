@@ -103,6 +103,11 @@ class Data:
             "mlat,feed.adsbexchange.com,31090,39003",
             has_policy=True,
         ),
+        "virtualradar": NetConfig(
+            "adsb,feed.virtualradar.nl,30004,beast_reduce_plus_out",
+            "mlat,feed.virtualradar.nl,31090,39006",
+            has_policy=True,
+        ),
         "tat": NetConfig(
             "adsb,feed.theairtraffic.com,30004,beast_reduce_plus_out",
             "mlat,feed.theairtraffic.com,31090,39004",
@@ -510,6 +515,11 @@ class Data:
             "_ADSBIM_STATE_ADSBX_FEEDER_ID",
             default=[""],
             tags="adsbxfeederid",
+        ),
+        Env(
+            "_ADSBIM_STATE_IS_ULTRAFEEDER_VIRTUALRADAR_ENABLED",
+            default=[False],
+            tags=["virtualradar", "ultrafeeder", "is_enabled"],
         ),
         Env(
             "_ADSBIM_STATE_ALIVE_MAP_LINK",
