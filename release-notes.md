@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- beta-notes: UI: another rewrite of the SDR Setup, this time with focus to responsiveness and good user experience on small screens
 - beta-notes: UI: make stage 2 setup screen more usable on small / mobile screens
 - beta-notes: clean up handling of SVG icons
 - beta-notes: clean up, reorder, and organize release notes as we get ready for the first v3.0 release

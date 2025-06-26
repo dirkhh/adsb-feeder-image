@@ -49,25 +49,28 @@
     </div>
     <div class="row gx-0">
       <div class=".g-0">
-        <div class="row gx-0">
-          <p class="col-2 bg-info mr-2">SDR #</p>
-          <p class="col-2 bg-info mr-2">Type</p>
-          <p class="col-4 bg-info mr-2">Serial</p>
-          <p class="col-1 bg-info mr-2">Gain</p>
-          <p class="col-1 bg-info mr-2">bias-T</p>
-          <p class="col-2 bg-info mr-2">Used for</p>
-        </div>
-        {% for sdr in [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15" ] %}
-        <div class="row" id="sdr{{ sdr }}" style="display: none">
-          <p class="col-2" onclick="sdr_setup_show_dialog({{ sdr }})"><button type="button" class="btn btn-light" data-mdb-ripple-init data-mdb-ripple-color="dark">SDR {{ sdr }}</button></p>
-          <p class="col-2" id="sdr{{ sdr }}-type"></p>
-          <p class="col-4 text-break" id="sdr{{ sdr }}-serial" onclick="sdr_setup_show_dialog({{ sdr }})"></p>
-          <p class="col-1" id="sdr{{ sdr }}-gain"></p>
-          <p class="col-1" id="sdr{{ sdr }}-biastee"></p>
-          <p class="col-2" id="sdr{{ sdr }}-purpose">
-          </p>
-        </div>
-        {% endfor %}
+        <table class="table table-sm" id="sdr_table">
+          <thead class="table-info bg-gradient text-dark">
+            <tr>
+              <th scope="col">Type</th>
+              <th scope="col">Serial</th>
+              <th scope="col">Gain</th>
+              <th scope="col">biastee</th>
+              <th scope="col" style="white-space: nowrap;">Use for</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for sdr in [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15" ] %}
+            <tr id="sdr{{ sdr }}" class="d-none" onclick="sdr_setup_show_dialog({{ sdr }})" data-mdb-ripple-init data-mdb-ripple-color="dark">
+              <td id="sdr{{ sdr }}-type"></td>
+              <td id="sdr{{ sdr }}-serial" class="text-break"></td>
+              <td id="sdr{{ sdr }}-gain"></td>
+              <td id="sdr{{ sdr }}-biastee" class="text-center"></td>
+              <td id="sdr{{ sdr }}-purpose"></td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -216,7 +219,7 @@
         have_rtlsdr = true;
       }
       let id = '#sdr' + i;
-      $(id).css({ 'display': 'flex' });
+      $(id).removeClass('d-none');
       $(id + "-serial").html(sdr['serial']);
       $(id + "-type").html(sdr['type']);
       $(id + "-gain").html(sdr['gain']);
