@@ -40,7 +40,7 @@
       </div>
       <div class="col-sm-12 mt-4 mb-3" style="display: block;" id="noduptext">
         <p>If the table of SDRs isn't consistent with your hardware, click on CHECK SDRS.</p>
-        <p>To edit the properties of an SDR, click on that line in the table.</p>
+        <p><strong>To edit the properties of an SDR, click on that line in the table below.</strong></p>
       </div>
       <div class="col-sm-3 mb-2">
         <button class="btn btn-secondary btn-rounded" type="button" name="update_sdr_info" onclick="sdr_info()">Check
@@ -61,7 +61,7 @@
           </thead>
           <tbody>
           {% for sdr in [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15" ] %}
-            <tr id="sdr{{ sdr }}" class="d-none" onclick="sdr_setup_show_dialog({{ sdr }})" data-mdb-ripple-init data-mdb-ripple-color="dark">
+            <tr id="sdr{{ sdr }}" class="d-none" onclick="sdr_setup_show_dialog({{ sdr }})" data-mdb-ripple-init data-mdb-ripple-color="dark" title="Click to configure this SDR">
               <td id="sdr{{ sdr }}-type"></td>
               <td id="sdr{{ sdr }}-serial" class="text-break"></td>
               <td id="sdr{{ sdr }}-purpose"></td>
