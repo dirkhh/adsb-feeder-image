@@ -210,7 +210,8 @@
       });
   }
 
-  function update_ui() {
+  function update_ui(force_arg) {
+    let force = force_arg || false;
     let have_rtlsdr = false;
     let num = sdrs.length;
     for (let i = 0; i < num; i++) {
@@ -229,9 +230,11 @@
         $(id + "-biastee").html("");
       }
       let purpose = sdr['purpose'];
-      for (const [freq, serial] of Object.entries(frequencies)) {
-        if (serial == sdr['serial']) {
-          purpose = freq;
+      if (!force) {
+        for (const [freq, serial] of Object.entries(frequencies)) {
+          if (serial == sdr['serial']) {
+            purpose = freq;
+          }
         }
       }
       // we have other-0 .. other-15, but that's an implementation detail that we hide from the user
@@ -434,7 +437,7 @@
       sdrs[sdr]['purpose'] = purpose;
     }
     modal.hide();
-    update_ui();
+    update_ui(true);
   }
 
   function submit_sdr_changes() {
