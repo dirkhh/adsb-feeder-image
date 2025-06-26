@@ -54,9 +54,9 @@
             <tr>
               <th scope="col">Type</th>
               <th scope="col">Serial</th>
+              <th scope="col" style="white-space: nowrap;">Use for</th>
               <th scope="col">Gain</th>
               <th scope="col">biastee</th>
-              <th scope="col" style="white-space: nowrap;">Use for</th>
             </tr>
           </thead>
           <tbody>
@@ -64,9 +64,9 @@
             <tr id="sdr{{ sdr }}" class="d-none" onclick="sdr_setup_show_dialog({{ sdr }})" data-mdb-ripple-init data-mdb-ripple-color="dark">
               <td id="sdr{{ sdr }}-type"></td>
               <td id="sdr{{ sdr }}-serial" class="text-break"></td>
+              <td id="sdr{{ sdr }}-purpose"></td>
               <td id="sdr{{ sdr }}-gain"></td>
               <td id="sdr{{ sdr }}-biastee" class="text-center"></td>
-              <td id="sdr{{ sdr }}-purpose"></td>
             </tr>
           {% endfor %}
           </tbody>
