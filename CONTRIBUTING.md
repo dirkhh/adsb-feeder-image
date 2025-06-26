@@ -16,7 +16,11 @@ Pull requests should usually be opened against the `beta` branch as I try to tes
 
 ## Testing changes
 
-After having done your changes on your local codebase, you can test these against your `adsb-feeder.local` instance. The prerequisite is to have a `root` SSH access to this instance and ist must be available under the hostname `adsb-feeder.local` in your local network.
+After having done your changes on your local codebase, you can test these against your own ADSB feeder. The prerequisite is to have a `root` SSH access to this instance and it must be available under the hostname `adsb-feeder.local` in your local network. However, if it's not, you can edit the first line in the [Makefile](Makefile) to: 
+
+```Makefile
+HOST ?= your-feeder-hostname-or-ip
+```
 
 The root working directory of this repository contains a `Makefile` with different commands that interacts with the instance, i.e. copies files, restarts services, respectively. This allows for immediate testing the impact of the changes made.
 
