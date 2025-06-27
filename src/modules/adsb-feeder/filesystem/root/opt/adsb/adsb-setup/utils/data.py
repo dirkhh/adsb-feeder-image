@@ -723,6 +723,7 @@ class Data:
         Env("AIS_SX_UDP_FEEDS", default=[""], tags=["ais_sx_udp_feeds"]),
         Env("AISCATCHER_UDP_INPUTS", default=[""], tags=["aiscatcher_udp_inputs"]),
         Env("TAR1090_AISCATCHER_URL", default="", tags=["tar1090_aiscatcher_url"]),
+        Env("_ADSBIM_STATE_SHOW_SHIPS_ON_MAP", default=False, tags=["show_ships_on_map", "is_enabled"]),
         # Radiosonde related stuff
         Env("AF_IS_RADIOSONDE_ENABLED", default=False, tags=["sonde", "is_enabled"]),
         Env("AF_RUN_RADIOSONDE", default=False, tags=["run_sonde", "is_enabled"]),
