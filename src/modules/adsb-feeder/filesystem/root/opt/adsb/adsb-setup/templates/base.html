@@ -630,9 +630,9 @@
         <div class="mb-3">
           <div class="d-flex align-items-center mb-2">
             {% if env_value_by_tag('aggregator_choice') == 'nonadsb' %}
-            <span class="fw-semibold">SDR Feeder Image</span>
+            <a href="https://sdre.im" target="_blank" rel="noopener" class="fw-semibold text-decoration-none">SDR Feeder Image</a>
             {% else %}
-            <span class="fw-semibold">ADS-B Feeder Image</span>
+            <a href="https://adsb.im" target="_blank" rel="noopener" class="fw-semibold text-decoration-none">ADS-B Feeder Image</a>
             {% endif %}
             <span class="badge bg-secondary ms-2">{{ env_value_by_tag("base_version") }}</span>
           </div>
