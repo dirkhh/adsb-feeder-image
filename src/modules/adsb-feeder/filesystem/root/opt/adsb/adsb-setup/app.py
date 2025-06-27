@@ -2874,13 +2874,18 @@ class AdsbIm:
 
                 if key == "aggregators":
                     # user has clicked Submit on Aggregator page
-                    # let's check if they enabled any of the ADS-B aggregators
-                    for agg in self.all_aggregators:
-                        if any([form.get(aggkey) == "1" for aggkey in [f"is_enabled--{agg}", f"{agg}--is_enabled"]]):
-                            self._d.env_by_tags("aggregators_chosen").value = True
-                            # set this to individual so if people have set "all" before can still deselect individual aggregators
-                            self._d.env_by_tags("aggregator_choice").value = "individual"
-                            break
+
+                    # we redirect to the aggregator page if this is not set
+                    # thus it is imperative to set it otherwise there can be a redirect cycle
+                    self._d.env_by_tags("aggregators_chosen").value = True
+
+                    # if aggregator choice currently is "all" or "privacy", change it to
+                    # "individual" as the user presumably wants to change the selection
+                    if self._d.env_by_tags("aggregator_choice").valuestr in ["all", "privacy"]:
+                        self._d.env_by_tags("aggregator_choice").value = "individual"
+
+                    # NOTE: seems like these 2 variables have an unfortunate name as they indicate
+                    # that at least one aggregator is selected, not that a choice has been made
                     if any([form.get(key) == "1" for key in form.keys() if "feed_acars" in key]):
                         self._d.env_by_tags("acars_aggregators_chosen").value = True
                     if any([form.get(key) == "1" for key in form.keys() if "ais_feed" in key]):

@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- beta-notes: fixup inability to deselect individual aggregators when aggregator choice is currently all or privacy
 - stage2 with local SDR: correctly show signal graph when using an airspy
 - beta-notes: UI: make the choice of whether AIS ships are shown on tar1090 live map user configurable on the expert page
 - beta-notes: UI: restyle the page footer
