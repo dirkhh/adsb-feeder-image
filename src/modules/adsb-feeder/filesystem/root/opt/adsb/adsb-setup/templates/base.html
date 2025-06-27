@@ -626,23 +626,24 @@
   <div class="container pt-5 my-3">
     {% block content %}{% endblock %}
     <footer class="mt-5 py-4 border-top">
-      <div class="container">
-        <div class="row align-items-center mb-3">
-          <div class="col-md-8">
-            <div class="d-flex align-items-center mb-2">
-              {% if env_value_by_tag('aggregator_choice') == 'nonadsb' %}
-              <span class="fw-semibold">SDR Feeder Image</span>
-              {% else %}
-              <span class="fw-semibold">ADS-B Feeder Image</span>
-              {% endif %}
-              <span class="badge bg-secondary ms-2">{{ env_value_by_tag("base_version") }}</span>
-            </div>
-            <div class="text-muted small">
-              Running on {{ env_value_by_tag("board_name") }} • {{ env_value_by_tag("image_name") }}
-            </div>
+      <div class="container px-0">
+        <div class="mb-3">
+          <div class="d-flex align-items-center mb-2">
+            {% if env_value_by_tag('aggregator_choice') == 'nonadsb' %}
+            <span class="fw-semibold">SDR Feeder Image</span>
+            {% else %}
+            <span class="fw-semibold">ADS-B Feeder Image</span>
+            {% endif %}
+            <span class="badge bg-secondary ms-2">{{ env_value_by_tag("base_version") }}</span>
           </div>
-          
-          <div class="col-md-4 text-md-end text-center mt-3 mt-md-0">
+          <div class="text-muted small d-none d-md-block">
+            Running on {{ env_value_by_tag("board_name") }} • {{ env_value_by_tag("image_name") }}
+          </div>
+          <div class="text-muted small d-block d-md-none">
+            {{ env_value_by_tag("board_name") }}<br>{{ env_value_by_tag("image_name") }}
+          </div>
+
+          <div class="mt-3">
             <a href="https://ko-fi.com/H2H2H3JS5" target="_blank" rel="noopener">
               <img src="/static/images/kofi_button_stroke.png" alt="Help sustain this project at ko-fi.com" class="kofi-icon">
             </a>
@@ -653,14 +654,14 @@
           <div class="col-md-8">
             <div class="small text-muted">
               Need help? Join our community:
-              <a href="https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image" 
+              <a href="https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image"
                  target="_blank" rel="noopener">Zulip Channel</a>
               •
-              <a href="https://discord.gg/7buWAFA28H" 
+              <a href="https://discord.gg/7buWAFA28H"
                  target="_blank" rel="noopener">Discord Server</a>
             </div>
           </div>
-          
+
         </div>
       </div>
     </footer>

@@ -2531,7 +2531,7 @@ class AdsbIm:
             self._d.env_by_tags("run_shipfeeder").value = self._d.is_enabled(["shipfeeder"])
             self._d.env_by_tags("tar1090_aiscatcher_url").value = (
                 f"http://HOSTNAME:{self._d.env_by_tags('webport').value}/"
-                if self._d.is_enabled(["shipfeeder"])
+                if self._d.is_enabled(["shipfeeder"]) and self._d.is_enabled(["show_ships_on_map"])
                 else ""
             )
         else:

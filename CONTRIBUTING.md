@@ -16,9 +16,14 @@ Pull requests should usually be opened against the `beta` branch as I try to tes
 
 ## Testing changes
 
-After having done your changes on your local codebase, you can test these against your `adsb-feeder.local` instance. The prerequisite is to have a `root` SSH access to this instance and ist must be available under the hostname `adsb-feeder.local` in your local network.
-
-The root working directory of this repository contains a `Makefile` with different commands that interacts with the instance, i.e. copies files, restarts services, respectively. This allows for immediate testing the impact of the changes made.
+After having done your changes on your local codebase, you can test these against your own ADSB feeder. The root working directory of this repository contains a `Makefile` with different commands that interacts with the instance, i.e. copies files, restarts services, respectively. This allows for immediate testing the impact of the changes made.
 
 * `$ make sync-and-update` will generally update "everything" including Docker definition changes or container versions
 * `$ make sync-and-update-nocontainer` is aimed for changes to the feeder homepage, web server etc. It skips the container part and is therefore quicker to execute.
+
+The prerequisite is to have a `root` SSH access to this instance and it must either be available under the hostname `adsb-feeder.local` in your local network, or you can target the specific IP or hostname needed; you can either edit the first line in the [Makefile](Makefile) to:
+
+```Makefile
+HOST ?= your-feeder-hostname-or-ip
+```
+or you can run this like `make HOST=<your-feeder-hostname-or-ip> sync-and-update-nocontainer`

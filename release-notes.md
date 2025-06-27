@@ -1,5 +1,8 @@
 Changes since v2.3.5:
 =======
+- beta-notes: UI: make the choice of whether AIS ships are shown on tar1090 live map user configurable on the expert page
+- beta-notes: UI: restyle the page footer
+- beta-notes: UI: add hover effect to SDR table
 - beta-notes: UI: another rewrite of the SDR Setup, this time with focus to responsiveness and good user experience on small screens
 - beta-notes: UI: make stage 2 setup screen more usable on small / mobile screens
 - beta-notes: clean up handling of SVG icons

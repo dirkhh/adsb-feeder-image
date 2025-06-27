@@ -660,6 +660,33 @@
           </div>
           <div class="col-12 col-lg-6 mt-2">
             <div class="row border my-2">
+              {% if not is_enabled('show_ships_on_map') %}
+              <!-- AIS_TO_TAR1090 -->
+              <div class="col-8 my-1">
+                <label for="show_ships_on_map--enable">
+                  Show ships on the ADS-B live map
+                </label>
+              </div>
+              <div class="col-4 my-1">
+                <button type="submit" class="btn btn-primary mx-auto w-100" name="show_ships_on_map--enable" value="go"
+                        {% if not is_enabled('shipfeeder') %} disabled {% endif %}>Enable</button>
+              </div>
+              {% else %}
+              <div class="col-6 my-1">
+                <label for="show_ships_on_map--disable">
+                  Show ships on the ADS-B live map
+                </label>
+              </div>
+              <div class="col-6 my-1">
+                <button type="submit" class="btn btn-secondary mx-auto w-100" name="show_ships_on_map--disable" formnovalidate
+                        value="go">Disable</button>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-6 mt-2">
+            <div class="row border my-2">
               {% if not is_enabled('sonde') %}
               <div class="col-8 my-1">
                 <label for="sonde--enable">

@@ -115,6 +115,15 @@ td.stickycolumn {
     fill: currentColor;
 }
 
+/* SDR Table Styles */
+#sdr_table tbody tr {
+    cursor: pointer;
+}
+
+#sdr_table tbody tr:hover td {
+  background-color: var(--mdb-primary-bg-subtle, rgba(13, 110, 253, 0.1));
+}
+
 footer {
     margin-top: auto;
 }
