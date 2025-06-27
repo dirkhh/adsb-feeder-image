@@ -5,7 +5,7 @@ services:
     hostname: radiosonde
     restart: unless-stopped
     ports:
-      - "${AF_RADIOSONDE_PORT:-9989}:5000"
+      - ${AF_RADIOSONDE_PORT:-9989:5000
     healthcheck:
       disable: true
     tmpfs:
