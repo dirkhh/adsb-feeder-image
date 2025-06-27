@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- beta-notes: remove virtualradar.nl again as their service appears to be continuously down -- possibly not ready for prime time
 - beta-notes: fixup inability to deselect individual aggregators when aggregator choice is currently all or privacy
 - stage2 with local SDR: correctly show signal graph when using an airspy
 - beta-notes: UI: make the choice of whether AIS ships are shown on tar1090 live map user configurable on the expert page
@@ -30,7 +31,6 @@ Changes since v2.3.5:
 - stage2: additional ultrafeeder arguments: replace SITENUM magic string
 - stage2: fix microfeeder edit with old docker compose version
 - stage2: fix restore issue connected to rbfeeder cpuinfo files
-- adsb: add virtualradar.nl as accountless aggregator
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)

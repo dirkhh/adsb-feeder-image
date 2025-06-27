@@ -31,7 +31,6 @@ ultrafeeder_aggs = [
     "tat",
     "adsbfi",
     "adsbx",
-    "virtualradar",
     "hpradar",
     "alive",
 ]
@@ -373,10 +372,6 @@ class AggStatus:
             self._mlat = T.Disabled
             self._last_check = datetime.now()
         elif self._agg == "radarvirtuel":
-            self._beast = T.Unknown
-            self._mlat = T.Unknown
-            self._last_check = datetime.now()
-        elif self._agg == "virtualradar":
             self._beast = T.Unknown
             self._mlat = T.Unknown
             self._last_check = datetime.now()
