@@ -1732,8 +1732,13 @@ class AdsbIm:
             if mf_ip == "local":
                 if self._d.is_enabled("airspy"):
                     self._d.env_by_tags("airspyurl").list_set(n, "http://airspy_adsb")
-                if self._d.env_by_tags("readsb_device_type").value == "rtlsdr":
+                    self._d.env_by_tags("rtlsdrurl").list_set(n, "")
+                elif self._d.env_by_tags("readsb_device_type").value == "rtlsdr":
                     self._d.env_by_tags("rtlsdrurl").list_set(n, "http://nanofeeder")
+                    self._d.env_by_tags("airspyurl").list_set(n, "")
+                else:
+                    self._d.env_by_tags("rtlsdrurl").list_set(n, "")
+                    self._d.env_by_tags("airspyurl").list_set(n, "")
             elif mf_ip == "local2":
                 # local2 only supports rtl-sdr as the primary use case is 2 rtl-sdr with differing
                 # gain. otherwise would need setting up more code to run a 2nd airspy container for
