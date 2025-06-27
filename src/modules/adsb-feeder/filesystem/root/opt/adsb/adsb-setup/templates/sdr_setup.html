@@ -20,6 +20,15 @@
     apply settings</button>
 
   <div class="col-12">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-warning">
+      {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
     <div id="max_sdrs" class="my-3" style="display: none;">
       <p class="text-warning">The number of SDRs connected to your system may be too much for your hardware.</p>
       <p id="max_sdrs_text"></p>
@@ -334,7 +343,7 @@
       'sdrplay': ['enter a value between 20 and 59', validate_20_59],
     },
     'sonde': {
-      'rtlsdr': ['enter a value between 0 and 50', validate_0_50],
+      'rtlsdr': ['enter a value between 0 and 50 or "auto"', validate_0_50_auto],
     }
   }
   function update_gain_text(sdr_given) {

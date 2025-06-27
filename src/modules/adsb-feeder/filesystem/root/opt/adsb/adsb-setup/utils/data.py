@@ -46,6 +46,7 @@ class Data:
         ["/config/", "DAZZLE", "/setup"],
         ["/acarshub/", "ACARSHUB", "/"],
         ["/aiscatcher/", "AISCATCHER", "/"],
+        ["/radiosonde/", "RADIOSONDE", "/"],
     ]
 
     @property
@@ -345,6 +346,7 @@ class Data:
         Env("AF_DAZZLE_PORT", default=9999, tags=["dazzleport", "norestore"]),
         Env("AF_ACARSHUB_PORT", default=8090, tags=["acarshubport", "norestore"]),
         Env("AF_AISCATCHER_PORT", default=9990, tags=["aiscatcherport", "norestore"]),
+        Env("AF_RADIOSONDE_PORT", default=9989, tags=["radiosondeport", "norestore"]),
         Env("AF_TAR1090_PORT", default=8080, tags=["tar1090port", "norestore"]),
         Env("AF_TAR1090_PORT_ADJUSTED", default=8080, tags=["tar1090portadjusted"]),
         Env("AF_NANO_TAR1090_PORT_ADJUSTED", default=8080, tags=["nanotar1090portadjusted"]),

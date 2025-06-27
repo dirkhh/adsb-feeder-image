@@ -1285,7 +1285,7 @@ class AdsbIm:
                     # all this SHOULD have been validated already client-side
                     # let's make sure we don't have 'auto' in there for containers that
                     # don't support it
-                    if not sdr.purpose in ["1090", "1090_2", "978", "ais"] and "auto" in gain:
+                    if not sdr.purpose in ["1090", "1090_2", "978", "ais", "sonde"] and "auto" in gain:
                         if sdr.purpose in ["acars", "acars_2"] and sdr._type != "airspy":
                             gain = "-10"
                         else:
@@ -2143,7 +2143,11 @@ class AdsbIm:
                 "sonde_share_position",
             ]
             for p in placeholders:
-                config_lines = [l.replace("%" + p + "%", str(self._d.env_by_tags(p).value)) for l in config_lines]
+                value = self._d.env_by_tags(p).value
+                # Convert "auto" to "-1" for radiosonde autogain
+                if p == "sondegain" and str(value).startswith("auto"):
+                    value = "-1"
+                config_lines = [l.replace("%" + p + "%", str(value)) for l in config_lines]
             placeholders = [
                 "lat",
                 "lon",

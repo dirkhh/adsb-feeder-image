@@ -1,0 +1,18 @@
+<svg class="status-icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="width: 1.5em; height: 1.5em;">
+ <g fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width=".8">
+  <!-- Balloon -->
+  <circle cx="8" cy="4" r="3.2"/>
+  <!-- String/cord -->
+  <path d="m8 7.2v2.3"/>
+  <!-- Payload box -->
+  <rect x="6.5" y="9.5" width="3" height="2.5" rx="0.2"/>
+  <!-- Antenna -->
+  <path d="m9.5 10.25h1.5"/>
+  <!-- Sensors -->
+  <circle cx="7.25" cy="10.5" r="0.15"/>
+  <circle cx="8.75" cy="10.5" r="0.15"/>
+  <!-- Parachute lines (optional detail) -->
+  <path d="m6.8 7.5l-0.8 1.5"/>
+  <path d="m9.2 7.5l0.8 1.5"/>
+ </g>
+</svg> 
