@@ -317,7 +317,7 @@ class SDRDevices:
                 "978": "978biastee",
                 "acars": "",
                 "acars_2": "",
-                "vdl2": "",
+                "vdl2": "vdl2biastee",
                 "hfdl": "",
                 "ais": "aisbiastee",
                 "sonde": "sondebiastee",

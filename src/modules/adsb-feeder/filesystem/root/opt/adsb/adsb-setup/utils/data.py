@@ -639,6 +639,8 @@ class Data:
         Env("AF_RUN_DUMPVDL2", default=False, tags=["run_dumpvdl2", "is_enabled"]),
         Env("VDL2_SDR_STRING", default="", tags=["vdl2_sdr_string"]),
         Env("VDL2_GAIN", default="", tags=["vdl2gain"]),
+        Env("VDL2_DEVICE_BIASTEE", default=False, tags=["vdl2biastee", "is_enabled"]),
+        Env("VDL2_DEVICE_SETTINGS", default="", tags=["vdl2devicesettings"]),
         Env("VDL2_FREQUENCIES", default="", tags=["vdl2_frequencies"]),
         Env("AF_IS_DUMPHFDL_ENABLED", default=False, tags=["dumphfdl", "is_enabled"]),
         Env("AF_RUN_DUMPHFDL", default=False, tags=["run_dumphfdl", "is_enabled"]),

@@ -2534,11 +2534,13 @@ class AdsbIm:
         if vdl2sdr != self._sdrdevices.null_sdr:
             vdl2sdr.purpose = "vdl2"
             vdl2string = f"driver={vdl2sdr._type},serial={vdl2serial}"
+            vdl2devicesettings = "biastee=true" if self._d.is_enabled(["vdl2biastee"]) else "biastee=false"
             self._d.env_by_tags("run_dumpvdl2").value = self._d.is_enabled(["dumpvdl2"])
             if self._d.is_enabled("run_dumpvdl2") and self._d.env_by_tags("vdl2_feed_id").value == "":
                 self._d.env_by_tags("vdl2_feed_id").value = f"{self._d.env_by_tags('site_name').list_get(0)}-VDLM2"
         else:
             vdl2string = ""
+            vdl2devicesettings = ""
             self._d.env_by_tags("run_dumpvdl2").value = False
         hfdlserial = self._d.env_by_tags("hfdlserial").valuestr
         hfdlsdr = self._sdrdevices.get_sdr_by_serial(hfdlserial)
@@ -2585,6 +2587,7 @@ class AdsbIm:
         self._d.env_by_tags("acars_sdr_string").value = acarsstring
         self._d.env_by_tags("acars_2_sdr_string").value = acars_2string
         self._d.env_by_tags("vdl2_sdr_string").value = vdl2string
+        self._d.env_by_tags("vdl2devicesettings").value = vdl2devicesettings
         self._d.env_by_tags("hfdl_sdr_string").value = hfdlstring
         self._d.env_by_tags("sonde_sdr_type").value = sonde_sdr_type.upper()
 

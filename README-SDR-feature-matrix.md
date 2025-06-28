@@ -29,20 +29,20 @@ Regardless of what your SDR can do, some of the containers that are used for thi
 | SDRplay | 20 - 59       | -10      | :x:     |
 
 ## VDLM2
+| SDR     | gain          | autogain   | biastee            |
+|:-------:|:-------------:|:----------:|:------------------:|
+| RTLSDR  | 0 - 49.6      | :x:        | :heavy_check_mark: |
+| Airspy  | :x:           | :x:        | :x:                |
+| AirspyHF| :x:           | :x:        | :x:                |
+| SDRplay | 20 - 59       | leave empty| :x:                |
+
+## HFDL
 | SDR     | gain          | autogain   | biastee |
 |:-------:|:-------------:|:----------:|:-------:|
 | RTLSDR  | 0 - 49.6      | :x:        | :x:     |
-| Airspy  | :x:           | :x:        |         |
-| AirspyHF| :x:           | :x:        | :x:     |
-| SDRplay | 20 - 59       | leave empty| :x:     |
-
-## HFDL
-| SDR     | gain          | autogain | biastee |
-|:-------:|:-------------:|:--------:|:-------:|
-| RTLSDR  | 0 - 49.6      | :x:      | :x:     |
 | Airspy  | 0 - 21        | leave empty| :x:     |
 | AirspyHF| 0 - 21        | leave empty| :x:     |
-| SDRplay | 20 - 59       | :x:      | :x:     |
+| SDRplay | 20 - 59       | :x:        | :x:     |
 
 ## AIS
 | SDR     | gain          | autogain   | biastee           |
