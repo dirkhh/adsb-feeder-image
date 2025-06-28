@@ -826,19 +826,22 @@
           const mlat_broken = !(data["mlat"] == "+" || data["mlat"] == "." || data["mlat"] == " ");
           const beast_broken = !(data["beast"] == "+" || data["beast"] == "." || data["beast"] == " ");
 
+          let sumIcon = statusOkIcon;
+          let sumColor = "text-muted";
           if (data["beast"] == "+" && !mlat_broken) {
-            $("#" + agg + "span" + idx).attr("class", "text-success");
-            $("#" + agg + "span" + idx).html(statusOkIcon);
+            sumIcon = statusOkIcon;
+            sumColor = "text-success";
           } else if (data["beast"] == "☒" || data["beast"] == "☈") {
-            $("#" + agg + "span" + idx).attr("class", "text-danger");
-            $("#" + agg + "span" + idx).html(icons['☒']);
+            sumIcon = icons['☒'];
+            sumColor = "text-danger";
           } else if (beast_broken || mlat_broken) {
-            $("#" + agg + "span" + idx).attr("class", "text-warning");
-            $("#" + agg + "span" + idx).html(icons['⚠']);
-          } else {
-            $("#" + agg + "span" + idx).attr("class", "text-muted");
-            $("#" + agg + "span" + idx).html(statusOkIcon);
+            sumIcon = icons['⚠'];
+            sumColor = "text-warning";
           }
+
+          $("#" + agg + "span" + idx).html(sumIcon);
+          $("#" + agg + "span" + idx).attr("class", sumColor);
+
           if (agg == "adsblol") {
             // console.log("set adsblol-link" + idx + " to " + data["adsblollink"])
             $("#adsblol-link-" + idx).attr("href", data["adsblollink"]);
