@@ -42,10 +42,10 @@
   <nav class="navbar fixed-top bg-body navbar-expand" id="navbar">
     {% if env_value_by_tag("aggregator_choice") != 'nonadsb' %}
     <a class="navbar-brand mx-1 me-sm-3" href="{{ url_for("director") }}"><img style="height:2em;"
-      src="/static/images/adsbim-logo-64.png" alt="adsb.im"><span class="d-none {% if is_enabled('stage2') %}d-xl-inline{%else%}d-md-inline{%endif%}">ADS-B Feeder</span></a>
+      src="/static/images/adsbim-logo-64.png" alt="adsb.im"><span id="brand_text">ADS-B Feeder</span></a>
     {% else %}
     <a class="navbar-brand mx-1 me-sm-3" href="{{ url_for("director") }}"><img style="height:2em;"
-           src="/static/images/sdrim-logo-64.png" alt="adsb.im"><span class="d-none {% if is_enabled('stage2') %}d-xl-inline{%else%}d-md-inline{%endif%}">SDR Feeder</span></a>
+      src="/static/images/sdrim-logo-64.png" alt="adsb.im"><span id="brand_text">SDR Feeder</span></a>
     {% endif %}
     <a class="btn btn-primary ms-0 me-1 mx-sm-1 nb-btn {% if not is_enabled('base_config') %}d-none{% endif %}"
       id="livemap-navbar-button"
@@ -178,66 +178,77 @@
   <script type="text/javascript" src="{{ url_for('static', filename='js/iconCache.js') }}"></script>
   <script>
     let verbose = true;
-    // oneMap, twoMap, and threeMap are the bit values for the maps that are visible if we can show only one or two maps
-    // where bit 0 is ADS-B, bit 1 is ACARS, bit 2 is SHIPFEEDER
-    let oneMap = 0;
-    let twoMap = 0;
-    let threeMap = 0;
+    // maps[0..4] are the bit values for the maps that are visible if we can potentially not
+    // show show all of the maps, where bit 0 is ADS-B, bit 1 is ACARS, bit 2 is SHIPFEEDER, and bit 3 is SONDE
+    let maps = [0];
+    // bitsSet simply creates a lookup table to calculate how many bits are set in a four bit number
+    let bitsSet = [0];
+    for (let i = 1; i < 16; i++) {
+      bitsSet[i] = (i & 1) + bitsSet[Math.floor(i / 2)];
+    }
+    let mapsNeeded = 0;
     {% if env_value_by_tag("aggregator_choice") != 'nonadsb' %}
-    oneMap = 1;
-    twoMap = 1;
-    threeMap = 1;
+    mapsNeeded = 1;
     {% endif %}
     {% if is_enabled('acarshub') %}
-    if (oneMap == 0) {
-      oneMap = 2;
-      twoMap = 2;
-    } else {
-      twoMap = 3;
-    }
-    threeMap = threeMap | 2;
+    mapsNeeded = mapsNeeded | 2;
     {% endif %}
     {% if is_enabled('run_shipfeeder') %}
-    if (oneMap == 0) {
-      oneMap = 4;
-      twoMap =  4;
-    } else if (twoMap != 3) {
-      twoMap = twoMap | 4;
-    }
-    threeMap = threeMap | 4;
+    mapsNeeded = mapsNeeded | 4;
     {% endif %}
     {% if is_enabled('run_sonde') %}
-    if (oneMap == 0) {
-      oneMap = 8;
-      twoMap =  8;
-    } else if (twoMap != 7) {
-      twoMap = twoMap | 8;
-    }
-    threeMap = threeMap | 8;
+    mapsNeeded = mapsNeeded | 8;
     {% endif %}
-    let breakpoints3 = [ "410px", "300px", "260px", "215px", "180px" ];
-    let breakpoints2 = [ "350px", "260px", "260px", "215px", "180px" ];
-    let breakpoints1 = [ "250px", "200px", "200px", "200px", "180px" ];
-    let breakpoints = threeMap == 15 ? breakpoints3 : (oneMap != twoMap ? breakpoints2 : breakpoints1);
 
-    let noKofi = window.matchMedia(`(max-width: ${breakpoints[1]})`);
-    noKofi.addEventListener("change", ({ matches }) => removeKofi(matches));
-    let twoMapButtons = window.matchMedia(`(max-width: ${breakpoints[2]})`);
-    twoMapButtons.addEventListener("change", ({ matches }) => twoButtons(matches));
-    let oneMapButton = window.matchMedia(`(max-width: ${breakpoints[3]})`);
-    oneMapButton.addEventListener("change", ({ matches }) => oneButton(matches));
-    let noMapButton = window.matchMedia(`(max-width: ${breakpoints[4]})`);
-    noMapButton.addEventListener("change", ({ matches }) => noButton(matches));
+    for (let i = 4; i >= 1; i--) {
+      for (mask of [15,7,3,1]) {
+        m = mapsNeeded & mask;
+        if (bitsSet[m] <= i) {
+          break
+        }
+      }
+      maps[i] = m;
+    }
+    let breakpointslist = [//notxt, navcolaps, sm btn,  noKofi,  3 btn ,  2 btn , 1 btn  ,  0 btn
+                           ["768px", "680px", "180px", "180px", "180px", "180px", "180px", "180px"],
+                           ["768px", "680px", "250px", "200px", "200px", "200px", "200px", "180px"],
+                           ["825px", "680px", "350px", "270px", "270px", "270px", "220px", "180px"],
+                           ["960px", "768px", "420px", "300px", "300px", "260px", "215px", "180px"],
+                           ["1100px","800px", "490px", "350px", "305px", "260px", "215px", "170px"]];
+    let breakpoints = breakpointslist[bitsSet[mapsNeeded]];
+    // console.log(`breakpoints: ${breakpoints}`);
 
-    let smallButtons = window.matchMedia("(max-width: {% if is_enabled('stage2') %}1050px{% else %}930px{% endif %})");
-    let navCollapse = window.matchMedia("(max-width: {% if is_enabled('stage2') %}900px{% else %}650px{% endif %})");
-    let tinyScreen = window.matchMedia(`(max-width: ${breakpoints[0]})`);
+    let nMapButtons = [];
+    for (let i = 0; i < 4; i++) {
+      nMapButtons[i] = window.matchMedia(`(max-width: ${breakpoints[7 - i]})`);
+      nMapButtons[i].addEventListener("change", ({ matches }) => nMapButton(matches, i));
+    }
+    function nMapButton(matches, num) {
+      // console.log(`nMapButton(${matches}, ${num})`);
+      // figure out which buttons to show -- up to num
+      if (matches) {
+        $("#livemap-navbar-button").toggleClass("d-none", (maps[num] & 1) == 0);
+        $("#acarshub-navbar-button").toggleClass("d-none", (maps[num] & 2) == 0);
+        $("#aiscatcher-navbar-button").toggleClass("d-none", (maps[num] & 4) == 0);
+        $("#radiosonde-navbar-button").toggleClass("d-none", (maps[num] & 8) == 0);
+      } else {
+        $("#livemap-navbar-button").toggleClass("d-none", (maps[num + 1] & 1) == 0);
+        $("#acarshub-navbar-button").toggleClass("d-none", (maps[num + 1] & 2) == 0);
+        $("#aiscatcher-navbar-button").toggleClass("d-none", (maps[num + 1] & 4) == 0);
+        $("#radiosonde-navbar-button").toggleClass("d-none", (maps[num + 1] & 8) == 0);
+      }
+    }
+    let smallButtons = window.matchMedia(`(max-width: ${breakpoints[0]})`);
+    let navCollapse = window.matchMedia(`(max-width: ${breakpoints[1]})`);
+    let tinyScreen = window.matchMedia(`(max-width: ${breakpoints[2]})`);
+    let noKofi = window.matchMedia(`(max-width: ${breakpoints[3]})`);
     smallButtons.addEventListener("change", ({ matches }) => adjustButtonSize(matches));
     navCollapse.addEventListener("change", ({ matches }) => navButtonCollapse(matches));
     tinyScreen.addEventListener("change", ({ matches }) => adjustButtonFont(matches));
+    noKofi.addEventListener("change", ({ matches }) => removeKofi(matches));
 
     function adjustButtonSize(matches) {
-      console.log("adjustButtonSize: " + matches);
+      // console.log("adjustButtonSize: " + matches);
       // find all buttons and adjust their size accordingly
       $('.btn').each(function () {
         $(this).toggleClass("btn-sm", matches);
@@ -255,12 +266,14 @@
         $('#aiscatcher-navbar-button-text').html('AIS CATCHER');
         $('#radiosonde-navbar-button-text').html('SONDE');
       }
+      $('#brand_text').toggleClass("d-none", matches);
     }
     function navButtonCollapse(matches) {
       $("#navbar").toggleClass("navbar-expand", ! matches)
     }
     function adjustButtonFont(matches) {
       // loop over all submit buttons and add css font-size of 70% and smaller horizontal padding
+      // console.log("adjustButtonFont: " + matches);
       $('.btn').each(function () {
         if (! $(this).hasClass('nb-btn')) {
           if (matches) {
@@ -288,48 +301,7 @@
     function removeKofi(matches) {
       $("#kofi-navbar-button").toggleClass("d-none", matches);
     }
-    function twoButtons(matches) {
-      console.log("twoButtons: " + matches);
-      if (matches) {
-        $("#livemap-navbar-button").toggleClass("d-none", (twoMap & 1) == 0);
-        $("#acarshub-navbar-button").toggleClass("d-none", (twoMap & 2) == 0);
-        $("#aiscatcher-navbar-button").toggleClass("d-none", (twoMap & 4) == 0);
-        $("#radiosonde-navbar-button").toggleClass("d-none", (twoMap & 8) == 0);
-      } else {
-        $("#livemap-navbar-button").toggleClass("d-none", (threeMap & 1) == 0);
-        $("#acarshub-navbar-button").toggleClass("d-none", (threeMap & 2) == 0);
-        $("#aiscatcher-navbar-button").toggleClass("d-none", (threeMap & 4) == 0);
-        $("#radiosonde-navbar-button").toggleClass("d-none", (threeMap & 8) == 0);
-      }
-    }
-    function oneButton(matches) {
-      console.log("oneButton: " + matches);
-      if (matches) {
-        $("#livemap-navbar-button").toggleClass("d-none", (oneMap & 1) == 0);
-        $("#acarshub-navbar-button").toggleClass("d-none", (oneMap & 2) == 0);
-        $("#aiscatcher-navbar-button").toggleClass("d-none", (oneMap & 4) == 0);
-        $("#radiosonde-navbar-button").toggleClass("d-none", (oneMap & 8) == 0);
-      } else {
-        $("#livemap-navbar-button").toggleClass("d-none", (twoMap & 1) == 0);
-        $("#acarshub-navbar-button").toggleClass("d-none", (twoMap & 2) == 0);
-        $("#aiscatcher-navbar-button").toggleClass("d-none", (twoMap & 4) == 0);
-        $("#radiosonde-navbar-button").toggleClass("d-none", (twoMap & 8) == 0);
-      }
-    }
-    function noButton(matches) {
-      console.log("noButton: " + matches);
-      if (matches) {
-        $("#livemap-navbar-button").addClass("d-none");
-        $("#acarshub-navbar-button").addClass("d-none");
-        $("#aiscatcher-navbar-button").addClass("d-none");
-        $("#radiosonde-navbar-button").addClass("d-none");
-      } else {
-        $("#livemap-navbar-button").toggleClass("d-none", (oneMap & 1) == 0);
-        $("#acarshub-navbar-button").toggleClass("d-none", (oneMap & 2) == 0);
-        $("#aiscatcher-navbar-button").toggleClass("d-none", (oneMap & 4) == 0);
-        $("#radiosonde-navbar-button").toggleClass("d-none", (oneMap & 8) == 0);
-      }
-    }
+
     // SVG icon loader with caching
     // iconCache loaded from iconCache.js which is generated by cachebust.sh
     // this is a bit of a hack to eliminates a bunch of http requests
@@ -379,15 +351,13 @@
       preloadIcons().then(() => {
         populateIconPlaceholders();
       });
-
-      if (noMapButton.matches) {
-        noButton(true)
-      } else if (oneMapButton.matches) {
-        oneButton(true)
-      } else if (twoMapButtons.matches) {
-        twoButtons(true)
-      } else {
-        twoButtons(false)
+      for (let i = 0; i < 4; i++) {
+        if (nMapButtons[i].matches) {
+          nMapButton(true, i);
+          break;
+        } else if (i == 3) {
+          nMapButton(false, 3)
+        }
       }
       adjustButtonSize(smallButtons.matches);
       adjustButtonFont(tinyScreen.matches);
