@@ -2158,14 +2158,25 @@ class AdsbIm:
                     l.replace("%" + p + "%", str(self._d.env_by_tags(p).list_get(0))) for l in config_lines
                 ]
 
+            new_config = "\n".join(config_lines)
+
             config = pathlib.Path("/opt/adsb/radiosonde/station.cfg")
             config_backup = pathlib.Path("/opt/adsb/radiosonde/station.cfg.bak")
+
             if config.exists():
                 config.rename(config_backup)
+
             with open(config, "w") as f:
-                f.write("\n".join(config_lines))
+                f.write(new_config)
             config.chmod(0o644)
-            print_err("radiosonde config updated")
+            #print_err("radiosonde config updated")
+
+            if config_backup.exists():
+                with open(config_backup, "r") as f:
+                    old_config = f.read()
+                    if old_config != new_config:
+                        print_err(f"radiosonde: config / station.cfg has changed, restarting container")
+                        success, output = run_shell_captured(f"docker restart radiosonde")
 
     def adjust_airspy_gain(self, gain):
         if gain.startswith("auto"):
