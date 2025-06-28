@@ -774,14 +774,17 @@
     updateChart();
   }
 
+  function setIcon(agg, cat, idx, icon, color) {
+    //console.log("#" + agg + cat + idx);
+    $("#" + agg + cat + idx).html(icon);
+    $("#" + agg + cat + idx).attr("class", color);
+  }
+
   async function reset_status(agg, idx) {
     const loadingIcon = await loadIcon('status-unknown');
-    $("#" + agg + "beast" + idx).html(loadingIcon);
-    $("#" + agg + "beast" + idx).attr("class", "text-muted");
-    $("#" + agg + "mlat" + idx).html(loadingIcon);
-    $("#" + agg + "mlat" + idx).attr("class", "text-muted");
-    $("#" + agg + "span" + idx).html(loadingIcon);
-    $("#" + agg + "span" + idx).attr("class", "text-muted");
+    setIcon(agg, "beast", idx, loadingIcon, "text-muted");
+    setIcon(agg, "mlat", idx, loadingIcon, "text-muted");
+    setIcon(agg, "span", idx, loadingIcon, "text-muted");
   }
   function get_status(agg) {
     fetch(`/api/status/${agg}`, { signal: AbortSignal.timeout(15000) })
@@ -820,11 +823,8 @@
           const beastColor = (data["beast"] === "" || data["beast"] === " ") ? "text-muted" : (colors[data["beast"]] || "text-muted");
           const mlatColor = (data["mlat"] === "" || data["mlat"] === " ") ? "text-muted" : (colors[data["mlat"]] || "text-muted");
 
-          $("#" + agg + "beast" + idx).html(beastIcon);
-          $("#" + agg + "mlat" + idx).html(mlatIcon);
-
-          $("#" + agg + "beast" + idx).attr("class", beastColor);
-          $("#" + agg + "mlat" + idx).attr("class", mlatColor);
+          setIcon(agg, "beast", idx, beastIcon, beastColor);
+          setIcon(agg, "mlat", idx, mlatIcon, mlatColor);
 
           const mlat_broken = !(data["mlat"] == "+" || data["mlat"] == "." || data["mlat"] == " ");
           const beast_broken = !(data["beast"] == "+" || data["beast"] == "." || data["beast"] == " ");
@@ -842,8 +842,7 @@
             sumColor = "text-warning";
           }
 
-          $("#" + agg + "span" + idx).html(sumIcon);
-          $("#" + agg + "span" + idx).attr("class", sumColor);
+          setIcon(agg, "span", idx, sumIcon, sumColor);
 
           if (agg == "adsblol") {
             // console.log("set adsblol-link" + idx + " to " + data["adsblollink"])
