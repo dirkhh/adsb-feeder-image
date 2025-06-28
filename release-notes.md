@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- beta-notes: add button for Sonde and redo all the UI logic to allow for up to four buttons
 - beta-notes: remove virtualradar.nl again as their service appears to be continuously down -- possibly not ready for prime time
 - beta-notes: fixup inability to deselect individual aggregators when aggregator choice is currently all or privacy
 - stage2 with local SDR: correctly show signal graph when using an airspy
