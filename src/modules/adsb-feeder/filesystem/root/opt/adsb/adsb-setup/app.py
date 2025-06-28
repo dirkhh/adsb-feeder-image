@@ -2164,7 +2164,16 @@ class AdsbIm:
             config_backup = pathlib.Path("/opt/adsb/radiosonde/station.cfg.bak")
 
             if config.exists():
-                config.rename(config_backup)
+                try:
+                    config.rename(config_backup)
+                except:
+                    # if the station.cfg doesn't exist when compose up is called, docker will create
+                    # a directory named station.cfg which needs to be removed for us to be able to
+                    # proceed
+                    try:
+                        config.rmdir()
+                    except:
+                        pass
 
             with open(config, "w") as f:
                 f.write(new_config)
