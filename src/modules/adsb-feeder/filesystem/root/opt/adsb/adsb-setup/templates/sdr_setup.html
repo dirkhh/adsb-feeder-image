@@ -20,15 +20,6 @@
     apply settings</button>
 
   <div class="col-12">
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    {% for message in messages %}
-    <div class="alert alert-warning">
-      {{ message }}
-    </div>
-    {% endfor %}
-    {% endif %}
-    {% endwith %}
     <div id="max_sdrs" class="my-3" style="display: none;">
       <p class="text-warning">The number of SDRs connected to your system may be too much for your hardware.</p>
       <p id="max_sdrs_text"></p>

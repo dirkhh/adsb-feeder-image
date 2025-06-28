@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- beta-notes: remove duplicate notifications on the SDR Setup page
 - beta-notes: new containers for ACARS
 - beta-notes: ensure radiosonde container is restarted when configuration changes
 - beta-notes: fix issue with incorrect icon colors when coming back to the feeder tab in the browser
