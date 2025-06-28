@@ -2178,7 +2178,7 @@ class AdsbIm:
             with open(config, "w") as f:
                 f.write(new_config)
             config.chmod(0o644)
-            #print_err("radiosonde config updated")
+            # print_err("radiosonde config updated")
 
             if config_backup.exists():
                 with open(config_backup, "r") as f:
@@ -2511,6 +2511,8 @@ class AdsbIm:
             acarssdr.purpose = "acars"
             acarsstring = f"driver={acarssdr._type},serial={acarsserial}"
             self._d.env_by_tags("run_acarsdec").value = self._d.is_enabled(["acarsdec"])
+            if self._d.is_enabled("run_acarsdec") and self._d.env_by_tags("acars_feed_id").value == "":
+                self._d.env_by_tags("acars_feed_id").value = f"{self._d.env_by_tags('site_name').list_get(0)}-ACARS"
         else:
             acarsstring = ""
             self._d.env_by_tags("run_acarsdec").value = False
@@ -2520,6 +2522,8 @@ class AdsbIm:
             acars_2sdr.purpose = "acars_2"
             acars_2string = f"driver={acars_2sdr._type},serial={acars_2serial}"
             self._d.env_by_tags("run_acarsdec2").value = self._d.is_enabled(["acarsdec2"])
+            if self._d.is_enabled("run_acarsdec2") and self._d.env_by_tags("acars_2_feed_id").value == "":
+                self._d.env_by_tags("acars_2_feed_id").value = f"{self._d.env_by_tags('site_name').list_get(0)}-ACARS2"
         else:
             acars_2string = ""
             self._d.env_by_tags("run_acarsdec2").value = False
@@ -2529,6 +2533,8 @@ class AdsbIm:
             vdl2sdr.purpose = "vdl2"
             vdl2string = f"driver={vdl2sdr._type},serial={vdl2serial}"
             self._d.env_by_tags("run_dumpvdl2").value = self._d.is_enabled(["dumpvdl2"])
+            if self._d.is_enabled("run_dumpvdl2") and self._d.env_by_tags("vdl2_feed_id").value == "":
+                self._d.env_by_tags("vdl2_feed_id").value = f"{self._d.env_by_tags('site_name').list_get(0)}-VDLM2"
         else:
             vdl2string = ""
             self._d.env_by_tags("run_dumpvdl2").value = False
@@ -2538,6 +2544,8 @@ class AdsbIm:
             hfdlsdr.purpose = "hfdl"
             hfdlstring = f"driver={hfdlsdr._type},serial={hfdlserial}"
             self._d.env_by_tags("run_dumphfdl").value = self._d.is_enabled(["dumphfdl"])
+            if self._d.is_enabled("run_dumphfdl") and self._d.env_by_tags("hfdl_feed_id").value == "":
+                self._d.env_by_tags("hfdl_feed_id").value = f"{self._d.env_by_tags('site_name').list_get(0)}-HFDL"
         else:
             hfdlstring = ""
             self._d.env_by_tags("run_dumphfdl").value = False
@@ -2547,6 +2555,8 @@ class AdsbIm:
             sondesdr.purpose = "sonde"
             sonde_sdr_type = sondesdr._type
             self._d.env_by_tags("run_sonde").value = self._d.is_enabled(["sonde"])
+            if self._d.is_enabled("run_sonde") and self._d.env_by_tags("sonde_callsign").value == "":
+                self._d.env_by_tags("sonde_callsign").value = f"{self._d.env_by_tags('site_name').list_get(0)}-SONDE"
         else:
             sonde_sdr_type = ""
             self._d.env_by_tags("run_sonde").value = False
@@ -2556,6 +2566,8 @@ class AdsbIm:
             aissdr.purpose = "ais"
             self._d.env_by_tags("ais_sdr_type").value = aissdr._type
             self._d.env_by_tags("run_shipfeeder").value = self._d.is_enabled(["shipfeeder"])
+            if self._d.is_enabled("run_shipfeeder") and self._d.env_by_tags("ais_station_name").value == "":
+                self._d.env_by_tags("ais_station_name").value = f"{self._d.env_by_tags('site_name').list_get(0)}-AIS"
             self._d.env_by_tags("tar1090_aiscatcher_url").value = (
                 f"http://HOSTNAME:{self._d.env_by_tags('webport').value}/"
                 if self._d.is_enabled(["shipfeeder"]) and self._d.is_enabled(["show_ships_on_map"])
