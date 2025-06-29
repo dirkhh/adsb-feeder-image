@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- core: show ambient temperature in graphs1090 temperature graph if supported temperature sensor is installed
 - beta-notes: update all the docker containers
 - beta-notes: remove duplicate notifications on the SDR Setup page
 - beta-notes: new containers for ACARS

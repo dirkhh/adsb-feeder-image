@@ -2229,12 +2229,14 @@ class AdsbIm:
                 dht22.value = False
             else:
                 self._d.env_by_tags("temperature_block").value = True
+                self._d.env_by_tags("graphs1090_other_temp1").value = "/run/ambient-temperature"
         else:
             _, output = run_shell_captured(
                 "systemctl is-enabled adsb-temperature.service && systemctl is-active adsb-temperature.service && systemctl disable --now adsb-temperature.service",
                 timeout=20,
             )
             self._d.env_by_tags("temperature_block").value = False
+            self._d.env_by_tags("graphs1090_other_temp1").value = ""
 
     def handle_implied_settings(self):
         self.handle_non_adsb()

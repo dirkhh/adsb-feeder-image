@@ -213,6 +213,7 @@ class Data:
         ),
         Env("_ASDBIM_CSS_THEME", default="auto", tags=["css_theme"]),
         Env("_ASDBIM_TAR1090_QUERY_PARAMS", default="", tags=["tar1090_query_params"]),
+        Env("GRAPHS1090_OTHER_TEMP1", default="", tags=["graphs1090_other_temp1"]),
         # 978
         # start the container (integrated / micro) or the replay
         Env("FEEDER_ENABLE_UAT978", default=[False], tags=["uat978", "is_enabled"]),

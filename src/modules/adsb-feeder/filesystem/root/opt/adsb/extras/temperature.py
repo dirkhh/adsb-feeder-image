@@ -103,6 +103,11 @@ if __name__ == "__main__":
             with os.fdopen(fd, "w") as f:
                 json.dump(output, f, indent=2)
             os.rename(tmp, "/run/adsb-feeder-ultrafeeder/temperature.json")
+            # for the graphs1090 integration we need a sensor style file
+            fd, tmp = tempfile.mkstemp(dir="/run/adsb-feeder-ultrafeeder")
+            with os.fdopen(fd, "w") as f:
+                print(f"{temperature * 1000.0:.0f}", file=f)
+            os.rename(tmp, "/run/adsb-feeder-ultrafeeder/ambient-temperature")
             # no point in updating this super often - the temperature sensor has a fair
             # bit of jitter, anyway
             delta = 60
