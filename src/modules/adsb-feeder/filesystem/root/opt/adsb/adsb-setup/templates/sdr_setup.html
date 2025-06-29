@@ -253,11 +253,11 @@
   sdr_info();
 
   function validate_0_50_auto(text) {
-    return text.startsWith('auto') || (text >= 0 && text <= 50);
+    return text.replace(/\s/g, '') != '' && (text.startsWith('auto') || (text >= 0 && text <= 50));
   }
 
   function validate_0_21_auto(text) {
-    return text.startsWith('auto') || (text >= 0 && text <= 21);
+    return text.replace(/\s/g, '') != '' && (text.startsWith('auto') || (text >= 0 && text <= 21));
   }
 
   function validate_0_21_empty(text) {
@@ -265,23 +265,23 @@
   }
 
   function validate_0_21(text) {
-    return text >= 0 && text <= 21;
+    return text.replace(/\s/g, '') != '' && text >= 0 && text <= 21;
   }
 
   function validate_0_50(text) {
-    return text >= 0 && text <= 50;
+    return text.replace(/\s/g, '') != '' && text >= 0 && text <= 50;
   }
 
   function validate_0_50_minus10(text) {
-    return text == -10 || (text >= 0 && text <= 50);
+    return text.replace(/\s/g, '') != '' && (text == -10 || (text >= 0 && text <= 50));
   }
 
   function validate_20_59(text) {
-    return text >= 20 && text <= 59;
+    return text.replace(/\s/g, '') != '' && text >= 20 && text <= 59;
   }
 
   function validate_20_59_minus10(text) {
-    return text == -10 || (text >= 20 && text <= 59);
+    return text.replace(/\s/g, '') != '' && (text == -10 || (text >= 20 && text <= 59));
   }
 
   function validate_20_59_empty(text) {
