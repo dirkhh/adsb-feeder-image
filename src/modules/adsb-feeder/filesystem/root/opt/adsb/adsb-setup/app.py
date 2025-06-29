@@ -327,6 +327,7 @@ class AdsbIm:
         self.app.add_url_rule(f"/api/status/<agg>", "beast", self.agg_status)
         self.app.add_url_rule("/api/stage2_connection", "stage2_connection", self.stage2_connection)
         self.app.add_url_rule("/api/get_temperatures.json", "temperatures", self.temperatures)
+        self.app.add_url_rule("/api/ambient_raw", "ambient_raw", self.ambient_raw)
         self.app.add_url_rule(f"/feeder-update-<channel>", "feeder-update", self.feeder_update)
         self.app.add_url_rule(f"/get-logs", "get-logs", self.get_logs)
         self.app.add_url_rule(f"/view-logs", "view-logs", self.view_logs)
@@ -3871,6 +3872,15 @@ class AdsbIm:
         except:
             pass
         return temperature_json
+
+    def ambient_raw(self):
+        temperature = ""
+        try:
+            with open("/run/adsb-feeder-ultrafeeder/ambient-temperature", "r") as temperature_file:
+                temperature = temperature_file.read().strip()
+        except:
+            pass
+        return temperature
 
     def support(self):
         print_err(f"support request, {request.form}")
