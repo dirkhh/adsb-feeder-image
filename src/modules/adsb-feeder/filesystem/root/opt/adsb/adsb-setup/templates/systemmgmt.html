@@ -202,7 +202,6 @@
         <div class="col-12">
           <label for="restart_containers">Typically this shouldn't be necessary, but occasionally it
             seems that for whatever reason a container doesn't pick up a setting or gets otherwise stuck.
-            <br>Not selecting any containers means that the action will be performed for all containers.
           </label>
         </div>
         <div class="row align-items-center">
@@ -217,9 +216,9 @@
           <div class="col-4">
             <div class="row align-items-center">
               <button type="submit" class="mb-3 btn btn-primary mx-auto w-100" name="restart_containers"
-                      value="go">Restart Containers</button>
+                      value="go" id="restart_button">Restart All</button>
               <button type="submit" class="mb-3 btn btn-primary mx-auto w-100" name="recreate_containers"
-                      value="go">Recreate Containers</button>
+                      value="go" id="recreate_button">Recreate All</button>
             </div>
           </div>
         </div>
@@ -357,6 +356,31 @@
     if (data["main_changelog"]) {
         $("#update_feeder_aps_stable").attr("title", data["main_changelog"]);
     }
+  });
+
+  // Update button text based on container selection
+  function updateContainerButtonText() {
+    const checkboxes = document.querySelectorAll('input[type="checkbox"][name^="restart-"]');
+    const restartButton = document.getElementById('restart_button');
+    const recreateButton = document.getElementById('recreate_button');
+    
+    const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+    
+    if (checkedCount === 0) {
+      restartButton.textContent = 'Restart All';
+      recreateButton.textContent = 'Recreate All';
+    } else {
+      restartButton.textContent = 'Restart Selected (' + checkedCount + ')';
+      recreateButton.textContent = 'Recreate Selected (' + checkedCount + ')';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('input[type="checkbox"][name^="restart-"]');
+    checkboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', updateContainerButtonText);
+    });
+    updateContainerButtonText();
   });
 </script>
 {% endblock %}
