@@ -1,0 +1,6 @@
+# This is a configuration file template for the adsb-temperature.service
+#
+# if your temperature sensor is on a different GPIO pin, you can provide that
+# information by copying this file to /opt/adsb/extras/adsb-temperature.default
+# and editing the copy accordingly
+GPIO_PIN=4

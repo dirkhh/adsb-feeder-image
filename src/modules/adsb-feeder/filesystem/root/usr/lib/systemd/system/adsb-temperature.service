@@ -6,7 +6,8 @@ After=adsb-setup.service pigpiod.service
 [Service]
 SyslogIdentifier=adsb-temperature
 WorkingDirectory=/opt/adsb/extras
-ExecStart=/usr/bin/python3 /opt/adsb/extras/temperature.py
+EnvironmentFile=-/opt/adsb/extras/adsb-temperature.default
+ExecStart=/usr/bin/python3 /opt/adsb/extras/temperature.py $GPIO_PIN
 Restart=always
 Type=simple
 RestartSec=5

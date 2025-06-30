@@ -1,5 +1,8 @@
 Changes since v2.3.5:
 =======
+- beta-notes: make GPIO pin for temperature sensor configurable
+- beta-notes: small UI updates
+- beta-notes: update sdrmap container
 - beta-notes: support biastee for RTLSDR with VDLM2
 - core: show ambient temperature in graphs1090 temperature graph if supported temperature sensor is installed
 - beta-notes: update all the docker containers
