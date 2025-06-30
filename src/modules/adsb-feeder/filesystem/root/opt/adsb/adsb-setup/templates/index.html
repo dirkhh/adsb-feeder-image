@@ -231,32 +231,38 @@
     </div>
   </div>
   <div class="col-12 mb-4">
-    <h5>
-      {% if env_value_by_tag('aggregator_choice') != 'nonadsb' %}ADS-B{% else %}SDR{% endif %} Feeder <small class="ml-1">running {{ env_value_by_tag("base_version")|replace('(beta)', '')|replace('(stable)', '') }}</small>
-    </h5>
-    <div class="mb-4">
-      Latest version: <span id="latest_tag"></span> - <span id="version_update"></span>
-      <br />
-      <span id="advice" class="small">&nbsp;</span>
-    </div>
     <div id="update_buttons" class="text-secondary">
-      <h5 class="mt-1">Update Feeder Software</h5>
-      <form method="POST" onsubmit="show_spinner(); return true;">
-        <label for="update_feeder_aps">
+      <h5 class="mt-1">Update {% if env_value_by_tag('aggregator_choice') != 'nonadsb' %}ADS-B{% else %}SDR{% endif %} Feeder Software</h5>
+      <label for="update_feeder_aps">
           Update the web UI, setup apps, and containers to the latest beta or stable version.
+      </label>
+      <div class="mt-2">
           <span onclick="$('#update_explain').toggleClass('d-none'); return false;">
           <a class="small" href="">More information</a>
           </span>
-          <span class="small d-none" id="update_explain"><br/>If this update brings in new container images, even with a fast
-            internet connection this can easily take more than ten minutes to complete. The web UI will pause while the
-            update is running, but the feeder apps will only be briefly interrupted once all new components have been
-            downloaded.</span>
-        </label>
+          <div class="small d-none mt-2" id="update_explain">
+            If this update brings in new container images, even with a fast internet connection this can easily take more than ten minutes to complete. The web UI will pause while the update is running, but the feeder apps will only be briefly interrupted once all new components have been downloaded. 
+      </div>
+      <div class="mt-3 mb-2">
+        <span class="text-info ">Your version:</span>
+        <span class="badge bg-primary ms-2 ">{{ env_value_by_tag("base_version")|replace('(beta)', '')|replace('(stable)', '') }}</span>
+      </div>
+      <form method="POST" onsubmit="show_spinner(); return true;">
+        <span>Latest stable:<span id="latest_tag" class="badge bg-secondary ms-2"></span></span>
+        • 
+        <span>Latest beta:<span id="beta_version" class="badge bg-secondary ms-2"></span></span>
+        {% if "dev" in channel %}
+        •
+        <span>Latest dev: <span id="dev_version" class="badge bg-secondary ms-2"></span></span>
+        {% endif %}
+
+        <span id="advice" class="small">&nbsp;</span>
+
         <div class="mt-2">
-          <button type="submit" class="btn btn-primary mb-3 ml-3 col-md-2" name="update_feeder_aps_beta"
-                  id="update_feeder_aps_beta" disabled value="go">Update (beta)</button>
           <button type="submit" class="btn btn-primary mb-3 ml-3 col-md-2" name="update_feeder_aps_stable"
                   id="update_feeder_aps_stable" disabled value="go">Update (stable)</button>
+          <button type="submit" class="btn btn-primary mb-3 ml-3 col-md-2" name="update_feeder_aps_beta"
+                  id="update_feeder_aps_beta" disabled value="go">Update (beta)</button>
           {% if "dev" in channel %}
           <button type="submit" class="btn btn-primary mb-3 ml-3 col-md-3"
                   name="update_feeder_aps_branch" id="update_feeder_aps_branch" value="go">
@@ -734,7 +740,15 @@
       .then(response => response.json())
       .then(data => {
         $("#latest_tag").text(data["latest_tag"]);
-        $("#version_update").text(data["latest_date"]);
+        // Parse the beta version from latest_date field if it contains beta info
+        let betaText = data["latest_date"];
+        if (betaText && betaText.includes("beta")) {
+          // Extract just the version part if it's in the format "latest beta: vX.X.X-beta.XX"
+          let betaMatch = betaText.match(/v[\d\.]+-beta\.[\d]+/);
+          $("#beta_version").text(betaMatch[0]);
+        } else {
+          $("#beta_version").text(betaText || "");
+        }
         $("#advice").html(data["advice"] + "&nbsp;");
         if (data["show_update"] == "1") {
           $("#update_buttons").removeClass("text-secondary");
