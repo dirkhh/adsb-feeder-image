@@ -430,10 +430,6 @@ SEDVERSION=${VERSION//\//\\\/}
 sed -i "s/BASE_VERSION=.*/BASE_VERSION=$SEDVERSION/" /opt/adsb/config/.env
 sed -i "s/\"_ADSBIM_BASE_VERSION\": \"[^\"]*\"/\"_ADSBIM_BASE_VERSION\": \"$SEDVERSION\"/" /opt/adsb/config/config.json
 
-# Reset changelog seen variable so user will see changelog for this update
-sed -i "s/^_ADSBIM_SEEN_CHANGELOG=.*/_ADSBIM_SEEN_CHANGELOG=False/" /opt/adsb/config/.env
-sed -i "s/\"_ADSBIM_SEEN_CHANGELOG\": \"[^\"]*\"/\"_ADSBIM_SEEN_CHANGELOG\": \"False\"/" /opt/adsb/config/config.json
-
 # if there is any special handling in the adsb-setup app for changes to the config files,
 # env var names, etc (like in the v1.2.3->v1.3.0 upgrade), we need to run that
 # BEFORE we update the Docker containers so that things align properly
@@ -442,6 +438,9 @@ sed -i "s/\"_ADSBIM_SEEN_CHANGELOG\": \"[^\"]*\"/\"_ADSBIM_SEEN_CHANGELOG\": \"F
 # this also moves potentially updated yml files into the config folder
 # also updates .env/config.json with new container versions from docker.image.versions
 python3 /opt/adsb/adsb-setup/app.py --update-config || true # this always exits 1 and that's fine
+
+# Now we know that a config.json exists and can reset the changelog seen variable so user will see changelog for this update
+cat <<< "$(jq '._ADSBIM_SEEN_CHANGELOG=false' < /opt/adsb/config/config.json)" > /opt/adsb/config/config.json.upd && mv /opt/adsb/config/config.json.upd /opt/adsb/config/config.json
 
 echo "$(date -u +"%FT%T.%3NZ") finally, trigger a container upgrade so that they match the new image"
 /opt/adsb/docker-update-adsb-im
