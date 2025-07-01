@@ -231,7 +231,7 @@
     </div>
   </div>
   <div class="col-12 mb-4">
-    <div id="update_buttons" class="text-secondary">
+    <div id="update_block">
       <h5 class="mt-1">Update {% if env_value_by_tag('aggregator_choice') != 'nonadsb' %}ADS-B{% else %}SDR{% endif %} Feeder Software</h5>
       <label for="update_feeder_aps">
           Update the web UI, setup apps, and containers to the latest beta or stable version.
@@ -241,24 +241,24 @@
           <a class="small" href="">More information</a>
           </span>
           <div class="small d-none mt-2" id="update_explain">
-            If this update brings in new container images, even with a fast internet connection this can easily take more than ten minutes to complete. The web UI will pause while the update is running, but the feeder apps will only be briefly interrupted once all new components have been downloaded. 
+            If this update brings in new container images, even with a fast internet connection this can easily take more than ten minutes to complete. The web UI will pause while the update is running, but the feeder apps will only be briefly interrupted once all new components have been downloaded.
       </div>
       <div class="mt-3 mb-2">
-        <span class="text-info ">Your version:</span>
-        <span class="badge bg-primary ms-2 ">{{ env_value_by_tag("base_version")|replace('(beta)', '')|replace('(stable)', '') }}</span>
+        <span>Your version:</span>
+        <span class="version-badge fw-bold ms-2 ">{{ env_value_by_tag("base_version")|replace('(beta)', '')|replace('(stable)', '')|replace('(dietpi)', '') }}</span>
       </div>
       <form method="POST" onsubmit="show_spinner(); return true;">
-        <span>Latest stable:<span id="latest_tag" class="badge bg-secondary ms-2"></span></span>
-        • 
-        <span>Latest beta:<span id="beta_version" class="badge bg-secondary ms-2"></span></span>
+        <span>Latest stable:<span id="latest_tag" class="version-badge ms-2"></span></span>
+        •
+        <span>Latest beta:<span id="beta_version" class="version-badge ms-2"></span></span>
         {% if "dev" in channel %}
         •
-        <span>Latest dev: <span id="dev_version" class="badge bg-secondary ms-2"></span></span>
+        <span>Latest dev: <span id="dev_version" class="version-badge ms-2"></span></span>
         {% endif %}
 
         <span id="advice" class="small">&nbsp;</span>
 
-        <div class="mt-2">
+        <div id="update_buttons" class="mt-2">
           <button type="submit" class="btn btn-primary mb-3 ml-3 col-md-2" name="update_feeder_aps_stable"
                   id="update_feeder_aps_stable" disabled value="go">Update (stable)</button>
           <button type="submit" class="btn btn-primary mb-3 ml-3 col-md-2" name="update_feeder_aps_beta"
@@ -270,7 +270,7 @@
           </button>
           {% endif %}
         </div>
-        
+
         <div class="mt-3">
           <div id="release_notes_section" class="d-none">
             <div class="mb-2">
@@ -769,9 +769,9 @@
           $("#beta_version").text(betaText || "");
         }
         $("#advice").html(data["advice"] + "&nbsp;");
-        
+
         let hasReleaseNotes = false;
-        
+
         if (data["show_update"] == "1") {
           $("#update_buttons").removeClass("text-secondary");
           const dev = data["advice"] && data["advice"].startsWith("you are running a development version");
@@ -805,7 +805,7 @@
           $("#beta_release_notes").addClass("d-none");
           $("#stable_release_notes").addClass("d-none");
         }
-        
+
         if (hasReleaseNotes) {
           $("#release_notes_section").removeClass("d-none");
         } else {

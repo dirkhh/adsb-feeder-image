@@ -252,6 +252,11 @@ td.stickycolumn {
   background-color: var(--mdb-primary-bg-subtle, rgba(13, 110, 253, 0.1));
 }
 
+.version-badge {
+    font-weight: 500;
+    padding: 0.1em 0.3em 0.1em 0.3em;
+}
+
 footer {
     margin-top: auto;
 }

@@ -612,7 +612,7 @@
               </div>
               <div class="modal-body">
                 <div class="mb-3">
-                  <strong>Updated from:</strong><span class="badge bg-secondary ms-2 ">${oldVersion}</span> <strong>to:</strong><span class="badge bg-primary ms-2">${newVersion}</span>
+                  <strong>Updated from:</strong><span class="version-badge ms-2 ">${oldVersion}</span> <strong>to:</strong><span class="version-badge ms-2">${newVersion}</span>
                 </div>
                 <div class="changelog-content">
                   <pre style="white-space: pre-wrap; font-family: inherit;">${changelog}</pre>
@@ -758,7 +758,7 @@
             {% else %}
             <a href="https://adsb.im" target="_blank" rel="noopener" class="fw-semibold text-decoration-none">ADS-B Feeder Image</a>
             {% endif %}
-            <span class="badge bg-secondary ms-2">{{ env_value_by_tag("base_version") }}</span>
+            <span class="version-badge ms-2">{{ env_value_by_tag("base_version") }}</span>
           </div>
           <div class="text-muted small d-none d-md-block">
             Running on {{ env_value_by_tag("board_name") }} • {{ env_value_by_tag("image_name") }}
