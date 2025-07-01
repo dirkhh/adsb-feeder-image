@@ -363,6 +363,9 @@
       adjustButtonFont(tinyScreen.matches);
       navButtonCollapse(navCollapse.matches);
       removeKofi(noKofi.matches);
+      
+      // Check for changelog popup
+      checkChangelogPopup();
     });
 
     let tasks = [];
@@ -576,6 +579,97 @@
       }
       location.replace(location.href.split('?')[0] + queryString);
       return false;
+    }
+
+    function checkChangelogPopup() {
+      fetch('/api/check_changelog_status', {
+        method: 'GET',
+        cors: 'no-cors',
+        signal: AbortSignal.timeout(5000)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.show_changelog) {
+          showChangelogPopup(data.old_version, data.new_version, data.changelog);
+        }
+      })
+      .catch(error => {
+        console.log('Error checking changelog status:', error);
+      });
+    }
+
+    function showChangelogPopup(oldVersion, newVersion, changelogContent) {
+      let changelog = changelogContent;
+      
+      // Create modal HTML
+      const modalHtml = `
+        <div class="modal fade" id="changelogModal" tabindex="-1" aria-labelledby="changelogModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="changelogModalLabel">Your Feeder Has Been Updated!</h5>
+                <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <div class="mb-3">
+                  <strong>Updated from:</strong><span class="badge bg-secondary ms-2 ">${oldVersion}</span> <strong>to:</strong><span class="badge bg-primary ms-2">${newVersion}</span>
+                </div>
+                <div class="changelog-content">
+                  <pre style="white-space: pre-wrap; font-family: inherit;">${changelog}</pre>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-mdb-dismiss="modal">Cool！😎</button>
+              </div>
+            </div>
+          </div>
+        </div>`;
+      
+      // Add modal to body
+      $('body').append(modalHtml);
+      
+      // Show modal
+      const changelogModal = new mdb.Modal(document.getElementById('changelogModal'));
+      changelogModal.show();
+      
+      // Mark as seen when modal is hidden
+      $('#changelogModal').on('hidden.bs.modal', function() {
+        markChangelogSeen();
+        $(this).remove();
+      });
+    }
+
+    function markChangelogSeen() {
+      fetch('/api/mark_changelog_seen', {
+        method: 'POST',
+        cors: 'no-cors',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        signal: AbortSignal.timeout(5000)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          const changelogModal = mdb.Modal.getInstance(document.getElementById('changelogModal'));
+          if (changelogModal) {
+            changelogModal.hide();
+          }
+        } else {
+          console.log('Server error marking changelog as seen:', data.error || 'Unknown error');
+          const changelogModal = mdb.Modal.getInstance(document.getElementById('changelogModal'));
+          if (changelogModal) {
+            changelogModal.hide();
+          }
+        }
+      })
+      .catch(error => {
+        console.log('Error marking changelog as seen:', error);
+        const changelogModal = mdb.Modal.getInstance(document.getElementById('changelogModal'));
+        if (changelogModal) {
+          changelogModal.hide();
+        }
+      });
     }
 
     $(document).find('form').each((key, value) => {
