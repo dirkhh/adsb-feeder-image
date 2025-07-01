@@ -328,6 +328,8 @@ class AdsbIm:
         self.app.add_url_rule("/api/stage2_connection", "stage2_connection", self.stage2_connection)
         self.app.add_url_rule("/api/get_temperatures.json", "temperatures", self.temperatures)
         self.app.add_url_rule("/api/ambient_raw", "ambient_raw", self.ambient_raw)
+        self.app.add_url_rule("/api/check_changelog_status", "check_changelog_status", self.check_changelog_status)
+        self.app.add_url_rule("/api/mark_changelog_seen", "mark_changelog_seen", self.mark_changelog_seen, methods=["POST"])
         self.app.add_url_rule(f"/feeder-update-<channel>", "feeder-update", self.feeder_update)
         self.app.add_url_rule(f"/get-logs", "get-logs", self.get_logs)
         self.app.add_url_rule(f"/view-logs", "view-logs", self.view_logs)
@@ -3881,6 +3883,55 @@ class AdsbIm:
         except:
             pass
         return temperature
+
+    def check_changelog_status(self):
+        """Check if changelog should be shown to user"""
+        try:
+            _ADSBIM_SEEN_CHANGELOG = self._d.env_by_tags("seen_changelog").value
+            print_err(f"_ADSBIM_SEEN_CHANGELOG value from env_by_tags: {_ADSBIM_SEEN_CHANGELOG}")
+            
+            if str(_ADSBIM_SEEN_CHANGELOG).lower() != "true":
+                old_version = (self.get_previous_version()).strip('(beta)')
+                current_version = (self._d.env_by_tags("base_version").valuestr).strip('(beta)')
+                
+                print_err(f"Version check - old: {old_version}, current: {current_version}")
+                
+                if old_version and current_version and old_version != current_version and old_version != "unknown-install":
+                    
+                    changelog_response, status_code = generic_get_json(f'https://adsb.im/api/changelog/{old_version}/{current_version}')
+                    
+                    changelog_content = changelog_response if status_code == 200 else "Failed to fetch changelog"
+
+                    print_err("Changelog should be shown")
+                    return {
+                        "show_changelog": True,
+                        "old_version": old_version,
+                        "new_version": current_version,
+                        "changelog": changelog_content,
+                    }
+                
+                else:
+                    print_err("Changelog should not be shown - versions same or missing")
+            
+            return {"show_changelog": False}
+        
+        except Exception as e:
+            print_err(f"Error checking changelog status: {e}")
+            return {"show_changelog": False}
+
+    def mark_changelog_seen(self):
+        """Mark changelog as seen by setting _ADSBIM_SEEN_CHANGELOG to True"""
+        try:
+            self._d.env_by_tags("seen_changelog").value = "True"
+            print_err("Marked changelog as seen")
+            
+            self.write_envfile()
+            
+            return {"success": True}
+ 
+        except Exception as e:
+            print_err(f"Error marking changelog as seen: {e}")
+            return {"success": False, "error": str(e)}
 
     def support(self):
         print_err(f"support request, {request.form}")

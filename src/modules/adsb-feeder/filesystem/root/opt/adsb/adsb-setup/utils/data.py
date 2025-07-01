@@ -339,6 +339,11 @@ class Data:
             tags=["base_version", "norestore"],
         ),
         Env(
+            "_ADSBIM_SEEN_CHANGELOG",
+            default="True",
+            tags=["seen_changelog"],
+        ),
+        Env(
             "_ADSBIM_STATE_BOARD_NAME",
             tags=["board_name", "norestore"],
         ),

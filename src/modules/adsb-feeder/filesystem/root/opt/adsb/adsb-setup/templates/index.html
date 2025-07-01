@@ -269,7 +269,26 @@
             DANGER: Update ({{ channel }})
           </button>
           {% endif %}
-
+        </div>
+        
+        <div class="mt-3">
+          <div id="release_notes_section" class="d-none">
+            <div class="mb-2">
+              <span onclick="$('#release_notes_content').toggleClass('d-none'); $(this).find('.toggle-icon').text($('#release_notes_content').hasClass('d-none') ? '▶' : '▼');" style="cursor: pointer;">
+                <span class="toggle-icon">▶</span> <strong>Changelog</strong>
+              </span>
+            </div>
+            <div id="release_notes_content" class="d-none">
+              <div id="beta_release_notes" class="mb-3 d-none">
+                <div class="small text-muted mb-2"><strong>Beta Release Notes:</strong></div>
+                <div class="small border rounded p-3" id="beta_changelog_content" style="white-space: pre-wrap; max-height: 280px; overflow-y: auto; background-color: rgba(0,0,0,0.05); backdrop-filter: blur(10px); line-height: 1.4;"></div>
+              </div>
+              <div id="stable_release_notes" class="mb-3 d-none">
+                <div class="small text-muted mb-2"><strong>Stable Release Notes:</strong></div>
+                <div class="small border rounded p-3" id="stable_changelog_content" style="white-space: pre-wrap; max-height: 280px; overflow-y: auto; background-color: rgba(0,0,0,0.05); backdrop-filter: blur(10px); line-height: 1.4;"></div>
+              </div>
+            </div>
+          </div>
         </div>
       </form>
     </div>
@@ -750,13 +769,19 @@
           $("#beta_version").text(betaText || "");
         }
         $("#advice").html(data["advice"] + "&nbsp;");
+        
+        let hasReleaseNotes = false;
+        
         if (data["show_update"] == "1") {
           $("#update_buttons").removeClass("text-secondary");
           const dev = data["advice"] && data["advice"].startsWith("you are running a development version");
           if (dev || data["beta_changelog"]) {
             $("#update_feeder_aps_beta").attr("disabled", false);
-            $("#update_feeder_aps_beta").attr("title", data["beta_changelog"]);
-            $("#advice").attr("title", data["beta_changelog"]);
+            $("#beta_changelog_content").text(data["beta_changelog"] || "");
+            $("#beta_release_notes").removeClass("d-none");
+            hasReleaseNotes = true;
+          } else {
+            $("#beta_release_notes").addClass("d-none");
           }
           if (dev || data["main_changelog"]) {
             let message = data["main_changelog"];
@@ -764,15 +789,27 @@
             if (!dev && data["main_changelog"] == "this will get you back to the last release version") {
               message = "you can downgrade to the last release version on the System->Management page";
               set_disabled = true;
+            } else {
+              $("#stable_changelog_content").text(message || "");
+              $("#stable_release_notes").removeClass("d-none");
+              hasReleaseNotes = true;
             }
             $("#update_feeder_aps_stable").attr("disabled", set_disabled);
-            $("#update_feeder_aps_stable").attr("title", message);
-            $("#latest_tag").attr("title", message);
+          } else {
+            $("#stable_release_notes").addClass("d-none");
           }
         } else {
           $("#update_buttons").addClass("text-secondary");
           $("#update_feeder_aps_beta").attr("disabled", true);
           $("#update_feeder_aps_stable").attr("disabled", true);
+          $("#beta_release_notes").addClass("d-none");
+          $("#stable_release_notes").addClass("d-none");
+        }
+        
+        if (hasReleaseNotes) {
+          $("#release_notes_section").removeClass("d-none");
+        } else {
+          $("#release_notes_section").addClass("d-none");
         }
       });
     {% for agg, name, m, s, table in aggregators %}

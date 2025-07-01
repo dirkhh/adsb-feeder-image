@@ -430,6 +430,10 @@ SEDVERSION=${VERSION//\//\\\/}
 sed -i "s/BASE_VERSION=.*/BASE_VERSION=$SEDVERSION/" /opt/adsb/config/.env
 sed -i "s/\"_ADSBIM_BASE_VERSION\": \"[^\"]*\"/\"_ADSBIM_BASE_VERSION\": \"$SEDVERSION\"/" /opt/adsb/config/config.json
 
+# Reset changelog seen variable so user will see changelog for this update
+sed -i "s/^_ADSBIM_SEEN_CHANGELOG=.*/_ADSBIM_SEEN_CHANGELOG=False/" /opt/adsb/config/.env
+sed -i "s/\"_ADSBIM_SEEN_CHANGELOG\": \"[^\"]*\"/\"_ADSBIM_SEEN_CHANGELOG\": \"False\"/" /opt/adsb/config/config.json
+
 # if there is any special handling in the adsb-setup app for changes to the config files,
 # env var names, etc (like in the v1.2.3->v1.3.0 upgrade), we need to run that
 # BEFORE we update the Docker containers so that things align properly
