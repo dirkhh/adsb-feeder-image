@@ -340,6 +340,8 @@ class AdsbIm:
         self.update_journal_state()
 
         self._d.previous_version = self.get_previous_version()
+        if self._d.previous_version != "":
+            self._d.env_by_tags("previous_version").value = self._d.previous_version
 
         self.load_planes_seen_per_day()
 
@@ -3891,22 +3893,22 @@ class AdsbIm:
             print_err(f"_ADSBIM_SEEN_CHANGELOG value from env_by_tags: {seen_changelog}")
 
             if not seen_changelog:
-                old_version = (self.get_previous_version()).strip("(beta)")
-                current_version = (self._d.env_by_tags("base_version").valuestr).strip("(beta)")
+                previous_version = self._d.env_by_tags("previous_version").valuestr.split("(")[0]
+                current_version = self._d.env_by_tags("base_version").valuestr.split("(")[0]
 
-                print_err(f"Version check - old: {old_version}, current: {current_version}")
+                print_err(f"Version check - old: {previous_version}, current: {current_version}")
 
                 if (
-                    old_version
+                    previous_version
                     and current_version
-                    and old_version != current_version
-                    and old_version != "unknown-install"
-                    and old_version != "image-install"
-                    and old_version != "app-install"
+                    and previous_version != current_version
+                    and previous_version != "unknown-install"
+                    and previous_version != "image-install"
+                    and previous_version != "app-install"
                 ):
 
                     changelog_response, status_code = generic_get_json(
-                        f"https://adsb.im/api/changelog/{old_version}/{current_version}"
+                        f"https://adsb.im/api/changelog/{previous_version}/{current_version}"
                     )
 
                     changelog_content = changelog_response if status_code == 200 else "Failed to fetch changelog"
@@ -3914,7 +3916,7 @@ class AdsbIm:
                     print_err("Changelog should be shown")
                     return {
                         "show_changelog": True,
-                        "old_version": old_version,
+                        "previous_version": previous_version,
                         "new_version": current_version,
                         "changelog": changelog_content,
                     }

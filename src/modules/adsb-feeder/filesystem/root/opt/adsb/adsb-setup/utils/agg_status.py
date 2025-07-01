@@ -571,7 +571,11 @@ class ImStatus:
                 self._cached, status = generic_get_json(json_url, self._d.env_by_tags("pack").value)
                 if status == 200:
                     # good result, no need to update this sooner than in a minute
-                    self._next_check = time.time() + 60  
+                    self._next_check = time.time() + 60
+                    if self._d.previous_version and not check:
+                        self._d.previous_version = ""
+                        pathlib.Path("/opt/adsb/adsb.im.previous-version").unlink(missing_ok=True)
+
                 elif status == 201:
                     # successful check-in
                     return {"latest_tag": "success", "latest_commit": "", "advice": ""}

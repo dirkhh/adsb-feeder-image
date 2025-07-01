@@ -333,20 +333,10 @@ class Data:
         ),
         # ADSB.im specific
         Env("_ADSBIM_AGGREGATORS_SELECTION", tags=["aggregator_choice"]),
-        Env(
-            "_ADSBIM_BASE_VERSION",
-            default="",
-            tags=["base_version", "norestore"],
-        ),
-        Env(
-            "_ADSBIM_SEEN_CHANGELOG",
-            default=True,
-            tags=["seen_changelog"],
-        ),
-        Env(
-            "_ADSBIM_STATE_BOARD_NAME",
-            tags=["board_name", "norestore"],
-        ),
+        Env("_ADSBIM_BASE_VERSION", default="", tags=["base_version", "norestore"]),
+        Env("_ADSBIM_STATE_PREVIOUS_VERSION", "", tags=["previous_version", "norestore"]),
+        Env("_ADSBIM_SEEN_CHANGELOG", default=True, tags=["seen_changelog"]),
+        Env("_ADSBIM_STATE_BOARD_NAME", tags=["board_name", "norestore"]),
         # ports used by our proxy system
         Env("AF_WEBPORT", default=80, tags=["webport", "norestore"]),
         Env("AF_DAZZLE_PORT", default=9999, tags=["dazzleport", "norestore"]),

@@ -363,7 +363,7 @@
       adjustButtonFont(tinyScreen.matches);
       navButtonCollapse(navCollapse.matches);
       removeKofi(noKofi.matches);
-      
+
       // Check for changelog popup
       checkChangelogPopup();
     });
@@ -590,7 +590,7 @@
       .then(response => response.json())
       .then(data => {
         if (data.show_changelog) {
-          showChangelogPopup(data.old_version, data.new_version, data.changelog);
+          showChangelogPopup(data.previous_version, data.new_version, data.changelog);
         }
       })
       .catch(error => {
@@ -600,7 +600,7 @@
 
     function showChangelogPopup(oldVersion, newVersion, changelogContent) {
       let changelog = changelogContent;
-      
+
       // Create modal HTML
       const modalHtml = `
         <div class="modal fade" id="changelogModal" tabindex="-1" aria-labelledby="changelogModalLabel" aria-hidden="true">
@@ -624,14 +624,14 @@
             </div>
           </div>
         </div>`;
-      
+
       // Add modal to body
       $('body').append(modalHtml);
-      
+
       // Show modal
       const changelogModal = new mdb.Modal(document.getElementById('changelogModal'));
       changelogModal.show();
-      
+
       // Mark as seen when modal is hidden
       $('#changelogModal').on('hidden.bs.modal', function() {
         markChangelogSeen();
