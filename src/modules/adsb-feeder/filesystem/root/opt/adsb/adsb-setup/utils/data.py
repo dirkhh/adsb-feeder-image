@@ -340,7 +340,7 @@ class Data:
         ),
         Env(
             "_ADSBIM_SEEN_CHANGELOG",
-            default="False",
+            default="True",
             tags=["seen_changelog"],
         ),
         Env(
