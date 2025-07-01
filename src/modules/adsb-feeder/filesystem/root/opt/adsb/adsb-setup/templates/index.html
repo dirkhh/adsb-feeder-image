@@ -190,10 +190,11 @@
         <span class="text-warning"><span class="icon-placeholder" data-icon="feed-warning"></span></span> feed is degraded,
         <span class="text-muted"><span class="icon-placeholder" data-icon="overall-good"></span></span> feed state is not supported
         <br />
-        <span onclick="$('#extra_legend').toggleClass('d-none'); return false;">
-          <a href="">Toggle detailed legend</a>
+        <span onclick="$('#extra_legend').toggleClass('d-none'); $(this).find('.toggle-icon').text($('#update_explain').hasClass('d-none') ? '▶' : '▼'); return false;"
+              style="cursor: pointer;">
+          <span class="toggle-icon small">▶</span> <strong class="small">Toggle detailed legend</strong>
         </span>
-        <span>| Last status update: <span id=last_status_update></span></span>
+        <span>| Last status update: <span id="last_status_update"></span></span>
         <br />
         <span class="d-none" id="extra_legend">
           '<span class="icon-placeholder" data-icon="feed-connected"></span>': feed/mlat is connected; '<span class="icon-placeholder" data-icon="feed-disconnected"></span>': feed/mlat is not connected
@@ -237,8 +238,9 @@
           Update the web UI, setup apps, and containers to the latest beta or stable version.
       </label>
       <div class="mt-2">
-          <span onclick="$('#update_explain').toggleClass('d-none'); return false;">
-          <a class="small" href="">More information</a>
+          <span onclick="$('#update_explain').toggleClass('d-none'); $(this).find('.toggle-icon').text($('#update_explain').hasClass('d-none') ? '▶' : '▼'); return false;"
+                style="cursor: pointer;">
+          <span class="toggle-icon small">▶</span> <strong class="small">More information</strong>
           </span>
           <div class="small d-none mt-2" id="update_explain">
             If this update brings in new container images, even with a fast internet connection this can easily take more than ten minutes to complete. The web UI will pause while the update is running, but the feeder apps will only be briefly interrupted once all new components have been downloaded.
