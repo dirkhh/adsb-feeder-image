@@ -3935,9 +3935,6 @@ class AdsbIm:
         try:
             self._d.env_by_tags("seen_changelog").value = True
             print_err("Marked changelog as seen")
-
-            self.write_envfile()
-
             return {"success": True}
 
         except Exception as e:
