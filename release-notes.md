@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- core: work around the fact that Flightradar24 appears to believe that emails have to be lowercase
 - UI: add hack to correctly align checkboxes on iOS/Safari
 - beta-notes: small UI changes to stay closer to the project style
 - UI: show changelog after update; change the changelog preview from 'button hover' to an explicit Changelog section that the user can easily discover, even on mobile

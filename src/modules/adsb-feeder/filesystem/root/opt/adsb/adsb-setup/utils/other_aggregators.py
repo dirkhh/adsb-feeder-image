@@ -163,7 +163,7 @@ class FlightRadar24(Aggregator):
         adsb_signup_command = (
             f"docker run --entrypoint /bin/bash --rm "
             f'-e FEEDER_LAT="{lat}" -e FEEDER_LONG="{lon}" -e FEEDER_ALT_FT="{self.alt_ft}" '
-            f'-e FR24_EMAIL="{email}" {self.container} '
+            f'-e FR24_EMAIL="{email.lower()}" {self.container} '
             f'-c "apt update && apt install -y expect && $(cat handsoff_signup_expect.sh)"'
         )
         open("/opt/adsb/handsoff_signup.sh", "w").write(f"#!/bin/bash\n{adsb_signup_command}")
