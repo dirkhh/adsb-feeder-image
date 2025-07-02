@@ -13,19 +13,23 @@
 
 .plane-animation {
   position: relative;
-  width: 50vw;
-  height: 50vh;
+  width: min(50vw, 300px);
+  height: min(50vh, 200px);
   overflow: hidden;
   background: linear-gradient(to bottom, #87CEEB 0%, #B0E0E6 50%, #E0F6FF 100%);
-  border-radius: 8px;
+  border-radius: 12px;
   margin: 0 auto;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
 }
 
 .plane {
   position: absolute;
-  width: 48px;
-  height: 48px;
-  animation: fly-through 6s ease-in-out infinite;
+  width: 40px;
+  height: 40px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  animation: gentle-hover 2.5s ease-in-out infinite;
   transform-origin: center;
 }
 
@@ -58,60 +62,75 @@
 }
 
 .cloud1 {
-  width: 50px;
-  height: 30px;
-  top: 10px;
-  left: -60px;
-  animation-delay: -3s;
+  width: 40px;
+  height: 24px;
+  top: 15px;
+  left: -50px;
+  animation-delay: -2s;
 }
 
 .cloud2 {
-  width: 40px;
-  height: 24px;
-  top: 70px;
-  left: -50px;
-  animation-delay: -8s;
+  width: 35px;
+  height: 21px;
+  top: 60px;
+  left: -45px;
+  animation-delay: -6s;
 }
 
 .cloud3 {
-  width: 35px;
-  height: 21px;
+  width: 30px;
+  height: 18px;
   top: 25px;
-  left: -45px;
-  animation-delay: -5s;
+  left: -40px;
+  animation-delay: -4s;
 }
 
 .cloud4 {
-  width: 45px;
-  height: 27px;
-  top: 85px;
-  left: -55px;
+  width: 38px;
+  height: 23px;
+  top: 80px;
+  left: -48px;
   animation-delay: -1s;
 }
 
 .cloud5 {
-  width: 30px;
-  height: 18px;
-  top: 50px;
-  left: -40px;
-  animation-delay: -10s;
+  width: 28px;
+  height: 17px;
+  top: 45px;
+  left: -38px;
+  animation-delay: -8s;
 }
 
-@keyframes fly-through {
-  0% {
-    left: 10px;
-    top: 40px;
-    transform: scale(0.8);
+.cloud6 {
+  width: 32px;
+  height: 19px;
+  top: 10px;
+  left: -42px;
+  animation-delay: -5s;
+}
+
+.cloud7 {
+  width: 36px;
+  height: 22px;
+  top: 70px;
+  left: -46px;
+  animation-delay: -3s;
+}
+
+.cloud8 {
+  width: 29px;
+  height: 17px;
+  top: 35px;
+  left: -39px;
+  animation-delay: -7s;
+}
+
+@keyframes gentle-hover {
+  0%, 100% {
+    transform: translate(-50%, -50%) translateY(0px);
   }
   50% {
-    left: 50%;
-    top: 50px;
-    transform: translateX(-50%) scale(1);
-  }
-  100% {
-    left: calc(100% - 58px);
-    top: 60px;
-    transform: scale(0.8);
+    transform: translate(-50%, -50%) translateY(-15px);
   }
 }
 
