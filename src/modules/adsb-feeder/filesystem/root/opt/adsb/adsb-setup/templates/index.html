@@ -297,6 +297,7 @@
   </div>
   <div class="col-12">
     <div id="UF" class="row {% if env_value_by_tag('aggregator_choice') in ['nano', 'nonadsb'] %}d-none{%endif%}">
+      <hr />
       <div class="col-12">
         <h5>{% if env_value_by_tag('aggregator_choice') == 'micro' %}Local {%endif%}TAR1090 Mapping Interface</h5>
       </div>
@@ -353,6 +354,7 @@
     {% endif %}
     {% endfor %}
     <div id="UAT978" class="row {% if not ns.uat978 %}d-none{% endif %}">
+      <hr />
       <div class="col-12">
         <h5>UAT978 Mapping Interface</h5>
       </div>
@@ -375,6 +377,7 @@
     </div>
     <div
          class="row mt-3 {% if not (ns.adsblol or ns.flightradar or ns.planefinder or ns.adsbx or ns.alive or ns.flightaware) %}d-none{% endif %}">
+      <hr />
       <div class="col-12">
         <h5>Additional aggregator links</h5>
       </div>
@@ -423,6 +426,7 @@
         {% endif %}
       </div>
       <div class="col-12 {% if not ns.flightradar %}d-none{% endif %}">
+        <hr />
         <div class="lead">FlightRadar 24</div>
         <table class="table table-sm table-borderless lh-1 w-auto mt-0 mb-0 ms-2">
           <tbody>
@@ -439,6 +443,7 @@
         </table>
       </div>
       <div class="col-12 {% if not ns.flightaware %}d-none{% endif %}">
+        <hr />
         <div class="lead">FlightAware</div>
         <div class="small text-muted">
           Note: The SkyAware map on the status page does not work, it's not needed to supply data to FA<br>
@@ -461,6 +466,7 @@
         </table>
       </div>
       <div class="col-12 {% if not ns.planefinder %}d-none{% endif %}">
+        <hr />
         <div class="lead">PlaneFinder</div>
         <table class="table table-sm table-borderless lh-1 w-auto mt-0 mb-0 ms-2">
           <tbody>
@@ -479,6 +485,7 @@
         </table>
       </div>
       <div class="col-12 {% if not ns.adsbx %}d-none{% endif %}">
+        <hr />
         <div class="lead">ADSBExchange</div>
         <table class="table table-sm table-borderless lh-1 w-auto mt-0 mb-0 ms-2">
           <tbody>
@@ -496,6 +503,7 @@
         </table>
       </div>
       <div class="col-12 {% if not ns.alive %}d-none{% endif %}">
+        <hr />
         <div class="lead">airplanes.live</div>
         <table class="table table-sm table-borderless lh-1 w-auto mt-0 mb-0 ms-2">
           <tbody>
