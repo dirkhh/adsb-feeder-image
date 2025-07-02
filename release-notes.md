@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- UI: add hack to correctly align checkboxes on iOS/Safari
 - beta-notes: small UI changes to stay closer to the project style
 - UI: show changelog after update; change the changelog preview from 'button hover' to an explicit Changelog section that the user can easily discover, even on mobile
 - beta-notes: make GPIO pin for temperature sensor configurable

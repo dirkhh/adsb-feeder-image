@@ -696,6 +696,15 @@
           }
         });
       });
+      // hack to fix the layout issues on iOS
+      let isIOS = /iPad|iPhone|iPod/.test(navigator.platform) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      if (isIOS) {
+        // loop over all elements with the class "col-11"
+        $('.col-11').each(function () {
+          // remove the class "col-11" and add the class "col-10"
+          $(this).removeClass('col-11').addClass('col-10');
+        })
+      }
     });
   </script>
 </head>
