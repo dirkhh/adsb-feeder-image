@@ -460,6 +460,10 @@
 
     let check_mf_task = {};
     check_mf_task.func = function() {
+
+      // you can comment this out this to permanently show the spinner for mobile testing for example
+      // show_spinner();
+
       verbose && console.log(new Date().toLocaleTimeString() + " check_mf");
       let url = "/api/stage2_stats";
       fetch(url, {
@@ -749,11 +753,6 @@
         <div class="runway"></div>
       </div>
       <div class="loading-text">Processing...</div>
-    </div>
-    <div id="overlaytext">
-      please wait
-      <br />
-      this could take several minutes
     </div>
   </div>
   <div class="container pt-5 my-3">

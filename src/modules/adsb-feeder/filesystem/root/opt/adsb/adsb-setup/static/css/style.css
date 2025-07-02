@@ -1,7 +1,7 @@
 #loader {
   position: absolute;
   left: 50%;
-  top: 30%;
+  top: 50%;
   transform: translate(-50%, -50%);
   z-index: 2020;
   display: flex;
@@ -13,8 +13,8 @@
 
 .plane-animation {
   position: relative;
-  width: 120px;
-  height: 120px;
+  width: 50vw;
+  height: 50vh;
   overflow: hidden;
   background: linear-gradient(to bottom, #87CEEB 0%, #B0E0E6 50%, #E0F6FF 100%);
   border-radius: 8px;
