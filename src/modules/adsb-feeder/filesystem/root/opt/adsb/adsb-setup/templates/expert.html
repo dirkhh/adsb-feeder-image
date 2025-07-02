@@ -218,6 +218,41 @@
     </form>
   </div>
   {% endif %}
+  {% if env_value_by_tag('show_changelog') %}
+  <div class="col-12 col-lg-6">
+    <h5 class="mt-3">Changelog popup</h5>
+    <form method="POST" onsubmit="show_spinner(); return true;">
+      <div class="row align-items-center">
+        <div class="col-8">
+          <label for="disable_changelog_popup">
+            If you want to disable the changelog popup that appears after feeder updates, you can disable it here.
+          </label>
+        </div>
+        <div class="col-4">
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="disable_changelog_popup" value="go">Disable
+            Popup</button>
+        </div>
+      </div>
+    </form>
+  </div>
+  {% else %}
+  <div class="col-12 col-lg-6">
+    <h5 class="mt-3">Changelog popup</h5>
+    <form method="POST" onsubmit="show_spinner(); return true;">
+      <div class="row align-items-center">
+        <div class="col-8">
+          <label for="enable_changelog_popup">
+            If you want to enable the changelog popup that appears after feeder updates, you can enable it here.
+          </label>
+        </div>
+        <div class="col-4">
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="enable_changelog_popup" value="go">Enable
+            Popup</button>
+        </div>
+      </div>
+    </form>
+  </div>
+  {% endif %}
   <div class="col-12 col-lg-6">
     <h5 class="mt-3">CSS Theme</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">

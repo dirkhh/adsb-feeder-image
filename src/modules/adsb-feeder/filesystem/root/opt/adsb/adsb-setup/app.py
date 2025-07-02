@@ -2983,6 +2983,10 @@ class AdsbIm:
                     self._d.env_by_tags("tar1090_image_config_link").value = ""
                 if key == "allow_config_link":
                     self._d.env_by_tags("tar1090_image_config_link").value = f"WILL_BE_SET_IN_IMPLIED_SETTINGS"
+                if key == "disable_changelog_popup":
+                    self._d.env_by_tags("show_changelog").value = False
+                if key == "enable_changelog_popup":
+                    self._d.env_by_tags("show_changelog").value = True
                 if key == "turn_on_gpsd":
                     self._d.env_by_tags(["use_gpsd", "is_enabled"]).value = True
                     # this updates the lat/lon/alt env variables as side effect, if there is a GPS fix
@@ -3889,6 +3893,12 @@ class AdsbIm:
     def check_changelog_status(self):
         """Check if changelog should be shown to user"""
         try:
+            # Check if changelog popup is disabled
+            show_changelog_enabled = self._d.env_by_tags("show_changelog").value
+            if not show_changelog_enabled:
+                print_err("Changelog popup is disabled by user")
+                return {"show_changelog": False}
+
             seen_changelog = self._d.env_by_tags("seen_changelog").value
             print_err(f"_ADSBIM_SEEN_CHANGELOG value from env_by_tags: {seen_changelog}")
 

@@ -34,6 +34,7 @@ if [ ! -f /opt/adsb/config/config.json ] ; then
     \"SDRPLAY_CONTAINER\": \"$SDRPLAY_CONTAINER\", \
     \"_ADSBIM_BASE_VERSION\": \"$_ADSBIM_BASE_VERSION\", \
     \"_ADSBIM_CONTAINER_VERSION\": \"$_ADSBIM_BASE_VERSION\", \
-    \"_ADSBIM_SEEN_CHANGELOG\": \"$_ADSBIM_SEEN_CHANGELOG\" \
+    \"_ADSBIM_SEEN_CHANGELOG\": \"$_ADSBIM_SEEN_CHANGELOG\", \
+    \"_ADSBIM_SHOW_CHANGELOG\": \"$_ADSBIM_SHOW_CHANGELOG\" \
     }" > /opt/adsb/config/config.json
 fi
