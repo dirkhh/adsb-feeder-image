@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- beta-notes: additional UI tweaks for visual separation on the home page and button text on the expert page
 - beta-notes: small UI tweaks, including updates to the spinner / flying plane animation
 - core: work around the fact that Flightradar24 appears to believe that emails have to be lowercase
 - UI: add hack to correctly align checkboxes on iOS/Safari
