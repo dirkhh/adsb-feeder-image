@@ -333,7 +333,12 @@
           network. There is no way for the feeder to automatically forward you to that.
         </div>
         <div class="col-4">
-          <input class="mx-auto w-100" id="wifi_ssid" name="wifi_ssid" type="text" placeholder="SSID" required>
+          <div class="dropdown">
+            <input class="form-control wifi-ssid-input" id="wifi_ssid" name="wifi_ssid" type="text" placeholder="SSID" required
+                   autocomplete="off" onclick="showWifiDropdown()">
+            <ul class="dropdown-menu w-100" id="wifi_dropdown" style="max-height: 200px; overflow-y: auto;">
+            </ul>
+          </div>
         </div>
         <div class="col-4">
           <input class="mx-auto w-100" id="wifi_password" name="wifi_password" type="text" placeholder="Password">
@@ -363,9 +368,9 @@
     const checkboxes = document.querySelectorAll('input[type="checkbox"][name^="restart-"]');
     const restartButton = document.getElementById('restart_button');
     const recreateButton = document.getElementById('recreate_button');
-    
+
     const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
-    
+
     if (checkedCount === 0) {
       restartButton.textContent = 'Restart All';
       recreateButton.textContent = 'Recreate All';
@@ -381,6 +386,57 @@
       checkbox.addEventListener('change', updateContainerButtonText);
     });
     updateContainerButtonText();
+
+    const wifiSsidInput = document.getElementById('wifi_ssid');
+
+    if (wifiSsidInput) {
+      wifiSsidInput.addEventListener('focus', function() {
+          scanWifiNetworks();
+      });
+
+      document.addEventListener('click', function(event) {
+        const dropdown = document.getElementById('wifi_dropdown');
+        if (!wifiSsidInput.contains(event.target) && !dropdown.contains(event.target)) {
+          dropdown.classList.remove('show');
+        }
+      });
+    }
   });
+
+  function scanWifiNetworks() {
+    const dropdown = document.getElementById('wifi_dropdown');
+
+    dropdown.innerHTML = '<li><span class="dropdown-item-text text-muted">Scanning for networks...</span></li>';
+    dropdown.classList.add('show');
+
+    fetch('/api/scan_wifi', { signal: AbortSignal.timeout(15000) })
+      .then(response => response.json())
+      .then(data => {
+        dropdown.innerHTML = '';
+
+        if (data.ssids && data.ssids.length > 0) {
+          data.ssids.forEach(ssid => {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.className = 'dropdown-item';
+            a.href = '#';
+            a.textContent = ssid;
+            a.onclick = function(e) {
+              e.preventDefault();
+              document.getElementById('wifi_ssid').value = ssid;
+              dropdown.classList.remove('show');
+            };
+            li.appendChild(a);
+            dropdown.appendChild(li);
+          });
+        } else {
+          dropdown.innerHTML = '<li><span class="dropdown-item-text text-muted">No networks found</span></li>';
+        }
+      })
+      .catch(error => {
+        console.warn('WiFi scan failed:', error);
+        dropdown.innerHTML = '<li><span class="dropdown-item-text text-muted">Scan failed</span></li>';
+      });
+  }
 </script>
 {% endblock %}
