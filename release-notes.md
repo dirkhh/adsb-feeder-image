@@ -2,32 +2,7 @@ Changes since v2.3.5:
 =======
 - beta-notes: add contact information for the AcarsDrama team to let them know that you are feeding them data
 - beta-notes: additional UI tweaks for visual separation on the home page, button text on the expert page, and removal of a redundant Ko-Fi link
-- beta-notes: small UI tweaks, including updates to the spinner / flying plane animation
-- core: work around the fact that Flightradar24 appears to believe that emails have to be lowercase
-- UI: add hack to correctly align checkboxes on iOS/Safari
-- beta-notes: small UI changes to stay closer to the project style
-- UI: show changelog after update; change the changelog preview from 'button hover' to an explicit Changelog section that the user can easily discover, even on mobile
-- beta-notes: make GPIO pin for temperature sensor configurable
-- beta-notes: update sdrmap container
-- beta-notes: support biastee for RTLSDR with VDLM2
-- core: show ambient temperature in graphs1090 temperature graph if supported temperature sensor is installed
-- beta-notes: update all the docker containers
-- beta-notes: remove duplicate notifications on the SDR Setup page
-- beta-notes: new containers for ACARS
-- beta-notes: ensure radiosonde container is restarted when configuration changes
-- beta-notes: fix issue with incorrect icon colors when coming back to the feeder tab in the browser
-- beta-notes: add button for Sonde and redo all the UI logic to allow for up to four buttons
-- beta-notes: remove virtualradar.nl again as their service appears to be continuously down -- possibly not ready for prime time
-- beta-notes: fixup inability to deselect individual aggregators when aggregator choice is currently all or privacy
-- stage2 with local SDR: correctly show signal graph when using an airspy
-- beta-notes: UI: make the choice of whether AIS ships are shown on tar1090 live map user configurable on the expert page
-- beta-notes: UI: restyle the page footer
-- beta-notes: UI: add hover effect to SDR table
-- beta-notes: UI: another rewrite of the SDR Setup, this time with focus to responsiveness and good user experience on small screens
-- beta-notes: UI: make stage 2 setup screen more usable on small / mobile screens
-- beta-notes: clean up handling of SVG icons
-- beta-notes: clean up, reorder, and organize release notes as we get ready for the first v3.0 release
-- beta-notes: all changes below are just artifacts of the release notes cleanup
+- beta-notes: random changes below will show up in Changelogs as we get ready for release - this is a tooling artifact
 - core: add support for additional SDR use cases: ACARS, VDLM2, HFDL, AIS, SONDE
 - core: redesign of the SDR setup page with clickable SDR entries that open a modal dialog to edit all the SDR settings in one place
 - core: improve SDR handling and explain why a user might get sent back to the SDR Setup page when all they want is the Feeder Homepage
@@ -35,19 +10,23 @@ Changes since v2.3.5:
 - core: add support for web-888 SDR via hfdlobserver
 - core: add SDR feature matrix README
 - core: add support for DHT22 temperature sensor on Raspberry Pi boards
-- hotspot: make hotspot RFC7710 compliant and fix a bug where it would respond to random web requests, making it hard to use if your computer / phone sends out a lot of web requests once you connect (and before you can enter the SSID/password)
-- UI: add Discord link to the footer
-- UI: rework UI to change button style and font size to support even smaller screen sizes
-- UI: add custom status icons for feeder home page
-- UI: show warning about potentially too many SDRs
-- UI: add UI to allow changing the serial number of an RTLSDR
+- core: show ambient temperature in graphs1090 temperature graph if supported temperature sensor is installed
+- core: work around the fact that Flightradar24 appears to believe that emails have to be lowercase
 - core: update containers to their current version
 - core: /feeder-update-<channel> endpoint: add oldstable option -- this allows downgrade to an earlier, known good 'stable' version after a release
 - core: many internal changes to Env variable handling and related code cleanup
 - core: better instructions on how to handle compose failure
+- hotspot: make hotspot RFC7710 compliant and fix usability issues
+- UI: show changelog after update; change the changelog preview from 'button hover' to an explicit Changelog section that the user can easily discover, even on mobile
+- UI: significant rework of the UI to accomodate small screens and usage on mobile devices
+- UI: add custom status icons for feeder home page
+- UI: show warning about potentially too many SDRs
+- UI: add UI to allow changing the serial number of an RTLSDR
+- UI: add Discord link to the footer
 - stage2: additional ultrafeeder arguments: replace SITENUM magic string
 - stage2: fix microfeeder edit with old docker compose version
 - stage2: fix restore issue connected to rbfeeder cpuinfo files
+- stage2 with local SDR: correctly show signal graph when using an airspy
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)
