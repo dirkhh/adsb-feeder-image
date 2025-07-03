@@ -46,14 +46,19 @@
             After that you'll be able to log in as root using an SSH client (e.g. PuTTY on Windows or <code>ssh</code> on macOS or Linux).
           </label>
         </div>
-        <div class="row fw-light collapse align-right" id="showrpw">
-          <pre class="align-middle ms-5 mt-2 col-auto"><code class="text-light bg-danger">{{ rpw }}</code></pre>
-          <button type="submit" name="rpw" value="stay"
-                  class="align-middle btn btn-primary mb-1 mx-3 col-sm-3">Accept</button>
+        <div class="col-8">
+          <div class="collapse" id="showrpw">
+            <div class="d-flex align-items-center">
+              <pre class="mb-0 me-3"><code class="text-light bg-danger px-2 py-1 rounded">{{ rpw }}</code></pre>
+              <button type="submit" name="rpw" value="stay" class="btn btn-primary">Accept</button>
+            </div>
+          </div>
+        </div>
+        <div class="col-4">
+          <button class="btn btn-secondary mx-auto w-100" type="button" data-mdb-toggle="collapse" data-mdb-target="#showrpw"
+                  aria-expanded="false" aria-controls="showrpw">Show Password</button>
         </div>
       </div>
-      <button class="btn btn-secondary btn-rounded" type="button" data-mdb-toggle="collapse" data-mdb-target="#showrpw"
-              aria-expanded="false" aria-controls="showrpw">Show Password</button>
     </form>
   </div>
   <div class="col-12 col-lg-6 {% if not is_enabled('secure_image') %} d-none {% endif %}">
