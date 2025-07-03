@@ -40,7 +40,7 @@
     </div>
   </div>
   <div class="container pt-5 mt-3">
-    <h1 class="mt-5">Wifi Setup</h1>
+    <h1 class="mt-5">WiFi Setup</h1>
     {% if comment == "" %}
     <div class="mt-3">The ADS-B Feeder Image wasn't able to connect to a network. Please enter an SSID and password so
       that we can connect to the network and continue the setup.</div>
@@ -49,25 +49,28 @@
     {% endif %}
     {% if not comment.startswith("Success") %}
     <form method="post">
-      <div class="form-group row mt-3">
-        <span class="col-md">
-          <label for="ssidinput">SSID</label>
-        </span>
-        <span class="col-md">
-          <input class="form-control" list="ssidlist" id="ssidinput" name="ssid" placeholder="Pick or enter SSID">
-          <datalist id="ssidlist">
-            {% for ssid in ssids %}
-            <option value="{{ ssid }}" />
-            {% endfor %}
-          </datalist>
-        </span>
-        <span class="col-md">
-          <label for="passwd">Password</label>
-        </span>
-        <span class="col-md">
-          <input type="text" id="passwd" name="passwd" placeholder="Password" class="form-control" />
-        </span>
-        <button type="submit" name="submit" value="go" class="col-md btn btn-primary">Configure</button>
+      <div class="row mt-4">
+        <div class="col-md-6 mb-3">
+          <label for="ssidinput" class="form-label">SSID</label>
+          <div class="dropdown">
+            <input class="form-control wifi-ssid-input" id="ssidinput" name="ssid" type="text" placeholder="Pick or enter SSID" required
+                   autocomplete="off" onclick="showHotspotWifiDropdown()">
+            <ul class="dropdown-menu w-100" id="hotspot_wifi_dropdown" style="max-height: 200px; overflow-y: auto;">
+              {% for ssid in ssids %}
+              <li><a class="dropdown-item" href="#" onclick="selectHotspotSsid('{{ ssid }}')">{{ ssid }}</a></li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="passwd" class="form-label">Password</label>
+          <input type="password" id="passwd" name="passwd" placeholder="Password" class="form-control" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <button type="submit" name="submit" value="go" class="btn btn-primary btn-lg">Configure</button>
+        </div>
       </div>
     </form>
     <div class="mt-4">
@@ -77,18 +80,46 @@
       again bring up this hotspot and you can try entering the credentials again.
     </div>
     {% endif %}
-    <footer class="text-center text-lg-start bg-light text-muted">
-      <hr class="mt-5" />
-      <section class="d-flex justify-content-center justify-content-lg-between border-bottom small">
-        <div class="me-5 d-lg-block">
-          <span>
-            Running <a href="https://adsb.im/home">ADS-B Feeder Image</a> {{ version }}
-          </span>
+    
+    <footer class="mt-5 py-4">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-auto">
+            <div class="text-muted text-center">
+              <small>
+                Running <a href="https://adsb.im/home" class="text-decoration-none">ADS-B Feeder Image</a> {{ version }}
+              </small>
+            </div>
+          </div>
         </div>
-      </section>
+      </div>
     </footer>
   </div>
   <script type="text/javascript" src="{{ url_for('static', filename='js/mdb.min.js') }}"></script>
+  <script>
+    function showHotspotWifiDropdown() {
+      const dropdown = document.getElementById('hotspot_wifi_dropdown');
+      dropdown.classList.add('show');
+    }
+
+    function selectHotspotSsid(ssid) {
+      document.getElementById('ssidinput').value = ssid;
+      document.getElementById('hotspot_wifi_dropdown').classList.remove('show');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const wifiSsidInput = document.getElementById('ssidinput');
+      const dropdown = document.getElementById('hotspot_wifi_dropdown');
+
+      if (wifiSsidInput && dropdown) {
+        document.addEventListener('click', function(event) {
+          if (!wifiSsidInput.contains(event.target) && !dropdown.contains(event.target)) {
+            dropdown.classList.remove('show');
+          }
+        });
+      }
+    });
+  </script>
 </body>
 
 </html>
