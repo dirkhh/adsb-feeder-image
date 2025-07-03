@@ -1,5 +1,6 @@
 Changes since v2.3.5:
 =======
+- beta-notes: add contact information for the AcarsDrama team to let them know that you are feeding them data
 - beta-notes: additional UI tweaks for visual separation on the home page, button text on the expert page, and removal of a redundant Ko-Fi link
 - beta-notes: small UI tweaks, including updates to the spinner / flying plane animation
 - core: work around the fact that Flightradar24 appears to believe that emails have to be lowercase
