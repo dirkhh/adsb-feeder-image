@@ -30,6 +30,7 @@
   top: 50%;
   transform: translate(-50%, -50%);
   animation: fly-through 10s ease-in infinite;
+  animation-delay: -1s;
   transform-origin: center;
 }
 
