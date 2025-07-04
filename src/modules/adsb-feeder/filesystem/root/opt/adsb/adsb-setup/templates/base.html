@@ -797,18 +797,14 @@
           </div>
         </div>
 
-        <div class="row align-items-center">
-          <div class="col-md-8">
-            <div class="small text-muted">
-              Need help? Join our community:
-              <a href="https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image"
-                 target="_blank" rel="noopener">Zulip Channel</a>
-              •
-              <a href="https://discord.gg/7buWAFA28H"
-                 target="_blank" rel="noopener">Discord Server</a>
-            </div>
-          </div>
-
+        <div class="small text-muted">
+          Need help? Check the <a {% if env_value_by_tag('aggregator_choice') == 'nonadsb' %}
+          href="https://sdre.im/using" {% else %} href="https://adsb.im/using" {% endif %}
+          target="_blank" rel="noopener">documentation</a>, look at our
+          <a href="https://youtube.com/@adsb" target="_blank" rel="noopener">YouTube Channel</a>,
+          or join our community: <a href="https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image"
+              target="_blank" rel="noopener">Zulip Channel</a> • <a href="https://discord.gg/7buWAFA28H"
+              target="_blank" rel="noopener">Discord Server</a>
         </div>
       </div>
     </footer>
