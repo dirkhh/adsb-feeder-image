@@ -1,8 +1,9 @@
+Version 3 of the ADS-B Feeder Image brings a lot of new features and expands the purpose quite a bit.
+
+This software now not only supports ADS-B and UAT, but also ACARS, VDL2, HFDL, AIS, and Radiosonde - so a lot more protocols that allow you to use SDRs to collect information from planes, ships, and weather balloons.
+
 Changes since v2.3.5:
 =======
-- beta-notes: add contact information for the AcarsDrama team to let them know that you are feeding them data
-- beta-notes: additional UI tweaks for visual separation on the home page, button text on the expert page, and removal of a redundant Ko-Fi link
-- beta-notes: random changes below will show up in Changelogs as we get ready for release - this is a tooling artifact
 - core: add support for additional SDR use cases: ACARS, VDLM2, HFDL, AIS, SONDE
 - core: redesign of the SDR setup page with clickable SDR entries that open a modal dialog to edit all the SDR settings in one place
 - core: improve SDR handling and explain why a user might get sent back to the SDR Setup page when all they want is the Feeder Homepage
@@ -22,7 +23,7 @@ Changes since v2.3.5:
 - UI: add custom status icons for feeder home page
 - UI: show warning about potentially too many SDRs
 - UI: add UI to allow changing the serial number of an RTLSDR
-- UI: add Discord link to the footer
+- UI: add Discord, documentation, and YouTube channel link to the footer
 - stage2: additional ultrafeeder arguments: replace SITENUM magic string
 - stage2: fix microfeeder edit with old docker compose version
 - stage2: fix restore issue connected to rbfeeder cpuinfo files
