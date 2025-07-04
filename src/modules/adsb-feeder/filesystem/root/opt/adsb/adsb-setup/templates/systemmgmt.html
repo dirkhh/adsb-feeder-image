@@ -26,7 +26,7 @@
           </label>
         </div>
         <div class="col-8">
-          <input class="mx-auto w-100" id="ssh_pub" name="ssh_pub" type="text" placeholder=" Enter your public key"
+          <input class="form-control mx-auto w-100" id="ssh_pub" name="ssh_pub" type="text" placeholder="Enter your public key"
                  required>
         </div>
         <div class="col-4">
@@ -246,12 +246,12 @@
         </div>
         {% if not zerotier_running %}
         <div class="col-8">
-          <input class="mx-auto w-100" id="zerotierid" name="zerotierid" type="text"
-                 value="{{ env_value_by_tag('zerotierid') }}" placeholder=" Enter your Zerotier Network ID" required>
+          <input class="form-control mx-auto w-100" id="zerotierid" name="zerotierid" type="text"
+                 value="{{ env_value_by_tag('zerotierid') }}" placeholder="Enter your Zerotier Network ID" required>
         </div>
         {% else %}
         <div class="col-8">
-          <input class="mx-auto w-100" id="zerotier_disable" name="zerotier_disable" type="text">
+          <input class="form-control mx-auto w-100" id="zerotier_disable" name="zerotier_disable" type="text">
           To <strong>disable</strong> Zerotier, enter "disable" and press Submit.
         </div>
         {% endif %}
@@ -292,16 +292,16 @@
         </div>
         {% if (env_value_by_tag("tailscale_name") =="" and env_value_by_tag("tailscale_ll") =="") or not tailscale_running %}
         <div class="col-8">
-          <input class="mx-auto w-100" id="tailscale_extras" name="tailscale_extras" type="text"
+          <input class="form-control mx-auto w-100" id="tailscale_extras" name="tailscale_extras" type="text"
                  value="{{ env_value_by_tag('tailscale_extras') }}"
-                 placeholder=" Enter additional tailscale options you need">
+                 placeholder="Enter additional tailscale options you need">
         </div>
         <div class="col-4">
           <button type="submit" class="btn btn-primary mx-auto w-100" name="tailscale" value="go">Submit</button>
         </div>
         {% else %}
         <div class="col-8">
-          <input class="mx-auto w-100" id="tailscale_disable" name="tailscale_disable" type="text">
+          <input class="form-control mx-auto w-100" id="tailscale_disable" name="tailscale_disable" type="text">
           To <strong>disable</strong> Tailscale, enter "disable" and press Submit.
         </div>
         <div class="col-4">
@@ -338,10 +338,10 @@
           network. There is no way for the feeder to automatically forward you to that.
         </div>
         <div class="col-4">
-          <input class="mx-auto w-100" id="wifi_ssid" name="wifi_ssid" type="text" placeholder="SSID" required>
+          <input class="form-control mx-auto w-100" id="wifi_ssid" name="wifi_ssid" type="text" placeholder="SSID" required>
         </div>
         <div class="col-4">
-          <input class="mx-auto w-100" id="wifi_password" name="wifi_password" type="text" placeholder="Password">
+          <input class="form-control mx-auto w-100" id="wifi_password" name="wifi_password" type="text" placeholder="Password">
         </div>
         <div class="col-4">
           <button type="submit" class="btn btn-primary mx-auto w-100" name="wifi" value="stay">Submit</button>
