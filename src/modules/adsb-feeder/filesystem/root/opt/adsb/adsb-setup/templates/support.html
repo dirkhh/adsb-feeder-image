@@ -10,6 +10,9 @@
 <p class="{% if url == '' %}d-none{% endif %}">The link to the uploaded log is: <a href="{{ url }}">{{ url }}</a>.</p>
 <p class="{% if url == '' %}d-none{% endif %}">Please share this link with the developers who are trying to help you
   (and who most likely asked you to provide this info in the first place).</p>
+<p>Please note, we offer multiple ways to upload these because the services tend to not reliably work from every
+  location and at all times. So if you get an error, please try one of the other options.
+</p>
 <form method="post" enctype="multipart/form-data">
   <button type="submit" class="btn btn-primary btn-rounded p-4 mb-3" name="upload" value="0x0.st"
     onclick="show_spinner(); return true;">Upload Logs to 0x0.st (curl POST)</button>
@@ -26,12 +29,6 @@
     <a href="https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image">adsb-feeder-image Zulip
       channel</a> or (if you prefer Discord) the <code>#adsb-dot-im</code> channel on this <a
        href="https://discord.gg/7buWAFA28H">Discord server</a>.
-  </div>
-  <div class="mb-3">
-    If you would like to support the development of this project, please consider
-    <a href="https://ko-fi.com/H2H2H3JS5" target="_blank"><img height="1.5em" style="border:0.1em;height:1.3em;"
-           src="/static/images/kofi_button_stroke.png" border="0"
-           alt="Help sustain this project at ko-fi.com" /></a>
   </div>
 </div>
 {% endblock %}
