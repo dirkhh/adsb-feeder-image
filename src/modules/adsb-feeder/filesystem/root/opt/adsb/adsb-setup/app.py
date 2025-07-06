@@ -330,6 +330,7 @@ class AdsbIm:
         self.app.add_url_rule("/api/ambient_raw", "ambient_raw", self.ambient_raw)
         self.app.add_url_rule("/api/check_changelog_status", "check_changelog_status", self.check_changelog_status)
         self.app.add_url_rule("/api/mark_changelog_seen", "mark_changelog_seen", self.mark_changelog_seen, methods=["POST"])
+        self.app.add_url_rule("/api/scan_wifi", "scan_wifi", self.scan_wifi)
         self.app.add_url_rule(f"/feeder-update-<channel>", "feeder-update", self.feeder_update)
         self.app.add_url_rule(f"/get-logs", "get-logs", self.get_logs)
         self.app.add_url_rule(f"/view-logs", "view-logs", self.view_logs)
@@ -1090,6 +1091,22 @@ class AdsbIm:
                 "feeder_ip": ip,
             },
             indent=2,
+        )
+        return Response(jsonString, mimetype="application/json")
+
+    def scan_wifi(self):
+        wifi_ssids = []
+
+
+        if self.wifi is None:
+            self.wifi = Wifi()
+        self.wifi.scan_ssids()
+        wifi_ssids = self.wifi.ssids
+
+        jsonString = json.dumps(
+            {
+                "ssids": wifi_ssids,
+            },
         )
         return Response(jsonString, mimetype="application/json")
 
