@@ -1,33 +1,7 @@
-Version 3 of the ADS-B Feeder Image brings a lot of new features and expands the purpose quite a bit.
-
-This software now not only supports ADS-B and UAT, but also ACARS, VDL2, HFDL, AIS, and Radiosonde - so a lot more protocols that allow you to use SDRs to collect information from planes, ships, and weather balloons.
-
-Changes since v2.3.5:
+Changes since v3.0.0
 =======
-- core: add support for additional SDR use cases: ACARS, VDLM2, HFDL, AIS, SONDE
-- core: redesign of the SDR setup page with clickable SDR entries that open a modal dialog to edit all the SDR settings in one place
-- core: improve SDR handling and explain why a user might get sent back to the SDR Setup page when all they want is the Feeder Homepage
-- core: add support for AirspyHF - limited to just a HFDL and AIS
-- core: add support for web-888 SDR via hfdlobserver
-- core: add SDR feature matrix README
-- core: add support for DHT22 temperature sensor on Raspberry Pi boards
-- core: show ambient temperature in graphs1090 temperature graph if supported temperature sensor is installed
-- core: work around the fact that Flightradar24 appears to believe that emails have to be lowercase
-- core: update containers to their current version
-- core: /feeder-update-<channel> endpoint: add oldstable option -- this allows downgrade to an earlier, known good 'stable' version after a release
-- core: many internal changes to Env variable handling and related code cleanup
-- core: better instructions on how to handle compose failure
-- hotspot: make hotspot RFC7710 compliant and fix usability issues
-- UI: show changelog after update; change the changelog preview from 'button hover' to an explicit Changelog section that the user can easily discover, even on mobile
-- UI: significant rework of the UI to accomodate small screens and usage on mobile devices
-- UI: add custom status icons for feeder home page
-- UI: show warning about potentially too many SDRs
-- UI: add UI to allow changing the serial number of an RTLSDR
-- UI: add Discord, documentation, and YouTube channel link to the footer
-- stage2: additional ultrafeeder arguments: replace SITENUM magic string
-- stage2: fix microfeeder edit with old docker compose version
-- stage2: fix restore issue connected to rbfeeder cpuinfo files
-- stage2 with local SDR: correctly show signal graph when using an airspy
+- UI: improve styling and consistency of system management and hotspot UI
+- core: add WiFi scanning to system management (similar to hotspot functionality)
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)

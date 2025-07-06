@@ -1097,7 +1097,6 @@ class AdsbIm:
     def scan_wifi(self):
         wifi_ssids = []
 
-
         if self.wifi is None:
             self.wifi = Wifi()
         self.wifi.scan_ssids()
