@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import subprocess
 import sys
 import time
 import tempfile
@@ -18,6 +19,59 @@ import tempfile
 #
 # for Orange Pi Zero 3 the pin number passed in is the PCxx number,
 # so for PC9 (aka pin 7 on the 26 pin header) pass in 9
+
+# set the version of the dht native app that this expects:
+VERSION = "v0.1.4"
+
+
+def run_subprocess(command, timeout=180):
+    try:
+        result = subprocess.run(
+            command,
+            shell=True,
+            capture_output=True,
+            check=True,
+            timeout=timeout,
+        )
+    except subprocess.SubprocessError as e:
+        # something went wrong
+        output = ""
+        if e.stdout:
+            output += e.stdout.decode()
+        if e.stderr:
+            output += e.stderr.decode()
+        return (False, output)
+
+    output = result.stdout.decode()
+    return (True, output)
+
+
+class RPInative:
+    def __init__(self, pin):
+        self.pin = pin
+        self.success = True
+        if not os.path.exists(f"/opt/adsb/extras/dht-{VERSION}"):
+            # download the file from GitHub
+            logging.info(f"Downloading dht-{VERSION}")
+            github_release_url = f"https://github.com/dirkhh/DHT-read/releases/download/{VERSION}/dht"
+            command = f"curl -L {github_release_url} -o /opt/adsb/extras/dht-{VERSION}"
+            success, output = run_subprocess(command)
+            if not success:
+                logging.error(f"Failed to download dht-{VERSION}: {output}")
+                self.success = False
+            else:
+                logging.info(f"Downloaded dht-{VERSION}")
+                os.chmod(f"/opt/adsb/extras/dht-{VERSION}", 0o755)
+
+    def get_temperature(self):
+        success, output = run_subprocess(f"/opt/adsb/extras/dht-{VERSION} -t {self.pin} 2>/dev/null")
+        if not success:
+            return None
+        try:
+            temperature = float(output.strip())
+        except:
+            return None
+        return temperature
 
 
 class RPI:
@@ -52,6 +106,8 @@ class OPI:
 
 
 if __name__ == "__main__":
+    logger = logging.getLogger("temperature-service")
+    logging.basicConfig(filename="/run/temperature-service.log", level=logging.INFO)
     # command line arg - call with PIN number (BCM for RPi, PCxx for OPi Zero 3)
     pin = None
     if len(sys.argv) == 2:
@@ -70,14 +126,21 @@ if __name__ == "__main__":
         if pin == None:
             pin = 9
         sensor = OPI(gpio, pin)
-    elif model.startswith("Raspberry Pi"):
-        import pigpio
-        import rpi_dht22
-
+        logger.info(f"Running on {model}")
+    elif model != None and model.startswith("Raspberry Pi"):
         if pin == None:
             pin = 4
-        sensor = RPI(pin)
+        sensor = RPInative(pin)
+        if sensor.success:
+            logger.info(f"Running native dht on {model}")
+        else:
+            import pigpio
+            import rpi_dht22
+
+            sensor = RPI(pin)
+            logger.info(f"Running legacy Python module on {model}")
     else:
+        logger.error(f"No support for temperature sensors on |{model}|")
         print(f"No support for temperature sensors on |{model}|")
         sys.exit(1)
 
