@@ -353,6 +353,8 @@
     let purpose = purpose_given || sdr['purpose'];
     let show_biastee = purpose == 'ais' && (sdr['type'] == 'rtlsdr' || sdr['type'] == 'airspy');
     show_biastee |= purpose == 'vdl2' && sdr['type'] == 'rtlsdr';
+    show_biastee |= purpose == 'acars' && sdr['type'] == 'rtlsdr';
+    show_biastee |= purpose == 'acars_2' && sdr['type'] == 'rtlsdr';
     show_biastee |= purpose == '1090' || purpose == '1090_2' || purpose == '978' || purpose == 'sonde';
     if (show_biastee) {
       $("#biastee_container").show();
