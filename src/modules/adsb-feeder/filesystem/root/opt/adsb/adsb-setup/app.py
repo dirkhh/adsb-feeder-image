@@ -2554,12 +2554,19 @@ class AdsbIm:
         vdl2sdr = self._sdrdevices.get_sdr_by_serial(vdl2serial)
         if vdl2sdr != self._sdrdevices.null_sdr:
             vdl2sdr.purpose = "vdl2"
-            vdl2string = f"driver={vdl2sdr._type},serial={vdl2serial}"
-            vdl2devicesettings = "biastee=true" if self._d.is_enabled(["vdl2biastee"]) else "biastee=false"
+            if vdl2sdr._type == "rtlsdr":
+                self._d.env_by_tags("vdl2serial_rtl").value = vdl2serial
+                vdl2string = ""
+                vdl2devicesettings = ""
+            else:
+                self._d.env_by_tags("vdl2serial_rtl").value = ""
+                vdl2string = f"driver={vdl2sdr._type},serial={vdl2serial}"
+                vdl2devicesettings = "biastee=true" if self._d.is_enabled(["vdl2biastee"]) else "biastee=false"
             self._d.env_by_tags("run_dumpvdl2").value = self._d.is_enabled(["dumpvdl2"])
             if self._d.is_enabled("run_dumpvdl2") and self._d.env_by_tags("vdl2_feed_id").value == "":
                 self._d.env_by_tags("vdl2_feed_id").value = f"{self._d.env_by_tags('site_name').list_get(0)}-VDLM2"
         else:
+            self._d.env_by_tags("vdl2serial_rtl").value = ""
             vdl2string = ""
             vdl2devicesettings = ""
             self._d.env_by_tags("run_dumpvdl2").value = False

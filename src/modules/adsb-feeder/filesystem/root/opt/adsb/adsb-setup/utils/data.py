@@ -621,6 +621,7 @@ class Data:
         Env("FEEDER_SERIAL_ACARS", tags=["acarsserial"]),
         Env("FEEDER_SERIAL_ACARS2", tags=["acars_2serial"]),
         Env("FEEDER_SERIAL_VDL2", tags=["vdl2serial"]),
+        Env("FEEDER_SERIAL_VDL2_RTL", tags=["vdl2serial_rtl"]),
         Env("FEEDER_SERIAL_HFDL", tags=["hfdlserial"]),
         Env("ACARS_SDR_STRING", default="", tags=["acars_sdr_string"]),
         Env("ACARS_GAIN", default="", tags=["acarsgain"]),
