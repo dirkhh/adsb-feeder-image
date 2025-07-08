@@ -331,6 +331,7 @@ class AdsbIm:
         self.app.add_url_rule("/api/check_changelog_status", "check_changelog_status", self.check_changelog_status)
         self.app.add_url_rule("/api/mark_changelog_seen", "mark_changelog_seen", self.mark_changelog_seen, methods=["POST"])
         self.app.add_url_rule("/api/scan_wifi", "scan_wifi", self.scan_wifi)
+        self.app.add_url_rule("/api/closest_airport/<lat>/<lon>", "closest_airport", self.closest_airport)
         self.app.add_url_rule(f"/feeder-update-<channel>", "feeder-update", self.feeder_update)
         self.app.add_url_rule(f"/get-logs", "get-logs", self.get_logs)
         self.app.add_url_rule(f"/view-logs", "view-logs", self.view_logs)
@@ -1123,6 +1124,13 @@ class AdsbIm:
         return {
             serial for serial in {self._d.env_by_tags(e).valuestr for e in self.serial_env_names()} if serial != ""
         }
+
+    def closest_airport(self, lat, lon):
+        airport, status = generic_get_json(f"https://adsb.im/api/closest_airport/{lat}/{lon}", timeout=10.0)
+        if status != 200:
+            print_err(f"closest_airport({lat}, {lon}) failed with status {status}")
+            return None
+        return airport
 
     def sdr_info(self):
         # get our guess for the right SDR to frequency mapping
