@@ -10,6 +10,8 @@ services:
       # - QUIET_LOGS=true
       - TZ=${FEEDER_TZ}
       - SOAPYSDR=${ACARS2_SDR_STRING}
+      - RTL_SERIAL=${FEEDER_SERIAL_ACARS2_RTL}
+      - BIASTEE=${ACARS2_BIASTEE}
       - GAIN=${ACARS2_GAIN}
       # the default frequencies are 'acarsdec has the the more common frequencies above 130MHz, acarsdec2 has the less common frequencies starting at 128.975MHz
       - FREQUENCIES=${ACARS2_FREQUENCIES:-128.975 129.000 129.125 129.350 129.525}
