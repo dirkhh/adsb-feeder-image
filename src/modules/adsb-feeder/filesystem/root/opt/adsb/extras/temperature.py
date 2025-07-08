@@ -46,6 +46,40 @@ def run_subprocess(command, timeout=180):
     return (True, output)
 
 
+class BME280_i2c:
+    def __init__(self):
+        self.success = True
+        # check that i2c is enabled
+        success, output = run_subprocess("lsmod | grep i2c_bcm2835 2> /dev/null", timeout=5)
+        if not success:
+            self.success = False
+            logger.info("i2c is not enabled")
+            return
+        try:
+            import bme280
+            import smbus2
+        except ImportError:
+            success, _ = run_subprocess("apt install -y python3-bme280 python3-smbus", timeout=600)
+            if not success:
+                self.success = False
+                logger.info("Failed to install python3-bme280 and python3-smbus")
+                return
+        # BME280 sensor address (default address)
+        self.address = 0x77
+
+        # Initialize I2C bus
+        self.bus = smbus2.SMBus(1)
+
+        # Load calibration parameters
+        self.calibration_params = bme280.load_calibration_params(self.bus, self.address)
+
+    def get_temperature(self):
+        if not self.success:
+            return None
+        data = bme280.sample(self.bus, self.address, self.calibration_params)
+        return data.temperature
+
+
 class RPInative:
     def __init__(self, pin):
         self.pin = pin
@@ -110,39 +144,68 @@ if __name__ == "__main__":
     logging.basicConfig(filename="/run/temperature-service.log", level=logging.INFO)
     # command line arg - call with PIN number (BCM for RPi, PCxx for OPi Zero 3)
     pin = None
-    if len(sys.argv) == 2:
-        pin = int(sys.argv[1])
-
-    # figure out which board this is
-    try:
-        with open("/sys/firmware/devicetree/base/model", "r") as model_file:
-            model = model_file.read().strip().strip("\0")
-    except:
-        model = None
-    if model == "OrangePi Zero3":
-        import OPi.GPIO as gpio
-        import opi_dht22
-
-        if pin == None:
-            pin = 9
-        sensor = OPI(gpio, pin)
-        logger.info(f"Running on {model}")
-    elif model != None and model.startswith("Raspberry Pi"):
-        if pin == None:
-            pin = 4
-        sensor = RPInative(pin)
-        if sensor.success:
-            logger.info(f"Running native dht on {model}")
+    bme280 = False
+    # loop over the command line arguments
+    for arg in sys.argv:
+        if arg == "bme280":
+            bme280 = True
         else:
+            try:
+                pin = int(arg)
+                break
+            except:
+                pass
+
+    if bme280:
+        logger.info("Setting up i2c communication with BME280")
+        sensor = BME280_i2c()
+        if sensor.success:
+            logger.info("Initialized i2c communication with BME280")
+        else:
+            logger.error("Failed to initialize i2c communication with BME280")
+            sys.exit(1)
+    else:
+        logger.info("Setting up communication with DHT11 or DHT22")
+        # figure out which board this is
+        try:
+            with open("/sys/firmware/devicetree/base/model", "r") as model_file:
+                model = model_file.read().strip().strip("\0")
+        except:
+            model = None
+        if model == "OrangePi Zero3":
+            import OPi.GPIO as gpio
+            import opi_dht22
+
+            if pin == None:
+                pin = 9
+            sensor = OPI(gpio, pin)
+            logger.info(f"Running on {model}")
+        # for Pi4 and 5 try the native app first, if that doesn't work, try the Python module
+        elif model != None and (model.startswith("Raspberry Pi 5") or model.startswith("Raspberry Pi 4")):
+            if pin == None:
+                pin = 4
+            sensor = RPInative(pin)
+            if sensor.success:
+                logger.info(f"Running native dht on {model}")
+            else:
+                import pigpio
+                import rpi_dht22
+
+                sensor = RPI(pin)
+                logger.info(f"Running legacy Python module on {model}")
+        # other Raspberry Pi models just go with the Python code
+        elif model != None and model.startswith("Raspberry Pi"):
+            if pin == None:
+                pin = 4
             import pigpio
             import rpi_dht22
 
             sensor = RPI(pin)
             logger.info(f"Running legacy Python module on {model}")
-    else:
-        logger.error(f"No support for temperature sensors on |{model}|")
-        print(f"No support for temperature sensors on |{model}|")
-        sys.exit(1)
+        else:
+            logger.error(f"No support for temperature sensors on |{model}|")
+            print(f"No support for temperature sensors on |{model}|")
+            sys.exit(1)
 
     # update the temperatures if we get valid data from the temperature sensor
     delta = 5
