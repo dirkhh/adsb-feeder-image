@@ -141,7 +141,12 @@ class OPI:
 
 if __name__ == "__main__":
     logger = logging.getLogger("temperature-service")
-    logging.basicConfig(filename="/run/temperature-service.log", level=logging.INFO)
+    logging.basicConfig(
+        filename="/run/temperature-service.log",
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)-8s %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
     # command line arg - call with PIN number (BCM for RPi, PCxx for OPi Zero 3)
     pin = None
     bme280 = False
