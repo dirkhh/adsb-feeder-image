@@ -69,14 +69,15 @@ class BME280_i2c:
 
         # Initialize I2C bus
         self.bus = smbus2.SMBus(1)
+        self.bm280 = bme280
 
         # Load calibration parameters
-        self.calibration_params = bme280.load_calibration_params(self.bus, self.address)
+        self.calibration_params = self.bme280.load_calibration_params(self.bus, self.address)
 
     def get_temperature(self):
         if not self.success:
             return None
-        data = bme280.sample(self.bus, self.address, self.calibration_params)
+        data = self.bme280.sample(self.bus, self.address, self.calibration_params)
         return data.temperature
 
 
@@ -149,11 +150,11 @@ if __name__ == "__main__":
     )
     # command line arg - call with PIN number (BCM for RPi, PCxx for OPi Zero 3)
     pin = None
-    bme280 = False
+    use_bme280 = False
     # loop over the command line arguments
     for arg in sys.argv:
         if arg == "bme280":
-            bme280 = True
+            use_bme280 = True
         else:
             try:
                 pin = int(arg)
@@ -161,7 +162,7 @@ if __name__ == "__main__":
             except:
                 pass
 
-    if bme280:
+    if use_bme280:
         logger.info("Setting up i2c communication with BME280")
         sensor = BME280_i2c()
         if sensor.success:
