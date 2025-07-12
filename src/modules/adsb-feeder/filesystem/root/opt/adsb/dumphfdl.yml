@@ -6,8 +6,6 @@ services:
     healthcheck:
       disable: true
     restart: unless-stopped
-    device_cgroup_rules:
-      - "c 189:* rwm"
     environment:
       - TZ=${FEEDER_TZ}
       - SOAPYSDRDRIVER=${HFDL_SDR_STRING}
@@ -26,7 +24,9 @@ services:
       - /run:exec,size=64M
       - /var/log
       - /tmp
+    device_cgroup_rules:
+      - "c 189:* rwm"
     volumes:
-      - /dev:/dev:ro
+      - /dev/bus/usb:/dev/bus/usb:ro
       - /opt/adsb/data/dumphfdl-data:/opt/dumphfdl
       - /opt/adsb/data/dumphfdl-scanner:/opt/scanner
