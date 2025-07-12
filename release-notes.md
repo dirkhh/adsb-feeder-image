@@ -1,7 +1,6 @@
 Changes since v3.0.0
 =======
 - UI: improve styling and consistency of system management and hotspot UI
-- core: DHT22 support isn't working on Raspberry Pi5 (issue with the pigpiod), so don't offer this for an RPi5
 - core: add WiFi scanning to system management (similar to hotspot functionality)
 
 > [!NOTE]
