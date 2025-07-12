@@ -21,12 +21,12 @@ Regardless of what your SDR can do, some of the containers that are used for thi
 | SDRplay | :x:           | :x:      | :x:                |
 
 ## ACARS (and ACARS_2)
-| SDR     | gain          | autogain | biastee |
-|:-------:|:-------------:|:--------:|:-------:|
-| RTLSDR  | 0 - 49.6      |  -10     | :x:     |
-| Airspy  | 0 - 21        | :x:      | :x:     |
-| AirspyHF| :x:           | :x:      | :x:     |
-| SDRplay | 20 - 59       | -10      | :x:     |
+| SDR     | gain          | autogain | biastee            |
+|:-------:|:-------------:|:--------:|:------------------:|
+| RTLSDR  | 0 - 49.6      |  -10     | :heavy_check_mark: |
+| Airspy  | 0 - 21        | :x:      | :x:                |
+| AirspyHF| :x:           | :x:      | :x:                |
+| SDRplay | 20 - 59       | -10      | :x:                |
 
 ## VDLM2
 | SDR     | gain          | autogain   | biastee            |
