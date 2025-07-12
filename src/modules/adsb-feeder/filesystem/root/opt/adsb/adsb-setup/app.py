@@ -2603,6 +2603,8 @@ class AdsbIm:
         if hfdlsdr != self._sdrdevices.null_sdr:
             hfdlsdr.purpose = "hfdl"
             hfdlstring = f"driver={hfdlsdr._type},serial={hfdlserial}"
+            if hfdlsdr._type == "sdrplay" and hfdlserial == "SDRplay w/o serial":
+                hfdlstring = f"driver={hfdlsdr._type}"
             self._d.env_by_tags("run_dumphfdl").value = self._d.is_enabled(["dumphfdl"])
             if self._d.is_enabled("run_dumphfdl") and self._d.env_by_tags("hfdl_feed_id").value == "":
                 self._d.env_by_tags("hfdl_feed_id").value = f"{self._d.env_by_tags('site_name').list_get(0)}-HFDL"
