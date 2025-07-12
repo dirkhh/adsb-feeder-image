@@ -2240,6 +2240,16 @@ class AdsbIm:
         dht22 = self._d.env_by_tags("has_dht22")
         print_err(f"handling dht22: {dht22.value}")
         if dht22.value:
+            # this is not a commonly used feature, so let's install dependencies here
+            success, output = run_shell_captured(
+                "dpkg-query -l pigpiod > /dev/null || apt install -y python3-pigpio pigpiod && systemctl enable --now pigpiod",
+                timeout=600,
+            )
+            if not success:
+                report_issue(f"failed to install pigpiod and python3-pigpio - check the logs for details")
+                print_err(f"failed to install pigpiod and python3-pigpio: {output}")
+                dht22.value = False
+                return
             success, output = run_shell_captured(
                 "systemctl is-active adsb-temperature.service || systemctl enable --now adsb-temperature.service",
                 timeout=20,
