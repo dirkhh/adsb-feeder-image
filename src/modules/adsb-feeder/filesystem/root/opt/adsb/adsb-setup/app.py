@@ -3378,7 +3378,9 @@ class AdsbIm:
             return self.update()
         # make sure we only show the gpsd option if gpsd is correctly configured and running
         self._d.env_by_tags("has_gpsd").value = self._system.check_gpsd()
-        return render_template("expert.html")
+        os_flag_file = self._d.data_path / "os.adsb.feeder.image"
+        is_image = os_flag_file.exists()
+        return render_template("expert.html", is_image=is_image)
 
     def change_sdr_serial_ui(self):
         return render_template("change_sdr_serial_ui.html")

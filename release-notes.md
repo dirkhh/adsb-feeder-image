@@ -1,5 +1,7 @@
 Changes since v3.0.0
 =======
+- core: restrict temperature sensor support to feeder image mode only (so not in app mode)
+- core: improve temperature sensor support with full support on the Raspberry Pi 5 and some support for the DHT11 and experimental support for the BME280
 - UI: improve styling and consistency of system management and hotspot UI
 - core: add WiFi scanning to system management (similar to hotspot functionality)
 
