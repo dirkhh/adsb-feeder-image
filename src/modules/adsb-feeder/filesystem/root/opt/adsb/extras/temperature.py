@@ -48,28 +48,32 @@ def run_subprocess(command, timeout=180):
 
 class BME280_i2c:
     def __init__(self):
-        self.success = True
         # check that i2c is enabled
-        success, output = run_subprocess("lsmod | grep i2c_bcm2835 2> /dev/null", timeout=5)
-        if not success:
-            self.success = False
+        self.success, output = run_subprocess("lsmod | grep i2c_bcm2835 2> /dev/null", timeout=5)
+        if not self.success:
             logger.info("i2c is not enabled")
             return
         try:
             import bme280
             import smbus2
         except ImportError:
-            success, _ = run_subprocess("apt install -y python3-bme280 python3-smbus", timeout=600)
-            if not success:
-                self.success = False
+            self.success, _ = run_subprocess("apt install -y python3-bme280 python3-smbus", timeout=600)
+            if not self.success:
                 logger.info("Failed to install python3-bme280 and python3-smbus")
+                return
+            try:
+                import bme280
+                import smbus2
+            except ImportError:
+                self.success = False
+                logger.info("Failed to import bme280 and smbus2")
                 return
         # BME280 sensor address (default address)
         self.address = 0x77
 
         # Initialize I2C bus
         self.bus = smbus2.SMBus(1)
-        self.bm280 = bme280
+        self.bme280 = bme280
 
         # Load calibration parameters
         self.calibration_params = self.bme280.load_calibration_params(self.bus, self.address)
