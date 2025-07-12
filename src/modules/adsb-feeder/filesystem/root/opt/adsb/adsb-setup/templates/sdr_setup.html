@@ -288,6 +288,10 @@
     return text == '' || (text >= 20 && text <= 59);
   }
 
+  function validate_0_45_empty(text) {
+    return text == '' || (text >= 0 && text <= 45);
+  }
+
   function validate_empty(text) {
     return text == '';
   }
@@ -325,7 +329,7 @@
       'rtlsdr': ['enter a value between 0 and 50', validate_0_50],
       'airspy': ['enter a value between 0 and 21, leave empty for agc', validate_0_21_empty],
       'airspyhf': ['enter a value between 0 and 21, leave empty for agc', validate_0_21_empty],
-      'sdrplay': ['enter a value between 20 and 59', validate_20_59],
+      'sdrplay': ['enter a value between 0 and 45, leave empty for agc', validate_0_45_empty],
     },
     'ais': {
       'rtlsdr': ['enter a value between 0 and 50 or auto', validate_0_50_auto],

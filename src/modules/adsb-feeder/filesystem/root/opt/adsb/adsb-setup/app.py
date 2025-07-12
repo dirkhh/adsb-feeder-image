@@ -1324,7 +1324,15 @@ class AdsbIm:
                             elif numgain >= 50:
                                 gain = "49.6"
                     elif sdr._type == "sdrplay" and gain != "" and gain != "-10":
-                        if "auto" in gain:
+                        # I don't understand why gain values for hfdl are different?
+                        if sdr.purpose == "hfdl":
+                            if gain != "":
+                                numgain = make_int(gain)
+                                if numgain <= 0:
+                                    gain = "0"
+                                elif numgain > 45:
+                                    gain = "45"
+                        elif "auto" in gain:
                             pass
                         else:
                             numgain = make_int(gain)

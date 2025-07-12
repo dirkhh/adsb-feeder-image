@@ -1,5 +1,6 @@
 Changes since v3.0.0
 =======
+- hfdl/SDRplay: correct the acceptable gain values
 - vdl2: allow specifying frequencies as list of space separated MHz values
 - acars/vdl2: changes to sample rates used and therefore frequency spread supported
 - acars: support biastee with RTLSDR
