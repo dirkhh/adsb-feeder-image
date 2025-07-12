@@ -2263,7 +2263,7 @@ class AdsbIm:
                 self._d.env_by_tags("graphs1090_other_temp1").value = "/run/ambient-temperature"
         else:
             _, output = run_shell_captured(
-                "systemctl is-enabled adsb-temperature.service && systemctl is-active adsb-temperature.service && systemctl disable --now adsb-temperature.service",
+                "systemctl is-enabled adsb-temperature.service && systemctl disable --now adsb-temperature.service",
                 timeout=20,
             )
             self._d.env_by_tags("temperature_block").value = False
