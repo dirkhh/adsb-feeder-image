@@ -339,7 +339,7 @@
               <div class="col-4 mb-1">
                 <label for="acars_frequencies">
                   ACARS frequencies <span class="text-danger" id="acars_frequencies_error"
-                  style="display: none;"><br>values must fit in 2MHz</span>
+                  style="display: none;"><br>values must fit in 2.4MHz</span>
                 </label>
               </div>
               <div class="col-8 mb-1" data-update="acarsdec--update">
@@ -396,7 +396,7 @@
               <div class="col-4 mb-1">
                 <label for="acars_2_frequencies">
                   ACARS2 frequencies <span class="text-danger" id="acars_2_frequencies_error"
-                  style="display: none;"><br>values must fit in 2MHz</span>
+                  style="display: none;"><br>values must fit in 2.4MHz</span>
                 </label>
               </div>
               <div class="col-8 mb-1" data-update="acarsdec2--update">
@@ -453,11 +453,11 @@
               <div class="col-4 mb-1">
                 <label for="vdl2_frequencies">
                   VDL2 frequencies<span class="text-danger" id="vdl2_frequencies_error"
-                  style="display: none;"><br>values must fit in 2MHz</span>
+                  style="display: none;"><br>values must fit in 1.2MHz</span>
                 </label>
               </div>
               <div class="col-8 mb-1" data-update="dumpvdl2--update">
-                <input type="text" class="mx-auto w-100 two_mhz" name="vdl2_frequencies" id="vdl2_frequencies"
+                <input type="text" class="mx-auto w-100 one_mhz" name="vdl2_frequencies" id="vdl2_frequencies"
                       placeholder="default values should be a good starting point"
                       value="{{ env_value_by_tag('vdl2_frequencies') }}">
               </div>
@@ -776,7 +776,14 @@
         $(this).toggle(checked);
       })
     });
-    function validate_two_mhz() {
+    function validate_range() {
+      let range = 0;
+      if ($(this).attr('class').includes("two_mhz")) {
+        range = 2.4;
+      }
+      if ($(this).attr('class').includes("one_mhz")) {
+        range = 1.2;
+      }
       let value = $(this).val();
       value = value.replaceAll(";", " ").replaceAll(",", " ").replaceAll("  ", " ");
       let freq_array = value.split(" ").filter(function (i) { return i }).sort();
@@ -789,20 +796,20 @@
       }
       let delta = freq_array[last] - freq_array[0];
       if (freq_array[0] < 200) {
-        range = 2;
+        range *= 1;
       } else if (freq_array[0] < 200000) {
-        range = 2000;
+        range *= 1000;
       } else {
-        range = 2000000;
+        range *= 1000000;
       }
       // toggle the error message and set the button disabled (or not)
       $("#" + $(this).attr('id') + "_error").toggle(delta > range);
       $('button[name=' + $(this).parent().data('update') + ']').prop("disabled", delta > range);
     }
     $('input[type="text"]').each(function () {
-      if ($(this).attr('class').includes("two_mhz")) {
-        validate_two_mhz.call(this);
-        $(this).on('change', validate_two_mhz);
+      if ($(this).attr('class').includes("two_mhz") || $(this).attr('class').includes("one_mhz")) {
+        validate_range.call(this);
+        $(this).on('change', validate_range);
       }
     });
 
