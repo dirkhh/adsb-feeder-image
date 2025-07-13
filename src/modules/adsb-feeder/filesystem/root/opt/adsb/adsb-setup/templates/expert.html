@@ -143,20 +143,20 @@
   </div>
   {% endif %}
   {% endif %}
-  {% if env_value_by_tag('board_name').startswith('Raspberry Pi') and is_image %}
-  {% if not is_enabled('has_dht22') %}
+  {% if is_image %}
+  {% if env_value_by_tag('temp_sensor') == "" %}
   <div class="col-12 col-lg-6">
     <h5 class="mt-3">Temperature sensor</h5>
-    <form method="POST">
+    <form id="temp_sensor_form" method="POST">
       <div class="row align-items-center">
         <div class="col-8">
-          <label for="has_dht22--enable">
+          <label for="temp_sensor_enable">
             This is certainly a more advanced feature, but if you have a DHT11 or DHRT22 temperature sensor and connect it to PINs
             1 (Vcc), 7 (Data) and 9 (Ground), you can enable it here.
           </label>
         </div>
         <div class="col-4">
-          <button type="submit" class="btn btn-primary mx-auto w-100" name="has_dht22--enable" value="go">Enable temp sensor</button>
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="temp_sensor_enable" value="go" onclick="show_temp_sensor_dialog(); return false;">Enable temp sensor</button>
         </div>
       </div>
     </form>
@@ -167,17 +167,54 @@
     <form method="POST" onsubmit="show_spinner(); return true;">
       <div class="row align-items-center">
         <div class="col-8">
-          <label for="has_dht22--disable">
+          <label for="temp_sensor_disable">
             Disable temperature sensor support.
           </label>
         </div>
         <div class="col-4">
-          <button type="submit" class="btn btn-primary mx-auto w-100" name="has_dht22--disable" value="go">Disable temp sensor</button>
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="temp_sensor_disable" value="go">Disable temp sensor</button>
         </div>
       </div>
     </form>
   </div>
   {% endif %}
+  <!-- place the modal dialog here in an invisible div -->
+  <div class="modal fade" id="tempsensor_dialog" tabindex="-1" aria-labelledby="tempsensor_label" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="tempsensor_label">Pick your temperature sensor</h5>
+          <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismiss="modal"
+                  aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-12 d-flex">
+              <label class="flex-grow-1">Sensor type</label>
+              {% if env_value_by_tag('board_name').startswith('Raspberry Pi') or env_value_by_tag('board_name').startswith('OrangePi Zero3') %}
+              <label class="mx-1"><input id="has_dht22" type="radio" name="tempsensor" value="dht22"> DHT11 / DHT22</label>
+              {% endif %}
+              {% if env_value_by_tag('board_name').startswith('Raspberry Pi') %}
+              <label class="mx-1"><input id="has_bme280" type="radio" name="tempsensor" value="bme280"> BME280</label>
+              {% endif %}
+              <label class="mx-1"><input id="has_temper_usb" type="radio" name="tempsensor" value="temper_usb"> TEMPer USB</label>
+            </div>
+            <div class="col-12" id="pin_container">
+              <label for="dht22_pin" id="pin_label" class="col-12 col-sm-9">GPIO Pin, typically
+                {% if env_value_by_tag('board_name').startswith('Raspberry Pi') %} 4 {% elif env_value_by_tag('board_name').startswith('OrangePi Zero3') %} 9 {% endif %}
+              </label>
+              <input class="col-10 col-sm-2 ms-3" id="dht22_pin" name="dht22_pin" type="text" style="height: 2rem;"
+                     value="" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-mdb-ripple-init data-mdb-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" data-mdb-ripple-init onclick="save_temp_setup()">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
   {% endif %}
   {% if env_value_by_tag('tar1090_image_config_link') != '' %}
   <div class="col-12 col-lg-6">
@@ -814,5 +851,35 @@
     });
 
   });
+  let modal = new mdb.Modal($("#tempsensor_dialog"))
+  $('input[name="tempsensor"][type="radio"]').on('change', function () {
+    console.log("has_dht22 " + $("#has_dht22").is(':checked'))
+    $("#pin_container").toggleClass("d-none", !$("#has_dht22").is(':checked'));
+   });
+
+  function show_temp_sensor_dialog() {
+    $("#pin_container").toggleClass("d-none", !$("#has_dht22").is(':checked'));
+    modal.show();
+  }
+  function save_temp_setup() {
+    let sensor = $('input[name="tempsensor"]:checked').val();
+    modal.hide();
+    let temp_sensor_form = $("#temp_sensor_form");
+    let form_data = new FormData(temp_sensor_form[0]);
+    form_data.append("temp_sensor_enable", "go");
+    form_data.append("temp_sensor", sensor);
+    form_data.append("dht22_pin", $("#dht22_pin").val());
+    console.log(form_data);
+    try {
+      let response = fetch("/expert", {
+        method: "POST",
+        body: form_data,
+        signal: AbortSignal.timeout(15000)
+      });
+      console.log(response.status);
+    } catch (e) {
+      console.error(e);
+    }
+  }
 </script>
 {% endblock %}

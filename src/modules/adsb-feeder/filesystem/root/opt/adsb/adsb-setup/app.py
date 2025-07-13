@@ -2244,10 +2244,8 @@ class AdsbIm:
         else:
             print_err("no action on ADS-B functions")
 
-    def handle_dht22(self):
-        dht22 = self._d.env_by_tags("has_dht22")
-        print_err(f"handling dht22: {dht22.value}")
-        if dht22.value:
+    def handle_temp_sensor(self, temp_sensor, dht22_pin=0):
+        if temp_sensor.value == "dht22":
             # this is not a commonly used feature, so let's install dependencies here
             success, output = run_shell_captured(
                 "dpkg-query -l pigpiod > /dev/null || apt install -y python3-pigpio pigpiod && systemctl enable --now pigpiod",
@@ -2256,26 +2254,64 @@ class AdsbIm:
             if not success:
                 report_issue(f"failed to install pigpiod and python3-pigpio - check the logs for details")
                 print_err(f"failed to install pigpiod and python3-pigpio: {output}")
-                dht22.value = False
+                temp_sensor.value = ""
                 return
+            default_file_content = f"GPIO_PIN={dht22_pin}\n"
+        elif temp_sensor.value == "temper_usb":
+            # this is not a commonly used feature, so let's install dependencies here
             success, output = run_shell_captured(
-                "systemctl is-active adsb-temperature.service || systemctl enable --now adsb-temperature.service",
-                timeout=20,
+                "dpkg-query -l python3-serial > /dev/null || apt install -y python3-serial",
+                timeout=600,
             )
             if not success:
-                report_issue(f"failed to enable adsb-temperature.service - check the logs for details")
-                print_err(f"failed to enable adsb-temperature.service: {output}")
-                dht22.value = False
-            else:
-                self._d.env_by_tags("temperature_block").value = True
-                self._d.env_by_tags("graphs1090_other_temp1").value = "/run/ambient-temperature"
+                report_issue(f"failed to install python3-serial - check the logs for details")
+                print_err(f"failed to install python3-serial: {output}")
+                temp_sensor.value = ""
+                return
+            default_file_content = f"DEVICE=usb-temper\n"
+        elif temp_sensor.value == "bme280":
+            # this is not a commonly used feature, so let's install dependencies here
+            success, output = run_shell_captured(
+                "dpkg-query -l python3-bme280 > /dev/null || apt install -y python3-bme280 python3-smbus",
+                timeout=600,
+            )
+            if not success:
+                report_issue(f"failed to install python3-serial - check the logs for details")
+                print_err(f"failed to install python3-serial: {output}")
+                temp_sensor.value = ""
+                return
+            success, output = run_shell_captured("lsmod | grep i2c_bcm2835 > /dev/null", timeout=30)
+            if not success:
+                report_issue(f"i2c is not enabled - please manually enable i2c and reboot your device")
+                print_err(f"i2c is not enabled - please manually enable i2c and reboot your device")
+                # but we still continue and leave things enabled
+            default_file_content = f"DEVICE=bme280\n"
         else:
             _, output = run_shell_captured(
                 "systemctl is-enabled adsb-temperature.service && systemctl disable --now adsb-temperature.service",
                 timeout=20,
             )
-            self._d.env_by_tags("temperature_block").value = False
             self._d.env_by_tags("graphs1090_other_temp1").value = ""
+            self._d.env_by_tags("temperature_block").value = False
+            self._d.env_by_tags("has_dht22").value = False
+            temp_sensor.value = ""
+            return
+
+        # we have a temperature sensor and dependency install (if needed) succeeded
+        # let's turn on the service
+        # first, write out the default config file
+        open("/opt/adsb/extras/adsb-temperature.default", "w").write(default_file_content)
+        success, output = run_shell_captured(
+            "systemctl is-active adsb-temperature.service || systemctl enable --now adsb-temperature.service",
+            timeout=20,
+        )
+        if not success:
+            report_issue(f"failed to enable adsb-temperature.service - check the logs for details")
+            print_err(f"failed to enable adsb-temperature.service: {output}")
+            temp_sensor.value = ""
+            return
+        self._d.env_by_tags("temperature_block").value = True
+        self._d.env_by_tags("graphs1090_other_temp1").value = "/run/ambient-temperature"
 
     def handle_implied_settings(self):
         self.handle_non_adsb()
@@ -2756,6 +2792,13 @@ class AdsbIm:
 
         self.generate_agg_structure()
 
+        # do we have any temperature sensors enabled? This shouldn't be needed
+        # here, but because we changed the name of the Env variable from being
+        # just about the DHT22 to support multiple different ones, this is the
+        # cleanest way to transition
+        if self._d.env_by_tags("temp_sensor").value == "" and self._d.is_enabled("has_dht22"):
+            self._d.env_by_tags("temp_sensor").value = "dht22"
+
     def sdr_assignments(self) -> Dict[str, Tuple[str, str, bool]]:
         assignments = {}
         for purpose in self._sdrdevices.purposes():
@@ -3064,8 +3107,6 @@ class AdsbIm:
                         e.value = False
                         print_err(f"disabled {tags}")
                         self._next_url_from_director = request.url
-                        if key.startswith("has_dht22"):
-                            self.handle_dht22()
                         continue
                 if key.endswith("--enable") and value == "go":
                     tags = [t.replace("enable", "is_enabled") for t in key.split("--")]
@@ -3074,12 +3115,18 @@ class AdsbIm:
                         e.value = True
                         print_err(f"enabled {tags}")
                         self._next_url_from_director = request.url
-                        if key.startswith("has_dht22"):
-                            self.handle_dht22()
                         continue
                 if key.endswith("--update") and value == "go":
                     self._next_url_from_director = request.url
                     continue
+                if key.startswith("temp_sensor_") and value == "go":
+                    self._d.env_by_tags("temp_sensor").value = (
+                        form.get("temp_sensor", "") if key.endswith("enable") else ""
+                    )
+                    self.handle_temp_sensor(self._d.env_by_tags("temp_sensor"), form.get("dht22_pin", "4"))
+                    self._next_url_from_director = request.url
+                    continue
+
                 if allow_insecure and key == "tailscale_disable_go" and form.get("tailscale_disable") == "disable":
                     success, output = run_shell_captured(
                         "systemctl disable --now tailscaled && systemctl mask tailscaled", timeout=30

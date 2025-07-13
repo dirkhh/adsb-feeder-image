@@ -1,5 +1,8 @@
 Changes since v3.0.0
 =======
+- UI: allow the user to choose the temperature sensor that they have and specify the GPIO that it is connected to (for DHT11/22)
+- core: allow the DHT22 to be used on OrangePi Zero3
+- core: add support for TEMPer USB temperature sensors on all platforms
 - hfdl/SDRplay: correct the acceptable gain values
 - vdl2: allow specifying frequencies as list of space separated MHz values
 - acars/vdl2: changes to sample rates used and therefore frequency spread supported

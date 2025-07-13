@@ -3,8 +3,12 @@
 # if your temperature sensor is on a different GPIO pin, you can provide that
 # information by copying this file to /opt/adsb/extras/adsb-temperature.default
 # and editing the copy accordingly
-GPIO_PIN=4
+# GPIO_PIN=4
 
 # if you are using a BME280 connected to I2C instead of a DHT11 or DHT22,
 # uncomment the following line
-# BME280=bme280
+# DEVICE=bme280
+
+# if you are using a TEMPer USB DEVICE
+# uncomment the following line
+# DEVICE=usb-temper
