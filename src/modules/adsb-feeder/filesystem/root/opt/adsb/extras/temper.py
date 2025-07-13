@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# fmt: off
+# prevent VSC/Black formatter from messing with this file in order to make
+# it easier to keep it in sync with https://github.com/ccwienk/temper
+#
 # temper.py -*-python-*-
 # Copyright 2018 by Pham Urwen (urwen@mail.ru)
 #
@@ -45,6 +49,10 @@ class USBList(object):
 
   SYSPATH = '/sys/bus/usb/devices'
 
+  # share the is_known_id method with calling class
+  def __init__(self, is_known_id):
+      self.is_known_id = is_known_id
+
   def _readfile(self, path):
     '''Read data from 'path' and return it as a string. Return the empty string
     if the file does not exist, cannot be read, or has an error.
@@ -81,6 +89,11 @@ class USBList(object):
       return None
     info['vendorid'] = int(vendorid, 16)
     productid = self._readfile(os.path.join(dirname, 'idProduct'))
+
+    # added to only show supported devices when calling the list() method
+    if not self.is_known_id(int(vendorid, 16), int(productid, 16)):
+      return None
+
     info['productid'] = int(productid, 16)
     info['manufacturer'] = self._readfile(os.path.join(dirname,
                                                        'manufacturer'))
@@ -332,7 +345,8 @@ class Temper(object):
   SYSPATH = '/sys/bus/usb/devices'
 
   def __init__(self, verbose=False):
-    usblist = USBList()
+    # modified to share the _is_known_id method
+    usblist = USBList(self._is_known_id)
     self.usb_devices = usblist.get_usb_devices()
     self.forced_vendor_id = None
     self.forced_product_id = None
@@ -342,12 +356,14 @@ class Temper(object):
     '''Returns True if the vendorid and product id are valid.
     '''
 
-    if self.forced_vendor_id is not None and \
-       self.forced_product_id is not None:
-      if self.forced_vendor_id == vendorid and \
-         self.forced_product_id == productid:
-        return True
-      return False
+    # only check for forced ids if called as member of the Temper class
+    if hasattr(self, "forced_vendor_id"):
+      if self.forced_vendor_id is not None and \
+        self.forced_product_id is not None:
+        if self.forced_vendor_id == vendorid and \
+          self.forced_product_id == productid:
+          return True
+        return False
 
     if vendorid == 0x0c45 and (productid == 0x7401 or productid == 0x7402):
       return True
@@ -368,8 +384,8 @@ class Temper(object):
     True, then JSON formatting will be used.
     '''
     if use_json:
-      print(json.dumps(self.usb_devices, indent=4))
-      return
+      # print(json.dumps(self.usb_devices, indent=4))
+      return self.usb_devices
 
     for _, info in sorted(self.usb_devices.items(),
                           key=lambda x: x[1]['busnum'] * 1000 + \
