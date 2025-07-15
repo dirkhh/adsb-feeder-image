@@ -206,6 +206,10 @@
               <input class="col-10 col-sm-2 ms-3" id="dht22_pin" name="dht22_pin" type="text" style="height: 2rem;"
                      value="" />
             </div>
+            <div class="col-12 mx-0 mt-3">
+              <input class="form-switch" id="freedom_units" name="freedom_units" type="checkbox" />
+              <label class="ms-2" for="freedom_units">Use Fahrenheit</label>
+            </div>
           </div>
         </div>
         <div class="modal-footer">
@@ -858,6 +862,7 @@
    });
 
   function show_temp_sensor_dialog() {
+    $("#freedom_units").prop("checked", "True" === "{{ is_enabled('freedom_units') }}");
     $("#pin_container").toggleClass("d-none", !$("#has_dht22").is(':checked'));
     modal.show();
   }
@@ -869,6 +874,7 @@
     form_data.append("temp_sensor_enable", "go");
     form_data.append("temp_sensor", sensor);
     form_data.append("dht22_pin", $("#dht22_pin").val());
+    form_data.append("freedom_units", $("#freedom_units").is(':checked'));
     console.log(form_data);
     try {
       let response = fetch("/expert", {

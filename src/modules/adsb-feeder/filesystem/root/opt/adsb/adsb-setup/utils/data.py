@@ -189,6 +189,7 @@ class Data:
         Env("_ADSBIM_STATE_TEMPERATURE_BLOCK", default=False, tags=["temperature_block", "is_enabled"]),
         Env("_ADSBIM_STATE_TEMP_SENSOR", default="", tags=["temp_sensor"]),
         Env("_ADSBIM_STATE_HAS_DHT22", default=False, tags=["has_dht22", "is_enabled"]),
+        Env("_ADSBIM_STATE_FREEDOM_UNITS", default=False, tags=["freedom_units", "is_enabled"]),
         #
         # Ultrafeeder config, used for all 4 types of Ultrafeeder instances
         Env("FEEDER_ULTRAFEEDER_CONFIG", default=[""], tags=["ultrafeeder_config"]),

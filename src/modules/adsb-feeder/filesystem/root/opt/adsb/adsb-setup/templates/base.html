@@ -543,7 +543,12 @@
       if (cpu != null) {
         $("#cpu").removeClass('d-none');
         $("#cpu_temp").removeClass('d-none');
-        $("#cpu_temp").text(cpu + "°C");
+        {% if is_enabled('freedom_units') %}
+        cpu_text = Math.round(cpu * 1.8 + 32) + "°F";
+        {% else %}
+        cpu_text = cpu + "°C";
+        {% endif %}
+        $("#cpu_temp").text(cpu_text);
         if (cpu < 50) {
           $("#cpu_temp").css('color', color_palette["good"]);
         } else if (cpu < 80) {
@@ -558,7 +563,12 @@
       if (ext != null) {
         $("#ext").removeClass('d-none');
         $("#ext_temp").removeClass('d-none');
-        $("#ext_temp").text(ext + "°C");
+        {% if is_enabled('freedom_units') %}
+        ext_text = Math.round(ext * 1.8 + 32) + "°F";
+        {% else %}
+        ext_text = ext + "°C";
+        {% endif %}
+        $("#ext_temp").text(ext_text);
         if (ext < -10) {
           $("#ext_temp").css('color', color_palette["warning"]);
         } else if (ext < 40) {

@@ -1,5 +1,6 @@
 Changes since v3.0.0
 =======
+- UI: allow the user to show the temperature in Fahrenheit
 - UI: don't offer to update the WiFi connection when running in a VM
 - UI: adjust temperature block colors for dark mode and fade them more slowly as the temperature information ages
 - UI: allow the user to choose the temperature sensor that they have and specify the GPIO that it is connected to (for DHT11/22)
