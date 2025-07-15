@@ -315,7 +315,7 @@
       </div>
     </form>
   </div>
-  <div class="col-12 col-lg-6 {% if is_enabled('secure_image') %} d-none {% endif %}">
+  <div class="col-12 col-lg-6 {% if is_enabled('secure_image') or env_value_by_tag('board_name').startswith("Virtualized") %} d-none {% endif %}">
     <h5 class="mt-3">{% if wifi != "" %}Reconfigure{% else %}Connect to{% endif %} WiFi</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
       <div class="row align-items-center">
