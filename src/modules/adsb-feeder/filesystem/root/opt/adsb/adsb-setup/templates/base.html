@@ -523,7 +523,20 @@
       if (isNaN(age - 0)) {
         age = 1
       }
-      opacity = Math.min(1, 30 / (1 + age));
+      opacity = Math.min(1, 120 / (1 + age));
+      let current_theme = $("html").attr("data-mdb-theme");
+      let color_palette = {
+        "good": "green",
+        "warning": "orange",
+        "bad": "red"
+      };
+      if (current_theme == "dark") {
+        color_palette = {
+          "good": "lightgreen",
+          "warning": "yellow",
+          "bad": "lightred"
+        };
+      }
       $("#temperature_block").css('opacity', opacity);
       $("#temperature_block").removeClass('d-none');
       $("#temperature_block").css('width', '4em');
@@ -532,11 +545,11 @@
         $("#cpu_temp").removeClass('d-none');
         $("#cpu_temp").text(cpu + "°C");
         if (cpu < 50) {
-          $("#cpu_temp").css('color', 'green');
+          $("#cpu_temp").css('color', color_palette["good"]);
         } else if (cpu < 80) {
-          $("#cpu_temp").css('color', 'orange');
+          $("#cpu_temp").css('color', color_palette["warning"]);
         } else {
-          $("#cpu_temp").css('color', 'red');
+          $("#cpu_temp").css('color', color_palette["bad"]);
         }
       } else {
         $("#cpu").addClass('d-none');
@@ -547,13 +560,13 @@
         $("#ext_temp").removeClass('d-none');
         $("#ext_temp").text(ext + "°C");
         if (ext < -10) {
-          $("#ext_temp").css('color', 'orange');
+          $("#ext_temp").css('color', color_palette["warning"]);
         } else if (ext < 40) {
-          $("#ext_temp").css('color', 'green');
+          $("#ext_temp").css('color', color_palette["good"]);
         } else if (ext < 50) {
-          $("#ext_temp").css('color', 'orange');
+          $("#ext_temp").css('color', color_palette["warning"]);
         } else {
-          $("#ext_temp").css('color', 'red');
+          $("#ext_temp").css('color', color_palette["bad"]);
         }
       } else {
         $("#ext").addClass('d-none');
