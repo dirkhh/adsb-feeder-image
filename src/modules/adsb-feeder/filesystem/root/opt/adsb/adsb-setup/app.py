@@ -2237,10 +2237,11 @@ class AdsbIm:
             for sdr in self._sdrdevices.sdrs:
                 if sdr.purpose in ["1090", "1090_2", "978"]:
                     sdr.purpose = ""
-            # while these SDRs can be used by other containers, these two containers
+            # while these SDRs can be used by other containers, these three containers
             # are specifically for ADS-B
             self._d.env_by_tags("airspy").value = False
             self._d.env_by_tags("sdrplay").value = False
+            self._d.env_by_tags("uat978").list_set(0, False)
         else:
             print_err("no action on ADS-B functions")
 
