@@ -1,5 +1,6 @@
 Changes since v3.0.0
 =======
+- ais: fix incorrect HPRadar feed setup
 - UI: allow the user to show the temperature in Fahrenheit
 - UI: don't offer to update the WiFi connection when running in a VM
 - UI: adjust temperature block colors for dark mode and fade them more slowly as the temperature information ages

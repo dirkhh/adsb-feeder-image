@@ -708,7 +708,7 @@ class Data:
         Env("AISHUB_UDP_PORT", default=[""], tags=["aishub_udp_port"]),
         Env("AIS_APRSFI_FEEDER_KEY", default=[""], tags=["ais_aprsfi_feeder_key"]),
         Env("AIS_BOATBEACON_UDP_PORT", default=[""], tags=["ais_boatbeacon_udp_port"]),
-        Env("AIS_HPRADAR_UDP_PORT", default=[""], tags=["ais_hpradar_udp_port"]),
+        Env("AIS_HPRADAR_UDP_PORT", default=["4010"], tags=["ais_hpradar_udp_port"]),
         Env("AIS_MARINETRAFFIC_UDP_PORT", default=[""], tags=["ais_marinetraffic_udp_port"]),
         Env("AIS_MYSHIPTRACKING_UDP_PORT", default=[""], tags=["ais_myshiptracking_udp_port"]),
         Env("AIS_RADARVIRTUEL_FEEDER_KEY", default=[""], tags=["ais_radarvirtuel_feeder_key"]),
