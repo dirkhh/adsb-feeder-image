@@ -876,16 +876,19 @@
     form_data.append("dht22_pin", $("#dht22_pin").val());
     form_data.append("freedom_units", $("#freedom_units").is(':checked'));
     console.log(form_data);
-    try {
-      let response = fetch("/expert", {
-        method: "POST",
-        body: form_data,
-        signal: AbortSignal.timeout(15000)
-      });
-      console.log(response.status);
-    } catch (e) {
-      console.error(e);
-    }
+    show_spinner();
+    let response = fetch("/expert", {
+      method: "POST",
+      body: form_data,
+      signal: AbortSignal.timeout(15000)
+    })
+    .then(response => {
+      console.log(response);
+      location.href = response.url;
+    })
+    .catch(error => {
+        console.log(error);
+    });
   }
 </script>
 {% endblock %}
