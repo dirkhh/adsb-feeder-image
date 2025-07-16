@@ -809,6 +809,12 @@
 </div>
 <script>
   // for each input checkbox, add an onclick handler to toggle the dependent devs (which include the input field)
+  function create_feed_id(id) {
+    let type = id.split("_")[0];
+    let name = "YOURINITIALS_{{ list_value_by_tag('closest_airport', 0) }}_" + type.toUpperCase();
+    console.log(`Feed ID: ${name}`);
+    return name;
+  }
   $(document).ready(function () {
     $('input[type="checkbox"]').on('change', function () {
       let dependent = "." + $(this).attr('id') + "_dependent";
@@ -817,6 +823,15 @@
         $(this).toggle(checked);
       })
     });
+    // for each text input field with an id ending in _feed_id, check that they aren't empty, both initially and on any change
+    $('input[id$="_feed_id"]').each(function () {
+      $(this).val(create_feed_id($(this).attr('id')));
+      $(this).on('change', function () {
+        if ($(this).val() == "") {
+          $(this).val(create_feed_id($(this).attr('id')));
+        }
+      })
+    })
     function validate_range() {
       let range = 0;
       if ($(this).attr('class').includes("two_mhz")) {
