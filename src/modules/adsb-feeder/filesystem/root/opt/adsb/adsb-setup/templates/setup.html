@@ -78,6 +78,9 @@
              class="form-control mt-2" value="{{ list_value_by_tag('tz', 0) }}" />
     </span>
   </div>
+  <div class="mt-3">
+    Closest airport suggestion: <span id="airport"></span>
+  </div>
   <div class="form-group mt-3">
     <label>
       <strong>ADS-B:</strong> Which
@@ -177,14 +180,45 @@
   <p>{{ message }}</p>
 </form>
 <script>
-  $("#lat").on("blur", function () {
+  $("#lat").on("blur", async function () {
     let lat_value = $("#lat").val();
     let values = lat_value.split(",");
     if (values.length > 1) {
       $("#lat").val(values[0]);
       $("#lon").val(values[1]);
     }
+    await checkAirport();
   });
+  $("#lon").on("blur", async function () {
+    await checkAirport();
+  })
+  let a_lat = "";
+  let a_lon = "";
+
+  async function checkAirport() {
+    let lat = $("#lat").val();
+    let lon = $("#lon").val();
+    if (lat != "" && lon != "" && (lat != a_lat || lon != a_lon)) {
+      a_lat = lat;
+      a_lon = lon;
+      let url = "/api/closest_airport/" + lat + "/" + lon;
+      fetch(url)
+      .then(response => response.json())
+      .then(airport_json => {
+        // console.log(`closest_airport(${lat}, ${lon}) -> ${JSON.stringify(airport_json)}`);
+        let airport_str = "";
+        if (airport_json != null) {
+          airport_str = airport_json["icao"] + " (" + airport_json["name"] + ")";
+        }
+        $("#airport").html(airport_str);
+      })
+      .catch(error => {
+        console.log(`getAirport(${lat}, ${lon}) -> ${error}`);
+        return null;
+      });
+    }
+  }
+
   function fixAlt() {
     let alt_value = $("#alt").val();
     let factor = 1.0;
@@ -281,6 +315,10 @@
   const aggregatorBtns = document.querySelectorAll('input[name="aggregator_choice"]');
   aggregatorBtns.forEach((radio) => {
     radio.addEventListener("click", aggregatorClick);
+  });
+  checkAirport()
+  .catch(() => {
+    console.log("checkAirport failed");
   });
 </script>
 {% endblock %}

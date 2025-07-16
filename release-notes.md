@@ -1,5 +1,6 @@
 Changes since v3.0.0
 =======
+- setup: show closest airport on basic setup page, based on lat/long data entered (this should help detect mistakes when entering the location)
 - ais: fix incorrect HPRadar feed setup
 - UI: allow the user to show the temperature in Fahrenheit
 - UI: don't offer to update the WiFi connection when running in a VM
