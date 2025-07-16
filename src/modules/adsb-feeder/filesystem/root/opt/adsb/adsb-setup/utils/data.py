@@ -149,6 +149,7 @@ class Data:
         Env("FEEDER_LONG", default=[""], is_mandatory=True, tags=["lon"]),
         Env("FEEDER_ALT_M", default=[""], is_mandatory=True, tags=["alt"]),
         Env("FEEDER_TZ", default=[""], tags=["tz"]),
+        Env("FEEDER_CLOSEST_AIRPORT", default=[""], tags=["closest_airport"]),
         Env("MLAT_SITE_NAME", default=[""], is_mandatory=True, tags=["site_name"]),
         Env("MLAT_SITE_NAME_SANITIZED", default=[""], is_mandatory=True, tags=["site_name_sanitized"]),
         # SDR settings are only valid on an integrated feeder or a micro feeder, not on stage2

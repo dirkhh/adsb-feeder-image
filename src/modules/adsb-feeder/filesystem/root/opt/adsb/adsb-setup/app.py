@@ -2340,6 +2340,14 @@ class AdsbIm:
         # make sure the avahi alias service runs on an adsb.im image
         self.set_hostname(self._d.env_by_tags("site_name").list_get(0))
 
+        # make sure we have a closest airport
+        if self._d.env_by_tags("closest_airport").list_get(0) == "":
+            airport = self.closest_airport(
+                self._d.env_by_tags("lat").list_get(0), self._d.env_by_tags("lon").list_get(0)
+            )
+            if airport:
+                self._d.env_by_tags("closest_airport").list_set(0, airport.get("icao", ""))
+
         if self._d.is_enabled("stage2") and (
             self._d.env_by_tags("1090serial").value or self._d.env_by_tags("978serial").value
         ):
@@ -3358,6 +3366,14 @@ class AdsbIm:
             if key in {"lat", "lon"}:
                 # remove letters, spaces, degree symbols
                 value = str(float(re.sub("[a-zA-Z° ]", "", value)))
+                # if the user changed their location we need to update the remembered
+                # closest airport
+                lat = str(float(re.sub("[a-zA-Z° ]", "", form.get("lat", ""))))
+                long = str(float(re.sub("[a-zA-Z° ]", "", form.get("lon", ""))))
+                if lat != self._d.env_by_tags("lat").list_get(0) or long != self._d.env_by_tags("lon").list_get(0):
+                    airport = self.closest_airport(lat, long)
+                    if airport:
+                        self._d.env_by_tags("closest_airport").list_set(0, airport["icao"])
             if key == "tz":
                 self.set_tz(value)
                 continue
