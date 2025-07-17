@@ -563,6 +563,27 @@ class AdsbIm:
                 "ghcr.io/sdr-enthusiasts/docker-planefinder:5.0.161_arm64"
             )
 
+        # as we migrate from pre v3.0.1 to v3.0.1 we need to sync the new feeder type
+        # variables based on existing settings - the rest of the code must ensure that
+        # these stay in sync, so this should only ever create change the first time
+        # the app is run
+        # fmt: off
+        if self._d.env_by_tags("aggregator_choice").value != "":
+            self._d.env_by_tags("is_adsb_feeder").value = self._d.env_by_tags("aggregator_choice").value != "nonadsb"
+        elif not self._d.is_enabled("is_adsb_feeder"):
+            self._d.env_by_tags("aggregator_choice").value = "nonadsb"
+        if not self._d.is_enabled("is_acars_feeder"):
+            self._d.env_by_tags("is_acars_feeder").value = (
+                self._d.is_enabled("acarsdec") or self._d.is_enabled("acarsdec2") or self._d.is_enabled("dumpvdl2")
+            )
+        if not self._d.is_enabled("is_hfdl_feeder"):
+            self._d.env_by_tags("is_hfdl_feeder").value = self._d.is_enabled("hfdlobserver") or self._d.is_enabled("dumphfdl")
+        if not self._d.is_enabled("is_ais_feeder"):
+            self._d.env_by_tags("is_ais_feeder").value = self._d.is_enabled("shipfeeder")
+        if not self._d.is_enabled("is_sonde_feeder"):
+            self._d.env_by_tags("is_sonde_feeder").value = self._d.is_enabled("sonde")
+        # fmt: on
+
         self.handle_implied_settings()
         self.write_envfile()
 

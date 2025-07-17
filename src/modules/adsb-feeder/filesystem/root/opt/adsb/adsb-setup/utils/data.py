@@ -152,6 +152,12 @@ class Data:
         Env("FEEDER_CLOSEST_AIRPORT", default=[""], tags=["closest_airport"]),
         Env("MLAT_SITE_NAME", default=[""], is_mandatory=True, tags=["site_name"]),
         Env("MLAT_SITE_NAME_SANITIZED", default=[""], is_mandatory=True, tags=["site_name_sanitized"]),
+        # what type of feeder are we looking at?
+        Env("_ADSBIM_IS_ADSB_FEEDER", default=False, tags=["is_adsb_feeder", "is_enabled"]),
+        Env("_ADSBIM_IS_ACARS_FEEDER", default=False, tags=["is_acars_feeder", "is_enabled"]),
+        Env("_ADSBIM_IS_HFDL_FEEDER", default=False, tags=["is_hfdl_feeder", "is_enabled"]),
+        Env("_ADSBIM_IS_AIS_FEEDER", default=False, tags=["is_ais_feeder", "is_enabled"]),
+        Env("_ADSBIM_IS_SONDE_FEEDER", default=False, tags=["is_sonde_feeder", "is_enabled"]),
         # SDR settings are only valid on an integrated feeder or a micro feeder, not on stage2
         # sdrs_locked means the initial setup has been completed, don't change
         # SDR assignments unless requested explicitely by the user
