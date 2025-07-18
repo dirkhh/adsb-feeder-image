@@ -2257,8 +2257,8 @@ class AdsbIm:
     def handle_non_adsb(self):
         # if the user explicitly says they don't want ADS-B, then don't
         # assign any SDRs to ADS-B functions
-        if self._d.env_by_tags("aggregator_choice").value == "nonadsb":
-            print_err("nonadsb selected, disabling ADS-B")
+        if not self._d.is_enabled("is_adsb_feeder"):
+            print_err("is_adsb_feeder not selected, disabling ADS-B")
             self._d.env_by_tags("1090serial").value = ""
             self._d.env_by_tags("978serial").value = ""
             self._d.env_by_tags("1090_2serial").value = ""
@@ -2273,6 +2273,13 @@ class AdsbIm:
             self._d.env_by_tags("uat978").list_set(0, False)
         else:
             print_err("no action on ADS-B functions")
+        # these two are a 1:1 map, so we can just enable them
+        # the rest are controlled by their individual checkboxes which are
+        # already propagagted
+        if self._d.is_enabled("is_sonde_feeder"):
+            self._d.env_by_tags("sonde").value = True
+        if self._d.is_enabled("is_ais_feeder"):
+            self._d.env_by_tags("shipfeeder").value = True
 
     def handle_temp_sensor(self, temp_sensor, dht22_pin=0):
         if temp_sensor.value == "dht22":
@@ -3157,6 +3164,23 @@ class AdsbIm:
                         e.value = False
                         print_err(f"disabled {tags}")
                         self._next_url_from_director = request.url
+                        # this is how we disable the non-ADS-B containers on the expert page
+                        # check if we are still feeding
+                        if key.startswith("acarsdec") or key.startswith("dumpvdl2"):
+                            self._d.env_by_tags("is_acars_feeder").value = (
+                                self._d.is_enabled("acarsdec")
+                                or self._d.is_enabled("acarsdec2")
+                                or self._d.is_enabled("dumpvdl2")
+                            )
+                        if key.startswith("dumphfdl") or key.startswith("hfdlobserver"):
+                            self._d.env_by_tags("is_hfdl_feeder").value = self._d.is_enabled(
+                                "hfdlobserver"
+                            ) or self._d.is_enabled("dumphfdl")
+                        if key.startswith("shipfeeder"):
+                            self._d.env_by_tags("is_ais_feeder").value = False
+                        if key.startswith("sonde"):
+                            self._d.env_by_tags("is_sonde_feeder").value = False
+
                         continue
                 if key.endswith("--enable") and value == "go":
                     tags = [t.replace("enable", "is_enabled") for t in key.split("--")]
@@ -3165,6 +3189,15 @@ class AdsbIm:
                         e.value = True
                         print_err(f"enabled {tags}")
                         self._next_url_from_director = request.url
+                        # this is how we enable the non-ADS-B containers on the expert page
+                        if key.startswith("acarsdec") or key.startswith("dumpvdl2"):
+                            self._d.env_by_tags("is_acars_feeder").value = True
+                        if key.startswith("dumphfdl") or key.startswith("hfdlobserver"):
+                            self._d.env_by_tags("is_hfdl_feeder").value = True
+                        if key.startswith("shipfeeder"):
+                            self._d.env_by_tags("is_ais_feeder").value = True
+                        if key.startswith("sonde"):
+                            self._d.env_by_tags("is_sonde_feeder").value = True
                         continue
                 if key.endswith("--update") and value == "go":
                     self._next_url_from_director = request.url
