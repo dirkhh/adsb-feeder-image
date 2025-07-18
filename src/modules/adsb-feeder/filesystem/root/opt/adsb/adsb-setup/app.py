@@ -2633,7 +2633,7 @@ class AdsbIm:
             self._d.env_by_tags("run_acarsdec").value = self._d.is_enabled(["acarsdec"])
             if self._d.is_enabled("run_acarsdec") and self._d.env_by_tags("acars_feed_id").value == "":
                 self._d.env_by_tags("acars_feed_id").value = (
-                    f"YOURINITIALS_{self._d.env_by_tags('closest_airport').list_get(0)}-ACARS"
+                    f"{self._d.env_by_tags('initials').list_get(0)}-{self._d.env_by_tags('closest_airport').list_get(0)}-ACARS"
                 )
         else:
             acarsstring = ""
@@ -2651,7 +2651,7 @@ class AdsbIm:
             self._d.env_by_tags("run_acarsdec2").value = self._d.is_enabled(["acarsdec2"])
             if self._d.is_enabled("run_acarsdec2") and self._d.env_by_tags("acars_2_feed_id").value == "":
                 self._d.env_by_tags("acars_2_feed_id").value = (
-                    f"YOURINITIALS_{self._d.env_by_tags('closest_airport').list_get(0)}-ACARS2"
+                    f"{self._d.env_by_tags('initials').list_get(0)}-{self._d.env_by_tags('closest_airport').list_get(0)}-ACARS2"
                 )
         else:
             acars_2string = ""
@@ -2671,7 +2671,7 @@ class AdsbIm:
             self._d.env_by_tags("run_dumpvdl2").value = self._d.is_enabled(["dumpvdl2"])
             if self._d.is_enabled("run_dumpvdl2") and self._d.env_by_tags("vdl2_feed_id").value == "":
                 self._d.env_by_tags("vdl2_feed_id").value = (
-                    f"YOURINITIALS_{self._d.env_by_tags('closest_airport').list_get(0)}-VDLM2"
+                    f"{self._d.env_by_tags('initials').list_get(0)}-{self._d.env_by_tags('closest_airport').list_get(0)}-VDLM2"
                 )
         else:
             self._d.env_by_tags("vdl2serial_rtl").value = ""
@@ -2688,7 +2688,7 @@ class AdsbIm:
             self._d.env_by_tags("run_dumphfdl").value = self._d.is_enabled(["dumphfdl"])
             if self._d.is_enabled("run_dumphfdl") and self._d.env_by_tags("hfdl_feed_id").value == "":
                 self._d.env_by_tags("hfdl_feed_id").value = (
-                    f"YOURINITIALS_{self._d.env_by_tags('closest_airport').list_get(0)}-HFDL"
+                    f"{self._d.env_by_tags('initials').list_get(0)}-{self._d.env_by_tags('closest_airport').list_get(0)}-HFDL"
                 )
         else:
             hfdlstring = ""
@@ -2701,7 +2701,7 @@ class AdsbIm:
             self._d.env_by_tags("run_sonde").value = self._d.is_enabled(["sonde"])
             if self._d.is_enabled("run_sonde") and self._d.env_by_tags("sonde_callsign").value == "":
                 self._d.env_by_tags("sonde_callsign").value = (
-                    f"YOURINITIALS_{self._d.env_by_tags('closest_airport').list_get(0)}-SONDE"
+                    f"{self._d.env_by_tags('initials').list_get(0)}-{self._d.env_by_tags('closest_airport').list_get(0)}-SONDE"
                 )
         else:
             sonde_sdr_type = ""
@@ -2714,7 +2714,7 @@ class AdsbIm:
             self._d.env_by_tags("run_shipfeeder").value = self._d.is_enabled(["shipfeeder"])
             if self._d.is_enabled("run_shipfeeder") and self._d.env_by_tags("ais_station_name").value == "":
                 self._d.env_by_tags("ais_station_name").value = (
-                    f"YOURINITIALS_{self._d.env_by_tags('closest_airport').list_get(0)}-AIS"
+                    f"{self._d.env_by_tags('initials').list_get(0)}-{self._d.env_by_tags('closest_airport').list_get(0)}-AIS"
                 )
             self._d.env_by_tags("tar1090_aiscatcher_url").value = (
                 f"http://HOSTNAME:{self._d.env_by_tags('webport').value}/"

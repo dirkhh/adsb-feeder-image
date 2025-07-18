@@ -44,69 +44,86 @@
     </label>
   </div>
 
-  <div class="col-12 h5 mt-3">Select the account-less ADS-B aggregators you want to feed:</div>
+  <div class="col-12 h5 mt-3">Select the <a href="#"
+    title="aggregators that don't require you to create an account or provide an email address">account-less</a>
+    ADS-B aggregators you want to feed:</div>
+  <div class="col-12 col-md-6 col-lg-4 my-2">
+    <button type="button" class="btn btn-large btn-primary w-100 with-checkbox" data-mdb-ripple-init><input
+              type="radio" class="me-2" name="aggregator_choice"  id="all" value="all" required {% if env_value_by_tag("aggregator_choice")=="all" %} checked {% endif %}
+              onclick="$('.ultrafeeder').each(function(){$(this).prop('checked', true)});"> All</button>
+  </div>
+  <div class="col-12 col-md-6 col-lg-4 my-2">
+    <button type="button" class="btn btn-large btn-primary w-100 with-checkbox" data-mdb-ripple-init><input type="radio"
+              class="me-2" name="aggregator_choice" id="privacy" value="privacy" required {% if env_value_by_tag("aggregator_choice")=="privacy" %} checked {% endif %}
+              onclick="$('.ultrafeeder').each(function(){$(this).prop('checked', ! $(this).hasClass('no_privacy'))});"> Privacy</button>
+  </div>
+  <div class="col-12 col-md-6 col-lg-4 my-2">
+    <button type="button" class="btn btn-large btn-primary w-100 with-checkbox" data-mdb-ripple-init><input type="radio"
+              class="me-2" name="aggregator_choice" id="individual" value="individual" required {% if env_value_by_tag("aggregator_choice")=="individual" %} checked {% endif %}> Individual</button>
+  </div>
+  <div class="col-12"></div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1" name="is_enabled--ultrafeeder--adsblol"
-           id="is_enabled--adsblol" {{ uf_enabled("adsblol", m) }} />
+    <input type="checkbox" class="form-check-input me-1 ultrafeeder" name="is_enabled--ultrafeeder--adsblol"
+           id="is_enabled--adsblol" {{ uf_enabled("adsblol", m) }} onclick="$('#individual').click();" />
     <label for="is_enabled--adsblol">
       <a href="https://adsb.lol/privacy-license/">adsb.lol</a>
     </label>
   </div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1" name="is_enabled--ultrafeeder--flyitaly"
-           id="is_enabled--flyitaly" {{ uf_enabled("flyitaly", m) }} />
+    <input type="checkbox" class="form-check-input me-1 ultrafeeder" name="is_enabled--ultrafeeder--flyitaly"
+           id="is_enabled--flyitaly" {{ uf_enabled("flyitaly", m) }}  onclick="$('#individual').click();" />
     <label for="is_enabled--flyitaly">
       <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/">Fly Italy ADSB</a>
     </label>
   </div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1" name="is_enabled--ultrafeeder--avdelphi"
-           id="is_enabled--avdelphi" {{ uf_enabled("avdelphi", m) }} />
+    <input type="checkbox" class="form-check-input me-1 ultrafeeder" name="is_enabled--ultrafeeder--avdelphi"
+           id="is_enabled--avdelphi" {{ uf_enabled("avdelphi", m) }}  onclick="$('#individual').click();" />
     <label for="is_enabled--avdelphi">
       <a href="https://www.avdelphi.com/privacy.html">AVDelphi</a>
     </label>
   </div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1" name="is_enabled--ultrafeeder--planespotters"
-           id="is_enabled--planespotters" {{ uf_enabled("planespotters", m) }} />
+    <input type="checkbox" class="form-check-input me-1 ultrafeeder" name="is_enabled--ultrafeeder--planespotters"
+           id="is_enabled--planespotters" {{ uf_enabled("planespotters", m) }}  onclick="$('#individual').click();" />
     <label for="is_enabled--planespotters">
       <a href="https://www.planespotters.net/legal/privacypolicy/">planespotters.net</a>
     </label>
   </div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1" data-mdb-toggle="tooltip"
+    <input type="checkbox" class="form-check-input me-1 ultrafeeder" data-mdb-toggle="tooltip"
            title="please note that this site is missing a clear data/privacy policy" name="is_enabled--ultrafeeder--tat"
-           id="is_enabled--tat" {{ uf_enabled("tat", m) }} />
+           id="is_enabled--tat" {{ uf_enabled("tat", m) }} onclick="$('#individual').click();" />
     <label for="is_enabled--tat">
       <a href="https://theairtraffic.com/privacy/">TheAirTraffic.com</a>
     </label>
   </div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1" name="is_enabled--ultrafeeder--adsbfi" id="is_enabled--adsbfi"
-           {{ uf_enabled("adsbfi", m) }} />
+    <input type="checkbox" class="form-check-input me-1 ultrafeeder" name="is_enabled--ultrafeeder--adsbfi" id="is_enabled--adsbfi"
+           {{ uf_enabled("adsbfi", m) }} onclick="$('#individual').click();" />
     <label for="is_enabled--adsbfi">
       <a href="https://adsb.fi/privacy">adsb.fi</a>
     </label>
   </div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1" data-mdb-toggle="tooltip"
+    <input type="checkbox" class="form-check-input me-1 ultrafeeder no_privacy" data-mdb-toggle="tooltip"
            title="please note that this site is missing a clear data/privacy policy"
-           name="is_enabled--ultrafeeder--hpradar" id="is_enabled--hpradar" {{ uf_enabled("hpradar", m) }} />
+           name="is_enabled--ultrafeeder--hpradar" id="is_enabled--hpradar" {{ uf_enabled("hpradar", m) }} onclick="$('#individual').click();" />
     <label for="is_enabled--hpradar">
       <a href="https://skylink.hpradar.com/" data-mdb-toggle="tooltip"
          title="please note that this site is missing a clear data/privacy policy">HPRadar</a>
     </label>
   </div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1" name="is_enabled--ultrafeeder--alive" id="is_enabled--alive"
-           {{ uf_enabled("alive", m) }} />
+    <input type="checkbox" class="form-check-input me-1 ultrafeeder" name="is_enabled--ultrafeeder--alive" id="is_enabled--alive"
+           {{ uf_enabled("alive", m) }} onclick="$('#individual').click();"/>
     <label for="is_enabled--alive">
       <a href="https://airplanes.live/privacy">airplanes.live</a>
     </label>
   </div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1" name="is_enabled--ultrafeeder--adsbx" id="is_enabled--adsbx"
-           {{ uf_enabled("adsbx", m) }} />
+    <input type="checkbox" class="form-check-input me-1 ultrafeeder" name="is_enabled--ultrafeeder--adsbx" id="is_enabled--adsbx"
+           {{ uf_enabled("adsbx", m) }} onclick="$('#individual').click();" />
     <label for="is_enabled--adsbx">
       <a href="https://www.adsbexchange.com/privacy-policy/">ADSBExchange</a>
     </label>
@@ -604,5 +621,15 @@
     });
     fields.toggle(box.prop("checked"));
   }
+  $(document).ready(function () {
+    $(".with-checkbox").each(function () {
+      $(this).on("click", function (ev) {
+        if (ev.target == this) {
+          $(this).find("input").click();
+        }
+      });
+    });
+  });
+
 </script>
 {% endblock %}

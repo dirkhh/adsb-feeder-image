@@ -82,95 +82,67 @@
     Closest airport suggestion: <span id="airport"></span>
   </div>
   <div class="form-group mt-3">
-    <label>
-      <strong>ADS-B:</strong> Which
-      <a href="#"
-         title="aggregators that don't require you to create an account or provide an email address">account-less
-      </a>
-      aggregators do you want to feed? There is a separate data sharing page for aggregators that require an account.
-      <br>
-      If you only want to share <strong>ACARS / AIS / SONDE</strong> data, please check "None (no ADS-B)"
-    </label>
-    <br />
-    <div>
-      <div class="d-inline-block me-2"><input type="radio" name="aggregator_choice" id="all" value="all" required {% if env_value_by_tag("aggregator_choice")=="all"
-      %} checked {% endif %}>
-      <label class="form-check-label mr-3" for="all">All</label></div>
-      <div class="d-inline-block me-2"><input type="radio" name="aggregator_choice" id="privacy" value="privacy" {% if
-      env_value_by_tag("aggregator_choice")=="privacy" %} checked {% endif %}>
-      <label class="form-check-label mr-3" for="privacy">Aggregators with privacy policy</label></div>
-      <div class="d-inline-block me-2"><input type="radio" name="aggregator_choice" id="individual" value="individual" {% if
-      env_value_by_tag("aggregator_choice")=="individual" %} checked {% endif %}>
-      <label class="form-check-label" for="individual">Pick individually</label></div>
-      <div class="d-inline-block me-2"><input type="radio" name="aggregator_choice" id="micro" value="micro"
-             {% if env_value_by_tag("aggregator_choice")=="micro" %} checked {% endif %}>
-      <label class="form-check-label mr-3" for="micro">None (micro feeder)</label></div>
-      <div class="d-inline-block me-2"><input type="radio" name="aggregator_choice" id="nano" value="nano"
-             {% if env_value_by_tag("aggregator_choice")=="nano" %} checked {% endif %}>
-      <label class="form-check-label mr-3" for="nano">None (nano feeder)</label></div>
-      <div class="d-inline-block me-2"><input type="radio" name="aggregator_choice" id="nonadsb" value="nonadsb"
-             {% if env_value_by_tag("aggregator_choice")=="nonadsb" %} checked {% endif %}>
-      <label class="form-check-label mr-3" for="nonadsb">None (no ADS-B)</label></div>
-      <div class="d-inline-block me-2"><input type="radio" name="aggregator_choice" id="stage2" value="stage2"
-             {% if env_value_by_tag("aggregator_choice")=="stage2" %} checked {% endif %}>
-      <label class="form-check-label mr-3" for="stage2">Stage 2 setup (select these later)</label></div>
-    </div>
-    <br>
-    <div id="explain-all" style="display: {% if env_value_by_tag('aggregator_choice')=='all' %} block {% else %} none {%
-            endif %}; font-size: normal;">
-      With this option you will feed data to
-      <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
-      <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/">Fly Italy ADSB</a>,
-      <a href="https://www.avdelphi.com/privacy.html">AVDelphi</a>,
-      <a href="https://www.planespotters.net/legal/privacypolicy/">planespotters.net</a>,
-      <a href="https://theairtraffic.com/privacy/">TheAirTraffic.com</a>,
-      <a href="https://adsb.fi/privacy">adsb.fi</a>,
-      <a href="https://skydata.hpradar.com/">hpradar</a>,
-      <a href="https://airplanes.live/privacy">airplanes.live</a>,
-      <a href="https://www.adsbexchange.com/privacy-policy/">ADSBExchange</a>
-    </div>
-    <div id="explain-privacy" style="display: {% if env_value_by_tag('aggregator_choice')=='priv' %} block {% else %}
-            none {% endif %}; font-size: normal;">
-      With this option you will feed data to
-      <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
-      <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/">Fly Italy ADSB</a>,
-      <a href="https://www.avdelphi.com/privacy.html">AVDelphi</a>,
-      <a href="https://www.planespotters.net/legal/privacypolicy/">planespotters.net</a>,
-      <a href="https://adsb.fi/privacy">adsb.fi</a>
-      <a href="https://airplanes.live/privacy">airplanes.live</a>,
-      <a href="https://www.adsbexchange.com/privacy-policy/">ADSBExchange</a>
-    </div>
-    <div id="explain-individual" style="display: {% if env_value_by_tag('aggregator_choice')=='ind' %} block {% else %}
-                none {% endif %}; font-size: normal;">
-      With this option you can make detailed selections on the Aggregator page.
-    </div>
-    <div id="explain-micro" style="display: {% if env_value_by_tag('aggregator_choice')=='micro' %} block {% else %}
-                    none {% endif %}; font-size: normal;">
-      With this option the image will be set up as a micro feeder, minimizing memory use and disabling many features.
-      This is designed to work with a second stage image that uses this feeder as its input and creates the map, feeds
-      the aggregators, etc.
-    </div>
-    <div id="explain-nano" style="display: {% if env_value_by_tag('aggregator_choice')=='nano' %} block {% else %}
-                none {% endif %}; font-size: normal;">
-      With this option the image will be set up as a nano feeder, even more minimizing memory use and disabling many
-      features, including the graphs running on the nano feeder.
-      This is designed to work with a second stage image that uses this feeder as its input and creates the map, feeds
-      the aggregators, etc. Compared to the micro feeder option this removes more local features and is additionally
-      optimized to reduce disk IO.
-    </div>
-    <div id="explain-stage2" style="display: {% if env_value_by_tag('aggregator_choice')=='stage2' %} block {% else %}
-                    none {% endif %}; font-size: normal;">
-      With this option the image will be set up as a Stage 2 system, designed to connect to one or more micro feeder(s).
-      You can select for each of them individually which aggregators you want to feed, and you get a combined map of all
-      the planes that the micro feeder(s) see.
-      <br>
-      {% if mem < 1800000 %} WARNING: Stage 2 setup with only {{ (mem / 1024) | int }} MB of memory
-      (400 to 600MB per microsite recommended){% endif %}
-    </div>
-    <div id="explain-nonadsb" style="display: {% if env_value_by_tag('aggregator_choice')=='nonadsb' %} block {% else %}
-                    none {% endif %}; font-size: normal;">
-      With this option the image will be set up as a feeder for non-ADS-B data, such as ACARS, AIS, SONDE. The selection
-      of services is available under Setup -> Expert. Please click Submit below to continue setup.
+    <h4>What data do you want to track?</h4>
+    <div>Simply click the button for each data type you want to track -- you can always change this later.</div>
+    <div class="row">
+      <div class="col-12 col-md-6 col-lg-4 mt-2">
+        <button type="button" class="btn btn-large btn-primary w-100 with-checkbox" data-mdb-ripple-init><input type="checkbox" class="me-2" name="is_adsb_feeder" id="is_adsb_feeder"
+               {% if env_value_by_tag("is_adsb_feeder") %} checked {% endif %}> ADS-B</button>
+        <div class="row inner w-100 d-none mx-2">
+          Select the type of feeder (explanations below):
+          <label class="form-check-label" for="adsb_integrated"><input type="radio" name="aggregator_choice" id="adsb_integrated" value="integrated" class="me-2"
+                 {% if env_value_by_tag("aggregator_choice")  != "micro" and env_value_by_tag("aggregator_choice") != "nano" and
+                 env_value_by_tag("aggregator_choice") != "stage2" %} checked {% endif %}> Integrated</label>
+          <label class="form-check-label" for="adsb_micro"><input type="radio" name="aggregator_choice" id="adsb_micro" value="micro" class="me-2"
+                 {% if env_value_by_tag("aggregator_choice")=="micro" %} checked {% endif %}> Micro</label>
+          <label class="form-check-label" for="adsb_nano"><input type="radio" name="aggregator_choice" id="adsb_nano" value="nano" class="me-2"
+                 {% if env_value_by_tag("aggregator_choice")=="nano" %} checked {% endif %}> Nano</label>
+          <label class="form-check-label" for="adsb_stage2"><input type="radio" name="aggregator_choice" id="adsb_stage2" value="stage2" class="me-2"
+                 {% if env_value_by_tag("aggregator_choice")=="stage2" %} checked {% endif %}> Stage 2</label>
+        </div>
+      </div>
+      <div class="col-12 col-md-6 col-lg-4 mt-2">
+        <button type="button" class="btn btn-large btn-primary w-100 with-checkbox" data-mdb-ripple-init><input type="checkbox" class="me-2" name="is_acars_feeder"
+               {% if is_enabled('is_acars_feeder') %} checked {% endif %}> ACARS / VDL2</button>
+        <div class="row inner w-100 d-none mx-2 mt-1 d-flex">
+          <label class="form-check-label" for="initials">Initials for Feed-Id:
+          <input type="text" class="initials_class" name="initials" id="initials" style="width: 6em;" placeholder="initials" value="{{ list_value_by_tag('initials', 0) }}" oninput="propagateInitials(this);" data-1p-ignore />
+          </label>
+          <div>
+            <label class="form-check-label" for="acarsdec"><input type="checkbox" class="me-2" name="acarsdec" {% if is_enabled('acarsdec') %} checked {% endif %}><span class="initials_class"></span>-<span class="airport_icao"></span>-ACARS</label><br>
+            <label class="form-check-label" for="acarsdec2"><input type="checkbox" class="me-2" name="acarsdec2" {% if is_enabled('acarsdec2') %} checked {% endif %}><span class="initials_class"></span>-<span class="airport_icao"></span>-ACARS2</label><br>
+            <label class="form-check-label" for="dumpvdl2"><input type="checkbox" class="me-2" name="dumpvdl2" {% if is_enabled('dumpvdl2') %} checked {% endif %}><span
+                    class="initials_class"></span>-<span class="airport_icao"></span>-VDL2</label>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-md-6 col-lg-4 mt-2">
+        <button type="button" class="btn btn-large btn-primary w-100 with-checkbox" data-mdb-ripple-init><input type="checkbox" class="me-2" name="is_hfdl_feeder"
+               {% if is_enabled('is_hfdl_feeder') %} checked {% endif %}> HFDL</button>
+        <div class="row inner w-100 d-none mx-2 mt-1 d-flex">
+          <label class="form-check-label" for="initials2">Initials for Feed-Id:
+            <input type="text" class="initials_class" name="initials" id="initials2" style="width: 6em;" placeholder="initials"
+                    value="{{ list_value_by_tag('initials', 0) }}"
+                    oninput="propagateInitials(this);" data-1p-ignore />
+          </label>
+          <div>
+            <label class="form-check-label" for="dumphfdl"><input type="checkbox" class="me-2" name="dumphfdl"
+                     {% if is_enabled('dumphfdl') %} checked {% endif %}><span class="initials_class"></span>-<span
+                    class="airport_icao"></span>-HFDL (SDR)</label>
+            <label class="form-check-label" for="hfdlobserver"><input type="checkbox" class="me-2" name="hfdlobserver"
+                     {% if is_enabled('hfdlobserver') %} checked {% endif %}><span class="initials_class"></span>-<span
+                    class="airport_icao"></span>-HFDL (WEB-888)</label><br>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-md-6 col-lg-4 mt-2">
+        <button type="button" class="btn btn-large btn-primary w-100 with-checkbox" data-mdb-ripple-init><input type="checkbox" class="me-2" name="is_ais_feeder"
+               {% if is_enabled('is_ais_feeder') %} checked {% endif %}> AIS</button>
+      </div>
+      <div class="col-12 col-md-6 col-lg-4 mt-2">
+        <button type="button" class="btn btn-large btn-primary w-100 with-checkbox" data-mdb-ripple-init><input type="checkbox" class="me-2" name="is_sonde_feeder"
+               {% if is_enabled('is_sonde_feeder') %} checked {% endif %}> SONDE</button>
+      </div>
     </div>
   </div>
   <br>
@@ -179,6 +151,34 @@
   </div>
   <p>{{ message }}</p>
 </form>
+<div id="explain-adsb" class="{% if not env_value_by_tag("is_adsb_feeder") %} d-none {% endif %} mt-4 small">
+  <h5>Explanation of the ADS-B feeder types</h5>
+  <div id="explain-integrated">
+    <strong>Integrated Feeder:</strong> Collect data using attached SDRs and send to one or more aggregators.
+  </div>
+  <div id="explain-micro">
+    <strong>Micro Feeder:</strong> Collect data using attached SDRs and otherwise
+    minimize memory use and disable local features.
+    Designed to work with a second stage image that uses this
+    feeder as its input and creates the map, feeds the aggregators, etc.
+  </div>
+  <div id="explain-nano">
+    <strong>Nano Feeder:</strong> Collect data using attached SDRs and otherwise
+    minimize memory use even more and disable most local features, including the graphs running on the nano feeder.
+    Designed to work with a second stage image that uses this feeder as its input and creates the map, feeds
+    the aggregators, etc. Compared to the micro feeder option this is additionally optimized to reduce disk IO.
+  </div>
+  <div id="explain-stage2">
+    <strong>Stage 2:</strong>
+    Designed to connect to one or more micro feeder(s).
+    You can select for each of them individually which aggregators you want to feed, and you get a combined map of all
+    the planes that the micro feeder(s) see.
+    <br>
+    {% if mem < 1800000 %} WARNING: Stage 2 setup with only {{ (mem / 1024) | int }} MB of memory
+    (400 to 600MB per microsite recommended){% endif %}
+  </div>
+          </div>
+
 <script>
   $("#lat").on("blur", async function () {
     let lat_value = $("#lat").val();
@@ -211,6 +211,9 @@
           airport_str = airport_json["icao"] + " (" + airport_json["name"] + ")";
         }
         $("#airport").html(airport_str);
+        $(".airport_icao").each(function () {
+          $(this).html(airport_json["icao"]);
+        })
       })
       .catch(error => {
         console.log(`getAirport(${lat}, ${lon}) -> ${error}`);
@@ -219,6 +222,33 @@
     }
   }
 
+  // for all buttons with class 'with-checkbox' toggle the checkbox when button is clicked
+  $(".with-checkbox").each(function () {
+    $(this).parent().find(".inner").toggleClass("d-none", !$(this).find("input").prop("checked"));
+    $(this).on("click", function (ev) {
+      if (ev.target == this) {
+        // $(this).find("input").prop("checked", !$(this).find("input").prop("checked"));
+        $(this).find("input").trigger("click");
+      }
+      $(this).parent().find(".inner").toggleClass("d-none", !$(this).find("input").prop("checked"));
+    });
+  });
+  $("#is_adsb_feeder").on("click", function () {
+    $("#explain-adsb").toggleClass("d-none", !$(this).prop("checked"));
+  });
+
+  function propagateInitials(element) {
+    let initials = element.value;
+    console.log('propagateInitials', initials, element);
+    $('.initials_class').each(function () {
+      if ($(this).is('span')) {
+        console.log("it's a span", $(this).attr("id"));
+        $(this).text(initials); }
+      else {
+        console.log("it's not a span", $(this).attr("id"));
+        $(this).val(initials); }
+    })
+  }
   function fixAlt() {
     let alt_value = $("#alt").val();
     let factor = 1.0;
@@ -227,7 +257,6 @@
     if (new_alt.toString() == "NaN") new_alt = ""; else new_alt = new_alt + "m";
     $("#alt").val(new_alt);
   }
-  fixAlt();
   $("#alt").on("blur", fixAlt);
   function browserTZ() {
     let timezone = "";
@@ -246,79 +275,16 @@
   if (!$("#tz").val()) {
     $("#tz").val(browserTZ());
   }
-  const explainAll = document.getElementById("explain-all");
-  const explainPriv = document.getElementById("explain-privacy");
-  const explainInd = document.getElementById("explain-individual");
-  const explainMicro = document.getElementById("explain-micro");
-  const explainNano = document.getElementById("explain-nano");
-  const explainStage2 = document.getElementById("explain-stage2");
-  const explainNonadsb = document.getElementById("explain-nonadsb");
-  function aggregatorClick() {
-    if (document.getElementById("all").checked) {
-      explainAll.style.display = "block";
-      explainPriv.style.display = "none";
-      explainInd.style.display = "none";
-      explainMicro.style.display = "none";
-      explainNano.style.display = "none";
-      explainStage2.style.display = "none";
-      explainNonadsb.style.display = "none";
-    } else if (document.getElementById("privacy").checked) {
-      explainAll.style.display = "none";
-      explainPriv.style.display = "block";
-      explainInd.style.display = "none";
-      explainMicro.style.display = "none";
-      explainNano.style.display = "none";
-      explainStage2.style.display = "none";
-      explainNonadsb.style.display = "none";
-    } else if (document.getElementById("individual").checked) {
-      explainAll.style.display = "none";
-      explainPriv.style.display = "none";
-      explainInd.style.display = "block";
-      explainMicro.style.display = "none";
-      explainNano.style.display = "none";
-      explainStage2.style.display = "none";
-      explainNonadsb.style.display = "none";
-    } else if (document.getElementById("micro").checked) {
-      explainAll.style.display = "none";
-      explainPriv.style.display = "none";
-      explainInd.style.display = "none";
-      explainMicro.style.display = "block";
-      explainNano.style.display = "none";
-      explainStage2.style.display = "none";
-      explainNonadsb.style.display = "none";
-    } else if (document.getElementById("nano").checked) {
-      explainAll.style.display = "none";
-      explainPriv.style.display = "none";
-      explainInd.style.display = "none";
-      explainMicro.style.display = "none";
-      explainNano.style.display = "block";
-      explainStage2.style.display = "none";
-      explainNonadsb.style.display = "none";
-    } else if (document.getElementById("nonadsb").checked) {
-      explainAll.style.display = "none";
-      explainPriv.style.display = "none";
-      explainInd.style.display = "none";
-      explainMicro.style.display = "none";
-      explainNano.style.display = "none";
-      explainStage2.style.display = "none";
-      explainNonadsb.style.display = "block";
-    } else if (document.getElementById("stage2").checked) {
-      explainAll.style.display = "none";
-      explainPriv.style.display = "none";
-      explainInd.style.display = "none";
-      explainMicro.style.display = "none";
-      explainNano.style.display = "none";
-      explainStage2.style.display = "block";
-      explainNonadsb.style.display = "none";
-    }
-  }
-  const aggregatorBtns = document.querySelectorAll('input[name="aggregator_choice"]');
-  aggregatorBtns.forEach((radio) => {
-    radio.addEventListener("click", aggregatorClick);
-  });
+
   checkAirport()
   .catch(() => {
     console.log("checkAirport failed");
+  });
+
+  // run when the page finished loading using the ready function
+  $(document).ready(function () {
+    $('.initials_class').each(function () { $(this).text($("#initials").val()); console.log('initials', $("#initials").val()); });
+    fixAlt();
   });
 </script>
 {% endblock %}

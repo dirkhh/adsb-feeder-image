@@ -811,7 +811,7 @@
   // for each input checkbox, add an onclick handler to toggle the dependent devs (which include the input field)
   function create_feed_id(id) {
     let type = id.split("_")[0];
-    let name = "YOURINITIALS_{{ list_value_by_tag('closest_airport', 0) }}_" + type.toUpperCase();
+    let name = "{{ list_value_by_tag('initials', 0) }}-{{ list_value_by_tag('closest_airport', 0) }}-" + type.toUpperCase();
     console.log(`Feed ID: ${name}`);
     return name;
   }
