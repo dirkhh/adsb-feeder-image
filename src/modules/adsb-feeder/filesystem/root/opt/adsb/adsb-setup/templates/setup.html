@@ -86,7 +86,7 @@
     <div>Simply click the button for each data type you want to track -- you can always change this later.</div>
     <div class="row">
       <div class="col-12 col-md-6 col-lg-4 mt-2">
-        <button type="button" class="btn btn-large btn-primary w-100 with-checkbox" data-mdb-ripple-init><input type="checkbox" class="me-2" name="is_adsb_feeder" id="is_adsb_feeder"
+        <button type="button" class="btn btn-large btn-primary w-100 with-checkbox" id="adsb_button" data-mdb-ripple-init><input type="checkbox" class="me-2" name="is_adsb_feeder" id="is_adsb_feeder"
                {% if env_value_by_tag("is_adsb_feeder") %} checked {% endif %}> ADS-B</button>
         <div class="row inner w-100 d-none mx-2">
           Select the type of feeder (explanations below):
@@ -235,7 +235,7 @@
   // for all buttons with class 'with-checkbox' toggle the checkbox when button is clicked
   $(".with-checkbox").each(function () {
     $(this).parent().find(".inner").toggleClass("d-none", !$(this).find("input").prop("checked"));
-    if ($(this).find("input").prop("checked")) {
+    if ($(this).prop("id") != "adsb_button" && $(this).find("input").prop("checked")) {
       $("#initials_div").removeClass("d-none");
     }
     $(this).on("click", function (ev) {
@@ -244,7 +244,7 @@
         $(this).find("input").trigger("click");
       }
       $(this).parent().find(".inner").toggleClass("d-none", !$(this).find("input").prop("checked"));
-      if ($(this).find("input").prop("checked")) {
+      if ($(this).prop("id") != "adsb_button" && $(this).find("input").prop("checked")) {
         $("#initials_div").removeClass("d-none");
       }
     });
