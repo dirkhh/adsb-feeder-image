@@ -104,9 +104,6 @@
         <button type="button" class="btn btn-large btn-primary w-100 with-checkbox" data-mdb-ripple-init><input type="checkbox" class="me-2" name="is_acars_feeder"
                {% if is_enabled('is_acars_feeder') %} checked {% endif %}> ACARS / VDL2</button>
         <div class="row inner w-100 d-none mx-2 mt-1 d-flex">
-          <label class="form-check-label" for="initials">Initials for Feed-Id:
-          <input type="text" class="initials_class" name="initials" id="initials" style="width: 6em;" placeholder="initials" value="{{ list_value_by_tag('initials', 0) }}" oninput="propagateInitials(this);" data-1p-ignore />
-          </label>
           <div>
             <label class="form-check-label" for="acarsdec"><input type="checkbox" class="me-2" name="acarsdec" {% if is_enabled('acarsdec') %} checked {% endif %}
               >{% if env_value_by_tag('acars_feed_id') != "" %}{{ env_value_by_tag('acars_feed_id') }}
@@ -124,18 +121,15 @@
         <button type="button" class="btn btn-large btn-primary w-100 with-checkbox" data-mdb-ripple-init><input type="checkbox" class="me-2" name="is_hfdl_feeder"
                {% if is_enabled('is_hfdl_feeder') %} checked {% endif %}> HFDL</button>
         <div class="row inner w-100 d-none mx-2 mt-1 d-flex">
-          <label class="form-check-label" for="initials2">Initials for Feed-Id:
-            <input type="text" class="initials_class" name="initials" id="initials2" style="width: 6em;" placeholder="initials"
-                    value="{{ list_value_by_tag('initials', 0) }}"
-                    oninput="propagateInitials(this);" data-1p-ignore />
-          </label>
           <div>
             <label class="form-check-label" for="dumphfdl"><input type="checkbox" class="me-2" name="dumphfdl"
-                     {% if is_enabled('dumphfdl') %} checked {% endif %}><span class="initials_class"></span>-<span
-                    class="airport_icao"></span>-HFDL (SDR)</label>
+                     {% if is_enabled('dumphfdl') %} checked {% endif %}
+                     >{% if env_value_by_tag('hfdl_feed_id') != "" %}{{ env_value_by_tag('hfdl_feed_id') }}
+                    {% else %}<span class="initials_class"></span>-<span class="airport_icao"></span>-HFDL (SDR){% endif %}</label>
             <label class="form-check-label" for="hfdlobserver"><input type="checkbox" class="me-2" name="hfdlobserver"
-                     {% if is_enabled('hfdlobserver') %} checked {% endif %}><span class="initials_class"></span>-<span
-                    class="airport_icao"></span>-HFDL (WEB-888)</label><br>
+                     {% if is_enabled('hfdlobserver') %} checked {% endif %}
+                     >{% if env_value_by_tag('hfdlobserver_feed_id') != "" %}{{ env_value_by_tag('hfdlobserver_feed_id') }}
+                    {% else %}<span class="initials_class"></span>-<span class="airport_icao"></span>-HFDL (WEB-888){% endif %}</label>
           </div>
         </div>
       </div>
@@ -152,6 +146,12 @@
       <div class="col-12 col-md-6 col-lg-4 mt-2">
         <button type="button" class="btn btn-large btn-primary w-100 with-checkbox" data-mdb-ripple-init><input type="checkbox" class="me-2" name="is_sonde_feeder"
                {% if is_enabled('is_sonde_feeder') %} checked {% endif %}> SONDE</button>
+      </div>
+      <div class="col-12 col-md-6 col-lg-4 mt-2 d-none" id="initials_div">
+        <label class="form-check-label" for="initials">Initials for non-ADS-B station names:
+          <input type="text" class="initials_class" name="initials" id="initials" style="width: 6em;" placeholder="initials"
+                  value="{{ list_value_by_tag('initials', 0) }}" oninput="propagateInitials(this);" data-1p-ignore />
+        </label>
       </div>
     </div>
   </div>
@@ -235,12 +235,18 @@
   // for all buttons with class 'with-checkbox' toggle the checkbox when button is clicked
   $(".with-checkbox").each(function () {
     $(this).parent().find(".inner").toggleClass("d-none", !$(this).find("input").prop("checked"));
+    if ($(this).find("input").prop("checked")) {
+      $("#initials_div").removeClass("d-none");
+    }
     $(this).on("click", function (ev) {
       if (ev.target == this) {
         // $(this).find("input").prop("checked", !$(this).find("input").prop("checked"));
         $(this).find("input").trigger("click");
       }
       $(this).parent().find(".inner").toggleClass("d-none", !$(this).find("input").prop("checked"));
+      if ($(this).find("input").prop("checked")) {
+        $("#initials_div").removeClass("d-none");
+      }
     });
   });
   $("#is_adsb_feeder").on("click", function () {
@@ -256,7 +262,6 @@
 
   function propagateInitials(element) {
     let initials = element.value;
-    console.log('propagateInitials', initials, element);
     $('.initials_class').each(function () {
       if ($(this).is('span')) {
         console.log("it's a span", $(this).attr("id"));
