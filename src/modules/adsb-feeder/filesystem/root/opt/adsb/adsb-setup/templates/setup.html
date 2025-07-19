@@ -91,8 +91,7 @@
         <div class="row inner w-100 d-none mx-2">
           Select the type of feeder (explanations below):
           <label class="form-check-label" for="adsb_integrated"><input type="radio" name="aggregator_choice" id="adsb_integrated" value="integrated" class="me-2"
-                 {% if env_value_by_tag("aggregator_choice")  != "micro" and env_value_by_tag("aggregator_choice") != "nano" and
-                 env_value_by_tag("aggregator_choice") != "stage2" %} checked {% endif %}> Integrated</label>
+                 {% if env_value_by_tag("aggregator_choice")  == "integrated" %} checked {% endif %}> Integrated</label>
           <label class="form-check-label" for="adsb_micro"><input type="radio" name="aggregator_choice" id="adsb_micro" value="micro" class="me-2"
                  {% if env_value_by_tag("aggregator_choice")=="micro" %} checked {% endif %}> Micro</label>
           <label class="form-check-label" for="adsb_nano"><input type="radio" name="aggregator_choice" id="adsb_nano" value="nano" class="me-2"
@@ -235,6 +234,13 @@
   });
   $("#is_adsb_feeder").on("click", function () {
     $("#explain-adsb").toggleClass("d-none", !$(this).prop("checked"));
+    if ($(this).prop("checked")) {
+      // if nothing has been selected, default to integrated
+      let $agg_choice = $("input[type='radio'][name='aggregator_choice']");
+      if (!$radio.filter(':checked').length) {
+        $("#adsb_integrated").prop("checked", true);
+      }
+    }
   });
 
   function propagateInitials(element) {
