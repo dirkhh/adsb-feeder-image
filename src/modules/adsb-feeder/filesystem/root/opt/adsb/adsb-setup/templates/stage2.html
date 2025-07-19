@@ -278,58 +278,8 @@
       </div>
     </form>
     <form method="post" action="{{ url_for('update') }}">
-      <div class="form-group mt-3">
-        <label>
-          Which
-          <a href="#"
-             title="aggregators that don't require you to create an account or provide an email address">account-less
-          </a>
-          aggregators do you want to feed?
-        </label>
-        <br />
-        <div>
-          <input type="radio" name="aggregator_choice" id="all" value="all" required {% if env_value_by_tag("aggregator_choice")=="all"
-      %} checked {% endif %}>
-          <label class="form-check-label mr-3" for="all">All</label>
-          <input type="radio" name="aggregator_choice" id="privacy" value="privacy" {% if
-      env_value_by_tag("aggregator_choice")=="privacy" %} checked {% endif %}>
-          <label class="form-check-label mr-3" for="privacy">Aggregators with privacy policy</label>
-          <input type="radio" name="aggregator_choice" id="individual" value="individual" {% if
-      env_value_by_tag("aggregator_choice")=="individual" %} checked {% endif %}>
-          <label class="form-check-label" for="individual">Pick individually</label>
-        </div>
-        <div id="explain-all" style="display: {% if env_value_by_tag('aggregator_choice')=='all' %} block {% else %} none {%
-            endif %}; font-size: smaller;">
-          With this option you will feed data to
-          <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
-          <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/">Fly Italy ADSB</a>,
-          <a href="https://www.avdelphi.com/privacy.html">AVDelphi</a>,
-          <a href="https://www.planespotters.net/legal/privacypolicy/">planespotters.net</a>,
-          <a href="https://theairtraffic.com/privacy/">TheAirTraffic.com</a>,
-          <a href="https://adsb.fi/privacy">adsb.fi</a>,
-          <a href="https://skydata.hpradar.com/">hpradar</a>,
-          <a href="https://airplanes.live/privacy">airplanes.live</a>,
-          <a href="https://www.adsbexchange.com/privacy-policy/">ADSBExchange</a>
-        </div>
-        <div id="explain-privacy" style="display: {% if env_value_by_tag('aggregator_choice')=='priv' %} block {% else %}
-            none {% endif %}; font-size: smaller;">
-          With this option you will feed data to
-          <a href="https://adsb.lol/privacy-license/">adsb.lol</a>,
-          <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/">Fly Italy ADSB</a>,
-          <a href="https://www.avdelphi.com/privacy.html">AVDelphi</a>,
-          <a href="https://www.planespotters.net/legal/privacypolicy/">planespotters.net</a>,
-          <a href="https://adsb.fi/privacy">adsb.fi</a>
-          <a href="https://airplanes.live/privacy">airplanes.live</a>,
-          <a href="https://www.adsbexchange.com/privacy-policy/">ADSBExchange</a>
-        </div>
-        <div id="explain-individual" style="display: {% if env_value_by_tag('aggregator_choice')=='ind' %} block {% else %}
-                none {% endif %}; font-size: smaller;">
-          With this option you can make detailed selections on the Aggregator page.
-        </div>
-      </div>
-      <br>
       <div class="col-12">
-        To configure aggregators beyond this, select a target MicroSite at the top of the page and select the Data Sharing menu.
+        To configure aggregators for the individual feeders, select a target MicroSite at the top of the page and select the Data Sharing menu.
       </div>
       <br>
       <div class="form-group">
