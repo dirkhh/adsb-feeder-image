@@ -823,9 +823,11 @@
         $(this).toggle(checked);
       })
     });
-    // for each text input field with an id ending in _feed_id, check that they aren't empty, both initially and on any change
-    $('input[id$="_feed_id"]').each(function () {
-      $(this).val(create_feed_id($(this).attr('id')));
+    // for each text input field with an id ending in either "_feed_id" or "_station name, check that they aren't empty, both initially and on any change
+    $('input[id$="_feed_id"], input[id$="_station_name"]').each(function () {
+      if ($(this).val() == "") {
+        $(this).val(create_feed_id($(this).attr('id')));
+      }
       $(this).on('change', function () {
         if ($(this).val() == "") {
           $(this).val(create_feed_id($(this).attr('id')));

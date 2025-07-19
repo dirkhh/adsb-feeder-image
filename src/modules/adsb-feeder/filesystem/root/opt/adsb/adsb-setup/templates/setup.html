@@ -142,6 +142,12 @@
       <div class="col-12 col-md-6 col-lg-4 mt-2">
         <button type="button" class="btn btn-large btn-primary w-100 with-checkbox" data-mdb-ripple-init><input type="checkbox" class="me-2" name="is_ais_feeder"
                {% if is_enabled('is_ais_feeder') %} checked {% endif %}> AIS</button>
+        <div class="row inner w-100 d-none mx-2 mt-1 d-flex">
+          <div>
+            <label class="form-check-label">{% if env_value_by_tag('ais_station_name') != "" %}{{ env_value_by_tag('ais_station_name') }}
+            {% else %}<span class="initials_class"></span>-<span class="airport_icao"></span>-AIS{% endif %}
+          </div>
+        </div>
       </div>
       <div class="col-12 col-md-6 col-lg-4 mt-2">
         <button type="button" class="btn btn-large btn-primary w-100 with-checkbox" data-mdb-ripple-init><input type="checkbox" class="me-2" name="is_sonde_feeder"
