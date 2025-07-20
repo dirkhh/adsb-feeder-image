@@ -1,5 +1,6 @@
 Changes since v3.0.0
 =======
+- adsb: move MLAT privacy to be part of the account less aggregator setup (where it belongs)
 - setup: complete overhaul of the UI flow to be less ADS-B centric
 - setup: ask the user for their initials and provide a feed id that matches the proposed pattern if the user doesn't provide their own
 - setup: show closest airport on basic setup page, based on lat/long data entered (this should help detect mistakes when entering the location)

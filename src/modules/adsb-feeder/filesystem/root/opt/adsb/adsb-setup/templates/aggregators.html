@@ -28,15 +28,6 @@
   <!-- ADS-B related aggregators -->
   {% if is_enabled('base_config') and not env_value_by_tag('aggregator_choice') in ['micro', 'nano', 'nonadsb'] %}
   <div class="col-12 form-check">
-    <input class="form-check-input me-1" type="checkbox" name="mlat_privacy--is_enabled" id="mlat_privacy--is_enabled"
-           {% if list_is_enabled("mlat_privacy", m) %}checked{% endif %} />
-    <label for="mlat_privacy--is_enabled">
-      Enable privacy flag (ON = your site won't be visible at all on <a
-         href="https://mlat.adsb.lol/syncmap/#lat={{ list_value_by_tag('lat', m) }}#lon={{ list_value_by_tag('lon', m) }}#zoom=10">public
-        aggregator maps</a> -- OFF = your site will be visible at an approximate location.)
-    </label>
-  </div>
-  <div class="col-12 form-check">
     <input class="form-check-input me-1" type="checkbox" name="mlat_enable--is_enabled" id="mlat_enable--is_enabled"
            {% if list_is_enabled("mlat_enable", m) %}checked{% endif %} />
     <label for="mlat_enable--is_enabled">
@@ -61,7 +52,15 @@
     <button type="button" class="btn btn-large btn-primary w-100 with-checkbox" data-mdb-ripple-init><input type="radio"
               class="me-2" name="aggregator_choice" id="individual" value="individual" required {% if env_value_by_tag("aggregator_choice")=="individual" %} checked {% endif %}> Individual</button>
   </div>
-  <div class="col-12"></div>
+  <div class="col-12 form-check">
+    <input class="form-check-input me-1" type="checkbox" name="mlat_privacy--is_enabled" id="mlat_privacy--is_enabled"
+           {% if list_is_enabled("mlat_privacy", m) %}checked{% endif %} />
+    <label for="mlat_privacy--is_enabled">
+      Enable privacy flag (ON = your site won't be visible at all on <a
+         href="https://mlat.adsb.lol/syncmap/#lat={{ list_value_by_tag('lat', m) }}#lon={{ list_value_by_tag('lon', m) }}#zoom=10">public
+        aggregator maps</a> -- OFF = your site will be visible at an approximate location.)
+    </label>
+  </div>
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
     <input type="checkbox" class="form-check-input me-1 ultrafeeder" name="is_enabled--ultrafeeder--adsblol"
            id="is_enabled--adsblol" {{ uf_enabled("adsblol", m) }} onclick="$('#individual').click();" />
