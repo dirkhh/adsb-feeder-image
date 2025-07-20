@@ -27,6 +27,7 @@
 
   <!-- ADS-B related aggregators -->
   {% if is_enabled('base_config') and not env_value_by_tag('aggregator_choice') in ['micro', 'nano', 'nonadsb'] %}
+  <h3 class="note-primary text-decoration-underline">ADS-B</h3>
   <div class="col-12 form-check">
     <input class="form-check-input me-1" type="checkbox" name="mlat_enable--is_enabled" id="mlat_enable--is_enabled"
            {% if list_is_enabled("mlat_enable", m) %}checked{% endif %} />
@@ -341,11 +342,13 @@
         </div>
     </label>
   </div>
+  <hr>
   {% endif %}
   <!-- end of the ADS-B section -->
 
   <!-- ACARS section -->
   {% if is_enabled('acarsdec') or is_enabled('acarsdec2') or is_enabled('dumpvdl2') %}
+  <h3 class="note-primary text-decoration-underline" >ACARS / VDL2 / HFDL</h3>
   <div class="col-12 mt-3 mb-1 h5">Select the ACARS (including VDL2 / HFDL) aggregators you want to feed:</div>
   <div class="ol-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="feed_acars_airframes--is_enabled" id="feed_acars_airframes--is_enabled" {{ nonadsb_enabled("feed_acars_airframes", m) }} />
@@ -378,13 +381,14 @@
       feed on their <a href="https://www.avdelphi.com/claim_feed.html">website</a> before you are allowed to feed them.
     </label>
   </div>
-
+  <hr>
 
   {% endif %}
   <!-- end of the ACARS section -->
 
   <!-- AIS section -->
   {% if is_enabled('shipfeeder') %}
+  <h3 class="note-primary text-decoration-underline">AIS</h3>
   <div class="col-12 mt-3 mb-1 h5">Select the AIS aggregators you want to feed:</div>
   <!-- Airframes.io -->
   <div class="ol-12 form-check mb-2">
@@ -578,7 +582,7 @@
     </label>
   </div>
 
-
+  <hr>
   {% endif %}
   <!-- end of the AIS section -->
 
