@@ -1,5 +1,6 @@
 Changes since v3.0.0
 =======
+- update containers to latest version
 - data sharing: add some visual separation / grouping to this rather busy page
 - adsb: move MLAT privacy to be part of the account less aggregator setup (where it belongs)
 - setup: complete overhaul of the UI flow to be less ADS-B centric
