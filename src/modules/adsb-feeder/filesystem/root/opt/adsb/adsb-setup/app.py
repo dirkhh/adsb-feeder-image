@@ -491,6 +491,14 @@ class AdsbIm:
             self._d.secure_image_path.touch(exist_ok=True)
             print_err("secure_image has been set")
 
+    def toggle_hotspot(self):
+        if self._d.hotspot_disabled_path.exists():
+            self._d.hotspot_disabled_path.unlink(missing_ok=True)
+            print_err("hotspot has been enabled")
+        else:
+            self._d.hotspot_disabled_path.touch(exist_ok=True)
+            print_err("hotspot has been disabled")
+
     def update_dns_state(self):
         def update_dns():
             dns_state = self._system.check_dns()
@@ -3133,6 +3141,8 @@ class AdsbIm:
                     self._next_url_from_director = request.url
                 if key == "secure_image":
                     self.set_secure_image()
+                if allow_insecure and key == "toggle_hotspot":
+                    self.toggle_hotspot()
                 if key == "no_config_link":
                     self._d.env_by_tags("tar1090_image_config_link").value = ""
                 if key == "allow_config_link":
@@ -3611,6 +3621,7 @@ class AdsbIm:
             "systemmgmt.html",
             tailscale_running=tailscale_running,
             zerotier_running=zerotier_running,
+            hotspot_enabled= not self._d.hotspot_disabled_path.exists(),
             rpw=self.rpw,
             channel=channel,
             current_branch=current_branch,

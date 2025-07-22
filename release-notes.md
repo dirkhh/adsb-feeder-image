@@ -1,5 +1,7 @@
 Changes since v3.0.0
 =======
+- while 'secure image' is activated, wifi config hotspot will remain disabled
+- add setting to disable wifi config hotspot
 - update containers to latest version
 - data sharing: add some visual separation / grouping to this rather busy page
 - adsb: move MLAT privacy to be part of the account less aggregator setup (where it belongs)

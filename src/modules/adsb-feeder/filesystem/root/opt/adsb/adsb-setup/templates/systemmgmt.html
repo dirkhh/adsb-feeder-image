@@ -84,11 +84,33 @@
             protection attempted here. Make sure you have an SSH key or
             password set up and tested before doing this, or you will
             permanently lock yourself out of this image.
+            Also disables the wifi hotspot which allows for wifi
+            configuration when there is no network connectivity.
           </label>
         </div>
         <div class="col-4">
           <button type="submit" class="btn btn-primary mx-auto w-100" name="secure_image" value="go">
             SSH is working.<br>Secure the image.
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="col-12 col-lg-6 {% if is_enabled('secure_image') %} d-none {% endif %}">
+    <h5 class="mt-3">Wifi Hotspot</h5>
+    <form method="POST" onsubmit="show_spinner(); return true;">
+      <div class="row align-items-center">
+        <div class="col-8">
+          <label for="hotspot">
+              When there is no network connectivity, this image provides
+              a wifi hotspot to configure wifi.
+              This feature is currently
+              {% if hotspot_enabled %}enabled{% else %}disabled{% endif %}.
+          </label>
+        </div>
+        <div class="col-4">
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="toggle_hotspot" value="go">
+            {% if hotspot_enabled %}Disable{% else %}Enable{% endif %} Hotspot
           </button>
         </div>
       </div>

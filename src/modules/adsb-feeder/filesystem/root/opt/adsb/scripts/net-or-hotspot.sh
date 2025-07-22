@@ -6,6 +6,12 @@ if [ "$(id -u)" != "0" ] ; then
     exit 1
 fi
 
+# if requested, disable this feature
+if [[ -f /opt/adsb/adsb.im.secure_image ]] || [[ -f /opt/adsb/adsb.im.hotspot_disabled ]]; then
+    echo "hotspot is disabled"
+    exit 0
+fi
+
 function test_network() {
     pids=()
 
