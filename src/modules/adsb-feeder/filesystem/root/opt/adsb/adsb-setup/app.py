@@ -2302,7 +2302,7 @@ class AdsbIm:
                 print_err(f"failed to install pigpiod and python3-pigpio: {output}")
                 temp_sensor.value = ""
                 return
-            default_file_content = f"GPIO_PIN={dht22_pin}\n"
+            default_file_content = f"GPIO_PIN={dht22_pin}\nPIGPIO=pigpiod.service\n"
         elif temp_sensor.value == "temper_usb":
             # this is not a commonly used feature, so let's install dependencies here
             success, output = run_shell_captured(
@@ -3621,7 +3621,7 @@ class AdsbIm:
             "systemmgmt.html",
             tailscale_running=tailscale_running,
             zerotier_running=zerotier_running,
-            hotspot_enabled= not self._d.hotspot_disabled_path.exists(),
+            hotspot_enabled=not self._d.hotspot_disabled_path.exists(),
             rpw=self.rpw,
             channel=channel,
             current_branch=current_branch,
