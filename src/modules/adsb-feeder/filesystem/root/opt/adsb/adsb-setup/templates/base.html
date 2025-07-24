@@ -216,8 +216,11 @@
                            ["960px", "768px", "420px", "300px", "300px", "260px", "215px", "180px"],
                            ["1100px","800px", "490px", "350px", "305px", "260px", "215px", "170px"]];
     let breakpoints = breakpointslist[bitsSet[mapsNeeded]];
-    // console.log(`breakpoints: ${breakpoints}`);
-
+    {% if env_value_by_tag("temp_sensor") != "" %}
+    for (let i = 0; i < breakpoints.length; i++) {
+      breakpoints[i] = (parseInt(breakpoints[i]) + 80) + 'px';
+    }
+    {% endif %}
     let nMapButtons = [];
     for (let i = 0; i < 4; i++) {
       nMapButtons[i] = window.matchMedia(`(max-width: ${breakpoints[7 - i]})`);
