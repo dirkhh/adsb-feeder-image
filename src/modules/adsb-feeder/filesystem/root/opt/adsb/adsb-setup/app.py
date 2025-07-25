@@ -2645,11 +2645,17 @@ class AdsbIm:
         acarssdr = self._sdrdevices.get_sdr_by_serial(acarsserial)
         if acarssdr != self._sdrdevices.null_sdr:
             acarssdr.purpose = "acars"
-            if acarssdr._type == "rtlsdr":
+            if acarssdr._type == "airspy":
+                self._d.env_by_tags("acarsserial_rtl").value = ""
+                self._d.env_by_tags("acarsserial_airspy").value = acarsserial
+                acarsstring = ""
+            elif acarssdr._type == "rtlsdr":
                 self._d.env_by_tags("acarsserial_rtl").value = acarsserial
+                self._d.env_by_tags("acarsserial_airspy").value = ""
                 acarsstring = ""
             else:
                 self._d.env_by_tags("acarsserial_rtl").value = ""
+                self._d.env_by_tags("acarsserial_airspy").value = ""
                 acarsstring = f"driver={acarssdr._type},serial={acarsserial}"
             self._d.env_by_tags("run_acarsdec").value = self._d.is_enabled(["acarsdec"])
             if self._d.is_enabled("run_acarsdec") and self._d.env_by_tags("acars_feed_id").value == "":
@@ -2663,11 +2669,17 @@ class AdsbIm:
         acars_2sdr = self._sdrdevices.get_sdr_by_serial(acars_2serial)
         if acars_2sdr != self._sdrdevices.null_sdr:
             acars_2sdr.purpose = "acars_2"
-            if acars_2sdr._type == "rtlsdr":
+            if acars_2sdr._type == "airspy":
+                self._d.env_by_tags("acars_2serial_rtl").value = ""
+                self._d.env_by_tags("acars_2serial_airspy").value = acars_2serial
+                acars_2string = ""
+            elif acars_2sdr._type == "rtlsdr":
                 self._d.env_by_tags("acars_2serial_rtl").value = acars_2serial
+                self._d.env_by_tags("acars_2serial_airspy").value = ""
                 acars_2string = ""
             else:
                 self._d.env_by_tags("acars_2serial_rtl").value = ""
+                self._d.env_by_tags("acars_2serial_airspy").value = ""
                 acars_2string = f"driver={acars_2sdr._type},serial={acars_2serial}"
             self._d.env_by_tags("run_acarsdec2").value = self._d.is_enabled(["acarsdec2"])
             if self._d.is_enabled("run_acarsdec2") and self._d.env_by_tags("acars_2_feed_id").value == "":
