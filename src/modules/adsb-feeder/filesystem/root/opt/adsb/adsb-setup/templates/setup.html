@@ -91,7 +91,7 @@
         <div class="row inner w-100 d-none mx-2">
           Select the type of feeder (explanations below):
           <label class="form-check-label" for="adsb_integrated"><input type="radio" name="aggregator_choice" id="adsb_integrated" value="integrated" class="me-2"
-                 {% if env_value_by_tag("aggregator_choice")  == "integrated" or env_value_by_tag("aggregator_choice") == "all" or env_value_by_tag("aggregator_choice") == "privacy" or env_value_by_tag("aggregator_choice") == "individual" %} checked {% endif %}> Integrated</label>
+                 {% if env_value_by_tag("aggregator_choice")  == "integrated" or env_value_by_tag("aggregator_choice") == "all" or env_value_by_tag("aggregator_choice") == "privacy" or env_value_by_tag("aggregator_choice") == "individual" %} checked {% endif %}> Default (integrated)</label>
           <label class="form-check-label" for="adsb_micro"><input type="radio" name="aggregator_choice" id="adsb_micro" value="micro" class="me-2"
                  {% if env_value_by_tag("aggregator_choice")=="micro" %} checked {% endif %}> Micro</label>
           <label class="form-check-label" for="adsb_nano"><input type="radio" name="aggregator_choice" id="adsb_nano" value="nano" class="me-2"
@@ -164,7 +164,7 @@
 <div id="explain-adsb" class="{% if not env_value_by_tag("is_adsb_feeder") %} d-none {% endif %} mt-4 small">
   <h5>Explanation of the ADS-B feeder types</h5>
   <div id="explain-integrated">
-    <strong>Integrated Feeder:</strong> Collect data using attached SDRs and send to one or more aggregators.
+    <strong>Integrated Feeder:</strong> This is the default option that most users will want. Collect data using attached SDRs and send to one or more aggregators.
   </div>
   <div id="explain-micro">
     <strong>Micro Feeder:</strong> Collect data using attached SDRs and otherwise
@@ -254,7 +254,7 @@
     if ($(this).prop("checked")) {
       // if nothing has been selected, default to integrated
       let $agg_choice = $("input[type='radio'][name='aggregator_choice']");
-      if (!$radio.filter(':checked').length) {
+      if (!$agg_choice.filter(':checked').length) {
         $("#adsb_integrated").prop("checked", true);
       }
     }
