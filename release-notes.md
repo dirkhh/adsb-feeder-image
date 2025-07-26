@@ -1,5 +1,6 @@
 Changes since v3.0.0
 =======
+- update DietPi based images to 9.15
 - fix use of 'integrated' as default for ADS-B
 - remove broken attempt to support DHT22 on non-Raspberry boards
 - fix enabling non-DHT22 sensors and prevent menu bar wrapping on small displays if temperature is enabled
