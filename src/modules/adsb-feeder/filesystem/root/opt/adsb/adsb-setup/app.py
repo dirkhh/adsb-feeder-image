@@ -2292,17 +2292,20 @@ class AdsbIm:
 
     def handle_temp_sensor(self, temp_sensor, dht22_pin=0):
         if temp_sensor.value == "dht22":
-            # this is not a commonly used feature, so let's install dependencies here
-            success, output = run_shell_captured(
-                "dpkg-query -l pigpiod > /dev/null || apt install -y python3-pigpio pigpiod && systemctl enable --now pigpiod",
-                timeout=600,
-            )
-            if not success:
-                report_issue(f"failed to install pigpiod and python3-pigpio - check the logs for details")
-                print_err(f"failed to install pigpiod and python3-pigpio: {output}")
-                temp_sensor.value = ""
-                return
-            default_file_content = f"GPIO_PIN={dht22_pin}\nPIGPIO=pigpiod.service\n"
+            if self._d.env_by_tags("board_name").valuestr.startswith("Raspberry Pi"):
+                # this is not a commonly used feature, so let's install dependencies here
+                success, output = run_shell_captured(
+                    "dpkg-query -l pigpiod > /dev/null || apt install -y python3-pigpio pigpiod && systemctl enable --now pigpiod",
+                    timeout=600,
+                )
+                if not success:
+                    report_issue(f"failed to install pigpiod and python3-pigpio - check the logs for details")
+                    print_err(f"failed to install pigpiod and python3-pigpio: {output}")
+                    temp_sensor.value = ""
+                    return
+                default_file_content = f"GPIO_PIN={dht22_pin}\n"
+            elif self._d.env_by_tags("board_name").valuestr.startswith("Orange Pi Zero3"):
+                default_file_content += "PIGPIO=pigpiod.service\n"
         elif temp_sensor.value == "temper_usb":
             # this is not a commonly used feature, so let's install dependencies here
             success, output = run_shell_captured(
