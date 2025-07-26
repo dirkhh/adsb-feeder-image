@@ -191,7 +191,7 @@
           <div class="row">
             <div class="col-12 d-flex">
               <label class="flex-grow-1">Sensor type</label>
-              {% if env_value_by_tag('board_name').startswith('Raspberry Pi') or env_value_by_tag('board_name').startswith('OrangePi Zero3') %}
+              {% if env_value_by_tag('board_name').startswith('Raspberry Pi') %}
               <label class="mx-1"><input id="has_dht22" type="radio" name="tempsensor" value="dht22"> DHT11 / DHT22</label>
               {% endif %}
               {% if env_value_by_tag('board_name').startswith('Raspberry Pi') %}
@@ -200,9 +200,7 @@
               <label class="mx-1"><input id="has_temper_usb" type="radio" name="tempsensor" value="temper_usb"> TEMPer USB</label>
             </div>
             <div class="col-12" id="pin_container">
-              <label for="dht22_pin" id="pin_label" class="col-12 col-sm-9">GPIO Pin, typically
-                {% if env_value_by_tag('board_name').startswith('Raspberry Pi') %} 4 {% elif env_value_by_tag('board_name').startswith('OrangePi Zero3') %} 9 {% endif %}
-              </label>
+              <label for="dht22_pin" id="pin_label" class="col-12 col-sm-9">GPIO Pin, typically 4</label>
               <input class="col-10 col-sm-2 ms-3" id="dht22_pin" name="dht22_pin" type="text" style="height: 2rem;"
                      value="" />
             </div>

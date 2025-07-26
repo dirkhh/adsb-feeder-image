@@ -1,5 +1,6 @@
 Changes since v3.0.0
 =======
+- remove broken attempt to support DHT22 on non-Raspberry boards
 - fix enabling non-DHT22 sensors and prevent menu bar wrapping on small displays if temperature is enabled
 - while 'secure image' is activated, wifi config hotspot will remain disabled
 - add setting to disable wifi config hotspot

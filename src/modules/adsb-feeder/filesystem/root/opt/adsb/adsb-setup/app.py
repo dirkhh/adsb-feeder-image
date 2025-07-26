@@ -2304,8 +2304,10 @@ class AdsbIm:
                     temp_sensor.value = ""
                     return
                 default_file_content = f"GPIO_PIN={dht22_pin}\n"
-            elif self._d.env_by_tags("board_name").valuestr.startswith("Orange Pi Zero3"):
-                default_file_content += "PIGPIO=pigpiod.service\n"
+            else:
+                print_err(f"temp_sensor: {temp_sensor.value} is not supported on this board")
+                temp_sensor.value = ""
+                return
         elif temp_sensor.value == "temper_usb":
             # this is not a commonly used feature, so let's install dependencies here
             success, output = run_shell_captured(
