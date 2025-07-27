@@ -1,5 +1,7 @@
 Changes since v3.0.0
 =======
+- password setting: improve readability / ensure password auth is enabled
+- acarsdec: reduce bandwidth / allow biastee when using airspy mini (R2 not supported, rtl-sdr generally recommended)
 - fix use of 'integrated' as default for ADS-B
 - remove broken attempt to support DHT22 on non-Raspberry boards
 - fix enabling non-DHT22 sensors and prevent menu bar wrapping on small displays if temperature is enabled
