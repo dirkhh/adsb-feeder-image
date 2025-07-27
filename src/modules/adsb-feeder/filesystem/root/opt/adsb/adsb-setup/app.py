@@ -1684,7 +1684,7 @@ class AdsbIm:
 
         if os.path.exists("/etc/ssh/sshd_config"):
             success, output = run_shell_captured(
-                "sed -i '/^PermitRootLogin.*/d' /etc/ssh/sshd_config &&"
+                "sed -i -e '/^PermitRootLogin.*/d' -e '/^PasswordAuthentication no.*/d' /etc/ssh/sshd_config &&"
                 + "echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config && "
                 + "systemctl restart sshd",
                 timeout=5,
