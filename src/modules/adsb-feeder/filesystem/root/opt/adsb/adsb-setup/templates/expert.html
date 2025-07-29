@@ -646,6 +646,38 @@
             </div>
           </div>
 
+          {% if is_enabled('acarshub') %}
+          <div class="col-12 col-lg-6 mt-2">
+            <div class="row border my-2">
+              {% if env_value_by_tag('acarshub_data_path') == '/run/acars_data' %}
+              <!-- ACARS2POS -->
+              <div class="col-8 my-1">
+                <label for="acarshub_to_disk">
+                  Always keep acarshub data on disk (not recommended for sd-cards)
+                </label>
+              </div>
+              <div class="col-4 my-1">
+                <button type="submit" class="btn btn-primary mx-auto w-100" name="acarshub_to_disk" value="go">
+                  Move acarshub data to disk
+                </button>
+              </div>
+              {% else %}
+              <div class="col-6 my-1">
+                <label for="acarshub_to_run">
+                  Only save acarshub data to disk on shutdown
+                </label>
+              </div>
+              <div class="col-6 my-1">
+                <button type="submit" class="btn btn-primary mx-auto w-100" name="acarshub_to_run" value="go">
+                  Move acarshub data to tmpfs
+                </button>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
+
+
           <div class="col-12 col-lg-6 mt-2">
             <div class="row border my-2">
               {% if not is_enabled('shipfeeder') %}

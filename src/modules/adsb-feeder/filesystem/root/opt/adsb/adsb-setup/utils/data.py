@@ -667,6 +667,7 @@ class Data:
         Env("HFDL_GAIN", default="", tags=["hfdlgain"]),
         Env("HFDL_SAMPLERATE", default="", tags=["hfdl_samplerate"]),
         Env("HFDL_FREQUENCIES", default="", tags=["hfdl_frequencies"]),
+        Env("ACARSHUB_DATA_PATH", default="/run/acars_data", tags=["acarshub_data_path"]),
         Env("FEEDER_ACARSHUB_EXTERNAL_ACARS", default="external", tags=["acarshub_acars"]),
         Env("FEEDER_ACARSHUB_EXTERNAL_VDL2", default="external", tags=["acarshub_vdl2"]),
         Env("FEEDER_ACARSHUB_EXTERNAL_HFDL", default="external", tags=["acarshub_hfdl"]),

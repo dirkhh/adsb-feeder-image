@@ -3156,6 +3156,24 @@ class AdsbIm:
                     except:
                         pass
                     self._next_url_from_director = request.url
+                if key == "acarshub_to_disk" and value == "go":
+                    run_shell_captured("docker stop acarshub", timeout=30)
+                    run_shell_captured(
+                        "mkdir -p /opt/adsb/config/acarshub_data" +
+                        "&& cp -f /run/acars_data/* /opt/adsb/config/acarshub_data" +
+                        "&& rm -rf /run/acars_data",
+                        timeout=30,
+                    )
+                    self._d.env_by_tags("acarshub_data_path").value = "/opt/adsb/config/acarshub_data"
+                if key == "acarshub_to_run" and value == "go":
+                    run_shell_captured("docker stop acarshub", timeout=30)
+                    run_shell_captured(
+                        "mkdir -p /run/acars_data" +
+                        "&& cp -f /opt/adsb/config/acarshub_data/* /run/acars_data" +
+                        "&& rm -rf /opt/adsb/config/acarshub_data",
+                        timeout=30,
+                    )
+                    self._d.env_by_tags("acarshub_data_path").value = "/run/acars_data"
                 if key == "secure_image":
                     self.set_secure_image()
                 if allow_insecure and key == "toggle_hotspot":

@@ -13,7 +13,7 @@ services:
       - 15550:15550
       - 15555:15555
     volumes:
-      - /run/acars_data:/run/acars
+      - "$ACARSHUB_DATA_PATH:/run/acars"
     tmpfs:
       - /database:exec,size=64M
       - /run:exec,size=64M
