@@ -9,8 +9,5 @@ services:
     environment:
       - JSON_IN=acars_router:15550;acars_router:15555;acars_router:15556
       - SBS_OUT=ultrafeeder:32009
-      - LOG_FILE=true
       # USER_PROVIDED_ENV_START
       # USER_PROVIDED_ENV_END
-    volumes:
-      - ./logs:/log
