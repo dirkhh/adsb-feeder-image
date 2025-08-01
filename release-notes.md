@@ -1,5 +1,6 @@
 Changes since v3.0.0
 =======
+- acars/vdl2: offer location specific frequencies as a starting point for the user
 - acarshub: add option to always have data on disk
 - password setting: improve readability / ensure password auth is enabled
 - acarsdec: reduce bandwidth / allow biastee when using airspy mini (R2 not supported, rtl-sdr generally recommended)

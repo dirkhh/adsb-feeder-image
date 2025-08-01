@@ -3584,7 +3584,24 @@ class AdsbIm:
         self._d.env_by_tags("has_gpsd").value = self._system.check_gpsd()
         os_flag_file = self._d.data_path / "os.adsb.feeder.image"
         is_image = os_flag_file.exists()
-        return render_template("expert.html", is_image=is_image)
+        # retrieve the busiest known frequencies JSON from the adsb.im website
+        url = f"https://adsb.im/api/best_frequencies/{self._d.env_by_tags('lat').list_get(0)}/{self._d.env_by_tags('lon').list_get(0)}?threshold=98"
+        acars_frequencies = ""
+        vdl2_frequencies = ""
+        frequencies_json, status_code = generic_get_json(url)
+        if status_code != 200:
+            print_err(f"failed to retrieve best_frequencies JSON from {url}: {status_code}")
+        else:
+            print_err(f"frequencies_json: {frequencies_json}")
+            acars_frequencies = "; ".join([f"{int(freq)/1000:.3f}" for freq in frequencies_json.get("acars", "")])
+            vdl2_frequencies = "; ".join([f"{int(freq)/1000:.3f}" for freq in frequencies_json.get("vdl2", "")])
+
+        return render_template(
+            "expert.html",
+            is_image=is_image,
+            best_acars_frequencies=acars_frequencies,
+            best_vdl2_frequencies=vdl2_frequencies,
+        )
 
     def change_sdr_serial_ui(self):
         return render_template("change_sdr_serial_ui.html")

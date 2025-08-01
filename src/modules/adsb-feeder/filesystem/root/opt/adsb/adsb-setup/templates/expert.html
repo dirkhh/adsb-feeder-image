@@ -383,9 +383,19 @@
               </div>
               <div class="col-8 mb-1" data-update="acarsdec--update">
                 <input type="text" class="mx-auto w-100 two_mhz" name="acars_frequencies" id="acars_frequencies"
+                      {% if best_acars_frequencies != '' %}
+                      placeholder="copying the frequencies below is a good starting point"
+                      {% else %}
                       placeholder="default values should work as a starting point"
+                      {% endif %}
                       value="{{ env_value_by_tag('acars_frequencies') }}">
               </div>
+              {% if best_acars_frequencies != '' %}
+              <div class="col-12 mb-1 text-muted">
+                <p>Based on your location, these ACARS frequencies appear to carry the most messages:<br>
+                  <code class="rounded text-info">{{ best_acars_frequencies }}</code></p>
+              </div>
+              {% endif %}
               {% if env_value_by_tag('acarsserial') == '' %}
               <div class="col-12 mb-1 text-warning">
                 <p>No SDR is assigned for ACARS - you can change that on the <a href="/sdr_setup">SDR Setup</a> page.</p>
@@ -497,9 +507,20 @@
               </div>
               <div class="col-8 mb-1" data-update="dumpvdl2--update">
                 <input type="text" class="mx-auto w-100 one_mhz" name="vdl2_frequencies" id="vdl2_frequencies"
+                      {% if best_vdl2_frequencies != '' %}
+                      placeholder="copying the frequencies below is a good starting point"
+                      {% else %}
                       placeholder="default values should be a good starting point"
+                      {% endif %}
                       value="{{ env_value_by_tag('vdl2_frequencies') }}">
               </div>
+              {% if best_vdl2_frequencies != '' %}
+              <div class="col-12 mb-1 text-muted">
+                <p>Based on your location, these VDL2 frequencies appear to carry the most messages:<br>
+                  <code class="rounded text-info">{{ best_vdl2_frequencies }}</code></p>
+              </div>
+              {% endif %}
+
               {% if env_value_by_tag('vdl2serial') == '' %}
               <div class="col-12 mb-1 text-warning">
                 <p>No SDR is assigned for VDL2 - you can change that on the <a href="/sdr_setup">SDR Setup</a> page.</p>
