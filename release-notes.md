@@ -1,5 +1,6 @@
 Changes since v3.0.0
 =======
+- beta-notes: sort acars/vdl2 frequencies
 - acars/vdl2: offer location specific frequencies as a starting point for the user
 - acarshub: add option to always have data on disk
 - password setting: improve readability / ensure password auth is enabled

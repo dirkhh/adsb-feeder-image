@@ -3593,8 +3593,12 @@ class AdsbIm:
             print_err(f"failed to retrieve best_frequencies JSON from {url}: {status_code}")
         else:
             print_err(f"frequencies_json: {frequencies_json}")
-            acars_frequencies = "; ".join([f"{int(freq)/1000:.3f}" for freq in frequencies_json.get("acars", "")])
-            vdl2_frequencies = "; ".join([f"{int(freq)/1000:.3f}" for freq in frequencies_json.get("vdl2", "")])
+            acars_frequencies = "; ".join(
+                sorted([f"{int(freq)/1000:.3f}" for freq in frequencies_json.get("acars", "")])
+            )
+            vdl2_frequencies = "; ".join(
+                sorted([f"{int(freq)/1000:.3f}" for freq in frequencies_json.get("vdl2", "")])
+            )
 
         return render_template(
             "expert.html",

@@ -393,7 +393,9 @@
               {% if best_acars_frequencies != '' %}
               <div class="col-12 mb-1 text-muted">
                 <p>Based on your location, these ACARS frequencies appear to carry the most messages:<br>
-                  <code class="rounded text-info">{{ best_acars_frequencies }}</code></p>
+                  <code class="rounded text-info">{{ best_acars_frequencies }}</code></p><br>
+                  <button type="button" class="btn btn-secondary btn-sm"
+                          onclick="$('#acars_frequencies').val('{{ best_acars_frequencies }}');">Use these</button>
               </div>
               {% endif %}
               {% if env_value_by_tag('acarsserial') == '' %}
@@ -517,7 +519,8 @@
               {% if best_vdl2_frequencies != '' %}
               <div class="col-12 mb-1 text-muted">
                 <p>Based on your location, these VDL2 frequencies appear to carry the most messages:<br>
-                  <code class="rounded text-info">{{ best_vdl2_frequencies }}</code></p>
+                  <code class="rounded text-info">{{ best_vdl2_frequencies }}</code></p><br>
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="$('#vdl2_frequencies').val('{{ best_vdl2_frequencies }}');">Use these</button>
               </div>
               {% endif %}
 
