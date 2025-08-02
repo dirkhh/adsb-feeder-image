@@ -2755,6 +2755,7 @@ class AdsbIm:
                 else ""
             )
         else:
+            self._d.env_by_tags("tar1090_aiscatcher_url").value = ""
             self._d.env_by_tags("run_shipfeeder").value = False
 
         # hfdlobserver is a bit different -- all we need to do is check if it's enabled
