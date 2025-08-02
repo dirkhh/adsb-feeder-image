@@ -1,5 +1,6 @@
 Changes since v3.0.0
 =======
+- acars2pos: update to fix delayed message processing
 - beta-notes: update ultrafeeder container to ignore acars2pos positions for range graph
 - acars2pos: disable logging to disk
 - beta-notes: add button to use the suggested acars/vdl2 frequencies
