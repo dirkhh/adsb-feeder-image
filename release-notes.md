@@ -1,42 +1,36 @@
 Changes since v3.0.0
 =======
-- acars2pos: update to fix delayed message processing
-- beta-notes: update ultrafeeder container to ignore acars2pos positions for range graph
-- acars2pos: disable logging to disk
-- beta-notes: add button to use the suggested acars/vdl2 frequencies
-- beta-notes: sort acars/vdl2 frequencies
-- acars/vdl2: offer location specific frequencies as a starting point for the user
-- acarshub: add option to always have data on disk
-- password setting: improve readability / ensure password auth is enabled
-- acarsdec: reduce bandwidth / allow biastee when using airspy mini (R2 not supported, rtl-sdr generally recommended)
-- update DietPi based images to 9.15
-- fix use of 'integrated' as default for ADS-B
-- remove broken attempt to support DHT22 on non-Raspberry boards
-- fix enabling non-DHT22 sensors and prevent menu bar wrapping on small displays if temperature is enabled
-- while 'secure image' is activated, wifi config hotspot will remain disabled
-- add setting to disable wifi config hotspot
-- update containers to latest version
-- data sharing: add some visual separation / grouping to this rather busy page
-- adsb: move MLAT privacy to be part of the account less aggregator setup (where it belongs)
 - setup: complete overhaul of the UI flow to be less ADS-B centric
-- setup: ask the user for their initials and provide a feed id that matches the proposed pattern if the user doesn't provide their own
-- setup: show closest airport on basic setup page, based on lat/long data entered (this should help detect mistakes when entering the location)
+- setup: ask the user for their initials and provide ACARS/VDL2/HFDL/AIS feed ids that match the proposed pattern if the user doesn't provide their own
+- setup: show closest airport on basic setup page, based on lat/long data entered (this should help detect mistakes when entering the location and is used in the feed ids)
+- acars/vdl2: offer location specific frequencies as a starting point for the user
+- acars/vdl2: use librtlsdr instead of soapy for RTLSDR support
+- acars/vdl2: changes to sample rates used and therefore frequency spread supported
+- vdl2: allow specifying frequencies as list of space separated MHz values
+- acars: reduce bandwidth / allow biastee when using airspy mini (R2 not supported, rtl-sdr generally recommended)
+- acars: support biastee with RTLSDR
+- acarshub: add option to always have data on disk
+- acars2pos: update to fix delayed message processing
+- acars2pos: disable logging to disk
+- hfdl/SDRplay: correct the acceptable gain values
+- update DietPi based images to 9.15
+- update containers to latest version
+- core: add WiFi scanning to system management (similar to hotspot functionality)
+- core: while 'secure image' is activated, wifi config hotspot will remain disabled
+- core: add setting to disable wifi config hotspot
 - ais: fix incorrect HPRadar feed setup
+- core: add support for TEMPer USB temperature sensors on all platforms
+- core: restrict temperature sensor support to feeder image mode only (so not in app mode) and install dependencies if missing
+- core: improve temperature sensor support with full support on the Raspberry Pi 5; add support for DHT11 and experimental / best effort support for BME280
 - UI: allow the user to show the temperature in Fahrenheit
 - UI: don't offer to update the WiFi connection when running in a VM
 - UI: adjust temperature block colors for dark mode and fade them more slowly as the temperature information ages
 - UI: allow the user to choose the temperature sensor that they have and specify the GPIO that it is connected to (for DHT11/22)
-- core: allow the DHT22 to be used on OrangePi Zero3
-- core: add support for TEMPer USB temperature sensors on all platforms
-- hfdl/SDRplay: correct the acceptable gain values
-- vdl2: allow specifying frequencies as list of space separated MHz values
-- acars/vdl2: changes to sample rates used and therefore frequency spread supported
-- acars: support biastee with RTLSDR
-- acars/vdl2: use librtlsdr instead of soapy for RTLSDR support
-- core: restrict temperature sensor support to feeder image mode only (so not in app mode) and install dependencies if missing
-- core: improve temperature sensor support with full support on the Raspberry Pi 5 and some support for the DHT11 and experimental support for the BME280
+- UI: prevent menu bar wrapping on small displays if temperature is enabled
 - UI: improve styling and consistency of system management and hotspot UI
-- core: add WiFi scanning to system management (similar to hotspot functionality)
+- UI: data sharing: add some visual separation / grouping to this rather busy page
+- UI: data sharing/adsb: move MLAT privacy to be part of the account less aggregator setup (where it belongs)
+- UI: password setting: improve readability / ensure password auth is enabled
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)
