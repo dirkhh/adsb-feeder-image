@@ -130,6 +130,11 @@ Or you could do the more sensible thing of downloading the script, reading it, a
 
 The UI can be accessed via port 1099.
 
+Uninstall after having installed via the above script:
+```
+sudo bash /opt/adsb/app-uninstall
+```
+
 # for developers
 
 This repo actually contains the scripting to create the SD card image for some common SBCs to run an ADS-B feeder. And as 'releases' it publishes such images.
