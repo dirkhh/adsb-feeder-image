@@ -2295,7 +2295,7 @@ class AdsbIm:
             if self._d.env_by_tags("board_name").valuestr.startswith("Raspberry Pi"):
                 # this is not a commonly used feature, so let's install dependencies here
                 success, output = run_shell_captured(
-                    "dpkg-query -l pigpiod > /dev/null || apt install -y python3-pigpio pigpiod && systemctl enable --now pigpiod",
+                    "dpkg-query -l pigpiod 2>&1 | grep -q ii || apt install -y python3-pigpio pigpiod && systemctl enable --now pigpiod",
                     timeout=600,
                 )
                 if not success:
