@@ -147,7 +147,7 @@ class RPInative:
                 os.chmod(f"/opt/adsb/extras/dht-{VERSION}", 0o755)
 
     def get_temperature(self):
-        success, output = run_subprocess(f"/opt/adsb/extras/dht-{VERSION} -t {self.pin} 2>/dev/null")
+        success, output = run_subprocess(f"timeout 55 /opt/adsb/extras/dht-{VERSION} -t {self.pin} 2>/dev/null", timeout=60)
         if not success:
             return None
         try:
