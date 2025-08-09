@@ -2292,7 +2292,10 @@ class AdsbIm:
 
     def handle_temp_sensor(self, temp_sensor, dht22_pin=0):
         if temp_sensor.value == "dht22":
-            if self._d.env_by_tags("board_name").valuestr.startswith("Raspberry Pi"):
+            if self._d.env_by_tags("board_name").valuestr.startswith("Raspberry Pi 5"):
+                # pigpiod doesn't work on the pi5, rely on native dht program
+                default_file_content = f"GPIO_PIN={dht22_pin}\n"
+            elif self._d.env_by_tags("board_name").valuestr.startswith("Raspberry Pi"):
                 # this is not a commonly used feature, so let's install dependencies here
                 success, output = run_shell_captured(
                     "dpkg-query -l pigpiod 2>&1 | grep -q ii || apt install -y python3-pigpio pigpiod && systemctl enable --now pigpiod",
