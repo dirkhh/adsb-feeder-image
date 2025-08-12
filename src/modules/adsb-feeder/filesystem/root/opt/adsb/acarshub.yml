@@ -6,6 +6,8 @@ services:
     healthcheck:
       disable: true
     restart: unless-stopped
+    networks:
+      - adsb_im_bridge
     ports:
       - ${AF_ACARSHUB_PORT:-8090}:80
       - 5550:5550/udp

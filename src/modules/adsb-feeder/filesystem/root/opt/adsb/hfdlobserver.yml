@@ -6,6 +6,8 @@ services:
     container_name: hfdlobserver
     hostname: hfdlobserver
     restart: unless-stopped
+    networks:
+      - adsb_im_bridge
     volumes:
       - /opt/adsb/hfdlobserver/compose:/run/hfdlobserver
     environment:

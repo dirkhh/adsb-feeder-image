@@ -6,6 +6,8 @@ services:
     container_name: airspy_adsb
     hostname: airspy_adsb
     restart: unless-stopped
+    networks:
+      - adsb_im_bridge
     device_cgroup_rules:
       - 'c 189:* rwm'
     ports:

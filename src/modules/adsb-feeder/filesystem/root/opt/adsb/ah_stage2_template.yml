@@ -6,6 +6,8 @@ services:
     container_name: adsbhub_STAGE2NUM
     hostname: adsbhub_STAGE2NUM
     restart: unless-stopped
+    networks:
+      - adsb_im_bridge
     cpu_period: 50000
     cpu_quota: 7500
     stop_grace_period: 3s

@@ -4,6 +4,8 @@ services:
     container_name: acarsdec2
     hostname: acarsdec2
     restart: unless-stopped
+    networks:
+      - adsb_im_bridge
     healthcheck:
       disable: true
     environment:

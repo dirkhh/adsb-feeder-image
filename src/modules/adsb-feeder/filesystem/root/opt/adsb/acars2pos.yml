@@ -6,6 +6,8 @@ services:
     healthcheck:
       disable: true
     restart: unless-stopped
+    networks:
+      - adsb_im_bridge
     environment:
       - JSON_IN=acars_router:15550;acars_router:15555;acars_router:15556
       - SBS_OUT=ultrafeeder:32009

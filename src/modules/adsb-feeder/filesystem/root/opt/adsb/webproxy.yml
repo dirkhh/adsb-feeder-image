@@ -6,6 +6,8 @@ services:
     healthcheck:
       disable: true
     restart: unless-stopped
+    networks:
+      - adsb_im_bridge
     ports:
       - ${AF_TAR1090_PORT:-8080}:80 # to expose the web interface
     environment:

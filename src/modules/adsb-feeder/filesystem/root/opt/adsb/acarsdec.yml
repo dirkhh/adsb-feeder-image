@@ -6,6 +6,8 @@ services:
     healthcheck:
       disable: true
     restart: unless-stopped
+    networks:
+      - adsb_im_bridge
     environment:
       # - QUIET_LOGS=true
       - TZ=${FEEDER_TZ}

@@ -11,6 +11,8 @@ services:
     container_name: acars_router
     hostname: acars_router
     restart: unless-stopped
+    networks:
+      - adsb_im_bridge
     environment:
       - AR_STATS_VERBOSE=true
       - TZ=${FEEDER_TZ}

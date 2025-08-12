@@ -6,6 +6,8 @@ services:
     container_name: nanofeeder_2
     hostname: nanofeeder_2
     restart: unless-stopped
+    networks:
+      - adsb_im_bridge
     cap_add:
       - SYS_NICE
     tty: false # work-around for /dev read-only mount + /dev/console error

@@ -1,3 +1,9 @@
+networks:
+  adsb_im_bridge:
+    name: adsb_im_bridge
+    driver: bridge
+    enable_ipv6: ${AF_DOCKER_IPV6}
+
 services:
   dozzle:
     container_name: dozzle
@@ -6,6 +12,8 @@ services:
     healthcheck:
       disable: true
     restart: unless-stopped
+    networks:
+      - adsb_im_bridge
     environment:
       - DOZZLE_NO_ANALYTICS=1
       # USER_PROVIDED_ENV_START
@@ -18,6 +26,8 @@ services:
   adsb-setup-proxy:
     container_name: adsb-setup-proxy
     image: ${ALPINE_CONTAINER}
+    networks:
+      - adsb_im_bridge
     healthcheck:
       disable: true
     stop_signal: SIGKILL

@@ -6,6 +6,8 @@ services:
     container_name: shipfeeder
     hostname: shipfeeder
     restart: unless-stopped
+    networks:
+      - adsb_im_bridge
     environment:
 #     general parameters:
       - VERBOSE_LOGGING=

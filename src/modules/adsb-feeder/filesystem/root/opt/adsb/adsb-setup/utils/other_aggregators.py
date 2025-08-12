@@ -352,7 +352,7 @@ class RadarBox(Aggregator):
             extra_env += "-v /opt/adsb/rb:/sys/class/thermal:ro "
 
         cmdline = (
-            f"--rm -i --network config_default -e BEASTHOST=ultrafeeder -e LAT={self.lat} "
+            f"--rm -i --network adsb_im_bridge -e BEASTHOST=ultrafeeder -e LAT={self.lat} "
             f"-e LONG={self.lon} -e ALT={self.alt} {extra_env} {docker_image}"
         )
         output = self._docker_run_with_timeout(cmdline, 45.0)
@@ -396,7 +396,7 @@ class OpenSky(Aggregator):
             return None
 
         cmdline = (
-            f"--rm -i --network config_default -e BEASTHOST=ultrafeeder -e LAT={self.lat} "
+            f"--rm -i --network adsb_im_bridge -e BEASTHOST=ultrafeeder -e LAT={self.lat} "
             f"-e LONG={self.lon} -e ALT={self.alt} -e OPENSKY_USERNAME={user} {docker_image}"
         )
         output = self._docker_run_with_timeout(cmdline, 60.0)

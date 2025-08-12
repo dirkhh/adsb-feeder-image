@@ -6,6 +6,8 @@ services:
     container_name: uf_STAGE2NUM
     hostname: uf_STAGE2NUM
     restart: unless-stopped
+    networks:
+      - adsb_im_bridge
     ports:
       - ${AF_TAR1090_PORT_STAGE2NUM}:80 # to expose the web interface
     environment:

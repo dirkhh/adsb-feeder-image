@@ -4,6 +4,8 @@ services:
     container_name: radiosonde
     hostname: radiosonde
     restart: unless-stopped
+    networks:
+      - adsb_im_bridge
     ports:
       - ${AF_RADIOSONDE_PORT:-9989}:5000
     healthcheck:

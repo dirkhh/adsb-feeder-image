@@ -363,6 +363,7 @@ class Data:
         Env("AF_PIAWARESTAT_PORT", default=8082, tags=["piastatport", "norestore"]),
         Env("AF_FLIGHTRADAR_PORT", default=8754, tags=["frport"]),
         Env("AF_PLANEFINDER_PORT", default=30053, tags=["pfport"]),
+        Env("AF_DOCKER_IPV6", default=False , tags=["docker_ipv6", "is_enabled", "norestore"]),
         Env("_ADSBIM_STATE_PACKAGE", tags=["pack", "norestore"]),
         Env(
             "_ADSBIM_STATE_IMAGE_NAME",
