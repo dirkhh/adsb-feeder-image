@@ -13,6 +13,7 @@ from .util import generic_get_json, print_err, make_int, run_shell_captured, get
 from .data import Data
 
 T = Enum("T", ["Disconnected", "Unknown", "Good", "Bad", "Warning", "Disabled", "Starting", "ContainerDown"])
+# deprecated status symbol, might be useful again for something?
 status_symbol = {
     T.Disconnected: "\u2612",
     T.Unknown: ".",
@@ -22,6 +23,16 @@ status_symbol = {
     T.Disabled: " ",
     T.Starting: "\u27f3",
     T.ContainerDown: "\u2608",
+}
+status_short = {
+    T.Disconnected: "disconnected",
+    T.Unknown: "unknown",
+    T.Good: "good",
+    T.Bad: "bad",
+    T.Warning: "warning",
+    T.Disabled: "disabled",
+    T.Starting: "starting",
+    T.ContainerDown: "container_down",
 }
 ultrafeeder_aggs = [
     "adsblol",
@@ -51,13 +62,13 @@ class AggStatus:
     @property
     def beast(self) -> str:
         if self.check():
-            return status_symbol.get(self._beast, ".")
+            return status_short.get(self._beast, ".")
         return "."
 
     @property
     def mlat(self) -> str:
         if self.check():
-            return status_symbol.get(self._mlat, ".")
+            return status_short.get(self._mlat, ".")
         return "."
 
     def get_json(self, json_url):

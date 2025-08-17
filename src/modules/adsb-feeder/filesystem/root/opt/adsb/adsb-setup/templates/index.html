@@ -853,22 +853,24 @@
       .then(async dict => {
         // Load all icons we might need
         const icons = {
-          '+': await loadIcon('feed-connected'),
-          '☒': await loadIcon('feed-disconnected'),
-          '☹': await loadIcon('mlat-sync-error'),
-          '⚠': await loadIcon('feed-warning'),
-          '⟳': await loadIcon('container-starting'),
-          '☈': await loadIcon('container-down'),
-          '.': await loadIcon('status-unknown')
+          'good': await loadIcon('feed-connected'),
+          'disconnected': await loadIcon('feed-disconnected'),
+          'bad': await loadIcon('mlat-sync-error'),
+          'warning': await loadIcon('feed-warning'),
+          'starting': await loadIcon('container-starting'),
+          'container_down': await loadIcon('container-down'),
+          'unknown': await loadIcon('status-unknown'),
+          'disabled': ' ',
         };
         const colors = {
-          '+': 'text-success',
-          '☒': 'text-danger',
-          '☹': 'text-danger',
-          '⚠': 'text-warning',
-          '⟳': 'text-muted',
-          '☈': 'text-danger',
-          '.': 'text-muted'
+          'good': 'text-success',
+          'disconnected':  'text-danger',
+          'bad': 'text-danger',
+          'warning': 'text-warning',
+          'starting': 'text-muted',
+          'container_down': 'text-danger',
+          'unknown': 'text-muted',
+          'disabled': 'text-muted',
         };
 
         const statusOkIcon = await loadIcon('overall-good');
@@ -878,28 +880,28 @@
           const data = dict[idx];
 
           // Update beast and mlat status with loaded icons
-          const beastIcon = (data["beast"] === "" || data["beast"] === " ") ? "" : (icons[data["beast"]] || fallbackIcon);
-          const mlatIcon = (data["mlat"] === "" || data["mlat"] === " ") ? "" : (icons[data["mlat"]] || fallbackIcon);
+          const beastIcon = (data["beast"] === "" || data["beast"] === "disabled") ? "" : (icons[data["beast"]] || fallbackIcon);
+          const mlatIcon = (data["mlat"] === "" || data["mlat"] === "disabled") ? "" : (icons[data["mlat"]] || fallbackIcon);
           // pick the colors
-          const beastColor = (data["beast"] === "" || data["beast"] === " ") ? "text-muted" : (colors[data["beast"]] || "text-muted");
-          const mlatColor = (data["mlat"] === "" || data["mlat"] === " ") ? "text-muted" : (colors[data["mlat"]] || "text-muted");
+          const beastColor = (data["beast"] === "" || data["beast"] === "disabled") ? "text-muted" : (colors[data["beast"]] || "text-muted");
+          const mlatColor = (data["mlat"] === "" || data["mlat"] === "disabled") ? "text-muted" : (colors[data["mlat"]] || "text-muted");
 
           setIcon(agg, "beast", idx, beastIcon, beastColor);
           setIcon(agg, "mlat", idx, mlatIcon, mlatColor);
 
-          const mlat_broken = !(data["mlat"] == "+" || data["mlat"] == "." || data["mlat"] == " ");
-          const beast_broken = !(data["beast"] == "+" || data["beast"] == "." || data["beast"] == " ");
+          const mlat_broken = !(data["mlat"] == "good" || data["mlat"] == "unknown" || data["mlat"] == "disabled");
+          const beast_broken = !(data["beast"] == "good" || data["beast"] == "unknown" || data["beast"] == "disabled");
 
           let sumIcon = statusOkIcon;
           let sumColor = "text-muted";
-          if (data["beast"] == "+" && !mlat_broken) {
+          if (data["beast"] == "good" && !mlat_broken) {
             sumIcon = statusOkIcon;
             sumColor = "text-success";
-          } else if (data["beast"] == "☒" || data["beast"] == "☈") {
-            sumIcon = icons['☒'];
+          } else if (data["beast"] == "disconnected" || data["beast"] == "starting") {
+            sumIcon = icons['disconnected'];
             sumColor = "text-danger";
           } else if (beast_broken || mlat_broken) {
-            sumIcon = icons['⚠'];
+            sumIcon = icons['warning'];
             sumColor = "text-warning";
           }
 
