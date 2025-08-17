@@ -2869,6 +2869,8 @@ class AdsbIm:
         for i in self.micro_indices():
             create_stage2_yml_files(i, self._d.env_by_tags("mf_ip").list_get(i))
 
+        self.dozzle_yml_from_template()
+
         # check if we need the stage2 multiOutline job
         if self._d.is_enabled("stage2"):
             if not self._multi_outline_bg:
@@ -4382,6 +4384,16 @@ class AdsbIm:
         self._system._restart.bg_run(cmdline="systemctl start adsb-feeder-update.service; sleep 30")
         self.exiting = True
         return render_template("/restarting.html")
+
+
+    def dozzle_yml_from_template(self):
+        # env vars are not supported in certain places in compose ymls,
+        # in even more places in docker v20 which is still somewhat prevalent
+        template_file = "/opt/adsb/config/dozzle_template.yml"
+        yml_file = "/opt/adsb/config/dozzle.yml"
+        with open(template_file, "r") as template:
+            with open(yml_file, "w") as yml:
+                yml.write(template.read().replace("DOCKER_IPV6", "true" if self._d.is_enabled("docker_ipv6") else "false"))
 
 
 def create_stage2_yml_from_template(stage2_yml_name, n, ip, template_file):

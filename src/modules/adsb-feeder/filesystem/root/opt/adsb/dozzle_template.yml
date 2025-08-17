@@ -2,7 +2,7 @@ networks:
   adsb_im_bridge:
     name: adsb_im_bridge
     driver: bridge
-    enable_ipv6: ${AF_DOCKER_IPV6}
+    enable_ipv6: DOCKER_IPV6
 
 services:
   dozzle:
