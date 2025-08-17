@@ -69,6 +69,10 @@ class AggStatus:
         return uf_dir
 
     def get_mlat_status(self, path=None):
+        # if mlat isn't enabled ignore status check results
+        if not self._d.list_is_enabled("mlat_enable", self._idx):
+            self._mlat = T.Disabled
+            return
         if not path:
             mconf = None
             netconfig = self._d.netconfigs.get(self._agg)
