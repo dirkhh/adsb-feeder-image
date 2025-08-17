@@ -357,9 +357,10 @@
     let purpose = purpose_given || sdr['purpose'];
     let show_biastee = purpose == 'ais' && (sdr['type'] == 'rtlsdr' || sdr['type'] == 'airspy');
     show_biastee |= purpose == 'vdl2' && sdr['type'] == 'rtlsdr';
-    show_biastee |= purpose == 'acars' && sdr['type'] in ['rtlsdr', 'airspy'];
-    show_biastee |= purpose == 'acars_2' && sdr['type'] in ['rtlsdr', 'airspy'];
+    show_biastee |= purpose == 'acars' && ['rtlsdr', 'airspy'].includes(sdr['type']);
+    show_biastee |= purpose == 'acars_2' && ['rtlsdr', 'airspy'].includes(sdr['type']);
     show_biastee |= purpose == '1090' || purpose == '1090_2' || purpose == '978' || purpose == 'sonde';
+    console.log(`update_biastee: ${show_biastee} for purpose: ${purpose}, type: ${sdr['type']}`);
     if (show_biastee) {
       $("#biastee_container").show();
       $("#enable_biastee").prop('checked', sdr['biastee']);
