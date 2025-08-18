@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 # Helper functions
 exit_with_message() { echo "$1"; exit; }

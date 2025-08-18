@@ -6,7 +6,7 @@ After=network-online.target adsb-hotspot.service
 Type=oneshot
 RemainAfterExit=yes
 WorkingDirectory=/opt/adsb
-ExecStart=/usr/bin/bash /opt/adsb/bootstrap.sh
+ExecStart=/bin/bash /opt/adsb/bootstrap.sh
 TimeoutStartSec=0
 SyslogIdentifier=adsb-bootstrap
 

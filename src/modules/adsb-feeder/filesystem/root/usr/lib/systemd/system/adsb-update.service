@@ -4,6 +4,6 @@ Description=ADS-B Feeder Image Update Service
 
 [Service]
 WorkingDirectory=/opt/adsb
-ExecStart=/usr/bin/bash /opt/adsb/scripts/update-checks-adsb-im
+ExecStart=/bin/bash /opt/adsb/scripts/update-checks-adsb-im
 SyslogIdentifier=adsb-update
 
