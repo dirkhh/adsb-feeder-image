@@ -1,0 +1,12 @@
+[Unit]
+Description=ADS-B Feeder Early Boot Service
+
+[Service]
+SyslogIdentifier=adsb-early-boot
+Type=oneshot
+
+ExecStart=-/opt/adsb/scripts/disk-to-run.sh
+
+[Install]
+WantedBy=default.target
+

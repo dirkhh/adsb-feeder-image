@@ -9,7 +9,6 @@ WorkingDirectory=/opt/adsb
 ExecStartPre=-/usr/bin/bash -c "mount -o remount,exec,size=$(( $(cat /proc/meminfo | grep -i 'memtotal' | grep -o '[[:digit:]]*') / 2 ))k /run"
 ExecStartPre=-/usr/bin/bash -c "[[ -f /opt/adsb/os.adsb.feeder.image ]] && echo 128 > /sys/module/usbcore/parameters/usbfs_memory_mb"
 ExecStartPre=-/opt/adsb/scripts/fix-docker-network
-ExecStartPre=-/opt/adsb/scripts/disk-to-run.sh
 ExecStart=/opt/adsb/docker-compose-start
 RemainAfterExit=yes
 ExecStop=/opt/adsb/docker-compose-adsb stop -t 30

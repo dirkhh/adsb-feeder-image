@@ -365,6 +365,7 @@ rm -f /opt/adsb/.cachebust_done
 
 echo "$(date -u +"%FT%T.%3NZ") updating systemd services ..."
 
+services_enable+=("adsb-early-boot.service")
 services_enable+=("adsb-docker.service")
 
 # the timer is gonna start the adsb-update service
