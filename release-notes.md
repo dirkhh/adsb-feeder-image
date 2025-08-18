@@ -1,36 +1,12 @@
-Changes since v3.0.0
+Changes since v3.0.1
 =======
-- setup: complete overhaul of the UI flow to be less ADS-B centric
-- setup: ask the user for their initials and provide ACARS/VDL2/HFDL/AIS feed ids that match the proposed pattern if the user doesn't provide their own
-- setup: show closest airport on basic setup page, based on lat/long data entered (this should help detect mistakes when entering the location and is used in the feed ids)
-- acars/vdl2: offer location specific frequencies as a starting point for the user
-- acars/vdl2: use librtlsdr instead of soapy for RTLSDR support
-- acars/vdl2: changes to sample rates used and therefore frequency spread supported
-- vdl2: allow specifying frequencies as list of space separated MHz values
-- acars: reduce bandwidth / allow biastee when using airspy mini (R2 not supported, rtl-sdr generally recommended)
-- acars: support biastee with RTLSDR
-- acarshub: add option to always have data on disk
-- acars2pos: update to fix delayed message processing
-- acars2pos: disable logging to disk
-- hfdl/SDRplay: correct the acceptable gain values
-- update DietPi based images to 9.15
-- update containers to latest version
-- core: add WiFi scanning to system management (similar to hotspot functionality)
-- core: while 'secure image' is activated, wifi config hotspot will remain disabled
-- core: add setting to disable wifi config hotspot
-- ais: fix incorrect HPRadar feed setup
-- core: add support for TEMPer USB temperature sensors on all platforms
-- core: restrict temperature sensor support to feeder image mode only (so not in app mode) and install dependencies if missing
-- core: improve temperature sensor support with full support on the Raspberry Pi 5; add support for DHT11 and experimental / best effort support for BME280
-- UI: allow the user to show the temperature in Fahrenheit
-- UI: don't offer to update the WiFi connection when running in a VM
-- UI: adjust temperature block colors for dark mode and fade them more slowly as the temperature information ages
-- UI: allow the user to choose the temperature sensor that they have and specify the GPIO that it is connected to (for DHT11/22)
-- UI: prevent menu bar wrapping on small displays if temperature is enabled
-- UI: improve styling and consistency of system management and hotspot UI
-- UI: data sharing: add some visual separation / grouping to this rather busy page
-- UI: data sharing/adsb: move MLAT privacy to be part of the account less aggregator setup (where it belongs)
-- UI: password setting: improve readability / ensure password auth is enabled
+- fix the acarshub data loss on power loss (probably)
+- fix biastee not showing for acars and acars2 (rtl-sdr and airspy)
+- fix MLAT displaying as disconnected when it's actually disabled
+- remove unicode symbols from internal API for feeder status
+- add option on expert page to enable ipv6 for the docker bridge network, name now adsb_im_bridge (was config_default)
+- expert page: don't disable when pressing return in the frequency input boxes
+- fix: some temperature sensor corner cases
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)
