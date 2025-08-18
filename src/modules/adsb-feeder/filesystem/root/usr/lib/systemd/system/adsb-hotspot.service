@@ -5,7 +5,7 @@ After=network-online.target
 [Service]
 Type=oneshot
 WorkingDirectory=/opt/adsb
-ExecStart=/usr/bin/bash /opt/adsb/scripts/net-or-hotspot.sh
+ExecStart=/bin/bash /opt/adsb/scripts/net-or-hotspot.sh
 SyslogIdentifier=adsb-hotspot
 
 [Install]

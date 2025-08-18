@@ -548,7 +548,7 @@ class AdsbIm:
         host_name = self.onlyAlphaNumDash(site_name)
 
         def start_mdns():
-            subprocess.run(["/usr/bin/bash", "/opt/adsb/scripts/mdns-alias-setup.sh", f"{host_name}"])
+            subprocess.run(["/bin/bash", "/opt/adsb/scripts/mdns-alias-setup.sh", f"{host_name}"])
             subprocess.run(["/usr/bin/hostnamectl", "hostname", f"{host_name}"])
 
         if not host_name or self._current_site_name == site_name:

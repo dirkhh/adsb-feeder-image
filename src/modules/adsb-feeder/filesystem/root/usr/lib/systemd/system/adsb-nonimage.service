@@ -4,6 +4,6 @@ Description=ADS-B Feeder Dummy service
 [Service]
 Type=oneshot
 WorkingDirectory=/opt/adsb
-ExecStart=/usr/bin/bash -c "exit 0"
+ExecStart=/bin/bash -c "exit 0"
 TimeoutStartSec=0
 
