@@ -7,9 +7,9 @@ trap 'echo "[ERROR] Error in line $LINENO"' ERR
 SEPARATOR="
 ----------------------------------------------------------------------------------------------------------
 "
-# We read the file
-# and also append a bunch of other diagnostic info
-SANITIZED_LOG="
+
+function generate_log() {
+echo "
 important:
 $(jq '{ version: ._ADSBIM_BASE_VERSION, board: ._ADSBIM_STATE_BOARD_NAME, user_env: ._ADSBIM_STATE_EXTRA_ENV, user_ultrafeeder: ._ADSBIM_STATE_ULTRAFEEDER_EXTRA_ARGS }' /opt/adsb/config/config.json 2>&1)
 ${SEPARATOR}
@@ -26,19 +26,19 @@ ${SEPARATOR}
 
 if ip -6 addr show scope global $(ip -j route get 1.2.3.4 | jq '.[0].dev' -r) | grep -v 'inet6 f' | grep -qs inet6; then
   if err=$(timeout 2 curl -sS -o /dev/null -6 https://google.com 2>&1); then
-    SANITIZED_LOG+="IPv6: working"
+    echo "IPv6: working"
   else
-    SANITIZED_LOG+="IPv6: BROKEN ($err) ($(ip -6 addr show scope global $(ip -j route get 1.2.3.4 | jq '.[0].dev' -r) | grep -v 'inet6 f' | grep inet6))"
+    echo "IPv6: BROKEN ($err) ($(ip -6 addr show scope global $(ip -j route get 1.2.3.4 | jq '.[0].dev' -r) | grep -v 'inet6 f' | grep inet6))"
   fi
 else
   if err=$(timeout 2 curl -sS -o /dev/null -6 https://google.com 2>&1); then
-    SANITIZED_LOG+="IPv6: working (but no global ipv6 address on primary route interface found)"
+    echo "IPv6: working (but no global ipv6 address on primary route interface found)"
   else
-    SANITIZED_LOG+="IPv6: no global address or disabled"
+    echo "IPv6: no global address or disabled"
   fi
 fi
 
-SANITIZED_LOG+="
+echo "
 ${SEPARATOR}
 dmesg | grep -iE under.?voltage:
 $(dmesg | grep -iE under.?voltage || true)
@@ -93,28 +93,22 @@ $(cat /opt/adsb/config/.env 2>&1)
 ${SEPARATOR}
 "
 if [ -f /opt/adsb/os.adsb.feeder.image ] ; then
-SANITIZED_LOG+="
-journalctl -e -n3000:
-$(journalctl -e -n3000 2>&1)
-${SEPARATOR}
-"
+    echo "journalctl -e -n3000:"
+    journalctl -e -n3000 2>&1
+    echo "${SEPARATOR}"
 fi
 
 for oldlog in $(find /opt/adsb/logs -name adsb-setup.log.\*zst | sort | tail -n2); do
-
-SANITIZED_LOG+="
-${oldlog}:
-$(zstdcat "$oldlog" 2>&1)
-${SEPARATOR}
-"
-
+    echo "${oldlog}:"
+    zstdcat "$oldlog" 2>&1
+    echo "${SEPARATOR}"
 done
 
-SANITIZED_LOG+="
-adsb-setup.log:
-$(cat /run/adsb-feeder-image.log 2>&1)
-${SEPARATOR}
-"
+echo "adsb-setup.log:"
+cat /run/adsb-feeder-image.log 2>&1
+echo "${SEPARATOR}"
+
+}
 
 # config variable replacement now done in search-replace.py
 # search-replace also accepts argument pairs for search replace
@@ -141,4 +135,5 @@ replace_args+='s/((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9][0-9]?|2[0-4]
 # finally, replace everything that looks like a uuid
 replace_args+='s/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/<hidden-uuid>/g;'
 
-perl -pe "${replace_args}" <<< "${SANITIZED_LOG}" | /opt/adsb/scripts/search-replace.py "$(hostname)" HOSTNAME
+# sanitize log by replacing all the stuff that should stay private
+generate_log | perl -pe "${replace_args}" | /opt/adsb/scripts/search-replace.py "$(hostname)" HOSTNAME
