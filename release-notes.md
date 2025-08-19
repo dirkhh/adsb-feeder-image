@@ -1,5 +1,7 @@
 Changes since v3.0.1
 =======
+- up fr24 version to fix an error ('use new version' .. version is out less than a week)
+- improve log-sanitizer / share diagnostics (was apparently truncating the log on some systems)
 - fix the acarshub data loss on power loss (probably)
 - fix biastee not showing for acars and acars2 (rtl-sdr and airspy)
 - fix MLAT displaying as disconnected when it's actually disabled
