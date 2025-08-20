@@ -1,5 +1,6 @@
 Changes since v3.0.1
 =======
+- beta-notes: up acars_router version so docker bridge ipv6 no longer breaks acars
 - up fr24 version to fix an error ('use new version' .. version is out less than a week)
 - improve log-sanitizer / share diagnostics (was apparently truncating the log on some systems)
 - fix the acarshub data loss on power loss (probably)
