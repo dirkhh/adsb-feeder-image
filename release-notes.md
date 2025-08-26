@@ -1,5 +1,6 @@
 Changes since v3.0.1
 =======
+- beta-notes: fixup various enable / disable buttons on expert page that simply weren't working
 - beta-notes: up acars_router version so docker bridge ipv6 no longer breaks acars
 - up fr24 version to fix an error ('use new version' .. version is out less than a week)
 - improve log-sanitizer / share diagnostics (was apparently truncating the log on some systems)
