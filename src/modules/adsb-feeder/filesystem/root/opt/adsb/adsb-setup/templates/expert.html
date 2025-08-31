@@ -407,6 +407,7 @@
               </div>
               <div class="col-8 mb-1">
                 <input type="text" class="mx-auto w-100" name="acars_feed_id" id="acars_feed_id"
+                      submit_button="acarsdec--update"
                       {% if is_enabled('acarsdec') %} required {% endif %}
                       placeholder="required ACARS feed ID"
                       value="{{ env_value_by_tag('acars_feed_id') }}">
@@ -419,6 +420,7 @@
               </div>
               <div class="col-8 mb-1" data-update="acarsdec--update">
                 <input type="text" class="mx-auto w-100 two_mhz" name="acars_frequencies" id="acars_frequencies"
+                      submit_button="acarsdec--update"
                       {% if best_acars_frequencies != '' %}
                       placeholder="copying the frequencies below is a good starting point"
                       {% else %}
@@ -476,6 +478,7 @@
               </div>
               <div class="col-8 mb-1">
                 <input type="text" class="mx-auto w-100" name="acars_2_feed_id" id="acars_2_feed_id"
+                      submit_button="acarsdec2--update"
                       {% if is_enabled('acarsdec2') %} required {% endif %}
                       placeholder="required ACARS2 feed ID"
                       value="{{ env_value_by_tag('acars_2_feed_id') }}">
@@ -488,6 +491,7 @@
               </div>
               <div class="col-8 mb-1" data-update="acarsdec2--update">
                 <input type="text" class="mx-auto w-100 two_mhz" name="acars_2_frequencies" id="acars_2_frequencies"
+                      submit_button="acarsdec2--update"
                       placeholder="default values should be a good starting point"
                       value="{{ env_value_by_tag('acars_2_frequencies') }}">
               </div>
@@ -533,6 +537,7 @@
               </div>
               <div class="col-8 mb-1">
                 <input type="text" class="mx-auto w-100" name="vdl2_feed_id" id="vdl2_feed_id"
+                      submit_button="dumpvdl2--update"
                       {% if is_enabled('dumpvdl2') %} required {% endif %}
                       placeholder="required VDL2 feed ID"
                       value="{{ env_value_by_tag('vdl2_feed_id') }}">
@@ -545,6 +550,7 @@
               </div>
               <div class="col-8 mb-1" data-update="dumpvdl2--update">
                 <input type="text" class="mx-auto w-100 one_mhz" name="vdl2_frequencies" id="vdl2_frequencies"
+                      submit_button="dumpvdl2--update"
                       {% if best_vdl2_frequencies != '' %}
                       placeholder="copying the frequencies below is a good starting point"
                       {% else %}
@@ -601,6 +607,7 @@
               </div>
               <div class="col-8 mb-1">
                 <input type="text" class="mx-auto w-100" name="hfdl_feed_id" id="hfdl_feed_id"
+                      submit_button="dumphfdl--update"
                       {% if is_enabled('dumphfdl') %} required {% endif %}
                       placeholder="required HFDL feed ID"
                       value="{{ env_value_by_tag('hfdl_feed_id') }}">
@@ -612,6 +619,7 @@
               </div>
               <div class="col-8 mb-1">
                 <input type="text" class="mx-auto w-100" name="hfdl_samplerate" id="hfdl_samplerate"
+                      submit_button="dumphfdl--update"
                       placeholder="3000000 for Airspy"
                       value="{{ env_value_by_tag('hfdl_samplerate') }}">
               </div>
@@ -622,6 +630,7 @@
               </div>
               <div class="col-8 mb-1">
                 <input type="text" class="mx-auto w-100" name="hfdl_frequencies" id="hfdl_frequencies"
+                      submit_button="dumphfdl--update"
                       placeholder="recomended to leave empty to use frequency scanner"
                       value="{{ env_value_by_tag('hfdl_frequencies') }}">
               </div>
@@ -665,8 +674,10 @@
                 </label>
               </div>
               <div class="col-8 mb-1">
-                <input type="text" class="mx-auto w-100" name="hfdlobserver_feed_id" id="hfdl_feed_id" {% if is_enabled('hfdlobserver') %}
-                       required {% endif %} placeholder="required HFDLOBSERVER feed ID" value="{{ env_value_by_tag('hfdlobserver_feed_id') }}">
+                <input type="text" class="mx-auto w-100" name="hfdlobserver_feed_id" id="hfdl_feed_id"
+                       submit_button="hfdlobserver--update"
+                       {% if is_enabled('hfdlobserver') %} required {% endif %}
+                       placeholder="required HFDLOBSERVER feed ID" value="{{ env_value_by_tag('hfdlobserver_feed_id') }}">
               </div>
               <div class="col-4 mb-1">
                 <label for="hfdlobserver_ip">
@@ -674,7 +685,9 @@
                 </label>
               </div>
               <div class="col-8 mb-1">
-                <input type="text" class="mx-auto w-100" name="hfdlobserver_ip" id="hfdlobserver_ip" placeholder="IP address of the web-888 SDR"
+                <input type="text" class="mx-auto w-100" name="hfdlobserver_ip" id="hfdlobserver_ip"
+                       submit_button="hfdlobserver--update"
+                       placeholder="IP address of the web-888 SDR"
                        value="{{ env_value_by_tag('hfdlobserver_ip') }}">
               </div>
               {% endif %}
@@ -711,7 +724,7 @@
           <div class="col-12 col-lg-6 mt-2">
             <div class="row border my-2">
               {% if env_value_by_tag('acarshub_data_path') == '/run/acars_data' %}
-              <!-- ACARS2POS -->
+              <!-- ACARSHUB_TO_DISK -->
               <div class="col-8 my-1">
                 <label for="acarshub_to_disk">
                   Always keep acarshub data on disk (not recommended for sd-cards)
@@ -773,6 +786,7 @@
               </div>
               <div class="col-8 mb-1">
                 <input type="text" class="mx-auto w-100" name="ais_station_name" id="ais_station_name"
+                      submit_button="shipfeeder--update"
                       {% if is_enabled('shipfeeder') %} required {% endif %}
                       placeholder="required AIS station name"
                       value="{{ env_value_by_tag('ais_station_name') }}">
@@ -784,6 +798,7 @@
               </div>
               <div class="col-8 mb-1">
                 <input type="text" class="mx-auto w-100" name="ais_sx_extra_options" id="ais_sx_extra_options"
+                      submit_button="shipfeeder--update"
                       value="{{ env_value_by_tag('ais_sx_extra_options') }}">
               </div>
               {% if env_value_by_tag('aisserial') == '' %}
@@ -854,6 +869,7 @@
               </div>
               <div class="col-8 mb-1">
                 <input type="text" class="mx-auto w-100" name="sonde_callsign" id="sonde_callsign"
+                      submit_button="sonde--update"
                       {% if is_enabled('sonde') %} required {% endif %}
                       placeholder="required sondehub callsign"
                       value="{{ env_value_by_tag('sonde_callsign') }}">
@@ -865,6 +881,7 @@
               </div>
               <div class="col-8 mb-1">
                 <input type="text" class="mx-auto w-100" name="sonde_min_freq" id="sonde_min_freq"
+                      submit_button="sonde--update"
                       value="{{ env_value_by_tag('sonde_min_freq') }}">
               </div>
               <div class="col-4 mb-1">
@@ -874,6 +891,7 @@
               </div>
               <div class="col-8 mb-1">
                 <input type="text" class="mx-auto w-100" name="sonde_max_freq" id="sonde_max_freq"
+                      submit_button="sonde--update"
                       value="{{ env_value_by_tag('sonde_max_freq') }}">
               </div>
               <div class="col-4 mb-1">
@@ -883,6 +901,7 @@
               </div>
               <div class="col-8 mb-1">
                 <input type="text" class="mx-auto w-100" name="sonde_share_position" id="sonde_share_position"
+                      submit_button="sonde--update"
                       value="{{ env_value_by_tag('sonde_share_position') }}">
               </div>
               {% if env_value_by_tag('sondeserial') == '' %}
@@ -959,6 +978,17 @@
       if ($(this).attr('class').includes("two_mhz") || $(this).attr('class').includes("one_mhz")) {
         validate_range.call(this);
         $(this).on('change', validate_range);
+      }
+    });
+    $('input[type="text"]').each(function () {
+      // for text input fields with a submit_button attribute, simulate pressing that button when enter is pressed
+      if ($(this).attr('submit_button')) {
+        $(this).on('keypress', function (e) {
+          if (e.key == "Enter") {
+            $('button[name=' + $(this).attr('submit_button') + ']').click();
+            return false;
+          }
+        });
       }
     });
 
