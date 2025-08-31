@@ -1,7 +1,7 @@
 Changes since v3.0.1
 =======
-- beta-notes: fixup various enable / disable buttons on expert page that simply weren't working
-- beta-notes: up acars_router version so docker bridge ipv6 no longer breaks acars
+- expert page: correctly handle enter in various text input fields to update the corresponding values
+- up acars_router version so docker bridge ipv6 no longer breaks acars
 - up fr24 version to fix an error ('use new version' .. version is out less than a week)
 - improve log-sanitizer / share diagnostics (was apparently truncating the log on some systems)
 - fix the acarshub data loss on power loss (probably)
@@ -9,7 +9,6 @@ Changes since v3.0.1
 - fix MLAT displaying as disconnected when it's actually disabled
 - remove unicode symbols from internal API for feeder status
 - add option on expert page to enable ipv6 for the docker bridge network, name now adsb_im_bridge (was config_default)
-- expert page: don't disable when pressing return in the frequency input boxes
 - fix: some temperature sensor corner cases
 
 > [!NOTE]
