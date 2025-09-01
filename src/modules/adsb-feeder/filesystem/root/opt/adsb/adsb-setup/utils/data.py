@@ -520,8 +520,9 @@ class Data:
         Env(
             "_ADSBIM_STATE_ADSBX_FEEDER_ID",
             default=[""],
-            tags="adsbxfeederid",
+            tags=["adsbxfeederid"],
         ),
+        Env("_ADSBIM_STATE_ADSBX_FEEDER_ID_UUID", default=[""], tags=["adsbxfeederid_uuid"]),
         Env(
             "_ADSBIM_STATE_ALIVE_MAP_LINK",
             default=[""],

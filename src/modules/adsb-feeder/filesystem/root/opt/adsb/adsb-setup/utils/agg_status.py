@@ -522,8 +522,9 @@ class AggStatus:
 
     def adsbx_feeder_id(self):
             feeder_id = self._d.env_by_tags("adsbxfeederid").list_get(self._idx)
+            uuid_saved = self._d.env_by_tags("adsbxfeederid_uuid").list_get(self._idx)
             uuid = self._d.env_by_tags("ultrafeeder_uuid").list_get(self._idx)
-            if not feeder_id or len(feeder_id) != 12:
+            if uuid_saved != uuid or not feeder_id or len(feeder_id) != 12:
                 # get the adsbexchange feeder id for the anywhere map / status things
                 print_err(f"don't have the adsbX Feeder ID for {self._idx}, yet")
                 output, status = get_plain_url(f"https://www.adsbexchange.com/api/feeders/tar1090/?feed={uuid}")
@@ -537,6 +538,7 @@ class AggStatus:
                 if adsbx_id and len(adsbx_id) == 12:
                     print_err(f"adsbx feeder id for {self._idx}: {adsbx_id}")
                     self._d.env_by_tags("adsbxfeederid").list_set(self._idx, adsbx_id)
+                    self._d.env_by_tags("adsbxfeederid_uuid").list_set(self._idx, uuid)
                 else:
                     print_err(f"failed to find adsbx ID in response {output}")
 
