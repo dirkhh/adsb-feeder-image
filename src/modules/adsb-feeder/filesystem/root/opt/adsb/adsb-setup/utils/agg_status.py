@@ -192,18 +192,9 @@ class AggStatus:
             if self._idx != 0:
                 container_name += f"_{self._idx}"
 
+        container_status = None
         if container_name:
             container_status = self._system.getContainerStatus(container_name)
-            if container_status == "down":
-                self._beast = T.ContainerDown
-                self._mlat = T.Disabled
-                self._last_check = datetime.now()
-                return
-            if container_status == "starting":
-                self._beast = T.Starting
-                self._mlat = T.Disabled
-                self._last_check = datetime.now()
-                return
 
         # for the Ultrafeeder based aggregators, let's not bother with talking to their API
         # readsb / mlat-client provide information about the feed status for those
@@ -212,7 +203,38 @@ class AggStatus:
             self.get_beast_status()
             self._last_check = datetime.now()
             self.get_maplink()
+
+        if container_status is None:
+            pass # status unknown
+        elif container_status == "down":
+            self._beast = T.ContainerDown
+            self._mlat = T.Disabled
+            self._last_check = datetime.now()
             return
+        elif container_status == "up":
+            pass
+        elif "up for" in container_status:
+            _, _, uptime = container_status.split(" ")
+            uptime = int(uptime)
+            if self._agg not in ultrafeeder_aggs:
+                if uptime < 60:
+                    self._beast = T.Starting
+                    self._mlat = T.Disabled
+                    self._last_check = datetime.now()
+                    return
+
+            if self._agg in ultrafeeder_aggs:
+                if uptime < 30:
+                    # overwrite the status we got above
+                    self._beast = T.Starting
+                    self._mlat = T.Starting
+                    self._last_check = datetime.now()
+                    return
+                if uptime < 60:
+                    # use beast status that has been determined above
+                    self._mlat = T.Starting
+                    self._last_check = datetime.now()
+                    return
 
         if self._agg == "flightaware":
             suffix = "" if self._idx == 0 else f"_{self._idx}"

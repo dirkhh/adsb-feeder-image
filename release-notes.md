@@ -1,5 +1,6 @@
 Changes since v3.0.1
 =======
+- tweak feed status on container startup to avoid false impression it's not working
 - airplanes live map link: make it work better for stage2 / multiple feeds on same IP
 - adsbexchange map / stats link: reliably retrieve for stage2 / multiple feeds on same IP
 - expert page: correctly handle enter in various text input fields to update the corresponding values

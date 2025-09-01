@@ -310,14 +310,17 @@ class System:
             if not status.startswith("Up"):
                 return "down"
 
-            try:
-                up, number, unit = status.split(" ")
-                if unit == "seconds" and int(number) < 30:
-                    # container up for less than 30 seconds, show 'starting'
-                    return "starting"
-            except:
-                if "second" in status:
-                    # handle status "Up Less than a second"
-                    return "starting"
+            if status == "Up Less than a second":
+                return "up for 0"
+            if status == "Up 1 second":
+                return "up for 1"
+
+            if "seconds" in status:
+                try:
+                    up, number, unit = status.split(" ")
+                    # container up for some number of seconds, return how long it's been up
+                    return f"up for {int(number)}"
+                except:
+                    print_err(f"issue parsing container status: {status}")
 
             return "up"
