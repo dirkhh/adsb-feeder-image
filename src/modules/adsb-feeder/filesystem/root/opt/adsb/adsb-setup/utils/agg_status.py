@@ -420,32 +420,8 @@ class AggStatus:
             else:
                 print_err(f"airplanes.live returned {status}")
         elif self._agg == "adsbx":
-            feeder_id = self._d.env_by_tags("adsbxfeederid").list_get(self._idx)
-            if not feeder_id or len(feeder_id) != 12:
-                # get the adsbexchange feeder id for the anywhere map / status things
-                print_err(f"don't have the adsbX Feeder ID for {self._idx}, yet")
-                container_name = "ultrafeeder" if self._idx == 0 else f"uf_{self._idx}"
-                try:
-                    result = subprocess.run(
-                        f"docker logs {container_name} | grep 'www.adsbexchange.com/api/feeders' | tail -1",
-                        shell=True,
-                        capture_output=True,
-                        text=True,
-                    )
-                    output = result.stdout
-                except:
-                    print_err("got exception trying to look at the adsbx logs")
-                    return
-                match = re.search(
-                    r"www.adsbexchange.com/api/feeders/\?feed=([^&\s]*)",
-                    output,
-                )
-                if match:
-                    adsbx_id = match.group(1)
-                    self._d.env_by_tags("adsbxfeederid").list_set(self._idx, adsbx_id)
-                else:
-                    print_err(f"ran: docker logs {container_name} | grep 'www.adsbexchange.com/api/feeders' | tail -1")
-                    print_err(f"failed to find adsbx ID in response {output}")
+            # get the adsbexchange feeder id for the anywhere map / status things
+            feeder_id = self.adsbx_feeder_id()
 
             self._last_check = datetime.now()
 
@@ -541,6 +517,10 @@ class AggStatus:
                     print_err(traceback.format_exc())
 
         if self._agg == "adsbx":
+            # get the adsbexchange feeder id for the anywhere map / status things
+            feeder_id = self.adsbx_feeder_id()
+
+    def adsbx_feeder_id(self):
             feeder_id = self._d.env_by_tags("adsbxfeederid").list_get(self._idx)
             if not feeder_id or len(feeder_id) != 12:
                 # get the adsbexchange feeder id for the anywhere map / status things
