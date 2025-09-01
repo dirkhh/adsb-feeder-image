@@ -1,5 +1,6 @@
 Changes since v3.0.1
 =======
+- adsbexchange map / stats link: reliably retrieve for stage2 / multiple feeds on same IP
 - expert page: correctly handle enter in various text input fields to update the corresponding values
 - up acars_router version so docker bridge ipv6 no longer breaks acars
 - up fr24 version to fix an error ('use new version' .. version is out less than a week)
