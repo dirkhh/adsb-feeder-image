@@ -431,26 +431,26 @@ class AggStatus:
                 self._d.env_by_tags("alivemaplink").list_set(self._idx, map_link)
 
     def adsbx_feeder_id(self):
-            feeder_id = self._d.env_by_tags("adsbxfeederid").list_get(self._idx)
-            uuid_saved = self._d.env_by_tags("adsbxfeederid_uuid").list_get(self._idx)
-            uuid = self._d.env_by_tags("ultrafeeder_uuid").list_get(self._idx)
-            if uuid_saved != uuid or not feeder_id or len(feeder_id) != 12:
-                # get the adsbexchange feeder id for the anywhere map / status things
-                print_err(f"don't have the adsbX Feeder ID for {self._idx}, yet")
-                output, status = get_plain_url(f"https://www.adsbexchange.com/api/feeders/tar1090/?feed={uuid}")
-                match = re.search(
-                    r"www.adsbexchange.com/api/feeders/\?feed=([A-Z,a-z,0-9]*)",
-                    output,
-                )
-                adsbx_id = None
-                if match:
-                    adsbx_id = match.group(1)
-                if adsbx_id and len(adsbx_id) == 12:
-                    print_err(f"adsbx feeder id for {self._idx}: {adsbx_id}")
-                    self._d.env_by_tags("adsbxfeederid").list_set(self._idx, adsbx_id)
-                    self._d.env_by_tags("adsbxfeederid_uuid").list_set(self._idx, uuid)
-                else:
-                    print_err(f"failed to find adsbx ID in response {output}")
+        feeder_id = self._d.env_by_tags("adsbxfeederid").list_get(self._idx)
+        uuid_saved = self._d.env_by_tags("adsbxfeederid_uuid").list_get(self._idx)
+        uuid = self._d.env_by_tags("ultrafeeder_uuid").list_get(self._idx)
+        if uuid_saved != uuid or not feeder_id or len(feeder_id) != 12:
+            # get the adsbexchange feeder id for the anywhere map / status things
+            print_err(f"don't have the adsbX Feeder ID for {self._idx}, yet")
+            output, status = get_plain_url(f"https://www.adsbexchange.com/api/feeders/tar1090/?feed={uuid}")
+            match = re.search(
+                r"www.adsbexchange.com/api/feeders/\?feed=([A-Z,a-z,0-9]*)",
+                output,
+            )
+            adsbx_id = None
+            if match:
+                adsbx_id = match.group(1)
+            if adsbx_id and len(adsbx_id) == 12:
+                print_err(f"adsbx feeder id for {self._idx}: {adsbx_id}")
+                self._d.env_by_tags("adsbxfeederid").list_set(self._idx, adsbx_id)
+                self._d.env_by_tags("adsbxfeederid_uuid").list_set(self._idx, uuid)
+            else:
+                print_err(f"failed to find adsbx ID in response {output}")
 
     def __repr__(self):
         return f"Aggregator({self._agg} last_check: {str(self._last_check)}, beast: {self._beast} mlat: {self._mlat})"
