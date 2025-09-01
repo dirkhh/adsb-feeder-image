@@ -522,30 +522,22 @@ class AggStatus:
 
     def adsbx_feeder_id(self):
             feeder_id = self._d.env_by_tags("adsbxfeederid").list_get(self._idx)
+            uuid = self._d.env_by_tags("ultrafeeder_uuid").list_get(self._idx)
             if not feeder_id or len(feeder_id) != 12:
                 # get the adsbexchange feeder id for the anywhere map / status things
                 print_err(f"don't have the adsbX Feeder ID for {self._idx}, yet")
-                container_name = "ultrafeeder" if self._idx == 0 else f"uf_{self._idx}"
-                try:
-                    result = subprocess.run(
-                        f"docker logs {container_name} | grep 'www.adsbexchange.com/api/feeders' | tail -1",
-                        shell=True,
-                        capture_output=True,
-                        text=True,
-                    )
-                    output = result.stdout
-                except:
-                    print_err("got exception trying to look at the adsbx logs")
-                    return
+                output, status = get_plain_url(f"https://www.adsbexchange.com/api/feeders/tar1090/?feed={uuid}")
                 match = re.search(
-                    r"www.adsbexchange.com/api/feeders/\?feed=([^&\s]*)",
+                    r"www.adsbexchange.com/api/feeders/\?feed=([A-Z,a-z,0-9]*)",
                     output,
                 )
+                adsbx_id = None
                 if match:
                     adsbx_id = match.group(1)
+                if adsbx_id and len(adsbx_id) == 12:
+                    print_err(f"adsbx feeder id for {self._idx}: {adsbx_id}")
                     self._d.env_by_tags("adsbxfeederid").list_set(self._idx, adsbx_id)
                 else:
-                    print_err(f"ran: docker logs {container_name} | grep 'www.adsbexchange.com/api/feeders' | tail -1")
                     print_err(f"failed to find adsbx ID in response {output}")
 
     def __repr__(self):
