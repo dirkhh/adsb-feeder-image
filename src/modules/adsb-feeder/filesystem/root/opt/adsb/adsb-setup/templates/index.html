@@ -897,7 +897,10 @@
           if (data["beast"] == "good" && !mlat_broken) {
             sumIcon = statusOkIcon;
             sumColor = "text-success";
-          } else if (data["beast"] == "disconnected" || data["beast"] == "starting") {
+          } else if (data["beast"] == "starting") {
+            sumIcon = icons['starting'];
+            sumColor = "text-muted";
+          } else if (data["beast"] == "disconnected") {
             sumIcon = icons['disconnected'];
             sumColor = "text-danger";
           } else if (beast_broken || mlat_broken) {
