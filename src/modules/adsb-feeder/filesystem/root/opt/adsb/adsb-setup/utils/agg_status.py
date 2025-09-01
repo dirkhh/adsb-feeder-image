@@ -439,7 +439,7 @@ class AggStatus:
             print_err(f"don't have the adsbX Feeder ID for {self._idx}, yet")
             output, status = get_plain_url(f"https://www.adsbexchange.com/api/feeders/tar1090/?feed={uuid}")
             match = re.search(
-                r"www.adsbexchange.com/api/feeders/\?feed=([A-Z,a-z,0-9]*)",
+                r"www.adsbexchange.com/api/feeders/\?feed=([^\"'&\s]*)",
                 output,
             )
             adsbx_id = None
