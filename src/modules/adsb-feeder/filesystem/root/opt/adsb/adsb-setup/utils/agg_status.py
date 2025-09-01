@@ -206,9 +206,7 @@ class AggStatus:
                 return
 
         # for the Ultrafeeder based aggregators, let's not bother with talking to their API
-        # that's of course bogus as hell - simply remove all the code for thsoe aggregators
-        # below - but for now I'm not sure I want to do this because I'm not sure it's the
-        # right thing to do
+        # readsb / mlat-client provide information about the feed status for those
         if self._agg in ultrafeeder_aggs:
             self.get_mlat_status()
             self.get_beast_status()
@@ -216,66 +214,7 @@ class AggStatus:
             self.get_maplink()
             return
 
-        if self._agg == "adsblol":
-            uuid = self._d.env_by_tags("adsblol_uuid").list_get(self._idx)
-            name = self._d.env_by_tags("site_name").list_get(self._idx)
-            json_url = "https://api.adsb.lol/0/me"
-            response_dict, status = self.get_json(json_url)
-            if response_dict and status == 200:
-                lolclients = response_dict.get("clients")
-                if lolclients:
-                    lolbeast = lolclients.get("beast")
-                    lolmlat = lolclients.get("mlat")
-                    self._beast = T.Disconnected
-                    if isinstance(lolbeast, list):
-                        for entry in lolbeast:
-                            if entry.get("uuid", "xxxxxxxx-xxxx-")[:14] == uuid[:14]:
-                                self._beast = T.Good
-                                self._d.env_by_tags("adsblol_link").list_set(self._idx, entry.get("adsblol_my_url"))
-                                break
-                    self._mlat = (
-                        T.Good
-                        if isinstance(lolmlat, list)
-                        and any(b.get("uuid", "xxxxxxxx-xxxx-")[:14] == uuid[:14] for b in lolmlat)
-                        else T.Disconnected
-                    )
-                    self._last_check = datetime.now()
-                else:
-                    print_err(f"adsblol returned status {status}")
-        elif self._agg == "flyitaly":
-            # get the data from json
-            json_url = "https://my.flyitalyadsb.com/am_i_feeding"
-            response_dict, status = self.get_json(json_url)
-            if response_dict and status == 200:
-                feeding = response_dict["feeding"]
-                if feeding:
-                    self._beast = T.Good if feeding.get("beast") else T.Disconnected
-                    self._mlat = T.Good if feeding.get("mlat") else T.Disconnected
-                    self._last_check = datetime.now()
-            else:
-                print_err(f"flyitaly returned {status}")
-        elif self._agg == "adsbfi":
-            # get the data from json
-            # get beast from https://api.adsb.fi/v1/feeder?id=uuid
-            # and get mlat from myip with name match
-            uuid = self._d.env_by_tags("ultrafeeder_uuid").list_get(self._idx)
-            name = self._d.env_by_tags("site_name").list_get(self._idx)
-            json_uuid_url = f"https://api.adsb.fi/v1/feeder?id={uuid}"
-
-            adsbfi_dict, status = self.get_json(json_uuid_url)
-            if adsbfi_dict and status == 200:
-                beast_array = adsbfi_dict.get("beast", [])
-                self._beast = (
-                    T.Good if len(beast_array) > 0 and beast_array[0].get("receiverId") == uuid else T.Disconnected
-                )
-                mlat_array = adsbfi_dict.get("mlat", [])
-                self._mlat = (
-                    T.Good if len(mlat_array) > 0 and mlat_array[0].get("receiverId") == uuid else T.Disconnected
-                )
-                self._last_check = datetime.now()
-            else:
-                print_err(f"adsbfi v1/feeder returned {status}")
-        elif self._agg == "flightaware":
+        if self._agg == "flightaware":
             suffix = "" if self._idx == 0 else f"_{self._idx}"
             json_url = f"{self._url}/fa-status.json{suffix}/"
             fa_dict, status = self.get_json(json_url)
@@ -390,72 +329,7 @@ class AggStatus:
             self._beast = T.Unknown
             self._mlat = T.Unknown
             self._last_check = datetime.now()
-        elif self._agg == "alive":
-            json_url = "https://api.airplanes.live/feed-status"
-            a_dict, status = self.get_json(json_url)
-            if a_dict and status == 200:
-                uuid = self._d.env_by_tags("ultrafeeder_uuid").list_get(self._idx)
-                beast_clients = a_dict.get("beast_clients")
-                # print_err(f"alife returned {beast_clients}", level=8)
-                if beast_clients:
-                    self._beast = T.Good if any(bc.get("uuid") == uuid for bc in beast_clients) else T.Disconnected
-                mlat_clients = a_dict.get("mlat_clients")
-                # print_err(f"alife returned {mlat_clients}")
-                if mlat_clients:
-                    self._mlat = (
-                        T.Good
-                        if any(
-                            (isinstance(mc.get("uuid"), list) and mc.get("uuid")[0] == uuid)
-                            or (isinstance(mc.get("uuid"), str) and mc.get("uuid") == uuid)
-                            for mc in mlat_clients
-                        )
-                        else T.Disconnected
-                    )
 
-                self.check_alive_maplink()
-
-                self._last_check = datetime.now()
-            else:
-                print_err(f"airplanes.live returned {status}")
-        elif self._agg == "adsbx":
-            # get the adsbexchange feeder id for the anywhere map / status things
-            feeder_id = self.adsbx_feeder_id()
-
-            self._last_check = datetime.now()
-
-        elif self._agg == "tat":
-            # get the data from the status text site
-            text_url = "https://theairtraffic.com/iapi/feeder_status"
-            tat_text, status = get_plain_url(text_url)
-            if text_url and status == 200:
-                if re.search(r" No ADS-B feed", tat_text):
-                    self._beast = T.Disconnected
-                elif re.search(r"  ADS-B feed", tat_text):
-                    self._beast = T.Good
-                else:
-                    print_err(f"can't parse beast part of tat response")
-                    return
-                if re.search(r" No MLAT feed", tat_text):
-                    self._mlat = T.Disconnected
-                elif re.search(r"  MLAT feed", tat_text):
-                    self._mlat = T.Good
-                else:
-                    print_err(f"can't parse mlat part of tat response")
-                    self._mlat = T.Unknown
-                    # but since we got someting we could parse for beast above, let's keep going
-
-                self._last_check = datetime.now()
-            else:
-                print_err(f"tat returned {status}")
-        elif self._agg == "planespotters":
-            uf_uuid = self._d.env_by_tags("ultrafeeder_uuid").list_get(self._idx)
-            html_url = f"https://www.planespotters.net/feed/status/{uf_uuid}"
-            ps_text, status = get_plain_url(html_url)
-            if ps_text and status == 200:
-                self._beast = T.Disconnected if re.search("Feeder client not connected", ps_text) else T.Good
-                self._last_check = datetime.now()
-            else:
-                print_err(f"planespotters returned {status}")
         elif self._agg == "planewatch":
             # they sometimes call it key, sometimes uuid
             pw_uuid = self._d.env_by_tags(["planewatch", "key"]).list_get(self._idx)
