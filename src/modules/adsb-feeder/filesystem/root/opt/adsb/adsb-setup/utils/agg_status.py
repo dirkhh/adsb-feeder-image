@@ -411,11 +411,9 @@ class AggStatus:
                         )
                         else T.Disconnected
                     )
-                map_link = a_dict.get("map_link")
-                # seems to currently only have one map link per IP, we save it
-                # per microsite nonetheless in case this changes in the future
-                if map_link:
-                    self._d.env_by_tags("alivemaplink").list_set(self._idx, map_link)
+
+                self.check_alive_maplink()
+
                 self._last_check = datetime.now()
             else:
                 print_err(f"airplanes.live returned {status}")
@@ -494,15 +492,8 @@ class AggStatus:
             self._mlat = T.Disabled
 
     def get_maplink(self):
-        if self._agg == "alive" and not self._d.env_by_tags("alivemaplink").list_get(self._idx):
-            json_url = "https://api.airplanes.live/feed-status"
-            a_dict, status = self.get_json(json_url)
-            if a_dict and status == 200:
-                map_link = a_dict.get("map_link")
-                # seems to currently only have one map link per IP, we save it
-                # per microsite nonetheless in case this changes in the future
-                if map_link:
-                    self._d.env_by_tags("alivemaplink").list_set(self._idx, map_link)
+        if self._agg == "alive":
+            self.check_alive_maplink()
 
         if self._agg == "adsblol" and not self._d.env_by_tags("adsblol_link").list_get(self._idx):
             uuid = self._d.env_by_tags("adsblol_uuid").list_get(self._idx)
@@ -519,6 +510,18 @@ class AggStatus:
         if self._agg == "adsbx":
             # get the adsbexchange feeder id for the anywhere map / status things
             feeder_id = self.adsbx_feeder_id()
+
+    def check_alive_maplink(self):
+        if self._d.env_by_tags("alivemaplink").list_get(self._idx):
+            return
+        json_url = "https://api.airplanes.live/feed-status"
+        a_dict, status = self.get_json(json_url)
+        if a_dict and status == 200:
+            map_link = a_dict.get("map_link")
+            # seems to currently only have one map link per IP, we save it
+            # per microsite nonetheless in case this changes in the future
+            if map_link:
+                self._d.env_by_tags("alivemaplink").list_set(self._idx, map_link)
 
     def adsbx_feeder_id(self):
             feeder_id = self._d.env_by_tags("adsbxfeederid").list_get(self._idx)
