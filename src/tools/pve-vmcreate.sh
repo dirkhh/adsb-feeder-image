@@ -24,6 +24,8 @@ MAC=$(printf '1A:67:30:%02X:%02X:%02X\n' $[RANDOM%256] $[RANDOM%256] $[RANDOM%25
 # conver the image and make sure it's the right size
 qemu-img resize -f qcow2 "${IMG}" "${SIZE}"
 
+# use sata, other storage emulations don't seem to work correctly with dietpi
+
 qm create $VMID \
    -cores 2 \
    -description "ADS-B Feeder image https://adsb.im/home" \
