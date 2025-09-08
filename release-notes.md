@@ -1,18 +1,8 @@
-Changes since v3.0.1
+Changes since v3.0.3
 =======
-- tweak feed status on container startup to avoid false impression it's not working
-- airplanes live map link: make it work better for stage2 / multiple feeds on same IP
-- adsbexchange map / stats link: reliably retrieve for stage2 / multiple feeds on same IP
-- expert page: correctly handle enter in various text input fields to update the corresponding values
-- up acars_router version so docker bridge ipv6 no longer breaks acars
-- up fr24 version to fix an error ('use new version' .. version is out less than a week)
-- improve log-sanitizer / share diagnostics (was apparently truncating the log on some systems)
-- fix the acarshub data loss on power loss (probably)
-- fix biastee not showing for acars and acars2 (rtl-sdr and airspy)
-- fix MLAT displaying as disconnected when it's actually disabled
-- remove unicode symbols from internal API for feeder status
-- add option on expert page to enable ipv6 for the docker bridge network, name now adsb_im_bridge (was config_default)
-- fix: some temperature sensor corner cases
+- non ADS-B setup: don't suggest SDR assignments for 1090/978
+- non ADS-B setup: make sure the ADS-B decoder doesn't grab an SDR
+- wifi hotspot: show wifi password on screen once more
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)
