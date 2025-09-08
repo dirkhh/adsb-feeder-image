@@ -2268,6 +2268,7 @@ class AdsbIm:
         if not self._d.is_enabled("is_adsb_feeder"):
             print_err("is_adsb_feeder not selected, disabling ADS-B")
             self._d.env_by_tags("aggregator_choice").value = "nonadsb"
+            self._d.env_by_tags("readsb_device_type").value = ""
             self._d.env_by_tags("1090serial").value = ""
             self._d.env_by_tags("978serial").value = ""
             self._d.env_by_tags("1090_2serial").value = ""
