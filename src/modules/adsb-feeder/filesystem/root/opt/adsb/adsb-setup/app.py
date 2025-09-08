@@ -184,7 +184,7 @@ class AdsbIm:
             # the case, then insert them into the settings
             self.setup_app_ports()
 
-        self._sdrdevices = SDRDevices(assignment_function=self.sdr_assignments)
+        self._sdrdevices = SDRDevices(assignment_function=self.sdr_assignments, data=self._d)
 
         for i in [0] + self.micro_indices():
             self._d.ultrafeeder.append(UltrafeederConfig(data=self._d, micro=i))

@@ -74,7 +74,8 @@ class SDR:
 
 
 class SDRDevices:
-    def __init__(self, assignment_function):
+    def __init__(self, assignment_function, data):
+        self._d = data
         self.assignment_function = assignment_function
         # these are the SDRs that we keep re-populating from lsusb
         self.sdrs: List[SDR] = []
@@ -277,6 +278,11 @@ class SDRDevices:
         # - if we find just one RTL SDR and no airspy, then that RTL SDR is for 1090
         # Make sure one SDR is used per frequency at most...
         ret = {frequency: "" for frequency in frequencies}
+
+        if not self._d.is_enabled("is_adsb_feeder"):
+            # currently no logic for non ads-b setups, don't give any suggestions
+            return ret
+
         for sdr in self.sdrs:
             if sdr._type == "airspy":
                 ret["1090"] = sdr._serial
