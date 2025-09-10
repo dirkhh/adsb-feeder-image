@@ -246,7 +246,7 @@ class AdsbIm:
             ["radarbox", "AirNav Radar", "https://www.airnavradar.com/coverage-map", ["https://www.airnavradar.com/stations/<FEEDER_RADARBOX_SN>"], 1],
             ["planefinder", "PlaneFinder", "https://planefinder.net/", ["/planefinder-statSTG2IDX/"], 1],
             ["adsbhub", "ADSBHub", "https://www.adsbhub.org/coverage.php", [""], 1],
-            ["opensky", "OpenSky", "https://opensky-network.org/network/explorer", ["https://opensky-network.org/receiver-profile?s=<FEEDER_OPENSKY_SERIAL>"], 1],
+            ["opensky", "OpenSky", "https://opensky-network.org/network/explorer", ["https://opensky-network.org/my-opensky/sensors/view-sensors"], 1],
             ["radarvirtuel", "RadarVirtuel", "https://www.radarvirtuel.com/", [""], 1],
             ["1090uk", "1090MHz UK", "https://1090mhz.uk", ["https://www.1090mhz.uk/mystatus.php?key=<FEEDER_1090UK_API_KEY>"], 1],
             ["sdrmap", "sdrmap", "https://sdrmap.org/", [""], 1],
