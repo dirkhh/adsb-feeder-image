@@ -647,6 +647,18 @@ class AdsbIm:
             else:
                 self._d.env_by_tags("under_voltage").value = True
 
+    def pi5_usb_current_limited(self):
+        try:
+            with open("/chosen/power/usb_max_current_enable", "r") as f:
+                text = f.read().strip()
+                if text == "0":
+                    print_err("USB current limited to 600mA, this is only sufficient for a single SDR")
+                    return True
+                return False
+        except:
+            return False
+
+
     def monitor_dmesg(self):
         while True:
             try:
@@ -4105,6 +4117,7 @@ class AdsbIm:
             compose_up_failed=compose_up_failed,
             channel=channel,
             adsb=adsb,
+            pi5_usb_current_limited=self.pi5_usb_current_limited(),
         )
 
     @check_restart_lock

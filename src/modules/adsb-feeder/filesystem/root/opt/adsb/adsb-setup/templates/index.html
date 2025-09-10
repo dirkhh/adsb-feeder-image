@@ -44,6 +44,11 @@
   The feeder system kernel detected under-voltage. This can lead to random crashes and various issues with clock
   stability, reduced reception, failing SDRs, etc. Please check and likely replace your power supply.
 </div>
+<div class="alert alert-danger {% if not pi5_usb_current_limited %}d-none{% endif %}" role="alert">
+  This pi5 is limiting USB current to 600 mA, this is insufficient for more than 1 SDR or additional USB devices.<br>
+  You can fix this by using an official RPi power supply. <br>
+  Or override by adding usb_max_current_enable=1 in /boot/firmware/config.txt if you're confident your power supply is sufficient.
+</div>
 <div id="ip-mismatch" class="alert alert-info d-none" role="alert">
   The external IP of your browser and the feeder are different. The information in the status links for some of the
   aggregators below may be incorrect.
