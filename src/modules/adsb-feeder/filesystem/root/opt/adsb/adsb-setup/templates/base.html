@@ -190,6 +190,10 @@
     {% if env_value_by_tag("aggregator_choice") != 'nonadsb' %}
     mapsNeeded = 1;
     {% endif %}
+    {% if is_enabled('run_hfdlobserver') or is_enabled('run_dumphfdl') or is_enabled('acars2pos') %}
+    // if we get map positions from HFDL or acars2pos, show the tar1090 map
+    mapsNeeded = mapsNeeded | 1;
+    {% endif %}
     {% if is_enabled('acarshub') %}
     mapsNeeded = mapsNeeded | 2;
     {% endif %}
