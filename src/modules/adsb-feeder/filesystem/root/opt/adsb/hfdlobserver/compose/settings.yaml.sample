@@ -30,6 +30,11 @@ dumphfdl:
         protocol: tcp
         address: acars_router
         port: 5556
+      # output SBS to ultrafeeder
+      - format: "basestation"
+        protocol: "tcp"
+        address: "ultrafeeder"
+        port: 32009
 
 # unless you have a specific setup, leave most of this alone
 

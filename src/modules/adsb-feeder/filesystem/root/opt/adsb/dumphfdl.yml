@@ -20,6 +20,8 @@ services:
       - ZMQ_ENDPOINT=tcp://0.0.0.0:45555
       - SERVER=acars_router
       - SERVER_PORT=5556
+      # output SBS data to the ultrafeeder map
+      - DUMP_HFDL_COMMAND_EXTRA=--output decoded:basestation:tcp:address=ultrafeeder,port=32009
       # USER_PROVIDED_ENV_START
       # USER_PROVIDED_ENV_END
     tmpfs:
