@@ -451,6 +451,11 @@ class Data:
             tags=["sdrplay_license_accepted", "is_enabled"],
         ),
         Env(
+            "AF_IS_SDRPLAY_IGNORE_SERIAL",
+            default=False,
+            tags=["sdrplay_ignore_serial", "is_enabled"],
+        ),
+        Env(
             "_ADSBIM_STATE_JOURNAL_CONFIGURED",
             default=False,
             tags=["journal_configured", "is_enabled", "norestore"],

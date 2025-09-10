@@ -357,6 +357,26 @@
     </form>
   </div>
   {% endif %}
+  <div class="col-12 col-lg-6">
+    <h5 class="mt-3">SDRPlay: Ignore Serial</h5>
+    <form method="POST" onsubmit="show_spinner(); return true;">
+      <div class="row align-items-center">
+        <div class="col-8">
+          <label for="sdrplay_ignore_serial--{% if is_enabled('sdrplay_ignore_serial') %}disable{% else %}enable{% endif %}">
+              Some SDRPlay / RSP devices will not always show up with serial.
+              If only one SDRPlay device is connected, enable this option to ignore the serial.
+          </label>
+        </div>
+        <div class="col-4">
+          <button type="submit" class="btn btn-primary mx-auto w-100"
+            name="sdrplay_ignore_serial--{% if is_enabled('sdrplay_ignore_serial') %}disable{% else %}enable{% endif %}"
+            value="go">
+            {% if is_enabled('sdrplay_ignore_serial') %}Disable{% else %}Enable{% endif %}
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
   <!-- the rest of this will create its own spread across two columns on wider screens -->
   <div class="col-12">
     <div class="row">

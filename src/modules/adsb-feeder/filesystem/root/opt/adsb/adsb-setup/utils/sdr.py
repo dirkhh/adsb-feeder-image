@@ -9,7 +9,8 @@ from .util import print_err
 
 
 class SDR:
-    def __init__(self, type_: str, address: str):
+    def __init__(self, type_: str, address: str, data):
+        self._d = data
         self._type = type_
         self._address = address
         self._serial_probed = None
@@ -50,6 +51,8 @@ class SDR:
                 self._serial_probed = "Mode-S Beast w/o serial"
             if self._type == "sdrplay":
                 self._serial_probed = "SDRplay w/o serial"
+        if self._type == "sdrplay" and self._d.is_enabled("sdrplay_ignore_serial"):
+            self._serial_probed = "SDRplay w/o serial"
         return self._serial_probed
 
     @property
@@ -81,7 +84,7 @@ class SDRDevices:
         self.sdrs: List[SDR] = []
         # this is the dict that contains the data of what we are doing with the SDRs, accessed by serial number
         self.sdr_settings: dict[str, SDR] = {}
-        self.null_sdr: SDR = SDR("unknown", "unknown")
+        self.null_sdr: SDR = SDR("unknown", "unknown", self._d)
         self.duplicates: Set[str] = set()
         self.lsusb_output = ""
         self.last_probe = 0
@@ -150,7 +153,7 @@ class SDRDevices:
                 for line in output:
                     address = self._get_address_for_pid_vid(pidvid, line)
                     if address:
-                        new_sdr = SDR(sdr_type, address)
+                        new_sdr = SDR(sdr_type, address, self._d)
                         if new_sdr._serial in self.sdr_settings:
                             self.duplicates.add(new_sdr._serial)
                         else:
