@@ -1,8 +1,12 @@
-Changes since v3.0.3
+Changes since v3.0.4
 =======
-- non ADS-B setup: don't suggest SDR assignments for 1090/978
-- non ADS-B setup: make sure the ADS-B decoder doesn't grab an SDR
-- wifi hotspot: show wifi password on screen once more
+- update containers
+- show live map link when HFDL / acars2pos is enabled
+- HFDL: add SBS position output to ultrafeeder / live map
+- change opensky status link to a less useful but existing page
+- pi5: add warning when only limited USB current is available due to power supply
+- add option to ignore intermittent SDRPlay serial
+
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)
