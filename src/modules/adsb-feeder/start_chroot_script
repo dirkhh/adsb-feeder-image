@@ -18,7 +18,7 @@ unpack /filesystem/root /
 rm -f /var/lib/man-db/auto-update
 
 # free up space
-apt-get autoremove -y gcc-12 dpkg-dev gdb build-essential mkvtoolnix iso-codes shared-mime-info rpicam-apps-lite\* || true
+apt-get autoremove -y gcc-12 dpkg-dev gdb build-essential mkvtoolnix iso-codes shared-mime-info rpicam-apps-lite\* p7zip || true
 
 echo "building on $(hostname) - available disk space inside the image:"
 df -h
@@ -70,7 +70,7 @@ apt-get install -y \
     gnupg hostapd isc-dhcp-server avahi-utils \
     git rtl-sdr \
     apt-transport-https ca-certificates curl gnupg2 \
-    slirp4netns uidmap jq zstd netcat-openbsd
+    jq zstd netcat-openbsd
 
 systemctl mask hostapd.service
 systemctl mask isc-dhcp-server.service
