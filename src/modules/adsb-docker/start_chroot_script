@@ -92,6 +92,18 @@ then
   sed -i 's/^\(127.0.0.1\s*localhost\)\(.*\)/\1\2 localunixsocket localunixsocket.local localunixsocket.home/g' /etc/hosts
 fi
 
+if [[ -f /boot/firmware/cmdline.txt ]]; then
+    # Raspbian: set wifi country on boot
+    # we also set this in net-or-hotspot.sh which is redundant in newer images that have this
+    sed -i \
+        -e "s/\s*cfg80211.ieee80211_regdom=\S*//" \
+        -e "s/\(.*\)/\1 cfg80211.ieee80211_regdom=PA/" \
+        /boot/firmware/cmdline.txt
+fi
+if [ -f /var/lib/NetworkManager/NetworkManager.state ]; then
+    # we need wifi to work on first boot, so enable it in NetworkManager.state
+    sed -i 's/^WirelessEnabled=.*/WirelessEnabled=true/' /var/lib/NetworkManager/NetworkManager.state
+fi
 if [[ -f /boot/firmware/config.txt ]]; then
     # for raspbian, reduce GPU memory to gain 48M of memory (very significant on 512 M systems)
     # this image does not plan to use the video output ever (and it apparently still works with limited feature set with 16M of gpu mem)
