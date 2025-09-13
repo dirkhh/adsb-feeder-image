@@ -112,7 +112,7 @@ Download the `adsb-im-x86-64-vm-*-Hyper-V-x86_64.vhdx.xz` for the latest release
 - connect to your Proxmox host web UI and log in
 - select your host in the left pane, then in the center pane click on `>_ Shell` to open a web shell
 - make a directory and cd there: `mkdir -p ~/adsbim; cd ~/adsbim`
-- download the x86-64-vm Proxmox image (use the URL for the current version): `wget -O adsb-im-vm.tar.xz https://github.com/dirkhh/adsb-feeder-image/releases/download/v3.0.3/adsb-im-x86-64-vm-v3.0.3-Proxmox-x86_64.qcow2.xz`
+- download the x86-64-vm Proxmox image (use the URL for the current version): `wget -O adsb-im-vm.tar.xz https://github.com/dirkhh/adsb-feeder-image/releases/download/v3.0.4/adsb-im-x86-64-vm-v3.0.4-proxmox.tar.xz`
 - unpack the image and create a fresh VM: `tar xJf adsb-im-vm.tar.xz && bash ./pve-vmcreate.sh -s 16G -p local-lvm:0`
 - optional: remove the download: `cd && rm -rf ~/adsbim`
 - after this process completes, you should see the new VM in the Proxmox web UI
