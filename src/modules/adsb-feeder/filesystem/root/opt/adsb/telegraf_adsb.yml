@@ -1,0 +1,22 @@
+services:
+  dumphfdl:
+    image: ${TELEGRAF_ADSB_CONTAINER}
+    container_name: telegraf_adsb
+    hostname: telegraf_adsb
+    healthcheck:
+      disable: true
+    restart: unless-stopped
+    networks:
+      - adsb_im_bridge
+    ports:
+      - 9273:9273
+    environment:
+      - TZ=${FEEDER_TZ}
+      - PROMETHEUS_ENABLE=true
+      - URL_1090=${TELEGRAF_URL_1090}
+      - URL_978=${TELEGRAF_URL_978}
+      - HOST_978=${TELEGRAF_HOST_978}
+      # USER_PROVIDED_ENV_START
+      # USER_PROVIDED_ENV_END
+    tmpfs:
+      - /run:exec,size=64M

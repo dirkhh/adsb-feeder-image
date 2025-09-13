@@ -364,6 +364,10 @@ class Data:
         Env("AF_FLIGHTRADAR_PORT", default=8754, tags=["frport"]),
         Env("AF_PLANEFINDER_PORT", default=30053, tags=["pfport"]),
         Env("AF_DOCKER_IPV6", default=False , tags=["docker_ipv6", "is_enabled", "norestore"]),
+        Env("AF_TELEGRAF_ADSB", default=False , tags=["telegraf_adsb", "is_enabled"]),
+        Env("TELEGRAF_URL_1090", default="" , tags=["telegraf_url_1090"]),
+        Env("TELEGRAF_URL_978", default="" , tags=["telegraf_url_978"]),
+        Env("TELEGRAF_HOST_978", default="" , tags=["telegraf_host_978"]),
         Env("_ADSBIM_STATE_PACKAGE", tags=["pack", "norestore"]),
         Env(
             "_ADSBIM_STATE_IMAGE_NAME",

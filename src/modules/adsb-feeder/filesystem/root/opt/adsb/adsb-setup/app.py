@@ -2884,6 +2884,8 @@ class AdsbIm:
 
         self.dozzle_yml_from_template()
 
+        self.configure_telegraf_adsb()
+
         # check if we need the stage2 multiOutline job
         if self._d.is_enabled("stage2"):
             if not self._multi_outline_bg:
@@ -4408,6 +4410,21 @@ class AdsbIm:
         with open(template_file, "r") as template:
             with open(yml_file, "w") as yml:
                 yml.write(template.read().replace("DOCKER_IPV6", "true" if self._d.is_enabled("docker_ipv6") else "false"))
+
+    def configure_telegraf_adsb(self):
+        # configure telegraf_adsb if it's enabled
+        if self._d.is_enabled("telegraf_adsb"):
+            if self._d.env_by_tags("aggregator_choice").value == "nano":
+                self._d.env_by_tags("telegraf_url_1090").value = "http://nanofeeder"
+            else:
+                self._d.env_by_tags("telegraf_url_1090").value = "http://ultrafeeder"
+        if self._d.list_is_enabled(['uat978'], 0):
+            self._d.env_by_tags("telegraf_url_978").value = "http://dump978/skyaware978"
+            self._d.env_by_tags("telegraf_host_978").value = "dump978"
+        else:
+            self._d.env_by_tags("telegraf_url_978").value = ""
+            self._d.env_by_tags("telegraf_host_978").value = ""
+
 
 
 def create_stage2_yml_from_template(stage2_yml_name, n, ip, template_file):
