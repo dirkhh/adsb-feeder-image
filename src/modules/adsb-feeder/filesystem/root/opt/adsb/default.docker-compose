@@ -133,4 +133,7 @@ if [ -f /opt/adsb/config/.env ] ; then
     if grep "AF_RUN_RADIOSONDE=True" /opt/adsb/config/.env > /dev/null 2>&1 && [ -f /opt/adsb/radiosonde/station.cfg ] ; then
         COMPOSE_FILES+=( "-f" "/opt/adsb/config/radiosonde.yml" )
     fi
+    if grep "AF_TELEGRAF_ADSB=True" /opt/adsb/config/.env > /dev/null 2>&1; then
+        COMPOSE_FILES+=( "-f" "/opt/adsb/config/telegraf_adsb.yml" )
+    fi
 fi
