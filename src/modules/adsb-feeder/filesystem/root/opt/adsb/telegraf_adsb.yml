@@ -1,5 +1,5 @@
 services:
-  dumphfdl:
+  telegraf_adsb:
     image: ${TELEGRAF_ADSB_CONTAINER}
     container_name: telegraf_adsb
     hostname: telegraf_adsb
