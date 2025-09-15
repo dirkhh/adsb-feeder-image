@@ -1,6 +1,9 @@
 Changes since v3.0.4
 =======
+- add option to use healthcheck.io (or similar services)
+- add option to run telegraf container for ADS-B
 - update containers
+- update Raspbian images to a newer base image (only for fresh installs)
 - show live map link when HFDL / acars2pos is enabled
 - HFDL: add SBS position output to ultrafeeder / live map
 - change opensky status link to a less useful but existing page
