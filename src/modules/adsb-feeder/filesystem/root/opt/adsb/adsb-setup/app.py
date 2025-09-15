@@ -4171,13 +4171,13 @@ class AdsbIm:
         """Check if changelog should be shown to user"""
         try:
             seen_changelog = self._d.env_by_tags("seen_changelog").value
-            print_err(f"_ADSBIM_SEEN_CHANGELOG value from env_by_tags: {seen_changelog}")
+            print_err(f"_ADSBIM_SEEN_CHANGELOG value from env_by_tags: {seen_changelog}", level=8)
 
             if not seen_changelog:
                 previous_version = self._d.env_by_tags("previous_version").valuestr.split("(")[0]
                 current_version = self._d.env_by_tags("base_version").valuestr.split("(")[0]
 
-                print_err(f"Version check - old: {previous_version}, current: {current_version}")
+                print_err(f"Version check - old: {previous_version}, current: {current_version}", level=8)
 
                 if (
                     previous_version
@@ -4194,7 +4194,7 @@ class AdsbIm:
 
                     changelog_content = changelog_response if status_code == 200 else "Failed to fetch changelog"
 
-                    print_err("Changelog should be shown")
+                    print_err("Changelog should be shown", level=8)
                     return {
                         "show_changelog": True,
                         "previous_version": previous_version,
@@ -4203,7 +4203,7 @@ class AdsbIm:
                     }
 
                 else:
-                    print_err("Changelog should not be shown - versions same or missing")
+                    print_err("Changelog should not be shown - versions same or missing", level=8)
 
             return {"show_changelog": False}
 
