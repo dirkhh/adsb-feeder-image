@@ -992,27 +992,34 @@
     <h5 class="mt-3">Healthcheck Ping URL</h5>
     <form method="POST">
       <div class="row align-items-center">
-        <div class="col-12 mb-2">
-          Healthcheck Ping URL, for example from healthchecks.io but can be any URL.
-          <br>
-          Set empty URL to disable.
-          <br>
-          Every 60 minutes a simple http GET request will be performed on this URL if the system is
-          considered healthy.
-          <br>
-          If the system is at any point considered unhealthy for more than 5 minutes, a simple http
-          GET request will  be performed using with /fail added to the URL and the reason for the
-          failure will be displayed on the Feeder Homepage.
-          <br>
-          Health status will not include feeds as that is pretty much always not an issue on the
-          receiver side but rather an issue with the aggregator.
-          (possibly adding bad MLAT sync in the future)
-          <br>
-          No planes / messages for a configurable period of time will mean the system is considered
-          unhealthy.  The default is 24 hours but if you have traffic around the clock this can
-          safely be reduced to 1 or 2 hours.
-          <br>
-          Decoder failures will mean the system is considered unhealthy. (1090 + 978 only)
+        <label for="healthcheck_url">Healthcheck Ping URL</label>
+        <div class="col-12 mb-2 mt-2">
+          <span onclick="$('#healthcheck_explain').toggleClass('d-none'); $(this).find('.toggle-icon').text($('#healthcheck_explain').hasClass('d-none') ? '▶' : '▼'); return false;"
+                style="cursor: pointer;">
+            <span class="toggle-icon small">▶</span> <strong class="small">More information</strong>
+          </span>
+          <div class="small d-none mt-2" id="healthcheck_explain">
+            Healthcheck Ping URL, for example from healthchecks.io but can be any URL.
+            <br>
+            Set empty URL to disable.
+            <br>
+            Every 60 minutes a simple http GET request will be performed on this URL if the system is
+            considered healthy.
+            <br>
+            If the system is at any point considered unhealthy for more than 5 minutes, a simple http
+            GET request will  be performed using with /fail added to the URL and the reason for the
+            failure will be displayed on the Feeder Homepage.
+            <br>
+            Health status will not include feeds as that is pretty much always not an issue on the
+            receiver side but rather an issue with the aggregator.
+            (possibly adding bad MLAT sync in the future)
+            <br>
+            No planes / messages for a configurable period of time will mean the system is considered
+            unhealthy.  The default is 24 hours but if you have traffic around the clock this can
+            safely be reduced to 1 or 2 hours.
+            <br>
+            Decoder failures will mean the system is considered unhealthy. (1090 + 978 only)
+          </div>
         </div>
         <div class="col-4 mb-1">
           <label for="healthcheck_url">
