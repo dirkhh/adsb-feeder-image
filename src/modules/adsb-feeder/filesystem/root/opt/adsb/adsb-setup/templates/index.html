@@ -49,6 +49,9 @@
   You can fix this by using an official RPi power supply. <br>
   Or override by adding usb_max_current_enable=1 in /boot/firmware/config.txt if you're confident your power supply is sufficient.
 </div>
+<div class="alert alert-danger {% if not env_value_by_tag('healthcheck_fail_reason') %}d-none{% endif %}" role="alert">
+  The system has been deemed unhealthy for this reason: {{env_value_by_tag('healthcheck_fail_reason')}}
+</div>
 <div id="ip-mismatch" class="alert alert-info d-none" role="alert">
   The external IP of your browser and the feeder are different. The information in the status links for some of the
   aggregators below may be incorrect.

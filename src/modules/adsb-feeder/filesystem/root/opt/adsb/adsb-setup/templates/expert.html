@@ -978,6 +978,75 @@
       </div>
     </form>
   </div>
+  <div class="col-12 col-lg-6">
+    <h5 class="mt-3">Healthcheck Ping URL</h5>
+    <form method="POST">
+      <div class="row align-items-center">
+        <div class="col-12 mb-2">
+          Healthcheck Ping URL, for example from healthchecks.io but can be any URL.
+          <br>
+          Set empty URL to disable.
+          <br>
+          Every 60 minutes a simple http GET request will be performed on this URL if the system is
+          considered healthy.
+          <br>
+          If the system is at any point considered unhealthy for more than 5 minutes, a simple http
+          GET request will  be performed using with /fail added to the URL and the reason for the
+          failure will be displayed on the Feeder Homepage.
+          <br>
+          Health status will not include feeds as that is pretty much always not an issue on the
+          receiver side but rather an issue with the aggregator.
+          (possibly adding bad MLAT sync in the future)
+          <br>
+          No planes / messages for a configurable period of time will mean the system is considered
+          unhealthy.  The default is 24 hours but if you have traffic around the clock this can
+          safely be reduced to 1 or 2 hours.
+          <br>
+          Decoder failures will mean the system is considered unhealthy. (1090 + 978 only)
+        </div>
+        <div class="col-4 mb-1">
+          <label for="healthcheck_url">
+            Healthcheck Ping URL
+          </label>
+        </div>
+        <div class="col-8 mb-1">
+          <input class="mx-auto w-100" id="healthcheck_url" name="healthcheck_url" type="text"
+                 value="{{ env_value_by_tag('healthcheck_url') }}">
+        </div>
+        <div class="col-4 mb-1">
+          <label for="healthcheck_noplane_hours_1090">
+            Healthcheck failure after no planes on 1090 for X hours
+          </label>
+        </div>
+        <div class="col-8 mb-1">
+          <input class="mx-auto w-100" id="healthcheck_noplane_hours_1090" name="healthcheck_noplane_hours_1090" type="text"
+                 value="{{ env_value_by_tag('healthcheck_noplane_hours_1090') }}">
+        </div>
+        <div class="col-4 mb-1">
+          <label for="healthcheck_noplane_hours_978">
+            Healthcheck failure after no planes on 978 for X hours
+          </label>
+        </div>
+        <div class="col-8 mb-1">
+          <input class="mx-auto w-100" id="healthcheck_noplane_hours_978" name="healthcheck_noplane_hours_978" type="text"
+                 value="{{ env_value_by_tag('healthcheck_noplane_hours_978') }}">
+        </div>
+        <div class="col-4 mb-1 d-none">
+          <label for="healthcheck_noacars_hours">
+            Healthcheck failure after no messages on ACARS / VDL for X hours
+          </label>
+        </div>
+        <div class="col-8 mb-1 d-none">
+          <input class="mx-auto w-100" id="healthcheck_noacars_hours" name="healthcheck_noacars_hours" type="text"
+                 value="{{ env_value_by_tag('healthcheck_noacars_hours') }}">
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="healthcheck--submit"
+                  value="go">Update</button>
+        </div>
+      </div>
+    </form>
+  </div>
 </div>
 <script>
   // for each input checkbox, add an onclick handler to toggle the dependent devs (which include the input field)

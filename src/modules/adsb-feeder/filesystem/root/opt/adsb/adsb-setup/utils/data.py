@@ -368,6 +368,11 @@ class Data:
         Env("TELEGRAF_URL_1090", default="" , tags=["telegraf_url_1090"]),
         Env("TELEGRAF_URL_978", default="" , tags=["telegraf_url_978"]),
         Env("TELEGRAF_HOST_978", default="" , tags=["telegraf_host_978"]),
+        Env("HEALTHCHECK_URL", default="" , tags=["healthcheck_url"]),
+        Env("HEALTHCHECK_NOPLANE_HOURS_1090", default=24.0, tags=["healthcheck_noplane_hours_1090"]),
+        Env("HEALTHCHECK_NOPLANE_HOURS_978", default=168.0, tags=["healthcheck_noplane_hours_978"]),
+        Env("HEALTHCHECK_NOACARS_HOURS", default=24.0, tags=["healthcheck_noacars_hours"]),
+        Env("HEALTHCHECK_FAIL_REASON", default="" , tags=["healthcheck_fail_reason"]),
         Env("_ADSBIM_STATE_PACKAGE", tags=["pack", "norestore"]),
         Env(
             "_ADSBIM_STATE_IMAGE_NAME",

@@ -489,3 +489,196 @@ class ImStatus:
                     }
 
             return self._cached
+
+class LastSeen:
+    def __init__(self):
+        self.seen = None
+
+    def update(self):
+        self.seen = time.time()
+
+    def tooLong(self, hours):
+        if not self.seen:
+            # last status is not kept across restarts for now, just assume we received a plane
+            # just now, this isn't pretty but if we don't have restarts it's fine
+            self.update()
+        if time.time() - self.seen > hours * 3600:
+            return True
+        return False
+
+
+class Healthcheck:
+    def __init__(self, data):
+        self._d = data
+        self.good = True
+        self.pingInterval = 60 * 60 # 60 minutes
+        self.graceTime = 5 * 60 # 5 minutes from failure to failPing
+
+        # first ping 1 minute after startup for the moment to avoid too frequent pings if stuck in
+        # restart loop or something
+        self.nextGoodPing = time.time() + 1 * 60
+        self.nextFailPing = time.time() + 1 * 60
+
+        self.failedSince = 0
+
+        self.last1090 = LastSeen()
+        self.last978 = LastSeen()
+        self.lastAcars = LastSeen()
+        self.lastAcars2 = LastSeen()
+        self.lastVdl = LastSeen()
+
+        self.lastReadsbUptime = -1
+        self.lastReadsbSamples = -1
+
+        self.pingURL = self._d.env_by_tags("healthcheck_url").value
+
+    def set_good(self):
+        if not self.good:
+            print_err(f"healthcheck healthy after it was bad previously")
+        self.good = True
+        self.failedSince = 0
+        self.reason = ""
+        self._d.env_by_tags("healthcheck_fail_reason").value = ""
+
+        if time.time() > self.nextGoodPing:
+            self.nextGoodPing = time.time() + self.pingInterval
+            self.nextFailPing = time.time() # set next fail ping to be immediate
+            if self._d.env_by_tags("healthcheck_url").value:
+                page, status = get_plain_url(self._d.env_by_tags("healthcheck_url").value)
+                if status != 200:
+                    print_err(f"healthcheck url ping FAILURE: got http status {status}")
+                    # failure, try again in a minute instead of waiting pingInterval
+                    self.nextGoodPing = time.time() + 60
+                print_err(f"healthcheck url ping success")
+
+    def set_failed(self, reason):
+        self.reason = reason
+        if self.good:
+            print_err(f"healthcheck failed with reason: {reason} (fail ping and UI notice only after 5 minutes of continued failure)")
+            self.failedSince = time.time()
+            self.good = False
+
+        if time.time() - self.failedSince > 5 * 60:
+            self._d.env_by_tags("healthcheck_fail_reason").value = reason
+        if time.time() > self.nextFailPing and time.time() - self.failedSince > 5 * 60:
+            print_err(f"healthcheck failPing due to: {self.reason}")
+            self.nextFailPing = time.time() + self.pingInterval
+            self.nextGoodPing = time.time() # set next success ping to be immediate
+            if self._d.env_by_tags("healthcheck_url").value:
+                page, status = get_plain_url(self._d.env_by_tags("healthcheck_url").value + "/fail")
+                if status != 200:
+                    print_err(f"healthcheck url fail FAILURE: got http status {status}")
+                    # failure, try again in a minute instead of waiting pingInterval
+                    self.nextFailPing = time.time() + 60
+                print_err(f"healthcheck url fail successfully signaled")
+
+
+    # this is called every minute from app.py so we don't need to run another thread
+    def check(self):
+        fail = []
+        adsb = not self._d.env_by_tags("aggregator_choice").value
+
+        uf_path = "/run/adsb-feeder-"
+        if self._d.env_by_tags("aggregator_choice").value == "nano":
+            uf_path += "nanofeeder"
+        else:
+            uf_path += "ultrafeeder"
+
+        try:
+            with open(f"{uf_path}/readsb/stats.json") as f:
+                obj = json.load(f)
+                now = obj.get("now")
+                if not now or now < time.time() - 60:
+                    fail.append("readsb stats.json out of date")
+                local = obj.get("total").get("local")
+                if local:
+                    samples = local.get("samples_processed")
+                    if samples == self.lastReadsbSamples:
+                        fail.append(f"1090 SDR hung (sample count: {samples})")
+                    self.lastReadsbSamples = samples
+        except:
+            if adsb:
+                print_err(traceback.format_exc())
+                fail.append("readsb stats.json not found")
+
+        if self._d.env_by_tags("1090serial").value != "":
+            try:
+                with open(f"{uf_path}/readsb/aircraft.json") as f:
+                    obj = json.load(f)
+                    ac = obj.get('aircraft')
+                    seen = False
+                    for a in ac:
+                        t = a.get('type')
+                        if t in ['adsb_icao', 'mode_s', 'mlat']:
+                            seen = True
+                    if seen:
+                        self.last1090.update()
+                    now = obj.get("now")
+                    if not now or now < time.time() - 60:
+                        fail.append("readsb aircraft.json out of date")
+            except:
+                print_err(traceback.format_exc())
+                fail.append("readsb aircraft.json not found")
+
+            hours = self._d.env_by_tags("healthcheck_noplane_hours_1090").value
+            if self.last1090.tooLong(hours):
+                fail.append(f"no planes 1090 for {hours}h")
+
+        if self._d.env_by_tags("978serial").value != "":
+            try:
+                with open(f"/run/adsb-feeder-dump978/skyaware978/aircraft.json") as f:
+                    obj = json.load(f)
+                    ac = obj.get('aircraft')
+                    seen = False
+                    for a in ac:
+                        if a.get('lat') != None:
+                            seen = True
+                    if seen:
+                        self.last978.update()
+                    now = obj.get("now")
+                    if not now or now < time.time() - 60:
+                        fail.append("dump978 aircraft.json out of date")
+            except:
+                print_err(traceback.format_exc())
+                fail.append("dump978 aircraft.json not found")
+
+            hours = self._d.env_by_tags("healthcheck_noplane_hours_978").value
+            if self.last978.tooLong(hours):
+                fail.append(f"no planes 978 for {hours}h")
+
+        if self._d.is_enabled("airspy"):
+            try:
+                with open(f"/run/adsb-feeder-airspy/airspy_adsb/obj.json") as f:
+                    obj = json.load(f)
+                    now = obj.get("now")
+                    if not now or now < time.time() - 60:
+                        fail.append("airspy stats.json outdated")
+            except:
+                print_err(traceback.format_exc())
+                fail.append("airspy stats.json not found")
+
+        ''' needs some container changes first
+        hours = self._d.env_by_tags("healthcheck_noacars_hours").value
+        if self._d.is_enabled("run_acarsdec")
+            if self.lastAcars.tooLong(hours):
+                fail.append(f"no ACARS messages for {hours}h"
+        if self._d.is_enabled("run_acarsdec2")
+            if self.lastAcars2.tooLong(hours):
+                fail.append(f"no ACARS2 messages for {hours}h"
+        if self._d.is_enabled("run_dumpvdl2")
+            if self.lastVdl.tooLong(hours):
+                fail.append(f"no VDL messages for {hours}h"
+        '''
+
+
+        if self.pingURL != self._d.env_by_tags("healthcheck_url").value:
+            self.pingURL = self._d.env_by_tags("healthcheck_url").value
+            # reset the ping timers so the first ping happens quickly after a user sets the URL
+            self.nextGoodPing = time.time()
+            self.nextFailPing = time.time()
+
+        fail = "; ".join(fail)
+        if fail:
+            self.set_failed(fail)
+        else:
+            self.set_good()

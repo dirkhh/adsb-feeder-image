@@ -74,7 +74,7 @@ from utils.other_aggregators import (
     Sdrmap,
 )
 from utils.sdr import SDR, SDRDevices
-from utils.agg_status import AggStatus, ImStatus
+from utils.agg_status import AggStatus, ImStatus, Healthcheck
 from utils.system import System
 from utils.util import (
     cleanup_str,
@@ -110,7 +110,6 @@ class NoStatic(flask_logging.Filter):
 
 
 flask_logging.getLogger("werkzeug").addFilter(NoStatic)
-
 
 class AdsbIm:
     def __init__(self):
@@ -150,6 +149,8 @@ class AdsbIm:
         # let's only instantiate the Wifi class if we are on WiFi
         self.wifi = None
         self.wifi_ssid = ""
+
+        self.healthcheck = Healthcheck(self._d)
 
         # prepare for app use (vs ADS-B Feeder Image use)
         # newer images will include a flag file that indicates that this is indeed
@@ -4056,6 +4057,8 @@ class AdsbIm:
         if self._d.previous_version:
             print_err(f"sending previous version: {self._d.previous_version}")
             self._im_status.check()
+
+        self.healthcheck.check()
 
     @check_restart_lock
     def index(self):

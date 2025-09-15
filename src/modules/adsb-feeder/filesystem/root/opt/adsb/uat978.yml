@@ -28,14 +28,11 @@ services:
     volumes:
       - /dev:/dev:ro
       - /opt/adsb/config/dump978/globe_history:/var/globe_history
+      - /run/adsb-feeder-dump978:/run
     ports:
       - ${AF_UAT978_PORT:-9780}:80
       - 30978:30978
       - 30979:30979
     tmpfs:
-      - /run:exec,size=64M
-      - /run/stats:size=32M
-      - /run/skyaware978:size=32M
-      - /run/autogain:size=32M
       - /var/log
 

@@ -24,9 +24,9 @@ services:
       # USER_PROVIDED_ENV_START
       # USER_PROVIDED_ENV_END
     tmpfs:
-      - /run:exec,size=64M
       - /var/log:size=64M
     device_cgroup_rules:
       - "c 189:* rwm"
     volumes:
+      - /run/adsb-feeder-acars:/run
       - /dev/bus/usb:/dev/bus/usb:ro
