@@ -648,7 +648,7 @@ class Healthcheck:
 
         if self._d.is_enabled("airspy"):
             try:
-                with open(f"/run/adsb-feeder-airspy/airspy_adsb/obj.json") as f:
+                with open(f"/run/adsb-feeder-airspy/airspy_adsb/stats.json") as f:
                     obj = json.load(f)
                     now = obj.get("now")
                     if not now or now < time.time() - 60:
