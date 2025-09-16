@@ -1,5 +1,6 @@
 Changes since v3.0.4
 =======
+- beta-log: reword no planes healthcheck, add 0 to disable
 - beta-log: fix airspy healthcheck
 - add option to use healthcheck.io (or similar services)
 - add option to run telegraf container for ADS-B

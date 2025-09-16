@@ -1030,9 +1030,13 @@
           <input class="mx-auto w-100" id="healthcheck_url" name="healthcheck_url" type="text"
                  value="{{ env_value_by_tag('healthcheck_url') }}">
         </div>
+        <div class="col-12 mb-1">
+          <br>
+          Fail Healthcheck for the following events (only when decoding frequency; set 0 to disable):
+        </div>
         <div class="col-4 mb-1">
           <label for="healthcheck_noplane_hours_1090">
-            Healthcheck failure after no planes on 1090 for X hours
+             No planes on 1090 for X hours
           </label>
         </div>
         <div class="col-8 mb-1">
@@ -1041,7 +1045,7 @@
         </div>
         <div class="col-4 mb-1">
           <label for="healthcheck_noplane_hours_978">
-            Healthcheck failure after no planes on 978 for X hours
+            No planes on 978 for X hours
           </label>
         </div>
         <div class="col-8 mb-1">
@@ -1050,7 +1054,7 @@
         </div>
         <div class="col-4 mb-1 d-none">
           <label for="healthcheck_noacars_hours">
-            Healthcheck failure after no messages on ACARS / VDL for X hours
+            No messages on ACARS / VDL for X hours
           </label>
         </div>
         <div class="col-8 mb-1 d-none">

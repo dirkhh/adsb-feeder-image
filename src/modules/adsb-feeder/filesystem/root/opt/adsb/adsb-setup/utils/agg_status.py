@@ -502,6 +502,9 @@ class LastSeen:
             # last status is not kept across restarts for now, just assume we received a plane
             # just now, this isn't pretty but if we don't have restarts it's fine
             self.update()
+        # 0 or negative means this check is disabled, always return false
+        if hours <= 0:
+            return False
         if time.time() - self.seen > hours * 3600:
             return True
         return False
