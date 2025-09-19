@@ -654,7 +654,7 @@ class Healthcheck:
                 with open(f"/run/adsb-feeder-airspy/airspy_adsb/stats.json") as f:
                     obj = json.load(f)
                     now = obj.get("now")
-                    if not now or now < time.time() - 60:
+                    if not now or now < time.time() - 90:
                         fail.append("airspy stats.json outdated")
             except:
                 print_err(traceback.format_exc())
