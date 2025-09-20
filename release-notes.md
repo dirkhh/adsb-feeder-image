@@ -1,5 +1,6 @@
 Changes since v3.0.4
 =======
+- beta-log: healthcheck: fix rare issue of no plane hours not being saved correctly
 - add explanation that on micro and nano feeders, data sharing is configured on the stage 2 system
 - beta-log: airspy healthcheck: fix false positive due to race condition
 - beta-log: reword no planes healthcheck, add 0 to disable

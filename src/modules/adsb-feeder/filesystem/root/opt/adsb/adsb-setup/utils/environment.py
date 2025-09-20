@@ -55,6 +55,9 @@ class Env:
                             self._value = [is_true(value_in_file)]
                             stack_info(f"converting {self._name} to list {self._value}")
                             return
+                    if type(self._default) == float and type(value_in_file) == int:
+                        self._value = float(value_in_file)
+                        return
                     if type(self._default) == int and type(value_in_file) == str:
                         try:
                             self._value = int(value_in_file)
