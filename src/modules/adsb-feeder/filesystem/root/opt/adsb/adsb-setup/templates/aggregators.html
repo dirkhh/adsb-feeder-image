@@ -26,6 +26,10 @@
           value={{go}}>apply settings - take me to the website</button>
 
   <!-- ADS-B related aggregators -->
+  {% if is_enabled('base_config') and env_value_by_tag('aggregator_choice') in ['micro', 'nano'] %}
+  <h3 class="note-primary text-decoration-underline">ADS-B</h3>
+  <div class="mt-2 mb-3 text-warning">ADS-B is enabled, however, for micro and nano feeders, the data sharing settings are handled on your stage 2 system.</div>
+  {% endif %}
   {% if is_enabled('base_config') and not env_value_by_tag('aggregator_choice') in ['micro', 'nano', 'nonadsb'] %}
   <h3 class="note-primary text-decoration-underline">ADS-B</h3>
   <div class="col-12 form-check">

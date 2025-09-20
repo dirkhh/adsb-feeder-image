@@ -543,7 +543,7 @@ class Healthcheck:
         self.reason = ""
         self._d.env_by_tags("healthcheck_fail_reason").value = ""
 
-        if time.time() > self.nextGoodPing:
+        if time.time() >= self.nextGoodPing:
             self.nextGoodPing = time.time() + self.pingInterval
             self.nextFailPing = time.time() # set next fail ping to be immediate
             if self._d.env_by_tags("healthcheck_url").value:
@@ -563,7 +563,7 @@ class Healthcheck:
 
         if time.time() - self.failedSince > 5 * 60:
             self._d.env_by_tags("healthcheck_fail_reason").value = reason
-        if time.time() > self.nextFailPing and time.time() - self.failedSince > 5 * 60:
+        if time.time() >= self.nextFailPing and time.time() - self.failedSince > 5 * 60:
             print_err(f"healthcheck failPing due to: {self.reason}")
             self.nextFailPing = time.time() + self.pingInterval
             self.nextGoodPing = time.time() # set next success ping to be immediate
@@ -654,7 +654,7 @@ class Healthcheck:
                 with open(f"/run/adsb-feeder-airspy/airspy_adsb/stats.json") as f:
                     obj = json.load(f)
                     now = obj.get("now")
-                    if not now or now < time.time() - 60:
+                    if not now or now < time.time() - 90:
                         fail.append("airspy stats.json outdated")
             except:
                 print_err(traceback.format_exc())

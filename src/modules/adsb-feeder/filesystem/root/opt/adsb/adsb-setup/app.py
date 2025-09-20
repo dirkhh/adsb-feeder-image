@@ -2997,10 +2997,9 @@ class AdsbIm:
         # let's try and figure out where we came from - for reasons I don't understand
         # the regexp didn't capture the site number, so let's do this the hard way
         extra_args = ""
-        referer = request.headers.get("referer")
-        m_arg = referer.rfind("?m=")
-        if m_arg > 0:
-            arg = make_int(referer[m_arg + 3 :])
+        m_arg = request.args.get("m")
+        if m_arg is not None:
+            arg = make_int(m_arg)
         else:
             arg = 0
         if arg in self.micro_indices():
@@ -3011,7 +3010,7 @@ class AdsbIm:
             site = ""
             sitenum = 0
         allow_insecure = not self.check_secure_image()
-        print_err(f"handling input from {referer} and site # {sitenum} / {site} (allow insecure is {allow_insecure})")
+        print_err(f"handling input from site # {sitenum} / {site} (allow insecure is {allow_insecure})")
         # in the HTML, every input field needs to have a name that is concatenated by "--"
         # and that matches the tags of one Env
         form: Dict = request.form
