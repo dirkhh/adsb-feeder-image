@@ -23,5 +23,5 @@ DUMPHFDL_CONTAINER=ghcr.io/sdr-enthusiasts/docker-dumphfdl:latest-build-167
 ACARS2POS_CONTAINER=ghcr.io/rpatel3001/docker-acars2pos:24-c4ee28f899f91e8446e019e0a370f55cc87a39c4
 SHIPFEEDER_CONTAINER=ghcr.io/sdr-enthusiasts/docker-shipfeeder:latest-build-1786
 RADIOSONDE_CONTAINER=ghcr.io/projecthorus/radiosonde_auto_rx:v1.8.1
-DOZZLE_CONTAINER=ghcr.io/amir20/dozzle:v8.13.3
-ALPINE_CONTAINER=alpine:3.22.0
+DOZZLE_CONTAINER=ghcr.io/amir20/dozzle:v8.13.14
+ALPINE_CONTAINER=alpine:3.22.1
