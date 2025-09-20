@@ -27,11 +27,11 @@
 
   <!-- ADS-B related aggregators -->
   {% if is_enabled('base_config') and env_value_by_tag('aggregator_choice') in ['micro', 'nano'] %}
-  <h3 class="note-primary text-decoration-underline">ADS-B</h3>
+  <h3 class="note-primary">ADS-B</h3>
   <div class="mt-2 mb-3 text-warning">ADS-B is enabled, however, for micro and nano feeders, the data sharing settings are handled on your stage 2 system.</div>
   {% endif %}
   {% if is_enabled('base_config') and not env_value_by_tag('aggregator_choice') in ['micro', 'nano', 'nonadsb'] %}
-  <h3 class="note-primary text-decoration-underline">ADS-B</h3>
+  <h3 class="note-primary">ADS-B</h3>
   <div class="col-12 form-check">
     <input class="form-check-input me-1" type="checkbox" name="mlat_enable--is_enabled" id="mlat_enable--is_enabled"
            {% if list_is_enabled("mlat_enable", m) %}checked{% endif %} />
@@ -40,9 +40,7 @@
     </label>
   </div>
 
-  <div class="col-12 h5 mt-3">Select the <a href="#"
-    title="aggregators that don't require you to create an account or provide an email address">account-less</a>
-    ADS-B aggregators you want to feed:</div>
+  <div class="col-12 h5 mt-3">Select the <span class="text-primary">account-less</span> ADS-B aggregators you want to feed:</div>
   <div class="col-12 col-md-6 col-lg-4 my-2">
     <button type="button" class="btn btn-large btn-primary w-100 with-checkbox" data-mdb-ripple-init><input
               type="radio" class="me-2" name="aggregator_choice"  id="all" value="all" required {% if env_value_by_tag("aggregator_choice")=="all" %} checked {% endif %}
@@ -141,7 +139,7 @@
     <button class="btn btn-secondary small" type="button" data-mdb-toggle="collapse" data-mdb-target="#showuuids"
             aria-expanded="false" aria-controls="showuuids">show UUIDS</button>
   </div>
-  <div class="col-12 mt-3 mb-1 h5">Select the account based ADS-B aggregators you want to feed:</div>
+  <div class="col-12 mt-3 mb-1 h5">Select the <span class="text-primary">account based</span> ADS-B aggregators you want to feed:</div>
   <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="flightradar--is_enabled" id="flightradar--is_enabled"
            {{ others_enabled("flightradar", m) }} />
@@ -352,7 +350,7 @@
 
   <!-- ACARS section -->
   {% if is_enabled('acarsdec') or is_enabled('acarsdec2') or is_enabled('dumpvdl2') %}
-  <h3 class="note-primary text-decoration-underline" >ACARS / VDL2 / HFDL</h3>
+  <h3 class="note-primary" >ACARS / VDL2 / HFDL</h3>
   <div class="col-12 mt-3 mb-1 h5">Select the ACARS (including VDL2 / HFDL) aggregators you want to feed:</div>
   <div class="ol-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="feed_acars_airframes--is_enabled" id="feed_acars_airframes--is_enabled" {{ nonadsb_enabled("feed_acars_airframes", m) }} />
@@ -392,7 +390,7 @@
 
   <!-- AIS section -->
   {% if is_enabled('shipfeeder') %}
-  <h3 class="note-primary text-decoration-underline">AIS</h3>
+  <h3 class="note-primary">AIS</h3>
   <div class="col-12 mt-3 mb-1 h5">Select the AIS aggregators you want to feed:</div>
   <!-- Airframes.io -->
   <div class="ol-12 form-check mb-2">
