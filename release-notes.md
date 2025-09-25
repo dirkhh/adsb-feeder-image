@@ -1,5 +1,7 @@
 Changes since v3.0.4
 =======
+- before configured, also provide new-adsb-feeder.local as mDNS for people with multiple instances
+- adsb-feeder.local: provide even if hostname has been changed in rpi imager
 - beta-log: go back to old acarshub version due to UI changes
 - beta-log: update dozzle / alpine containers
 - beta-log: healthcheck: fix rare issue of no plane hours not being saved correctly

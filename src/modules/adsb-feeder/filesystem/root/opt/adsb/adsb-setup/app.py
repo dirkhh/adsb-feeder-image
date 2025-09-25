@@ -541,18 +541,26 @@ class AdsbIm:
 
     def set_hostname(self, site_name: str):
         os_flag_file = self._d.data_path / "os.adsb.feeder.image"
-        if not os_flag_file.exists() or not site_name:
+        if not os_flag_file.exists():
             return
+        if not site_name:
+            # use this placeholder hostname until a sitename is set mdns-alias-setup will always add
+            # adsb-feeder.local in addition regardless of the hostname
+            site_name = "new-adsb-feeder"
         # create a valid hostname from the site name and set it up as mDNS alias
         # initially we only allowed alpha-numeric characters, but after fixing an
         # error in the service file, we now can allow dash (or hyphen) as well.
         host_name = self.onlyAlphaNumDash(site_name)
 
+        if not host_name:
+            print_err("set_hostname: no host_name, this shouldn't happen ever")
+            return
+
         def start_mdns():
             subprocess.run(["/bin/bash", "/opt/adsb/scripts/mdns-alias-setup.sh", f"{host_name}"])
             subprocess.run(["/usr/bin/hostnamectl", "hostname", f"{host_name}"])
 
-        if not host_name or self._current_site_name == site_name:
+        if self._current_site_name == site_name:
             return
 
         self._current_site_name = site_name
