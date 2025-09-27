@@ -213,22 +213,29 @@ def string2file(path=None, string=None, verbose=False):
             print_err(f'wrote "{string}" to {path}')
 
 
-def get_plain_url(plain_url):
+def get_plain_url(plain_url, method="GET", data=None):
     requests.packages.urllib3.util.connection.HAS_IPV6 = False
     status = -1
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/117.0",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+        "Upgrade-Insecure-Requests": "1",
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-User": "?1",
+    }
+    method = method.upper()
+    if data is not None:
+        # sending plain text for custom bodies
+        headers["Content-Type"] = "text/plain; charset=utf-8"
     try:
-        response = requests.get(
-            plain_url,
-            headers={
-                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/117.0",
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-                "Accept-Language": "en-US,en;q=0.5",
-                "Upgrade-Insecure-Requests": "1",
-                "Sec-Fetch-Dest": "document",
-                "Sec-Fetch-Mode": "navigate",
-                "Sec-Fetch-Site": "none",
-                "Sec-Fetch-User": "?1",
-            },
+        response = requests.request(
+            method=method,
+            url=plain_url,
+            headers=headers,
+            data=data
         )
     except (
         requests.HTTPError,

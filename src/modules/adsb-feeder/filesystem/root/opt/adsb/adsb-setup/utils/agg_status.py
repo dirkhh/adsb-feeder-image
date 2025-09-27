@@ -547,7 +547,7 @@ class Healthcheck:
             self.nextGoodPing = time.time() + self.pingInterval
             self.nextFailPing = time.time() # set next fail ping to be immediate
             if self._d.env_by_tags("healthcheck_url").value:
-                page, status = get_plain_url(self._d.env_by_tags("healthcheck_url").value)
+                page, status = get_plain_url(self._d.env_by_tags("healthcheck_url").value, method="POST")
                 if status != 200:
                     print_err(f"healthcheck url ping FAILURE: got http status {status}")
                     # failure, try again in a minute instead of waiting pingInterval
@@ -568,7 +568,9 @@ class Healthcheck:
             self.nextFailPing = time.time() + self.pingInterval
             self.nextGoodPing = time.time() # set next success ping to be immediate
             if self._d.env_by_tags("healthcheck_url").value:
-                page, status = get_plain_url(self._d.env_by_tags("healthcheck_url").value + "/fail")
+                fail_url = self._d.env_by_tags("healthcheck_url").value + "/fail"
+                payload = self.reason if self.reason else ""
+                page, status = get_plain_url(fail_url, method="POST", data=payload)
                 if status != 200:
                     print_err(f"healthcheck url fail FAILURE: got http status {status}")
                     # failure, try again in a minute instead of waiting pingInterval
