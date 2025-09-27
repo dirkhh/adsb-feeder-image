@@ -1003,12 +1003,12 @@
             <br>
             Set empty URL to disable.
             <br>
-            Every 60 minutes a simple http GET request will be performed on this URL if the system is
+            Every 60 minutes a simple http POST request will be performed on this URL if the system is
             considered healthy.
             <br>
             If the system is at any point considered unhealthy for more than 5 minutes, a simple http
-            GET request will  be performed using with /fail added to the URL and the reason for the
-            failure will be displayed on the Feeder Homepage.
+            POST request will  be performed using with /fail added to the URL and the reason for the
+            failure will be displayed on the Feeder Homepage and passed as a body to the URL.
             <br>
             Health status will not include feeds as that is pretty much always not an issue on the
             receiver side but rather an issue with the aggregator.
