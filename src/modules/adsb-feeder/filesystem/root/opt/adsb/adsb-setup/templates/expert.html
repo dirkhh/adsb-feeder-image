@@ -1007,18 +1007,18 @@
             considered healthy.
             <br>
             If the system is at any point considered unhealthy for more than 5 minutes, a simple http
-            POST request will  be performed using with /fail added to the URL and the reason for the
-            failure will be displayed on the Feeder Homepage and passed as a body to the URL.
+            POST request will  be performed with /fail added to the URL. The reason for the
+            failure will be displayed on the Feeder Homepage and passed as a body in the POST request.
             <br>
             Health status will not include feeds as that is pretty much always not an issue on the
-            receiver side but rather an issue with the aggregator.
-            (possibly adding bad MLAT sync in the future)
+            receiver side but rather an issue with the aggregator
+            (bad MLAT sync may be added in the future).
             <br>
             No planes / messages for a configurable period of time will mean the system is considered
-            unhealthy.  The default is 24 hours but if you have traffic around the clock this can
+            unhealthy. The default is 24 hours but if you have traffic around the clock this can
             safely be reduced to 1 or 2 hours.
             <br>
-            Decoder failures will mean the system is considered unhealthy. (1090 + 978 only)
+            Decoder failures will mean the system is considered unhealthy (1090 + 978 only).
           </div>
         </div>
         <div class="col-4 mb-1">
