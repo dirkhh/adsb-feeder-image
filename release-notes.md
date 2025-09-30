@@ -1,5 +1,7 @@
 Changes since v3.0.4
 =======
+- beta-log: reword healthcheck explanation a bit
+- beta-log: use POST instead of GET for healthcheck http requests to add reason to failures via body
 - beta-log: update container versions
 - before configured, also provide new-adsb-feeder.local as mDNS for people with multiple instances
 - adsb-feeder.local: provide even if hostname has been changed in rpi imager
