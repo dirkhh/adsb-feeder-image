@@ -1,5 +1,6 @@
 Changes since v3.0.4
 =======
+- beta-log: update container versions
 - before configured, also provide new-adsb-feeder.local as mDNS for people with multiple instances
 - adsb-feeder.local: provide even if hostname has been changed in rpi imager
 - beta-log: go back to old acarshub version due to UI changes
