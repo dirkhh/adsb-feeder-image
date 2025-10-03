@@ -72,6 +72,8 @@ apt-get install -y \
     apt-transport-https ca-certificates curl gnupg2 \
     jq zstd netcat-openbsd
 
+df -h
+
 systemctl mask hostapd.service
 systemctl mask isc-dhcp-server.service
 
@@ -83,6 +85,8 @@ systemctl disable tailscaled
 systemctl disable zerotier-one
 systemctl mask tailscaled
 systemctl mask zerotier-one
+
+df -h
 
 # avoid unnecessary diskwrites by zerotier
 ln -sf /dev/null /var/lib/zerotier-one/metrics.prom
