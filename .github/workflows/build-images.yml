@@ -290,8 +290,14 @@ jobs:
           echo "image=${NAME}*" >> $GITHUB_OUTPUT
           ;;
         *)
-          echo "simply compress ${IMAGE}"
-          sudo xz -z -1 -T0 "${IMAGE}"
+          COMPLVL=1
+          if [[ ${is_release} == release ]]; then
+            COMPLVL=9
+          elif [[ ${is_release} == beta ]]; then
+            COMPLVL=4
+          fi
+          echo "simply compress ${IMAGE} with compression level $COMPLVL"
+          sudo xz -z -${COMPLVL} -T0 "${IMAGE}"
           if [ -f ${IMAGE%.img}.iso ] ; then
             sudo xz -z -1 -T0 ${IMAGE%.img}.iso
             echo "image=${IMAGE%.img}.iso.xz" >> $GITHUB_OUTPUT
