@@ -31,6 +31,10 @@ echo "$SSH_PUB_KEY" >> ~root/.ssh/authorized_keys
 echo "$SSH_PUB_KEY" > ~root/.ssh/adsb.im.installkey
 touch /opt/adsb/adsb.im.passwd.and.keys
 
+# work around trixie issue with default ssh config that doesn't work ... SERIOUSLY Raspberry Pi you
+# released this image without ssh working?!
+sed -i -e 's/IPQoS 0x00/#\0/' /etc/ssh/sshd_config
+
 # zerotier and tailscale repos
 
 DEBIAN_DISTRO=$(grep /etc/os-release -e VERSION_CODENAME | cut -d= -f2)
