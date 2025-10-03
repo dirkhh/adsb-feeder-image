@@ -1,17 +1,8 @@
 Changes since v3.0.4
 =======
-- beta-log: reword healthcheck explanation a bit
-- beta-log: use POST instead of GET for healthcheck http requests to add reason to failures via body
-- beta-log: update container versions
 - before configured, also provide new-adsb-feeder.local as mDNS for people with multiple instances
 - adsb-feeder.local: provide even if hostname has been changed in rpi imager
-- beta-log: go back to old acarshub version due to UI changes
-- beta-log: update dozzle / alpine containers
-- beta-log: healthcheck: fix rare issue of no plane hours not being saved correctly
 - add explanation that on micro and nano feeders, data sharing is configured on the stage 2 system
-- beta-log: airspy healthcheck: fix false positive due to race condition
-- beta-log: reword no planes healthcheck, add 0 to disable
-- beta-log: fix airspy healthcheck
 - add option to use healthcheck.io (or similar services)
 - add option to run telegraf container for ADS-B
 - update containers
