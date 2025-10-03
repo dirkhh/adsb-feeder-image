@@ -7,6 +7,16 @@ set -ex
 source /common.sh
 install_cleanup_trap
 
+# install docker without the crud, this mostly follows what the script at get.docker.com does
+
+DEBIAN_DISTRO=$(grep /etc/os-release -e VERSION_CODENAME | cut -d= -f2)
+install -m 0755 -d /etc/apt/keyrings
+curl -fsSL "https://download.docker.com/linux/debian/gpg" -o /etc/apt/keyrings/docker.asc
+chmod a+r /etc/apt/keyrings/docker.asc
+echo "deb [arch=arm64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian $DEBIAN_DISTRO stable" > /etc/apt/sources.list.d/docker.list
+apt-get -qq update >/dev/null
+DEBIAN_FRONTEND=noninteractive apt-get -y install --no-install-recommends docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
 #shellcheck shell=bash external-sources=false disable=SC1090,SC2164
 # DOCKER-INSTALL.SH -- Installation script for the Docker infrastructure on a Raspbian or Ubuntu system
 # Usage: source <(curl -s https://raw.githubusercontent.com/sdr-enthusiasts/docker-install/main/docker-install.sh)
@@ -16,14 +26,6 @@ install_cleanup_trap
 # distribution of this package.
 #
 #
-export DEBIAN_FRONTEND=noninteractive
-
-    echo "Installing docker, each step may take a while:"
-    echo -n "Getting docker..."
-    curl -fsSL https://get.docker.com -o get-docker.sh
-    echo "Installing Docker... "
-    sh get-docker.sh
-    echo "Docker installed -- configuring docker..."
     mkdir -p /etc/docker
     cat > /etc/docker/daemon.json <<EOF
 {
@@ -109,6 +111,3 @@ if [[ -f /boot/firmware/config.txt ]]; then
     # this image does not plan to use the video output ever (and it apparently still works with limited feature set with 16M of gpu mem)
     echo "gpu_mem=16" >> /boot/firmware/config.txt
 fi
-
-# remove unnecessary docker components
-apt autoremove -y docker-ce-rootless-extras docker-buildx-plugin
