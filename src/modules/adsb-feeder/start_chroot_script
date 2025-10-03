@@ -33,7 +33,7 @@ touch /opt/adsb/adsb.im.passwd.and.keys
 
 # zerotier and tailscale repos
 
-DEBIAN_DISTRO=$(head -1 /etc/apt/sources.list | cut -d\  -f 3)
+DEBIAN_DISTRO=$(grep /etc/os-release -e VERSION_CODENAME | cut -d= -f2)
 echo "deb http://download.zerotier.com/debian/${DEBIAN_DISTRO} ${DEBIAN_DISTRO} main" > /etc/apt/sources.list.d/zerotier.list
 curl -fsSL "https://pkgs.tailscale.com/stable/debian/${DEBIAN_DISTRO}.noarmor.gpg" | sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
 curl -fsSL "https://pkgs.tailscale.com/stable/debian/${DEBIAN_DISTRO}.tailscale-keyring.list" | sudo tee /etc/apt/sources.list.d/tailscale.list
