@@ -12,11 +12,13 @@ sed -i -e 's/.*Storage=.*/Storage=persistent/' /etc/systemd/journald.conf
 sed -i -e 's/.*RuntimeMaxUse=.*/RuntimeMaxUse=10M/' /etc/systemd/journald.conf
 sed -i -e 's/.*SystemMaxUse=.*/SystemMaxUse=128M/' /etc/systemd/journald.conf
 
+# this isn't needed anymore and we want to make sure /var/cache is clean to save space
+umount /var/cache/apt || true
 
 # free up space
 apt-get clean -y
 find  /var/lib/apt/lists | grep -v InRelease | xargs rm -rf
-rm -rf /tmp/* /var/log/* /var/cache/debconf/templates.dat* /var/lib/dpkg/status-old
+rm -rf /tmp/* /var/log/* /var/cache/* /var/lib/dpkg/status-old
 
 # remove pycache, nothing found doesn't mean failure thus always return true
 find /usr | grep -E "/__pycache__$" | xargs rm -rf || true
