@@ -91,7 +91,11 @@ else
     if [[ "$1" == "pull" ]]; then
         echo "$(date -u +"%FT%T.%3NZ") things aren't configured, yet, but for argument pull will also pull ultrafeeder"
         for i in {1..3}; do
-            $docker_compose --env-file /opt/adsb/docker.image.versions -f /opt/adsb/config/docker-compose.yml pull && break
+            docker pull "$(grep /opt/adsb/docker.image.versions -e ULTRAFEEDER_CONTAINER | cut -d= -f2)" && break
+            # compose needs the network to be defined even for pulling, so we can't use compose to
+            # pull ultrafeeder yet as adsb_im_bridge is not defined yet (in dozzle.yml which was
+            # pulled but no compose up has been run yet)
+            #$docker_compose --env-file /opt/adsb/docker.image.versions -f /opt/adsb/config/docker-compose.yml pull && break
         done
     fi
 fi
