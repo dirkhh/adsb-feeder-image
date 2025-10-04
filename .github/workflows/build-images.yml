@@ -134,7 +134,7 @@ jobs:
       run: |
         sudo rm -f /var/lib/man-db/auto-update
         sudo apt update
-        sudo apt-get install -y coreutils p7zip-full qemu-user-static qemu-utils lz4
+        sudo apt-get install --no-install-recommends -y coreutils p7zip-full qemu-user-static qemu-utils lz4
 
     - name: Checkout CustomPiOS
       uses: actions/checkout@v4
