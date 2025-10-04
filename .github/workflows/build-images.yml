@@ -272,6 +272,7 @@ jobs:
       run: |
         cd uploads
         export IMAGE="${{ steps.build.outputs.feeder_image_name }}"
+        export is_release="${{ steps.tag.outputs.is_release }}"
         case ${IMAGE} in
         *-x86-64-vm*)
           NAME=${IMAGE%.img}
@@ -296,6 +297,7 @@ jobs:
           elif [[ ${is_release} == beta ]]; then
             COMPLVL=4
           fi
+          echo "is_release: ${is_release}"
           echo "simply compress ${IMAGE} with compression level $COMPLVL"
           sudo xz -z -${COMPLVL} -T0 "${IMAGE}"
           if [ -f ${IMAGE%.img}.iso ] ; then
