@@ -120,6 +120,7 @@ services:
       - /opt/adsb/config/ultrafeeder/globe_history:/var/globe_history
       - /opt/adsb/config/ultrafeeder/graphs1090:/var/lib/collectd
       - /usr/local/share/osm_tiles_offline:/usr/local/share/osm_tiles_offline
+      - /usr/local/share/openfreemap_offline/mnt:/usr/local/share/openfreemap_offline/mnt
       - /proc/diskstats:/proc/diskstats:ro
       - /dev:/dev:ro
       - /run/adsb-feeder-ultrafeeder:/run
