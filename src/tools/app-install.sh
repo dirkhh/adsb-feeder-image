@@ -131,10 +131,13 @@ if [[ $missing != "" ]] ; then
 
     if grep -qs -e docker <<< "$missing" && command -v docker-compose &>/dev/null; then
         echo "It seems the docker-compose provided by your OS doesn't work correctly, please install docker using the packages provided by docker using this script"
+        echo
         echo "curl https://get.docker.com/ | sudo bash"
+        echo
         echo "Once it is finished, rerun this install script"
     else
         echo "Please install the missing packages before re-running this script:"
+        echo
         echo "$inst $missing"
     fi
 	exit 1
