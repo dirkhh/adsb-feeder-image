@@ -129,8 +129,14 @@ if [[ $missing != "" ]] ; then
         [ "$distro" == "suse" ] && inst="zypper install -y"
         [ "$distro" == "debian" ] && inst="apt-get install -y"
 
-	echo "Please install the missing packages before re-running this script:"
-	echo "$inst $missing"
+    if grep -qs -e docker <<< "$missing" && command -v docker-compose &>/dev/null; then
+        echo "It seems the docker-compose provided by your OS doesn't work correctly, please install docker using the packages provided by docker using this script"
+        echo "curl https://get.docker.com/ | sudo bash"
+        echo "Once it is finished, rerun this install script"
+    else
+        echo "Please install the missing packages before re-running this script:"
+        echo "$inst $missing"
+    fi
 	exit 1
 fi
 
