@@ -17,8 +17,17 @@ unpack /filesystem/root /
 # speed up apt-get operations by not rebuilding the man-db cache:
 rm -f /var/lib/man-db/auto-update
 
+DEBIAN_DISTRO=$(grep /etc/os-release -e VERSION_CODENAME | cut -d= -f2)
+
 # free up space
-apt-get autoremove -y gcc-12 dpkg-dev gdb build-essential mkvtoolnix iso-codes shared-mime-info rpicam-apps-lite\* p7zip || true
+GCC="gcc-12"
+if [[ "${DEBIAN_DISTRO}" == trixie ]]; then
+    GCC="gcc-14"
+fi
+apt-get autoremove -y ${GCC} dpkg-dev gdb build-essential \
+    mkvtoolnix iso-codes shared-mime-info \
+    rpicam-apps-lite\* p7zip\* \
+    || true
 
 echo "building on $(hostname) - available disk space inside the image:"
 df -h
@@ -37,7 +46,6 @@ sed -i -e 's/IPQoS 0x00/#\0/' /etc/ssh/sshd_config
 
 # zerotier and tailscale repos
 
-DEBIAN_DISTRO=$(grep /etc/os-release -e VERSION_CODENAME | cut -d= -f2)
 echo "deb http://download.zerotier.com/debian/${DEBIAN_DISTRO} ${DEBIAN_DISTRO} main" > /etc/apt/sources.list.d/zerotier.list
 curl -fsSL "https://pkgs.tailscale.com/stable/debian/${DEBIAN_DISTRO}.noarmor.gpg" | sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
 curl -fsSL "https://pkgs.tailscale.com/stable/debian/${DEBIAN_DISTRO}.tailscale-keyring.list" | sudo tee /etc/apt/sources.list.d/tailscale.list
