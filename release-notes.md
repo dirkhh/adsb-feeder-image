@@ -1,17 +1,9 @@
-Changes since v3.0.4
+Changes since v3.0.5
 =======
-- before configured, also provide new-adsb-feeder.local as mDNS for people with multiple instances
-- adsb-feeder.local: provide even if hostname has been changed in rpi imager
-- add explanation that on micro and nano feeders, data sharing is configured on the stage 2 system
-- add option to use healthcheck.io (or similar services)
-- add option to run telegraf container for ADS-B
+- app install: prompt to install docker via get.docker.com in some cases
+- add support for openfreemap offline map (not included)
+- healthcheck: improve wording when decoders are not running
 - update containers
-- update Raspbian images to a newer base image (only for fresh installs)
-- show live map link when HFDL / acars2pos is enabled
-- HFDL: add SBS position output to ultrafeeder / live map
-- change opensky status link to a less useful but existing page
-- pi5: add warning when only limited USB current is available due to power supply
-- add option to ignore intermittent SDRPlay serial
 
 
 > [!NOTE]
