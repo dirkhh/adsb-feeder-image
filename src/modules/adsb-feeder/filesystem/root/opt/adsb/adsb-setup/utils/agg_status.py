@@ -623,7 +623,7 @@ class Healthcheck:
                         fail.append("readsb aircraft.json out of date")
             except:
                 print_err(traceback.format_exc())
-                fail.append("readsb aircraft.json not found")
+                fail.append("readsb not running / 1090 SDR probably dead / unplugged")
 
             hours = self._d.env_by_tags("healthcheck_noplane_hours_1090").value
             if self.last1090.tooLong(hours):
@@ -645,7 +645,7 @@ class Healthcheck:
                         fail.append("dump978 aircraft.json out of date")
             except:
                 print_err(traceback.format_exc())
-                fail.append("dump978 aircraft.json not found")
+                fail.append("dump978 not running / 978 SDR probably dead / unplugged")
 
             hours = self._d.env_by_tags("healthcheck_noplane_hours_978").value
             if self.last978.tooLong(hours):
@@ -660,7 +660,7 @@ class Healthcheck:
                         fail.append("airspy stats.json outdated")
             except:
                 print_err(traceback.format_exc())
-                fail.append("airspy stats.json not found")
+                fail.append("airspy_adsb not running, 1090 SDR (airspy) probably dead / unplugged")
 
         ''' needs some container changes first
         hours = self._d.env_by_tags("healthcheck_noacars_hours").value
