@@ -1122,81 +1122,90 @@
           <button type="submit" class="btn btn-primary mx-auto w-100" name="skystats--update"
                   value="go">Update</button>
         </div>
-        <div class="col-4 mb-1">
-          <label for="skystats_aircraft_json">
-            Aircraft JSON URL
-          </label>
+        <div class="col-12 mb-2 mt-2">
+          <span onclick="$('#skystats_advanced').toggleClass('d-none'); $(this).find('.toggle-icon').text($('#skystats_advanced').hasClass('d-none') ? '▶' : '▼'); return false;"
+                style="cursor: pointer;">
+            <span class="toggle-icon small">▶</span> <strong class="small">Advanced Configuration</strong>
+          </span>
         </div>
-        <div class="col-8 mb-1">
-          <input class="mx-auto w-100" id="skystats_aircraft_json" name="skystats_aircraft_json" type="text"
-                 submit_button="skystats--update"
-                 placeholder="http://ultrafeeder:8080/data/aircraft.json"
-                 value="{{ env_value_by_tag('skystats_aircraft_json') }}">
-        </div>
-        <div class="col-4 mb-1">
-          <label for="skystats_db_host">
-            Database Host
-          </label>
-        </div>
-        <div class="col-8 mb-1">
-          <input class="mx-auto w-100" id="skystats_db_host" name="skystats_db_host" type="text"
-                 submit_button="skystats--update"
-                 placeholder="skystats-db"
-                 value="{{ env_value_by_tag('skystats_db_host') }}">
-        </div>
-        <div class="col-4 mb-1">
-          <label for="skystats_db_port">
-            Database Port
-          </label>
-        </div>
-        <div class="col-8 mb-1">
-          <input class="mx-auto w-100" id="skystats_db_port" name="skystats_db_port" type="text"
-                 submit_button="skystats--update"
-                 placeholder="5432"
-                 value="{{ env_value_by_tag('skystats_db_port') }}">
-        </div>
-        <div class="col-4 mb-1">
-          <label for="skystats_db_user">
-            Database User
-          </label>
-        </div>
-        <div class="col-8 mb-1">
-          <input class="mx-auto w-100" id="skystats_db_user" name="skystats_db_user" type="text"
-                 submit_button="skystats--update"
-                 required
-                 placeholder="skystats-user"
-                 value="{{ env_value_by_tag('skystats_db_user') }}">
-        </div>
-        <div class="col-4 mb-1">
-          <label for="skystats_db_password">
-            Database Password
-          </label>
-        </div>
-        <div class="col-8 mb-1">
-          <div class="input-group">
-            <input class="form-control" id="skystats_db_password" name="skystats_db_password" type="password"
-                   submit_button="skystats--update"
-                   required
-                   placeholder="required password"
-                   value="{{ env_value_by_tag('skystats_db_password') }}">
-            <button class="btn btn-outline-secondary" type="button" id="toggle_skystats_password"
-                    onclick="togglePasswordVisibility('skystats_db_password', 'toggle_skystats_password')">
-              <span id="toggle_skystats_password_icon"></span>
-            </button>
-            <script>document.getElementById('toggle_skystats_password_icon').innerHTML = EYE_ICON;</script>
+        <div id="skystats_advanced" class="d-none col-12">
+          <div class="row">
+            <div class="col-4 mb-1">
+              <label for="skystats_aircraft_json">
+                Aircraft JSON URL
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input class="mx-auto w-100" id="skystats_aircraft_json" name="skystats_aircraft_json" type="text"
+                     submit_button="skystats--update"
+                     placeholder="http://ultrafeeder:8080/data/aircraft.json"
+                     value="{{ env_value_by_tag('skystats_aircraft_json') }}">
+            </div>
+            <div class="col-4 mb-1">
+              <label for="skystats_db_host">
+                Database Host
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input class="mx-auto w-100" id="skystats_db_host" name="skystats_db_host" type="text"
+                     submit_button="skystats--update"
+                     placeholder="skystats-db"
+                     value="{{ env_value_by_tag('skystats_db_host') }}">
+            </div>
+            <div class="col-4 mb-1">
+              <label for="skystats_db_port">
+                Database Port
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input class="mx-auto w-100" id="skystats_db_port" name="skystats_db_port" type="text"
+                     submit_button="skystats--update"
+                     placeholder="5432"
+                     value="{{ env_value_by_tag('skystats_db_port') }}">
+            </div>
+            <div class="col-4 mb-1">
+              <label for="skystats_db_user">
+                Database User
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input class="mx-auto w-100" id="skystats_db_user" name="skystats_db_user" type="text"
+                     submit_button="skystats--update"
+                     required
+                     placeholder="skystats-user"
+                     value="{{ env_value_by_tag('skystats_db_user') }}">
+            </div>
+            <div class="col-4 mb-1">
+              <label for="skystats_db_password">
+                Database Password
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <div class="input-group">
+                <input class="form-control" id="skystats_db_password" name="skystats_db_password" type="password"
+                       submit_button="skystats--update"
+                       required
+                       placeholder="required password"
+                       value="{{ env_value_by_tag('skystats_db_password') }}">
+                <button class="btn btn-outline-secondary" type="button" id="toggle_skystats_password"
+                        onclick="togglePasswordVisibility('skystats_db_password', 'toggle_skystats_password')">
+                  <span id="toggle_skystats_password_icon"></span>
+                </button>
+              </div>
+            </div>
+            <div class="col-4 mb-1">
+              <label for="skystats_db_name">
+                Database Name
+              </label>
+            </div>
+            <div class="col-8 mb-1">
+              <input class="mx-auto w-100" id="skystats_db_name" name="skystats_db_name" type="text"
+                     submit_button="skystats--update"
+                     required
+                     placeholder="skystats_db"
+                     value="{{ env_value_by_tag('skystats_db_name') }}">
+            </div>
           </div>
-        </div>
-        <div class="col-4 mb-1">
-          <label for="skystats_db_name">
-            Database Name
-          </label>
-        </div>
-        <div class="col-8 mb-1">
-          <input class="mx-auto w-100" id="skystats_db_name" name="skystats_db_name" type="text"
-                 submit_button="skystats--update"
-                 required
-                 placeholder="skystats_db"
-                 value="{{ env_value_by_tag('skystats_db_name') }}">
         </div>
         <div class="col-4 mb-1">
           <label for="skystats_radius">
@@ -1271,6 +1280,12 @@
     return name;
   }
   $(document).ready(function () {
+    // Initialize password toggle icon
+    const passwordIcon = document.getElementById('toggle_skystats_password_icon');
+    if (passwordIcon) {
+      passwordIcon.innerHTML = EYE_ICON;
+    }
+
     $('input[type="checkbox"]').on('change', function () {
       let dependent = "." + $(this).attr('id') + "_dependent";
       let checked = $(this).is(':checked');
