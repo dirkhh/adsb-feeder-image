@@ -762,6 +762,18 @@ class Data:
         Env("SONDE_MAX_FREQ", default="406.00", tags=["sonde_max_freq"]),
         Env("SONDE_CALLSIGN", default="ADSBIMDEFAULT", tags=["sonde_callsign"]),
         Env("SONDE_SHARE_POSITION", default="False", tags=["sonde_share_position"]),
+        # Skystats related stuff
+        Env("AF_IS_SKYSTATS_ENABLED", default=False, tags=["skystats", "is_enabled"]),
+        Env("SKYSTATS_AIRCRAFT_JSON", default="http://ultrafeeder:8080/data/aircraft.json", tags=["skystats_aircraft_json"]),
+        Env("SKYSTATS_DB_HOST", default="skystats-db", tags=["skystats_db_host"]),
+        Env("SKYSTATS_DB_PORT", default="5432", tags=["skystats_db_port"]),
+        Env("SKYSTATS_DB_USER", default="skystats-user", tags=["skystats_db_user"]),
+        Env("SKYSTATS_DB_PASSWORD", default="", tags=["skystats_db_password"]),
+        Env("SKYSTATS_DB_NAME", default="skystats_db", tags=["skystats_db_name"]),
+        Env("SKYSTATS_RADIUS", default="500", tags=["skystats_radius"]),
+        Env("SKYSTATS_ABOVE_RADIUS", default="20", tags=["skystats_above_radius"]),
+        Env("SKYSTATS_DOMESTIC_COUNTRY_ISO", default="", tags=["skystats_domestic_country_iso"]),
+        Env("SKYSTATS_DB_DATA_PATH", default="/opt/adsb/skystats-db", tags=["skystats_db_data_path"]),
     }
     for i in range(16):
         _env.add(Env(f"FEEDER_UNUSED_SERIAL_{i}", tags=[f"other-{i}"]))
@@ -785,6 +797,7 @@ class Data:
         "PW_CONTAINER": "planewatch",
         "TNUK_CONTAINER": "1090uk",
         "SDRMAP_CONTAINER": "sdrmap",
+        "SKYSTATS_CONTAINER": "skystats",
     }
     with open(data_path / "docker.image.versions", "r") as file:
         for line in file:

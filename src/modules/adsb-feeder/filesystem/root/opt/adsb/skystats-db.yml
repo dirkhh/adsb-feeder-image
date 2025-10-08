@@ -1,0 +1,27 @@
+services:
+  skystats-db:
+    image: postgres:17
+    container_name: skystats-db
+    hostname: skystats-db
+    restart: unless-stopped
+    networks:
+      - adsb_im_bridge
+    # ports:
+    #  - 127.0.0.1:5432:5432
+    environment:
+      - POSTGRES_USER=${SKYSTATS_DB_USER}
+      - POSTGRES_PASSWORD=${SKYSTATS_DB_PASSWORD}
+      - POSTGRES_DB=${SKYSTATS_DB_NAME}
+    command: ["postgres", "-c", "wal_writer_delay=10000ms"]
+    volumes:
+      - ${SKYSTATS_DB_DATA_PATH}:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${SKYSTATS_DB_USER} -d ${SKYSTATS_DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+volumes:
+  postgres_data:
+
