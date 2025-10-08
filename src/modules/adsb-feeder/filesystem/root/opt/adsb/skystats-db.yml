@@ -22,6 +22,6 @@ services:
       retries: 10
       start_period: 10s
 
-volumes:
-  postgres_data:
-
+networks:
+  adsb_im_bridge:
+    external: true
