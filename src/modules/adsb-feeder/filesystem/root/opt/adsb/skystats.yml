@@ -5,7 +5,7 @@ services:
       skystats-db:
         condition: service_healthy
     ports:
-      - "5173:80"
+      - "${AF_SKYSTATS_PORT}:80"
     container_name: skystats
     hostname: skystats
     restart: unless-stopped
