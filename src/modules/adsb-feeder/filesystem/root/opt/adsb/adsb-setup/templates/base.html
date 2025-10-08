@@ -167,6 +167,9 @@
             <li><a id="stats_current" class="dropdown-item" href="/stats_1/">Current Stats</a></li>
             {% endif %}
             {% endif %}
+            {% if is_enabled('skystats') %}
+            <li><a class="dropdown-item" href="/skystats/">Skystats</a></li>
+            {% endif %}
           </ul>
             </li>
       </ul>
