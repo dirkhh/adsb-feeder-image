@@ -12,8 +12,8 @@ services:
     networks:
       - adsb_im_bridge
     environment:
-      # ADSB
-      - READSB_AIRCRAFT_JSON=${SKYSTATS_AIRCRAFT_JSON:-http://ultrafeeder:8080/data/aircraft.json}
+      # ADSB -- note, if this is an external ultrafeeder, you may need port 8080
+      - READSB_AIRCRAFT_JSON=${SKYSTATS_AIRCRAFT_JSON:-http://ultrafeeder/data/aircraft.json}
       # PostgreSQL
       - DB_HOST=${SKYSTATS_DB_HOST}
       - DB_PORT=${SKYSTATS_DB_PORT}
