@@ -88,9 +88,7 @@ class AggStatus:
             mconf = None
             netconfig = self._d.netconfigs.get(self._agg)
             if not netconfig:
-                print_err(
-                    f"ERROR: get_mlat_status called on {self._agg} not found in netconfigs: {self._d.netconfigs}"
-                )
+                print_err(f"ERROR: get_mlat_status called on {self._agg} not found in netconfigs: {self._d.netconfigs}")
                 return
             mconf = netconfig.mlat_config
             # example mlat_config: "mlat,dati.flyitalyadsb.com,30100,39002",
@@ -131,9 +129,7 @@ class AggStatus:
         if not bconf:
             print_err(f"ERROR: get_beast_status no netconfig for {self._agg}")
             return
-        pattern = (
-            f"readsb_net_connector_status{{host=\"{bconf.split(',')[1]}\",port=\"{bconf.split(',')[2]}\"}} (\\d+)"
-        )
+        pattern = f"readsb_net_connector_status{{host=\"{bconf.split(',')[1]}\",port=\"{bconf.split(',')[2]}\"}} (\\d+)"
         filename = f"{self.uf_path()}/readsb/stats.prom"
         try:
             readsb_status = open(filename, "r").read()
@@ -205,7 +201,7 @@ class AggStatus:
             self.get_maplink()
 
         if container_status is None:
-            pass # status unknown
+            pass  # status unknown
         elif container_status == "down":
             self._beast = T.ContainerDown
             self._mlat = T.Disabled
@@ -242,11 +238,7 @@ class AggStatus:
             fa_dict, status = self.get_json(json_url)
             if fa_dict and status == 200:
                 # print_err(f"fa status.json returned {fa_dict}")
-                self._beast = (
-                    T.Good
-                    if fa_dict.get("adept") and fa_dict.get("adept").get("status") == "green"
-                    else T.Disconnected
-                )
+                self._beast = T.Good if fa_dict.get("adept") and fa_dict.get("adept").get("status") == "green" else T.Disconnected
 
                 self._mlat = T.Disconnected
                 if fa_dict.get("mlat"):
@@ -490,6 +482,7 @@ class ImStatus:
 
             return self._cached
 
+
 class LastSeen:
     def __init__(self):
         self.seen = None
@@ -514,8 +507,8 @@ class Healthcheck:
     def __init__(self, data):
         self._d = data
         self.good = True
-        self.pingInterval = 60 * 60 # 60 minutes
-        self.graceTime = 5 * 60 # 5 minutes from failure to failPing
+        self.pingInterval = 60 * 60  # 60 minutes
+        self.graceTime = 5 * 60  # 5 minutes from failure to failPing
 
         # first ping 1 minute after startup for the moment to avoid too frequent pings if stuck in
         # restart loop or something
@@ -545,7 +538,7 @@ class Healthcheck:
 
         if time.time() >= self.nextGoodPing:
             self.nextGoodPing = time.time() + self.pingInterval
-            self.nextFailPing = time.time() # set next fail ping to be immediate
+            self.nextFailPing = time.time()  # set next fail ping to be immediate
             if self._d.env_by_tags("healthcheck_url").value:
                 page, status = get_plain_url(self._d.env_by_tags("healthcheck_url").value, method="POST")
                 if status != 200:
@@ -557,7 +550,9 @@ class Healthcheck:
     def set_failed(self, reason):
         self.reason = reason
         if self.good:
-            print_err(f"healthcheck failed with reason: {reason} (fail ping and UI notice only after 5 minutes of continued failure)")
+            print_err(
+                f"healthcheck failed with reason: {reason} (fail ping and UI notice only after 5 minutes of continued failure)"
+            )
             self.failedSince = time.time()
             self.good = False
 
@@ -566,7 +561,7 @@ class Healthcheck:
         if time.time() >= self.nextFailPing and time.time() - self.failedSince > 5 * 60:
             print_err(f"healthcheck failPing due to: {self.reason}")
             self.nextFailPing = time.time() + self.pingInterval
-            self.nextGoodPing = time.time() # set next success ping to be immediate
+            self.nextGoodPing = time.time()  # set next success ping to be immediate
             if self._d.env_by_tags("healthcheck_url").value:
                 fail_url = self._d.env_by_tags("healthcheck_url").value + "/fail"
                 payload = self.reason if self.reason else ""
@@ -576,7 +571,6 @@ class Healthcheck:
                     # failure, try again in a minute instead of waiting pingInterval
                     self.nextFailPing = time.time() + 60
                 print_err(f"healthcheck url fail successfully signaled")
-
 
     # this is called every minute from app.py so we don't need to run another thread
     def check(self):
@@ -610,11 +604,11 @@ class Healthcheck:
             try:
                 with open(f"{uf_path}/readsb/aircraft.json") as f:
                     obj = json.load(f)
-                    ac = obj.get('aircraft')
+                    ac = obj.get("aircraft")
                     seen = False
                     for a in ac:
-                        t = a.get('type')
-                        if t in ['adsb_icao', 'mode_s', 'mlat']:
+                        t = a.get("type")
+                        if t in ["adsb_icao", "mode_s", "mlat"]:
                             seen = True
                     if seen:
                         self.last1090.update()
@@ -633,10 +627,10 @@ class Healthcheck:
             try:
                 with open(f"/run/adsb-feeder-dump978/skyaware978/aircraft.json") as f:
                     obj = json.load(f)
-                    ac = obj.get('aircraft')
+                    ac = obj.get("aircraft")
                     seen = False
                     for a in ac:
-                        if a.get('lat') != None:
+                        if a.get("lat") != None:
                             seen = True
                     if seen:
                         self.last978.update()
@@ -662,7 +656,7 @@ class Healthcheck:
                 print_err(traceback.format_exc())
                 fail.append("airspy_adsb not running, 1090 SDR (airspy) probably dead / unplugged")
 
-        ''' needs some container changes first
+        """ needs some container changes first
         hours = self._d.env_by_tags("healthcheck_noacars_hours").value
         if self._d.is_enabled("run_acarsdec")
             if self.lastAcars.tooLong(hours):
@@ -673,8 +667,7 @@ class Healthcheck:
         if self._d.is_enabled("run_dumpvdl2")
             if self.lastVdl.tooLong(hours):
                 fail.append(f"no VDL messages for {hours}h"
-        '''
-
+        """
 
         if self.pingURL != self._d.env_by_tags("healthcheck_url").value:
             self.pingURL = self._d.env_by_tags("healthcheck_url").value

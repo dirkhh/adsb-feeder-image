@@ -96,10 +96,10 @@ class UltrafeederConfig:
         # add primary data input for microproxy
         if is_stage2 and self._micro > 0:
             mf_ip = self._d.env_by_tags("mf_ip").list_get(self._micro)
-            stage2_nano = mf_ip in [ "local", "local2" ]
+            stage2_nano = mf_ip in ["local", "local2"]
             ip, triplet = mf_get_ip_and_triplet(mf_ip)
             # is_user_triplet: microfeeder was specified by user as triplet
-            is_user_triplet = (mf_ip != ip)
+            is_user_triplet = mf_ip != ip
             if mf_ip == ip and self._d.env_by_tags("mf_brofm").list_get(self._micro):
                 ret.add(f"adsb,{ip},30006,beast_in")
             else:
@@ -156,7 +156,7 @@ class UltrafeederConfig:
             if not is_stage2:
                 ret.add(ultrafeeder_extra_args)
             if is_stage2 and self._micro == 0:
-                    ret.add(ultrafeeder_extra_args)
+                ret.add(ultrafeeder_extra_args)
         if ultrafeeder_extra_args_microsites:
             if is_stage2 and self._micro != 0:
                 ret.add(ultrafeeder_extra_args_microsites.replace("SITENUM", f"{self._micro:02}"))

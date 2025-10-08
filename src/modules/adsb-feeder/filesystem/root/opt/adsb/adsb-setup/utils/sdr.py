@@ -160,7 +160,9 @@ class SDRDevices:
                             # add this SDR to the settings dict
                             self.sdr_settings[new_sdr._serial] = new_sdr
                         self.sdrs.append(new_sdr)
-                        self.debug_out += f"sdr_info: type: {sdr_type} serial: {new_sdr._serial} address: {address} pidvid: {pidvid}\n"
+                        self.debug_out += (
+                            f"sdr_info: type: {sdr_type} serial: {new_sdr._serial} address: {address} pidvid: {pidvid}\n"
+                        )
 
         # list from rtl-sdr drivers
         # lots of these are likely not gonna work / work well but it's still better
@@ -357,9 +359,7 @@ class SDRDevices:
             print_err(f"found rtlsdr serial {sdr._serial} but expected {oldserial}")
             return f"[ERROR] did not find RTLSDR with serial {oldserial}"
         try:
-            result = subprocess.run(
-                "rtl_eeprom -d 0", shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-            )
+            result = subprocess.run("rtl_eeprom -d 0", shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         except subprocess.SubprocessError:
             print_err("rtl_eeprom -d 0 failed")
             return f"[ERROR] rtl_eeprom -d 0 failed"
@@ -390,9 +390,7 @@ class SDRDevices:
 
         # because we are paranoid, let's check
         try:
-            result = subprocess.run(
-                "rtl_eeprom -d 0", shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-            )
+            result = subprocess.run("rtl_eeprom -d 0", shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         except subprocess.SubprocessError:
             print_err("verify success: rtl_eeprom -d 0 failed")
             return f"[ERROR] verify success: rtl_eeprom -d 0 failed"

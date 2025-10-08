@@ -83,9 +83,7 @@ class Aggregator:
                     capture_output=True,
                 )
             except subprocess.TimeoutExpired as exc2:
-                print_err(
-                    f"failed to remove the container {name} stderr: {str(exc2.stdout)} / stdout: {str(exc2.stderr)}"
-                )
+                print_err(f"failed to remove the container {name} stderr: {str(exc2.stdout)} / stdout: {str(exc2.stderr)}")
 
         # let's make sure the container isn't still there, if it is the docker run won't work
         force_remove_container("temp_container")

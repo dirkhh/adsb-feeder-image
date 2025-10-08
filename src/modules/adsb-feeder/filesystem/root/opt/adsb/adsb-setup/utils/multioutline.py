@@ -116,9 +116,7 @@ class MultiOutline:
                         print_err(f"multioutline: can't create polygon from outline #{i}")
                 except:
                     print_err(traceback.format_exc())
-                    print_err(
-                        f"multioutline: can't create linear ring from outline #{i} - maybe there is no data, yet?"
-                    )
+                    print_err(f"multioutline: can't create linear ring from outline #{i} - maybe there is no data, yet?")
 
         if len(polygons) == 0:
             return result
@@ -144,9 +142,7 @@ class MultiOutline:
                             combined = True
                     except Exception as e:
                         print_err(traceback.format_exc())
-                        print_err(
-                            f"multioutline: exception {e} while combining polygons #{j} and #{i} for hwt_alt={hwt_alt}"
-                        )
+                        print_err(f"multioutline: exception {e} while combining polygons #{j} and #{i} for hwt_alt={hwt_alt}")
                         pass
                 if not combined:
                     to_consider.append(i)

@@ -15,9 +15,7 @@ import traceback
 
 from flask import flash
 
-verbose = (
-    0 if not os.path.exists("/opt/adsb/config/verbose") else int(open("/opt/adsb/config/verbose", "r").read().strip())
-)
+verbose = 0 if not os.path.exists("/opt/adsb/config/verbose") else int(open("/opt/adsb/config/verbose", "r").read().strip())
 
 # create a board unique but otherwise random / anonymous ID
 idhash = hashlib.md5(pathlib.Path("/etc/machine-id").read_text().encode()).hexdigest()
@@ -52,9 +50,7 @@ def print_err(*args, **kwargs):
     level = int(kwargs.pop("level", 0))
     if level > 0 and int(verbose) & int(level) == 0:
         return
-    timestamp = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()) + ".{0:03.0f}Z".format(
-        math.modf(time.time())[0] * 1000
-    )
+    timestamp = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()) + ".{0:03.0f}Z".format(math.modf(time.time())[0] * 1000)
     print(*((timestamp,) + args), file=sys.stderr, **kwargs)
 
 
@@ -206,7 +202,7 @@ def string2file(path=None, string=None, verbose=False):
             file.write(string)
         os.rename(tmp, path)
     except Exception as e:
-        #print_err(traceback.format_exc())
+        # print_err(traceback.format_exc())
         print_err(f'error writing "{string}" to {path} ({type(e).__name__})')
     else:
         if verbose:
@@ -231,12 +227,7 @@ def get_plain_url(plain_url, method="GET", data=None):
         # sending plain text for custom bodies
         headers["Content-Type"] = "text/plain; charset=utf-8"
     try:
-        response = requests.request(
-            method=method,
-            url=plain_url,
-            headers=headers,
-            data=data
-        )
+        response = requests.request(method=method, url=plain_url, headers=headers, data=data)
     except (
         requests.HTTPError,
         requests.ConnectionError,
