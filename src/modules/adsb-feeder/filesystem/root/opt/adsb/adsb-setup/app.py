@@ -111,6 +111,7 @@ class NoStatic(flask_logging.Filter):
 
 flask_logging.getLogger("werkzeug").addFilter(NoStatic)
 
+
 class AdsbIm:
     def __init__(self):
         print_err("starting AdsbIm.__init__", level=4)
@@ -420,9 +421,7 @@ class AdsbIm:
             file_version = ""
         if file_version:
             if file_version != conf_version:
-                print_err(
-                    f"found version '{conf_version}' in memory, but '{file_version}' on disk, updating to {file_version}"
-                )
+                print_err(f"found version '{conf_version}' in memory, but '{file_version}' on disk, updating to {file_version}")
                 self._d.env_by_tags("base_version").value = file_version
         else:
             if conf_version:
@@ -576,9 +575,7 @@ class AdsbIm:
         # doesn't run on Raspberry Pi 5 boards
         board = self._d.env_by_tags("board_name").valuestr
         if board.startswith("Raspberry Pi 5"):
-            self._d.env_by_tags(["container", "planefinder"]).value = (
-                "ghcr.io/sdr-enthusiasts/docker-planefinder:5.0.161_arm64"
-            )
+            self._d.env_by_tags(["container", "planefinder"]).value = "ghcr.io/sdr-enthusiasts/docker-planefinder:5.0.161_arm64"
 
         # as we migrate from pre v3.0.1 to v3.0.1 we need to sync the new feeder type
         # variables based on existing settings - the rest of the code must ensure that
@@ -667,7 +664,6 @@ class AdsbIm:
         except:
             return False
 
-
     def monitor_dmesg(self):
         while True:
             try:
@@ -734,9 +730,7 @@ class AdsbIm:
             return
 
         def push_mo():
-            subprocess.run(
-                ["bash", "/opt/adsb/push_multioutline.sh", f"{self._d.env_by_tags('num_micro_sites').value}"]
-            )
+            subprocess.run(["bash", "/opt/adsb/push_multioutline.sh", f"{self._d.env_by_tags('num_micro_sites').value}"])
 
         thread = threading.Thread(
             target=push_mo,
@@ -879,9 +873,7 @@ class AdsbIm:
                         if microIndex == 0:
                             uf_path = adsb_path / "ultrafeeder"
                         else:
-                            uf_path = (
-                                adsb_path / "ultrafeeder" / str(self._d.env_by_tags("mf_ip").list_get(microIndex))
-                            )
+                            uf_path = adsb_path / "ultrafeeder" / str(self._d.env_by_tags("mf_ip").list_get(microIndex))
 
                         gh_path = uf_path / "globe_history"
                         if include_heatmap and gh_path.is_dir():
@@ -1171,9 +1163,7 @@ class AdsbIm:
         return {self.sdr_serial_name_from_purpose(p) for p in self._sdrdevices.purposes()}
 
     def configured_serials(self):
-        return {
-            serial for serial in {self._d.env_by_tags(e).valuestr for e in self.serial_env_names()} if serial != ""
-        }
+        return {serial for serial in {self._d.env_by_tags(e).valuestr for e in self.serial_env_names()} if serial != ""}
 
     def closest_airport(self, lat, lon):
         airport, status = generic_get_json(f"https://adsb.im/api/closest_airport/{lat}/{lon}", timeout=10.0)
@@ -1240,8 +1230,7 @@ class AdsbIm:
                     "alt": self._d.env_by_tags("alt").list_get(i),
                     "uat_capable": uat_capable,
                     "brofm_capable": (
-                        self._d.list_is_enabled("mf_brofm_capable", idx=i)
-                        or self._d.list_is_enabled("mf_brofm", idx=i)
+                        self._d.list_is_enabled("mf_brofm_capable", idx=i) or self._d.list_is_enabled("mf_brofm", idx=i)
                     ),
                     "brofm_enabled": self._d.list_is_enabled("mf_brofm", idx=i),
                 }
@@ -1295,9 +1284,7 @@ class AdsbIm:
                     "version": self._d.env_by_tags("base_version").value,
                     "airspy_at_port": (self._d.env_by_tags("airspyport").value if self._d.is_enabled("airspy") else 0),
                     "rtlsdr_at_port": rtlsdr_at_port,
-                    "dump978_at_port": (
-                        self._d.env_by_tags("uatport").value if self._d.list_is_enabled(["uat978"], 0) else 0
-                    ),
+                    "dump978_at_port": (self._d.env_by_tags("uatport").value if self._d.list_is_enabled(["uat978"], 0) else 0),
                     "brofm_capable": (self._d.env_by_tags("aggregator_choice").value in ["micro", "nano"]),
                 }
             )
@@ -1350,9 +1337,7 @@ class AdsbIm:
                     if exist_serial != "":
                         previous_sdr = self._sdrdevices.get_sdr_by_serial(exist_serial)
                         if previous_sdr is not self._sdrdevices.null_sdr:
-                            print_err(
-                                f"SDR serial {exist_serial} was previously assigned for purpose {sdr_data['purpose']}"
-                            )
+                            print_err(f"SDR serial {exist_serial} was previously assigned for purpose {sdr_data['purpose']}")
                             previous_sdr.purpose = ""
                     self._d.env_by_tags(self._sdrdevices.purpose_env(sdr_data["purpose"])).value = sdr_data["serial"]
                 gainenv, biasteeenv = self._sdrdevices.set_sdr_data(sdr, sdr_data)
@@ -1783,9 +1768,7 @@ class AdsbIm:
                 # after that the user may have overwritten it
                 self._d.env_by_tags("site_name").list_set(n, self.unique_site_name(base_info["name"], idx=n))
                 if mf_ip in ["local", "local2"]:
-                    self._d.env_by_tags("site_name").list_set(
-                        n, self.unique_site_name(f"{base_info['name']} {mf_ip}", idx=n)
-                    )
+                    self._d.env_by_tags("site_name").list_set(n, self.unique_site_name(f"{base_info['name']} {mf_ip}", idx=n))
             self._d.env_by_tags("lat").list_set(n, base_info["lat"])
             # deal with backwards compatibility
             lon = base_info.get("lon", None)
@@ -2092,9 +2075,7 @@ class AdsbIm:
                     try:
                         os.rename(data_dir / f"{old_ip}", data_dir / f"{ip}")
                     except:
-                        print_err(
-                            f"failed to move micro feeder data directory from {data_dir/old_ip} to {data_dir/ip}"
-                        )
+                        print_err(f"failed to move micro feeder data directory from {data_dir/old_ip} to {data_dir/ip}")
                         return (
                             False,
                             f"failed to move micro feeder data directory from {data_dir/old_ip} to {data_dir/ip}",
@@ -2177,8 +2158,7 @@ class AdsbIm:
             local_config = "%LOCAL_EDITS_DONT_MANAGE%=1" in config_lines
             # we have config settings or the user has edited the file themselves - etiher way we want to run the container
             self._d.env_by_tags("run_hfdlobserver").value = local_config or (
-                self._d.env_by_tags("hfdlobserver_feed_id").value != ""
-                and self._d.env_by_tags("hfdlobserver_ip").value != ""
+                self._d.env_by_tags("hfdlobserver_feed_id").value != "" and self._d.env_by_tags("hfdlobserver_ip").value != ""
             )
             if local_config:
                 print_err("user requested not to manage hfdlobserver config")
@@ -2241,9 +2221,7 @@ class AdsbIm:
                 "alt",
             ]
             for p in placeholders:
-                config_lines = [
-                    l.replace("%" + p + "%", str(self._d.env_by_tags(p).list_get(0))) for l in config_lines
-                ]
+                config_lines = [l.replace("%" + p + "%", str(self._d.env_by_tags(p).list_get(0))) for l in config_lines]
 
             new_config = "\n".join(config_lines)
 
@@ -2409,15 +2387,11 @@ class AdsbIm:
 
         # make sure we have a closest airport
         if self._d.env_by_tags("closest_airport").list_get(0) == "":
-            airport = self.closest_airport(
-                self._d.env_by_tags("lat").list_get(0), self._d.env_by_tags("lon").list_get(0)
-            )
+            airport = self.closest_airport(self._d.env_by_tags("lat").list_get(0), self._d.env_by_tags("lon").list_get(0))
             if airport:
                 self._d.env_by_tags("closest_airport").list_set(0, airport.get("icao", ""))
 
-        if self._d.is_enabled("stage2") and (
-            self._d.env_by_tags("1090serial").value or self._d.env_by_tags("978serial").value
-        ):
+        if self._d.is_enabled("stage2") and (self._d.env_by_tags("1090serial").value or self._d.env_by_tags("978serial").value):
             # this is special - the user has declared this a stage2 feeder, yet
             # appears to be setting up an SDR - let's force this to be treated as
             # nanofeeder
@@ -2474,9 +2448,7 @@ class AdsbIm:
             self._d.env_by_tags("beast-reduce-optimize-for-mlat").value = False
 
         if self._d.env_by_tags("tar1090_image_config_link").value != "":
-            self._d.env_by_tags("tar1090_image_config_link").value = (
-                f"http://HOSTNAME:{self._d.env_by_tags('webport').valueint}/"
-            )
+            self._d.env_by_tags("tar1090_image_config_link").value = f"http://HOSTNAME:{self._d.env_by_tags('webport').valueint}/"
 
         if self._d.is_enabled("stage2"):
             # for stage2 tar1090port is used for the webproxy
@@ -2500,9 +2472,9 @@ class AdsbIm:
 
         # fix up airspy installs without proper serial number configuration
         if self._d.is_enabled("airspy"):
-            if self._d.env_by_tags("1090serial").valuestr == "" or self._d.env_by_tags(
-                "1090serial"
-            ).valuestr.startswith("AIRSPY SN:"):
+            if self._d.env_by_tags("1090serial").valuestr == "" or self._d.env_by_tags("1090serial").valuestr.startswith(
+                "AIRSPY SN:"
+            ):
                 self._sdrdevices.ensure_populated()
                 airspy_serials = [sdr._serial for sdr in self._sdrdevices.sdrs if sdr._type == "airspy"]
                 if len(airspy_serials) == 1:
@@ -2510,10 +2482,9 @@ class AdsbIm:
 
         # make all the smart choices for plugged in SDRs - unless we are a stage2 that hasn't explicitly requested SDR support
         # only run this for initial setup or when the SDR setup is requested via the interface
-        if (
-            not self._d.is_enabled("stage2")
-            or self._d.is_enabled("stage2_nano")
-        ) and not self._d.env_by_tags("sdrs_locked").value:
+        if (not self._d.is_enabled("stage2") or self._d.is_enabled("stage2_nano")) and not self._d.env_by_tags(
+            "sdrs_locked"
+        ).value:
             # first grab the SDRs plugged in and check if we have one identified for UAT
             env978 = self._d.env_by_tags("978serial")
             env1090 = self._d.env_by_tags("1090serial")
@@ -2539,9 +2510,7 @@ class AdsbIm:
             if not env978.value and auto_assignment["978"]:
                 env978.value = auto_assignment["978"]
 
-            stratuxv3 = any(
-                [sdr._serial == env978.value and sdr._type == "stratuxv3" for sdr in self._sdrdevices.sdrs]
-            )
+            stratuxv3 = any([sdr._serial == env978.value and sdr._type == "stratuxv3" for sdr in self._sdrdevices.sdrs])
             if stratuxv3:
                 self._d.env_by_tags("uat_device_type").value = "stratuxv3"
             else:
@@ -2567,9 +2536,7 @@ class AdsbIm:
             sdrplay = any([sdr._serial == env1090.value and sdr._type == "sdrplay" for sdr in self._sdrdevices.sdrs])
             self._d.env_by_tags(["sdrplay", "is_enabled"]).value = sdrplay
             # Mode-S Beast
-            modesbeast = any(
-                [sdr._serial == env1090.value and sdr._type == "modesbeast" for sdr in self._sdrdevices.sdrs]
-            )
+            modesbeast = any([sdr._serial == env1090.value and sdr._type == "modesbeast" for sdr in self._sdrdevices.sdrs])
 
             # rtl-sdr
             rtlsdr = any(sdr._type == "rtlsdr" and sdr._serial == env1090.value for sdr in self._sdrdevices.sdrs)
@@ -2851,11 +2818,7 @@ class AdsbIm:
         # AIS stuff -- this needs to be extended for stage 2
         self._d.env_by_tags("ais_airframes_station_id").list_set(
             0,
-            (
-                self._d.env_by_tags("ais_station_name").value
-                if self._d.list_is_enabled(["ais_feed_airframes"], idx=0)
-                else ""
-            ),
+            (self._d.env_by_tags("ais_station_name").value if self._d.list_is_enabled(["ais_feed_airframes"], idx=0) else ""),
         )
 
         # SONDE stuff
@@ -3278,9 +3241,7 @@ class AdsbIm:
                     self._next_url_from_director = request.url
                     continue
                 if key.startswith("temp_sensor_") and value == "go":
-                    self._d.env_by_tags("temp_sensor").value = (
-                        form.get("temp_sensor", "") if key.endswith("enable") else ""
-                    )
+                    self._d.env_by_tags("temp_sensor").value = form.get("temp_sensor", "") if key.endswith("enable") else ""
                     self.handle_temp_sensor(self._d.env_by_tags("temp_sensor"), form.get("dht22_pin", "4"))
                     self._next_url_from_director = request.url
                     continue
@@ -3622,12 +3583,8 @@ class AdsbIm:
             print_err(f"failed to retrieve best_frequencies JSON from {url}: {status_code}")
         else:
             print_err(f"frequencies_json: {frequencies_json}")
-            acars_frequencies = "; ".join(
-                sorted([f"{int(freq)/1000:.3f}" for freq in frequencies_json.get("acars", "")])
-            )
-            vdl2_frequencies = "; ".join(
-                sorted([f"{int(freq)/1000:.3f}" for freq in frequencies_json.get("vdl2", "")])
-            )
+            acars_frequencies = "; ".join(sorted([f"{int(freq)/1000:.3f}" for freq in frequencies_json.get("acars", "")]))
+            vdl2_frequencies = "; ".join(sorted([f"{int(freq)/1000:.3f}" for freq in frequencies_json.get("vdl2", "")]))
 
         return render_template(
             "expert.html",
@@ -3650,9 +3607,7 @@ class AdsbIm:
             containers = self._system.list_containers()
             containers = [c for c in containers if c not in {"dozzle", "adsb-setup-proxy", "acars_router", "acarshub"}]
 
-            print_err(
-                f"stopping containers potentially accessing SDRs ({containers}) in order to be able to access SDRs"
-            )
+            print_err(f"stopping containers potentially accessing SDRs ({containers}) in order to be able to access SDRs")
             self._system.stop_containers(containers)
             result = self._sdrdevices.change_sdr_serial(oldserial, newserial)
             self._system.start_containers()
@@ -4134,9 +4089,7 @@ class AdsbIm:
 
     @check_restart_lock
     def setup(self):
-        if request.method == "POST" and (
-            request.form.get("submit") == "go" or request.form.get("set_stage2_data") == "go"
-        ):
+        if request.method == "POST" and (request.form.get("submit") == "go" or request.form.get("set_stage2_data") == "go"):
             return self.update()
         # is this a stage2 feeder?
         if self._d.is_enabled("stage2"):
@@ -4411,7 +4364,6 @@ class AdsbIm:
         self.exiting = True
         return render_template("/restarting.html")
 
-
     def dozzle_yml_from_template(self):
         # env vars are not supported in certain places in compose ymls,
         # in even more places in docker v20 which is still somewhat prevalent
@@ -4428,13 +4380,12 @@ class AdsbIm:
                 self._d.env_by_tags("telegraf_url_1090").value = "http://nanofeeder"
             else:
                 self._d.env_by_tags("telegraf_url_1090").value = "http://ultrafeeder"
-        if self._d.list_is_enabled(['uat978'], 0):
+        if self._d.list_is_enabled(["uat978"], 0):
             self._d.env_by_tags("telegraf_url_978").value = "http://dump978/skyaware978"
             self._d.env_by_tags("telegraf_host_978").value = "dump978"
         else:
             self._d.env_by_tags("telegraf_url_978").value = ""
             self._d.env_by_tags("telegraf_host_978").value = ""
-
 
 
 def create_stage2_yml_from_template(stage2_yml_name, n, ip, template_file):
