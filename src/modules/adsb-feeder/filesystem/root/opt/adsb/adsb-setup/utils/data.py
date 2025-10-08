@@ -764,6 +764,7 @@ class Data:
         Env("SONDE_SHARE_POSITION", default="False", tags=["sonde_share_position"]),
         # Skystats related stuff
         Env("AF_IS_SKYSTATS_ENABLED", default=False, tags=["skystats", "is_enabled"]),
+        Env("AF_IS_SKYSTATS_DB_ENABLED", default=False, tags=["skystats_db", "is_enabled"]),
         Env("SKYSTATS_AIRCRAFT_JSON", default="http://ultrafeeder:8080/data/aircraft.json", tags=["skystats_aircraft_json"]),
         Env("SKYSTATS_DB_HOST", default="skystats-db", tags=["skystats_db_host"]),
         Env("SKYSTATS_DB_PORT", default="5432", tags=["skystats_db_port"]),

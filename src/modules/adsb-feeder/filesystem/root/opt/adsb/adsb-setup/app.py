@@ -2390,6 +2390,8 @@ class AdsbIm:
             airport = self.closest_airport(self._d.env_by_tags("lat").list_get(0), self._d.env_by_tags("lon").list_get(0))
             if airport:
                 self._d.env_by_tags("closest_airport").list_set(0, airport.get("icao", ""))
+                if self._d.env_by_tags("skystats_domestic_country_iso").value == "":
+                    self._d.env_by_tags("skystats_domestic_country_iso").value = airport.get("isocountry", "")
 
         if self._d.is_enabled("stage2") and (self._d.env_by_tags("1090serial").value or self._d.env_by_tags("978serial").value):
             # this is special - the user has declared this a stage2 feeder, yet
@@ -2631,6 +2633,21 @@ class AdsbIm:
             sdr1090.purpose = "1090"
         if not sdr978 is self._sdrdevices.null_sdr:
             sdr978.purpose = "978"
+
+        # Skystats
+        if self._d.is_enabled("skystats"):
+            # if no password is set, set it to a random one
+            if self._d.env_by_tags("skystats_db_password").value == "":
+                self._d.env_by_tags("skystats_db_password").value = self.generate_random_password()
+            # make sure we grab the domestic country iso from the closest airport
+            if self._d.env_by_tags("skystats_domestic_country_iso").value == "":
+                airport = self.closest_airport(self._d.env_by_tags("lat").list_get(0), self._d.env_by_tags("lon").list_get(0))
+                if airport:
+                    self._d.env_by_tags("skystats_domestic_country_iso").value = airport.get("isocountry", "")
+        # check if we need to run the skystats database container
+        self._d.env_by_tags("skystats_db").value = (
+            self._d.is_enabled("skystats") and self._d.env_by_tags("skystats_db_host").value == "skystats-db"
+        )
 
         # create the non-ADS-B SDR strings
         acarsserial = self._d.env_by_tags("acarsserial").valuestr
