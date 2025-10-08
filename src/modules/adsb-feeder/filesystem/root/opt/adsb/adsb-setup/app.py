@@ -3614,6 +3614,10 @@ class AdsbIm:
 
         return result
 
+    def generate_random_password(self):
+        alphabet = string.ascii_letters + string.digits
+        return "".join(secrets.choice(alphabet) for i in range(12))
+
     @check_restart_lock
     def systemmgmt(self):
         if request.method == "POST":
@@ -3651,8 +3655,7 @@ class AdsbIm:
                 else:
                     self._d.env_by_tags("tailscale_name").value = ""
         # create a potential new root password in case the user wants to change it
-        alphabet = string.ascii_letters + string.digits
-        self.rpw = "".join(secrets.choice(alphabet) for i in range(12))
+        self.rpw = self.generate_random_password()
         # if we are on a branch that's neither stable nor beta, pass the value to the template
         # so that a third update button will be shown - separately, pass along unconditional
         # information on the current branch the user is on so we can show that in the explanatory text.
@@ -4039,8 +4042,7 @@ class AdsbIm:
                             if "adsb.im" not in line and installkey not in line:
                                 new_authfile.write(line)
                 # now overwrite the root password with something random
-                alphabet = string.ascii_letters + string.digits
-                self.rpw = "".join(secrets.choice(alphabet) for i in range(12))
+                self.rpw = self.generate_random_password()
                 self.set_rpw()
                 os.remove("/opt/adsb/adsb.im.passwd.and.keys")
 
