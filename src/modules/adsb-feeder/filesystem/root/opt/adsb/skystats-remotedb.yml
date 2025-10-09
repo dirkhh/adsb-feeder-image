@@ -1,0 +1,30 @@
+services:
+  skystats:
+    image: ${SKYSTATS_CONTAINER}
+    ports:
+      - "${AF_SKYSTATS_PORT}:80"
+    container_name: skystats
+    hostname: skystats
+    restart: unless-stopped
+    networks:
+      - adsb_im_bridge
+    environment:
+      # ADSB -- note, if this is an external ultrafeeder, you may need port 8080
+      - READSB_AIRCRAFT_JSON=${SKYSTATS_AIRCRAFT_JSON:-http://ultrafeeder/data/aircraft.json}
+      # PostgreSQL
+      - DB_HOST=${SKYSTATS_DB_HOST}
+      - DB_PORT=${SKYSTATS_DB_PORT}
+      - DB_USER=${SKYSTATS_DB_USER}
+      - DB_PASSWORD=${SKYSTATS_DB_PASSWORD}
+      - DB_NAME=${SKYSTATS_DB_NAME}
+      # App
+      - LAT=${FEEDER_LAT}
+      - LON=${FEEDER_LONG}
+      - RADIUS=${SKYSTATS_RADIUS}
+      - ABOVE_RADIUS=${SKYSTATS_ABOVE_RADIUS}
+      - DOMESTIC_COUNTRY_ISO=${SKYSTATS_DOMESTIC_COUNTRY_ISO}
+
+networks:
+  adsb_im_bridge:
+    external: true
+
