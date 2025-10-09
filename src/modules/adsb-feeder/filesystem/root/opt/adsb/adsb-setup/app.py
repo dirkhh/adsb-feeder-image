@@ -307,6 +307,7 @@ class AdsbIm:
         self.app.add_url_rule("/executerestore", "executerestore", self.executerestore, methods=["GET", "POST"])
         self.app.add_url_rule("/sdr_setup", "sdr_setup", self.sdr_setup, methods=["GET", "POST"])
         self.app.add_url_rule("/visualization", "visualization", self.visualization, methods=["GET", "POST"])
+        self.app.add_url_rule("/advanced", "advanced", self.advanced, methods=["GET", "POST"])
         self.app.add_url_rule("/expert", "expert", self.expert, methods=["GET", "POST"])
         self.app.add_url_rule("/systemmgmt", "systemmgmt", self.systemmgmt, methods=["GET", "POST"])
         self.app.add_url_rule("/aggregators", "aggregators", self.aggregators, methods=["GET", "POST"])
@@ -3584,11 +3585,9 @@ class AdsbIm:
         return redirect(url_for("director"))
 
     @check_restart_lock
-    def expert(self):
+    def advanced(self):
         if request.method == "POST":
             return self.update()
-        # make sure we only show the gpsd option if gpsd is correctly configured and running
-        self._d.env_by_tags("has_gpsd").value = self._system.check_gpsd()
         os_flag_file = self._d.data_path / "os.adsb.feeder.image"
         is_image = os_flag_file.exists()
         # retrieve the busiest known frequencies JSON from the adsb.im website
@@ -3604,11 +3603,20 @@ class AdsbIm:
             vdl2_frequencies = "; ".join(sorted([f"{int(freq)/1000:.3f}" for freq in frequencies_json.get("vdl2", "")]))
 
         return render_template(
-            "expert.html",
+            "advanced.html",
             is_image=is_image,
             best_acars_frequencies=acars_frequencies,
             best_vdl2_frequencies=vdl2_frequencies,
         )
+
+    @check_restart_lock
+    def expert(self):
+        if request.method == "POST":
+            return self.update()
+        # make sure we only show the gpsd option if gpsd is correctly configured and running
+        self._d.env_by_tags("has_gpsd").value = self._system.check_gpsd()
+
+        return render_template("expert.html")
 
     def change_sdr_serial_ui(self):
         return render_template("change_sdr_serial_ui.html")
