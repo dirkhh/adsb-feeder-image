@@ -51,12 +51,25 @@
       <div class="row align-items-center">
         <div class="col-8">
           <label for="temp_sensor_enable">
-            This is certainly a more advanced feature, but if you have a DHT11 or DHRT22 temperature sensor and connect it to PINs
-            1 (Vcc), 7 (Data) and 9 (Ground), you can enable it here.
+            A small number of temperature sensors for ambient temperature monitoring are supported.
           </label>
         </div>
         <div class="col-4">
           <button type="submit" class="btn btn-primary mx-auto w-100" name="temp_sensor_enable" value="go" onclick="show_temp_sensor_dialog(); return false;">Enable temp sensor</button>
+        </div>
+        <div class="col-12 mb-2 mt-2">
+          <span onclick="$('#tempsensor_explain').toggleClass('d-none'); $(this).find('.toggle-icon').text($('#tempsensor_explain').hasClass('d-none') ? '▶' : '▼'); return false;"
+                style="cursor: pointer;">
+            <span class="toggle-icon small">▶</span> <strong class="small">More information</strong>
+          </span>
+          <div class="small d-none mt-2" id="tempsensor_explain">
+            <ul>
+              <li>DHT11 or DHRT22 temperature sensor connected to GPIO pins 1 (Vcc), 7 (Data) and 9 (Ground) on a Raspberry Pi
+              </li>
+              <li>BME280 temperature sensor connected to I2C pins on a Raspberry Pi</li>
+              <li>TEMPer USB temperature sensor</li>
+            </ul>
+          </div>
         </div>
       </div>
     </form>
