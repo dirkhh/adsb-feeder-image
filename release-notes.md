@@ -1,6 +1,7 @@
 Changes since v3.0.5
 =======
 - core: add Skystats for extended statistics - tuned for low disk IO
+- UI: always show the CPU temperature in the title bar, even without a temperature sensor
 - UI: split Expert settings into an Advanced page and the existing Expert page, making the user experience a bit easier to explore
 - app install: prompt to install docker via get.docker.com in some cases
 - add support for openfreemap offline map (not included)

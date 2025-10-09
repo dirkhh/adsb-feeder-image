@@ -4146,8 +4146,14 @@ class AdsbIm:
                 now = int(time.time())
                 age = now - int(temperature_json.get("now", "0"))
                 temperature_json["age"] = age
-        except:
-            pass
+        except Exception:
+            try:
+                with open("/sys/class/thermal/thermal_zone0/temp", "r") as cpu:
+                    temperature_json["cpu"] = f"{int(cpu.read().strip()) / 1000:.0f}"
+                    temperature_json["age"] = 1
+            except Exception:
+                pass
+
         return temperature_json
 
     def ambient_raw(self):
