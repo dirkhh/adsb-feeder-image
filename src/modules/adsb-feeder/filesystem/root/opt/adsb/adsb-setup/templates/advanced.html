@@ -286,10 +286,16 @@
     </form>
   </div>
   <div class="col-12 col-lg-6">
-    <h5 class="mt-4">Healthcheck Ping URL</h5>
+    <h5 class="mt-4">Healthcheck</h5>
     <form method="POST">
       <div class="row align-items-center">
-        <label for="healthcheck_url">Healthcheck Ping URL</label>
+        <div class="col-8">
+          <label for="healthcheck_url">Healthcheck settings</label>
+        </div>
+        <div class="col-4">
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="healthcheck--submit"
+                  value="go">Update</button>
+        </div>
         <div class="col-12 mb-2 mt-2">
           <span onclick="$('#healthcheck_explain').toggleClass('d-none'); $(this).find('.toggle-icon').text($('#healthcheck_explain').hasClass('d-none') ? '▶' : '▼'); return false;"
                 style="cursor: pointer;">
@@ -331,36 +337,32 @@
           <br>
           Fail Healthcheck for the following events (only when decoding frequency; set 0 to disable):
         </div>
-        <div class="col-4 mb-1">
+        <div class="col-8 mb-1">
           <label for="healthcheck_noplane_hours_1090">
              No planes on 1090 for X hours
           </label>
         </div>
-        <div class="col-8 mb-1">
+        <div class="col-4 mb-1">
           <input class="mx-auto w-100" id="healthcheck_noplane_hours_1090" name="healthcheck_noplane_hours_1090" type="text"
                  value="{{ env_value_by_tag('healthcheck_noplane_hours_1090') }}">
         </div>
-        <div class="col-4 mb-1">
+        <div class="col-8 mb-1">
           <label for="healthcheck_noplane_hours_978">
             No planes on 978 for X hours
           </label>
         </div>
-        <div class="col-8 mb-1">
+        <div class="col-4 mb-1">
           <input class="mx-auto w-100" id="healthcheck_noplane_hours_978" name="healthcheck_noplane_hours_978" type="text"
                  value="{{ env_value_by_tag('healthcheck_noplane_hours_978') }}">
         </div>
-        <div class="col-4 mb-1 d-none">
+        <div class="col-8 mb-1 d-none">
           <label for="healthcheck_noacars_hours">
             No messages on ACARS / VDL for X hours
           </label>
         </div>
-        <div class="col-8 mb-1 d-none">
+        <div class="col-4 mb-1 d-none">
           <input class="mx-auto w-100" id="healthcheck_noacars_hours" name="healthcheck_noacars_hours" type="text"
                  value="{{ env_value_by_tag('healthcheck_noacars_hours') }}">
-        </div>
-        <div class="col-12">
-          <button type="submit" class="btn btn-primary mx-auto w-100" name="healthcheck--submit"
-                  value="go">Update</button>
         </div>
       </div>
     </form>

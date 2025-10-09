@@ -278,50 +278,50 @@
     <h5 class="mt-4">Prometheus / Grafana / Influx / Telegraf</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
       <div class="row align-items-center">
-        <label for="telegraf_adsb">
-          Generally unsupported option to enable telegraf in the image. Only enable this if you really
-          understand what you are doing.
-        </label>
-        <div class="mt-2">
-          <span onclick="$('#telegraf_explain').toggleClass('d-none'); $(this).find('.toggle-icon').text($('#telegraf_explain').hasClass('d-none') ? '▶' : '▼'); return false;"
-                style="cursor: pointer;">
-            <span class="toggle-icon small">▶</span> <strong class="small">More information</strong>
-          </span>
-          <div class="small d-none mt-2" id="telegraf_explain">
-            If you just want basic prometheus statistics for grafana, there is no need to enable
-            this, basic metrics are always availabe using the same URL as the tar1090 map
-            interface with /metrics added.
-            <br>
-            For a normal setup or stage2 combined data this means just add a prometheus scrape job
-            with target 192.168.2.33:8080 (:1099 on app install).
-            <br>
-            For individual stage2 sites where the tar1090 map interface is available at :8080/2
-            for example, you will need to add metrics_path: /2/metrics.
-            <br>
-            Some people would like to feed data into influx or do fancy graphs with prometheus / grafana.
-            For this you can activate this container.
-            <br>
-            On a stage2 this will only cover combined data, adding more of this container for each
-            stage2 site is probably not gonna happen but you could run probably enable this
-            container for each individual site if you really wanted to.
-            <br>
-            The prometheus output will automatically be available on port 9273.
-            <br>
-            Influx needs to be configured via the respective environment variables:
-            https://github.com/sdr-enthusiasts/docker-telegraf-adsb
-            <br>
-            Please understand this is only meant for expert users, if you ask about this features
-            just know that we are reluctant to fully support this.  If you have questions about
-            influx / grafana / prometheus, try and use one of the non-adsb.im channels on the
-            SDR-E discord, they are better suited there.
-          </div>
+        <div class="col-8">
+          <label for="telegraf_adsb">
+            Generally unsupported option to enable telegraf in the image. Only enable this if you really
+            understand what you are doing.
+          </label>
         </div>
-        <div class="col-12 mt-2">
-          <button type="submit" class="btn btn-primary mx-auto w-100"
-            name="telegraf_adsb--{% if is_enabled('telegraf_adsb') %}disable{% else %}enable{% endif %}"
-            value="go">
-            {% if is_enabled('telegraf_adsb') %}Disable{% else %}Enable{% endif %} telegraf_adsb container
+        <div class="col-4">
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="telegraf_adsb" value="go">
+            Enable telegraf
           </button>
+        </div>
+      </div>
+      <div class="mt-2">
+        <span onclick="$('#telegraf_explain').toggleClass('d-none'); $(this).find('.toggle-icon').text($('#telegraf_explain').hasClass('d-none') ? '▶' : '▼'); return false;"
+              style="cursor: pointer;">
+          <span class="toggle-icon small">▶</span> <strong class="small">More information</strong>
+        </span>
+        <div class="small d-none mt-2" id="telegraf_explain">
+          If you just want basic prometheus statistics for grafana, there is no need to enable
+          this, basic metrics are always availabe using the same URL as the tar1090 map
+          interface with /metrics added.
+          <br>
+          For a normal setup or stage2 combined data this means just add a prometheus scrape job
+          with target 192.168.2.33:8080 (:1099 on app install).
+          <br>
+          For individual stage2 sites where the tar1090 map interface is available at :8080/2
+          for example, you will need to add metrics_path: /2/metrics.
+          <br>
+          Some people would like to feed data into influx or do fancy graphs with prometheus / grafana.
+          For this you can activate this container.
+          <br>
+          On a stage2 this will only cover combined data, adding more of this container for each
+          stage2 site is probably not gonna happen but you could run probably enable this
+          container for each individual site if you really wanted to.
+          <br>
+          The prometheus output will automatically be available on port 9273.
+          <br>
+          Influx needs to be configured via the respective environment variables:
+          https://github.com/sdr-enthusiasts/docker-telegraf-adsb
+          <br>
+          Please understand this is only meant for expert users, if you ask about this features
+          just know that we are reluctant to fully support this.  If you have questions about
+          influx / grafana / prometheus, try and use one of the non-adsb.im channels on the
+          SDR-E discord, they are better suited there.
         </div>
       </div>
     </form>
