@@ -152,7 +152,7 @@ class RPInative:
             return None
         try:
             temperature = float(output.strip())
-        except:
+        except Exception:
             return None
         return temperature
 
@@ -225,7 +225,7 @@ if __name__ == "__main__":
             try:
                 pin = int(arg)
                 break
-            except:
+            except Exception:
                 usage("can't parse pin number")
                 sys.exit(1)
 
@@ -251,19 +251,19 @@ if __name__ == "__main__":
         try:
             with open("/sys/firmware/devicetree/base/model", "r") as model_file:
                 model = model_file.read().strip().strip("\0")
-        except:
+        except Exception:
             model = None
         if model == "OrangePi Zero3":
             import OPi.GPIO as gpio
             import opi_dht22
 
-            if pin == None:
+            if pin is None:
                 pin = 9
             sensor = OPI(gpio, pin)
             logger.info(f"Running on {model}")
         # for Pi4 and 5 try the native app first, if that doesn't work, try the Python module
-        elif model != None and (model.startswith("Raspberry Pi 5") or model.startswith("Raspberry Pi 4")):
-            if pin == None:
+        elif model is not None and (model.startswith("Raspberry Pi 5") or model.startswith("Raspberry Pi 4")):
+            if pin is None:
                 pin = 4
             sensor = RPInative(pin)
             if sensor.success:
@@ -275,8 +275,8 @@ if __name__ == "__main__":
                 sensor = RPI(pin)
                 logger.info(f"Running legacy Python module on {model}")
         # other Raspberry Pi models just go with the Python code
-        elif model != None and model.startswith("Raspberry Pi"):
-            if pin == None:
+        elif model is not None and model.startswith("Raspberry Pi"):
+            if pin is None:
                 pin = 4
             import pigpio
             import rpi_dht22
@@ -296,12 +296,12 @@ if __name__ == "__main__":
             time.sleep(60)
             continue
         temperature = sensor.get_temperature()
-        if temperature != None:
+        if temperature is not None:
             output = {"cpu": ""}
             try:
                 with open("/sys/class/thermal/thermal_zone0/temp", "r") as cpu:
                     output["cpu"] = f"{int(cpu.read().strip()) / 1000:.0f}"
-            except:
+            except Exception:
                 pass
             output["ext"] = f"{temperature:.0f}"
             output["now"] = f"{int(time.time())}"
