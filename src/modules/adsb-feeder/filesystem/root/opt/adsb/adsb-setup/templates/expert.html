@@ -383,16 +383,19 @@
       <div class="row align-items-center">
         {% if not is_enabled('skystats') %}
         <div class="col-12 mb-2 mt-2">
+          SkyStats is a much extended ADS-B statistics package that provides more detailed data about the aircraft found
+          by the receiver, the most common types, the most common routes and airports, and a list of most interesting aircraft.
+          <br>
           <span onclick="$('#skystats_explain').toggleClass('d-none'); $(this).find('.toggle-icon').text($('#skystats_explain').hasClass('d-none') ? '▶' : '▼'); return false;"
                 style="cursor: pointer;">
             <span class="toggle-icon small">▶</span> <strong class="small">More information</strong>
           </span>
           <div class="small d-none mt-2" id="skystats_explain">
-            Skystats provides advanced statistics and analytics for aircraft tracking data.
-            <br>
-            It uses a PostgreSQL database to store and analyze aircraft positions, flights, and patterns.
-            <br>
-            The database will be stored at the configured data path (default: /opt/adsb/skystats-db).
+            Skystats uses a PostgreSQL database to store and analyze aircraft positions, flights, and patterns. This will
+            cause additional write activity on the system (which has otherwise been optimized for minimum disk writes). If
+            you are running this on an SBC with an SD card, this may cause wear on the card and could lead to reduced lifespan.
+            In the advanced configuration below, you can configure the database host, port, user, and password in order to run
+            that database on a different machine instead.
           </div>
         </div>
         <div class="col-8 my-1">
@@ -405,16 +408,19 @@
         </div>
         {% else %}
         <div class="col-12 mb-2 mt-2">
+          SkyStats is a much extended ADS-B statistics package that provides more detailed data about the aircraft found
+          by the receiver, the most common types, the most common routes and airports, and a list of most interesting aircraft.
+          <br>
           <span onclick="$('#skystats_explain').toggleClass('d-none'); $(this).find('.toggle-icon').text($('#skystats_explain').hasClass('d-none') ? '▶' : '▼'); return false;"
                 style="cursor: pointer;">
             <span class="toggle-icon small">▶</span> <strong class="small">More information</strong>
           </span>
           <div class="small d-none mt-2" id="skystats_explain">
-            Skystats provides advanced statistics and analytics for aircraft tracking data.
-            <br>
-            It uses a PostgreSQL database to store and analyze aircraft positions, flights, and patterns.
-            <br>
-            The database will be stored at the configured data path (default: /opt/adsb/skystats-db).
+            Skystats uses a PostgreSQL database to store and analyze aircraft positions, flights, and patterns. This will
+            cause additional write activity on the system (which has otherwise been optimized for minimum disk writes). If
+            you are running this on an SBC with an SD card, this may cause wear on the card and could lead to reduced lifespan.
+            In the advanced configuration below, you can configure the database host, port, user, and password in order to run
+            that database on a different machine instead.
           </div>
         </div>
         <div class="col-6 my-1">
