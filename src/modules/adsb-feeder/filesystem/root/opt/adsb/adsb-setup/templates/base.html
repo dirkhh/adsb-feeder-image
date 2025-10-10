@@ -60,15 +60,15 @@
       id="radiosonde-navbar-button"
       href="/radiosonde"><span class="icon-placeholder" data-icon="sonde"></span><span id="radiosonde-navbar-button-text">SONDE</span></a>
     {% if is_enabled('temperature_block') %}
-    <div id="temperature_block" style="height:auto;" class="d-none d-sm-block">
-      <span id="cpu" class="d-none"
-            style="float:left;width:45%;height:1em;font-size:0.6em;margin-left: 1px;">CPU</span>
-      <span id="ext" class=" d-none"
-            style="float:left;width:45%;height:1em;font-size:0.6em;margin-left: 1px;">EXT</span>
-      <span id="cpu_temp" class=" d-none"
-            style="float:left;width:45%;height:1em;font-size:0.6em;margin-left: 1px;"></span>
-      <span id="ext_temp" class="d-none"
-            style="float:left;width:45%;height:1em;font-size:0.6em;margin-left: 1px;"></span>
+    <div id="cpu_temp_block" class="d-none ms-0 me-1 mx-sm-1" style="line-height:0.9em;font-size:0.8em">
+      <span>CPU</span>
+      <br>
+      <span id="cpu_temp"</span>
+    </div>
+    <div id="ext_temp_block" class="d-none ms-0 me-1 mx-sm-1" style="line-height:0.9em;font-size:0.8em;">
+      <span>EXT</span>
+      <br>
+      <span id="ext_temp"</span>
     </div>
     {% endif %}
     <div class="mx-auto"><!-- filler element --></div>
@@ -530,11 +530,6 @@
     }
 
     function update_temp_block(cpu, ext, age) {
-      if (cpu == null && ext == null) {
-        $("#temperature_block").addClass('d-none');
-        $("#temperature_block").css('width', 0);
-        return;
-      }
       if (isNaN(age - 0)) {
         age = 1
       }
@@ -552,12 +547,9 @@
           "bad": "lightred"
         };
       }
-      $("#temperature_block").css('opacity', opacity);
-      $("#temperature_block").removeClass('d-none');
-      $("#temperature_block").css('width', '4em');
       if (cpu != null) {
-        $("#cpu").removeClass('d-none');
-        $("#cpu_temp").removeClass('d-none');
+        $("#cpu_temp_block").css('opacity', opacity);
+        $("#cpu_temp_block").removeClass('d-none');
         {% if is_enabled('freedom_units') %}
         cpu_text = Math.round(cpu * 1.8 + 32) + "°F";
         {% else %}
@@ -572,12 +564,11 @@
           $("#cpu_temp").css('color', color_palette["bad"]);
         }
       } else {
-        $("#cpu").addClass('d-none');
-        $("#cpu_temp").addClass('d-none');
+        $("#cpu_temp_block").addClass('d-none');
       }
       if (ext != null) {
-        $("#ext").removeClass('d-none');
-        $("#ext_temp").removeClass('d-none');
+        $("#ext_temp_block").css('opacity', opacity);
+        $("#ext_temp_block").removeClass('d-none');
         {% if is_enabled('freedom_units') %}
         ext_text = Math.round(ext * 1.8 + 32) + "°F";
         {% else %}
@@ -594,8 +585,7 @@
           $("#ext_temp").css('color', color_palette["bad"]);
         }
       } else {
-        $("#ext").addClass('d-none');
-        $("#ext_temp").addClass('d-none');
+        $("#ext_temp_block").addClass('d-none');
       }
     }
 
