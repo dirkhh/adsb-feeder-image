@@ -59,6 +59,7 @@
     <a class="btn btn-primary ms-0 me-1 mx-sm-1 nb-btn {% if not is_enabled('run_sonde') %}d-none{% endif %}"
       id="radiosonde-navbar-button"
       href="/radiosonde"><span class="icon-placeholder" data-icon="sonde"></span><span id="radiosonde-navbar-button-text">SONDE</span></a>
+    {% if is_enabled('temperature_block') %}
     <div id="temperature_block" style="height:auto;" class="d-none d-sm-block">
       <span id="cpu" class="d-none"
             style="float:left;width:45%;height:1em;font-size:0.6em;margin-left: 1px;">CPU</span>
@@ -69,6 +70,7 @@
       <span id="ext_temp" class="d-none"
             style="float:left;width:45%;height:1em;font-size:0.6em;margin-left: 1px;"></span>
     </div>
+    {% endif %}
     <div class="mx-auto"><!-- filler element --></div>
     <div class="mt-1 mx-1"><a href="https://ko-fi.com/H2H2H3JS5" target="_blank"><img height="2em" style="border:0.1em;height:1.8em;"
          src="/static/images/kofi_button_stroke_small.png" border="0" id="kofi-navbar-button"
@@ -510,6 +512,7 @@
       scheduleTask(check_mf_task, 15000);
     };
 
+    {% if is_enabled('temperature_block') %}
     let temperatureTask = {};
     temperatureTask.func = function() {
       let url = "/api/get_temperatures.json";
@@ -596,7 +599,6 @@
       }
     }
 
-    {% if is_enabled('temperature_block') %}
     registerTask(temperatureTask);
     {% endif %}
 

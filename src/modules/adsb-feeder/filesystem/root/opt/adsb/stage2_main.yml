@@ -81,6 +81,7 @@ services:
       - MLATHUB_ENABLE=${FEEDER_MLATHUB_ENABLE}
       # --------------------------------------------------
       # GRAPHS1090 (Decoder and System Status Web Page) parameters:
+      - GRAPHS1090_CPU_TEMP=${CPU_TEMPERATURE_PATH}
       # ambient temperature graph is temperature sensor is installed
       - GRAPHS1090_OTHER_TEMP1=${GRAPHS1090_OTHER_TEMP1}
       # The two 978 related parameters should only be included if you are running dump978 for UAT reception (USA only)

@@ -199,6 +199,7 @@ class Data:
         Env("_ADSBIM_STATE_DOCKER_CONCURRENT", default=True, tags=["docker_concurrent", "is_enabled"]),
         Env("_ADSBIM_STATE_TEMPERATURE_BLOCK", default=False, tags=["temperature_block", "is_enabled"]),
         Env("_ADSBIM_STATE_TEMP_SENSOR", default="", tags=["temp_sensor"]),
+        Env("CPU_TEMPERATURE_PATH", default="/sys/class/thermal/thermal_zone0/temp", tags=["cpu_temperature_path"]),
         Env("_ADSBIM_STATE_HAS_DHT22", default=False, tags=["has_dht22", "is_enabled"]),
         Env("_ADSBIM_STATE_FREEDOM_UNITS", default=False, tags=["freedom_units", "is_enabled"]),
         #

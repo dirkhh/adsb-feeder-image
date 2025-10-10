@@ -214,6 +214,9 @@ class AdsbIm:
         else:
             self._d.env_by_tags("rbthermalhack").value = ""
 
+        # make sure we show the temperature block if we have a temperature sensor
+        self._d.env_by_tags("temperature_block").value = os.path.exists(self._d.env_by_tags("cpu_temperature_path").value)
+
         # Ensure secure_image is set the new way if before the update it was set only as env variable
         if self._d.is_enabled("secure_image"):
             self.set_secure_image()
@@ -2347,7 +2350,7 @@ class AdsbIm:
                 timeout=20,
             )
             self._d.env_by_tags("graphs1090_other_temp1").value = ""
-            self._d.env_by_tags("temperature_block").value = False
+            self._d.env_by_tags("temperature_block").value = os.path.exists(self._d.env_by_tags("cpu_temperature_path").value)
             self._d.env_by_tags("has_dht22").value = False
             temp_sensor.value = ""
             return
@@ -4148,7 +4151,7 @@ class AdsbIm:
                 temperature_json["age"] = age
         except Exception:
             try:
-                with open("/sys/class/thermal/thermal_zone0/temp", "r") as cpu:
+                with open(self._d.env_by_tags("cpu_temperature_path").value, "r") as cpu:
                     temperature_json["cpu"] = f"{int(cpu.read().strip()) / 1000:.0f}"
                     temperature_json["age"] = 1
             except Exception:
