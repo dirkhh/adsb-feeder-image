@@ -60,15 +60,15 @@
       id="radiosonde-navbar-button"
       href="/radiosonde"><span class="icon-placeholder" data-icon="sonde"></span><span id="radiosonde-navbar-button-text">SONDE</span></a>
     {% if is_enabled('temperature_block') %}
-    <div id="cpu_temp_block" class="d-none ms-0 me-1 mx-sm-1" style="line-height:0.9em;font-size:0.8em">
+    <div id="cpu_temp_block" class="d-none ms-0 me-1 mx-sm-1" style="line-height:0.9em;font-size:0.7em">
       <span>CPU</span>
       <br>
-      <span id="cpu_temp"</span>
+      <span id="cpu_temp"></span>
     </div>
-    <div id="ext_temp_block" class="d-none ms-0 me-1 mx-sm-1" style="line-height:0.9em;font-size:0.8em;">
+    <div id="ext_temp_block" class="d-none ms-0 me-1 mx-sm-1" style="line-height:0.9em;font-size:0.7em;">
       <span>EXT</span>
       <br>
-      <span id="ext_temp"</span>
+      <span id="ext_temp"></span>
     </div>
     {% endif %}
     <div class="mx-auto"><!-- filler element --></div>
@@ -556,7 +556,7 @@
         cpu_text = cpu + "°C";
         {% endif %}
         $("#cpu_temp").text(cpu_text);
-        if (cpu < 50) {
+        if (cpu < 55) {
           $("#cpu_temp").css('color', color_palette["good"]);
         } else if (cpu < 80) {
           $("#cpu_temp").css('color', color_palette["warning"]);
