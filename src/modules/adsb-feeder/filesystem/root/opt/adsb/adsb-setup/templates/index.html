@@ -29,7 +29,7 @@
     {% endwith %}
   </div>
 <div class="alert alert-danger {% if env_value_by_tag('dns_state') %}d-none{% endif %}" role="alert">
-  The feeder cannot resolve DNS queries. This will most likely prevent it from working at all.
+  The feeder cannot resolve DNS queries. This will most likely prevent it from working at all. Try System -> Management -> Reboot to see if that will fix it.
 </div>
 <div class="alert alert-danger {% if not ipv6_broken %}d-none{% endif %}" role="alert">
   The feeder has an IPv6 address but IPv6 isn't working. This can cause docker and other issues.
