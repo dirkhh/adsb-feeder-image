@@ -4150,12 +4150,14 @@ class AdsbIm:
                 age = now - int(temperature_json.get("now", "0"))
                 temperature_json["age"] = age
         except Exception:
-            try:
-                with open(self._d.env_by_tags("cpu_temperature_path").value, "r") as cpu:
-                    temperature_json["cpu"] = f"{int(cpu.read().strip()) / 1000:.0f}"
+            pass
+        try:
+            with open(self._d.env_by_tags("cpu_temperature_path").value, "r") as cpu:
+                temperature_json["cpu"] = f"{int(cpu.read().strip()) / 1000:.0f}"
+                if temperature_json.get("age") is None:
                     temperature_json["age"] = 1
-            except Exception:
-                pass
+        except Exception:
+            pass
 
         return temperature_json
 

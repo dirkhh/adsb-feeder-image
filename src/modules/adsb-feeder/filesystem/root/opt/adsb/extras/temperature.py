@@ -297,12 +297,7 @@ if __name__ == "__main__":
             continue
         temperature = sensor.get_temperature()
         if temperature is not None:
-            output = {"cpu": ""}
-            try:
-                with open("/sys/class/thermal/thermal_zone0/temp", "r") as cpu:
-                    output["cpu"] = f"{int(cpu.read().strip()) / 1000:.0f}"
-            except Exception:
-                pass
+            output = {}
             output["ext"] = f"{temperature:.0f}"
             output["now"] = f"{int(time.time())}"
             # write to temp file and move in place
