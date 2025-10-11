@@ -6,13 +6,13 @@ import os
 import pathlib
 import re
 import secrets
-import requests
-import sys
-import time
 import subprocess
+import sys
 import tempfile
+import time
 import traceback
 
+import requests
 from flask import flash
 
 verbose = 0 if not os.path.exists("/opt/adsb/config/verbose") else int(open("/opt/adsb/config/verbose", "r").read().strip())
@@ -23,7 +23,8 @@ idhash = hashlib.md5(pathlib.Path("/etc/machine-id").read_text().encode()).hexdi
 
 def stack_info(msg=""):
     framenr = 0
-    for frame, filename, line_num, func, source_code, source_index in inspect.stack():
+    fname = ""
+    for _, filename, line_num, func, _, _ in inspect.stack():
         if framenr == 0:
             framenr += 1
             continue
@@ -58,7 +59,7 @@ def report_issue(msg):
     print_err(msg, level=1)
     try:
         flash(msg)
-    except:
+    except Exception:
         print_err(traceback.format_exc())
 
 
@@ -69,7 +70,7 @@ def is_email(text: str):
 
 # extend the truthy concept to exclude all non-empty string except a few specific ones ([Tt]rue, [Oo]n, 1)
 def is_true(value):
-    if type(value) == str:
+    if type(value) is str:
         return value.lower() in ["true", "on", "1"]
     return bool(value)
 
@@ -77,13 +78,13 @@ def is_true(value):
 def make_int(value):
     try:
         return int(value)
-    except:
+    except Exception:
         stack_info(f"ERROR: make_int({value}) - returning 0")
         return 0
 
 
 def generic_get_json(url: str, data=None, timeout=5.0):
-    requests.packages.urllib3.util.connection.HAS_IPV6 = False
+    requests.packages.urllib3.util.connection.HAS_IPV6 = False  # type: ignore[attr-defined]
     if "host.docker.internal" in url:
         url = url.replace("host.docker.internal", "localhost")
     # use image specific but random value for user agent to distinguish
@@ -92,7 +93,7 @@ def generic_get_json(url: str, data=None, timeout=5.0):
     status = -1
     try:
         response = requests.request(
-            method="GET" if data == None else "POST",
+            method="GET" if data is None else "POST",
             url=url,
             timeout=timeout,
             data=data,
@@ -109,8 +110,8 @@ def generic_get_json(url: str, data=None, timeout=5.0):
         requests.RequestException,
     ) as err:
         print_err(f"checking {url} failed: {err}")
-        status = err.errno
-    except:
+        status = err.errno if err.errno else -1
+    except Exception:
         # for some reason this didn't work
         print_err("checking {url} failed: reason unknown")
     else:
@@ -131,7 +132,7 @@ def create_fake_info(indices):
         if cpuinfo.is_dir():
             try:
                 cpuinfo.rmdir()
-            except:
+            except Exception:
                 pass
         if not cpuinfo.exists():
             with open("/proc/cpuinfo", "r") as ci_in, open(cpuinfo, "w") as ci_out:
@@ -159,12 +160,12 @@ def mf_get_ip_and_triplet(ip):
         # unless we are a stage2 getting data from a nanofeeder on localhost
         if ip == "local":
             # container to container connections we do directly, use nanofeeder
-            triplet = f"nanofeeder,30005,beast_in"
+            triplet = "nanofeeder,30005,beast_in"
             # this ip is used to talk to the python running on the host, use host.docker.internal
             ip = "host.docker.internal"
         elif ip == "local2":
             # container to container connections we do directly, use nanofeeder
-            triplet = f"nanofeeder_2,30005,beast_in"
+            triplet = "nanofeeder_2,30005,beast_in"
             # this ip is used to talk to the python running on the host, use host.docker.internal
             ip = "host.docker.internal"
         else:
@@ -182,7 +183,7 @@ def run_shell_captured(command="", timeout=1800):
             check=True,
             timeout=timeout,
         )
-    except subprocess.SubprocessError as e:
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
         # something went wrong
         output = ""
         if e.stdout:
@@ -190,12 +191,16 @@ def run_shell_captured(command="", timeout=1800):
         if e.stderr:
             output += e.stderr.decode()
         return (False, output)
+    except Exception as e:
+        # catch any other unexpected exceptions
+        print_err(f"run_shell_captured: unexpected exception {e}")
+        return (False, str(e))
 
     output = result.stdout.decode()
     return (True, output)
 
 
-def string2file(path=None, string=None, verbose=False):
+def string2file(path: str = "", string: str = "", verbose: bool = False):
     try:
         fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path))
         with os.fdopen(fd, "w") as file:
@@ -210,7 +215,7 @@ def string2file(path=None, string=None, verbose=False):
 
 
 def get_plain_url(plain_url, method="GET", data=None):
-    requests.packages.urllib3.util.connection.HAS_IPV6 = False
+    requests.packages.urllib3.util.connection.HAS_IPV6 = False  # type: ignore[attr-defined]
     status = -1
     headers = {
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/117.0",
@@ -235,8 +240,8 @@ def get_plain_url(plain_url, method="GET", data=None):
         requests.RequestException,
     ) as err:
         print_err(f"checking {plain_url} failed: {err}")
-        status = err.errno
-    except:
+        status = err.errno if err.errno else -1
+    except Exception:
         print_err("checking {plain_url} failed: {traceback.format_exc()}")
     else:
         return response.text, response.status_code

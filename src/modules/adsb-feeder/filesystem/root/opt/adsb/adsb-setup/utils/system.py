@@ -1,10 +1,10 @@
-import os
-import requests
 import socket
 import subprocess
 import threading
 import time
 from time import sleep
+
+import requests
 
 from .data import Data
 from .util import print_err, run_shell_captured
@@ -42,7 +42,7 @@ class Restart:
     def bg_run(self, cmdline=None, func=None, silent=False):
 
         if not cmdline and not func:
-            print_err(f"WARNING: bg_run called without something to do")
+            print_err("WARNING: bg_run called without something to do")
             return False
 
         gotLock = self.lock.acquire(blocking=False)
@@ -94,17 +94,17 @@ class System:
         self._restart = Restart(self._restart_lock)
         self._d = data
 
-        self.gateway_ips = None
+        self.gateway_ips: list[str] | None = None
 
         self.containerCheckLock = threading.RLock()
-        self.lastContainerCheck = 0
-        self.dockerPsCache = dict()
+        self.lastContainerCheck: float = 0.0
+        self.dockerPsCache: dict[str, str] = dict()
 
     @property
     def restart(self):
         return self._restart
 
-    def shutdown_action(self, action="", delay=0):
+    def shutdown_action(self, action="", delay: float = 0.0):
         if action == "shutdown":
             cmd = "shutdown now"
         elif action == "reboot":
@@ -146,7 +146,7 @@ class System:
                 # if i[0] is socket.AddressFamily.AF_INET
                 # and i[1] is socket.SocketKind.SOCK_RAW
             )
-        except:
+        except Exception:
             return False
         return responses != list()
 
@@ -169,7 +169,7 @@ class System:
         return True
 
     def check_ip(self):
-        requests.packages.urllib3.util.connection.HAS_IPV6 = False
+        requests.packages.urllib3.util.connection.HAS_IPV6 = False  # type: ignore[attr-defined]
         status = -1
         try:
             response = requests.get(
@@ -185,8 +185,8 @@ class System:
             requests.Timeout,
             requests.RequestException,
         ) as err:
-            status = err.errno
-        except:
+            status = err.errno if err.errno else -1
+        except Exception:
             status = -1
         else:
             return response.text, response.status_code
@@ -220,7 +220,7 @@ class System:
                 s.connect((ip, 2947))
                 print_err(f"Connected to gpsd on {ip}:2947")
                 return True
-            except socket.error as e:
+            except socket.error:
                 print_err(f"No gpsd on {ip}:2947 detected")
             finally:
                 s.close()
@@ -247,7 +247,7 @@ class System:
         print_err(f"restarting {containers}")
         try:
             subprocess.run(["/opt/adsb/docker-compose-adsb", "restart"] + containers)
-        except:
+        except Exception:
             print_err("docker compose restart failed")
 
     def recreate_containers(self, containers):
@@ -255,21 +255,21 @@ class System:
         try:
             subprocess.run(["/opt/adsb/docker-compose-adsb", "down", "--remove-orphans", "-t", "30"] + containers)
             subprocess.run(["/opt/adsb/docker-compose-adsb", "up", "-d", "--force-recreate", "--remove-orphans"] + containers)
-        except:
+        except Exception:
             print_err("docker compose recreate failed")
 
     def stop_containers(self, containers: list[str]):
         print_err(f"stopping {containers}")
         try:
             subprocess.run(["/opt/adsb/docker-compose-adsb", "down", "-t", "30"] + containers)
-        except:
+        except Exception:
             print_err(f"docker compose down {containers} failed")
 
     def start_containers(self):
         print_err("starting all containers")
         try:
             subprocess.run(["/opt/adsb/docker-compose-start"])
-        except:
+        except Exception:
             print_err("docker compose start failed")
 
     def refreshDockerPs(self):
@@ -316,7 +316,7 @@ class System:
                     up, number, unit = status.split(" ")
                     # container up for some number of seconds, return how long it's been up
                     return f"up for {int(number)}"
-                except:
+                except Exception:
                     print_err(f"issue parsing container status: {status}")
 
             return "up"

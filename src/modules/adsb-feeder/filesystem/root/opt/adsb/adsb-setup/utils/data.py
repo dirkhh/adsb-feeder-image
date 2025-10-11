@@ -2,18 +2,19 @@
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from utils.config import read_values_from_env_file
+
 from .environment import Env
 from .netconfig import NetConfig
 from .util import is_true, print_err
-from utils.config import read_values_from_env_file
 
 
 @dataclass
 class Data:
-    def __new__(cc):
-        if not hasattr(cc, "instance"):
-            cc.instance = super(Data, cc).__new__(cc)
-        return cc.instance
+    def __new__(cls):
+        if not hasattr(cls, "instance"):
+            cls.instance = super(Data, cls).__new__(cls)
+        return cls.instance
 
     data_path = Path("/opt/adsb")
     config_path = data_path / "config"
@@ -25,8 +26,8 @@ class Data:
     is_feeder_image = True
     _env_by_tags_dict: dict[tuple[str, ...], Env] = field(default_factory=dict[tuple[str, ...], Env])
 
-    ultrafeeder = []
-    previous_version = ""
+    ultrafeeder: list = []
+    previous_version: str = ""
 
     _proxy_routes = [
         # endpoint, port, url_path
@@ -56,8 +57,13 @@ class Data:
     def proxy_routes(self):
         ret = []
         for [endpoint, _env, path] in self._proxy_routes:
-            env = "AF_" + _env.upper() + "_PORT"
-            port = self.env(env).value
+            env_name = "AF_" + _env.upper() + "_PORT"
+            env = self.env(env_name)
+            if env is None:
+                print_err(f"env {env_name} is not a known Env variable")
+                continue
+            assert env is not None
+            port = env.value
             ret.append([endpoint, port, path])
             if endpoint in [
                 "/fr24/",
@@ -73,9 +79,9 @@ class Data:
                 # this is passed to the URL handling function in flask.py
                 # this function will add (inc_port * 1000) to the port
                 if endpoint[-1] == "/":
-                    ret.append([endpoint[:-1] + f"_<int:inc_port>/", port, path])
+                    ret.append([endpoint[:-1] + "_<int:inc_port>/", port, path])
                 else:
-                    ret.append([endpoint + f"_<int:inc_port>", port, path])
+                    ret.append([endpoint + "_<int:inc_port>", port, path])
             if endpoint in [
                 "/map/",
                 "/stats/",
@@ -85,9 +91,9 @@ class Data:
                 # this is passed to the URL handling function in flask.py
                 # this function will insert /idx into the URL after the domain
                 if endpoint[-1] == "/":
-                    ret.append([endpoint[:-1] + f"_<int:idx>/", port, path])
+                    ret.append([endpoint[:-1] + "_<int:idx>/", port, path])
                 else:
-                    ret.append([endpoint + f"_<int:idx>", port, path])
+                    ret.append([endpoint + "_<int:idx>", port, path])
         return ret
 
     # these are the default values for the env file
@@ -543,7 +549,7 @@ class Data:
         Env(
             "_ADSBIM_STATE_ALIVE_MAP_LINK",
             default=[""],
-            tags="alivemaplink",
+            tags=["alivemaplink"],
         ),
         Env(
             "_ADSBIM_STATE_IS_ULTRAFEEDER_TAT_ENABLED",
@@ -818,7 +824,8 @@ class Data:
             # this also defaults to key for the airspy and sdrplay container
             tag = tag_for_name.get(key, key)
             entry = Env(key, tags=[tag, "container", "norestore"])
-            entry.value = value  # always use value from docker.image.versions as definitive source
+            # always use value from docker.image.versions as definitive source
+            entry.value = value
             _env.add(entry)  # add to _env set
 
     @property
@@ -841,20 +848,21 @@ class Data:
 
         def adjust_heywhatsthat(value):
             enabled = self.env_by_tags(["heywhatsthat", "is_enabled"])._value
+            assert isinstance(enabled, list), f"heywhatsthat is not a list: {enabled}"
             new_value = []
             for i in range(len(value)):
                 new_value.append(value[i] if enabled[i] else "")
             return new_value
 
         def value_for_env(e, value):
-            if type(value) == bool or "is_enabled" in e.tags:
+            if type(value) is bool or "is_enabled" in e.tags:
                 value = adjust_bool(e, value)
 
             # the env vars have no concept of None, convert to empty string
-            if value == None or value == "None":
+            if value is None or value == "None":
                 value = ""
 
-            if type(value) == str:
+            if type(value) is str:
                 # remove spaces
                 value = value.strip()
 
@@ -878,7 +886,7 @@ class Data:
                         level=2,
                     )
 
-            if type(e._value) == list:
+            if type(e._value) is list:
                 if e._name == "FEEDER_HEYWHATSTHAT_ID":
                     actual_value = adjust_heywhatsthat(e._value)
                 else:
@@ -904,12 +912,12 @@ class Data:
         # fmt: off
         ret["AF_FALSE_ON_STAGE2"] = "false" if self.is_enabled(["stage2"]) else "true"
         if self.is_enabled(["stage2"]):
-            for i in range(1, self.env_by_tags("num_micro_sites").value + 1):
-                ret[f"AF_TAR1090_PORT_{i}"] = int(ret[f"AF_TAR1090_PORT"]) + i * 1000
-                ret[f"AF_PIAWAREMAP_PORT_{i}"] = int(ret[f"AF_PIAWAREMAP_PORT"]) + i * 1000
-                ret[f"AF_PIAWARESTAT_PORT_{i}"] = int(ret[f"AF_PIAWARESTAT_PORT"]) + i * 1000
-                ret[f"AF_FLIGHTRADAR_PORT_{i}"] = int(ret[f"AF_FLIGHTRADAR_PORT"]) + i * 1000
-                ret[f"AF_PLANEFINDER_PORT_{i}"] = int(ret[f"AF_PLANEFINDER_PORT"]) + i * 1000
+            for i in range(1, self.env_by_tags("num_micro_sites").valueint + 1):
+                ret[f"AF_TAR1090_PORT_{i}"] = int(ret["AF_TAR1090_PORT"]) + i * 1000
+                ret[f"AF_PIAWAREMAP_PORT_{i}"] = int(ret["AF_PIAWAREMAP_PORT"]) + i * 1000
+                ret[f"AF_PIAWARESTAT_PORT_{i}"] = int(ret["AF_PIAWARESTAT_PORT"]) + i * 1000
+                ret[f"AF_FLIGHTRADAR_PORT_{i}"] = int(ret["AF_FLIGHTRADAR_PORT"]) + i * 1000
+                ret[f"AF_PLANEFINDER_PORT_{i}"] = int(ret["AF_PLANEFINDER_PORT"]) + i * 1000
                 site_name = self.env_by_tags("site_name").list_get(i)
                 ret[f"GRAPHS1090_WWW_TITLE_{i}"] = f"{site_name} graphs1090 stats"
                 ret[f"GRAPHS1090_WWW_HEADER_{i}"] = f"Performance Graphs: {site_name}"
@@ -929,24 +937,25 @@ class Data:
         for e in self._env:
             if e.name == name:
                 return e
-        return None
+        print_err(f"ERROR:env {name} not found")
+        return Env(name, default=[""])
 
     # helper function to find env by tags
     # Return only if there is one env with all the tags,
     # Raise error if there are more than one match
-    def env_by_tags(self, _tags):
-        if type(_tags) == str:
+    def env_by_tags(self, _tags) -> Env:
+        if type(_tags) is str:
             tags = [_tags]
-        elif type(_tags) == list:
+        elif type(_tags) is list:
             tags = _tags
         else:
             raise Exception(f"env_by_tags called with invalid argument {_tags} of type {type(_tags)}")
         if not tags:
-            raise Exception(f"env_by_tags called with no tags")
+            raise Exception("env_by_tags called with no tags")
 
         # make the list a tuple so it's hashable
-        tags = tuple(tags)
-        cached = self._env_by_tags_dict.get(tags)
+        tags_tuple = tuple(tags)
+        cached = self._env_by_tags_dict.get(tags_tuple)
         if cached:
             return cached
 
@@ -963,7 +972,7 @@ class Data:
             for e in matches:
                 print_err(f"  {e}")
 
-        self._env_by_tags_dict[tags] = matches[0]
+        self._env_by_tags_dict[tags_tuple] = matches[0]
         return matches[0]
 
     def _get_enabled_env_by_tags(self, tags):
@@ -973,19 +982,19 @@ class Data:
         return self.env_by_tags(tags)
 
     # helper function to see if something is enabled
-    def is_enabled(self, tags):
-        if type(tags) != list:
+    def is_enabled(self, tags) -> bool:
+        if type(tags) is not list:
             tags = [tags]
         e = self._get_enabled_env_by_tags(tags)
-        if type(e._value) == list:
+        if type(e._value) is list:
             ret = e and is_true(e.list_get(0))
             print_err(f"is_enabled called on list: {e}[0] = {ret}")
             return ret
         return e and is_true(e._value)
 
     # helper function to see if list element is enabled
-    def list_is_enabled(self, tags, idx):
-        if type(tags) != list:
+    def list_is_enabled(self, tags, idx) -> bool:
+        if type(tags) is not list:
             tags = [tags]
         e = self._get_enabled_env_by_tags(tags)
         ret = is_true(e.list_get(idx)) if e else False

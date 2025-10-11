@@ -1,6 +1,9 @@
 import re
 import subprocess
+from typing import Optional
+
 from flask import flash
+
 from .system import System
 from .util import is_email, make_int, print_err, report_issue
 
@@ -10,7 +13,7 @@ class Aggregator:
         self,
         name: str,
         system: System,
-        tags: list = None,
+        tags: list = [],
     ):
         self._name = name
         self._tags = tags
@@ -52,13 +55,13 @@ class Aggregator:
 
     @property
     def container(self):
-        return self._d.env_by_tags(self.tags + ["container"]).value
+        return self._d.env_by_tags(self.tags + ["container"]).valuestr
 
     @property
     def is_enabled(self, idx=0):
         return self._d.env_by_tags(self._enabled_tags).list_get(self._idx)
 
-    def _activate(self, user_input: str, idx: 0):
+    def _activate(self, user_input: str, idx: int):
         raise NotImplementedError
 
     def _deactivate(self):
@@ -68,7 +71,7 @@ class Aggregator:
         print_err(f"download_docker_container {container}")
         cmdline = f"docker pull {container}"
         try:
-            result = subprocess.run(cmdline, timeout=180.0, shell=True)
+            subprocess.run(cmdline, timeout=180.0, shell=True, check=False)
         except subprocess.TimeoutExpired:
             return False
         return True
@@ -76,7 +79,7 @@ class Aggregator:
     def _docker_run_with_timeout(self, cmdline: str, timeout: float) -> str:
         def force_remove_container(name):
             try:
-                result2 = subprocess.run(
+                subprocess.run(
                     f"docker rm -f {name}",
                     timeout=15,
                     shell=True,
@@ -87,6 +90,7 @@ class Aggregator:
 
         # let's make sure the container isn't still there, if it is the docker run won't work
         force_remove_container("temp_container")
+        output = ""
         try:
             result = subprocess.run(
                 f"docker run --name temp_container {cmdline}",
@@ -98,14 +102,14 @@ class Aggregator:
         except subprocess.TimeoutExpired as exc:
             # for several of these containers "timeout" is actually the expected behavior;
             # they don't stop on their own. So just grab the output and kill the container
-            print_err(f"docker run {cmdline} received a timeout error after {timeout} with output {exc.stdout}")
-            output = exc.stdout.decode()
+            output = exc.stdout.decode() if exc.stdout else ""
+            print_err(f"docker run {cmdline} received a timeout error after {timeout} with output {output}")
 
             force_remove_container("temp_container")
         except subprocess.SubprocessError as exc:
             print_err(f"docker run {cmdline} ended with an exception {exc}")
         else:
-            output = result.stdout
+            output = result.stdout if result.stdout else ""
             print_err(f"docker run {cmdline} completed with output {output}")
         return output
 
@@ -236,6 +240,8 @@ class FlightRadar24(Aggregator):
         if not user_input:
             return False
         input_values = user_input.count("::")
+        adsb_sharing_key: Optional[str] = None
+        uat_sharing_key: Optional[str] = None
         if input_values > 1:
             return False
         elif input_values == 1:
@@ -248,7 +254,7 @@ class FlightRadar24(Aggregator):
         self._idx = make_int(idx)  # this way the properties work correctly
         print_err(f"FR_activate adsb |{adsb_sharing_key}| uat |{uat_sharing_key}| idx |{idx}|")
 
-        if is_email(adsb_sharing_key):
+        if adsb_sharing_key and is_email(adsb_sharing_key):
             # that's an email address, so we are looking to get a sharing key
             adsb_sharing_key = self._request_fr24_sharing_key(adsb_sharing_key)
             print_err(f"got back sharing_key |{adsb_sharing_key}|")
@@ -256,7 +262,7 @@ class FlightRadar24(Aggregator):
             adsb_sharing_key = None
             report_issue("invalid FR24 sharing key")
 
-        if is_email(uat_sharing_key):
+        if uat_sharing_key and is_email(uat_sharing_key):
             # that's an email address, so we are looking to get a sharing key
             uat_sharing_key = self._request_fr24_uat_sharing_key(uat_sharing_key)
             print_err(f"got back uat_sharing_key |{uat_sharing_key}|")
@@ -337,7 +343,7 @@ class RadarBox(Aggregator):
         )
 
     def _request_rb_sharing_key(self, idx):
-        docker_image = self._d.env_by_tags(["radarbox", "container"]).value
+        docker_image = self._d.env_by_tags(["radarbox", "container"]).valuestr
 
         if not self._download_docker_container(docker_image):
             report_issue("failed to download the AirNav Radar docker image")
@@ -346,7 +352,7 @@ class RadarBox(Aggregator):
         suffix = f"_{idx}" if idx else ""
         # make sure we correctly enable the hacks
         extra_env = f"-v /opt/adsb/rb/cpuinfo{suffix}:/proc/cpuinfo "
-        if self._d.env_by_tags("rbthermalhack").value != "":
+        if self._d.env_by_tags("rbthermalhack").valuestr != "":
             extra_env += "-v /opt/adsb/rb:/sys/class/thermal:ro "
 
         cmdline = (
@@ -387,7 +393,7 @@ class OpenSky(Aggregator):
         )
 
     def _request_fr_serial(self, user):
-        docker_image = self._d.env_by_tags(["opensky", "container"]).value
+        docker_image = self._d.env_by_tags(["opensky", "container"]).valuestr
 
         if not self._download_docker_container(docker_image):
             report_issue("failed to download the OpenSky docker image")
@@ -411,10 +417,10 @@ class OpenSky(Aggregator):
         serial, user = user_input.split("::")
         print_err(f"passed in {user_input} seeing user |{user}| and serial |{serial}|")
         if not user:
-            print_err(f"missing user name for OpenSky")
+            print_err("missing user name for OpenSky")
             return False
         if not serial:
-            print_err(f"need to request serial for OpenSky")
+            print_err("need to request serial for OpenSky")
             serial = self._request_fr_serial(user)
             if not serial:
                 print_err("failed to get OpenSky serial")
@@ -474,10 +480,10 @@ class Sdrmap(Aggregator):
         password, user = user_input.split("::")
         print_err(f"passed in {user_input} seeing user |{user}| and password |{password}|")
         if not user:
-            print_err(f"missing user name for sdrmap")
+            print_err("missing user name for sdrmap")
             return False
         if not password:
-            print_err(f"missing password for sdrmap")
+            print_err("missing password for sdrmap")
             return False
         self._d.env_by_tags(self.tags + ["user"]).list_set(idx, user)
         self._d.env_by_tags(self.tags + ["key"]).list_set(idx, password)

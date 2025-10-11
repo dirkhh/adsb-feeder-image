@@ -1,5 +1,6 @@
 from uuid import uuid4
-from utils.util import is_true, print_err, mf_get_ip_and_triplet
+
+from utils.util import is_true, mf_get_ip_and_triplet, print_err
 
 
 class NetConfig:
@@ -8,7 +9,7 @@ class NetConfig:
         self.mlat_config = mlat_config
         self._has_policy = has_policy
 
-    def generate(self, mlat_privacy: bool = True, uuid: str = None, mlat_enable: bool = True):
+    def generate(self, mlat_privacy: bool = True, uuid: str = "", mlat_enable: bool = True):
         adsb_line = self.adsb_config
         mlat_line = self.mlat_config
 
@@ -41,7 +42,7 @@ class UltrafeederConfig:
         # should feed any aggregators themselves
         aggregator_selection = self._d.env_by_tags("aggregator_choice").value
         print_err(
-            f"enabled_aggregators for {self._micro} with agg_sel {aggregator_selection} and stage2 {self._d.is_enabled('stage2')}",
+            f"enabled_aggregators for {self._micro} with agg_sel {aggregator_selection}, stage2 {self._d.is_enabled('stage2')}",
             level=8,
         )
         # be careful to set the correct values for the individual aggregators;
@@ -147,7 +148,7 @@ class UltrafeederConfig:
                 ret.add("adsb,sdrplay-beast1090,30005,beast_in")
 
             if self._d.list_is_enabled("uat978", self._micro):
-                ret.add(f"adsb,dump978,30978,uat_in")
+                ret.add("adsb,dump978,30978,uat_in")
 
         # finally, add user provided things
         ultrafeeder_extra_args = self._d.env_by_tags("ultrafeeder_extra_args").value
@@ -171,8 +172,8 @@ class UltrafeederConfig:
             ret.add("gpsd,host.docker.internal,2947")
 
         # generate sorted listed for deterministic env var (avoid unnecessary container recreation by docker compose)
-        ret = sorted(ret)
+        sorted_ret = sorted(ret)
 
-        print_err(f"ended up with Ultrafeeder args {ret}")
+        print_err(f"ended up with Ultrafeeder args {sorted_ret}")
 
-        return ";".join(ret)
+        return ";".join(sorted_ret)

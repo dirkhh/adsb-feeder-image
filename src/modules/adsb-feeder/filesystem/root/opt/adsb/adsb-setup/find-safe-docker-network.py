@@ -9,8 +9,8 @@ for arg in sys.argv[1:]:
     try:
         cidr = ipaddress.ip_network(arg, strict=False)
         in_use.append(cidr)
-    except:
-        print(f"skipping {cidr}")
+    except Exception:
+        print(f"skipping {arg}")
         pass
 
 # start with three of the usual suspects and then for good measure add a few more dozen in the 10.x.x.x range

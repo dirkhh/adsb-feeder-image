@@ -32,7 +32,6 @@ class DNSHandler(socketserver.BaseRequestHandler):
         # Filter only those questions, which have QTYPE=A and QCLASS=IN
         accepted_questions = []
         for question in all_questions:
-            name = str(b".".join(question["name"]), encoding="UTF-8")
             if question["qtype"] == b"\x00\x01" and question["qclass"] == b"\x00\x01":
                 accepted_questions.append(question)
 
@@ -55,7 +54,7 @@ class DNSHandler(socketserver.BaseRequestHandler):
         pointer = DNS_HEADER_LENGTH
         # Read each question section
         for i in range(n):
-            question = {
+            question: dict = {
                 "name": [],
                 "qtype": "",
                 "qclass": "",

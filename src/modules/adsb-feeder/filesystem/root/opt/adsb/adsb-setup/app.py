@@ -9,28 +9,42 @@ import pathlib
 import pickle
 import platform
 import re
-import shlex
-import requests
 import secrets
-import signal
+import shlex
 import shutil
+import signal
 import string
 import subprocess
+import sys
+import tempfile
 import threading
 import time
-import tempfile
 import traceback
-from uuid import uuid4
-import sys
 import zipfile
 from base64 import b64encode
+from copy import deepcopy
 from datetime import datetime, timezone
 from os import urandom
 from time import sleep
 from typing import Dict, List, Tuple
+from uuid import uuid4
 from zlib import compress
-from copy import deepcopy
 
+import requests
+from flask import (
+    Flask,
+    Response,
+    flash,
+    make_response,
+    redirect,
+    render_template,
+    request,
+    send_file,
+    url_for,
+)
+from flask.logging import logging as flask_logging  # pyright: ignore[reportPrivateImportUsage]  # noqa: F401
+from utils.agg_status import AggStatus, Healthcheck, ImStatus
+from utils.background import Background
 from utils.config import (
     config_lock,
     log_consistency_warning,
@@ -39,28 +53,10 @@ from utils.config import (
     write_values_to_config_json,
     write_values_to_env_file,
 )
-from utils.util import create_fake_info, make_int, print_err, report_issue, mf_get_ip_and_triplet, string2file
-from utils.wifi import Wifi
-
-# nofmt: on
-# isort: off
-from flask import (
-    Flask,
-    flash,
-    make_response,
-    redirect,
-    render_template,
-    request,
-    Response,
-    send_file,
-    url_for,
-)
-
-
 from utils.data import Data
 from utils.environment import Env
 from utils.flask import RouteManager, check_restart_lock
-from utils.netconfig import NetConfig, UltrafeederConfig
+from utils.netconfig import UltrafeederConfig
 from utils.other_aggregators import (
     ADSBHub,
     FlightAware,
@@ -70,36 +66,31 @@ from utils.other_aggregators import (
     PlaneWatch,
     RadarBox,
     RadarVirtuel,
-    Uk1090,
     Sdrmap,
+    Uk1090,
 )
-from utils.sdr import SDR, SDRDevices
-from utils.agg_status import AggStatus, ImStatus, Healthcheck
+from utils.sdr import SDRDevices
 from utils.system import System
 from utils.util import (
     cleanup_str,
+    create_fake_info,
     generic_get_json,
     is_true,
-    print_err,
-    stack_info,
-    verbose,
     make_int,
+    mf_get_ip_and_triplet,
+    print_err,
+    report_issue,
     run_shell_captured,
+    string2file,
+    verbose,
 )
-from utils.background import Background
 from utils.wifi import Wifi
-
-# nofmt: off
-# isort: on
-
 from werkzeug.utils import secure_filename
-
-from flask.logging import logging as flask_logging
 
 
 # don't log static assets
 class NoStatic(flask_logging.Filter):
-    def filter(record):
+    def filter(self, record) -> bool:
         msg = record.getMessage()
         if "GET /static/" in msg:
             return False
@@ -109,7 +100,7 @@ class NoStatic(flask_logging.Filter):
         return True
 
 
-flask_logging.getLogger("werkzeug").addFilter(NoStatic)
+flask_logging.getLogger("werkzeug").addFilter(NoStatic())
 
 
 class AdsbIm:
@@ -191,8 +182,8 @@ class AdsbIm:
         for i in [0] + self.micro_indices():
             self._d.ultrafeeder.append(UltrafeederConfig(data=self._d, micro=i))
 
-        self.last_dns_check = 0
-        self.undervoltage_epoch = 0
+        self.last_dns_check: float = 0.0
+        self.undervoltage_epoch: float = 0.0
 
         self._current_site_name = None
         self._agg_status_instances = dict()
@@ -205,7 +196,7 @@ class AdsbIm:
 
         self._multi_outline_bg = None
 
-        self.lastSetGainWrite = 0
+        self.lastSetGainWrite = 0.0
 
         # no one should share a CPU serial with AirNav, so always create fake cpuinfo;
         # also identify if we would use the thermal hack for RB and Ultrafeeder
@@ -215,7 +206,7 @@ class AdsbIm:
             self._d.env_by_tags("rbthermalhack").value = ""
 
         # make sure we show the temperature block if we have a temperature sensor
-        self._d.env_by_tags("temperature_block").value = os.path.exists(self._d.env_by_tags("cpu_temperature_path").value)
+        self._d.env_by_tags("temperature_block").value = os.path.exists(self._d.env_by_tags("cpu_temperature_path").valuestr)
 
         # Ensure secure_image is set the new way if before the update it was set only as env variable
         if self._d.is_enabled("secure_image"):
@@ -234,7 +225,7 @@ class AdsbIm:
             "sdrmap--submit": Sdrmap(self._system),
         }
         # fmt: off
-        self.all_aggregators = [
+        self.all_aggregators: list = [
             # tag, name, map link, status link, table number
             ["adsblol", "adsb.lol", "https://adsb.lol/", ["https://api.adsb.lol/0/me"], 0],
             ["flyitaly", "Fly Italy ADSB", "https://mappa.flyitalyadsb.com/", ["https://my.flyitalyadsb.com/am_i_feeding"], 0],
@@ -258,7 +249,7 @@ class AdsbIm:
         ]
         self.agg_matrix = None
         self.agg_structure = []
-        self.last_cache_agg_status = 0
+        self.last_cache_agg_status = 0.0
         self.ci = False
         self.cache_agg_status_lock = threading.Lock()
         self.miscLock = threading.Lock()
@@ -330,7 +321,7 @@ class AdsbIm:
         self.app.add_url_rule("/api/stats", "stats", self.stats)
         self.app.add_url_rule("/api/micro_settings", "micro_settings", self.micro_settings)
         self.app.add_url_rule("/api/check_remote_feeder/<ip>", "check_remote_feeder", self.check_remote_feeder)
-        self.app.add_url_rule(f"/api/status/<agg>", "beast", self.agg_status)
+        self.app.add_url_rule("/api/status/<agg>", "beast", self.agg_status)
         self.app.add_url_rule("/api/stage2_connection", "stage2_connection", self.stage2_connection)
         self.app.add_url_rule("/api/get_temperatures.json", "temperatures", self.temperatures)
         self.app.add_url_rule("/api/ambient_raw", "ambient_raw", self.ambient_raw)
@@ -338,9 +329,9 @@ class AdsbIm:
         self.app.add_url_rule("/api/mark_changelog_seen", "mark_changelog_seen", self.mark_changelog_seen, methods=["POST"])
         self.app.add_url_rule("/api/scan_wifi", "scan_wifi", self.scan_wifi)
         self.app.add_url_rule("/api/closest_airport/<lat>/<lon>", "closest_airport", self.closest_airport)
-        self.app.add_url_rule(f"/feeder-update-<channel>", "feeder-update", self.feeder_update)
-        self.app.add_url_rule(f"/get-logs", "get-logs", self.get_logs)
-        self.app.add_url_rule(f"/view-logs", "view-logs", self.view_logs)
+        self.app.add_url_rule("/feeder-update-<channel>", "feeder-update", self.feeder_update)
+        self.app.add_url_rule("/get-logs", "get-logs", self.get_logs)
+        self.app.add_url_rule("/view-logs", "view-logs", self.view_logs)
         # fmt: on
         self.update_boardname()
         self.update_version()
@@ -353,8 +344,8 @@ class AdsbIm:
 
         self.load_planes_seen_per_day()
 
-        while len(self._d.env_by_tags("site_name").value) > self._d.env_by_tags("num_micro_sites").valueint + 1:
-            actual_len = len(self._d.env_by_tags("site_name").value)
+        while len(self._d.env_by_tags("site_name").valuestr) > self._d.env_by_tags("num_micro_sites").valueint + 1:
+            actual_len = len(self._d.env_by_tags("site_name").valuestr)
             nominal_len = self._d.env_by_tags("num_micro_sites").valueint + 1
             print_err(f"BAD CONFIG STATE, site_name list too long {actual_len} > {nominal_len}, removing one element")
             self._d.env_by_tags("site_name").list_remove()
@@ -402,7 +393,7 @@ class AdsbIm:
                             capture_output=True,
                             text=True,
                         ).stdout.strip()
-                    except:
+                    except Exception:
                         pass
                     if prod or manufacturer:
                         board = f"Native on {manufacturer} {prod} {platform.machine()} system"
@@ -454,7 +445,7 @@ class AdsbIm:
                     if line.startswith("MemTotal:"):
                         self._memtotal = make_int(line.split()[1])
                         break
-        except:
+        except Exception:
             pass
 
     def update_journal_state(self):
@@ -466,7 +457,7 @@ class AdsbIm:
                 "systemd-analyze cat-config systemd/journald.conf", shell=True, capture_output=True, timeout=2.0
             )
             config = result.stdout.decode("utf-8")
-        except:
+        except Exception:
             config = "Storage=auto"
         for line in config:
             if line.startswith("Storage=volatile"):
@@ -665,7 +656,7 @@ class AdsbIm:
                     print_err("USB current limited to 600mA, this is only sufficient for a single SDR")
                     return True
                 return False
-        except:
+        except Exception:
             return False
 
     def monitor_dmesg(self):
@@ -679,7 +670,7 @@ class AdsbIm:
                     stdin=subprocess.PIPE,
                     text=True,
                 )
-                if proc.stdout != None:
+                if proc.stdout is not None:
                     while line := proc.stdout.readline():
                         if "New USB device found" in line or "USB disconnect" in line:
                             self._sdrdevices.ensure_populated()
@@ -688,7 +679,7 @@ class AdsbIm:
                             self.undervoltage_epoch = time.time()
                         # print_err(f"dmesg: {line.rstrip()}")
 
-            except:
+            except Exception:
                 print_err(traceback.format_exc())
 
             # this shouldn't happen
@@ -718,13 +709,13 @@ class AdsbIm:
             print_err(f"failed to set up timezone ({timezone}) using timedatectl, try dpkg-reconfigure instead")
             try:
                 subprocess.run(["test", "-f", f"/usr/share/zoneinfo/{timezone}"], check=True)
-            except:
+            except Exception:
                 print_err(f"setting timezone: /usr/share/zoneinfo/{timezone} doesn't exist")
                 return False
             try:
                 subprocess.run(["ln", "-sf", f"/usr/share/zoneinfo/{timezone}", "/etc/localtime"])
                 subprocess.run("dpkg-reconfigure --frontend noninteractive tzdata", shell=True)
-            except:
+            except Exception:
                 pass
 
         return True
@@ -826,7 +817,7 @@ class AdsbIm:
                 # when the new copy is moved in place, which will make os.stat unhappy
                 try:
                     return time.time() - os.stat(rrd_file).st_mtime
-                except:
+                except Exception:
                     return time.time() - 0  # fallback to long time since last write
 
             context = f"graphs1090 writeback {microIndex}"
@@ -848,11 +839,11 @@ class AdsbIm:
                     shell=True,
                     check=True,
                 )
-            except:
+            except Exception:
                 report_issue(f"{context}: docker exec failed - backed up graph data might miss up to 6h")
                 pass
             else:
-                count = 0
+                count = 0.0
                 increment = 0.1
                 # give up after 30 seconds
                 while count < 30:
@@ -903,7 +894,7 @@ class AdsbIm:
                                 report_issue(f"graphs1090 backup failed, file not found: {graphs_path}")
 
             except BrokenPipeError:
-                report_issue(f"warning: backup download aborted mid-stream")
+                report_issue("warning: backup download aborted mid-stream")
 
         thread = threading.Thread(
             target=zip2fobj,
@@ -932,7 +923,7 @@ class AdsbIm:
                 pipeOut,
                 mimetype="application/zip",
                 as_attachment=True,
-                attachment_filename=download_name,
+                attachment_filename=download_name,  # type: ignore[call-arg]
             )
 
     def restore(self):
@@ -947,7 +938,7 @@ class AdsbIm:
             if file.filename == "":
                 flash("No file selected")
                 return redirect(request.url)
-            if file.filename.endswith(".zip") or file.filename.endswith(".backup"):
+            if file.filename and (file.filename.endswith(".zip") or file.filename.endswith(".backup")):
                 filename = secure_filename(file.filename)
                 restore_path = pathlib.Path("/opt/adsb/config/restore")
                 # clean up the restore path when saving a fresh zipfile
@@ -963,8 +954,6 @@ class AdsbIm:
             return render_template("/restore.html")
 
     def executerestore(self):
-        if request.method == "GET":
-            return self.restore_get(request)
         if request.method == "POST":
             form = deepcopy(request.form)
 
@@ -973,6 +962,7 @@ class AdsbIm:
 
             self._system._restart.bg_run(func=do_restore_post)
             return render_template("/restarting.html")
+        return self.restore_get(request)
 
     def restore_get(self, request):
         # the user has uploaded a zip file and we need to take a look.
@@ -998,8 +988,6 @@ class AdsbIm:
         # now check which ones are different from the installed versions
         changed: List[str] = []
         unchanged: List[str] = []
-        saw_globe_history = False
-        saw_graphs = False
         uf_paths = set()
         for name in restored_files:
             if name.startswith("ultrafeeder/"):
@@ -1109,7 +1097,7 @@ class AdsbIm:
     def base_is_configured(self):
         base_config: set[Env] = {env for env in self._d._env if env.is_mandatory}
         for env in base_config:
-            if env._value == None or (type(env._value) == list and not env.list_get(0)):
+            if env._value is None or (type(env._value) is list and not env.list_get(0)):
                 print_err(f"base_is_configured: {env} isn't set up yet")
                 return False
         return True
@@ -1133,27 +1121,18 @@ class AdsbIm:
         if status == 200:
             self._d.env_by_tags(["feeder_ip"]).value = ip
             self._d.env_by_tags(["mf_ip"]).list_set(0, ip)
-        jsonString = json.dumps(
-            {
-                "feeder_ip": ip,
-            },
-            indent=2,
-        )
+        jsonString = json.dumps({"feeder_ip": ip}, indent=2)
         return Response(jsonString, mimetype="application/json")
 
     def scan_wifi(self):
-        wifi_ssids = []
+        wifi_ssids: list[str] = []
 
         if self.wifi is None:
             self.wifi = Wifi()
         self.wifi.scan_ssids()
         wifi_ssids = self.wifi.ssids
 
-        jsonString = json.dumps(
-            {
-                "ssids": wifi_ssids,
-            },
-        )
+        jsonString = json.dumps({"ssids": wifi_ssids}, indent=2)
         return Response(jsonString, mimetype="application/json")
 
     # to avoid compatibility issues and migration issues when upgrading, we use a rather
@@ -1169,12 +1148,21 @@ class AdsbIm:
     def configured_serials(self):
         return {serial for serial in {self._d.env_by_tags(e).valuestr for e in self.serial_env_names()} if serial != ""}
 
-    def closest_airport(self, lat, lon):
+    def closest_airport_dict(self, lat, lon) -> dict[str, str]:
         airport, status = generic_get_json(f"https://adsb.im/api/closest_airport/{lat}/{lon}", timeout=10.0)
-        if status != 200:
+        if status != 200 or airport is None:
             print_err(f"closest_airport({lat}, {lon}) failed with status {status}")
-            return None
-        return airport
+            return {"error": "Failed to fetch closest airport"}
+        try:
+            airport_dict = json.loads(airport)
+        except Exception:
+            print_err(f"closest_airport({lat}, {lon}) failed to parse JSON {airport}")
+            return {"error": "Failed to parse closest airport"}
+        return airport_dict if airport_dict else {"error": "No closest airport found"}
+
+    def closest_airport(self, lat, lon) -> Response:
+        airport = self.closest_airport_dict(lat, lon)
+        return Response(json.dumps(airport), mimetype="application/json")
 
     def sdr_info(self):
         # get our guess for the right SDR to frequency mapping
@@ -1270,7 +1258,7 @@ class AdsbIm:
         listener = request.remote_addr
         tm = int(time.time())
         print_err(f"access to base_info from {listener}", level=8)
-        self._last_stage2_contact = listener
+        self._last_stage2_contact = listener if listener else ""
         self._last_stage2_contact_time = tm
         lat, lon, alt = self.get_lat_lon_alt()
         rtlsdr_at_port = 0
@@ -1299,10 +1287,10 @@ class AdsbIm:
     def sdr_config(self, value):
         try:
             sdr_data_list = json.loads(value)
-        except:
+        except Exception:
             print_err(f"sdr_config: got {value} and can't parse as JSON")
             return
-        if not type(sdr_data_list) == list:
+        if type(sdr_data_list) is not list:
             print_err(f"sdr_config: got {sdr_data_list} and not a list")
             return
         print_err(f"sdr_config: got {sdr_data_list}")
@@ -1353,7 +1341,7 @@ class AdsbIm:
                     # all this SHOULD have been validated already client-side
                     # let's make sure we don't have 'auto' in there for containers that
                     # don't support it
-                    if not sdr.purpose in ["1090", "1090_2", "978", "ais", "sonde"] and "auto" in gain:
+                    if sdr.purpose not in ["1090", "1090_2", "978", "ais", "sonde"] and "auto" in gain:
                         if sdr.purpose in ["acars", "acars_2"] and sdr._type != "airspy":
                             gain = "-10"
                         else:
@@ -1408,16 +1396,16 @@ class AdsbIm:
         # length by padding with zeros (that means the value for days for which we have
         # no data is 0)
         plane_stats = []
-        l = 0
+        max_len = 0
         for i in [0] + self.micro_indices():
             plane_stats.append([len(self.planes_seen_per_day[i])] + self.plane_stats[i])
-            l = max(l, len(plane_stats[-1]))
+            max_len = max(max_len, len(plane_stats[-1]))
         for i in range(len(plane_stats)):
-            plane_stats[i] = plane_stats[i] + [0] * (l - len(plane_stats[i]))
+            plane_stats[i] = plane_stats[i] + [0] * (max_len - len(plane_stats[i]))
         return Response(json.dumps(plane_stats), mimetype="application/json")
 
     def stage2_stats(self):
-        ret = []
+        ret: list[dict[str, int | float]] = []
         for i in [0] + self.micro_indices():
             if i == 0 and not self._d.is_enabled("stage2"):
                 # if this is supposed to be a feeder by itself, make sure it actually
@@ -1447,10 +1435,10 @@ class AdsbIm:
             suffix = self.uf_suffix(i)
             try:
                 with open(f"/run/adsb-feeder-{suffix}/readsb/stats.prom") as f:
-                    uptime = 0
+                    uptime = 0.0
                     found = 0
-                    pps = 0
-                    mps = 0
+                    pps = 0.0
+                    mps = 0.0
                     planes = 0
                     for line in f:
                         if "position_count_total" in line:
@@ -1483,13 +1471,13 @@ class AdsbIm:
                     )
             except FileNotFoundError:
                 ret.append({"pps": 0, "mps": 0, "uptime": 0, "planes": 0, "tplanes": tplanes})
-            except:
+            except Exception:
                 print_err(traceback.format_exc())
                 ret.append({"pps": 0, "mps": 0, "uptime": 0, "planes": 0, "tplanes": tplanes})
         return Response(json.dumps(ret), mimetype="application/json")
 
     def stage2_connection(self):
-        if not self._d.env_by_tags("aggregator_choice").value in ["micro", "nano"] or self._last_stage2_contact == "":
+        if self._d.env_by_tags("aggregator_choice").value not in ["micro", "nano"] or self._last_stage2_contact == "":
             return Response(json.dumps({"stage2_connected": "never"}), mimetype="application/json")
         now = int(time.time())
         last = self._last_stage2_contact_time
@@ -1517,7 +1505,7 @@ class AdsbIm:
             for t in self.microfeeder_setting_tags:
                 tags = t.split("--")
                 if all(t in e.tags for t in tags):
-                    if type(e._value) == list:
+                    if type(e._value) is list:
                         microsettings[t] = e.list_get(0)
                     else:
                         microsettings[t] = e._value
@@ -1673,7 +1661,7 @@ class AdsbIm:
         setGainPath = pathlib.Path(f"/run/adsb-feeder-{suffix}/readsb/setGain")
 
         self.waitSetGainRace()
-        string2file(path=setGainPath, string=f"resetRangeOutline", verbose=True)
+        string2file(path=str(setGainPath), string="resetRangeOutline", verbose=True)
 
     def waitSetGainRace(self):
         # readsb checks this the setGain file every 0.2 seconds
@@ -1719,7 +1707,7 @@ class AdsbIm:
         # make sure that a site name is unique - if the idx is given that's
         # the current value and excluded from the check
         existing_names = self._d.env_by_tags("site_name")
-        names = [existing_names.list_get(n) for n in range(0, len(existing_names.value)) if n != idx]
+        names = [existing_names.list_get(n) for n in range(0, len(existing_names.valuestr)) if n != idx]
         while name in names:
             name += "_"
         return name
@@ -1737,13 +1725,13 @@ class AdsbIm:
         if do_import:
             micro_settings, status = generic_get_json(f"http://{ip}:{port}/api/micro_settings", timeout=timeout)
             print_err(f"micro_settings API on {ip}:{port}: {status}, {micro_settings}")
-            if status != 200 or micro_settings == None:
+            if status != 200 or micro_settings is None:
                 # maybe we're running on 1099?
                 port = "1099"
                 micro_settings, status = generic_get_json(f"http://{ip}:{port}/api/micro_settings", timeout=timeout)
                 print_err(f"micro_settings API on {ip}:{port}: {status}, {micro_settings}")
 
-            if status == 200 and micro_settings != None:
+            if status == 200 and micro_settings is not None:
                 for key, value in micro_settings.items():
                     # when getting values from a microfeeder older than v2.1.3
                     if key == "lng":
@@ -1755,11 +1743,11 @@ class AdsbIm:
                     if e:
                         e.list_set(n, value)
         base_info, status = generic_get_json(f"http://{ip}:{port}/api/base_info", timeout=timeout)
-        if (status != 200 or base_info == None) and port == "80":
+        if (status != 200 or base_info is None) and port == "80":
             # maybe we're running on 1099?
             port = "1099"
             base_info, status = generic_get_json(f"http://{ip}:{port}/api/base_info", timeout=timeout)
-        if status == 200 and base_info != None:
+        if status == 200 and base_info is not None:
 
             base_info_string = json.dumps(base_info)
 
@@ -1824,7 +1812,7 @@ class AdsbIm:
             self._d.env_by_tags("mf_brofm_capable").list_set(n, bool(base_info.get("brofm_capable")))
 
             return True
-        #    except:
+        #    except Exception:
         #        pass
         print_err(f"failed to get base_info from micro feeder {n}")
         return False
@@ -1845,7 +1833,7 @@ class AdsbIm:
                 print_err(f"response code: {response.status_code}")
                 json_dict = response.json()
                 print_err(f"json_dict: {type(json_dict)} {json_dict}")
-            except:
+            except Exception:
                 print_err(f"failed to check base_info from remote feeder {ip}:{port}")
             else:
                 if response.status_code == 200:
@@ -1855,7 +1843,7 @@ class AdsbIm:
                     print_err(f"checking remote feeder {url}")
                     try:
                         response = requests.get(url, timeout=5.0)
-                    except:
+                    except Exception:
                         print_err(f"failed to check micro_settings from remote feeder {ip}")
                         json_dict["micro_settings"] = False
                     else:
@@ -1890,13 +1878,13 @@ class AdsbIm:
         ]
         print_err(f"running: {cmd}")
         try:
-            response = subprocess.run(
+            result = subprocess.run(
                 cmd,
                 timeout=30.0,
                 capture_output=True,
             )
-            output = response.stderr.decode("utf-8")
-        except:
+            output = result.stderr.decode("utf-8")
+        except Exception:
             print_err("failed to use readsb in ultrafeeder container to check on remote feeder status")
             return make_response(json.dumps({"status": "fail"}), 200)
         if not re.search("input: Connection established", output):
@@ -1941,7 +1929,7 @@ class AdsbIm:
             )
 
             print_err(f"done importing graphs and history from {ip}")
-        except:
+        except Exception:
             report_issue(f"ERROR when importing graphs and history from {ip}")
         finally:
             os.remove(tmpfile)
@@ -2036,6 +2024,7 @@ class AdsbIm:
             print_err(f"shifting {e.name} down and deleting last element {e._value}")
             for i in range(num, self._d.env_by_tags("num_micro_sites").valueint):
                 e.list_set(i, e.list_get(i + 1))
+            assert isinstance(e._value, list), f"{e.name} is not a list"
             while len(e._value) > self._d.env_by_tags("num_micro_sites").valueint:
                 e.list_remove()
         self._d.env_by_tags("num_micro_sites").value = self._d.env_by_tags("num_micro_sites").valueint - 1
@@ -2072,13 +2061,13 @@ class AdsbIm:
                             f"/opt/adsb/docker-compose-adsb down uf_{num} -t 30",
                             shell=True,
                         )
-                    except:
+                    except Exception:
                         print_err(f"failed to stop micro feeder {num}")
                         return (False, f"failed to stop micro feeder {num}")
                     print_err(f"moving micro feeder data directory from {data_dir/old_ip} to {data_dir/ip}")
                     try:
                         os.rename(data_dir / f"{old_ip}", data_dir / f"{ip}")
-                    except:
+                    except Exception:
                         print_err(f"failed to move micro feeder data directory from {data_dir/old_ip} to {data_dir/ip}")
                         return (
                             False,
@@ -2117,7 +2106,7 @@ class AdsbIm:
             setGainPath = pathlib.Path("/run/adsb-feeder-ultrafeeder/readsb/setGain")
         try:
             gaindir.mkdir(exist_ok=True, parents=True)
-        except:
+        except Exception:
             pass
         gain = self._d.env_by_tags(["1090gain"]).value
 
@@ -2136,11 +2125,11 @@ class AdsbIm:
             (gaindir / "suspend").touch(exist_ok=True)
 
             # this file sets the gain on readsb start
-            string2file(path=(gaindir / "gain"), string=f"{gain}\n")
+            string2file(path=str(gaindir / "gain"), string=f"{gain}\n")
 
             # this adjusts the gain while readsb is running
             self.waitSetGainRace()
-            string2file(path=setGainPath, string=f"{gain}\n")
+            string2file(path=str(setGainPath), string=f"{gain}\n")
 
     def setup_or_disable_uat(self, sitenum):
         if sitenum and self._d.list_is_enabled(["uat978"], sitenum):
@@ -2177,7 +2166,7 @@ class AdsbIm:
                 "hfdlobserver_ip",
             ]
             for p in placeholders:
-                config_lines = [l.replace("%" + p + "%", str(self._d.env_by_tags(p).value)) for l in config_lines]
+                config_lines = [line.replace("%" + p + "%", str(self._d.env_by_tags(p).value)) for line in config_lines]
             config = pathlib.Path("/opt/adsb/hfdlobserver/compose/settings.yaml")
             config_backup = pathlib.Path("/opt/adsb/hfdlobserver/compose/settings.yaml.bak")
             if config.exists():
@@ -2218,14 +2207,14 @@ class AdsbIm:
                 # Convert "auto" to "-1" for radiosonde autogain
                 if p == "sondegain" and str(value).startswith("auto"):
                     value = "-1"
-                config_lines = [l.replace("%" + p + "%", str(value)) for l in config_lines]
+                config_lines = [line.replace("%" + p + "%", str(value)) for line in config_lines]
             placeholders = [
                 "lat",
                 "lon",
                 "alt",
             ]
             for p in placeholders:
-                config_lines = [l.replace("%" + p + "%", str(self._d.env_by_tags(p).list_get(0))) for l in config_lines]
+                config_lines = [line.replace("%" + p + "%", str(self._d.env_by_tags(p).list_get(0))) for line in config_lines]
 
             new_config = "\n".join(config_lines)
 
@@ -2235,13 +2224,13 @@ class AdsbIm:
             if config.exists():
                 try:
                     config.rename(config_backup)
-                except:
+                except Exception:
                     # if the station.cfg doesn't exist when compose up is called, docker will create
                     # a directory named station.cfg which needs to be removed for us to be able to
                     # proceed
                     try:
                         config.rmdir()
-                    except:
+                    except Exception:
                         pass
 
             with open(config, "w") as f:
@@ -2253,8 +2242,8 @@ class AdsbIm:
                 with open(config_backup, "r") as f:
                     old_config = f.read()
                     if old_config != new_config:
-                        print_err(f"radiosonde: config / station.cfg has changed, restarting container")
-                        success, output = run_shell_captured(f"docker restart radiosonde")
+                        print_err("radiosonde: config / station.cfg has changed, restarting container")
+                        success, output = run_shell_captured("docker restart radiosonde")
 
     def adjust_airspy_gain(self, gain):
         if gain.startswith("auto"):
@@ -2306,7 +2295,7 @@ class AdsbIm:
                     timeout=600,
                 )
                 if not success:
-                    report_issue(f"failed to install pigpiod and python3-pigpio - check the logs for details")
+                    report_issue("failed to install pigpiod and python3-pigpio - check the logs for details")
                     print_err(f"failed to install pigpiod and python3-pigpio: {output}")
                     temp_sensor.value = ""
                     return
@@ -2322,11 +2311,11 @@ class AdsbIm:
                 timeout=600,
             )
             if not success:
-                report_issue(f"failed to install python3-serial - check the logs for details")
+                report_issue("failed to install python3-serial - check the logs for details")
                 print_err(f"failed to install python3-serial: {output}")
                 temp_sensor.value = ""
                 return
-            default_file_content = f"DEVICE=usb-temper\n"
+            default_file_content = "DEVICE=usb-temper\n"
         elif temp_sensor.value == "bme280":
             # this is not a commonly used feature, so let's install dependencies here
             success, output = run_shell_captured(
@@ -2334,23 +2323,23 @@ class AdsbIm:
                 timeout=600,
             )
             if not success:
-                report_issue(f"failed to install python3-serial - check the logs for details")
+                report_issue("failed to install python3-serial - check the logs for details")
                 print_err(f"failed to install python3-serial: {output}")
                 temp_sensor.value = ""
                 return
             success, output = run_shell_captured("lsmod | grep i2c_bcm2835 > /dev/null", timeout=30)
             if not success:
-                report_issue(f"i2c is not enabled - please manually enable i2c and reboot your device")
-                print_err(f"i2c is not enabled - please manually enable i2c and reboot your device")
+                report_issue("i2c is not enabled - please manually enable i2c and reboot your device")
+                print_err("i2c is not enabled - please manually enable i2c and reboot your device")
                 # but we still continue and leave things enabled
-            default_file_content = f"DEVICE=bme280\n"
+            default_file_content = "DEVICE=bme280\n"
         else:
             _, output = run_shell_captured(
                 "systemctl is-enabled adsb-temperature.service && systemctl disable --now adsb-temperature.service",
                 timeout=20,
             )
             self._d.env_by_tags("graphs1090_other_temp1").value = ""
-            self._d.env_by_tags("temperature_block").value = os.path.exists(self._d.env_by_tags("cpu_temperature_path").value)
+            self._d.env_by_tags("temperature_block").value = os.path.exists(self._d.env_by_tags("cpu_temperature_path").valuestr)
             self._d.env_by_tags("has_dht22").value = False
             temp_sensor.value = ""
             return
@@ -2364,7 +2353,7 @@ class AdsbIm:
             timeout=20,
         )
         if not success:
-            report_issue(f"failed to enable adsb-temperature.service - check the logs for details")
+            report_issue("failed to enable adsb-temperature.service - check the logs for details")
             print_err(f"failed to enable adsb-temperature.service: {output}")
             temp_sensor.value = ""
             return
@@ -2391,7 +2380,9 @@ class AdsbIm:
 
         # make sure we have a closest airport
         if self._d.env_by_tags("closest_airport").list_get(0) == "":
-            airport = self.closest_airport(self._d.env_by_tags("lat").list_get(0), self._d.env_by_tags("lon").list_get(0))
+            airport: dict[str, str] = self.closest_airport_dict(
+                self._d.env_by_tags("lat").list_get(0), self._d.env_by_tags("lon").list_get(0)
+            )
             if airport:
                 self._d.env_by_tags("closest_airport").list_set(0, airport.get("icao", ""))
                 if self._d.env_by_tags("skystats_domestic_country_iso").value == "":
@@ -2537,7 +2528,7 @@ class AdsbIm:
             # next check for airspy devices
             airspy = any([sdr._serial == env1090.value and sdr._type == "airspy" for sdr in self._sdrdevices.sdrs])
             self._d.env_by_tags(["airspy", "is_enabled"]).value = airspy
-            self._d.env_by_tags("airspyurl").list_set(0, f"http://airspy_adsb" if airspy else "")
+            self._d.env_by_tags("airspyurl").list_set(0, "http://airspy_adsb" if airspy else "")
             # SDRplay devices
             sdrplay = any([sdr._serial == env1090.value and sdr._type == "sdrplay" for sdr in self._sdrdevices.sdrs])
             self._d.env_by_tags(["sdrplay", "is_enabled"]).value = sdrplay
@@ -2570,7 +2561,7 @@ class AdsbIm:
                 self._d.env_by_tags(["978gain"]).value = "autogain"
 
             if verbose & 1:
-                print_err(f"in the end we have")
+                print_err("in the end we have")
                 print_err(f"1090serial {env1090.value}")
                 print_err(f"1090_2serial {self._d.env_by_tags('1090_2serial').value}")
                 print_err(f"978serial {env978.value}")
@@ -2633,9 +2624,9 @@ class AdsbIm:
         # ensure that our 1090 and 978 SDRs have the correct purpose set
         sdr1090 = self._sdrdevices.get_sdr_by_serial(self._d.env_by_tags("1090serial").valuestr)
         sdr978 = self._sdrdevices.get_sdr_by_serial(self._d.env_by_tags("978serial").valuestr)
-        if not sdr1090 is self._sdrdevices.null_sdr:
+        if sdr1090 is not self._sdrdevices.null_sdr:
             sdr1090.purpose = "1090"
-        if not sdr978 is self._sdrdevices.null_sdr:
+        if sdr978 is not self._sdrdevices.null_sdr:
             sdr978.purpose = "978"
 
         # Skystats
@@ -2645,7 +2636,9 @@ class AdsbIm:
                 self._d.env_by_tags("skystats_db_password").value = self.generate_random_password()
             # make sure we grab the domestic country iso from the closest airport
             if self._d.env_by_tags("skystats_domestic_country_iso").value == "":
-                airport = self.closest_airport(self._d.env_by_tags("lat").list_get(0), self._d.env_by_tags("lon").list_get(0))
+                airport = self.closest_airport_dict(
+                    self._d.env_by_tags("lat").list_get(0), self._d.env_by_tags("lon").list_get(0)
+                )
                 if airport:
                     self._d.env_by_tags("skystats_domestic_country_iso").value = airport.get("isocountry", "")
         # check if we need to run the skystats database container
@@ -2869,7 +2862,7 @@ class AdsbIm:
                     subprocess.run(cmd, shell=True, timeout=5.0)
                     self.update_journal_state()
                     self._d.env_by_tags("journal_configured").value = True
-                except:
+                except Exception:
                     pass
 
         for i in self.micro_indices():
@@ -2903,11 +2896,11 @@ class AdsbIm:
             # careful - env tags might not exist
             try:
                 gain = self._d.env_by_tags(f"{purpose}gain").valuestr
-            except:
+            except Exception:
                 gain = ""
             try:
                 biastee = bool(self._d.env_by_tags(f"{purpose}biastee").value)
-            except:
+            except Exception:
                 biastee = False
             assignments[purpose] = (serial, gain, biastee)
         return assignments
@@ -2920,7 +2913,7 @@ class AdsbIm:
         try:
             with open("/etc/docker/daemon.json", "r") as f:
                 daemon_json = json.load(f)
-        except:
+        except Exception:
             daemon_json = {}
         new_daemon_json = daemon_json.copy()
         if value:
@@ -2982,10 +2975,8 @@ class AdsbIm:
 
     @check_restart_lock
     def update(self):
-        description = """
-            This is the one endpoint that handles all the updates coming in from the UI.
-            It walks through the form data and figures out what to do about the information provided.
-        """
+        # This is the one endpoint that handles all the updates coming in from the UI.
+        # It walks through the form data and figures out what to do about the information provided.
         # let's try and figure out where we came from - for reasons I don't understand
         # the regexp didn't capture the site number, so let's do this the hard way
         extra_args = ""
@@ -3077,7 +3068,7 @@ class AdsbIm:
                     return render_template("stage2.html", edit_index=num)
                 if key.startswith("cancel_edit_micro_"):
                     # discard changes
-                    flash(f"Cancelled changes", "success")
+                    flash("Cancelled changes", "success")
                     return redirect(url_for("stage2"))
                 if key.startswith("save_edit_micro_"):
                     # save changes
@@ -3159,14 +3150,14 @@ class AdsbIm:
                     return render_template("/restarting.html")
                 if key == "log_persistence_toggle":
                     if self._persistent_journal:
-                        cmd = "/opt/adsb/scripts/journal-set-volatile.sh"
+                        cmd = ["/opt/adsb/scripts/journal-set-volatile.sh"]
                     else:
-                        cmd = "/opt/adsb/scripts/journal-set-persist.sh"
+                        cmd = ["/opt/adsb/scripts/journal-set-persist.sh"]
                     try:
                         print_err(cmd)
                         subprocess.run(cmd, shell=True, timeout=5.0)
                         self.update_journal_state()
-                    except:
+                    except Exception:
                         pass
                     self._next_url_from_director = request.url
                 if key == "acarshub_to_disk" and value == "go":
@@ -3194,7 +3185,7 @@ class AdsbIm:
                 if key == "no_config_link":
                     self._d.env_by_tags("tar1090_image_config_link").value = ""
                 if key == "allow_config_link":
-                    self._d.env_by_tags("tar1090_image_config_link").value = f"WILL_BE_SET_IN_IMPLIED_SETTINGS"
+                    self._d.env_by_tags("tar1090_image_config_link").value = "WILL_BE_SET_IN_IMPLIED_SETTINGS"
                 if key == "turn_on_gpsd":
                     self._d.env_by_tags(["use_gpsd", "is_enabled"]).value = True
                     # this updates the lat/lon/alt env variables as side effect, if there is a GPS fix
@@ -3263,7 +3254,7 @@ class AdsbIm:
                     continue
                 if key.startswith("temp_sensor_") and value == "go":
                     self._d.env_by_tags("temp_sensor").value = form.get("temp_sensor", "") if key.endswith("enable") else ""
-                    self.handle_temp_sensor(self._d.env_by_tags("temp_sensor"), form.get("dht22_pin", "4"))
+                    self.handle_temp_sensor(self._d.env_by_tags("temp_sensor"), int(form.get("dht22_pin", "4")))
                     self._next_url_from_director = request.url
                     continue
 
@@ -3281,11 +3272,13 @@ class AdsbIm:
                 if allow_insecure and key == "tailscale":
                     # grab extra arguments if given
                     ts_args = form.get("tailscale_extras", "")
+                    ts_cli_switch = ""
+                    ts_cli_value = ""
                     if ts_args:
                         # right now we really only want to allow the login server arg
                         try:
                             ts_cli_switch, ts_cli_value = ts_args.split("=")
-                        except:
+                        except Exception:
                             ts_cli_switch, ts_cli_value = ["", ""]
 
                         if ts_cli_switch != "--login-server":
@@ -3334,8 +3327,11 @@ class AdsbIm:
                             stdout=subprocess.DEVNULL,
                             text=True,
                         )
+                        if proc is None or proc.stderr is None:
+                            report_issue("failure to start tailscale process")
+                            continue
                         os.set_blocking(proc.stderr.fileno(), False)
-                    except:
+                    except Exception:
                         # this really needs a user visible error...
                         report_issue("exception trying to set up tailscale - giving up")
                         continue
@@ -3345,7 +3341,7 @@ class AdsbIm:
                         while time.time() - startTime < 30:
                             output = proc.stderr.readline()
                             if not output:
-                                if proc.poll() != None:
+                                if proc.poll() is not None:
                                     break
                                 time.sleep(0.1)
                                 continue
@@ -3366,7 +3362,7 @@ class AdsbIm:
                         print_err(f"found login link {login_link}")
                         self._d.env_by_tags("tailscale_ll").value = login_link
                     else:
-                        report_issue(f"ERROR: tailscale didn't provide a login link within 30 seconds")
+                        report_issue("ERROR: tailscale didn't provide a login link within 30 seconds")
                     return redirect(url_for("systemmgmt"))
                 # tailscale handling uses 'continue' to avoid deep nesting - don't add other keys
                 # here at the end - instead insert them before tailscale
@@ -3417,8 +3413,8 @@ class AdsbIm:
                     print_err(f"got aggregator object {aggregator_object} -- activating for sitenum {l_sitenum}")
                     try:
                         is_successful = aggregator_object._activate(aggregator_argument, l_sitenum)
-                    except Exception as e:
-                        print_err(f"error activating {key}: {e}")
+                    except Exception as ex:
+                        print_err(f"error activating {key}: {ex}")
                     if not is_successful:
                         report_issue(f"did not successfully enable {base}")
 
@@ -3443,7 +3439,7 @@ class AdsbIm:
                     cmdline = "docker exec ultrafeeder /usr/local/bin/autogain1090 reset"
                 try:
                     subprocess.run(cmdline, timeout=5.0, shell=True)
-                except:
+                except Exception:
                     report_issue("Error running Ultrafeeder autogain reset")
                 continue
             if key == "resetuatgain" and value == "1":
@@ -3451,7 +3447,7 @@ class AdsbIm:
                 cmdline = "docker exec dump978 /usr/local/bin/autogain978 reset"
                 try:
                     subprocess.run(cmdline, timeout=5.0, shell=True)
-                except:
+                except Exception:
                     report_issue("Error running UAT autogain reset")
                 continue
             if allow_insecure and key == "ssh_pub":
@@ -3466,14 +3462,14 @@ class AdsbIm:
                     timeout=60,
                 )
                 if not success:
-                    report_issue(f"failed to enable ssh - check the logs for details")
+                    report_issue("failed to enable ssh - check the logs for details")
                     print_err(f"failed to enable ssh: {output}")
                 if success:
                     report_issue(f"added ssh key: {value}")
                 continue
             try:
                 e = self._d.env_by_tags(key.split("--"))
-            except:
+            except Exception:
                 # if the key isn't creating a valid tag, just skip it
                 continue
             if allow_insecure and key == "zerotierid":
@@ -3484,7 +3480,7 @@ class AdsbIm:
                     subprocess.call(
                         ["/usr/sbin/zerotier-cli", "join", f"{value}"],
                     )
-                except:
+                except Exception:
                     report_issue("exception trying to set up zerorier - giving up")
             if key in {"lat", "lon"}:
                 # remove letters, spaces, degree symbols
@@ -3494,7 +3490,7 @@ class AdsbIm:
                 lat = str(float(re.sub("[a-zA-Z° ]", "", form.get("lat", ""))))
                 long = str(float(re.sub("[a-zA-Z° ]", "", form.get("lon", ""))))
                 if lat != self._d.env_by_tags("lat").list_get(0) or long != self._d.env_by_tags("lon").list_get(0):
-                    airport = self.closest_airport(lat, long)
+                    airport = self.closest_airport_dict(lat, long)
                     if airport:
                         self._d.env_by_tags("closest_airport").list_set(0, airport["icao"])
             if key == "tz":
@@ -3515,7 +3511,7 @@ class AdsbIm:
                     try:
                         subprocess.call("bash /opt/adsb/scripts/journal-set-volatile.sh", shell=True, timeout=5)
                         print_err("switched to volatile journal")
-                    except:
+                    except Exception:
                         print_err("exception trying to switch to volatile journal - ignoring")
             if key == "aggregator_choice" and value == "stage2":
                 next_url = url_for("stage2")
@@ -3554,7 +3550,7 @@ class AdsbIm:
                 self._d.env_by_tags("aggregators_chosen").value = True
                 self._d.env_by_tags(tags).list_set(sitenum, is_true(value))
             else:
-                if type(e._value) == list:
+                if type(e._value) is list:
                     e.list_set(sitenum, value)
                 else:
                     e.value = value
@@ -3598,7 +3594,7 @@ class AdsbIm:
         acars_frequencies = ""
         vdl2_frequencies = ""
         frequencies_json, status_code = generic_get_json(url)
-        if status_code != 200:
+        if status_code != 200 or frequencies_json is None:
             print_err(f"failed to retrieve best_frequencies JSON from {url}: {status_code}")
         else:
             print_err(f"frequencies_json: {frequencies_json}")
@@ -3666,7 +3662,7 @@ class AdsbIm:
                     check=True,
                     capture_output=True,
                 )
-            except:
+            except Exception:
                 # a non-zero return value means tailscale isn't configured or tailscale is disabled
                 # reset both associated env vars
                 # if tailscale recovers / is re-enabled and the system management page is visited,
@@ -3714,25 +3710,25 @@ class AdsbIm:
 
         def uf_enabled(tag, m=0):
             # stack_info(f"tags are {type(tag)} {tag}")
-            if type(tag) == str:
+            if type(tag) is str:
                 tag = [tag]
-            if type(tag) != list:
+            if type(tag) is not list:
                 print_err(f"PROBLEM::: tag is {type(tag)}")
             return "checked" if self._d.list_is_enabled(["ultrafeeder"] + tag, idx=m) else ""
 
         def others_enabled(tag, m=0):
             # stack_info(f"tags are {type(tag)} {tag}")
-            if type(tag) == str:
+            if type(tag) is str:
                 tag = [tag]
-            if type(tag) != list:
+            if type(tag) is not list:
                 print_err(f"PROBLEM::: tag is {type(tag)}")
             return "checked" if self._d.list_is_enabled(["other_aggregator"] + tag, idx=m) else ""
 
         def nonadsb_enabled(tag, m=0):
             # stack_info(f"tags are {type(tag)} {tag}")
-            if type(tag) == str:
+            if type(tag) is str:
                 tag = [tag]
-            if type(tag) != list:
+            if type(tag) is not list:
                 print_err(f"PROBLEM::: tag is {type(tag)}")
             return "checked" if self._d.list_is_enabled(tag, idx=m) else ""
 
@@ -3742,8 +3738,8 @@ class AdsbIm:
         if self._d.is_enabled("stage2"):
             print_err("setting up aggregators on a stage 2 system")
             try:
-                m = int(request.args.get("m"))
-            except:
+                m = int(request.args.get("m", "0"))
+            except Exception:
                 m = 0
             if m == 0:  # do not set up aggregators for the aggregated feed
                 if self._d.env_by_tags("num_micro_sites").value == "0":
@@ -3774,7 +3770,7 @@ class AdsbIm:
         if request.method == "POST":
             return self.update()
         if not self._d.is_enabled("base_config"):
-            print_err(f"director redirecting to setup, base_config not completed")
+            print_err("director redirecting to setup, base_config not completed")
             return self.setup()
         # if we already figured out where to go next, let's just do that
         if self._next_url_from_director:
@@ -3792,7 +3788,7 @@ class AdsbIm:
                         response = requests.get(testurl, timeout=2.0)
                         if response.status_code == 200:
                             break
-                    except:
+                    except Exception:
                         pass
             return redirect(url)
         # If we have more than one SDR, or one of them is an airspy,
@@ -3816,7 +3812,7 @@ class AdsbIm:
                     print_err(f"configured serials: {configured_serials}")
                     print_err(f"available serials: {available_serials}")
                     print_err("director redirecting to sdr_setup: unconfigured devices present")
-                    report_issue(f"New SDR detected, please check / adjust the configuration and apply the changes!")
+                    report_issue("New SDR detected, please check / adjust the configuration and apply the changes!")
                     return self.sdr_setup()
 
             used_serials = [self._d.env_by_tags(purpose).value for purpose in ["978serial", "1090serial"]]
@@ -3825,7 +3821,7 @@ class AdsbIm:
                 print_err(f"used serials: {used_serials}")
                 print_err(f"available serials: {available_serials}")
                 print_err("director redirecting to sdr_setup: at least one used device is not present")
-                report_issue(f"Missing SDR detected, please check / adjust the configuration and apply the changes!")
+                report_issue("Missing SDR detected, please check / adjust the configuration and apply the changes!")
                 return self.sdr_setup()
         elif not self._d.is_enabled("stage2"):
             # we don't do ADS-B, we don't do any of the other protocols, and this isn't a stage 2
@@ -3840,7 +3836,7 @@ class AdsbIm:
         return self.aggregators()
 
     def reset_planes_seen_per_day(self):
-        self.planes_seen_per_day = [set() for i in [0] + self.micro_indices()]
+        self.planes_seen_per_day: list = [set() for i in [0] + self.micro_indices()]
 
     def load_planes_seen_per_day(self):
         # set limit on how many days of statistics to keep
@@ -3850,7 +3846,7 @@ class AdsbIm:
         start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
         self.reset_planes_seen_per_day()
         self.plane_stats_day = start_of_day.timestamp()
-        self.plane_stats = [[] for i in [0] + self.micro_indices()]
+        self.plane_stats: list = [[] for i in [0] + self.micro_indices()]
         try:
             with gzip.open("/opt/adsb/adsb_planes_seen_per_day.json.gz", "r") as f:
                 planes = json.load(f)
@@ -3880,7 +3876,7 @@ class AdsbIm:
 
                 diff = start_of_day.timestamp() - ts
                 if diff > 0:
-                    print_err(f"loading planes_seen_per_day: file not from this utc day")
+                    print_err("loading planes_seen_per_day: file not from this utc day")
                     days = math.ceil(diff / (24 * 60 * 60))
                     if days > 0:
                         days -= 1
@@ -3897,7 +3893,7 @@ class AdsbIm:
                     while len(self.plane_stats[i]) > self.plane_stats_limit:
                         self.plane_stats[i].pop()
 
-        except:
+        except Exception:
             print_err(f"error loading planes_seen_per_day:\n{traceback.format_exc()}")
             pass
 
@@ -3916,7 +3912,7 @@ class AdsbIm:
                 f.write(planes_json.encode("utf-8"))
             os.rename(tmp, path)
             print_err("wrote planes_seen_per_day")
-        except Exception as e:
+        except Exception:
             print_err(f"error writing planes_seen_per_day:\n{traceback.format_exc()}")
             pass
 
@@ -3928,7 +3924,7 @@ class AdsbIm:
                 aircraftdict = json.load(f)
                 aircraft = aircraftdict.get("aircraft", [])
                 planes = set([plane["hex"] for plane in aircraft if not plane["hex"].startswith("~")])
-        except:
+        except Exception:
             pass
         return planes
 
@@ -3959,23 +3955,26 @@ class AdsbIm:
             self._d.previous_version = "check-in"
             r = self._im_status.check(True)
             self._d.previous_version = pv
-            if r.get("latest_tag", "unknown") != "unknown":
+            if r is not None and r.get("latest_tag", "unknown") != "unknown":
                 self.ci = False
 
     def update_net_dev(self):
         dev = ""
         addr = ""
         try:
-            result = subprocess.run(
-                "ip route get 1 | head -1  | cut -d' ' -f5,7",
-                shell=True,
-                capture_output=True,
-                timeout=2.0,
-            ).stdout
-        except:
+            result = (
+                subprocess.run(
+                    "ip route get 1 | head -1  | cut -d' ' -f5,7",
+                    shell=True,
+                    capture_output=True,
+                    timeout=2.0,
+                )
+                .stdout.decode()
+                .strip()
+            )
+        except Exception:
             result = ""
         else:
-            result = result.decode().strip()
             if " " in result:
                 dev, addr = result.split(" ")
             else:
@@ -4010,32 +4009,36 @@ class AdsbIm:
 
         if self._d.env_by_tags("tailscale_name").value:
             try:
-                result = subprocess.run(
-                    "tailscale ip -4 2>/dev/null",
-                    shell=True,
-                    capture_output=True,
-                    timeout=2.0,
-                ).stdout
-            except:
+                result = (
+                    subprocess.run(
+                        "tailscale ip -4 2>/dev/null",
+                        shell=True,
+                        capture_output=True,
+                        timeout=2.0,
+                    )
+                    .stdout.decode()
+                    .strip()
+                )
+            except Exception:
                 result = ""
-            else:
-                result = result.decode().strip()
             self.tailscale_address = result
         else:
             self.tailscale_address = ""
         zt_network = self._d.env_by_tags("zerotierid").value
         if zt_network:
             try:
-                result = subprocess.run(
-                    ["zerotier-cli", "get", f"{zt_network}", "ip4"],
-                    shell=True,
-                    capture_output=True,
-                    timeout=2.0,
-                ).stdout
-            except:
+                result = (
+                    subprocess.run(
+                        ["zerotier-cli", "get", f"{zt_network}", "ip4"],
+                        shell=True,
+                        capture_output=True,
+                        timeout=2.0,
+                    )
+                    .stdout.decode()
+                    .strip()
+                )
+            except Exception:
                 result = ""
-            else:
-                result = result.decode().strip()
             self.zerotier_address = result
         else:
             self.zerotier_address = ""
@@ -4152,7 +4155,7 @@ class AdsbIm:
         except Exception:
             pass
         try:
-            with open(self._d.env_by_tags("cpu_temperature_path").value, "r") as cpu:
+            with open(self._d.env_by_tags("cpu_temperature_path").valuestr, "r") as cpu:
                 temperature_json["cpu"] = f"{int(cpu.read().strip()) / 1000:.0f}"
                 if temperature_json.get("age") is None:
                     temperature_json["age"] = 1
@@ -4166,7 +4169,7 @@ class AdsbIm:
         try:
             with open("/run/adsb-feeder-ultrafeeder/ambient-temperature", "r") as temperature_file:
                 temperature = temperature_file.read().strip()
-        except:
+        except Exception:
             pass
         return temperature
 
@@ -4210,8 +4213,8 @@ class AdsbIm:
 
             return {"show_changelog": False}
 
-        except Exception as e:
-            print_err(f"Error checking changelog status: {e}")
+        except Exception as ex:
+            print_err(f"Error checking changelog status: {ex}")
             return {"show_changelog": False}
 
     def mark_changelog_seen(self):
@@ -4221,9 +4224,9 @@ class AdsbIm:
             print_err("Marked changelog as seen")
             return {"success": True}
 
-        except Exception as e:
-            print_err(f"Error marking changelog as seen: {e}")
-            return {"success": False, "error": str(e)}
+        except Exception as ex:
+            print_err(f"Error marking changelog as seen: {ex}")
+            return {"success": False, "error": str(ex)}
 
     def support(self):
         print_err(f"support request, {request.form}")
@@ -4236,7 +4239,7 @@ class AdsbIm:
         print_err(f'trying to upload the logs with target: "{target}"')
 
         if not target:
-            print_err(f"ERROR: support POST request without target")
+            print_err("ERROR: support POST request without target")
             return render_template("support.html", url="Error, unspecified upload target!")
 
         if target == "0x0.st":
@@ -4249,7 +4252,7 @@ class AdsbIm:
                 print_err(f"uploaded logs to {url}")
             else:
                 print_err(f"failed to upload logs, output: {output}")
-                report_issue(f"failed to upload logs")
+                report_issue("failed to upload logs")
             return render_template("support.html", url=url)
 
         if target == "termbin.com":
@@ -4263,7 +4266,7 @@ class AdsbIm:
                 print_err(f"uploaded logs to {url}")
             else:
                 print_err(f"failed to upload logs, output: {output}")
-                report_issue(f"failed to upload logs")
+                report_issue("failed to upload logs")
             return render_template("support.html", url=url)
 
         if target == "local_view" or target == "local_download":
@@ -4322,7 +4325,7 @@ class AdsbIm:
             try:
                 result = subprocess.run(cmd, shell=True, capture_output=True, timeout=2.0)
                 return result.stdout.decode("utf-8")
-            except:
+            except Exception:
                 return f"failed to run '{cmd}'"
 
         storage = simple_cmd_result("df -h | grep -v overlay")
