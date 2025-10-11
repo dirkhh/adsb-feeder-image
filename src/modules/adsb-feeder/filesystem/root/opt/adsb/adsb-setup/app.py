@@ -2635,7 +2635,7 @@ class AdsbIm:
         if not sdr978 is self._sdrdevices.null_sdr:
             sdr978.purpose = "978"
 
-        # Skystats
+        # SkyStats
         if self._d.is_enabled("skystats"):
             # if no password is set, set it to a random one
             if self._d.env_by_tags("skystats_db_password").value == "":

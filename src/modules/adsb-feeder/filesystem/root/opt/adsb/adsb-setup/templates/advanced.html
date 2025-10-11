@@ -132,7 +132,7 @@
   </div>
   {% endif %}
   <div class="col-12 col-lg-6">
-    <h5 class="mt-4">Skystats</h5>
+    <h5 class="mt-4">SkyStats</h5>
     <form method="POST">
       <div class="row align-items-center">
         {% if not is_enabled('skystats') %}
@@ -145,7 +145,7 @@
             <span class="toggle-icon small">▶</span> <strong class="small">More information</strong>
           </span>
           <div class="small d-none mt-2" id="skystats_explain">
-            Skystats uses a PostgreSQL database to store and analyze aircraft positions, flights, and patterns. This will
+            SkyStats uses a PostgreSQL database to store and analyze aircraft positions, flights, and patterns. This will
             cause additional write activity on the system (which has otherwise been optimized for minimum disk writes). If
             you are running this on an SBC with an SD card, this may cause wear on the card and could lead to reduced lifespan.
             In the advanced configuration below, you can configure the database host, port, user, and password in order to run
@@ -154,7 +154,7 @@
         </div>
         <div class="col-8 my-1">
           <label for="skystats--enable">
-            Enable Skystats
+            Enable SkyStats
           </label>
         </div>
         <div class="col-4 my-1">
@@ -170,7 +170,7 @@
             <span class="toggle-icon small">▶</span> <strong class="small">More information</strong>
           </span>
           <div class="small d-none mt-2" id="skystats_explain">
-            Skystats uses a PostgreSQL database to store and analyze aircraft positions, flights, and patterns. This will
+            SkyStats uses a PostgreSQL database to store and analyze aircraft positions, flights, and patterns. This will
             cause additional write activity on the system (which has otherwise been optimized for minimum disk writes). If
             you are running this on an SBC with an SD card, this may cause wear on the card and could lead to reduced lifespan.
             In the advanced configuration below, you can configure the database host, port, user, and password in order to run
@@ -179,7 +179,7 @@
         </div>
         <div class="col-6 my-1">
           <label for="skystats--disable">
-            Skystats
+            SkyStats
           </label>
         </div>
         <div class="col-3 my-1">
