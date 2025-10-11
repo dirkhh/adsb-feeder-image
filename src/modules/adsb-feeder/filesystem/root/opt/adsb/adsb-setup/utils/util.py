@@ -236,7 +236,7 @@ def get_plain_url(plain_url, method="GET", data=None):
     ) as err:
         print_err(f"checking {plain_url} failed: {err}")
         status = err.errno
-    except:
+    except Exception:
         print_err("checking {plain_url} failed: {traceback.format_exc()}")
     else:
         return response.text, response.status_code

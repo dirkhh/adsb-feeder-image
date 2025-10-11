@@ -23,5 +23,6 @@ class Background:
         self._function()
 
     def cancel(self):
-        self._timer.cancel()
+        if self._timer:
+            self._timer.cancel()
         self._running = False

@@ -100,9 +100,8 @@ class AggStatus:
             mlat_json = json.load(open(path, "r"))
             percent_good = mlat_json.get("good_sync_percentage_last_hour", 0)
             percent_bad = mlat_json.get("bad_sync_percentage_last_hour", 0)
-            peer_count = mlat_json.get("peer_count", 0)
             now = mlat_json.get("now")
-        except:
+        except Exception:
             self._mlat = T.Disconnected
             return
         if time.time() - now > 60:
@@ -132,7 +131,7 @@ class AggStatus:
         filename = f"{self.uf_path()}/readsb/stats.prom"
         try:
             readsb_status = open(filename, "r").read()
-        except:
+        except Exception:
             self._beast = T.Disconnected
             return
         match = re.search(pattern, readsb_status)
@@ -288,7 +287,7 @@ class AggStatus:
                         capture_output=True,
                         text=True,
                     )
-                except:
+                except Exception:
                     print_err("got exception trying to look at the rbfeeder logs")
                     return
                 serial_text = result.stdout.strip()
@@ -383,7 +382,7 @@ class AggStatus:
             self.check_alive_maplink()
 
         if self._agg == "adsblol" and not self._d.env_by_tags("adsblol_link").list_get(self._idx):
-            uuid = self._d.env_by_tags("adsblol_uuid").list_get(self._idx)
+            uuid = str(self._d.env_by_tags("adsblol_uuid").list_get(self._idx))
             json_url = "https://api.adsb.lol/0/me"
             response_dict, status = self.get_json(json_url)
             if response_dict and status == 200:
@@ -391,17 +390,17 @@ class AggStatus:
                     for entry in response_dict.get("clients").get("beast"):
                         if entry.get("uuid", "xxxxxxxx-xxxx-")[:14] == uuid[:14]:
                             self._d.env_by_tags("adsblol_link").list_set(self._idx, entry.get("adsblol_my_url"))
-                except:
+                except Exception:
                     print_err(traceback.format_exc())
 
         if self._agg == "adsbx":
             # get the adsbexchange feeder id for the anywhere map / status things
-            feeder_id = self.adsbx_feeder_id()
+            self.adsbx_feeder_id()
 
     def check_alive_maplink(self):
         # currently airplanes live uses the first 16 characters of the uuid as the feed id
         # this works better than getting it for the API because the API only returns 1 feed id
-        uuid = self._d.env_by_tags("ultrafeeder_uuid").list_get(self._idx)
+        uuid = str(self._d.env_by_tags("ultrafeeder_uuid").list_get(self._idx))
         feed_id = uuid.replace("-", "")[:16]
         map_link = f"https://globe.airplanes.live/?feed={feed_id}"
         self._d.env_by_tags("alivemaplink").list_set(self._idx, map_link)
@@ -422,16 +421,16 @@ class AggStatus:
                 self._d.env_by_tags("alivemaplink").list_set(self._idx, map_link)
 
     def adsbx_feeder_id(self):
-        feeder_id = self._d.env_by_tags("adsbxfeederid").list_get(self._idx)
-        uuid_saved = self._d.env_by_tags("adsbxfeederid_uuid").list_get(self._idx)
-        uuid = self._d.env_by_tags("ultrafeeder_uuid").list_get(self._idx)
+        feeder_id = str(self._d.env_by_tags("adsbxfeederid").list_get(self._idx))
+        uuid_saved = str(self._d.env_by_tags("adsbxfeederid_uuid").list_get(self._idx))
+        uuid = str(self._d.env_by_tags("ultrafeeder_uuid").list_get(self._idx))
         if uuid_saved != uuid or not feeder_id or len(feeder_id) != 12:
             # get the adsbexchange feeder id for the anywhere map / status things
             print_err(f"don't have the adsbX Feeder ID for {self._idx}, yet")
             output, status = get_plain_url(f"https://www.adsbexchange.com/api/feeders/tar1090/?feed={uuid}")
             match = re.search(
                 r"www.adsbexchange.com/api/feeders/\?feed=([^\"'&\s]*)",
-                output,
+                str(output),
             )
             adsbx_id = None
             if match:
@@ -457,7 +456,7 @@ class ImStatus:
     def check(self, check=False):
         with self._lock:
             if not self._cached or time.time() > self._next_check or check:
-                json_url = f"https://adsb.im/api/status"
+                json_url = "https://adsb.im/api/status"
                 self._cached, status = generic_get_json(json_url, self._d.env_by_tags("pack").value)
                 if status == 200:
                     # good result, no need to update this sooner than in a minute
@@ -494,6 +493,7 @@ class LastSeen:
             # last status is not kept across restarts for now, just assume we received a plane
             # just now, this isn't pretty but if we don't have restarts it's fine
             self.update()
+        assert self.seen is not None  # update() always sets self.seen
         # 0 or negative means this check is disabled, always return false
         if hours <= 0:
             return False
@@ -529,7 +529,7 @@ class Healthcheck:
 
     def set_good(self):
         if not self.good:
-            print_err(f"healthcheck healthy after it was bad previously")
+            print_err("healthcheck healthy after it was bad previously")
         self.good = True
         self.failedSince = 0
         self.reason = ""
@@ -544,7 +544,7 @@ class Healthcheck:
                     print_err(f"healthcheck url ping FAILURE: got http status {status}")
                     # failure, try again in a minute instead of waiting pingInterval
                     self.nextGoodPing = time.time() + 60
-                print_err(f"healthcheck url ping success")
+                print_err("healthcheck url ping success")
 
     def set_failed(self, reason):
         self.reason = reason
@@ -569,7 +569,7 @@ class Healthcheck:
                     print_err(f"healthcheck url fail FAILURE: got http status {status}")
                     # failure, try again in a minute instead of waiting pingInterval
                     self.nextFailPing = time.time() + 60
-                print_err(f"healthcheck url fail successfully signaled")
+                print_err("healthcheck url fail successfully signaled")
 
     # this is called every minute from app.py so we don't need to run another thread
     def check(self):
@@ -594,7 +594,7 @@ class Healthcheck:
                     if samples == self.lastReadsbSamples:
                         fail.append(f"1090 SDR hung (sample count: {samples})")
                     self.lastReadsbSamples = samples
-        except:
+        except Exception:
             if adsb:
                 print_err(traceback.format_exc())
                 fail.append("readsb stats.json not found")
@@ -614,7 +614,7 @@ class Healthcheck:
                     now = obj.get("now")
                     if not now or now < time.time() - 60:
                         fail.append("readsb aircraft.json out of date")
-            except:
+            except Exception:
                 print_err(traceback.format_exc())
                 fail.append("readsb not running / 1090 SDR probably dead / unplugged")
 
@@ -624,19 +624,19 @@ class Healthcheck:
 
         if self._d.env_by_tags("978serial").value != "":
             try:
-                with open(f"/run/adsb-feeder-dump978/skyaware978/aircraft.json") as f:
+                with open("/run/adsb-feeder-dump978/skyaware978/aircraft.json") as f:
                     obj = json.load(f)
                     ac = obj.get("aircraft")
                     seen = False
                     for a in ac:
-                        if a.get("lat") != None:
+                        if a.get("lat") is not None:
                             seen = True
                     if seen:
                         self.last978.update()
                     now = obj.get("now")
                     if not now or now < time.time() - 60:
                         fail.append("dump978 aircraft.json out of date")
-            except:
+            except Exception:
                 print_err(traceback.format_exc())
                 fail.append("dump978 not running / 978 SDR probably dead / unplugged")
 
@@ -646,12 +646,12 @@ class Healthcheck:
 
         if self._d.is_enabled("airspy"):
             try:
-                with open(f"/run/adsb-feeder-airspy/airspy_adsb/stats.json") as f:
+                with open("/run/adsb-feeder-airspy/airspy_adsb/stats.json") as f:
                     obj = json.load(f)
                     now = obj.get("now")
                     if not now or now < time.time() - 90:
                         fail.append("airspy stats.json outdated")
-            except:
+            except Exception:
                 print_err(traceback.format_exc())
                 fail.append("airspy_adsb not running, 1090 SDR (airspy) probably dead / unplugged")
 
