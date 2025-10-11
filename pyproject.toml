@@ -1,0 +1,25 @@
+[tool.black]
+line-length = 130
+
+[tool.ruff]
+line-length = 130
+
+[tool.pylint.format]
+max-line-length = 130
+
+[tool.flake8]
+max-line-length = 130
+
+[tool.mypy]
+check_untyped_defs = true
+
+[project]
+dependencies = [
+    "djlint",
+    "Flask",
+    "requests",
+    "shapely",
+    "types-requests",
+    "types-shapely",
+]
+
