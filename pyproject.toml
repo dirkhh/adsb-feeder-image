@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=45", "setuptools-scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[tool.black]
+line-length = 130
+extend-exclude = '''
+/(
+  | src/modules/adsb-feeder/filesystem/root/opt/adsb/extras/.*\.py
+)/
+'''
+
+[tool.ruff]
+line-length = 130
+exclude = [
+    "src/modules/adsb-feeder/filesystem/root/opt/adsb/extras/*.py",
+]
+
+[tool.ruff.lint]
+# Enable pycodestyle (E, W), pyflakes (F), and isort (I) by default
+select = ["E", "W", "F", "I"]
+# Ignore line too long (E501) and whitespace before ':' (E203) - same as flake8
+ignore = ["E501", "E203"]
+
+[tool.pylint.format]
+max-line-length = 130
+
+[tool.flake8]
+extend-ignore = "E501"
+
+[tool.mypy]
+check_untyped_defs = true
+exclude = [
+    "src/modules/adsb-feeder/filesystem/root/opt/adsb/extras/.*\\.py$",
+]
+
+[project]
+name = "adsb-feeder-image"
+dynamic = ["version"]
+dependencies = [
+    "djlint",
+    "Flask",
+    "requests",
+    "shapely",
+    "types-requests",
+    "types-shapely",
+]
+
+[tool.setuptools_scm]
+# Derive version from git tags
+
