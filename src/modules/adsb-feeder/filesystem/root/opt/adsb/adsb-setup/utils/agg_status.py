@@ -1,7 +1,6 @@
 import json
 import re
 import subprocess
-import requests
 import threading
 import traceback
 import time
@@ -9,7 +8,7 @@ import pathlib
 import os
 from datetime import datetime, timedelta
 from enum import Enum
-from .util import generic_get_json, print_err, make_int, run_shell_captured, get_plain_url
+from .util import generic_get_json, print_err, make_int, get_plain_url
 from .data import Data
 
 T = Enum("T", ["Disconnected", "Unknown", "Good", "Bad", "Warning", "Disabled", "Starting", "ContainerDown"])
@@ -184,7 +183,7 @@ class AggStatus:
                 "planewatch": "planewatch",
                 "sdrmap": "sdrmap",
             }
-            container_name = container_for_agg.get(self._agg)
+            container_name = container_for_agg.get(self._agg, "")
             if self._idx != 0:
                 container_name += f"_{self._idx}"
 
