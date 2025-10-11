@@ -23,7 +23,7 @@
 <form class="row gy-2 gx-3 mx-1 mx-lg-3 mx-xl-5 align-items-center" method="post"
       onsubmit="show_spinner(); return true;">
   <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3" name="aggregators"
-          value={{go}}>apply settings - take me to the website</button>
+          value={{go}}>Apply</button>
 
   <!-- ADS-B related aggregators -->
   {% if is_enabled('base_config') and env_value_by_tag('aggregator_choice') in ['micro', 'nano'] %}
@@ -589,7 +589,7 @@
   <!-- end of the AIS section -->
 
   <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3 my-5" name="aggregators"
-          value={{go}}>apply settings - take me to the website</button>
+          value={{go}}>Apply</button>
 </form>
 <script>
   const box_fields = [
