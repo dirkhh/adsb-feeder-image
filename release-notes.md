@@ -1,5 +1,6 @@
 Changes since v3.0.5
 =======
+- beta-notes: update Skystats to v0.1.8
 - ais-catcher: update container to make sure biastee is set to off on startup if not enabled
 - beta-notes: fix showing CPU temperature and allow manual configuration of the correct sensor
 - core: add Skystats for extended statistics - tuned for low disk IO
