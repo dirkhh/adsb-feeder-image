@@ -131,6 +131,7 @@ fi
 
 # Enable services at boot
 systemctl enable adsb-setup.service
+systemctl enable adsb-recovery.service
 systemctl enable adsb-early-boot.service
 systemctl enable adsb-docker.service
 systemctl enable adsb-bootstrap.service

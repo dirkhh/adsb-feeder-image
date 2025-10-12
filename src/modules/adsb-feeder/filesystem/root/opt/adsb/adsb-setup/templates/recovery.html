@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" data-mdb-theme="{{ theme }}">
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <!-- Google Fonts Roboto. Copyright 2011 Google Inc. All Rights Reserved. See {{ url_for('static', filename='fonts/LICENSE.txt') }} -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts.css') }}" />
+  <!-- MDB -->
+  <link rel="stylesheet" id="css-theme" href="{{ url_for('static', filename='css/mdb.min.css') }}" />
+  {% if not (theme == 'light') or (theme == 'dark') %}
+  <script>
+    ; (function () {
+      const htmlElement = document.querySelector("html")
+      if (htmlElement.getAttribute("data-mdb-theme") === 'auto') {
+        function updateTheme() {
+          document.querySelector("html").setAttribute("data-mdb-theme",
+            window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateTheme)
+        updateTheme()
+      }
+    })()
+  </script>
+  {% endif %}
+  <link rel="shortcut icon" href="/static/favicon.ico" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+<title>ADS-B Feeder System Recovery</title>
+</head>
+
+<body>
+  <div class="bgimage">
+    <img src="/static/images/adsbim-background-transparent-4k.png" alt="">
+  </div>
+  <div class="container pt-5 mt-3">
+    <h1>ADS-B Feeder System Recovery</h1>
+
+    {% if rollback_in_progress %}
+    <div class="alert alert-info my-3 w-75" role="alert">
+      <h5 class="alert-heading">
+        <div class="spinner-border spinner-border-sm me-2" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        Recovering to version {{ rollback_target_version }}
+      </h5>
+      <p class="mb-0">
+        Please wait while the system rolls back. This may take several minutes.
+      </p>
+    </div>
+    {% elif previous_version %}
+    <div class="alert alert-warning my-3 w-75" role="alert">
+      <h5 class="alert-heading">System Recovery</h5>
+      <p class="mb-2">
+        Current version: <strong>{{ current_version or 'Unknown' }}</strong>
+      </p>
+      <p class="mb-3">
+        If you are experiencing issues with the current version, you can roll back to the previous stable version.
+      </p>
+      <a href="/rollback" class="btn btn-danger" onclick="return confirm('Roll back to version {{ previous_version }}? This will restart the system.');">
+        Roll back to {{ previous_version }}
+      </a>
+    </div>
+    {% else %}
+    <div class="alert alert-info my-3" role="alert">
+      Current version: <strong>{{ current_version or 'Unknown' }}</strong>
+      <br />
+      <small class="text-muted">Previous version information not available</small>
+    </div>
+    {% endif %}
+
+    <h3 class="my-3">System Log</h3>
+    <div class="row overflow-auto" style="height: 60vh" id="logcontainer">
+      <pre class="col-6-sm col-12 small" id="log"></pre>
+    </div>
+  </div>
+
+  <script src="/static/js/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8="
+          crossorigin="anonymous"></script>
+
+  <script>
+    function stream() {
+      var streamlog = new EventSource("/stream-log");
+      console.log("created EventSource")
+      streamErrorHandled = false;
+      streamlog.onerror = function (e) {
+        streamlog.close();
+        console.log("streamlog error");
+      }
+      streamlog.onmessage = function (e) {
+        $('#log').append(e.data + "\n");
+        $('#logcontainer').scrollTop($('#logcontainer')[0].scrollHeight);
+      };
+    }
+
+    console.log("starting stream");
+    stream();
+
+    let tinyScreen = window.matchMedia("(max-width: 480px)");
+    tinyScreen.addEventListener("change", ({ matches }) => adjustFont(matches));
+    function adjustFont(matches) {
+      if (matches) {
+        $("#log").css("font-size", "30%");
+      } else {
+        $("#log").css("font-size", "50%");
+      }
+    }
+    adjustFont(tinyScreen.matches);
+
+    // Check recovery status if in progress
+    {% if rollback_in_progress %}
+    function checkRecoveryStatus() {
+      var request = new XMLHttpRequest();
+      request.open('GET', '/recovery-status');
+      request.timeout = 5000;
+
+      request.onload = function () {
+        if (request.readyState === 4 && request.status === 200) {
+          if (request.responseText === 'completed') {
+            console.log('Recovery completed, reloading page...');
+            window.location.reload();
+            return;
+          } else if (request.responseText === 'in-progress') {
+            console.log('Recovery still in progress...');
+            setTimeout(checkRecoveryStatus, 2000);
+            return;
+          }
+        }
+        // Check again on error or unexpected response
+        setTimeout(checkRecoveryStatus, 2000);
+      };
+
+      request.onerror = function () {
+        console.log("Error checking recovery status, retrying...");
+        setTimeout(checkRecoveryStatus, 2000);
+      };
+
+      request.ontimeout = function () {
+        console.log("Timeout checking recovery status, retrying...");
+        setTimeout(checkRecoveryStatus, 2000);
+      };
+
+      request.send();
+    }
+
+    console.log("Starting recovery status checks...");
+    setTimeout(checkRecoveryStatus, 2000);
+    {% endif %}
+
+  </script>
+</body>
+
+</html>
+

@@ -1,0 +1,19 @@
+[Unit]
+Description=ADS-B Feeder Recovery Service
+After=network-online.target
+
+[Service]
+SyslogIdentifier=adsb-recovery
+WorkingDirectory=/opt/adsb/adsb-setup
+ExecStart=/usr/bin/python3 /opt/adsb/adsb-setup/recovery-app.py 1089 /run/adsb-feeder-image.log
+Restart=always
+Type=simple
+RestartSec=5
+StartLimitInterval=1
+StartLimitBurst=100
+StandardOutput=append:/run/adsb-feeder-image.log
+StandardError=append:/run/adsb-feeder-image.log
+
+[Install]
+WantedBy=multi-user.target
+
