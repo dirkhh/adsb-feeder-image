@@ -623,6 +623,12 @@ class AdsbIm:
 
         threading.Thread(target=self.monitor_dmesg).start()
 
+        # Suppress Flask development server warning
+        import logging
+
+        log = logging.getLogger("werkzeug")
+        log.setLevel(logging.ERROR)
+
         self.app.run(
             host="0.0.0.0",
             port=self._d.env_by_tags("webport").valueint,

@@ -73,4 +73,11 @@ if __name__ == "__main__":
         with open("/opt/adsb/config/config.json") as f:
             config = json.load(f)
         theme = config.get("_ASDBIM_CSS_THEME", "auto")
+
+    # Suppress Flask development server warning
+    import logging
+
+    log = logging.getLogger("werkzeug")
+    log.setLevel(logging.ERROR)
+
     app.run(host="0.0.0.0", port=port)

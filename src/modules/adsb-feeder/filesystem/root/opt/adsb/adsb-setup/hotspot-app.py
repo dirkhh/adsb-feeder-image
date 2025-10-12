@@ -121,6 +121,12 @@ class Hotspot:
 
         threading.Thread(target=idle_exit).start()
 
+        # Suppress Flask development server warning
+        import logging
+
+        log = logging.getLogger("werkzeug")
+        log.setLevel(logging.ERROR)
+
         self.app.run(host="0.0.0.0", port=80)
 
     def setup_hotspot(self):
