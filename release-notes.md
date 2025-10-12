@@ -1,5 +1,6 @@
 Changes since v3.0.5
 =======
+- beta-notes: fix two stupid bugs introduced in the last beta
 - UI: consistent wording of button text to apply changes
 - beta-notes: update Skystats to v0.1.8
 - ais-catcher: update container to make sure biastee is set to off on startup if not enabled

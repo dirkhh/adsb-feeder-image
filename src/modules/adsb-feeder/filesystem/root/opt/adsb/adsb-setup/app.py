@@ -344,11 +344,13 @@ class AdsbIm:
 
         self.load_planes_seen_per_day()
 
-        while len(self._d.env_by_tags("site_name").valuestr) > self._d.env_by_tags("num_micro_sites").valueint + 1:
-            actual_len = len(self._d.env_by_tags("site_name").valuestr)
-            nominal_len = self._d.env_by_tags("num_micro_sites").valueint + 1
-            print_err(f"BAD CONFIG STATE, site_name list too long {actual_len} > {nominal_len}, removing one element")
-            self._d.env_by_tags("site_name").list_remove()
+        site_name_env = self._d.env_by_tags("site_name")
+        if isinstance(site_name_env.value, list):
+            while len(site_name_env.value) > self._d.env_by_tags("num_micro_sites").valueint + 1:
+                actual_len = len(site_name_env.value)
+                nominal_len = self._d.env_by_tags("num_micro_sites").valueint + 1
+                print_err(f"BAD CONFIG STATE, site_name list too long {actual_len} > {nominal_len}, removing one element")
+                site_name_env.list_remove()
 
         # now all the envs are loaded and reconciled with the data on file - which means we should
         # actually write out the potentially updated values (e.g. when plain values were converted
