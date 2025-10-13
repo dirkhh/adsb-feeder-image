@@ -26,7 +26,7 @@ class Data:
     is_feeder_image = True
     _env_by_tags_dict: dict[tuple[str, ...], Env] = field(default_factory=dict[tuple[str, ...], Env])
 
-    ultrafeeder: list = field(default_factory=list)
+    ultrafeeder: list = []
     previous_version: str = ""
 
     _proxy_routes = [
