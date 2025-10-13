@@ -272,13 +272,19 @@ p2p_disabled=1
                         capture_output=True,
                         timeout=20.0,
                     )
-                except subprocess.SubprocessError as e:
+                except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
                     # something went wrong
                     output = ""
                     if e.stdout:
                         output += e.stdout.decode()
                     if e.stderr:
                         output += e.stderr.decode()
+
+                except Exception as e:
+                    # catch any other unexpected exceptions
+                    print_err(f"run_shell_captured: unexpected exception {e}")
+                    output = str(e)
+
                 else:
                     output = result.stdout.decode() + result.stderr.decode()
 

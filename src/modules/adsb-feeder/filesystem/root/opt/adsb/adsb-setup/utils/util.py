@@ -182,7 +182,7 @@ def run_shell_captured(command="", timeout=1800):
             check=True,
             timeout=timeout,
         )
-    except subprocess.SubprocessError as e:
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
         # something went wrong
         output = ""
         if e.stdout:
@@ -190,6 +190,10 @@ def run_shell_captured(command="", timeout=1800):
         if e.stderr:
             output += e.stderr.decode()
         return (False, output)
+    except Exception as e:
+        # catch any other unexpected exceptions
+        print_err(f"run_shell_captured: unexpected exception {e}")
+        return (False, str(e))
 
     output = result.stdout.decode()
     return (True, output)
