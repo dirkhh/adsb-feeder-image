@@ -1,6 +1,5 @@
 import json
 import re
-import time
 import traceback
 
 from shapely.geometry import LinearRing, Polygon
@@ -31,7 +30,6 @@ class MultiOutline:
     def _get_heywhatsthat(self, num):
         data = []
         hwt_feeders = []
-        now = time.time()
         tar1090port = 8080
         with open("/opt/adsb/config/.env", "r") as env:
             for line in env:

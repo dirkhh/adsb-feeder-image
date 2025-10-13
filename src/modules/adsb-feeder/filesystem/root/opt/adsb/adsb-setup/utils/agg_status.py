@@ -101,7 +101,6 @@ class AggStatus:
             mlat_json = json.load(open(path, "r"))
             percent_good = mlat_json.get("good_sync_percentage_last_hour", 0)
             percent_bad = mlat_json.get("bad_sync_percentage_last_hour", 0)
-            peer_count = mlat_json.get("peer_count", 0)
             now = mlat_json.get("now")
         except Exception:
             self._mlat = T.Disconnected
@@ -394,10 +393,6 @@ class AggStatus:
                             self._d.env_by_tags("adsblol_link").list_set(self._idx, entry.get("adsblol_my_url"))
                 except Exception:
                     print_err(traceback.format_exc())
-
-        if self._agg == "adsbx":
-            # get the adsbexchange feeder id for the anywhere map / status things
-            feeder_id = self.adsbx_feeder_id()
 
     def check_alive_maplink(self):
         # currently airplanes live uses the first 16 characters of the uuid as the feed id

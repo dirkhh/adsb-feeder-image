@@ -70,7 +70,7 @@ class Aggregator:
         print_err(f"download_docker_container {container}")
         cmdline = f"docker pull {container}"
         try:
-            result = subprocess.run(cmdline, timeout=180.0, shell=True)
+            subprocess.run(cmdline, timeout=180.0, shell=True)
         except subprocess.TimeoutExpired:
             return False
         return True
@@ -78,7 +78,7 @@ class Aggregator:
     def _docker_run_with_timeout(self, cmdline: str, timeout: float) -> str:
         def force_remove_container(name):
             try:
-                result2 = subprocess.run(
+                subprocess.run(
                     f"docker rm -f {name}",
                     timeout=15,
                     shell=True,

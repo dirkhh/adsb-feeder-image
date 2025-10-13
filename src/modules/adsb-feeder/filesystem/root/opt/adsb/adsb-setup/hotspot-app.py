@@ -20,9 +20,7 @@ from utils.wifi import Wifi
 
 
 def print_err(*args, **kwargs):
-    timestamp = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()) + ".{0:03.0f}Z".format(
-        math.modf(time.time())[0] * 1000
-    )
+    timestamp = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()) + ".{0:03.0f}Z".format(math.modf(time.time())[0] * 1000)
     print(*((timestamp,) + args), file=sys.stderr, **kwargs)
 
 
@@ -48,7 +46,6 @@ class Hotspot:
             sys.exit(1)
         print_err("trying to scan for SSIDs")
         self.wifi.ssids = []
-        i = 0
         startTime = time.time()
         while time.time() - startTime < 20:
             self.wifi.scan_ssids()
@@ -72,9 +69,7 @@ class Hotspot:
         return self.restart_state
 
     def hotspot(self):
-        return render_template(
-            "hotspot.html", version=self.version, comment=self.comment,
-            ssids=self.wifi.ssids)
+        return render_template("hotspot.html", version=self.version, comment=self.comment, ssids=self.wifi.ssids)
 
     def catch_all(self, path):
         # Catch all requests not explicitly handled. Since our fake DNS server
@@ -100,9 +95,7 @@ class Hotspot:
         return self.hotspot()
 
     def _request_looks_like_wifi_credentials(self):
-        return (
-            request.method == "POST" and "ssid" in request.form
-            and "passwd" in request.form)
+        return request.method == "POST" and "ssid" in request.form and "passwd" in request.form
 
     def restarting(self):
         return render_template("hotspot-restarting.html")
@@ -184,9 +177,7 @@ class Hotspot:
                 shell=True,
                 capture_output=True,
             )
-            print_err(
-                f"restarted networking.service: {output.returncode}\n{output.stderr.decode()}\n{output.stdout.decode()}"
-            )
+            print_err(f"restarted networking.service: {output.returncode}\n{output.stderr.decode()}\n{output.stdout.decode()}")
         elif self._baseos == "raspbian":
             subprocess.run(
                 f"iw reg set PA; systemctl restart wpa_supplicant NetworkManager",
