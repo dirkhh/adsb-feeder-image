@@ -12,6 +12,7 @@ app = Flask(__name__)
 logfile = "/run/adsb-feeder-image.log"
 title = "Restarting the ADS-B Feeder System"
 theme = "auto"
+verbose: int = 0
 
 
 # we need to fake having env_value_by_tag so that the waiting.html can be
@@ -25,9 +26,7 @@ def print_err(*args, **kwargs):
     level = int(kwargs.pop("level", 0))
     if level > 0 and int(verbose) & int(level) == 0:
         return
-    timestamp = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()) + ".{0:03.0f}Z".format(
-        math.modf(time.time())[0] * 1000
-    )
+    timestamp = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()) + ".{0:03.0f}Z".format(math.modf(time.time())[0] * 1000)
     print(*((timestamp,) + args), file=sys.stderr, **kwargs)
 
 
