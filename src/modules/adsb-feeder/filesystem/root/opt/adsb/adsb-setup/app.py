@@ -1010,8 +1010,6 @@ class AdsbIm:
         # now check which ones are different from the installed versions
         changed: List[str] = []
         unchanged: List[str] = []
-        saw_globe_history = False
-        saw_graphs = False
         uf_paths = set()
         for name in restored_files:
             if name.startswith("ultrafeeder/"):
@@ -3033,10 +3031,9 @@ class AdsbIm:
 
     @check_restart_lock
     def update(self):
-        description = """
-            This is the one endpoint that handles all the updates coming in from the UI.
-            It walks through the form data and figures out what to do about the information provided.
-        """
+        # This is the one endpoint that handles all the updates coming in from the UI.
+        # It walks through the form data and figures out what to do about the information provided.
+        #
         # let's try and figure out where we came from - for reasons I don't understand
         # the regexp didn't capture the site number, so let's do this the hard way
         extra_args = ""
