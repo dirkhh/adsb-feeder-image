@@ -90,7 +90,7 @@ from werkzeug.utils import secure_filename
 
 # don't log static assets
 class NoStatic(flask_logging.Filter):
-    def filter(record):
+    def filter(self, record):
         msg = record.getMessage()
         if "GET /static/" in msg:
             return False
@@ -100,7 +100,7 @@ class NoStatic(flask_logging.Filter):
         return True
 
 
-flask_logging.getLogger("werkzeug").addFilter(NoStatic)
+flask_logging.getLogger("werkzeug").addFilter(NoStatic())
 
 
 class AdsbIm:
