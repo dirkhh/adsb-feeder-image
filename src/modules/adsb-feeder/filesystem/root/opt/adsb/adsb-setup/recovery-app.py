@@ -98,7 +98,7 @@ def get_git_tags_and_branches():
             branches = result.stdout.strip().split("\n")
             branches = [branch.replace("origin/", "").strip() for branch in branches if branch.strip()]
 
-        print_err(f"tags: {tags} branches: {branches}")
+        #  print_err(f"tags: {tags} branches: {branches}")
         return tags, branches
     except Exception as e:
         print_err(f"Failed to get git tags and branches: {e}")
@@ -114,7 +114,7 @@ def get_previous_version():
     if not tags:
         return None
     release_tags = [tag for tag in tags if "-beta" not in tag]
-    print_err(f"tags: {tags} release_tags: {release_tags} current: {current}")
+    #  print_err(f"tags: {tags} release_tags: {release_tags} current: {current}")
     is_beta = "-beta" in current
 
     # Find current version in tags list
