@@ -16,6 +16,9 @@ sync-and-update-nocontainer:
 	# restart webinterface
 	ssh -S "${SSH_CONTROL}" root@$(HOST) systemctl restart adsb-setup
 
+	# restart the reovery service
+	ssh -S "${SSH_CONTROL}" root@$(HOST) systemctl restart adsb-recovery
+
 sync-and-update:
 # sync relevant files and update
 	ssh -O check -S "${SSH_CONTROL}" root@$(HOST) || make ssh-control
@@ -33,6 +36,9 @@ sync-and-update:
 
 	# start webinterface back up
 	ssh -S "${SSH_CONTROL}" root@$(HOST) systemctl restart adsb-setup
+
+	# restart the reovery service
+	ssh -S "${SSH_CONTROL}" root@$(HOST) systemctl restart adsb-recovery
 
 sync-py-control:
 # check if the SSH control port is open, if not, open it.
