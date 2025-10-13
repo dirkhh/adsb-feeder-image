@@ -1516,7 +1516,7 @@ class AdsbIm:
         return Response(json.dumps(ret), mimetype="application/json")
 
     def stage2_connection(self):
-        if not self._d.env_by_tags("aggregator_choice").value in ["micro", "nano"] or self._last_stage2_contact == "":
+        if self._d.env_by_tags("aggregator_choice").value not in ["micro", "nano"] or self._last_stage2_contact == "":
             return Response(json.dumps({"stage2_connected": "never"}), mimetype="application/json")
         now = int(time.time())
         last = self._last_stage2_contact_time

@@ -13,7 +13,7 @@ if (len(sys.argv) - 1) % 2 != 0:
 
 for i in range(int((len(sys.argv) - 1) / 2)):
     sr.append((sys.argv[2 * i + 1], sys.argv[2 * i + 2]))
-    #print(f"{sr[-1]}")
+    # print(f"{sr[-1]}")
 
 sanitize_vars = [
     "FEEDER_LAT",
@@ -61,12 +61,12 @@ for name in sanitize_vars:
         pairs.append((item, name))
 
     for search, replace in pairs:
-        if not search or search == True or search == False:
+        if not search or search == "True" or search == "False":
             continue
         search = str(search).strip()
         if not search:
             continue
-        #print(f"{search} {replace}")
+        # print(f"{search} {replace}")
         sr.append((search, replace))
         # in the .env file, $ is escaped with $$, in the json $ is not escaped
         # thus in addition to the above replacement, we also need to replace
@@ -79,4 +79,3 @@ for line in sys.stdin:
     for search, replace in sr:
         line = line.replace(search, replace)
     sys.stdout.write(line)
-
