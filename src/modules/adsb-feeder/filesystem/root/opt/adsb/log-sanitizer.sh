@@ -92,6 +92,11 @@ ${SEPARATOR}
 $(cat /opt/adsb/config/.env 2>&1)
 ${SEPARATOR}
 "
+
+# this is good to view the logs for failed SDRs which is a good amount of support requests
+docker logs ultrafeeder 2>&1 | grep -F '[readsb]'
+echo "${SEPARATOR}"
+
 if [ -f /opt/adsb/os.adsb.feeder.image ] ; then
     echo "journalctl -e -n3000:"
     journalctl -e -n3000 2>&1
