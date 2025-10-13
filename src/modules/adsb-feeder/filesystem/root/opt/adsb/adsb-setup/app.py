@@ -1189,12 +1189,21 @@ class AdsbIm:
     def configured_serials(self):
         return {serial for serial in {self._d.env_by_tags(e).valuestr for e in self.serial_env_names()} if serial != ""}
 
-    def closest_airport(self, lat, lon):
+    def closest_airport_dict(self, lat, lon) -> dict:
         airport, status = generic_get_json(f"https://adsb.im/api/closest_airport/{lat}/{lon}", timeout=10.0)
-        if status != 200:
+        if status != 200 or airport == None:
             print_err(f"closest_airport({lat}, {lon}) failed with status {status}")
-            return None
-        return airport
+            return {"error": "Failed to fetch closest airport"}
+        try:
+            airport_dict = json.loads(airport)
+        except Exception:
+            print_err(f"closest_airport({lat}, {lon}) failed to parse JSON {airport}")
+            return {"error": "Failed to parse closest airport"}
+        return airport_dict if airport_dict else {"error": "No closest airport found"}
+
+    def closest_airport(self, lat, lon) -> Response:
+        airport = self.closest_airport_dict(lat, lon)
+        return Response(json.dumps(airport), mimetype="application/json")
 
     def sdr_info(self):
         # get our guess for the right SDR to frequency mapping
@@ -2432,7 +2441,7 @@ class AdsbIm:
 
         # make sure we have a closest airport
         if self._d.env_by_tags("closest_airport").list_get(0) == "":
-            airport = self.closest_airport(self._d.env_by_tags("lat").list_get(0), self._d.env_by_tags("lon").list_get(0))
+            airport = self.closest_airport_dict(self._d.env_by_tags("lat").list_get(0), self._d.env_by_tags("lon").list_get(0))
             if airport:
                 self._d.env_by_tags("closest_airport").list_set(0, airport.get("icao", ""))
                 if self._d.env_by_tags("skystats_domestic_country_iso").value == "":
@@ -2686,7 +2695,9 @@ class AdsbIm:
                 self._d.env_by_tags("skystats_db_password").value = self.generate_random_password()
             # make sure we grab the domestic country iso from the closest airport
             if self._d.env_by_tags("skystats_domestic_country_iso").value == "":
-                airport = self.closest_airport(self._d.env_by_tags("lat").list_get(0), self._d.env_by_tags("lon").list_get(0))
+                airport = self.closest_airport_dict(
+                    self._d.env_by_tags("lat").list_get(0), self._d.env_by_tags("lon").list_get(0)
+                )
                 if airport:
                     self._d.env_by_tags("skystats_domestic_country_iso").value = airport.get("isocountry", "")
         # check if we need to run the skystats database container
@@ -3540,7 +3551,7 @@ class AdsbIm:
                 lat = str(float(re.sub("[a-zA-Z° ]", "", form.get("lat", ""))))
                 long = str(float(re.sub("[a-zA-Z° ]", "", form.get("lon", ""))))
                 if lat != self._d.env_by_tags("lat").list_get(0) or long != self._d.env_by_tags("lon").list_get(0):
-                    airport = self.closest_airport(lat, long)
+                    airport = self.closest_airport_dict(lat, long)
                     if airport:
                         self._d.env_by_tags("closest_airport").list_set(0, airport["icao"])
             if key == "tz":
