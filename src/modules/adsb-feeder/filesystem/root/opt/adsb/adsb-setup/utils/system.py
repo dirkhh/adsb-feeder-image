@@ -220,7 +220,7 @@ class System:
                 s.connect((ip, 2947))
                 print_err(f"Connected to gpsd on {ip}:2947")
                 return True
-            except socket.error as e:
+            except socket.error:
                 print_err(f"No gpsd on {ip}:2947 detected")
             finally:
                 s.close()
