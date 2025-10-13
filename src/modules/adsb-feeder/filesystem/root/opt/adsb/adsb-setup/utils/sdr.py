@@ -1,10 +1,10 @@
+import io
 import re
 import subprocess
 import sys
 import time
 from threading import Lock
 from typing import Dict, List, Set, Tuple
-
 from .util import print_err
 
 
@@ -13,7 +13,7 @@ class SDR:
         self._d = data
         self._type = type_
         self._address = address
-        self._serial_probed: str = ""
+        self._serial_probed = None
         self.lsusb_output = ""
         # probe serial to popuplate lsusb_output right now
         self._serial
@@ -73,10 +73,7 @@ class SDR:
         return False
 
     def __repr__(self):
-        return (
-            f"SDR(type: '{self._type}' address: '{self._address}', serial: '{self._serial}', "
-            f"purpose: '{self.purpose}', gain: '{self.gain}', biastee: {self.biastee})"
-        )
+        return f"SDR(type: '{self._type}' address: '{self._address}', serial: '{self._serial}', purpose: '{self.purpose}', gain: '{self.gain}', biastee: {self.biastee})"
 
 
 class SDRDevices:
@@ -90,7 +87,7 @@ class SDRDevices:
         self.null_sdr: SDR = SDR("unknown", "unknown", self._d)
         self.duplicates: Set[str] = set()
         self.lsusb_output = ""
-        self.last_probe: float = 0.0
+        self.last_probe = 0
         self.last_debug_out = ""
         self.lock = Lock()
 
@@ -100,8 +97,8 @@ class SDRDevices:
     def __repr__(self):
         return f"SDRDevices({', '.join([s.__repr__() for s in self.sdrs])})"
 
-    def purposes(self) -> list[str]:
-        p = [
+    def purposes(self):
+        p = (
             "1090",
             "978",
             "1090_2",
@@ -111,9 +108,9 @@ class SDRDevices:
             "hfdl",
             "ais",
             "sonde",
-        ]
+        )
         for i in range(16):
-            p.append(f"other-{i}")
+            p += (f"other-{i}",)
         return p
 
     def purpose_env(self, purpose: str):
@@ -255,11 +252,11 @@ class SDRDevices:
         assignments: Dict[str, Tuple[str, str, bool]] = self.assignment_function()
         for purpose in assignments.keys():
             serial, gain, biastee = assignments[purpose]
-            assigned_sdr: SDR | None = self.sdr_settings.get(serial)
-            if assigned_sdr:
-                assigned_sdr.purpose = purpose
-                assigned_sdr.gain = gain
-                assigned_sdr.biastee = biastee
+            sdr = self.sdr_settings.get(serial)
+            if sdr:
+                sdr.purpose = purpose
+                sdr.gain = gain
+                sdr.biastee = biastee
 
     def get_sdr_by_serial(self, serial: str):
         self.ensure_populated()
@@ -365,15 +362,15 @@ class SDRDevices:
             result = subprocess.run("rtl_eeprom -d 0", shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         except subprocess.SubprocessError:
             print_err("rtl_eeprom -d 0 failed")
-            return "[ERROR] rtl_eeprom -d 0 failed"
+            return f"[ERROR] rtl_eeprom -d 0 failed"
         rtl_eeprom_text = result.stdout
         if "usb_claim_interface error" in rtl_eeprom_text:
             print_err("usb_claim_interface error in rtl_eeprom output")
-            return "[ERROR] the SDR is in use, did you stop all containers?"
+            return f"[ERROR] the SDR is in use, did you stop all containers?"
         match = re.search(r"Serial number:\s*(\w+)", rtl_eeprom_text)
         if not match:
             print_err(f"could not find serial number in rtl_eeprom output '{rtl_eeprom_text}'")
-            return "[ERROR] could not find serial number in rtl_eeprom output"
+            return f"[ERROR] could not find serial number in rtl_eeprom output"
         if match.group(1) != oldserial:
             print_err(f"rtl_eeprom found serial number {match.group(1)} but expected {oldserial}")
             return f"[ERROR] rtl_eeprom found serial number {match.group(1)} but expected {oldserial}"
@@ -396,12 +393,12 @@ class SDRDevices:
             result = subprocess.run("rtl_eeprom -d 0", shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         except subprocess.SubprocessError:
             print_err("verify success: rtl_eeprom -d 0 failed")
-            return "[ERROR] verify success: rtl_eeprom -d 0 failed"
+            return f"[ERROR] verify success: rtl_eeprom -d 0 failed"
         rtl_eeprom_text = result.stdout
         match = re.search(r"Serial number:\s*(\w+)", rtl_eeprom_text)
         if not match:
             print_err("verify success: could not find serial number in rtl_eeprom output")
-            return "[ERROR] verify successs: could not find serial number in rtl_eeprom output"
+            return f"[ERROR] verify successs: could not find serial number in rtl_eeprom output"
         if match.group(1) != newserial:
             print_err(f"verify success: rtl_eepromfound serial number {match.group(1)} but expected {newserial}")
             return f"[ERROR] verify success: rtl_eeprom found serial number {match.group(1)} but expected {newserial}"

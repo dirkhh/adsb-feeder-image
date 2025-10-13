@@ -1,18 +1,19 @@
 import json
+import os
 import re
+import subprocess
+import time
 import traceback
-
 from shapely.geometry import LinearRing, Polygon
 from shapely.ops import unary_union
-
-from utils.util import get_plain_url, print_err
+from utils.util import make_int, print_err, get_plain_url
 
 use_is_valid_reason = True
 try:
-    from shapely.validation import is_valid_reason  # type: ignore
-except Exception:
+    from shapely.validation import is_valid_reason
+except:
     use_is_valid_reason = False
-    from shapely.validation import explain_validity  # type: ignore
+    from shapely.validation import explain_validity
 
 
 class MultiOutline:
@@ -21,7 +22,7 @@ class MultiOutline:
         for i in range(1, num + 1):
             try:
                 outline = json.load(open(f"/run/adsb-feeder-uf_{i}/readsb/outline.json"))
-            except Exception:
+            except:
                 pass
             else:
                 data.append(outline)
@@ -30,12 +31,13 @@ class MultiOutline:
     def _get_heywhatsthat(self, num):
         data = []
         hwt_feeders = []
+        now = time.time()
         tar1090port = 8080
         with open("/opt/adsb/config/.env", "r") as env:
             for line in env:
                 match = re.search(r"AF_TAR1090_PORT=(\d+)", line)
                 if match:
-                    tar1090port = int(match.group(1))
+                    tar1090port = match.group(1)
                 match = re.search(r"_ADSBIM_HEYWHATSTHAT_ENABLED_(\d+)=True", line)
                 if match:
                     hwt_feeders.append(int(match.group(1)))
@@ -46,12 +48,9 @@ class MultiOutline:
             if status != 200:
                 print_err(f"_get_heywhatsthat: http status {status} for {hwt_url}")
                 continue
-            if response is None:
-                print_err(f"_get_heywhatsthat: response is None for {hwt_url}")
-                continue
             try:
                 hwt = json.loads(response)
-            except Exception:
+            except:
                 print_err(f"_get_heywhatsthat: json.loads failed on response: {response}")
             else:
                 data.append(hwt)
@@ -81,7 +80,7 @@ class MultiOutline:
 
     def create(self, data, hwt_alt=0):
         # print_err(f"multioutline: called create with for data with len {len(data)}")
-        result: dict[str, list[list[list[float]]]] = {"multiRange": []}
+        result = {"multiRange": []}
         polygons = []
         for i in range(len(data)):
             d = data[i]
@@ -98,55 +97,46 @@ class MultiOutline:
                     p = Polygon(shell=LinearRing(points))
                     if p:
                         if use_is_valid_reason:
-                            r = is_valid_reason(p)  # type: ignore[possibly-unbound]
+                            r = is_valid_reason(p)
                             if r == "Valid Geometry":
                                 polygons.append(p)
                             else:
                                 print_err(f"multioutline: can't create polygon from outline #{i} - {r}")
                         else:
                             try:
-                                r = explain_validity(p)  # type: ignore[possibly-unbound]
+                                r = explain_validity(p)
                                 if r == "Valid Geometry":
                                     polygons.append(p)
                                 else:
                                     print_err(f"multioutline: can't create polygon from outline #{i} - {r}")
-                            except Exception:
+                            except:
                                 print_err(traceback.format_exc())
                                 print_err(f"multioutline: can't create polygon from outline #{i}")
                     else:
                         print_err(f"multioutline: can't create polygon from outline #{i}")
-                except Exception:
+                except:
                     print_err(traceback.format_exc())
                     print_err(f"multioutline: can't create linear ring from outline #{i} - maybe there is no data, yet?")
 
         if len(polygons) == 0:
             return result
         made_change = True
-        look_at = list(range(1, len(polygons)))
-        to_consider = [0]  # looks redundant, but prevents a potential 'unbound' error
+        look_at = range(1, len(polygons))
         while made_change:
             made_change = False
             to_consider = [0]
             for i in look_at:
                 combined = False
                 if not polygons[i] or not polygons[i].is_valid:
-                    if use_is_valid_reason:
-                        r = is_valid_reason(polygons[i])  # type: ignore[possibly-unbound]
-                    else:
-                        r = explain_validity(polygons[i])  # type: ignore[possibly-unbound]
-                    print_err(f"multioutline: polygons[{i}]: {r}")  # type: ignore[possibly-unbound]
+                    print_err(f"multioutline: polygons[{i}]: {explain_validity(polygons[i])}")
                     polygons[i] = polygons[i].buffer(0.0001)
                 for j in to_consider:
                     if not polygons[j].is_valid:
-                        if use_is_valid_reason:
-                            r = is_valid_reason(polygons[j])  # type: ignore[possibly-unbound]
-                        else:
-                            r = explain_validity(polygons[j])  # type: ignore[possibly-unbound]
-                        print_err(f"multioutline: polygons[{j}]: {r}")  # type: ignore[possibly-unbound]
+                        print_err(f"multioutline: polygons[{j}]: {explain_validity(polygons[j])}")
                         polygons[j] = polygons[j].buffer(0.0001)
                     try:
                         if not polygons[j].disjoint(polygons[i]):
-                            p = unary_union([polygons[j], polygons[i]])  # type: ignore[assignment]
+                            p = unary_union([polygons[j], polygons[i]])
                             polygons[j] = p
                             made_change = True
                             combined = True

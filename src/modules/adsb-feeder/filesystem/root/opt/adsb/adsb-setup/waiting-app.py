@@ -1,12 +1,11 @@
 import json
-import math
-import os
-import re
-import sys
-import time
-from sys import argv
-
 from flask import Flask, Response, render_template
+import re
+import os
+from sys import argv
+import time
+import math
+import sys
 
 app = Flask(__name__)
 logfile = "/run/adsb-feeder-image.log"
@@ -22,7 +21,12 @@ def utility_processor():
 
 
 def print_err(*args, **kwargs):
-    timestamp = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()) + ".{0:03.0f}Z".format(math.modf(time.time())[0] * 1000)
+    level = int(kwargs.pop("level", 0))
+    if level > 0 and int(verbose) & int(level) == 0:
+        return
+    timestamp = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()) + ".{0:03.0f}Z".format(
+        math.modf(time.time())[0] * 1000
+    )
     print(*((timestamp,) + args), file=sys.stderr, **kwargs)
 
 

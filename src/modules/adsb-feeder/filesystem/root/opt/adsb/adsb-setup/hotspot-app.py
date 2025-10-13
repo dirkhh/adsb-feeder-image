@@ -6,21 +6,24 @@ import socketserver
 import subprocess
 import sys
 import threading
+import tempfile
 import time
-from sys import argv
-
-from fakedns import DNSHandler
+import traceback
 from flask import (
     Flask,
     redirect,
     render_template,
     request,
 )
+from sys import argv
+from fakedns import DNSHandler
 from utils.wifi import Wifi
 
 
 def print_err(*args, **kwargs):
-    timestamp = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()) + ".{0:03.0f}Z".format(math.modf(time.time())[0] * 1000)
+    timestamp = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()) + ".{0:03.0f}Z".format(
+        math.modf(time.time())[0] * 1000
+    )
     print(*((timestamp,) + args), file=sys.stderr, **kwargs)
 
 
@@ -46,6 +49,7 @@ class Hotspot:
             sys.exit(1)
         print_err("trying to scan for SSIDs")
         self.wifi.ssids = []
+        i = 0
         startTime = time.time()
         while time.time() - startTime < 20:
             self.wifi.scan_ssids()
@@ -69,7 +73,9 @@ class Hotspot:
         return self.restart_state
 
     def hotspot(self):
-        return render_template("hotspot.html", version=self.version, comment=self.comment, ssids=self.wifi.ssids)
+        return render_template(
+            "hotspot.html", version=self.version, comment=self.comment,
+            ssids=self.wifi.ssids)
 
     def catch_all(self, path):
         # Catch all requests not explicitly handled. Since our fake DNS server
@@ -84,8 +90,8 @@ class Hotspot:
             self.lastUserInput = time.monotonic()
             self.restart_state = "restarting"
 
-            self.ssid = request.form.get("ssid", "")
-            self.passwd = request.form.get("passwd", "")
+            self.ssid = request.form.get("ssid")
+            self.passwd = request.form.get("passwd")
 
             threading.Thread(target=self.test_wifi).start()
             print_err("started wifi test thread")
@@ -95,7 +101,9 @@ class Hotspot:
         return self.hotspot()
 
     def _request_looks_like_wifi_credentials(self):
-        return request.method == "POST" and "ssid" in request.form and "passwd" in request.form
+        return (
+            request.method == "POST" and "ssid" in request.form
+            and "passwd" in request.form)
 
     def restarting(self):
         return render_template("hotspot-restarting.html")
@@ -146,47 +154,43 @@ class Hotspot:
 
         if self._baseos == "dietpi":
             subprocess.run(
-                "systemctl stop networking.service",
+                f"systemctl stop networking.service",
                 shell=True,
             )
         elif self._baseos == "raspbian":
             subprocess.run(
-                "systemctl stop NetworkManager wpa_supplicant; iw reg set 00",
+                f"systemctl stop NetworkManager wpa_supplicant; iw reg set 00",
                 shell=True,
             )
 
         subprocess.run(
-            f"ip li set {self.wlan} up && "
-            f"ip ad add 192.168.199.1/24 broadcast 192.168.199.255 dev {self.wlan} && "
-            f"systemctl start hostapd.service",
+            f"ip li set {self.wlan} up && ip ad add 192.168.199.1/24 broadcast 192.168.199.255 dev {self.wlan} && systemctl start hostapd.service",
             shell=True,
         )
         time.sleep(2)
         subprocess.run(
-            "systemctl start isc-dhcp-server.service",
+            f"systemctl start isc-dhcp-server.service",
             shell=True,
         )
         print_err("started hotspot")
 
     def teardown_hotspot(self):
         subprocess.run(
-            f"systemctl stop isc-dhcp-server.service; "
-            f"systemctl stop hostapd.service; "
-            f"ip ad del 192.168.199.1/24 dev {self.wlan}; "
-            f"ip addr flush {self.wlan}; "
-            f"ip link set dev {self.wlan} down",
+            f"systemctl stop isc-dhcp-server.service; systemctl stop hostapd.service; ip ad del 192.168.199.1/24 dev {self.wlan}; ip addr flush {self.wlan}; ip link set dev {self.wlan} down",
             shell=True,
         )
         if self._baseos == "dietpi":
             output = subprocess.run(
-                "systemctl restart --no-block networking.service",
+                f"systemctl restart --no-block networking.service",
                 shell=True,
                 capture_output=True,
             )
-            print_err(f"restarted networking.service: {output.returncode}\n{output.stderr.decode()}\n{output.stdout.decode()}")
+            print_err(
+                f"restarted networking.service: {output.returncode}\n{output.stderr.decode()}\n{output.stdout.decode()}"
+            )
         elif self._baseos == "raspbian":
             subprocess.run(
-                "iw reg set PA; systemctl restart wpa_supplicant NetworkManager",
+                f"iw reg set PA; systemctl restart wpa_supplicant NetworkManager",
                 shell=True,
             )
         # used to wait here, just spin around the wifi instead

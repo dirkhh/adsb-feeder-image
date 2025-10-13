@@ -26,7 +26,7 @@ class Wifi:
                 capture_output=True,
                 timeout=2.0,
             ).stdout.decode("utf-8")
-        except Exception:
+        except:
             ssid = ""
 
         return ssid.strip()
@@ -47,7 +47,6 @@ class Wifi:
     def wpa_cli_reconfigure(self):
         connected = False
         output = ""
-        proc = None
 
         try:
             proc = subprocess.Popen(
@@ -57,8 +56,6 @@ class Wifi:
                 stdin=subprocess.PIPE,
                 text=True,
             )
-            assert proc.stdout is not None, "Popen stdout is None"
-            assert proc.stdin is not None, "Popen stdin is None"
             os.set_blocking(proc.stdout.fileno(), False)
 
             startTime = time.time()
@@ -81,7 +78,7 @@ class Wifi:
                 if reconfigured and "CTRL-EVENT-CONNECTED" in line:
                     connected = True
                     break
-        except Exception:
+        except:
             print_err(traceback.format_exc())
         finally:
             if proc:
@@ -94,8 +91,6 @@ class Wifi:
 
     def wpa_cli_scan(self):
         ssids = []
-        proc = None
-        output = ""
         try:
             proc = subprocess.Popen(
                 ["wpa_cli", f"-i{self.wlan}"],
@@ -104,8 +99,6 @@ class Wifi:
                 stdin=subprocess.PIPE,
                 text=True,
             )
-            assert proc.stdout is not None, "Popen stdout is None"
-            assert proc.stdin is not None, "Popen stdin is None"
             os.set_blocking(proc.stdout.fileno(), False)
 
             output = ""
@@ -140,7 +133,7 @@ class Wifi:
                     if len(fields) == 5:
                         ssids.append(fields[4])
 
-        except Exception:
+        except:
             print_err(f"ERROR in wpa_cli_scan(), wpa_cli ouput: {output}")
         finally:
             if proc:
@@ -148,10 +141,8 @@ class Wifi:
 
         return ssids
 
-    def writeWpaConf(self, ssid="", passwd="", path="", country_code="GB"):
+    def writeWpaConf(self, ssid=None, passwd=None, path=None, country_code="GB"):
         netblocks = {}
-        netblock = ""
-        exist_ssid = None
         try:
             # extract the existing network blocks from the config file
             with open(path, "r") as conf:
@@ -178,9 +169,9 @@ class Wifi:
                             raise SyntaxError("unexpected close of network block")
                         inBlock = False
                         netblocks[exist_ssid] = netblock
-        except Exception:
+        except:
             print_err(traceback.format_exc())
-            print_err("ERROR when parsing existing wpa supplicant config, will DISCARD OLD CONFIG")
+            print_err(f"ERROR when parsing existing wpa supplicant config, will DISCARD OLD CONFIG")
             netblocks = {}
 
         try:
@@ -206,7 +197,7 @@ p2p_disabled=1
                 )
                 for k in netblocks.keys():
                     conf.write(netblocks[k])
-        except Exception:
+        except:
             print_err(traceback.format_exc())
             print_err(f"ERROR when writing wpa supplicant config to {path}")
             return False
@@ -281,16 +272,13 @@ p2p_disabled=1
                         capture_output=True,
                         timeout=20.0,
                     )
-                except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
+                except subprocess.SubprocessError as e:
                     # something went wrong
                     output = ""
                     if e.stdout:
                         output += e.stdout.decode()
                     if e.stderr:
                         output += e.stderr.decode()
-                except Exception as e:
-                    print_err(f"error connecting to '{ssid}': {e}")
-                    return False
                 else:
                     output = result.stdout.decode() + result.stderr.decode()
 
@@ -307,7 +295,6 @@ p2p_disabled=1
         return success
 
     def scan_ssids(self):
-        ssids = []
         try:
             if self.baseos == "raspbian":
                 try:
@@ -320,6 +307,7 @@ p2p_disabled=1
                     print_err(f"error scanning for SSIDs: {e}")
                     return
 
+                ssids = []
                 for line in output.stdout.decode().split("\n"):
                     if line and line != "--" and line not in ssids:
                         ssids.append(line)

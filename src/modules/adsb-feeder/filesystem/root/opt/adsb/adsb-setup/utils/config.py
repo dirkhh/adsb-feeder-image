@@ -3,8 +3,7 @@ import os
 import os.path
 import tempfile
 import threading
-
-from .util import print_err
+from .util import make_int, print_err, verbose
 
 CONF_DIR = "/opt/adsb/config"
 ENV_FILE_PATH = CONF_DIR + "/.env"
@@ -33,7 +32,7 @@ def read_values_from_config_json(check_integrity=False):
     ret = {}
     try:
         ret = json.load(open(JSON_FILE_PATH, "r"))
-    except Exception:
+    except:
         print_err("Failed to read .json file")
     return ret
 
@@ -45,7 +44,7 @@ def write_values_to_config_json(data: dict, reason="no reason provided"):
         with os.fdopen(fd, "w") as f:
             json.dump(data, f, indent=2)
         os.rename(tmp, JSON_FILE_PATH)
-    except Exception:
+    except:
         print_err(f"Error writing config.json to {JSON_FILE_PATH}")
 
 
@@ -61,7 +60,7 @@ def read_values_from_env_file():
                 if key in conversion.keys():
                     key = conversion[key]
                 ret[key.strip()] = var.strip()
-    except Exception:
+    except:
         print_err("Failed to read .env file")
     return ret
 
@@ -76,7 +75,7 @@ def write_values_to_env_file(values):
             # _ADSBIM_STATE variables aren't needed in the .env file
             if key.startswith("_ADSBIM_STATE"):
                 continue
-            if type(value) is list:
+            if type(value) == list:
                 print_err(f"WARNING: ==== key {key} has list value {value}")
                 for i in range(len(value)):
                     suffix = "" if i == 0 else f"_{i}"
