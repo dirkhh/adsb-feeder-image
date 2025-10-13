@@ -55,7 +55,8 @@ class Aggregator:
 
     @property
     def container(self):
-        return self._d.env_by_tags(self.tags + ["container"]).value
+        # we know that the container Env is always a string
+        return self._d.env_by_tags(self.tags + ["container"]).valuestr
 
     @property
     def is_enabled(self, idx=0):
@@ -343,7 +344,8 @@ class RadarBox(Aggregator):
         )
 
     def _request_rb_sharing_key(self, idx):
-        docker_image = self._d.env_by_tags(["radarbox", "container"]).value
+        # we know that the container Env is always a string
+        docker_image = self._d.env_by_tags(["radarbox", "container"]).valuestr
 
         if not self._download_docker_container(docker_image):
             report_issue("failed to download the AirNav Radar docker image")
@@ -393,7 +395,8 @@ class OpenSky(Aggregator):
         )
 
     def _request_fr_serial(self, user):
-        docker_image = self._d.env_by_tags(["opensky", "container"]).value
+        # we know that the container Env is always a string
+        docker_image = self._d.env_by_tags(["opensky", "container"]).valuestr
 
         if not self._download_docker_container(docker_image):
             report_issue("failed to download the OpenSky docker image")
