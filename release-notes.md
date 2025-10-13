@@ -1,5 +1,6 @@
 Changes since v3.0.5
 =======
+- beta-notes: revert some internal changes that need more careful planning as they introduced bugs in a number of scenarios, including for systems with older Python versions
 - add recovery service to the image (not the app): go to http://<IP>:1089 and be offered to go back to the previous version - or go to a specific version or branch with http://<IP>:1089/recover-to/<tag-or-branch>
 - beta-notes: fix two stupid bugs introduced in the last beta
 - UI: consistent wording of button text to apply changes
