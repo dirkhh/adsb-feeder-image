@@ -1380,7 +1380,7 @@ class AdsbIm:
                     # all this SHOULD have been validated already client-side
                     # let's make sure we don't have 'auto' in there for containers that
                     # don't support it
-                    if not sdr.purpose in ["1090", "1090_2", "978", "ais", "sonde"] and "auto" in gain:
+                    if sdr.purpose not in ["1090", "1090_2", "978", "ais", "sonde"] and "auto" in gain:
                         if sdr.purpose in ["acars", "acars_2"] and sdr._type != "airspy":
                             gain = "-10"
                         else:
@@ -2680,9 +2680,9 @@ class AdsbIm:
         # ensure that our 1090 and 978 SDRs have the correct purpose set
         sdr1090 = self._sdrdevices.get_sdr_by_serial(self._d.env_by_tags("1090serial").valuestr)
         sdr978 = self._sdrdevices.get_sdr_by_serial(self._d.env_by_tags("978serial").valuestr)
-        if not sdr1090 is self._sdrdevices.null_sdr:
+        if sdr1090 is not self._sdrdevices.null_sdr:
             sdr1090.purpose = "1090"
-        if not sdr978 is self._sdrdevices.null_sdr:
+        if sdr978 is not self._sdrdevices.null_sdr:
             sdr978.purpose = "978"
 
         # Skystats
