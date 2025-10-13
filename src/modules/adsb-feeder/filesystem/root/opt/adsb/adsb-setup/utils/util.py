@@ -23,6 +23,7 @@ idhash = hashlib.md5(pathlib.Path("/etc/machine-id").read_text().encode()).hexdi
 
 def stack_info(msg=""):
     framenr = 0
+    fname = ""
     for frame, filename, line_num, func, source_code, source_index in inspect.stack():
         if framenr == 0:
             framenr += 1
