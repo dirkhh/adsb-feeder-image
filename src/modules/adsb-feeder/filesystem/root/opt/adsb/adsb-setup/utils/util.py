@@ -200,7 +200,7 @@ def run_shell_captured(command="", timeout=1800):
     return (True, output)
 
 
-def string2file(path=None, string=None, verbose=False):
+def string2file(path: str = "", string: str = "", verbose: bool = False):
     try:
         fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path))
         with os.fdopen(fd, "w") as file:
