@@ -83,7 +83,7 @@ def make_int(value):
 
 
 def generic_get_json(url: str, data=None, timeout=5.0):
-    requests.packages.urllib3.util.connection.HAS_IPV6 = False
+    requests.packages.urllib3.util.connection.HAS_IPV6 = False  # type: ignore[attr-defined]
     if "host.docker.internal" in url:
         url = url.replace("host.docker.internal", "localhost")
     # use image specific but random value for user agent to distinguish
@@ -210,7 +210,7 @@ def string2file(path=None, string=None, verbose=False):
 
 
 def get_plain_url(plain_url, method="GET", data=None):
-    requests.packages.urllib3.util.connection.HAS_IPV6 = False
+    requests.packages.urllib3.util.connection.HAS_IPV6 = False  # type: ignore[attr-defined]
     status = -1
     headers = {
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/117.0",

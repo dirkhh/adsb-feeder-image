@@ -169,7 +169,7 @@ class System:
         return True
 
     def check_ip(self):
-        requests.packages.urllib3.util.connection.HAS_IPV6 = False
+        requests.packages.urllib3.util.connection.HAS_IPV6 = False  # type: ignore[attr-defined]
         status = -1
         try:
             response = requests.get(
