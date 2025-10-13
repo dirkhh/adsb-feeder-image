@@ -47,6 +47,7 @@ class Wifi:
     def wpa_cli_reconfigure(self):
         connected = False
         output = ""
+        proc: subprocess.Popen | None = None
 
         try:
             proc = subprocess.Popen(
@@ -56,6 +57,9 @@ class Wifi:
                 stdin=subprocess.PIPE,
                 text=True,
             )
+            if proc.stdout == None or proc.stdin == None:
+                print_err("ERROR: can't start wpa_cli, proc.stdout or proc.stdin is None")
+                return False
             os.set_blocking(proc.stdout.fileno(), False)
 
             startTime = time.time()
@@ -92,6 +96,7 @@ class Wifi:
     def wpa_cli_scan(self):
         ssids: list[str] = []
         output: str = ""
+        proc: subprocess.Popen | None = None
         try:
             proc = subprocess.Popen(
                 ["wpa_cli", f"-i{self.wlan}"],
@@ -100,9 +105,10 @@ class Wifi:
                 stdin=subprocess.PIPE,
                 text=True,
             )
+            if proc.stdout == None or proc.stdin == None:
+                print_err("ERROR: can't start wpa_cli, proc.stdout or proc.stdin is None")
+                return []
             os.set_blocking(proc.stdout.fileno(), False)
-
-            output = ""
 
             startTime = time.time()
             while time.time() - startTime < 15:
