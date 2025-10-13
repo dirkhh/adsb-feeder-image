@@ -6,17 +6,16 @@ import socketserver
 import subprocess
 import sys
 import threading
-import tempfile
 import time
-import traceback
+from sys import argv
+
+from fakedns import DNSHandler
 from flask import (
     Flask,
     redirect,
     render_template,
     request,
 )
-from sys import argv
-from fakedns import DNSHandler
 from utils.wifi import Wifi
 
 

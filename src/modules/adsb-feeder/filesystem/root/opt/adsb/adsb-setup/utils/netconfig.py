@@ -1,5 +1,6 @@
 from uuid import uuid4
-from utils.util import is_true, print_err, mf_get_ip_and_triplet
+
+from utils.util import is_true, mf_get_ip_and_triplet, print_err
 
 
 class NetConfig:

@@ -9,28 +9,42 @@ import pathlib
 import pickle
 import platform
 import re
-import shlex
-import requests
 import secrets
-import signal
+import shlex
 import shutil
+import signal
 import string
 import subprocess
+import sys
+import tempfile
 import threading
 import time
-import tempfile
 import traceback
-from uuid import uuid4
-import sys
 import zipfile
 from base64 import b64encode
+from copy import deepcopy
 from datetime import datetime, timezone
 from os import urandom
 from time import sleep
 from typing import Dict, List, Tuple
+from uuid import uuid4
 from zlib import compress
-from copy import deepcopy
 
+import requests
+from flask import (
+    Flask,
+    Response,
+    flash,
+    make_response,
+    redirect,
+    render_template,
+    request,
+    send_file,
+    url_for,
+)
+from flask.logging import logging as flask_logging  # pyright: ignore[reportPrivateImportUsage]
+from utils.agg_status import AggStatus, Healthcheck, ImStatus
+from utils.background import Background
 from utils.config import (
     config_lock,
     log_consistency_warning,
@@ -39,28 +53,10 @@ from utils.config import (
     write_values_to_config_json,
     write_values_to_env_file,
 )
-from utils.util import create_fake_info, make_int, print_err, report_issue, mf_get_ip_and_triplet, string2file
-from utils.wifi import Wifi
-
-# nofmt: on
-# isort: off
-from flask import (
-    Flask,
-    flash,
-    make_response,
-    redirect,
-    render_template,
-    request,
-    Response,
-    send_file,
-    url_for,
-)
-
-
 from utils.data import Data
 from utils.environment import Env
 from utils.flask import RouteManager, check_restart_lock
-from utils.netconfig import NetConfig, UltrafeederConfig
+from utils.netconfig import UltrafeederConfig
 from utils.other_aggregators import (
     ADSBHub,
     FlightAware,
@@ -70,31 +66,26 @@ from utils.other_aggregators import (
     PlaneWatch,
     RadarBox,
     RadarVirtuel,
-    Uk1090,
     Sdrmap,
+    Uk1090,
 )
-from utils.sdr import SDR, SDRDevices
-from utils.agg_status import AggStatus, ImStatus, Healthcheck
+from utils.sdr import SDRDevices
 from utils.system import System
 from utils.util import (
     cleanup_str,
+    create_fake_info,
     generic_get_json,
     is_true,
-    print_err,
-    stack_info,
-    verbose,
     make_int,
+    mf_get_ip_and_triplet,
+    print_err,
+    report_issue,
     run_shell_captured,
+    string2file,
+    verbose,
 )
-from utils.background import Background
 from utils.wifi import Wifi
-
-# nofmt: off
-# isort: on
-
 from werkzeug.utils import secure_filename
-
-from flask.logging import logging as flask_logging
 
 
 # don't log static assets

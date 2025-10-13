@@ -1,6 +1,8 @@
 import re
 import subprocess
+
 from flask import flash
+
 from .system import System
 from .util import is_email, make_int, print_err, report_issue
 

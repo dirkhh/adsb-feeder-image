@@ -2,10 +2,11 @@
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from utils.config import read_values_from_env_file
+
 from .environment import Env
 from .netconfig import NetConfig
 from .util import is_true, print_err
-from utils.config import read_values_from_env_file
 
 
 @dataclass

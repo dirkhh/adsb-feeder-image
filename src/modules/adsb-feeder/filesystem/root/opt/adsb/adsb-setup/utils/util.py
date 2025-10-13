@@ -6,13 +6,13 @@ import os
 import pathlib
 import re
 import secrets
-import requests
-import sys
-import time
 import subprocess
+import sys
 import tempfile
+import time
 import traceback
 
+import requests
 from flask import flash
 
 verbose = 0 if not os.path.exists("/opt/adsb/config/verbose") else int(open("/opt/adsb/config/verbose", "r").read().strip())

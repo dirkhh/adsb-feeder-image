@@ -1,10 +1,10 @@
-import os
-import requests
 import socket
 import subprocess
 import threading
 import time
 from time import sleep
+
+import requests
 
 from .data import Data
 from .util import print_err, run_shell_captured

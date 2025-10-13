@@ -1,15 +1,16 @@
 import json
+import os
+import pathlib
 import re
 import subprocess
 import threading
-import traceback
 import time
-import pathlib
-import os
+import traceback
 from datetime import datetime, timedelta
 from enum import Enum
-from .util import generic_get_json, print_err, make_int, get_plain_url
+
 from .data import Data
+from .util import generic_get_json, get_plain_url, make_int, print_err
 
 T = Enum("T", ["Disconnected", "Unknown", "Good", "Bad", "Warning", "Disabled", "Starting", "ContainerDown"])
 # deprecated status symbol, might be useful again for something?

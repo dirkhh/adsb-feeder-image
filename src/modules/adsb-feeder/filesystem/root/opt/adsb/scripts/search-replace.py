@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-import sys
 import json
+import sys
 
 config = json.load(open("/opt/adsb/config/config.json", "r"))
 

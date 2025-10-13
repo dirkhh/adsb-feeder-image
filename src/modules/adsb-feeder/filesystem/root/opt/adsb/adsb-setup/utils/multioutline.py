@@ -1,12 +1,12 @@
 import json
-import os
 import re
-import subprocess
 import time
 import traceback
+
 from shapely.geometry import LinearRing, Polygon
 from shapely.ops import unary_union
-from utils.util import make_int, print_err, get_plain_url
+
+from utils.util import get_plain_url, print_err
 
 use_is_valid_reason = True
 try:

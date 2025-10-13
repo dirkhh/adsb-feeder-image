@@ -1,9 +1,9 @@
 import re
 from functools import wraps
 
-from utils.util import print_err
-
 from flask import Flask, redirect, request
+
+from utils.util import print_err
 
 
 class RouteManager:

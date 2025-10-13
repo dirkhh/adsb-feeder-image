@@ -1,10 +1,10 @@
-import io
 import re
 import subprocess
 import sys
 import time
 from threading import Lock
 from typing import Dict, List, Set, Tuple
+
 from .util import print_err
 
 

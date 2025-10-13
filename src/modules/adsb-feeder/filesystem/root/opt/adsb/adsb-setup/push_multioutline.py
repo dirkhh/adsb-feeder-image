@@ -2,10 +2,9 @@ import json
 import subprocess
 import sys
 import traceback
-from tempfile import TemporaryDirectory
+
 from utils.multioutline import MultiOutline
 from utils.util import make_int, print_err
-
 
 n = make_int(sys.argv[1] if len(sys.argv) > 1 else 1)
 

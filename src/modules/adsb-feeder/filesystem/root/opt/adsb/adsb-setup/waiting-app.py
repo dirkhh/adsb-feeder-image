@@ -1,11 +1,12 @@
 import json
-from flask import Flask, Response, render_template
-import re
-import os
-from sys import argv
-import time
 import math
+import os
+import re
 import sys
+import time
+from sys import argv
+
+from flask import Flask, Response, render_template
 
 app = Flask(__name__)
 logfile = "/run/adsb-feeder-image.log"

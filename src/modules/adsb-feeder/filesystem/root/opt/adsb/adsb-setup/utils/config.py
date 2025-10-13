@@ -3,7 +3,8 @@ import os
 import os.path
 import tempfile
 import threading
-from .util import make_int, print_err, verbose
+
+from .util import print_err
 
 CONF_DIR = "/opt/adsb/config"
 ENV_FILE_PATH = CONF_DIR + "/.env"
