@@ -177,6 +177,9 @@ def stream_log():
 def start_recovery(target_version):
     global rollback_in_progress, rollback_target_version, recovery_process
 
+    if os.path.exists("/opt/adsb/adsb.im.secure_image"):
+        return (False, "Secure Image is set, rollback is disabled.")
+
     print_err(f"Starting recovery to version {target_version}")
     try:
         # Mark rollback as in progress
