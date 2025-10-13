@@ -178,6 +178,13 @@ class Env:
         # make sure we have at least idx + 1 values, padding with default if necessary
         # only call after you verified that this env is a list and idx is an int
         # internal function - does not reconcile
+        if type(self._value) != list:
+            stack_info(f"{self._name} is not a list")
+            report_issue(
+                f"please report this to the maintainers, including the data from System->Share Diagnostics: "
+                f"{self._name} is not a list"
+            )
+            return
         if idx >= len(self._value):
             d = None
             if type(self._default) != list:
