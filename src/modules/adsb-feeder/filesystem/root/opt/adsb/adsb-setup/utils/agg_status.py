@@ -8,6 +8,7 @@ import time
 import traceback
 from datetime import datetime, timedelta
 from enum import Enum
+from typing import Optional
 
 from .data import Data
 from .util import generic_get_json, get_plain_url, make_int, print_err
@@ -383,7 +384,7 @@ class AggStatus:
             self.check_alive_maplink()
 
         if self._agg == "adsblol" and not self._d.env_by_tags("adsblol_link").list_get(self._idx):
-            uuid = self._d.env_by_tags("adsblol_uuid").list_get(self._idx)
+            uuid = str(self._d.env_by_tags("adsblol_uuid").list_get(self._idx))
             json_url = "https://api.adsb.lol/0/me"
             response_dict, status = self.get_json(json_url)
             if response_dict and status == 200:
@@ -397,7 +398,7 @@ class AggStatus:
     def check_alive_maplink(self):
         # currently airplanes live uses the first 16 characters of the uuid as the feed id
         # this works better than getting it for the API because the API only returns 1 feed id
-        uuid = self._d.env_by_tags("ultrafeeder_uuid").list_get(self._idx)
+        uuid = str(self._d.env_by_tags("ultrafeeder_uuid").list_get(self._idx))
         feed_id = uuid.replace("-", "")[:16]
         map_link = f"https://globe.airplanes.live/?feed={feed_id}"
         self._d.env_by_tags("alivemaplink").list_set(self._idx, map_link)
@@ -418,20 +419,21 @@ class AggStatus:
                 self._d.env_by_tags("alivemaplink").list_set(self._idx, map_link)
 
     def adsbx_feeder_id(self):
-        feeder_id = self._d.env_by_tags("adsbxfeederid").list_get(self._idx)
-        uuid_saved = self._d.env_by_tags("adsbxfeederid_uuid").list_get(self._idx)
-        uuid = self._d.env_by_tags("ultrafeeder_uuid").list_get(self._idx)
+        feeder_id = str(self._d.env_by_tags("adsbxfeederid").list_get(self._idx))
+        uuid_saved = str(self._d.env_by_tags("adsbxfeederid_uuid").list_get(self._idx))
+        uuid = str(self._d.env_by_tags("ultrafeeder_uuid").list_get(self._idx))
+        adsbx_id = ""
         if uuid_saved != uuid or not feeder_id or len(feeder_id) != 12:
             # get the adsbexchange feeder id for the anywhere map / status things
             print_err(f"don't have the adsbX Feeder ID for {self._idx}, yet")
             output, status = get_plain_url(f"https://www.adsbexchange.com/api/feeders/tar1090/?feed={uuid}")
-            match = re.search(
-                r"www.adsbexchange.com/api/feeders/\?feed=([^\"'&\s]*)",
-                output,
-            )
-            adsbx_id = None
-            if match:
-                adsbx_id = match.group(1)
+            if output:
+                match = re.search(
+                    r"www.adsbexchange.com/api/feeders/\?feed=([^\"'&\s]*)",
+                    output,
+                )
+                if match:
+                    adsbx_id = match.group(1)
             if adsbx_id and len(adsbx_id) == 12:
                 print_err(f"adsbx feeder id for {self._idx}: {adsbx_id}")
                 self._d.env_by_tags("adsbxfeederid").list_set(self._idx, adsbx_id)
@@ -447,8 +449,8 @@ class ImStatus:
     def __init__(self, data: Data):
         self._d = data
         self._lock = threading.Lock()
-        self._next_check = 0
-        self._cached = None
+        self._next_check = 0.0
+        self._cached: Optional[dict] = None
 
     def check(self, check=False):
         with self._lock:
@@ -490,6 +492,8 @@ class LastSeen:
             # last status is not kept across restarts for now, just assume we received a plane
             # just now, this isn't pretty but if we don't have restarts it's fine
             self.update()
+        assert self.seen is not None  # given that self.update() always sets self.seen to a float
+
         # 0 or negative means this check is disabled, always return false
         if hours <= 0:
             return False
@@ -510,7 +514,7 @@ class Healthcheck:
         self.nextGoodPing = time.time() + 1 * 60
         self.nextFailPing = time.time() + 1 * 60
 
-        self.failedSince = 0
+        self.failedSince = 0.0
 
         self.last1090 = LastSeen()
         self.last978 = LastSeen()
@@ -527,7 +531,7 @@ class Healthcheck:
         if not self.good:
             print_err(f"healthcheck healthy after it was bad previously")
         self.good = True
-        self.failedSince = 0
+        self.failedSince = 0.0
         self.reason = ""
         self._d.env_by_tags("healthcheck_fail_reason").value = ""
 
@@ -670,8 +674,8 @@ class Healthcheck:
             self.nextGoodPing = time.time()
             self.nextFailPing = time.time()
 
-        fail = "; ".join(fail)
-        if fail:
-            self.set_failed(fail)
+        fail_msg = "; ".join(fail)
+        if fail_msg:
+            self.set_failed(fail_msg)
         else:
             self.set_good()

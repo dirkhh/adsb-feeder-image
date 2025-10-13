@@ -84,8 +84,8 @@ class Hotspot:
             self.lastUserInput = time.monotonic()
             self.restart_state = "restarting"
 
-            self.ssid = request.form.get("ssid")
-            self.passwd = request.form.get("passwd")
+            self.ssid = request.form.get("ssid", "")
+            self.passwd = request.form.get("passwd", "")
 
             threading.Thread(target=self.test_wifi).start()
             print_err("started wifi test thread")

@@ -35,7 +35,7 @@ class MultiOutline:
             for line in env:
                 match = re.search(r"AF_TAR1090_PORT=(\d+)", line)
                 if match:
-                    tar1090port = match.group(1)
+                    tar1090port = int(match.group(1))
                 match = re.search(r"_ADSBIM_HEYWHATSTHAT_ENABLED_(\d+)=True", line)
                 if match:
                     hwt_feeders.append(int(match.group(1)))
@@ -45,6 +45,9 @@ class MultiOutline:
             response, status = get_plain_url(hwt_url)
             if status != 200:
                 print_err(f"_get_heywhatsthat: http status {status} for {hwt_url}")
+                continue
+            if response is None:
+                print_err(f"_get_heywhatsthat: response is None for {hwt_url}")
                 continue
             try:
                 hwt = json.loads(response)
@@ -78,7 +81,7 @@ class MultiOutline:
 
     def create(self, data, hwt_alt=0):
         # print_err(f"multioutline: called create with for data with len {len(data)}")
-        result = {"multiRange": []}
+        result: dict = {"multiRange": []}
         polygons = []
         for i in range(len(data)):
             d = data[i]
@@ -119,7 +122,8 @@ class MultiOutline:
         if len(polygons) == 0:
             return result
         made_change = True
-        look_at = range(1, len(polygons))
+        look_at = list(range(1, len(polygons)))
+        to_consider = [0]  # looks redundant, but prevents a potential 'unbound' error
         while made_change:
             made_change = False
             to_consider = [0]
@@ -143,7 +147,7 @@ class MultiOutline:
                     polygons[j] = polygons[j].buffer(0.0001)
                     try:
                         if not polygons[j].disjoint(polygons[i]):
-                            p = unary_union([polygons[j], polygons[i]])
+                            p = unary_union([polygons[j], polygons[i]])  # type: ignore[assignment]
                             polygons[j] = p
                             made_change = True
                             combined = True
@@ -154,6 +158,7 @@ class MultiOutline:
                 if not combined:
                     to_consider.append(i)
             look_at = to_consider[1:]
+
         for i in to_consider:
             try:
                 coords = polygons[i].exterior.coords

@@ -54,7 +54,7 @@ class DNSHandler(socketserver.BaseRequestHandler):
         pointer = DNS_HEADER_LENGTH
         # Read each question section
         for i in range(n):
-            question = {
+            question: dict = {
                 "name": [],
                 "qtype": "",
                 "qclass": "",

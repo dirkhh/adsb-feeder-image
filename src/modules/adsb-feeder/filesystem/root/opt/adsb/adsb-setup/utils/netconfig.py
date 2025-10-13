@@ -9,7 +9,7 @@ class NetConfig:
         self.mlat_config = mlat_config
         self._has_policy = has_policy
 
-    def generate(self, mlat_privacy: bool = True, uuid: str = None, mlat_enable: bool = True):
+    def generate(self, mlat_privacy: bool = True, uuid: str = "", mlat_enable: bool = True):
         adsb_line = self.adsb_config
         mlat_line = self.mlat_config
 
@@ -172,8 +172,8 @@ class UltrafeederConfig:
             ret.add("gpsd,host.docker.internal,2947")
 
         # generate sorted listed for deterministic env var (avoid unnecessary container recreation by docker compose)
-        ret = sorted(ret)
+        sorted_ret = sorted(ret)
 
-        print_err(f"ended up with Ultrafeeder args {ret}")
+        print_err(f"ended up with Ultrafeeder args {sorted_ret}")
 
-        return ";".join(ret)
+        return ";".join(sorted_ret)

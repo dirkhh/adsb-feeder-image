@@ -182,8 +182,8 @@ class AdsbIm:
         for i in [0] + self.micro_indices():
             self._d.ultrafeeder.append(UltrafeederConfig(data=self._d, micro=i))
 
-        self.last_dns_check = 0
-        self.undervoltage_epoch = 0
+        self.last_dns_check = 0.0
+        self.undervoltage_epoch = 0.0
 
         self._current_site_name = None
         self._agg_status_instances = dict()
@@ -196,7 +196,7 @@ class AdsbIm:
 
         self._multi_outline_bg = None
 
-        self.lastSetGainWrite = 0
+        self.lastSetGainWrite = 0.0
 
         # no one should share a CPU serial with AirNav, so always create fake cpuinfo;
         # also identify if we would use the thermal hack for RB and Ultrafeeder
@@ -225,7 +225,7 @@ class AdsbIm:
             "sdrmap--submit": Sdrmap(self._system),
         }
         # fmt: off
-        self.all_aggregators = [
+        self.all_aggregators: list = [
             # tag, name, map link, status link, table number
             ["adsblol", "adsb.lol", "https://adsb.lol/", ["https://api.adsb.lol/0/me"], 0],
             ["flyitaly", "Fly Italy ADSB", "https://mappa.flyitalyadsb.com/", ["https://my.flyitalyadsb.com/am_i_feeding"], 0],
@@ -249,7 +249,7 @@ class AdsbIm:
         ]
         self.agg_matrix = None
         self.agg_structure = []
-        self.last_cache_agg_status = 0
+        self.last_cache_agg_status = 0.0
         self.ci = False
         self.cache_agg_status_lock = threading.Lock()
         self.miscLock = threading.Lock()
@@ -344,11 +344,19 @@ class AdsbIm:
 
         self.load_planes_seen_per_day()
 
-        while len(self._d.env_by_tags("site_name").value) > self._d.env_by_tags("num_micro_sites").valueint + 1:
-            actual_len = len(self._d.env_by_tags("site_name").value)
-            nominal_len = self._d.env_by_tags("num_micro_sites").valueint + 1
-            print_err(f"BAD CONFIG STATE, site_name list too long {actual_len} > {nominal_len}, removing one element")
-            self._d.env_by_tags("site_name").list_remove()
+        site_name_env = self._d.env_by_tags("site_name")
+        if type(site_name_env.value) == list:
+            while len(site_name_env.value) > self._d.env_by_tags("num_micro_sites").valueint + 1:
+                actual_len = len(site_name_env.value)
+                nominal_len = self._d.env_by_tags("num_micro_sites").valueint + 1
+                print_err(f"BAD CONFIG STATE, site_name list too long {actual_len} > {nominal_len}, removing one element")
+                site_name_env.list_remove()
+        else:
+            print_err(f"BAD CONFIG STATE, site_name is not a list: {type(site_name_env.value)}")
+            report_issue(
+                f"please report this to the maintainers, including the data from System->Share Diagnostics:"
+                f"site_name is not a list: {type(site_name_env.value)}"
+            )
 
         # now all the envs are loaded and reconciled with the data on file - which means we should
         # actually write out the potentially updated values (e.g. when plain values were converted
@@ -697,12 +705,20 @@ class AdsbIm:
         # replace spaces with underscores to correct this common error
         timezone = timezone.replace(" ", "_")
 
+        tz_env = self._d.env("FEEDER_TZ")
+        if not tz_env or not type(tz_env.value) == list:
+            print_err(f"BAD CONFIG STATE, FEEDER_TZ is not a list")
+            report_issue(
+                f"please report this to the maintainers, including the data from System->Share Diagnostics:"
+                "FEEDER_TZ is not a list"
+            )
+            return
         success = self.set_system_tz(timezone)
         if success:
-            self._d.env("FEEDER_TZ").list_set(0, timezone)
+            tz_env.list_set(0, timezone)
         else:
             report_issue(f"timezone {timezone} probably invalid, defaulting to UTC")
-            self._d.env("FEEDER_TZ").list_set(0, "UTC")
+            tz_env.list_set(0, "UTC")
             self.set_system_tz("UTC")
 
     def set_system_tz(self, timezone):
@@ -849,7 +865,7 @@ class AdsbIm:
                 report_issue(f"{context}: docker exec failed - backed up graph data might miss up to 6h")
                 pass
             else:
-                count = 0
+                count = 0.0
                 increment = 0.1
                 # give up after 30 seconds
                 while count < 30:
@@ -929,7 +945,7 @@ class AdsbIm:
                 pipeOut,
                 mimetype="application/zip",
                 as_attachment=True,
-                attachment_filename=download_name,
+                attachment_filename=download_name,  # type: ignore[call-arg]
             )
 
     def restore(self):
@@ -944,7 +960,7 @@ class AdsbIm:
             if file.filename == "":
                 flash("No file selected")
                 return redirect(request.url)
-            if file.filename.endswith(".zip") or file.filename.endswith(".backup"):
+            if file.filename and (file.filename.endswith(".zip") or file.filename.endswith(".backup")):
                 filename = secure_filename(file.filename)
                 restore_path = pathlib.Path("/opt/adsb/config/restore")
                 # clean up the restore path when saving a fresh zipfile
@@ -1076,7 +1092,15 @@ class AdsbIm:
         self.update_boardname()
         self.update_version()
 
-        self.set_tz(self._d.env("FEEDER_TZ").list_get(0))
+        tz_env = self._d.env("FEEDER_TZ")
+        if not tz_env or not type(tz_env.value) == list:
+            print_err(f"BAD CONFIG STATE, FEEDER_TZ is not a list")
+            report_issue(
+                f"please report this to the maintainers, including the data from System->Share Diagnostics:"
+                "FEEDER_TZ is not a list"
+            )
+            return
+        self.set_tz(tz_env.list_get(0))
 
         # make sure we are connected to the right Zerotier network
         zt_network = self._d.env_by_tags("zerotierid").valuestr
@@ -1139,7 +1163,7 @@ class AdsbIm:
         return Response(jsonString, mimetype="application/json")
 
     def scan_wifi(self):
-        wifi_ssids = []
+        wifi_ssids: list = []
 
         if self.wifi is None:
             self.wifi = Wifi()
@@ -1267,7 +1291,7 @@ class AdsbIm:
         listener = request.remote_addr
         tm = int(time.time())
         print_err(f"access to base_info from {listener}", level=8)
-        self._last_stage2_contact = listener
+        self._last_stage2_contact = listener if listener else ""
         self._last_stage2_contact_time = tm
         lat, lon, alt = self.get_lat_lon_alt()
         rtlsdr_at_port = 0
@@ -1414,7 +1438,7 @@ class AdsbIm:
         return Response(json.dumps(plane_stats), mimetype="application/json")
 
     def stage2_stats(self):
-        ret = []
+        ret: list = []
         for i in [0] + self.micro_indices():
             if i == 0 and not self._d.is_enabled("stage2"):
                 # if this is supposed to be a feeder by itself, make sure it actually
@@ -1446,8 +1470,8 @@ class AdsbIm:
                 with open(f"/run/adsb-feeder-{suffix}/readsb/stats.prom") as f:
                     uptime = 0
                     found = 0
-                    pps = 0
-                    mps = 0
+                    pps = 0.0
+                    mps = 0.0
                     planes = 0
                     for line in f:
                         if "position_count_total" in line:
@@ -1545,7 +1569,15 @@ class AdsbIm:
                 else:
                     match = re.search("<([^>]*)>", template_link)
                     if match:
-                        final_link = template_link.replace(match.group(0), self._d.env(match.group(1)).list_get(i))
+                        agg_env = self._d.env(match.group(1))
+                        if not agg_env or not type(agg_env.value) == list:
+                            print_err(f"BAD CONFIG STATE, {match.group(1)} is not a list")
+                            report_issue(
+                                f"please report this to the maintainers, including the data from System->Share Diagnostics:"
+                                f"{match.group(1)} is not a list"
+                            )
+                            continue
+                        final_link = template_link.replace(match.group(0), agg_env.list_get(i))
                 if i == 0:
                     status_link_list[0] = final_link
                 else:
@@ -1670,7 +1702,7 @@ class AdsbIm:
         setGainPath = pathlib.Path(f"/run/adsb-feeder-{suffix}/readsb/setGain")
 
         self.waitSetGainRace()
-        string2file(path=setGainPath, string=f"resetRangeOutline", verbose=True)
+        string2file(path=str(setGainPath), string="resetRangeOutline", verbose=True)
 
     def waitSetGainRace(self):
         # readsb checks this the setGain file every 0.2 seconds
@@ -1716,6 +1748,13 @@ class AdsbIm:
         # make sure that a site name is unique - if the idx is given that's
         # the current value and excluded from the check
         existing_names = self._d.env_by_tags("site_name")
+        if not existing_names or not type(existing_names.value) == list:
+            print_err(f"BAD CONFIG STATE, site_name is not a list")
+            report_issue(
+                f"please report this to the maintainers, including the data from System->Share Diagnostics:"
+                "site_name is not a list"
+            )
+            return name
         names = [existing_names.list_get(n) for n in range(0, len(existing_names.value)) if n != idx]
         while name in names:
             name += "_"
@@ -2030,6 +2069,13 @@ class AdsbIm:
         log_consistency_warning(False)
         for e in self._d.stage2_envs:
             print_err(f"shifting {e.name} down and deleting last element {e._value}")
+            if not type(e._value) == list:
+                print_err(f"BAD CONFIG STATE, {e.name} is not a list")
+                report_issue(
+                    f"please report this to the maintainers, including the data from System->Share Diagnostics:"
+                    f"{e.name} is not a list"
+                )
+                continue
             for i in range(num, self._d.env_by_tags("num_micro_sites").valueint):
                 e.list_set(i, e.list_get(i + 1))
             while len(e._value) > self._d.env_by_tags("num_micro_sites").valueint:
@@ -2132,11 +2178,11 @@ class AdsbIm:
             (gaindir / "suspend").touch(exist_ok=True)
 
             # this file sets the gain on readsb start
-            string2file(path=(gaindir / "gain"), string=f"{gain}\n")
+            string2file(path=str(gaindir / "gain"), string=f"{gain}\n")
 
             # this adjusts the gain while readsb is running
             self.waitSetGainRace()
-            string2file(path=setGainPath, string=f"{gain}\n")
+            string2file(path=str(setGainPath), string=f"{gain}\n")
 
     def setup_or_disable_uat(self, sitenum):
         if sitenum and self._d.list_is_enabled(["uat978"], sitenum):
@@ -3155,9 +3201,9 @@ class AdsbIm:
                     return render_template("/restarting.html")
                 if key == "log_persistence_toggle":
                     if self._persistent_journal:
-                        cmd = "/opt/adsb/scripts/journal-set-volatile.sh"
+                        cmd = ["/opt/adsb/scripts/journal-set-volatile.sh"]
                     else:
-                        cmd = "/opt/adsb/scripts/journal-set-persist.sh"
+                        cmd = ["/opt/adsb/scripts/journal-set-persist.sh"]
                     try:
                         print_err(cmd)
                         subprocess.run(cmd, shell=True, timeout=5.0)
@@ -3259,7 +3305,7 @@ class AdsbIm:
                     continue
                 if key.startswith("temp_sensor_") and value == "go":
                     self._d.env_by_tags("temp_sensor").value = form.get("temp_sensor", "") if key.endswith("enable") else ""
-                    self.handle_temp_sensor(self._d.env_by_tags("temp_sensor"), form.get("dht22_pin", "4"))
+                    self.handle_temp_sensor(self._d.env_by_tags("temp_sensor"), int(form.get("dht22_pin", "4")))
                     self._next_url_from_director = request.url
                     continue
 
@@ -3277,6 +3323,8 @@ class AdsbIm:
                 if allow_insecure and key == "tailscale":
                     # grab extra arguments if given
                     ts_args = form.get("tailscale_extras", "")
+                    ts_cli_switch = ""
+                    ts_cli_value = ""
                     if ts_args:
                         # right now we really only want to allow the login server arg
                         try:
@@ -3330,6 +3378,9 @@ class AdsbIm:
                             stdout=subprocess.DEVNULL,
                             text=True,
                         )
+                        if not proc or not proc.stderr:
+                            report_issue("exception trying to set up tailscale - giving up")
+                            continue
                         os.set_blocking(proc.stderr.fileno(), False)
                     except Exception:
                         # this really needs a user visible error...
@@ -3594,7 +3645,7 @@ class AdsbIm:
         acars_frequencies = ""
         vdl2_frequencies = ""
         frequencies_json, status_code = generic_get_json(url)
-        if status_code != 200:
+        if status_code != 200 or not frequencies_json:
             print_err(f"failed to retrieve best_frequencies JSON from {url}: {status_code}")
         else:
             print_err(f"frequencies_json: {frequencies_json}")
@@ -3738,7 +3789,7 @@ class AdsbIm:
         if self._d.is_enabled("stage2"):
             print_err("setting up aggregators on a stage 2 system")
             try:
-                m = int(request.args.get("m"))
+                m = int(request.args.get("m", "0"))
             except Exception:
                 m = 0
             if m == 0:  # do not set up aggregators for the aggregated feed
@@ -3836,7 +3887,7 @@ class AdsbIm:
         return self.aggregators()
 
     def reset_planes_seen_per_day(self):
-        self.planes_seen_per_day = [set() for i in [0] + self.micro_indices()]
+        self.planes_seen_per_day: list = [set() for i in [0] + self.micro_indices()]
 
     def load_planes_seen_per_day(self):
         # set limit on how many days of statistics to keep
@@ -3846,7 +3897,7 @@ class AdsbIm:
         start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
         self.reset_planes_seen_per_day()
         self.plane_stats_day = start_of_day.timestamp()
-        self.plane_stats = [[] for i in [0] + self.micro_indices()]
+        self.plane_stats: list = [[] for i in [0] + self.micro_indices()]
         try:
             with gzip.open("/opt/adsb/adsb_planes_seen_per_day.json.gz", "r") as f:
                 planes = json.load(f)
@@ -3955,23 +4006,26 @@ class AdsbIm:
             self._d.previous_version = "check-in"
             r = self._im_status.check(True)
             self._d.previous_version = pv
-            if r.get("latest_tag", "unknown") != "unknown":
+            if r and r.get("latest_tag", "unknown") != "unknown":
                 self.ci = False
 
     def update_net_dev(self):
         dev = ""
         addr = ""
         try:
-            result = subprocess.run(
-                "ip route get 1 | head -1  | cut -d' ' -f5,7",
-                shell=True,
-                capture_output=True,
-                timeout=2.0,
-            ).stdout
+            result = (
+                subprocess.run(
+                    "ip route get 1 | head -1  | cut -d' ' -f5,7",
+                    shell=True,
+                    capture_output=True,
+                    timeout=2.0,
+                )
+                .stdout.decode()
+                .strip()
+            )
         except Exception:
             result = ""
         else:
-            result = result.decode().strip()
             if " " in result:
                 dev, addr = result.split(" ")
             else:
@@ -4006,32 +4060,36 @@ class AdsbIm:
 
         if self._d.env_by_tags("tailscale_name").value:
             try:
-                result = subprocess.run(
-                    "tailscale ip -4 2>/dev/null",
-                    shell=True,
-                    capture_output=True,
-                    timeout=2.0,
-                ).stdout
+                result = (
+                    subprocess.run(
+                        "tailscale ip -4 2>/dev/null",
+                        shell=True,
+                        capture_output=True,
+                        timeout=2.0,
+                    )
+                    .stdout.decode()
+                    .strip()
+                )
             except Exception:
                 result = ""
-            else:
-                result = result.decode().strip()
             self.tailscale_address = result
         else:
             self.tailscale_address = ""
         zt_network = self._d.env_by_tags("zerotierid").value
         if zt_network:
             try:
-                result = subprocess.run(
-                    ["zerotier-cli", "get", f"{zt_network}", "ip4"],
-                    shell=True,
-                    capture_output=True,
-                    timeout=2.0,
-                ).stdout
+                result = (
+                    subprocess.run(
+                        ["zerotier-cli", "get", f"{zt_network}", "ip4"],
+                        shell=True,
+                        capture_output=True,
+                        timeout=2.0,
+                    )
+                    .stdout.decode()
+                    .strip()
+                )
             except Exception:
                 result = ""
-            else:
-                result = result.decode().strip()
             self.zerotier_address = result
         else:
             self.zerotier_address = ""
