@@ -548,7 +548,7 @@ class Data:
         Env(
             "_ADSBIM_STATE_ALIVE_MAP_LINK",
             default=[""],
-            tags="alivemaplink",
+            tags=["alivemaplink"],
         ),
         Env(
             "_ADSBIM_STATE_IS_ULTRAFEEDER_TAT_ENABLED",
