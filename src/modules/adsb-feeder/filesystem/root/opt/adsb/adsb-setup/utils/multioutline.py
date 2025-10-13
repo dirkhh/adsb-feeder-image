@@ -9,7 +9,7 @@ from utils.util import get_plain_url, print_err
 
 use_is_valid_reason = True
 try:
-    from shapely.validation import is_valid_reason
+    from shapely import is_valid_reason
 except Exception:
     use_is_valid_reason = False
     from shapely.validation import explain_validity
@@ -95,14 +95,14 @@ class MultiOutline:
                     p = Polygon(shell=LinearRing(points))
                     if p:
                         if use_is_valid_reason:
-                            r = is_valid_reason(p)
+                            r = is_valid_reason(p)  # type: ignore[possibly-unbound]
                             if r == "Valid Geometry":
                                 polygons.append(p)
                             else:
                                 print_err(f"multioutline: can't create polygon from outline #{i} - {r}")
                         else:
                             try:
-                                r = explain_validity(p)
+                                r = explain_validity(p)  # type: ignore[possibly-unbound]
                                 if r == "Valid Geometry":
                                     polygons.append(p)
                                 else:
@@ -126,12 +126,21 @@ class MultiOutline:
             for i in look_at:
                 combined = False
                 if not polygons[i] or not polygons[i].is_valid:
-                    print_err(f"multioutline: polygons[{i}]: {explain_validity(polygons[i])}")
+                    if use_is_valid_reason:
+                        r = is_valid_reason(polygons[i])  # type: ignore[possibly-unbound]
+                    else:
+                        r = explain_validity(polygons[i])  # type: ignore[possibly-unbound]
+                    print_err(f"multioutline: polygons[{i}]: {r}")
+
                     polygons[i] = polygons[i].buffer(0.0001)
                 for j in to_consider:
                     if not polygons[j].is_valid:
-                        print_err(f"multioutline: polygons[{j}]: {explain_validity(polygons[j])}")
-                        polygons[j] = polygons[j].buffer(0.0001)
+                        if use_is_valid_reason:
+                            r = is_valid_reason(polygons[j])  # type: ignore[possibly-unbound]
+                        else:
+                            r = explain_validity(polygons[j])  # type: ignore[possibly-unbound]
+                        print_err(f"multioutline: polygons[{j}]: {r}")
+                    polygons[j] = polygons[j].buffer(0.0001)
                     try:
                         if not polygons[j].disjoint(polygons[i]):
                             p = unary_union([polygons[j], polygons[i]])
