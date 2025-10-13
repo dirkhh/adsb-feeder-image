@@ -57,8 +57,12 @@ class Data:
     def proxy_routes(self):
         ret = []
         for [endpoint, _env, path] in self._proxy_routes:
-            env = "AF_" + _env.upper() + "_PORT"
-            port = self.env(env).value
+            env_name = "AF_" + _env.upper() + "_PORT"
+            env = self.env(env_name)
+            if env is None:
+                print_err(f"env {env_name} is not a known Env variable")
+                continue
+            port = env.value
             ret.append([endpoint, port, path])
             if endpoint in [
                 "/fr24/",
