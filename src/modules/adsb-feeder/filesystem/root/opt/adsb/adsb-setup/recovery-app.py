@@ -56,9 +56,11 @@ def get_current_version():
         return None
 
 
-def get_git_tags():
+def get_git_tags_and_branches():
+    tags = []
+    branches = []
     if not ensure_git_repo():
-        return []
+        return [], []
 
     try:
         # Fetch latest tags
@@ -82,11 +84,25 @@ def get_git_tags():
             tags = result.stdout.strip().split("\n")
             # Filter tags that match our version pattern
             version_pattern = re.compile(r"^v\d+\.\d+\.\d+(?:-beta\.\d+)?$")
-            return [tag for tag in tags if version_pattern.match(tag)]
-        return []
+            tags = [tag for tag in tags if version_pattern.match(tag)]
+
+        # Get all remote branches
+        result = subprocess.run(
+            ["git", "branch", "-r"],
+            cwd=git_repo_path,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        if result.returncode == 0:
+            branches = result.stdout.strip().split("\n")
+            branches = [branch.replace("origin/", "").strip() for branch in branches if branch.strip()]
+
+        print_err(f"tags: {tags} branches: {branches}")
+        return tags, branches
     except Exception as e:
-        print_err(f"Failed to get git tags: {e}")
-        return []
+        print_err(f"Failed to get git tags and branches: {e}")
+        return tags, branches
 
 
 def get_previous_version():
@@ -94,7 +110,7 @@ def get_previous_version():
     if not current:
         return None
 
-    tags = get_git_tags()
+    tags, _ = get_git_tags_and_branches()
     if not tags:
         return None
     release_tags = [tag for tag in tags if "-beta" not in tag]
@@ -198,21 +214,21 @@ def rollback():
     return redirect("/")
 
 
-@app.route("/recover-to/<tag>")
-def recover_to_tag(tag):
+@app.route("/recover-to/<tagorbranch>")
+def recover_to_tag(tagorbranch):
+    tags, branches = get_git_tags_and_branches()
+    if tagorbranch not in tags and tagorbranch not in branches:
+        print_err(f"{tagorbranch} is not a valid tag or branch")
+        return f"{tagorbranch} is not a valid tag or branch", 400
+
     # Validate tag format
     version_pattern = re.compile(r"^v\d+\.\d+\.\d+(?:-beta\.\d+)?$")
-    if not version_pattern.match(tag):
-        print_err(f"Invalid tag format: {tag}")
-        return f"Invalid version tag format: {tag}", 400
+    if version_pattern.match(tagorbranch):
+        tagorbranch = tagorbranch[1:]
+    else:
+        tagorbranch = f"origin/{tagorbranch}"
 
-    # Verify the tag exists in git
-    tags = get_git_tags()
-    if tags and tag not in tags:
-        print_err(f"Tag not found: {tag}")
-        return f"Version tag not found: {tag}", 404
-
-    success, error = start_recovery(tag)
+    success, error = start_recovery(tagorbranch)
     if not success:
         return f"Failed to start recovery: {error}", 500
 
@@ -230,17 +246,11 @@ def recovery_status():
     if recovery_process and recovery_process.poll() is None:
         return "in-progress"
 
-    # Process finished, check if version changed
-    current = get_current_version()
-    if current == rollback_target_version:
-        # Recovery completed successfully
-        rollback_in_progress = False
-        rollback_target_version = None
-        recovery_process = None
-        return "completed"
-
-    # Still in progress (version not updated yet)
-    return "in-progress"
+    # Process finished so let the UI know
+    rollback_in_progress = False
+    rollback_target_version = None
+    recovery_process = None
+    return "completed"
 
 
 @app.route("/restart")
