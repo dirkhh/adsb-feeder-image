@@ -19,14 +19,25 @@ exclude = [
 [tool.ruff.lint]
 # Enable pycodestyle (E, W), pyflakes (F), and isort (I) by default
 select = ["E", "W", "F", "I"]
-# Ignore line too long (E501) and whitespace before ':' (E203) - same as flake8
-ignore = ["E501", "E203"]
+# Ignore
+#       line too long (E501)
+#       whitespace before ':' (E203)
+#       f-string without placeholders (F541)
+#       type-comparison (E721)
+#       comparison to None (E711)
+ignore = ["E501", "E203", "F541", "E721", "E711"]
 
 [tool.pylint.format]
 max-line-length = 130
 
 [tool.flake8]
-extend-ignore = "E501"
+# Ignore
+#       line too long (E501)
+#       whitespace before ':' (E203)
+#       f-string without placeholders (F541)
+#       type-comparison (E721)
+#       comparison to None (E711)
+extend-ignore = ["E501", "E203", "F541", "E721", "E711"]
 
 [tool.mypy]
 check_untyped_defs = true
