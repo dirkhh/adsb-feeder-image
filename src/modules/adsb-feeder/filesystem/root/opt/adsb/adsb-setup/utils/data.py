@@ -911,7 +911,7 @@ class Data:
         # fmt: off
         ret["AF_FALSE_ON_STAGE2"] = "false" if self.is_enabled(["stage2"]) else "true"
         if self.is_enabled(["stage2"]):
-            for i in range(1, self.env_by_tags("num_micro_sites").value + 1):
+            for i in range(1, self.env_by_tags("num_micro_sites").valueint + 1):
                 ret[f"AF_TAR1090_PORT_{i}"] = int(ret[f"AF_TAR1090_PORT"]) + i * 1000
                 ret[f"AF_PIAWAREMAP_PORT_{i}"] = int(ret[f"AF_PIAWAREMAP_PORT"]) + i * 1000
                 ret[f"AF_PIAWARESTAT_PORT_{i}"] = int(ret[f"AF_PIAWARESTAT_PORT"]) + i * 1000
