@@ -185,7 +185,7 @@ class System:
             requests.Timeout,
             requests.RequestException,
         ) as err:
-            status = err.errno
+            status = err.errno if err.errno else -1
         except Exception:
             status = -1
         else:

@@ -109,7 +109,7 @@ def generic_get_json(url: str, data=None, timeout=5.0):
         requests.RequestException,
     ) as err:
         print_err(f"checking {url} failed: {err}")
-        status = err.errno
+        status = err.errno if err.errno else -1
     except Exception:
         # for some reason this didn't work
         print_err("checking {url} failed: reason unknown")
@@ -239,7 +239,7 @@ def get_plain_url(plain_url, method="GET", data=None):
         requests.RequestException,
     ) as err:
         print_err(f"checking {plain_url} failed: {err}")
-        status = err.errno
+        status = err.errno if err.errno else -1
     except Exception:
         print_err("checking {plain_url} failed: {traceback.format_exc()}")
     else:
