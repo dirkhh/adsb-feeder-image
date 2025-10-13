@@ -41,7 +41,7 @@ jobs:
       continue-on-error: true
       run: |
         echo "Running flake8..."
-        flake8 src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup --extend-ignore=E501,E203 --show-source --statistics --count
+        flake8 src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup --extend-ignore=E501,E203,F541,E721,E711 --show-source --statistics --count
         echo "flake8 completed"
 
     - name: Run mypy

@@ -37,7 +37,7 @@ max-line-length = 130
 #       f-string without placeholders (F541)
 #       type-comparison (E721)
 #       comparison to None (E711)
-extend-ignore = ["E501", "E203", "F541", "E721", "E711"]
+extend-ignore = "E501,E203,F541,E721,E711"
 
 [tool.mypy]
 check_untyped_defs = true
