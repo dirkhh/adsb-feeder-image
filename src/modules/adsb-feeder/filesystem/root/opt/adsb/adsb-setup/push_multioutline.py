@@ -13,7 +13,7 @@ try:
     mo_data = MultiOutline().create_outline(n)
     with open(f"/run/adsb-feeder-ultrafeeder/readsb/multiOutline.json", "w") as f:
         json.dump(mo_data, f)
-except:
+except Exception:
     print_err(traceback.format_exc(), level=8)
     print_err("failed to push multiOutline.json verbose 8 for details")
 
@@ -33,6 +33,6 @@ try:
             "ultrafeeder:/usr/local/share/tar1090/html-webroot/upintheair.json",
         ]
         subprocess.run(cmd, check=True)
-except:
+except Exception:
     print_err(traceback.format_exc(), level=8)
     print_err("failed to push heywhatsthat.json - verbose 8 for details")

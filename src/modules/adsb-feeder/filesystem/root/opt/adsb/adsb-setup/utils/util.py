@@ -58,7 +58,7 @@ def report_issue(msg):
     print_err(msg, level=1)
     try:
         flash(msg)
-    except:
+    except Exception:
         print_err(traceback.format_exc())
 
 
@@ -77,7 +77,7 @@ def is_true(value):
 def make_int(value):
     try:
         return int(value)
-    except:
+    except Exception:
         stack_info(f"ERROR: make_int({value}) - returning 0")
         return 0
 
@@ -110,7 +110,7 @@ def generic_get_json(url: str, data=None, timeout=5.0):
     ) as err:
         print_err(f"checking {url} failed: {err}")
         status = err.errno
-    except:
+    except Exception:
         # for some reason this didn't work
         print_err("checking {url} failed: reason unknown")
     else:
@@ -131,7 +131,7 @@ def create_fake_info(indices):
         if cpuinfo.is_dir():
             try:
                 cpuinfo.rmdir()
-            except:
+            except Exception:
                 pass
         if not cpuinfo.exists():
             with open("/proc/cpuinfo", "r") as ci_in, open(cpuinfo, "w") as ci_out:
@@ -236,7 +236,7 @@ def get_plain_url(plain_url, method="GET", data=None):
     ) as err:
         print_err(f"checking {plain_url} failed: {err}")
         status = err.errno
-    except:
+    except Exception:
         print_err("checking {plain_url} failed: {traceback.format_exc()}")
     else:
         return response.text, response.status_code

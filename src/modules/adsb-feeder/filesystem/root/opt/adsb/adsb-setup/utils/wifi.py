@@ -26,7 +26,7 @@ class Wifi:
                 capture_output=True,
                 timeout=2.0,
             ).stdout.decode("utf-8")
-        except:
+        except Exception:
             ssid = ""
 
         return ssid.strip()
@@ -78,7 +78,7 @@ class Wifi:
                 if reconfigured and "CTRL-EVENT-CONNECTED" in line:
                     connected = True
                     break
-        except:
+        except Exception:
             print_err(traceback.format_exc())
         finally:
             if proc:
@@ -133,7 +133,7 @@ class Wifi:
                     if len(fields) == 5:
                         ssids.append(fields[4])
 
-        except:
+        except Exception:
             print_err(f"ERROR in wpa_cli_scan(), wpa_cli ouput: {output}")
         finally:
             if proc:
@@ -169,7 +169,7 @@ class Wifi:
                             raise SyntaxError("unexpected close of network block")
                         inBlock = False
                         netblocks[exist_ssid] = netblock
-        except:
+        except Exception:
             print_err(traceback.format_exc())
             print_err(f"ERROR when parsing existing wpa supplicant config, will DISCARD OLD CONFIG")
             netblocks = {}
@@ -197,7 +197,7 @@ p2p_disabled=1
                 )
                 for k in netblocks.keys():
                     conf.write(netblocks[k])
-        except:
+        except Exception:
             print_err(traceback.format_exc())
             print_err(f"ERROR when writing wpa supplicant config to {path}")
             return False

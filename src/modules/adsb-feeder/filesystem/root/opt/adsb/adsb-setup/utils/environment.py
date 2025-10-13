@@ -144,7 +144,7 @@ class Env:
         if type(self._default) == float:
             try:
                 value = float(value)
-            except:
+            except Exception:
                 print_err(f"{self._name}: Can't set to non-float value")
                 return
 

@@ -103,7 +103,7 @@ class AggStatus:
             percent_bad = mlat_json.get("bad_sync_percentage_last_hour", 0)
             peer_count = mlat_json.get("peer_count", 0)
             now = mlat_json.get("now")
-        except:
+        except Exception:
             self._mlat = T.Disconnected
             return
         if time.time() - now > 60:
@@ -133,7 +133,7 @@ class AggStatus:
         filename = f"{self.uf_path()}/readsb/stats.prom"
         try:
             readsb_status = open(filename, "r").read()
-        except:
+        except Exception:
             self._beast = T.Disconnected
             return
         match = re.search(pattern, readsb_status)
@@ -289,7 +289,7 @@ class AggStatus:
                         capture_output=True,
                         text=True,
                     )
-                except:
+                except Exception:
                     print_err("got exception trying to look at the rbfeeder logs")
                     return
                 serial_text = result.stdout.strip()
@@ -392,7 +392,7 @@ class AggStatus:
                     for entry in response_dict.get("clients").get("beast"):
                         if entry.get("uuid", "xxxxxxxx-xxxx-")[:14] == uuid[:14]:
                             self._d.env_by_tags("adsblol_link").list_set(self._idx, entry.get("adsblol_my_url"))
-                except:
+                except Exception:
                     print_err(traceback.format_exc())
 
         if self._agg == "adsbx":
@@ -595,7 +595,7 @@ class Healthcheck:
                     if samples == self.lastReadsbSamples:
                         fail.append(f"1090 SDR hung (sample count: {samples})")
                     self.lastReadsbSamples = samples
-        except:
+        except Exception:
             if adsb:
                 print_err(traceback.format_exc())
                 fail.append("readsb stats.json not found")
@@ -615,7 +615,7 @@ class Healthcheck:
                     now = obj.get("now")
                     if not now or now < time.time() - 60:
                         fail.append("readsb aircraft.json out of date")
-            except:
+            except Exception:
                 print_err(traceback.format_exc())
                 fail.append("readsb not running / 1090 SDR probably dead / unplugged")
 
@@ -637,7 +637,7 @@ class Healthcheck:
                     now = obj.get("now")
                     if not now or now < time.time() - 60:
                         fail.append("dump978 aircraft.json out of date")
-            except:
+            except Exception:
                 print_err(traceback.format_exc())
                 fail.append("dump978 not running / 978 SDR probably dead / unplugged")
 
@@ -652,7 +652,7 @@ class Healthcheck:
                     now = obj.get("now")
                     if not now or now < time.time() - 90:
                         fail.append("airspy stats.json outdated")
-            except:
+            except Exception:
                 print_err(traceback.format_exc())
                 fail.append("airspy_adsb not running, 1090 SDR (airspy) probably dead / unplugged")
 

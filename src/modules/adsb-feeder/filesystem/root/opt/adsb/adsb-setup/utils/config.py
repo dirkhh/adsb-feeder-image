@@ -33,7 +33,7 @@ def read_values_from_config_json(check_integrity=False):
     ret = {}
     try:
         ret = json.load(open(JSON_FILE_PATH, "r"))
-    except:
+    except Exception:
         print_err("Failed to read .json file")
     return ret
 
@@ -45,7 +45,7 @@ def write_values_to_config_json(data: dict, reason="no reason provided"):
         with os.fdopen(fd, "w") as f:
             json.dump(data, f, indent=2)
         os.rename(tmp, JSON_FILE_PATH)
-    except:
+    except Exception:
         print_err(f"Error writing config.json to {JSON_FILE_PATH}")
 
 
@@ -61,7 +61,7 @@ def read_values_from_env_file():
                 if key in conversion.keys():
                     key = conversion[key]
                 ret[key.strip()] = var.strip()
-    except:
+    except Exception:
         print_err("Failed to read .env file")
     return ret
 

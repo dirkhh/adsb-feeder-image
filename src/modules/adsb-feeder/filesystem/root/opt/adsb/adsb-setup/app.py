@@ -393,7 +393,7 @@ class AdsbIm:
                             capture_output=True,
                             text=True,
                         ).stdout.strip()
-                    except:
+                    except Exception:
                         pass
                     if prod or manufacturer:
                         board = f"Native on {manufacturer} {prod} {platform.machine()} system"
@@ -445,7 +445,7 @@ class AdsbIm:
                     if line.startswith("MemTotal:"):
                         self._memtotal = make_int(line.split()[1])
                         break
-        except:
+        except Exception:
             pass
 
     def update_journal_state(self):
@@ -457,7 +457,7 @@ class AdsbIm:
                 "systemd-analyze cat-config systemd/journald.conf", shell=True, capture_output=True, timeout=2.0
             )
             config = result.stdout.decode("utf-8")
-        except:
+        except Exception:
             config = "Storage=auto"
         for line in config:
             if line.startswith("Storage=volatile"):
@@ -662,7 +662,7 @@ class AdsbIm:
                     print_err("USB current limited to 600mA, this is only sufficient for a single SDR")
                     return True
                 return False
-        except:
+        except Exception:
             return False
 
     def monitor_dmesg(self):
@@ -685,7 +685,7 @@ class AdsbIm:
                             self.undervoltage_epoch = time.time()
                         # print_err(f"dmesg: {line.rstrip()}")
 
-            except:
+            except Exception:
                 print_err(traceback.format_exc())
 
             # this shouldn't happen
@@ -715,13 +715,13 @@ class AdsbIm:
             print_err(f"failed to set up timezone ({timezone}) using timedatectl, try dpkg-reconfigure instead")
             try:
                 subprocess.run(["test", "-f", f"/usr/share/zoneinfo/{timezone}"], check=True)
-            except:
+            except Exception:
                 print_err(f"setting timezone: /usr/share/zoneinfo/{timezone} doesn't exist")
                 return False
             try:
                 subprocess.run(["ln", "-sf", f"/usr/share/zoneinfo/{timezone}", "/etc/localtime"])
                 subprocess.run("dpkg-reconfigure --frontend noninteractive tzdata", shell=True)
-            except:
+            except Exception:
                 pass
 
         return True
@@ -823,7 +823,7 @@ class AdsbIm:
                 # when the new copy is moved in place, which will make os.stat unhappy
                 try:
                     return time.time() - os.stat(rrd_file).st_mtime
-                except:
+                except Exception:
                     return time.time() - 0  # fallback to long time since last write
 
             context = f"graphs1090 writeback {microIndex}"
@@ -845,7 +845,7 @@ class AdsbIm:
                     shell=True,
                     check=True,
                 )
-            except:
+            except Exception:
                 report_issue(f"{context}: docker exec failed - backed up graph data might miss up to 6h")
                 pass
             else:
@@ -1296,7 +1296,7 @@ class AdsbIm:
     def sdr_config(self, value):
         try:
             sdr_data_list = json.loads(value)
-        except:
+        except Exception:
             print_err(f"sdr_config: got {value} and can't parse as JSON")
             return
         if not type(sdr_data_list) == list:
@@ -1480,7 +1480,7 @@ class AdsbIm:
                     )
             except FileNotFoundError:
                 ret.append({"pps": 0, "mps": 0, "uptime": 0, "planes": 0, "tplanes": tplanes})
-            except:
+            except Exception:
                 print_err(traceback.format_exc())
                 ret.append({"pps": 0, "mps": 0, "uptime": 0, "planes": 0, "tplanes": tplanes})
         return Response(json.dumps(ret), mimetype="application/json")
@@ -1821,8 +1821,7 @@ class AdsbIm:
             self._d.env_by_tags("mf_brofm_capable").list_set(n, bool(base_info.get("brofm_capable")))
 
             return True
-        #    except:
-        #        pass
+
         print_err(f"failed to get base_info from micro feeder {n}")
         return False
 
@@ -1842,7 +1841,7 @@ class AdsbIm:
                 print_err(f"response code: {response.status_code}")
                 json_dict = response.json()
                 print_err(f"json_dict: {type(json_dict)} {json_dict}")
-            except:
+            except Exception:
                 print_err(f"failed to check base_info from remote feeder {ip}:{port}")
             else:
                 if response.status_code == 200:
@@ -1852,7 +1851,7 @@ class AdsbIm:
                     print_err(f"checking remote feeder {url}")
                     try:
                         response = requests.get(url, timeout=5.0)
-                    except:
+                    except Exception:
                         print_err(f"failed to check micro_settings from remote feeder {ip}")
                         json_dict["micro_settings"] = False
                     else:
@@ -1893,7 +1892,7 @@ class AdsbIm:
                 capture_output=True,
             )
             output = response.stderr.decode("utf-8")
-        except:
+        except Exception:
             print_err("failed to use readsb in ultrafeeder container to check on remote feeder status")
             return make_response(json.dumps({"status": "fail"}), 200)
         if not re.search("input: Connection established", output):
@@ -1938,7 +1937,7 @@ class AdsbIm:
             )
 
             print_err(f"done importing graphs and history from {ip}")
-        except:
+        except Exception:
             report_issue(f"ERROR when importing graphs and history from {ip}")
         finally:
             os.remove(tmpfile)
@@ -2069,13 +2068,13 @@ class AdsbIm:
                             f"/opt/adsb/docker-compose-adsb down uf_{num} -t 30",
                             shell=True,
                         )
-                    except:
+                    except Exception:
                         print_err(f"failed to stop micro feeder {num}")
                         return (False, f"failed to stop micro feeder {num}")
                     print_err(f"moving micro feeder data directory from {data_dir/old_ip} to {data_dir/ip}")
                     try:
                         os.rename(data_dir / f"{old_ip}", data_dir / f"{ip}")
-                    except:
+                    except Exception:
                         print_err(f"failed to move micro feeder data directory from {data_dir/old_ip} to {data_dir/ip}")
                         return (
                             False,
@@ -2114,7 +2113,7 @@ class AdsbIm:
             setGainPath = pathlib.Path("/run/adsb-feeder-ultrafeeder/readsb/setGain")
         try:
             gaindir.mkdir(exist_ok=True, parents=True)
-        except:
+        except Exception:
             pass
         gain = self._d.env_by_tags(["1090gain"]).value
 
@@ -2232,13 +2231,13 @@ class AdsbIm:
             if config.exists():
                 try:
                     config.rename(config_backup)
-                except:
+                except Exception:
                     # if the station.cfg doesn't exist when compose up is called, docker will create
                     # a directory named station.cfg which needs to be removed for us to be able to
                     # proceed
                     try:
                         config.rmdir()
-                    except:
+                    except Exception:
                         pass
 
             with open(config, "w") as f:
@@ -2866,7 +2865,7 @@ class AdsbIm:
                     subprocess.run(cmd, shell=True, timeout=5.0)
                     self.update_journal_state()
                     self._d.env_by_tags("journal_configured").value = True
-                except:
+                except Exception:
                     pass
 
         for i in self.micro_indices():
@@ -2900,11 +2899,11 @@ class AdsbIm:
             # careful - env tags might not exist
             try:
                 gain = self._d.env_by_tags(f"{purpose}gain").valuestr
-            except:
+            except Exception:
                 gain = ""
             try:
                 biastee = bool(self._d.env_by_tags(f"{purpose}biastee").value)
-            except:
+            except Exception:
                 biastee = False
             assignments[purpose] = (serial, gain, biastee)
         return assignments
@@ -2917,7 +2916,7 @@ class AdsbIm:
         try:
             with open("/etc/docker/daemon.json", "r") as f:
                 daemon_json = json.load(f)
-        except:
+        except Exception:
             daemon_json = {}
         new_daemon_json = daemon_json.copy()
         if value:
@@ -3163,7 +3162,7 @@ class AdsbIm:
                         print_err(cmd)
                         subprocess.run(cmd, shell=True, timeout=5.0)
                         self.update_journal_state()
-                    except:
+                    except Exception:
                         pass
                     self._next_url_from_director = request.url
                 if key == "acarshub_to_disk" and value == "go":
@@ -3282,7 +3281,7 @@ class AdsbIm:
                         # right now we really only want to allow the login server arg
                         try:
                             ts_cli_switch, ts_cli_value = ts_args.split("=")
-                        except:
+                        except Exception:
                             ts_cli_switch, ts_cli_value = ["", ""]
 
                         if ts_cli_switch != "--login-server":
@@ -3332,7 +3331,7 @@ class AdsbIm:
                             text=True,
                         )
                         os.set_blocking(proc.stderr.fileno(), False)
-                    except:
+                    except Exception:
                         # this really needs a user visible error...
                         report_issue("exception trying to set up tailscale - giving up")
                         continue
@@ -3440,7 +3439,7 @@ class AdsbIm:
                     cmdline = "docker exec ultrafeeder /usr/local/bin/autogain1090 reset"
                 try:
                     subprocess.run(cmdline, timeout=5.0, shell=True)
-                except:
+                except Exception:
                     report_issue("Error running Ultrafeeder autogain reset")
                 continue
             if key == "resetuatgain" and value == "1":
@@ -3448,7 +3447,7 @@ class AdsbIm:
                 cmdline = "docker exec dump978 /usr/local/bin/autogain978 reset"
                 try:
                     subprocess.run(cmdline, timeout=5.0, shell=True)
-                except:
+                except Exception:
                     report_issue("Error running UAT autogain reset")
                 continue
             if allow_insecure and key == "ssh_pub":
@@ -3470,7 +3469,7 @@ class AdsbIm:
                 continue
             try:
                 e = self._d.env_by_tags(key.split("--"))
-            except:
+            except Exception:
                 # if the key isn't creating a valid tag, just skip it
                 continue
             if allow_insecure and key == "zerotierid":
@@ -3481,7 +3480,7 @@ class AdsbIm:
                     subprocess.call(
                         ["/usr/sbin/zerotier-cli", "join", f"{value}"],
                     )
-                except:
+                except Exception:
                     report_issue("exception trying to set up zerorier - giving up")
             if key in {"lat", "lon"}:
                 # remove letters, spaces, degree symbols
@@ -3512,7 +3511,7 @@ class AdsbIm:
                     try:
                         subprocess.call("bash /opt/adsb/scripts/journal-set-volatile.sh", shell=True, timeout=5)
                         print_err("switched to volatile journal")
-                    except:
+                    except Exception:
                         print_err("exception trying to switch to volatile journal - ignoring")
             if key == "aggregator_choice" and value == "stage2":
                 next_url = url_for("stage2")
@@ -3663,7 +3662,7 @@ class AdsbIm:
                     check=True,
                     capture_output=True,
                 )
-            except:
+            except Exception:
                 # a non-zero return value means tailscale isn't configured or tailscale is disabled
                 # reset both associated env vars
                 # if tailscale recovers / is re-enabled and the system management page is visited,
@@ -3740,7 +3739,7 @@ class AdsbIm:
             print_err("setting up aggregators on a stage 2 system")
             try:
                 m = int(request.args.get("m"))
-            except:
+            except Exception:
                 m = 0
             if m == 0:  # do not set up aggregators for the aggregated feed
                 if self._d.env_by_tags("num_micro_sites").value == "0":
@@ -3789,7 +3788,7 @@ class AdsbIm:
                         response = requests.get(testurl, timeout=2.0)
                         if response.status_code == 200:
                             break
-                    except:
+                    except Exception:
                         pass
             return redirect(url)
         # If we have more than one SDR, or one of them is an airspy,
@@ -3894,7 +3893,7 @@ class AdsbIm:
                     while len(self.plane_stats[i]) > self.plane_stats_limit:
                         self.plane_stats[i].pop()
 
-        except:
+        except Exception:
             print_err(f"error loading planes_seen_per_day:\n{traceback.format_exc()}")
             pass
 
@@ -3925,7 +3924,7 @@ class AdsbIm:
                 aircraftdict = json.load(f)
                 aircraft = aircraftdict.get("aircraft", [])
                 planes = set([plane["hex"] for plane in aircraft if not plane["hex"].startswith("~")])
-        except:
+        except Exception:
             pass
         return planes
 
@@ -3969,7 +3968,7 @@ class AdsbIm:
                 capture_output=True,
                 timeout=2.0,
             ).stdout
-        except:
+        except Exception:
             result = ""
         else:
             result = result.decode().strip()
@@ -4013,7 +4012,7 @@ class AdsbIm:
                     capture_output=True,
                     timeout=2.0,
                 ).stdout
-            except:
+            except Exception:
                 result = ""
             else:
                 result = result.decode().strip()
@@ -4029,7 +4028,7 @@ class AdsbIm:
                     capture_output=True,
                     timeout=2.0,
                 ).stdout
-            except:
+            except Exception:
                 result = ""
             else:
                 result = result.decode().strip()
@@ -4163,7 +4162,7 @@ class AdsbIm:
         try:
             with open("/run/adsb-feeder-ultrafeeder/ambient-temperature", "r") as temperature_file:
                 temperature = temperature_file.read().strip()
-        except:
+        except Exception:
             pass
         return temperature
 
@@ -4319,7 +4318,7 @@ class AdsbIm:
             try:
                 result = subprocess.run(cmd, shell=True, capture_output=True, timeout=2.0)
                 return result.stdout.decode("utf-8")
-            except:
+            except Exception:
                 return f"failed to run '{cmd}'"
 
         storage = simple_cmd_result("df -h | grep -v overlay")

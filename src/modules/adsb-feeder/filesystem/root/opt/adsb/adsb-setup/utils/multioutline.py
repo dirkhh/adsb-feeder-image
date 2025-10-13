@@ -11,7 +11,7 @@ from utils.util import get_plain_url, print_err
 use_is_valid_reason = True
 try:
     from shapely.validation import is_valid_reason
-except:
+except Exception:
     use_is_valid_reason = False
     from shapely.validation import explain_validity
 
@@ -22,7 +22,7 @@ class MultiOutline:
         for i in range(1, num + 1):
             try:
                 outline = json.load(open(f"/run/adsb-feeder-uf_{i}/readsb/outline.json"))
-            except:
+            except Exception:
                 pass
             else:
                 data.append(outline)
@@ -50,7 +50,7 @@ class MultiOutline:
                 continue
             try:
                 hwt = json.loads(response)
-            except:
+            except Exception:
                 print_err(f"_get_heywhatsthat: json.loads failed on response: {response}")
             else:
                 data.append(hwt)
@@ -109,12 +109,12 @@ class MultiOutline:
                                     polygons.append(p)
                                 else:
                                     print_err(f"multioutline: can't create polygon from outline #{i} - {r}")
-                            except:
+                            except Exception:
                                 print_err(traceback.format_exc())
                                 print_err(f"multioutline: can't create polygon from outline #{i}")
                     else:
                         print_err(f"multioutline: can't create polygon from outline #{i}")
-                except:
+                except Exception:
                     print_err(traceback.format_exc())
                     print_err(f"multioutline: can't create linear ring from outline #{i} - maybe there is no data, yet?")
 

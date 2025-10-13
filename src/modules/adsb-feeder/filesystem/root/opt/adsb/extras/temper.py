@@ -60,7 +60,7 @@ class USBList(object):
     try:
       with open(path, 'r') as fp:
         return fp.read().strip()
-    except:
+    except Exception:
       return ''
 
   def _find_devices(self, dirname):
@@ -139,14 +139,14 @@ class USBRead(object):
     try:
       if bytes[offset] == 0x4e and bytes[offset+1] == 0x20:
         return
-    except:
+    except Exception:
       return
     try:
     # Big endian, short (signed) integer (2 Bytes)
       if verbose:
         print('Converted value: %s' % binascii.hexlify(bytes[offset:offset+2]))
       info[name] = struct.unpack_from('>h', bytes, offset)[0] / divisor
-    except:
+    except Exception:
       return
 
   def _read_hidraw_firmware(self, fd, verbose = False):
@@ -326,7 +326,7 @@ class USBRead(object):
       try:
         info['external temperature'] = float(m.group(1))
         info['external humidity'] = float(m.group(2))
-      except:
+      except Exception:
         pass
     return info
 
@@ -493,7 +493,7 @@ class Temper(object):
       try:
         vendor_id = int(ids[0], 16)
         product_id = int(ids[1], 16)
-      except:
+      except Exception:
         print('Cannot parse hexadecimal id: %s' % args.force)
         return 1
       self.forced_vendor_id = vendor_id;

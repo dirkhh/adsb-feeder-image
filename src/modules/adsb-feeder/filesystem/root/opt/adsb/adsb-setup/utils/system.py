@@ -146,7 +146,7 @@ class System:
                 # if i[0] is socket.AddressFamily.AF_INET
                 # and i[1] is socket.SocketKind.SOCK_RAW
             )
-        except:
+        except Exception:
             return False
         return responses != list()
 
@@ -186,7 +186,7 @@ class System:
             requests.RequestException,
         ) as err:
             status = err.errno
-        except:
+        except Exception:
             status = -1
         else:
             return response.text, response.status_code
@@ -247,7 +247,7 @@ class System:
         print_err(f"restarting {containers}")
         try:
             subprocess.run(["/opt/adsb/docker-compose-adsb", "restart"] + containers)
-        except:
+        except Exception:
             print_err("docker compose restart failed")
 
     def recreate_containers(self, containers):
@@ -255,21 +255,21 @@ class System:
         try:
             subprocess.run(["/opt/adsb/docker-compose-adsb", "down", "--remove-orphans", "-t", "30"] + containers)
             subprocess.run(["/opt/adsb/docker-compose-adsb", "up", "-d", "--force-recreate", "--remove-orphans"] + containers)
-        except:
+        except Exception:
             print_err("docker compose recreate failed")
 
     def stop_containers(self, containers: list[str]):
         print_err(f"stopping {containers}")
         try:
             subprocess.run(["/opt/adsb/docker-compose-adsb", "down", "-t", "30"] + containers)
-        except:
+        except Exception:
             print_err(f"docker compose down {containers} failed")
 
     def start_containers(self):
         print_err("starting all containers")
         try:
             subprocess.run(["/opt/adsb/docker-compose-start"])
-        except:
+        except Exception:
             print_err("docker compose start failed")
 
     def refreshDockerPs(self):
@@ -316,7 +316,7 @@ class System:
                     up, number, unit = status.split(" ")
                     # container up for some number of seconds, return how long it's been up
                     return f"up for {int(number)}"
-                except:
+                except Exception:
                     print_err(f"issue parsing container status: {status}")
 
             return "up"
