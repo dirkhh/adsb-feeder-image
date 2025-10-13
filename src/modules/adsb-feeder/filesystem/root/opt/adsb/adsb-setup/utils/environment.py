@@ -1,7 +1,7 @@
 from typing import List, Union
 
 from utils.config import config_lock, read_values_from_config_json, write_values_to_config_json
-from utils.util import is_true, make_int, print_err, stack_info
+from utils.util import is_true, make_int, print_err, report_issue, stack_info
 
 
 class Env:
@@ -107,6 +107,28 @@ class Env:
         return type(self._default) == list
 
     @property
+    def valuestr(self):
+        v = self.value
+        if type(v) != str:
+            stack_info(f"{self._name} is not a string: {v}")
+            report_issue(
+                f"please report this to the maintainers, including the data from System->Share Diagnostics: "
+                f"{self._name} is not a string: {v}"
+            )
+        return str(self.value)
+
+    @property
+    def valueint(self):
+        v = self.value
+        if type(v) != int:
+            stack_info(f"{self._name} is not an int: {v}")
+            report_issue(
+                f"please report this to the maintainers, including the data from System->Share Diagnostics: "
+                f"{self._name} is not an int: {v}"
+            )
+        return make_int(v)
+
+    @property
     def value(self):
         if self._value_call:
             return self._value_call()
@@ -119,20 +141,6 @@ class Env:
                 return self._default
             return self._default
         return ""
-
-    @property
-    def valuestr(self):
-        v = self.value
-        if type(v) != str:
-            stack_info(f"{self._name} is not a string: {v}")
-        return str(self.value)
-
-    @property
-    def valueint(self):
-        v = self.value
-        if type(v) != int:
-            stack_info(f"{self._name} is not an int: {v}")
-        return make_int(v)
 
     @value.setter
     def value(self, value):
