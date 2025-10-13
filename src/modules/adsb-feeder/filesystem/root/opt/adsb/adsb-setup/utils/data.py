@@ -952,8 +952,8 @@ class Data:
             raise Exception(f"env_by_tags called with no tags")
 
         # make the list a tuple so it's hashable
-        tags = tuple(tags)
-        cached = self._env_by_tags_dict.get(tags)
+        tags_tuple = tuple(tags)
+        cached = self._env_by_tags_dict.get(tags_tuple)
         if cached:
             return cached
 
@@ -970,7 +970,7 @@ class Data:
             for e in matches:
                 print_err(f"  {e}")
 
-        self._env_by_tags_dict[tags] = matches[0]
+        self._env_by_tags_dict[tags_tuple] = matches[0]
         return matches[0]
 
     def _get_enabled_env_by_tags(self, tags):

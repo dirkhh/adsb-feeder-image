@@ -1437,12 +1437,12 @@ class AdsbIm:
         # length by padding with zeros (that means the value for days for which we have
         # no data is 0)
         plane_stats = []
-        l = 0
+        max_length = 0
         for i in [0] + self.micro_indices():
             plane_stats.append([len(self.planes_seen_per_day[i])] + self.plane_stats[i])
-            l = max(l, len(plane_stats[-1]))
+            max_length = max(max_length, len(plane_stats[-1]))
         for i in range(len(plane_stats)):
-            plane_stats[i] = plane_stats[i] + [0] * (l - len(plane_stats[i]))
+            plane_stats[i] = plane_stats[i] + [0] * (max_length - len(plane_stats[i]))
         return Response(json.dumps(plane_stats), mimetype="application/json")
 
     def stage2_stats(self):
@@ -1933,12 +1933,11 @@ class AdsbIm:
         ]
         print_err(f"running: {cmd}")
         try:
-            response = subprocess.run(
+            output = subprocess.run(
                 cmd,
                 timeout=30.0,
                 capture_output=True,
-            )
-            output = response.stderr.decode("utf-8")
+            ).stderr.decode("utf-8")
         except Exception:
             print_err("failed to use readsb in ultrafeeder container to check on remote feeder status")
             return make_response(json.dumps({"status": "fail"}), 200)
@@ -2227,7 +2226,7 @@ class AdsbIm:
                 "hfdlobserver_ip",
             ]
             for p in placeholders:
-                config_lines = [l.replace("%" + p + "%", str(self._d.env_by_tags(p).value)) for l in config_lines]
+                config_lines = [line.replace("%" + p + "%", str(self._d.env_by_tags(p).value)) for line in config_lines]
             config = pathlib.Path("/opt/adsb/hfdlobserver/compose/settings.yaml")
             config_backup = pathlib.Path("/opt/adsb/hfdlobserver/compose/settings.yaml.bak")
             if config.exists():
@@ -2268,14 +2267,14 @@ class AdsbIm:
                 # Convert "auto" to "-1" for radiosonde autogain
                 if p == "sondegain" and str(value).startswith("auto"):
                     value = "-1"
-                config_lines = [l.replace("%" + p + "%", str(value)) for l in config_lines]
+                config_lines = [line.replace("%" + p + "%", str(value)) for line in config_lines]
             placeholders = [
                 "lat",
                 "lon",
                 "alt",
             ]
             for p in placeholders:
-                config_lines = [l.replace("%" + p + "%", str(self._d.env_by_tags(p).list_get(0))) for l in config_lines]
+                config_lines = [line.replace("%" + p + "%", str(self._d.env_by_tags(p).list_get(0))) for line in config_lines]
 
             new_config = "\n".join(config_lines)
 
@@ -3474,8 +3473,8 @@ class AdsbIm:
                     print_err(f"got aggregator object {aggregator_object} -- activating for sitenum {l_sitenum}")
                     try:
                         is_successful = aggregator_object._activate(aggregator_argument, l_sitenum)
-                    except Exception as e:
-                        print_err(f"error activating {key}: {e}")
+                    except Exception as ex:
+                        print_err(f"error activating {key}: {ex}")
                     if not is_successful:
                         report_issue(f"did not successfully enable {base}")
 
@@ -3973,7 +3972,7 @@ class AdsbIm:
                 f.write(planes_json.encode("utf-8"))
             os.rename(tmp, path)
             print_err("wrote planes_seen_per_day")
-        except Exception as e:
+        except Exception:
             print_err(f"error writing planes_seen_per_day:\n{traceback.format_exc()}")
             pass
 
@@ -4274,8 +4273,8 @@ class AdsbIm:
 
             return {"show_changelog": False}
 
-        except Exception as e:
-            print_err(f"Error checking changelog status: {e}")
+        except Exception as ex:
+            print_err(f"Error checking changelog status: {ex}")
             return {"show_changelog": False}
 
     def mark_changelog_seen(self):
@@ -4285,9 +4284,9 @@ class AdsbIm:
             print_err("Marked changelog as seen")
             return {"success": True}
 
-        except Exception as e:
-            print_err(f"Error marking changelog as seen: {e}")
-            return {"success": False, "error": str(e)}
+        except Exception as ex:
+            print_err(f"Error marking changelog as seen: {ex}")
+            return {"success": False, "error": str(ex)}
 
     def support(self):
         print_err(f"support request, {request.form}")
