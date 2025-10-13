@@ -1,19 +1,25 @@
-from typing import List, Union
+from typing import Callable, List, Optional
 
 from utils.config import config_lock, read_values_from_config_json, write_values_to_config_json
 from utils.util import is_true, make_int, print_err, report_issue, stack_info
 
 
 class Env:
+    _value: Optional[str | list | bool | int | float]
+    _default: Optional[str | list | bool | int | float]
+    _is_mandatory: bool
+    _value_call: Optional[Callable]
+    _tags: List[str]
+
     def __init__(
         self,
         name: str,
-        value: Union[str, List[str]] = None,
+        value: Optional[str | list | bool | int | float] = None,
         is_mandatory: bool = False,
-        default: any = None,
-        default_call: callable = None,
-        value_call: callable = None,
-        tags: list = None,
+        default: Optional[str | list | bool | int | float] = None,
+        default_call: Optional[Callable] = None,
+        value_call: Optional[Callable] = None,
+        tags: List[str] = [""],
     ):
         self._name = name
 
