@@ -73,7 +73,10 @@ class SDR:
         return False
 
     def __repr__(self):
-        return f"SDR(type: '{self._type}' address: '{self._address}', serial: '{self._serial}', purpose: '{self.purpose}', gain: '{self.gain}', biastee: {self.biastee})"
+        return (
+            f"SDR(type: '{self._type}' address: '{self._address}', serial: '{self._serial}', "
+            f"purpose: '{self.purpose}', gain: '{self.gain}', biastee: {self.biastee})"
+        )
 
 
 class SDRDevices:
