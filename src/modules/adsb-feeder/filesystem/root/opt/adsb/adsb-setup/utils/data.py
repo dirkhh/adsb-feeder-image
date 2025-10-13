@@ -11,10 +11,10 @@ from .util import is_true, print_err
 
 @dataclass
 class Data:
-    def __new__(cc):
-        if not hasattr(cc, "instance"):
-            cc.instance = super(Data, cc).__new__(cc)
-        return cc.instance
+    def __new__(cls):
+        if not hasattr(cls, "instance"):
+            cls.instance = super(Data, cls).__new__(cls)
+        return cls.instance
 
     data_path = Path("/opt/adsb")
     config_path = data_path / "config"
