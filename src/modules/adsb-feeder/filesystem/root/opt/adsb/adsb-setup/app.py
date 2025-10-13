@@ -976,8 +976,6 @@ class AdsbIm:
             return render_template("/restore.html")
 
     def executerestore(self):
-        if request.method == "GET":
-            return self.restore_get(request)
         if request.method == "POST":
             form = deepcopy(request.form)
 
@@ -986,6 +984,7 @@ class AdsbIm:
 
             self._system._restart.bg_run(func=do_restore_post)
             return render_template("/restarting.html")
+        return self.restore_get(request)
 
     def restore_get(self, request):
         # the user has uploaded a zip file and we need to take a look.
