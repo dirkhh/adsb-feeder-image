@@ -94,17 +94,17 @@ class System:
         self._restart = Restart(self._restart_lock)
         self._d = data
 
-        self.gateway_ips = None
+        self.gateway_ips: list[str] | None = None
 
         self.containerCheckLock = threading.RLock()
-        self.lastContainerCheck = 0
-        self.dockerPsCache = dict()
+        self.lastContainerCheck: float = 0.0
+        self.dockerPsCache: dict[str, str] = dict()
 
     @property
     def restart(self):
         return self._restart
 
-    def shutdown_action(self, action="", delay=0):
+    def shutdown_action(self, action: str = "", delay: float = 0.0):
         if action == "shutdown":
             cmd = "shutdown now"
         elif action == "reboot":

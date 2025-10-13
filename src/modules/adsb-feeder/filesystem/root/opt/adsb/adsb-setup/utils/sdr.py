@@ -13,7 +13,7 @@ class SDR:
         self._d = data
         self._type = type_
         self._address = address
-        self._serial_probed = None
+        self._serial_probed: str = ""
         self.lsusb_output = ""
         # probe serial to popuplate lsusb_output right now
         self._serial
@@ -87,7 +87,7 @@ class SDRDevices:
         self.null_sdr: SDR = SDR("unknown", "unknown", self._d)
         self.duplicates: Set[str] = set()
         self.lsusb_output = ""
-        self.last_probe = 0
+        self.last_probe: float = 0.0
         self.last_debug_out = ""
         self.lock = Lock()
 
@@ -98,7 +98,7 @@ class SDRDevices:
         return f"SDRDevices({', '.join([s.__repr__() for s in self.sdrs])})"
 
     def purposes(self):
-        p = (
+        p = [
             "1090",
             "978",
             "1090_2",
@@ -108,9 +108,9 @@ class SDRDevices:
             "hfdl",
             "ais",
             "sonde",
-        )
+        ]
         for i in range(16):
-            p += (f"other-{i}",)
+            p.append(f"other-{i}")
         return p
 
     def purpose_env(self, purpose: str):
@@ -252,11 +252,11 @@ class SDRDevices:
         assignments: Dict[str, Tuple[str, str, bool]] = self.assignment_function()
         for purpose in assignments.keys():
             serial, gain, biastee = assignments[purpose]
-            sdr = self.sdr_settings.get(serial)
-            if sdr:
-                sdr.purpose = purpose
-                sdr.gain = gain
-                sdr.biastee = biastee
+            assigned_sdr: SDR | None = self.sdr_settings.get(serial)
+            if assigned_sdr:
+                assigned_sdr.purpose = purpose
+                assigned_sdr.gain = gain
+                assigned_sdr.biastee = biastee
 
     def get_sdr_by_serial(self, serial: str):
         self.ensure_populated()

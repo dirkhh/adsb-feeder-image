@@ -90,7 +90,8 @@ class Wifi:
         return connected
 
     def wpa_cli_scan(self):
-        ssids = []
+        ssids: list[str] = []
+        output: str = ""
         try:
             proc = subprocess.Popen(
                 ["wpa_cli", f"-i{self.wlan}"],
@@ -141,8 +142,10 @@ class Wifi:
 
         return ssids
 
-    def writeWpaConf(self, ssid=None, passwd=None, path=None, country_code="GB"):
-        netblocks = {}
+    def writeWpaConf(self, ssid: str = "", passwd: str = "", path: str = "", country_code: str = "GB"):
+        netblocks: dict[str, str] = {}
+        netblock: str = ""
+        exist_ssid: str | None = None
         try:
             # extract the existing network blocks from the config file
             with open(path, "r") as conf:
@@ -301,6 +304,7 @@ p2p_disabled=1
         return success
 
     def scan_ssids(self):
+        ssids = []
         try:
             if self.baseos == "raspbian":
                 try:
@@ -313,7 +317,6 @@ p2p_disabled=1
                     print_err(f"error scanning for SSIDs: {e}")
                     return
 
-                ssids = []
                 for line in output.stdout.decode().split("\n"):
                     if line and line != "--" and line not in ssids:
                         ssids.append(line)
