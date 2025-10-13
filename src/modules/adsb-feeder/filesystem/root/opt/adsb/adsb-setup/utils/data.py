@@ -846,6 +846,8 @@ class Data:
 
         def adjust_heywhatsthat(value):
             enabled = self.env_by_tags(["heywhatsthat", "is_enabled"])._value
+            if type(enabled) != list:
+                enabled = [enabled]
             new_value = []
             for i in range(len(value)):
                 new_value.append(value[i] if enabled[i] else "")
