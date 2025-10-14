@@ -1,6 +1,19 @@
 HOST ?= adsb-feeder.local
 SSH_CONTROL=/tmp/adsb-setup-ssh-control-${HOST}
 
+run-checks:
+# run the Python linter checks locally
+	@echo "Running Python linter checks..."
+	@echo "=== Running flake8 ==="
+	flake8 src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup --extend-ignore=E501,E203,E711,E721,F541 --show-source --statistics --count
+	@echo "=== Running mypy ==="
+	mypy src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup --config-file=pyproject.toml
+	@echo "=== Running black ==="
+	black --check --line-length 130 src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup
+	@echo "=== Running ruff ==="
+	ruff check src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup --config=pyproject.toml
+	@echo "All linter checks completed successfully!"
+
 ssh-control:
 # to avoid having to SSH every time,
 # we make a SSH control port to use with rsync.
