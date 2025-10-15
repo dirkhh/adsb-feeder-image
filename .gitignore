@@ -13,3 +13,19 @@ src/modules/adsb-feeder/filesystem/root/etc/adsb.im.version
 .env
 *.env
 !*.env.example
+
+# any python virtual environment
+.venv/
+venv/
+.env/
+.env.user/
+.env.local/
+.env.development.local/
+.env.test.local/
+.env.production.local/
+.env.development/
+.env.test/
+.env.production/
+
+# egg-info
+adsb_feeder_image.egg-info/
