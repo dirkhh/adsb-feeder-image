@@ -15,10 +15,24 @@ import traceback
 import requests
 from flask import flash
 
-verbose = 0 if not os.path.exists("/opt/adsb/config/verbose") else int(open("/opt/adsb/config/verbose", "r").read().strip())
+# Import paths after they might be configured
+try:
+    from .paths import FAKE_CPUINFO_DIR, FAKE_THERMAL_TEMP_FILE, FAKE_THERMAL_ZONE_DIR, MACHINE_ID_FILE, VERBOSE_FILE
+except ImportError:
+    # Fallback for when paths module is not available
+    import os as _os
+
+    _ADSB_BASE_DIR = pathlib.Path(_os.environ.get("ADSB_BASE_DIR", "/opt/adsb"))
+    VERBOSE_FILE = _ADSB_BASE_DIR / "config" / "verbose"
+    MACHINE_ID_FILE = pathlib.Path("/etc/machine-id")
+    FAKE_CPUINFO_DIR = _ADSB_BASE_DIR / "rb"
+    FAKE_THERMAL_ZONE_DIR = FAKE_CPUINFO_DIR / "thermal_zone0"
+    FAKE_THERMAL_TEMP_FILE = FAKE_THERMAL_ZONE_DIR / "temp"
+
+verbose = 0 if not VERBOSE_FILE.exists() else int(VERBOSE_FILE.read_text().strip())
 
 # create a board unique but otherwise random / anonymous ID
-idhash = hashlib.md5(pathlib.Path("/etc/machine-id").read_text().encode()).hexdigest()
+idhash = hashlib.md5(MACHINE_ID_FILE.read_text().encode()).hexdigest()
 
 
 def stack_info(msg=""):
@@ -122,11 +136,11 @@ def generic_get_json(url: str, data=None, timeout=5.0):
 def create_fake_info(indices):
     # instead of trying to figure out if we need this and creating it only in that case,
     # let's just make sure the fake files are there and move on
-    os.makedirs("/opt/adsb/rb/thermal_zone0", exist_ok=True)
+    os.makedirs(FAKE_THERMAL_ZONE_DIR, exist_ok=True)
 
     for idx in indices:
         suffix = f"_{idx}" if idx else ""
-        cpuinfo = pathlib.Path(f"/opt/adsb/rb/cpuinfo{suffix}")
+        cpuinfo = FAKE_CPUINFO_DIR / f"cpuinfo{suffix}"
         # when docker tries to mount this file without it existing, it creates a directory
         # in case that has happened, remove it
         if cpuinfo.is_dir():
@@ -142,8 +156,8 @@ def create_fake_info(indices):
                 random_hex_string = secrets.token_hex(8)
                 ci_out.write(f"Serial\t\t: {random_hex_string}\n")
 
-    if not pathlib.Path("/opt/adsb/rb/thermal_zone0/temp").exists():
-        with open("/opt/adsb/rb/thermal_zone0/temp", "w") as fake_temp:
+    if not FAKE_THERMAL_TEMP_FILE.exists():
+        with open(FAKE_THERMAL_TEMP_FILE, "w") as fake_temp:
             fake_temp.write("12345\n")
     return not pathlib.Path("/sys/class/thermal/thermal_zone0/temp").exists()
 

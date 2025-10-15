@@ -4,6 +4,7 @@ from typing import Optional
 
 from flask import flash
 
+from .paths import ADSB_BASE_DIR, ADSB_RB_DIR
 from .system import System
 from .util import is_email, make_int, print_err, report_issue
 
@@ -169,11 +170,11 @@ class FlightRadar24(Aggregator):
             f'-e FR24_EMAIL="{email.lower()}" {self.container} '
             f'-c "apt update && apt install -y expect && $(cat handsoff_signup_expect.sh)"'
         )
-        open("/opt/adsb/handsoff_signup.sh", "w").write(f"#!/bin/bash\n{adsb_signup_command}")
+        open(ADSB_BASE_DIR / "handsoff_signup.sh", "w").write(f"#!/bin/bash\n{adsb_signup_command}")
         try:
             output = subprocess.run(
-                "bash /opt/adsb/handsoff_signup.sh",
-                cwd="/opt/adsb",
+                f"bash {ADSB_BASE_DIR}/handsoff_signup.sh",
+                cwd=str(ADSB_BASE_DIR),
                 timeout=180.0,
                 shell=True,
                 text=True,
@@ -209,11 +210,11 @@ class FlightRadar24(Aggregator):
             f'-e FR24_EMAIL="{email}" {self.container} '
             f'-c "apt update && apt install -y expect && $(cat handsoff_signup_expect_uat.sh)"'
         )
-        open("/opt/adsb/handsoff_signup_uat.sh", "w").write(f"#!/bin/bash\n{uat_signup_command}")
+        open(ADSB_BASE_DIR / "handsoff_signup_uat.sh", "w").write(f"#!/bin/bash\n{uat_signup_command}")
         try:
             output = subprocess.run(
-                "bash /opt/adsb/handsoff_signup_uat.sh",
-                cwd="/opt/adsb",
+                f"bash {ADSB_BASE_DIR}/handsoff_signup_uat.sh",
+                cwd=str(ADSB_BASE_DIR),
                 timeout=180.0,
                 shell=True,
                 text=True,
@@ -353,9 +354,9 @@ class RadarBox(Aggregator):
 
         suffix = f"_{idx}" if idx else ""
         # make sure we correctly enable the hacks
-        extra_env = f"-v /opt/adsb/rb/cpuinfo{suffix}:/proc/cpuinfo "
+        extra_env = f"-v {ADSB_RB_DIR}/cpuinfo{suffix}:/proc/cpuinfo "
         if self._d.env_by_tags("rbthermalhack").value != "":
-            extra_env += "-v /opt/adsb/rb:/sys/class/thermal:ro "
+            extra_env += f"-v {ADSB_RB_DIR}:/sys/class/thermal:ro "
 
         cmdline = (
             f"--rm -i --network adsb_im_bridge -e BEASTHOST=ultrafeeder -e LAT={self.lat} "
