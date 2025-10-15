@@ -59,6 +59,12 @@ dependencies = [
     "types-shapely",
 ]
 
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+    "pytest-mock>=3.14.1",
+]
+
 [tool.setuptools_scm]
 # Derive version from git tags
 

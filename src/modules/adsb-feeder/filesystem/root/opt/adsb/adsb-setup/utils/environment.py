@@ -98,6 +98,10 @@ class Env:
         return self._name
 
     @property
+    def default(self):
+        return self._default
+
+    @property
     def is_mandatory(self) -> bool:
         return self._is_mandatory
 
