@@ -34,6 +34,9 @@ services:
       - ADSB_LAT=${FEEDER_LAT}
       - ADSB_LON=${FEEDER_LONG}
       - HIDE_VERSION_UPDATE=True
+      # unless this is optimize or merge, the DB can grow quite a bit due to the FTS index not being
+      # cleaned up
+      - DB_FTS_OPTIMIZE=merge
       # USER_PROVIDED_ENV_START
       # USER_PROVIDED_ENV_END
 
