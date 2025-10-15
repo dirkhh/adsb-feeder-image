@@ -1192,12 +1192,7 @@ class AdsbIm:
         if status != 200 or airport == None:
             print_err(f"closest_airport({lat}, {lon}) failed with status {status}")
             return {"error": "Failed to fetch closest airport"}
-        try:
-            airport_dict = json.loads(airport)
-        except Exception:
-            print_err(f"closest_airport({lat}, {lon}) failed to parse JSON {airport}")
-            return {"error": "Failed to parse closest airport"}
-        return airport_dict if airport_dict else {"error": "No closest airport found"}
+        return airport if airport else {"error": "No closest airport found"}
 
     def closest_airport(self, lat, lon) -> Response:
         airport = self.closest_airport_dict(lat, lon)
@@ -3548,8 +3543,8 @@ class AdsbIm:
                 long = str(float(re.sub("[a-zA-Z° ]", "", form.get("lon", ""))))
                 if lat != self._d.env_by_tags("lat").list_get(0) or long != self._d.env_by_tags("lon").list_get(0):
                     airport = self.closest_airport_dict(lat, long)
-                    if airport:
-                        self._d.env_by_tags("closest_airport").list_set(0, airport["icao"])
+                    if airport and "icao" in airport:
+                        self._d.env_by_tags("closest_airport").list_set(0, airport.get("icao", ""))
             if key == "tz":
                 self.set_tz(value)
                 continue
