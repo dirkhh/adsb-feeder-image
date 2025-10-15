@@ -3,6 +3,7 @@ SSH_CONTROL=/tmp/adsb-setup-ssh-control-${HOST}
 
 run-checks:
 # run the Python linter checks locally
+	export PATH=.venv/bin:$$PATH
 	@echo "Running Python linter checks..."
 	@echo "=== Running flake8 ==="
 	flake8 src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup --extend-ignore=E501,E203,E711,E721,F541 --show-source --statistics --count
@@ -13,6 +14,13 @@ run-checks:
 	@echo "=== Running ruff ==="
 	ruff check src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup --config=pyproject.toml
 	@echo "All linter checks completed successfully!"
+
+create-venv:
+# create virtual environment necessary to run linter checks
+	python3 -m venv .venv
+	export PATH=.venv/bin:$$PATH
+	pip3 install flask flake8 mypy black ruff requests types-requests shapely types-shapely
+
 
 ssh-control:
 # to avoid having to SSH every time,
