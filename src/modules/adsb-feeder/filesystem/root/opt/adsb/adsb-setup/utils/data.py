@@ -1,11 +1,20 @@
 # dataclass
 from dataclasses import dataclass, field
-from pathlib import Path
 
 from utils.config import read_values_from_env_file
 
 from .environment import Env
 from .netconfig import NetConfig
+from .paths import (
+    ADSB_BASE_DIR,
+    ADSB_CONFIG_DIR,
+    DOCKER_IMAGE_VERSIONS_FILE,
+    ENV_FILE,
+    FEEDER_IMAGE_NAME_FILE,
+    HOTSPOT_DISABLED_FILE,
+    SECURE_IMAGE_FILE,
+    VERSION_FILE,
+)
 from .util import is_true, print_err
 
 
@@ -16,13 +25,12 @@ class Data:
             cls.instance = super(Data, cls).__new__(cls)
         return cls.instance
 
-    data_path = Path("/opt/adsb")
-    config_path = data_path / "config"
-    env_file_path = config_path / ".env"
-    version_file = data_path / "adsb.im.version"
-    secure_image_path = data_path / "adsb.im.secure_image"
-    # hardcoded path in net-or-hotspot, also hardcode here
-    hotspot_disabled_path = Path("/opt/adsb/adsb.im.hotspot_disabled")
+    data_path = ADSB_BASE_DIR
+    config_path = ADSB_CONFIG_DIR
+    env_file_path = ENV_FILE
+    version_file = VERSION_FILE
+    secure_image_path = SECURE_IMAGE_FILE
+    hotspot_disabled_path = HOTSPOT_DISABLED_FILE
     is_feeder_image = True
     _env_by_tags_dict: dict[tuple[str, ...], Env] = field(default_factory=dict[tuple[str, ...], Env])
 
@@ -384,10 +392,9 @@ class Data:
         Env("_ADSBIM_STATE_PACKAGE", tags=["pack", "norestore"]),
         Env(
             "_ADSBIM_STATE_IMAGE_NAME",
-            # somehow I can't make a path relative to data_path work here...
             default_call=lambda: (
-                Path("/opt/adsb/feeder-image.name").read_text().strip()
-                if Path("/opt/adsb/feeder-image.name").exists()
+                FEEDER_IMAGE_NAME_FILE.read_text().strip()
+                if FEEDER_IMAGE_NAME_FILE.exists()
                 else "ADS-B Feeder Image prior to v0.12"
             ),
             tags=["image_name", "norestore"],
@@ -782,7 +789,7 @@ class Data:
         Env("SKYSTATS_RADIUS", default="500", tags=["skystats_radius"]),
         Env("SKYSTATS_ABOVE_RADIUS", default="20", tags=["skystats_above_radius"]),
         Env("SKYSTATS_DOMESTIC_COUNTRY_ISO", default="", tags=["skystats_domestic_country_iso"]),
-        Env("SKYSTATS_DB_DATA_PATH", default="/opt/adsb/skystats-db", tags=["skystats_db_data_path"]),
+        Env("SKYSTATS_DB_DATA_PATH", default=str(ADSB_BASE_DIR / "skystats-db"), tags=["skystats_db_data_path"]),
     }
     for i in range(16):
         _env.add(Env(f"FEEDER_UNUSED_SERIAL_{i}", tags=[f"other-{i}"]))
@@ -808,23 +815,27 @@ class Data:
         "SDRMAP_CONTAINER": "sdrmap",
         "SKYSTATS_CONTAINER": "skystats",
     }
-    with open(data_path / "docker.image.versions", "r") as file:
-        for line in file:
-            if line.startswith("#"):
-                continue
-            items = line.replace("\n", "").split("=")
-            if len(items) != 2:
-                print_err(f"docker.image.versions check line: {line}")
-                continue
-            key = items[0]
-            value = items[1]
-            # .get(key, key) defaults to key for key DOZZLE_CONTAINER / ALPINE_CONTAINER, that's fine as we never need
-            # to check if they are enabled as they are always enabled
-            # this also defaults to key for the airspy and sdrplay container
-            tag = tag_for_name.get(key, key)
-            entry = Env(key, tags=[tag, "container", "norestore"])
-            entry.value = value  # always use value from docker.image.versions as definitive source
-            _env.add(entry)  # add to _env set
+    try:
+        with open(DOCKER_IMAGE_VERSIONS_FILE, "r") as file:
+            for line in file:
+                if line.startswith("#"):
+                    continue
+                items = line.replace("\n", "").split("=")
+                if len(items) != 2:
+                    print_err(f"docker.image.versions check line: {line}")
+                    continue
+                key = items[0]
+                value = items[1]
+                # .get(key, key) defaults to key for key DOZZLE_CONTAINER / ALPINE_CONTAINER, that's fine as we never need
+                # to check if they are enabled as they are always enabled
+                # this also defaults to key for the airspy and sdrplay container
+                tag = tag_for_name.get(key, key)
+                entry = Env(key, tags=[tag, "container", "norestore"])
+                entry.value = value  # always use value from docker.image.versions as definitive source
+                _env.add(entry)  # add to _env set
+    except FileNotFoundError:
+        # File doesn't exist (e.g., in test environment) - skip loading container versions
+        pass
 
     @property
     def envs_for_envfile(self):

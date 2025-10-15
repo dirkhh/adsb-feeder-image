@@ -7,6 +7,7 @@ from time import sleep
 import requests
 
 from .data import Data
+from .paths import ADSB_SCRIPTS_DIR, DOCKER_COMPOSE_ADSB_SCRIPT, DOCKER_COMPOSE_START_SCRIPT
 from .util import print_err, run_shell_captured
 
 
@@ -136,7 +137,7 @@ class System:
         self.shutdown_action(action="reboot", delay=delay)
 
     def os_update(self) -> None:
-        subprocess.call("systemd-run --wait -u adsb-feeder-update-os /bin/bash /opt/adsb/scripts/update-os", shell=True)
+        subprocess.call(f"systemd-run --wait -u adsb-feeder-update-os /bin/bash {ADSB_SCRIPTS_DIR}/update-os", shell=True)
 
     def check_dns(self):
         try:
@@ -246,29 +247,29 @@ class System:
     def restart_containers(self, containers):
         print_err(f"restarting {containers}")
         try:
-            subprocess.run(["/opt/adsb/docker-compose-adsb", "restart"] + containers)
+            subprocess.run([str(DOCKER_COMPOSE_ADSB_SCRIPT), "restart"] + containers)
         except Exception:
             print_err("docker compose restart failed")
 
     def recreate_containers(self, containers):
         print_err(f"recreating {containers}")
         try:
-            subprocess.run(["/opt/adsb/docker-compose-adsb", "down", "--remove-orphans", "-t", "30"] + containers)
-            subprocess.run(["/opt/adsb/docker-compose-adsb", "up", "-d", "--force-recreate", "--remove-orphans"] + containers)
+            subprocess.run([str(DOCKER_COMPOSE_ADSB_SCRIPT), "down", "--remove-orphans", "-t", "30"] + containers)
+            subprocess.run([str(DOCKER_COMPOSE_ADSB_SCRIPT), "up", "-d", "--force-recreate", "--remove-orphans"] + containers)
         except Exception:
             print_err("docker compose recreate failed")
 
     def stop_containers(self, containers: list[str]):
         print_err(f"stopping {containers}")
         try:
-            subprocess.run(["/opt/adsb/docker-compose-adsb", "down", "-t", "30"] + containers)
+            subprocess.run([str(DOCKER_COMPOSE_ADSB_SCRIPT), "down", "-t", "30"] + containers)
         except Exception:
             print_err(f"docker compose down {containers} failed")
 
     def start_containers(self):
         print_err("starting all containers")
         try:
-            subprocess.run(["/opt/adsb/docker-compose-start"])
+            subprocess.run([str(DOCKER_COMPOSE_START_SCRIPT)])
         except Exception:
             print_err("docker compose start failed")
 
