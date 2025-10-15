@@ -1,5 +1,7 @@
 Changes since v3.0.5
 =======
+- acarshub: make sure /run size is increased before restoring data from disk
+- acarshub: use index optimization setting to prevent the DB growing unnecessarily
 - beta-notes: redoing the internal changes, this time hopefully without breaking things - tested on Python 3.9
 - beta-notes: revert some internal changes that need more careful planning as they introduced bugs in a number of scenarios, including for systems with older Python versions
 - add recovery service to the image (not the app): go to http://<IP>:1089 and be offered to go back to the previous version - or go to a specific version or branch with http://<IP>:1089/recover-to/<tag-or-branch>
