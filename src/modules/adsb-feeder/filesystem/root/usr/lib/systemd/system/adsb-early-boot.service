@@ -5,6 +5,7 @@ Description=ADS-B Feeder Early Boot Service
 SyslogIdentifier=adsb-early-boot
 Type=oneshot
 
+ExecStartPre=-/bin/bash -c "mount -o remount,exec,size=$(( $(cat /proc/meminfo | grep -i 'memtotal' | grep -o '[[:digit:]]*') / 2 ))k /run"
 ExecStart=-/opt/adsb/scripts/disk-to-run.sh
 
 [Install]
