@@ -6,6 +6,7 @@ import traceback
 from shapely.geometry import LinearRing, Polygon
 from shapely.ops import unary_union
 
+from utils.paths import ENV_FILE
 from utils.util import get_plain_url, print_err
 
 use_is_valid_reason = True
@@ -30,7 +31,7 @@ class MultiOutline:
 
     def _tar1090port(self):
         tar1090port = 8080
-        with open("/opt/adsb/config/.env", "r") as env:
+        with open(ENV_FILE, "r") as env:
             for line in env:
                 match = re.search(r"AF_TAR1090_PORT=(\d+)", line)
                 if match:

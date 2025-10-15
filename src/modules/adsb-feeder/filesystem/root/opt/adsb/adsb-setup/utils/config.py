@@ -4,12 +4,14 @@ import os.path
 import tempfile
 import threading
 
+from .paths import ADSB_CONFIG_DIR, CONFIG_JSON_FILE, ENV_FILE, USER_ENV_FILE
 from .util import print_err
 
-CONF_DIR = "/opt/adsb/config"
-ENV_FILE_PATH = CONF_DIR + "/.env"
-USER_ENV_FILE_PATH = CONF_DIR + "/.env.user"
-JSON_FILE_PATH = CONF_DIR + "/config.json"
+# Backward compatibility - use new path system
+CONF_DIR = str(ADSB_CONFIG_DIR)
+ENV_FILE_PATH = str(ENV_FILE)
+USER_ENV_FILE_PATH = str(USER_ENV_FILE)
+JSON_FILE_PATH = str(CONFIG_JSON_FILE)
 
 config_lock = threading.Lock()
 

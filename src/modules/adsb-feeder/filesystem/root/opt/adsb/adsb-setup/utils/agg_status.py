@@ -1,6 +1,5 @@
 import json
 import os
-import pathlib
 import re
 import subprocess
 import threading
@@ -11,6 +10,7 @@ from enum import Enum
 from typing import Optional
 
 from .data import Data
+from .paths import PREVIOUS_VERSION_FILE
 from .util import generic_get_json, get_plain_url, make_int, print_err
 
 T = Enum("T", ["Disconnected", "Unknown", "Good", "Bad", "Warning", "Disabled", "Starting", "ContainerDown"])
@@ -462,7 +462,7 @@ class ImStatus:
                     self._next_check = time.time() + 60
                     if self._d.previous_version and not check:
                         self._d.previous_version = ""
-                        pathlib.Path("/opt/adsb/adsb.im.previous-version").unlink(missing_ok=True)
+                        PREVIOUS_VERSION_FILE.unlink(missing_ok=True)
 
                 elif status == 201:
                     # successful check-in
