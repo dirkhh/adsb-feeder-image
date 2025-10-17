@@ -1,0 +1,41 @@
+# ADS-B Test Service and Test Feeder Image Requirements
+#
+# This file contains all Python dependencies needed for:
+# - adsb-test-service.py (web API service)
+# - test-feeder-image.py (automated testing)
+# - Supporting tools and utilities
+
+# Web Framework
+flask>=3.1.0
+
+# HTTP Requests
+requests>=2.32.0
+
+# Selenium WebDriver (for browser automation)
+selenium>=4.15.0
+webdriver-manager>=4.0.0
+
+# HTML Parsing
+beautifulsoup4>=4.14.0
+
+# Smart Home Automation (Kasa switches)
+python-kasa>=0.5.0
+
+# Standard Library Extensions
+pathlib2>=2.3.7; python_version < '3.4'
+
+# Optional: For enhanced JSON handling
+# ujson>=5.8.0
+
+# Optional: For better HTTP client features
+# urllib3>=2.0.0
+
+# Development/Testing Dependencies (optional)
+# pytest>=7.4.0
+# pytest-flask>=1.3.0
+# pytest-cov>=4.1.0
+
+# Note: Some system dependencies may also be required:
+# - Firefox browser (for Selenium WebDriver)
+# - SSH client tools (for remote system management)
+# - Network utilities (ping, etc.)
