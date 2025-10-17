@@ -1,0 +1,8 @@
+{
+  "rpi_ip": "192.168.77.190",
+  "kasa_ip": "192.168.22.147",
+  "timeout_minutes": 10,
+  "host": "0.0.0.0",
+  "port": 9456,
+  "log_level": "INFO"
+}
