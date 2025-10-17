@@ -156,12 +156,54 @@ Use the included test script:
 
 ## Security
 
+### Network Security Model
+
+This service is designed for use on **private, encrypted networks** (Tailscale, WireGuard, or VPN):
+
+#### ✅ Recommended: Tailscale/VPN Deployment
+- **Bind to Tailscale IP** (`100.x.x.x`) or localhost (`127.0.0.1`)
+- Tailscale provides WireGuard encryption between nodes
+- API keys transmitted securely over encrypted tunnel
+- No public internet exposure
+
+Example configuration:
+```json
+{
+  "host": "100.64.1.2",  // Your Tailscale IP
+  "port": 9456
+}
+```
+
+#### ⚠️ Warning: Public Network Deployment
+If binding to `0.0.0.0` (all interfaces):
+- API keys transmitted in **plaintext** over HTTP
+- Vulnerable to network sniffing
+- Must use HTTPS/TLS or restrict with firewall rules
+
+**For production use on public networks:**
+1. Deploy behind nginx with TLS termination, or
+2. Use SSH tunneling: `ssh -L 9456:localhost:9456 user@host`, or
+3. Add firewall rules to restrict access
+
+### Authentication Security
+
+- API key authentication using timing-safe comparison
+- Keys stored in `/etc/adsb-test-service/config.json` (readable by service only)
+- Generate secure keys with: `python3 generate-api-key.py`
+
+**Important:**
+- Never use example keys from `config.json.example`
+- Rotate keys if compromised
+- Keep config file permissions restrictive: `chmod 600 /etc/adsb-test-service/config.json`
+
+### Systemd Hardening
+
 The service runs with systemd security features:
-- `NoNewPrivileges=true`
-- `PrivateTmp=true`
-- `ProtectSystem=strict`
-- `ProtectHome=true`
-- Limited write access to specific paths
+- `NoNewPrivileges=true` - Prevents privilege escalation
+- `PrivateTmp=true` - Isolated /tmp directory
+- `ProtectSystem=strict` - Read-only system directories
+- `ProtectHome=true` - No access to user home directories
+- Limited write access to `/opt/adsb-test-service/` only
 
 ## Troubleshooting
 
