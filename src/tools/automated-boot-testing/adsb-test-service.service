@@ -8,8 +8,8 @@ Wants=network-online.target
 Type=simple
 User=root
 Group=root
-WorkingDirectory=/home/hohndel/src/adsb-feeder-image
-ExecStart=/home/hohndel/src/adsb-feeder-image/.venv/bin/python /home/hohndel/src/adsb-feeder-image/src/tools/adsb-test-service.py --config /etc/adsb-test-service/config.json
+WorkingDirectory=/opt/adsb-test-service
+ExecStart=/opt/adsb-test-service/venv/bin/python /opt/adsb-test-service/adsb-test-service.py --config /etc/adsb-test-service/config.json
 Restart=always
 RestartSec=10
 StandardOutput=journal
@@ -21,10 +21,10 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=/etc/adsb-test-service /tmp /srv/iscsi /home/hohndel/src/adsb-feeder-image/test-images
+ReadWritePaths=/etc/adsb-test-service /tmp /srv/iscsi /opt/adsb-test-service/test-images
 
 # Environment
-Environment=PYTHONPATH=/home/hohndel/src/adsb-feeder-image
+Environment=PYTHONPATH=/opt/adsb-test-service
 Environment=PYTHONUNBUFFERED=1
 
 [Install]

@@ -196,14 +196,22 @@ def wait_for_feeder_online(rpi_ip: str, expected_image_name: str, timeout_minute
 def log_browser_activity(driver, description: str):
     """Log browser console messages and network activity for debugging."""
     try:
+        # Check if get_log method is available (varies by browser)
+        if not hasattr(driver, 'get_log'):
+            print(f"📝 Browser logging not available for {description} (get_log method not supported)")
+            return
+
         # Get console logs (Firefox supports this)
-        logs = driver.get_log('browser')
-        if logs:
-            print(f"📝 Console logs during {description}:")
-            for log in logs[-5:]:  # Show last 5 messages
-                print(f"   [{log['level']}] {log['message']}")
-        else:
-            print(f"📝 No console logs during {description}")
+        try:
+            logs = driver.get_log('browser')
+            if logs:
+                print(f"📝 Console logs during {description}:")
+                for log in logs[-5:]:  # Show last 5 messages
+                    print(f"   [{log['level']}] {log['message']}")
+            else:
+                print(f"📝 No console logs during {description}")
+        except Exception as e:
+            print(f"📝 Could not retrieve console logs: {e}")
 
         # Get performance logs (Firefox supports this)
         try:
@@ -216,11 +224,11 @@ def log_browser_activity(driver, description: str):
                         print(f"   {message}")
             else:
                 print(f"🌐 No network logs during {description}")
-        except Exception:
-            print(f"🌐 Network logging not available during {description}")
+        except Exception as e:
+            print(f"🌐 Network logging not available during {description}: {e}")
 
     except Exception as e:
-        print(f"   Could not retrieve logs: {e}")
+        print(f"📝 Could not retrieve logs: {e}")
 
 
 def execute_js_and_wait(driver, js_code: str, description: str, wait_seconds: int = 5):
@@ -702,7 +710,7 @@ Examples:
 
     args = parser.parse_args()
 
-    script_dir = Path(__file__).parent.parent.parent
+    script_dir = Path(__file__).parent
     cache_dir = script_dir / "test-images"
     expected_image_name = download_and_decompress_image(args.image_url, args.force_download, cache_dir)
     cached_image_path = cache_dir / expected_image_name
@@ -733,6 +741,16 @@ Examples:
         setup_iscsi_image(cached_image_path)
         control_kasa_switch(args.kasa_ip, True)
         success = wait_for_feeder_online(args.rpi_ip, expected_image_name, args.timeout)
+        count = 1
+        while not success and count < 3:
+            print("\nThe Feeder isn't online - on a DietPi feeder this can mean that the reboot failed because it got confused by iSCSI root filesystem!")
+            if "dietpi" in expected_image_name:
+                # power cycle and try again
+                control_kasa_switch(args.kasa_ip, False)
+                time.sleep(10)
+                control_kasa_switch(args.kasa_ip, True)
+                success = wait_for_feeder_online(args.rpi_ip, expected_image_name, args.timeout)
+                count += 1
 
         if success:
             print("\n🎉 Feeder is online!")

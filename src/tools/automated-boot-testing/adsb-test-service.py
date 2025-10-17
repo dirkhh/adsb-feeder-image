@@ -162,7 +162,7 @@ class TestExecutor:
         self.kasa_ip = kasa_ip
         self.timeout_minutes = timeout_minutes
         self.script_path = Path(__file__).parent / "test-feeder-image.py"
-        self.venv_python = Path(__file__).parent.parent.parent / ".venv" / "bin" / "python"
+        self.venv_python = Path(__file__).parent / "venv" / "bin" / "python"
 
     def execute_test(self, test_item: Dict) -> Dict[str, str]:
         """Execute a test with timeout."""
