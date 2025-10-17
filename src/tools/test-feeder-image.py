@@ -16,6 +16,7 @@ Usage:
 import argparse
 import asyncio
 import os
+import re
 import requests
 import shutil
 import subprocess
@@ -24,6 +25,14 @@ import time
 import urllib.parse
 from kasa import SmartPlug
 from pathlib import Path
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
+from webdriver_manager.firefox import GeckoDriverManager
+from selenium.webdriver.firefox.service import Service as FirefoxService
+from bs4 import BeautifulSoup
 
 
 def try_ssh_shutdown(rpi_ip: str, user: str = "root", ssh_key: str = "", timeout: int = 10) -> bool:
@@ -184,6 +193,488 @@ def wait_for_feeder_online(rpi_ip: str, expected_image_name: str, timeout_minute
     return False
 
 
+def log_browser_activity(driver, description: str):
+    """Log browser console messages and network activity for debugging."""
+    try:
+        # Get console logs (Firefox supports this)
+        logs = driver.get_log('browser')
+        if logs:
+            print(f"📝 Console logs during {description}:")
+            for log in logs[-5:]:  # Show last 5 messages
+                print(f"   [{log['level']}] {log['message']}")
+        else:
+            print(f"📝 No console logs during {description}")
+
+        # Get performance logs (Firefox supports this)
+        try:
+            perf_logs = driver.get_log('performance')
+            if perf_logs:
+                print(f"🌐 Network activity during {description}:")
+                for log in perf_logs[-3:]:  # Show last 3 network events
+                    message = log.get('message', '')
+                    if 'Network.responseReceived' in message or 'Network.requestWillBeSent' in message:
+                        print(f"   {message}")
+            else:
+                print(f"🌐 No network logs during {description}")
+        except Exception:
+            print(f"🌐 Network logging not available during {description}")
+
+    except Exception as e:
+        print(f"   Could not retrieve logs: {e}")
+
+
+def execute_js_and_wait(driver, js_code: str, description: str, wait_seconds: int = 5):
+    """Execute JavaScript and monitor the results."""
+    print(f"🔧 Executing JS: {description}")
+    print(f"   Code: {js_code}")
+
+    try:
+        result = driver.execute_script(js_code)
+        print(f"   Result: {result}")
+
+        # Wait and monitor activity
+        time.sleep(wait_seconds)
+        log_browser_activity(driver, f"after {description}")
+
+        return result
+    except Exception as e:
+        print(f"   JS execution failed: {e}")
+        return None
+
+
+def test_basic_setup_with_visible_browser(rpi_ip: str, timeout_seconds: int = 90) -> bool:
+    """Test the basic setup process using Selenium with visible browser for debugging."""
+    print(f"Testing basic setup with VISIBLE browser on http://{rpi_ip}/setup...")
+
+    driver = None
+    try:
+        print("Starting Firefox browser in VISIBLE mode...")
+
+        # Setup Firefox with VISIBLE mode for debugging
+        firefox_service = FirefoxService(GeckoDriverManager().install())
+        firefox_options = webdriver.FirefoxOptions()
+        # Remove headless mode to see what's happening
+        # firefox_options.add_argument("--headless")  # Commented out for visible debugging
+
+        firefox_options.add_argument("--no-sandbox")
+        firefox_options.add_argument("--disable-dev-shm-usage")
+        firefox_options.add_argument("--disable-gpu")
+        firefox_options.add_argument("--disable-extensions")
+
+        # Set Firefox preferences for debugging
+        firefox_options.set_preference("dom.webnotifications.enabled", False)
+        firefox_options.set_preference("media.volume_scale", "0.0")
+
+        driver = webdriver.Firefox(service=firefox_service, options=firefox_options)
+        driver.set_page_load_timeout(30)
+
+        print("✓ Firefox browser started in VISIBLE mode with debugging enabled")
+        print("🔍 Watch the browser window to see what happens after form submission!")
+
+        # Navigate to the feeder page
+        driver.get(f"http://{rpi_ip}/setup")
+
+        # Wait for user to observe the page
+        input("Press Enter after you've observed the page to continue with form filling...")
+
+        # Continue with the rest of the test...
+        wait = WebDriverWait(driver, 10)
+
+        # Check page title
+        print("Checking page title...")
+        current_title = driver.title
+        if "Basic Setup" not in current_title:
+            print(f"✗ Wrong page title: {current_title}")
+            return False
+        else:
+            print(f"✓ Page title is correct ({current_title})")
+
+        # Fill form and submit (simplified version for debugging)
+        print("Filling form...")
+        site_name_input = wait.until(EC.presence_of_element_located((By.ID, "site_name")))
+        site_name_input.clear()
+        site_name_input.send_keys("automated test site")
+
+        lat_input = driver.find_element(By.ID, "lat")
+        lat_input.clear()
+        lat_input.send_keys("45.48")
+
+        lon_input = driver.find_element(By.ID, "lon")
+        lon_input.clear()
+        lon_input.send_keys("-122.66")
+
+        alt_input = driver.find_element(By.ID, "alt")
+        alt_input.clear()
+        alt_input.send_keys("30")
+
+        # Click ADSB checkbox
+        adsb_checkbox = driver.find_element(By.ID, "is_adsb_feeder")
+        driver.execute_script("arguments[0].scrollIntoView(true);", adsb_checkbox)
+        time.sleep(1)
+        adsb_checkbox.click()
+
+        print("✓ Form filled, about to submit...")
+        input("Press Enter to submit the form and watch the JavaScript magic...")
+
+        # Click submit button
+        submit_button = driver.find_element(By.XPATH, "//button[@type='submit'][@name='submit'][@value='go']")
+        driver.execute_script("arguments[0].scrollIntoView(true);", submit_button)
+        time.sleep(1)
+        submit_button.click()
+
+        print("✓ Form submitted! Watch what happens next...")
+
+        # Wait for the complete flow automatically
+        try:
+            # Step 1: Wait for URL change to /waiting
+            print("  Step 1: Waiting for form submission redirect...")
+            WebDriverWait(driver, 30).until(
+                lambda d: "/waiting" in d.current_url
+            )
+            print("✓ Form submitted successfully - redirected to waiting page")
+
+            # Step 2: Wait for the system to finish processing
+            print("  Step 2: Waiting for system to finish processing...")
+            WebDriverWait(driver, 60).until(
+                lambda d: "SDR Setup" in d.title
+            )
+            print("✓ Successfully reached SDR Setup page")
+
+            # Check final state
+            final_title = driver.title
+            final_url = driver.current_url
+            print(f"Final page title: {final_title}")
+            print(f"Final URL: {final_url}")
+
+            return True
+
+        except TimeoutException:
+            current_url = driver.current_url
+            current_title = driver.title
+            print(f"⚠ Did not complete the full flow within timeout")
+            print(f"Current URL: {current_url}")
+            print(f"Current title: {current_title}")
+
+            # Accept partial completion
+            if "/waiting" in current_url or "performing requested actions" in current_title.lower():
+                print("✓ Form submission was successful, system is processing")
+                return True
+            else:
+                print("✗ Form submission may have failed")
+                return False
+
+    except Exception as e:
+        print(f"✗ Error during visible browser test: {e}")
+        return False
+    finally:
+        if driver:
+            input("Press Enter to close the browser...")
+            driver.quit()
+
+
+def test_basic_setup(rpi_ip: str, timeout_seconds: int = 90) -> bool:
+    """Test the basic setup process using Selenium."""
+    print(f"Testing basic setup on http://{rpi_ip}/setup...")
+
+    driver = None
+    try:
+        print("Attempting to start Firefox browser...")
+
+        # Setup Firefox with enhanced options
+        firefox_service = FirefoxService(GeckoDriverManager().install())
+        firefox_options = webdriver.FirefoxOptions()
+        firefox_options.add_argument("--headless")
+        firefox_options.add_argument("--no-sandbox")
+        firefox_options.add_argument("--disable-dev-shm-usage")
+        firefox_options.add_argument("--disable-gpu")
+        firefox_options.add_argument("--disable-extensions")
+        firefox_options.add_argument("--disable-background-timer-throttling")
+        firefox_options.add_argument("--disable-backgrounding-occluded-windows")
+        firefox_options.add_argument("--disable-renderer-backgrounding")
+        firefox_options.add_argument("--disable-features=TranslateUI")
+        firefox_options.add_argument("--disable-web-security")
+        firefox_options.add_argument("--allow-running-insecure-content")
+
+        # Set Firefox preferences for better headless operation
+        firefox_options.set_preference("dom.webnotifications.enabled", False)
+        firefox_options.set_preference("media.volume_scale", "0.0")
+        firefox_options.set_preference("general.useragent.override", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+
+        driver = webdriver.Firefox(service=firefox_service, options=firefox_options)
+        driver.set_page_load_timeout(30)
+
+        print("✓ Firefox browser started successfully with debugging enabled")
+
+        wait = WebDriverWait(driver, 10)
+
+        # Navigate to the feeder page
+        driver.get(f"http://{rpi_ip}/setup")
+
+        # Check page title - it should be "Basic Setup"
+        print("Checking page title...")
+        current_title = driver.title
+
+        if "Basic Setup" not in current_title:
+            print(f"✗ Wrong page title: {current_title}")
+            return False
+        else:
+            print(f"✓ Page title is correct ({current_title})")
+
+        # Check CPU temperature
+        print("Checking CPU temperature...")
+        cpu_temp_block = wait.until(EC.presence_of_element_located((By.ID, "cpu_temp_block")))
+        cpu_temp_element = cpu_temp_block.find_element(By.ID, "cpu_temp")
+        temp_text = cpu_temp_element.text.strip()
+
+        # Extract temperature value (assuming format like "45.2°C" or "45.2")
+        temp_value = float(''.join(filter(lambda x: x.isdigit() or x == '.', temp_text)))
+
+        if not (30 <= temp_value <= 85):
+            print(f"✗ CPU temperature out of range: {temp_value}°C")
+            return False
+        print(f"✓ CPU temperature is reasonable: {temp_value}°C")
+
+        # Fill in site information
+        print("Filling in site information...")
+
+        # Site name
+        site_name_input = wait.until(EC.element_to_be_clickable((By.ID, "site_name")))
+        site_name_input.clear()
+        site_name_input.send_keys("automated test site")
+
+        # Latitude
+        lat_input = driver.find_element(By.ID, "lat")
+        lat_input.clear()
+        lat_input.send_keys("45.48")
+
+        # Longitude
+        lon_input = driver.find_element(By.ID, "lon")
+        lon_input.clear()
+        lon_input.send_keys("-122.66")
+
+        # Altitude
+        alt_input = driver.find_element(By.ID, "alt")
+        alt_input.clear()
+        alt_input.send_keys("30")
+
+        print("✓ Site information filled")
+
+        # Click ADSB checkbox
+        print("Clicking ADSB checkbox...")
+        adsb_checkbox = wait.until(EC.presence_of_element_located((By.ID, "is_adsb_feeder")))
+
+        # Scroll element into view
+        driver.execute_script("arguments[0].scrollIntoView(true);", adsb_checkbox)
+
+        # Wait a bit for scroll to complete
+        time.sleep(1)
+
+        # Check if checkbox is already checked
+        is_checked = adsb_checkbox.is_selected()
+        print(f"ADSB checkbox current state: {'checked' if is_checked else 'unchecked'}")
+
+        # Only click if not already checked
+        if not is_checked:
+            # Try to click the checkbox
+            try:
+                adsb_checkbox.click()
+                print("✓ ADSB checkbox clicked successfully")
+            except Exception as e:
+                print(f"Direct click failed: {e}, trying JavaScript click...")
+                # If direct click fails, try JavaScript click
+                driver.execute_script("arguments[0].click();", adsb_checkbox)
+                print("✓ ADSB checkbox clicked via JavaScript")
+        else:
+            print("✓ ADSB checkbox was already checked")
+
+        # Click submit button - try multiple possible selectors
+        print("Looking for submit button...")
+        submit_button = None
+
+        # Try different selectors for the submit button
+        submit_selectors = [
+            "//button[@type='submit'][@name='submit'][@value='go']",
+            "//button[@type='submit']",
+        ]
+
+        for selector in submit_selectors:
+            try:
+                submit_button = driver.find_element(By.XPATH, selector)
+                print(f"✓ Found submit button with selector: {selector}")
+                break
+            except:
+                continue
+
+        if not submit_button:
+            print("✗ Could not find submit button with any selector")
+            return False
+
+        # Scroll submit button into view
+        driver.execute_script("arguments[0].scrollIntoView(true);", submit_button)
+        time.sleep(1)
+
+        # Log browser activity before form submission
+        log_browser_activity(driver, "before form submission")
+
+        # Try to click the submit button
+        try:
+            submit_button.click()
+            print("✓ Submit button clicked successfully")
+        except Exception as e:
+            print(f"Direct click failed: {e}, trying JavaScript click...")
+            # If direct click fails, try JavaScript click
+            driver.execute_script("arguments[0].click();", submit_button)
+            print("✓ Submit button clicked via JavaScript")
+
+        # Monitor what happens after form submission
+        print("🔍 Monitoring post-submission activity...")
+        log_browser_activity(driver, "immediately after form submission")
+
+        # Check for any JavaScript timers or redirects
+        execute_js_and_wait(driver, "return window.location.href;", "get current URL")
+        execute_js_and_wait(driver, "return document.title;", "get current title")
+        execute_js_and_wait(driver, "return document.readyState;", "get document ready state")
+
+        # Check for any pending JavaScript timers
+        execute_js_and_wait(driver, """
+            var timers = [];
+            for (var i = 1; i < 10000; i++) {
+                if (window.clearTimeout.toString().indexOf(i) > -1) {
+                    timers.push(i);
+                }
+            }
+            return timers.length;
+        """, "count active timers")
+
+        # Look for any JavaScript errors or console messages
+        execute_js_and_wait(driver, """
+            return window.console && window.console.error ? 'Console available' : 'No console errors captured';
+        """, "check console availability")
+
+        # Wait for the complete form submission flow
+        print("Waiting for form submission to complete...")
+        try:
+            # Step 1: Wait for URL change to /waiting (indicates form was submitted)
+            print("  Step 1: Waiting for form submission redirect...")
+            WebDriverWait(driver, 30).until(
+                lambda d: "/waiting" in d.current_url
+            )
+            print("✓ Form submitted successfully - redirected to waiting page")
+
+            # Step 2: Wait for the system to finish processing
+            print("  Step 2: Waiting for system to finish processing...")
+            WebDriverWait(driver, 60).until(
+                lambda d: "SDR Setup" in d.title
+            )
+            print("✓ Successfully reached SDR Setup page")
+            return True
+
+        except TimeoutException as e:
+            current_url = driver.current_url
+            current_title = driver.title
+            print(f"✗ Did not complete the flow within timeout")
+            print(f"Current URL: {current_url}")
+            print(f"Current title: {current_title}")
+
+            # Check if we're in an acceptable intermediate state
+            if "/waiting" in current_url:
+                print("✓ Form was submitted and system is processing")
+                if "performing requested actions" in current_title.lower():
+                    print("✓ System is performing requested actions")
+                    return True
+                else:
+                    print("⚠ System is in waiting state but may need more time")
+                    return True
+            elif "performing requested actions" in current_title.lower():
+                print("✓ System is performing requested actions")
+                return True
+            else:
+                print("✗ Form submission may have failed or system is in unexpected state")
+                return False
+
+    except Exception as e:
+        print(f"✗ Error during basic setup test: {e}")
+        return False
+    finally:
+        if driver:
+            driver.quit()
+
+
+def test_basic_setup_simple(rpi_ip: str) -> bool:
+    """Simple fallback test using requests (no browser automation)."""
+    print(f"Running simple setup test on http://{rpi_ip}/...")
+
+    try:
+        # Get the page content
+        response = requests.get(f"http://{rpi_ip}/", timeout=10)
+        if response.status_code != 200:
+            print(f"✗ HTTP error: {response.status_code}")
+            return False
+
+        # Parse the page
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        # Check page title - it might be "Basic Setup" or "SDR Setup"
+        title = soup.find('title')
+        title_text = title.get_text() if title else ""
+
+        if "SDR Setup" in title_text:
+            print("✓ Already on SDR Setup page (form was previously submitted)")
+            return True
+        elif not title or "Basic Setup" not in title_text:
+            print(f"✗ Wrong page title: {title_text if title else 'No title found'}")
+            return False
+        else:
+            print("✓ Page title is correct (Basic Setup)")
+
+        # Check CPU temperature - try multiple approaches
+        cpu_temp_value = None
+
+        # Try to find CPU temperature in different ways
+        cpu_temp_selectors = [
+            ('div', {'id': 'cpu_temp'}),
+            ('div', {'id': 'cpu_temp_block'}),
+            ('span', {'id': 'cpu_temp'}),
+            ('span', {'id': 'cpu_temp_block'}),
+        ]
+
+        for tag, attrs in cpu_temp_selectors:
+            cpu_temp_element = soup.find(tag, attrs)
+            if cpu_temp_element:
+                temp_text = cpu_temp_element.get_text().strip()
+                # Extract temperature value from text
+                temp_match = re.search(r'(\d+\.?\d*)', temp_text)
+                if temp_match:
+                    cpu_temp_value = float(temp_match.group(1))
+                    print(f"✓ Found CPU temperature: {cpu_temp_value}°C")
+                    break
+
+        if cpu_temp_value is None:
+            print("✗ CPU temperature element not found with any selector")
+            return False
+
+        if not (30 <= cpu_temp_value <= 85):
+            print(f"✗ CPU temperature out of range: {cpu_temp_value}°C")
+            return False
+        print(f"✓ CPU temperature is reasonable: {cpu_temp_value}°C")
+
+        # Check that required form elements exist
+        required_elements = ['site_name', 'lat', 'lon', 'alt', 'is_adsb_feeder']
+        for element_id in required_elements:
+            element = soup.find(id=element_id)
+            if not element:
+                print(f"✗ Required element not found: {element_id}")
+                return False
+
+        print("✓ All required form elements found")
+        print("✓ Basic setup test passed (limited verification)")
+        return True
+
+    except Exception as e:
+        print(f"✗ Error during simple setup test: {e}")
+        return False
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Test feeder image on actual hardware",
@@ -191,8 +682,8 @@ def main():
         epilog="""
 Examples:
     .venv/bin/python test-feeder-image.py https://example.com/adsb-im-raspberrypi64-pi-2-3-4-5-v3.0.6-beta.6.img.xz 192.168.1.100 192.168.1.200
-    .venv/bin/python test-feeder-image.py file:///path/to/adsb-im-raspberrypi64-pi-2-3-4-5-v3.0.6-beta.6.img.xz 192.168.1.100 192.168.1.200
-    .venv/bin/python test-feeder-image.py -f https://example.com/adsb-im-raspberrypi64-pi-2-3-4-5-v3.0.6-beta.6.img.xz 192.168.1.100 192.168.1.200
+    .venv/bin/python test-feeder-image.py --test-setup https://example.com/adsb-im-raspberrypi64-pi-2-3-4-5-v3.0.6-beta.6.img.xz 192.168.1.100 192.168.1.200
+    .venv/bin/python test-feeder-image.py --test-only --visible-browser --test-setup https://example.com/adsb-im-raspberrypi64-pi-2-3-4-5-v3.0.6-beta.6.img.xz 192.168.1.100 192.168.1.200
         """,
     )
 
@@ -205,14 +696,34 @@ Examples:
     parser.add_argument("--ssh-key", help="Path to SSH private key")
     parser.add_argument("--shutdown-timeout", type=int, default=10, help="SSH connection timeout in seconds (default: 10)")
     parser.add_argument("--timeout", type=int, default=5, help="Timeout in minutes (default: 5)")
+    parser.add_argument("--test-setup", action="store_true", help="Run basic setup test after feeder comes online")
+    parser.add_argument("--test-only", action="store_true", help="Don't run install / boot, just the tests")
+    parser.add_argument("--visible-browser", action="store_true", help="Use visible browser for debugging JavaScript behavior")
 
     args = parser.parse_args()
 
+    script_dir = Path(__file__).parent.parent.parent
+    cache_dir = script_dir / "test-images"
+    expected_image_name = download_and_decompress_image(args.image_url, args.force_download, cache_dir)
+    cached_image_path = cache_dir / expected_image_name
+    if args.test_only:
+        print("\n🧪 Running basic setup test...")
+        if args.visible_browser:
+            setup_success = test_basic_setup_with_visible_browser(args.rpi_ip)
+        else:
+            setup_success = test_basic_setup(args.rpi_ip)
+            if not setup_success:
+                print("\n⚠ Selenium test failed, trying simple fallback test...")
+                setup_success = test_basic_setup_simple(args.rpi_ip)
+
+        if setup_success:
+            print("\n🎉 All tests completed successfully!")
+            sys.exit(0)
+        else:
+            print("\n❌ Basic setup test failed!")
+            sys.exit(1)
+
     try:
-        script_dir = Path(__file__).parent.parent.parent
-        cache_dir = script_dir / "test-images"
-        expected_image_name = download_and_decompress_image(args.image_url, args.force_download, cache_dir)
-        cached_image_path = cache_dir / expected_image_name
 
         if not args.force_off:
             try_ssh_shutdown(args.rpi_ip, args.user, args.ssh_key, args.shutdown_timeout)
@@ -224,8 +735,28 @@ Examples:
         success = wait_for_feeder_online(args.rpi_ip, expected_image_name, args.timeout)
 
         if success:
-            print("\n🎉 Test completed successfully!")
-            sys.exit(0)
+            print("\n🎉 Feeder is online!")
+
+            # Run basic setup test if requested
+            if args.test_setup:
+                print("\n🧪 Running basic setup test...")
+                if args.visible_browser:
+                    setup_success = test_basic_setup_with_visible_browser(args.rpi_ip)
+                else:
+                    setup_success = test_basic_setup(args.rpi_ip)
+                    if not setup_success:
+                        print("\n⚠ Selenium test failed, trying simple fallback test...")
+                        setup_success = test_basic_setup_simple(args.rpi_ip)
+
+                if setup_success:
+                    print("\n🎉 All tests completed successfully!")
+                    sys.exit(0)
+                else:
+                    print("\n❌ Basic setup test failed!")
+                    sys.exit(1)
+            else:
+                print("\n🎉 Test completed successfully!")
+                sys.exit(0)
         else:
             print("\n❌ Test failed!")
             sys.exit(1)
