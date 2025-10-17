@@ -15,15 +15,19 @@ Features:
 
 import argparse
 import asyncio
+import hashlib
+import hmac
 import json
 import logging
 import os
+import secrets
 import signal
 import subprocess
 import sys
 import threading
 import time
 from datetime import datetime, timedelta
+from functools import wraps
 from pathlib import Path
 from queue import Queue, Empty
 from typing import Dict, List, Optional
@@ -31,6 +35,69 @@ from urllib.parse import urlparse
 
 import requests
 from flask import Flask, request, jsonify
+
+
+class APIKeyAuth:
+    """Simple API key authentication with timing-safe comparison."""
+
+    def __init__(self, api_keys: Dict[str, str]):
+        """
+        Initialize with API keys.
+
+        Args:
+            api_keys: Dict mapping API key to user identifier
+                     e.g., {"abc123...": "github-ci", "def456...": "developer1"}
+        """
+        self.api_keys = api_keys
+        if not api_keys:
+            logging.warning("⚠️  No API keys configured - authentication will reject all requests")
+
+    def validate_key(self, provided_key: str) -> Optional[str]:
+        """
+        Validate an API key using timing-safe comparison.
+
+        Returns user identifier if valid, None if invalid.
+        """
+        if not provided_key:
+            return None
+
+        # Use timing-safe comparison to prevent timing attacks
+        for valid_key, user_id in self.api_keys.items():
+            if hmac.compare_digest(provided_key, valid_key):
+                return user_id
+
+        return None
+
+    def require_auth(self, f):
+        """Decorator to require API key authentication on endpoints."""
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            # Get API key from header
+            api_key = request.headers.get('X-API-Key')
+
+            if not api_key:
+                logging.warning(
+                    f"Authentication failed: No API key provided from {request.environ.get('REMOTE_ADDR')}"
+                )
+                return jsonify({"error": "Missing X-API-Key header"}), 401
+
+            # Validate the key
+            user_id = self.validate_key(api_key)
+            if not user_id:
+                logging.warning(
+                    f"Authentication failed: Invalid API key from {request.environ.get('REMOTE_ADDR')}"
+                )
+                return jsonify({"error": "Invalid API key"}), 401
+
+            # Log successful authentication
+            logging.info(f"Authenticated request from user: {user_id}")
+
+            # Add user_id to request context for use in endpoint
+            request.user_id = user_id
+
+            return f(*args, **kwargs)
+
+        return decorated_function
 
 
 class TestQueue:
@@ -237,6 +304,10 @@ class ADSBTestService:
             timeout_minutes=config.get("timeout_minutes", 10)
         )
 
+        # API key authentication
+        api_keys = config.get("api_keys", {})
+        self.auth = APIKeyAuth(api_keys)
+
         # Flask app
         self.app = Flask(__name__)
         self.setup_routes()
@@ -249,8 +320,9 @@ class ADSBTestService:
         """Setup Flask routes."""
 
         @self.app.route('/api/trigger-boot-test', methods=['POST'])
+        @self.auth.require_auth
         def trigger_test():
-            """API endpoint to trigger a boot test."""
+            """API endpoint to trigger a boot test (requires authentication)."""
             try:
                 data = request.get_json()
                 if not data:
@@ -261,6 +333,7 @@ class ADSBTestService:
                     return jsonify({"error": "No 'url' field provided"}), 400
 
                 requester_ip = request.environ.get('REMOTE_ADDR', 'unknown')
+                user_id = getattr(request, 'user_id', 'unknown')
 
                 # Validate URL
                 validation = self.url_validator.validate_url(url)
@@ -272,7 +345,7 @@ class ADSBTestService:
                 # Add to queue
                 result = self.test_queue.add_test(url, requester_ip)
 
-                logging.info(f"Test request from {requester_ip}: {result}")
+                logging.info(f"Test request from {user_id} ({requester_ip}): {result}")
                 return jsonify(result)
 
             except Exception as e:
@@ -280,8 +353,9 @@ class ADSBTestService:
                 return jsonify({"error": str(e)}), 500
 
         @self.app.route('/api/status', methods=['GET'])
+        @self.auth.require_auth
         def get_status():
-            """Get service status and queue information."""
+            """Get service status and queue information (requires authentication)."""
             return jsonify({
                 "status": "running",
                 "queue_size": self.test_queue.queue.qsize(),
@@ -295,7 +369,7 @@ class ADSBTestService:
 
         @self.app.route('/health', methods=['GET'])
         def health_check():
-            """Health check endpoint."""
+            """Health check endpoint (unauthenticated for monitoring)."""
             return jsonify({"status": "healthy"}), 200
 
     def start_queue_processor(self):
@@ -384,7 +458,12 @@ def load_config(config_file: str = "/etc/adsb-test-service/config.json") -> Dict
             "timeout_minutes": 10,
             "host": "0.0.0.0",
             "port": 8080,
-            "log_level": "INFO"
+            "log_level": "INFO",
+            "api_keys": {
+                # Format: "api_key": "user_identifier"
+                # Generate keys with: python3 generate-api-key.py
+                # Example: "abc123def456...": "github-ci"
+            }
         }
 
         # Create directory if needed
@@ -394,6 +473,7 @@ def load_config(config_file: str = "/etc/adsb-test-service/config.json") -> Dict
             json.dump(default_config, f, indent=2)
 
         logging.warning(f"Created default config at {config_path}")
+        logging.warning("⚠️  No API keys configured. Generate keys with: python3 generate-api-key.py")
         return default_config
 
     with open(config_path, 'r') as f:
