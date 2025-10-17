@@ -16,14 +16,15 @@ A systemd service that provides a web API for triggering automated feeder image 
 
 ```bash
 # Run the installation script as root
-sudo ./src/tools/install-service.sh
+sudo ./src/tools/automated-boot-testing/install-service.sh
 ```
 
 This will:
-1. Install Python dependencies (Flask, requests)
-2. Create `/etc/adsb-test-service/config.json`
-3. Install systemd service
-4. Enable the service
+1. Create `/opt/adsb-test-service/` with dedicated virtual environment
+2. Install Python dependencies from `requirements.txt`
+3. Copy service files to `/opt/adsb-test-service/`
+4. Create `/etc/adsb-test-service/config.json`
+5. Install and enable systemd service
 
 ## Configuration
 
@@ -147,10 +148,10 @@ Use the included test script:
 
 ```bash
 # Test API endpoints
-./src/tools/test-api.py
+./src/tools/automated-boot-testing/test-api.py
 
 # Test with custom URL
-./src/tools/test-api.py http://192.168.1.100:8080
+./src/tools/automated-boot-testing/test-api.py http://192.168.1.100:9456
 ```
 
 ## Security
@@ -176,10 +177,10 @@ sudo journalctl -u adsb-test-service -n 50
 ### Tests Failing
 ```bash
 # Check if test script exists and is executable
-ls -la src/tools/test-feeder-image.py
+ls -la src/tools/automated-boot-testing/test-feeder-image.py
 
 # Test manually
-sudo .venv/bin/python src/tools/test-feeder-image.py --help
+sudo .venv/bin/python src/tools/automated-boot-testing/test-feeder-image.py --help
 ```
 
 ### API Not Responding
@@ -201,21 +202,87 @@ This service can be integrated with:
 
 ## File Structure
 
+### Development Files (in project)
 ```
-src/tools/
-├── adsb-test-service.py          # Main service
+src/tools/automated-boot-testing/
+├── adsb-test-service.py          # Main service (source)
 ├── adsb-test-service.service     # Systemd service file
 ├── config.json.example          # Configuration template
-├── install-service.sh           # Installation script
+├── install-service.sh           # Production installation script
+├── setup-dev.sh                 # Development setup script
+├── setup-tftp-iscsi.sh          # TFTP/iSCSI boot setup
+├── requirements.txt             # Python dependencies
 ├── test-api.py                  # API testing script
-└── test-feeder-image.py         # Core test script
+├── test-feeder-image.py         # Core test script (source)
+├── analyze-js-behavior.py       # JavaScript analysis tool
+└── debug-js-transitions.py      # Transition debugging tool
 ```
+
+### Production Installation (after install)
+```
+/opt/adsb-test-service/
+├── adsb-test-service.py         # Main service (installed)
+├── test-feeder-image.py         # Core test script (installed)
+├── setup-tftp-iscsi.sh         # TFTP/iSCSI setup script (installed)
+├── venv/                        # Dedicated virtual environment
+│   └── bin/python              # Service Python interpreter
+└── test-images/                 # Cached test images
+
+/etc/adsb-test-service/
+└── config.json                 # Service configuration
+
+/etc/systemd/system/
+└── adsb-test-service.service   # Systemd service file
+```
+
+## Updating the Service
+
+To update the service with new code:
+
+```bash
+# Stop the service
+sudo systemctl stop adsb-test-service
+
+# Run the install script again (it will update files)
+sudo ./src/tools/automated-boot-testing/install-service.sh
+
+# Start the service
+sudo systemctl start adsb-test-service
+```
+
+The installation script is idempotent - it can be run multiple times safely.
 
 ## Requirements
 
+### System Requirements
 - Python 3.11+
-- Flask
-- requests
-- selenium
-- kasa (python-kasa)
-- Virtual environment with all test dependencies
+- Firefox browser (for Selenium WebDriver)
+- SSH client tools (for remote system management)
+- Network utilities (ping, etc.)
+
+### Python Dependencies
+All Python dependencies are listed in `requirements.txt` and automatically installed:
+- Flask (web framework)
+- requests (HTTP client)
+- selenium (browser automation)
+- webdriver-manager (WebDriver management)
+- beautifulsoup4 (HTML parsing)
+- python-kasa (smart switch control)
+
+### Installation
+Dependencies are automatically installed in the dedicated virtual environment at `/opt/adsb-test-service/venv/`
+
+### Development Setup
+For development, use the setup script:
+
+```bash
+# Set up development environment
+./src/tools/automated-boot-testing/setup-dev.sh
+```
+
+Or install manually:
+
+```bash
+# In your development environment
+pip install -r src/tools/automated-boot-testing/requirements.txt
+```
