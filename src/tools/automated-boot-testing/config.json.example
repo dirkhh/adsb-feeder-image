@@ -4,5 +4,10 @@
   "timeout_minutes": 10,
   "host": "0.0.0.0",
   "port": 9456,
-  "log_level": "INFO"
+  "log_level": "INFO",
+  "api_keys": {
+    "example-key-abc123": "github-ci",
+    "example-key-def456": "developer1"
+  },
+  "_comment": "Generate API keys with: python3 generate-api-key.py"
 }
