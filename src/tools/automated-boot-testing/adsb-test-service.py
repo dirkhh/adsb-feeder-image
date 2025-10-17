@@ -17,6 +17,7 @@ import argparse
 import hmac
 import json
 import logging
+import os
 import signal
 import subprocess
 import sys
@@ -146,6 +147,27 @@ class TestQueue:
     def mark_completed(self, test_id: str, success: bool, message: str = ""):
         """Mark a test as completed."""
         logging.info(f"Test {test_id} completed: {'SUCCESS' if success else 'FAILED'} - {message}")
+
+    def get_queued_items(self) -> list:
+        """Get list of items currently in queue (without removing them)."""
+        with self._lock:
+            # Convert queue to list without modifying it
+            return list(self.queue.queue)
+
+    def flush(self) -> int:
+        """Flush all items from queue and return count of flushed items."""
+        with self._lock:
+            count = 0
+            while not self.queue.empty():
+                try:
+                    self.queue.get_nowait()
+                    count += 1
+                except Empty:
+                    break
+            # Also clear the processed URLs cache
+            self.processed_urls.clear()
+            logging.info(f"Flushed {count} items from queue")
+            return count
 
 
 class GitHubValidator:
@@ -365,10 +387,15 @@ class ADSBTestService:
         @self.auth.require_auth
         def get_status():
             """Get service status and queue information (requires authentication)."""
+            # Get queued items and extract filenames
+            queued_items = self.test_queue.get_queued_items()
+            queued_images = [os.path.basename(item["url"]) for item in queued_items]
+
             return jsonify(
                 {
                     "status": "running",
                     "queue_size": self.test_queue.queue.qsize(),
+                    "queued_images": queued_images,
                     "processing": self.processing,
                     "config": {
                         "rpi_ip": self.config["rpi_ip"],
@@ -377,6 +404,21 @@ class ADSBTestService:
                     },
                 }
             )
+
+        @self.app.route("/api/queue/flush", methods=["POST"])
+        @self.auth.require_auth
+        def flush_queue():
+            """Flush all items from the queue (requires authentication)."""
+            try:
+                user_id = getattr(request, "user_id", "unknown")
+                flushed_count = self.test_queue.flush()
+
+                logging.info(f"Queue flushed by {user_id}: {flushed_count} items removed")
+                return jsonify({"success": True, "flushed_count": flushed_count, "message": f"Flushed {flushed_count} items from queue"})
+
+            except Exception as e:
+                logging.error(f"Error flushing queue: {e}")
+                return jsonify({"error": str(e)}), 500
 
         @self.app.route("/health", methods=["GET"])
         def health_check():
