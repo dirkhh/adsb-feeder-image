@@ -1,0 +1,37 @@
+[Unit]
+Description=GitHub Webhook Service
+After=network.target
+Wants=network.target
+
+[Service]
+Type=exec
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/github-webhook
+Environment=PYTHONPATH=/opt/github-webhook
+# Load secrets from environment file (mode 600, owned by root)
+EnvironmentFile=/etc/github-webhook/secrets.env
+Environment=HOST=127.0.0.1
+Environment=PORT=9111
+Environment=BOOT_TEST_TIMEOUT=30
+ExecStart=/opt/github-webhook/venv/bin/uvicorn --host 127.0.0.1 --port 9111 --workers 2 --timeout-keep-alive 30 --access-log --log-level info webhook_service:app
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=github-webhook
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+# Service is read-only - no write access needed
+# ReadWritePaths=/opt/github-webhook
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+
+[Install]
+WantedBy=multi-user.target
