@@ -8,15 +8,14 @@ by monitoring network requests, console logs, and DOM changes.
 
 import argparse
 import time
+
+from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.firefox.service import Service as FirefoxService
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.firefox import GeckoDriverManager
-from bs4 import BeautifulSoup
-import requests
-import json
 
 
 def analyze_form_submission(rpi_ip: str):
@@ -50,19 +49,19 @@ def analyze_form_submission(rpi_ip: str):
 
         # Get page source for analysis
         page_source = driver.page_source
-        soup = BeautifulSoup(page_source, 'html.parser')
+        soup = BeautifulSoup(page_source, "html.parser")
 
         # Find all forms
-        forms = soup.find_all('form')
+        forms = soup.find_all("form")
         print(f"   Forms found: {len(forms)}")
 
         for i, form in enumerate(forms):
-            action = form.get('action', 'No action')
-            method = form.get('method', 'GET')
-            print(f"     Form {i+1}: method={method}, action={action}")
+            action = form.get("action", "No action")
+            method = form.get("method", "GET")
+            print(f"     Form {i + 1}: method={method}, action={action}")
 
         # Find all JavaScript files
-        scripts = soup.find_all('script')
+        scripts = soup.find_all("script")
         print(f"   Scripts found: {len(scripts)}")
 
         # Look for inline JavaScript
@@ -72,7 +71,7 @@ def analyze_form_submission(rpi_ip: str):
         for i, script in enumerate(inline_scripts):
             script_content = script.string.strip() if script.string else ""
             if script_content:
-                print(f"     Script {i+1} preview: {script_content[:100]}...")
+                print(f"     Script {i + 1} preview: {script_content[:100]}...")
 
         # Fill out the form
         print("\n📝 Filling out the form...")
@@ -137,20 +136,20 @@ def analyze_form_submission(rpi_ip: str):
                 print(f"   {i}s: URL={current_url}, Title={current_title}")
 
                 # Check for any JavaScript errors
-                logs = driver.get_log('browser')
+                logs = driver.get_log("browser")
                 if logs:
                     recent_logs = logs[-3:]
                     for log in recent_logs:
-                        if log['level'] in ['SEVERE', 'WARNING']:
+                        if log["level"] in ["SEVERE", "WARNING"]:
                             print(f"     ⚠ {log['level']}: {log['message']}")
 
                 # Check for network requests
-                perf_logs = driver.get_log('performance')
+                perf_logs = driver.get_log("performance")
                 if perf_logs:
                     recent_perf = perf_logs[-2:]
                     for log in recent_perf:
-                        message = log.get('message', '')
-                        if 'Network.responseReceived' in message or 'Network.requestWillBeSent' in message:
+                        message = log.get("message", "")
+                        if "Network.responseReceived" in message or "Network.requestWillBeSent" in message:
                             print(f"     🌐 {message}")
 
             # Check if we've reached a stable state
@@ -167,7 +166,7 @@ def analyze_form_submission(rpi_ip: str):
         print(f"   Final Title: {driver.title}")
 
         # Get all console logs
-        all_logs = driver.get_log('browser')
+        all_logs = driver.get_log("browser")
         if all_logs:
             print(f"\n📝 All Console Logs ({len(all_logs)} total):")
             for log in all_logs[-10:]:  # Show last 10
