@@ -1,5 +1,7 @@
 Changes since v3.0.5
 =======
+- beta-notes: update Skystats to v0.1.10
+- beta-notes: update ultrafeeder and telegraf containers to fix Mode-S Beast message counting issue
 - acarshub: make sure /run size is increased before restoring data from disk
 - acarshub: use index optimization setting to prevent the DB growing unnecessarily
 - beta-notes: redoing the internal changes, this time hopefully without breaking things - tested on Python 3.9
