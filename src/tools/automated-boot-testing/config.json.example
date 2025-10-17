@@ -2,12 +2,15 @@
   "rpi_ip": "192.168.77.190",
   "kasa_ip": "192.168.22.147",
   "timeout_minutes": 10,
-  "host": "0.0.0.0",
+  "host": "100.x.x.x",
   "port": 9456,
   "log_level": "INFO",
   "api_keys": {
-    "example-key-abc123": "github-ci",
-    "example-key-def456": "developer1"
+    "REPLACE_WITH_SECURE_KEY_1": "github-ci",
+    "REPLACE_WITH_SECURE_KEY_2": "developer1"
   },
-  "_comment": "Generate API keys with: python3 generate-api-key.py"
+  "_security_notes": {
+    "host": "Use your Tailscale IP (100.x.x.x) for secure, encrypted access. Use 127.0.0.1 for localhost-only. AVOID 0.0.0.0 unless behind a firewall.",
+    "api_keys": "Generate secure keys with: python3 generate-api-key.py. NEVER use example keys in production!"
+  }
 }
