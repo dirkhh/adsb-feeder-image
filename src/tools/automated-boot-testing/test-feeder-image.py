@@ -17,22 +17,23 @@ import argparse
 import asyncio
 import os
 import re
-import requests
 import shutil
 import subprocess
 import sys
 import time
 import urllib.parse
-from kasa import SmartPlug
 from pathlib import Path
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
-from webdriver_manager.firefox import GeckoDriverManager
-from selenium.webdriver.firefox.service import Service as FirefoxService
+
+import requests
 from bs4 import BeautifulSoup
+from kasa import SmartPlug
+from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.firefox.service import Service as FirefoxService
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from webdriver_manager.firefox import GeckoDriverManager
 
 
 def try_ssh_shutdown(rpi_ip: str, user: str = "root", ssh_key: str = "", timeout: int = 10) -> bool:
@@ -56,7 +57,6 @@ def try_ssh_shutdown(rpi_ip: str, user: str = "root", ssh_key: str = "", timeout
         return result.returncode == 0
     except (subprocess.TimeoutExpired, subprocess.CalledProcessError, FileNotFoundError):
         return False
-
 
 
 async def control_kasa_switch_async(kasa_ip: str, turn_on: bool) -> bool:
@@ -86,7 +86,6 @@ def control_kasa_switch(kasa_ip: str, turn_on: bool) -> bool:
     return asyncio.run(control_kasa_switch_async(kasa_ip, turn_on))
 
 
-
 def validate_image_filename(filename: str) -> str:
     if not filename.startswith("adsb-im-") or not filename.endswith(".img.xz"):
         raise ValueError(f"Invalid image filename: {filename}. Must start with 'adsb-im-' and end with '.img.xz'")
@@ -95,7 +94,8 @@ def validate_image_filename(filename: str) -> str:
     expected_image_name = filename[:-3]  # Remove .xz
     return expected_image_name
 
-def download_and_decompress_image(url: str, force_download: bool = False, cache_dir:Path = Path("/tmp")) -> str:
+
+def download_and_decompress_image(url: str, force_download: bool = False, cache_dir: Path = Path("/tmp")) -> str:
     # Extract filename from URL
     parsed_url = urllib.parse.urlparse(url)
     filename = os.path.basename(parsed_url.path)
@@ -125,6 +125,7 @@ def download_and_decompress_image(url: str, force_download: bool = False, cache_
         print(f"Decompressed to {cached_decompressed.stat().st_size / 1024 / 1024:.1f} MB")
     return expected_image_name
 
+
 def setup_iscsi_image(cached_decompressed: Path) -> None:
     target_path = Path("/srv/iscsi/adsbim.img")
     target_path.parent.mkdir(parents=True, exist_ok=True)
@@ -143,8 +144,7 @@ def wait_for_system_down(rpi_ip: str, timeout_seconds: int = 60) -> bool:
 
     while time.time() - start_time < timeout_seconds:
         try:
-            result = subprocess.run(["ping", "-c", "1", "-W", "2", rpi_ip],
-                                  capture_output=True, text=True, timeout=5)
+            result = subprocess.run(["ping", "-c", "1", "-W", "2", rpi_ip], capture_output=True, text=True, timeout=5)
             if result.returncode != 0:
                 print(f"\n✓ System at {rpi_ip} is down")
                 return True
@@ -197,13 +197,13 @@ def log_browser_activity(driver, description: str):
     """Log browser console messages and network activity for debugging."""
     try:
         # Check if get_log method is available (varies by browser)
-        if not hasattr(driver, 'get_log'):
+        if not hasattr(driver, "get_log"):
             print(f"📝 Browser logging not available for {description} (get_log method not supported)")
             return
 
         # Get console logs (Firefox supports this)
         try:
-            logs = driver.get_log('browser')
+            logs = driver.get_log("browser")
             if logs:
                 print(f"📝 Console logs during {description}:")
                 for log in logs[-5:]:  # Show last 5 messages
@@ -215,12 +215,12 @@ def log_browser_activity(driver, description: str):
 
         # Get performance logs (Firefox supports this)
         try:
-            perf_logs = driver.get_log('performance')
+            perf_logs = driver.get_log("performance")
             if perf_logs:
                 print(f"🌐 Network activity during {description}:")
                 for log in perf_logs[-3:]:  # Show last 3 network events
-                    message = log.get('message', '')
-                    if 'Network.responseReceived' in message or 'Network.requestWillBeSent' in message:
+                    message = log.get("message", "")
+                    if "Network.responseReceived" in message or "Network.requestWillBeSent" in message:
                         print(f"   {message}")
             else:
                 print(f"🌐 No network logs during {description}")
@@ -336,16 +336,12 @@ def test_basic_setup_with_visible_browser(rpi_ip: str, timeout_seconds: int = 90
         try:
             # Step 1: Wait for URL change to /waiting
             print("  Step 1: Waiting for form submission redirect...")
-            WebDriverWait(driver, 30).until(
-                lambda d: "/waiting" in d.current_url
-            )
+            WebDriverWait(driver, 30).until(lambda d: "/waiting" in d.current_url)
             print("✓ Form submitted successfully - redirected to waiting page")
 
             # Step 2: Wait for the system to finish processing
             print("  Step 2: Waiting for system to finish processing...")
-            WebDriverWait(driver, 60).until(
-                lambda d: "SDR Setup" in d.title
-            )
+            WebDriverWait(driver, 60).until(lambda d: "SDR Setup" in d.title)
             print("✓ Successfully reached SDR Setup page")
 
             # Check final state
@@ -406,7 +402,10 @@ def test_basic_setup(rpi_ip: str, timeout_seconds: int = 90) -> bool:
         # Set Firefox preferences for better headless operation
         firefox_options.set_preference("dom.webnotifications.enabled", False)
         firefox_options.set_preference("media.volume_scale", "0.0")
-        firefox_options.set_preference("general.useragent.override", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+        firefox_options.set_preference(
+            "general.useragent.override",
+            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        )
 
         driver = webdriver.Firefox(service=firefox_service, options=firefox_options)
         driver.set_page_load_timeout(30)
@@ -435,7 +434,7 @@ def test_basic_setup(rpi_ip: str, timeout_seconds: int = 90) -> bool:
         temp_text = cpu_temp_element.text.strip()
 
         # Extract temperature value (assuming format like "45.2°C" or "45.2")
-        temp_value = float(''.join(filter(lambda x: x.isdigit() or x == '.', temp_text)))
+        temp_value = float("".join(filter(lambda x: x.isdigit() or x == ".", temp_text)))
 
         if not (30 <= temp_value <= 85):
             print(f"✗ CPU temperature out of range: {temp_value}°C")
@@ -510,7 +509,7 @@ def test_basic_setup(rpi_ip: str, timeout_seconds: int = 90) -> bool:
                 submit_button = driver.find_element(By.XPATH, selector)
                 print(f"✓ Found submit button with selector: {selector}")
                 break
-            except:
+            except Exception:  # noqa: S110
                 continue
 
         if not submit_button:
@@ -544,7 +543,9 @@ def test_basic_setup(rpi_ip: str, timeout_seconds: int = 90) -> bool:
         execute_js_and_wait(driver, "return document.readyState;", "get document ready state")
 
         # Check for any pending JavaScript timers
-        execute_js_and_wait(driver, """
+        execute_js_and_wait(
+            driver,
+            """
             var timers = [];
             for (var i = 1; i < 10000; i++) {
                 if (window.clearTimeout.toString().indexOf(i) > -1) {
@@ -552,32 +553,34 @@ def test_basic_setup(rpi_ip: str, timeout_seconds: int = 90) -> bool:
                 }
             }
             return timers.length;
-        """, "count active timers")
+        """,
+            "count active timers",
+        )
 
         # Look for any JavaScript errors or console messages
-        execute_js_and_wait(driver, """
+        execute_js_and_wait(
+            driver,
+            """
             return window.console && window.console.error ? 'Console available' : 'No console errors captured';
-        """, "check console availability")
+        """,
+            "check console availability",
+        )
 
         # Wait for the complete form submission flow
         print("Waiting for form submission to complete...")
         try:
             # Step 1: Wait for URL change to /waiting (indicates form was submitted)
             print("  Step 1: Waiting for form submission redirect...")
-            WebDriverWait(driver, 30).until(
-                lambda d: "/waiting" in d.current_url
-            )
+            WebDriverWait(driver, 30).until(lambda d: "/waiting" in d.current_url)
             print("✓ Form submitted successfully - redirected to waiting page")
 
             # Step 2: Wait for the system to finish processing
             print("  Step 2: Waiting for system to finish processing...")
-            WebDriverWait(driver, 60).until(
-                lambda d: "SDR Setup" in d.title
-            )
+            WebDriverWait(driver, 60).until(lambda d: "SDR Setup" in d.title)
             print("✓ Successfully reached SDR Setup page")
             return True
 
-        except TimeoutException as e:
+        except TimeoutException:
             current_url = driver.current_url
             current_title = driver.title
             print(f"✗ Did not complete the flow within timeout")
@@ -620,10 +623,10 @@ def test_basic_setup_simple(rpi_ip: str) -> bool:
             return False
 
         # Parse the page
-        soup = BeautifulSoup(response.content, 'html.parser')
+        soup = BeautifulSoup(response.content, "html.parser")
 
         # Check page title - it might be "Basic Setup" or "SDR Setup"
-        title = soup.find('title')
+        title = soup.find("title")
         title_text = title.get_text() if title else ""
 
         if "SDR Setup" in title_text:
@@ -640,10 +643,10 @@ def test_basic_setup_simple(rpi_ip: str) -> bool:
 
         # Try to find CPU temperature in different ways
         cpu_temp_selectors = [
-            ('div', {'id': 'cpu_temp'}),
-            ('div', {'id': 'cpu_temp_block'}),
-            ('span', {'id': 'cpu_temp'}),
-            ('span', {'id': 'cpu_temp_block'}),
+            ("div", {"id": "cpu_temp"}),
+            ("div", {"id": "cpu_temp_block"}),
+            ("span", {"id": "cpu_temp"}),
+            ("span", {"id": "cpu_temp_block"}),
         ]
 
         for tag, attrs in cpu_temp_selectors:
@@ -651,7 +654,7 @@ def test_basic_setup_simple(rpi_ip: str) -> bool:
             if cpu_temp_element:
                 temp_text = cpu_temp_element.get_text().strip()
                 # Extract temperature value from text
-                temp_match = re.search(r'(\d+\.?\d*)', temp_text)
+                temp_match = re.search(r"(\d+\.?\d*)", temp_text)
                 if temp_match:
                     cpu_temp_value = float(temp_match.group(1))
                     print(f"✓ Found CPU temperature: {cpu_temp_value}°C")
@@ -667,7 +670,7 @@ def test_basic_setup_simple(rpi_ip: str) -> bool:
         print(f"✓ CPU temperature is reasonable: {cpu_temp_value}°C")
 
         # Check that required form elements exist
-        required_elements = ['site_name', 'lat', 'lon', 'alt', 'is_adsb_feeder']
+        required_elements = ["site_name", "lat", "lon", "alt", "is_adsb_feeder"]
         for element_id in required_elements:
             element = soup.find(id=element_id)
             if not element:
@@ -732,7 +735,6 @@ Examples:
             sys.exit(1)
 
     try:
-
         if not args.force_off:
             try_ssh_shutdown(args.rpi_ip, args.user, args.ssh_key, args.shutdown_timeout)
             wait_for_system_down(args.rpi_ip, args.shutdown_timeout)
@@ -743,7 +745,9 @@ Examples:
         success = wait_for_feeder_online(args.rpi_ip, expected_image_name, args.timeout)
         count = 1
         while not success and count < 3:
-            print("\nThe Feeder isn't online - on a DietPi feeder this can mean that the reboot failed because it got confused by iSCSI root filesystem!")
+            print(
+                "\nThe Feeder isn't online - on a DietPi feeder this can mean that the reboot failed because it got confused by iSCSI root filesystem!"
+            )
             if "dietpi" in expected_image_name:
                 # power cycle and try again
                 control_kasa_switch(args.kasa_ip, False)
