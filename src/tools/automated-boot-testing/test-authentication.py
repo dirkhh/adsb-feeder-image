@@ -13,7 +13,7 @@ import importlib.util
 import sys
 import unittest
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 # Import the service module (has hyphens in filename)
 service_path = Path(__file__).parent / "adsb-test-service.py"
@@ -31,10 +31,7 @@ class TestAPIKeyAuth(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        self.test_keys = {
-            "valid_key_123": "test_user_1",
-            "another_valid_key": "test_user_2"
-        }
+        self.test_keys = {"valid_key_123": "test_user_1", "another_valid_key": "test_user_2"}
         self.auth = APIKeyAuth(self.test_keys)
 
     def test_validate_valid_key(self):
@@ -69,8 +66,8 @@ class TestAPIKeyAuth(unittest.TestCase):
         user_id = self.auth.validate_key("valid_key_124")  # One char different
         self.assertIsNone(user_id)
 
-    @patch('adsb_test_service.request')
-    @patch('adsb_test_service.logging')
+    @patch("adsb_test_service.request")
+    @patch("adsb_test_service.logging")
     def test_require_auth_no_header(self, mock_logging, mock_request):
         """Test decorator with missing X-API-Key header."""
         mock_request.headers.get.return_value = None
@@ -87,8 +84,8 @@ class TestAPIKeyAuth(unittest.TestCase):
         self.assertEqual(result[1], 401)
         self.assertIn("Missing X-API-Key", str(result[0]))
 
-    @patch('adsb_test_service.request')
-    @patch('adsb_test_service.logging')
+    @patch("adsb_test_service.request")
+    @patch("adsb_test_service.logging")
     def test_require_auth_invalid_key(self, mock_logging, mock_request):
         """Test decorator with invalid API key."""
         mock_request.headers.get.return_value = "invalid_key_xyz"
@@ -104,8 +101,8 @@ class TestAPIKeyAuth(unittest.TestCase):
         self.assertEqual(result[1], 401)
         self.assertIn("Invalid API key", str(result[0]))
 
-    @patch('adsb_test_service.request')
-    @patch('adsb_test_service.logging')
+    @patch("adsb_test_service.request")
+    @patch("adsb_test_service.logging")
     def test_require_auth_valid_key(self, mock_logging, mock_request):
         """Test decorator with valid API key."""
         mock_request.headers.get.return_value = "valid_key_123"
@@ -123,8 +120,8 @@ class TestAPIKeyAuth(unittest.TestCase):
 
     def test_empty_api_keys(self):
         """Test initialization with empty API keys."""
-        with patch('adsb_test_service.logging') as mock_logging:
-            auth = APIKeyAuth({})
+        with patch("adsb_test_service.logging") as mock_logging:
+            _auth = APIKeyAuth({})  # noqa: F841
             # Should log a warning
             mock_logging.warning.assert_called_once()
 
@@ -135,6 +132,7 @@ class TestSecurityProperties(unittest.TestCase):
     def test_key_length(self):
         """Test that generated keys have sufficient entropy."""
         import secrets
+
         key = secrets.token_urlsafe(32)
 
         # 32 bytes = 256 bits, base64-encoded should be ~43 chars
@@ -143,7 +141,6 @@ class TestSecurityProperties(unittest.TestCase):
     def test_timing_attack_resistance(self):
         """Verify we use hmac.compare_digest for timing safety."""
         import inspect
-        import hmac
 
         # Check that APIKeyAuth.validate_key uses hmac.compare_digest
         source = inspect.getsource(APIKeyAuth.validate_key)
@@ -152,9 +149,9 @@ class TestSecurityProperties(unittest.TestCase):
 
 def run_tests():
     """Run all tests."""
-    print("="*70)
+    print("=" * 70)
     print("Testing Authentication Implementation")
-    print("="*70)
+    print("=" * 70)
     print()
 
     # Run tests
@@ -168,9 +165,9 @@ def run_tests():
     result = runner.run(suite)
 
     print()
-    print("="*70)
+    print("=" * 70)
     print("Summary")
-    print("="*70)
+    print("=" * 70)
     print(f"Tests run: {result.testsRun}")
     print(f"Successes: {result.testsRun - len(result.failures) - len(result.errors)}")
     print(f"Failures: {len(result.failures)}")

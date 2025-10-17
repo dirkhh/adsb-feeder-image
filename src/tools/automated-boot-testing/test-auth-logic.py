@@ -98,17 +98,16 @@ def test_security_properties():
     test_key = "AbCdEf123456"
     similar_key = "AbCdEf123457"
 
-    assert not hmac.compare_digest(test_key, similar_key), \
-        "Similar keys should not match"
+    assert not hmac.compare_digest(test_key, similar_key), "Similar keys should not match"
 
     print("  ✓ Security properties verified")
 
 
 def main():
     """Run all tests."""
-    print("="*70)
+    print("=" * 70)
     print("Authentication Logic Tests")
-    print("="*70)
+    print("=" * 70)
     print()
 
     tests = [
@@ -130,14 +129,14 @@ def main():
             failed = True
 
     print()
-    print("="*70)
+    print("=" * 70)
     if not failed:
         print("✅ All authentication logic tests passed!")
-        print("="*70)
+        print("=" * 70)
         return 0
     else:
         print("❌ Some tests failed")
-        print("="*70)
+        print("=" * 70)
         return 1
 
 
