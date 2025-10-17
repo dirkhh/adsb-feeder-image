@@ -1,0 +1,31 @@
+[Unit]
+Description=ADS-B Feeder Test Service
+Documentation=https://github.com/dirkhh/adsb-feeder-image
+After=network.target network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/home/hohndel/src/adsb-feeder-image
+ExecStart=/home/hohndel/src/adsb-feeder-image/.venv/bin/python /home/hohndel/src/adsb-feeder-image/src/tools/adsb-test-service.py --config /etc/adsb-test-service/config.json
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=adsb-test-service
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/etc/adsb-test-service /tmp /srv/iscsi /home/hohndel/src/adsb-feeder-image/test-images
+
+# Environment
+Environment=PYTHONPATH=/home/hohndel/src/adsb-feeder-image
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
