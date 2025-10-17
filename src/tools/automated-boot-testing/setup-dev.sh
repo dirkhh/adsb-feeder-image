@@ -1,36 +1,54 @@
 #!/bin/bash
-# Development setup script for ADS-B Test Service
-#
-# This script helps set up a development environment by installing
-# dependencies from requirements.txt into the project's virtual environment.
+# Development environment setup for automated-boot-testing
 
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$(dirname "$(dirname "$SCRIPT_DIR")")")"
+echo "Setting up development environment..."
+echo
 
-echo "🔧 Setting up development environment for ADS-B Test Service..."
-
-# Check if we're in the right directory
-if [[ ! -f "$PROJECT_ROOT/.venv/bin/pip" ]]; then
-    echo "❌ Virtual environment not found at $PROJECT_ROOT/.venv/"
-    echo "   Please run the main project setup first"
+# Check Python version
+if ! command -v python3 &> /dev/null; then
+    echo "Error: python3 not found. Please install Python 3.11 or later."
     exit 1
 fi
 
-# Install dependencies
-echo "📦 Installing Python dependencies..."
-cd "$PROJECT_ROOT"
-.venv/bin/pip install -r "$SCRIPT_DIR/requirements.txt"
+PYTHON_VERSION=$(python3 --version | awk '{print $2}')
+echo "Found Python $PYTHON_VERSION"
 
-echo ""
-echo "✅ Development environment setup complete!"
-echo ""
-echo "You can now run:"
-echo "  .venv/bin/python src/tools/automated-boot-testing/adsb-test-service.py --help"
-echo "  .venv/bin/python src/tools/automated-boot-testing/test-feeder-image.py --help"
-echo "  .venv/bin/python src/tools/automated-boot-testing/test-api.py"
-echo ""
-echo "For production installation, use:"
-echo "  sudo ./src/tools/automated-boot-testing/install-service.sh"
-echo ""
+# Create virtual environment
+if [ ! -d "venv" ]; then
+    echo "Creating virtual environment..."
+    python3 -m venv venv
+    echo "✓ Virtual environment created"
+else
+    echo "✓ Virtual environment already exists"
+fi
+
+# Activate and upgrade pip
+echo "Upgrading pip, setuptools, and wheel..."
+./venv/bin/pip install --upgrade pip setuptools wheel > /dev/null
+echo "✓ Package tools upgraded"
+
+# Install dependencies
+echo "Installing dependencies from requirements.txt..."
+./venv/bin/pip install -r requirements.txt > /dev/null
+echo "✓ Dependencies installed"
+
+echo
+echo "================================"
+echo "Setup complete!"
+echo "================================"
+echo
+echo "To activate the virtual environment:"
+echo "  source venv/bin/activate"
+echo
+echo "To run tests:"
+echo "  ./venv/bin/python test-auth-logic.py"
+echo "  ./venv/bin/python test-authentication.py"
+echo
+echo "To generate API keys:"
+echo "  ./venv/bin/python generate-api-key.py <user-id>"
+echo
+echo "To run the service:"
+echo "  ./venv/bin/python adsb-test-service.py --config config.json"
+echo
