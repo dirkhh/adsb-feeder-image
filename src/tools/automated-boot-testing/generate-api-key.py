@@ -14,10 +14,8 @@ Example:
 """
 
 import argparse
-import json
 import secrets
 import sys
-from pathlib import Path
 
 
 def generate_api_key() -> str:
@@ -41,19 +39,10 @@ Examples:
 
   Interactive mode (no arguments):
     python3 generate-api-key.py
-        """
+        """,
     )
-    parser.add_argument(
-        "user_id",
-        nargs="?",
-        help="User identifier for this API key (e.g., 'github-ci', 'developer1')"
-    )
-    parser.add_argument(
-        "--count",
-        type=int,
-        default=1,
-        help="Number of keys to generate (default: 1)"
-    )
+    parser.add_argument("user_id", nargs="?", help="User identifier for this API key (e.g., 'github-ci', 'developer1')")
+    parser.add_argument("--count", type=int, default=1, help="Number of keys to generate (default: 1)")
 
     args = parser.parse_args()
 
@@ -70,61 +59,62 @@ Examples:
     if not user_id.replace("-", "").replace("_", "").isalnum():
         print(f"Warning: User identifier '{user_id}' contains special characters")
         confirm = input("Continue? (y/n): ").strip().lower()
-        if confirm != 'y':
+        if confirm != "y":
             sys.exit(0)
 
-    print(f"\n{'='*70}")
+    print(f"\n{'=' * 70}")
     print(f"Generating {args.count} API key(s) for user: {user_id}")
-    print(f"{'='*70}\n")
+    print(f"{'=' * 70}\n")
 
     keys = []
     for i in range(args.count):
         api_key = generate_api_key()
-        keys.append((api_key, user_id if args.count == 1 else f"{user_id}-{i+1}"))
+        keys.append((api_key, user_id if args.count == 1 else f"{user_id}-{i + 1}"))
 
-        current_user_id = user_id if args.count == 1 else f"{user_id}-{i+1}"
+        current_user_id = user_id if args.count == 1 else f"{user_id}-{i + 1}"
 
-        print(f"Key {i+1}:")
+        print(f"Key {i + 1}:")
         print(f"  API Key: {api_key}")
         print(f"  User ID: {current_user_id}")
         print()
 
     # Show configuration example
-    print(f"{'='*70}")
+    print(f"{'=' * 70}")
     print("Configuration")
-    print(f"{'='*70}\n")
+    print(f"{'=' * 70}\n")
 
     print("Add the following to your config.json file:")
     print()
     print('"api_keys": {')
     for api_key, uid in keys:
         print(f'  "{api_key}": "{uid}"{" " if (api_key, uid) == keys[-1] else ","} ')
-    print('}')
+    print("}")
     print()
 
     # Show usage example
-    print(f"{'='*70}")
+    print(f"{'=' * 70}")
     print("Usage")
-    print(f"{'='*70}\n")
+    print(f"{'=' * 70}\n")
 
     print("Test the API with curl:")
     print()
     example_key, example_user = keys[0]
-    print(f'curl -X POST http://localhost:8080/api/trigger-boot-test \\')
+    print(f"curl -X POST http://localhost:9456/api/trigger-boot-test \\")
     print(f'  -H "X-API-Key: {example_key}" \\')
     print(f'  -H "Content-Type: application/json" \\')
     print(f'  -d \'{{"url": "https://github.com/dirkhh/adsb-feeder-image/releases/download/v1.0/test.img.xz"}}\'')
     print()
 
     # Security reminder
-    print(f"{'='*70}")
+    print(f"{'=' * 70}")
     print("Security Reminders")
-    print(f"{'='*70}\n")
+    print(f"{'=' * 70}\n")
 
     print("• Store API keys securely (e.g., in environment variables or secrets manager)")
     print("• Never commit API keys to version control")
     print("• Rotate keys periodically")
-    print("• Use HTTPS in production to protect keys in transit")
+    print("• Use Tailscale/VPN for encrypted transport, or HTTPS/TLS for public networks")
+    print("• Bind service to Tailscale IP (100.x.x.x) or localhost (127.0.0.1) for security")
     print("• Each user/system should have its own unique key")
     print()
 

@@ -7,13 +7,14 @@ including monitoring page transitions, JavaScript execution, and network request
 """
 
 import argparse
-import time
 import json
+import time
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.firefox.service import Service as FirefoxService
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.firefox import GeckoDriverManager
 
 
@@ -55,21 +56,16 @@ def monitor_page_transitions(driver, duration_seconds=30):
                 };
             """)
 
-            state = {
-                'time': round(current_time, 1),
-                'url': url,
-                'title': title,
-                'js_state': js_state
-            }
+            state = {"time": round(current_time, 1), "url": url, "title": title, "js_state": js_state}
 
             states.append(state)
 
             # Print significant changes
-            if len(states) == 1 or states[-1]['title'] != states[-2]['title']:
+            if len(states) == 1 or states[-1]["title"] != states[-2]["title"]:
                 print(f"   {current_time:.1f}s: {title}")
-                if js_state['hasProgressIndicators']:
+                if js_state["hasProgressIndicators"]:
                     print(f"     🔄 Progress indicators detected")
-                if js_state['activeTimers'] > 0:
+                if js_state["activeTimers"] > 0:
                     print(f"     ⏰ {js_state['activeTimers']} active timers")
 
             time.sleep(1)
@@ -158,11 +154,14 @@ def analyze_form_submission_behavior(rpi_ip: str, visible=False):
         adsb_checkbox = driver.find_element(By.ID, "is_adsb_feeder")
 
         # Scroll to element with offset to avoid navbar
-        driver.execute_script("""
+        driver.execute_script(
+            """
             arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});
             // Scroll up a bit to avoid navbar
             window.scrollBy(0, -100);
-        """, adsb_checkbox)
+        """,
+            adsb_checkbox,
+        )
         time.sleep(2)
 
         # Try to click, fallback to JavaScript click if needed
@@ -206,23 +205,23 @@ def analyze_form_submission_behavior(rpi_ip: str, visible=False):
         print(f"\n📈 Transition Analysis:")
         print(f"   Total state changes: {len(transitions)}")
 
-        unique_titles = set(state['title'] for state in transitions)
+        unique_titles = set(state["title"] for state in transitions)
         print(f"   Unique page titles: {len(unique_titles)}")
         for title in unique_titles:
             print(f"     - {title}")
 
-        unique_urls = set(state['url'] for state in transitions)
+        unique_urls = set(state["url"] for state in transitions)
         print(f"   Unique URLs: {len(unique_urls)}")
         for url in unique_urls:
             print(f"     - {url}")
 
         # Check for JavaScript timers
-        timer_states = [state for state in transitions if state['js_state']['activeTimers'] > 0]
+        timer_states = [state for state in transitions if state["js_state"]["activeTimers"] > 0]
         if timer_states:
             print(f"   ⏰ JavaScript timers detected at: {[s['time'] for s in timer_states]}s")
 
         # Check for progress indicators
-        progress_states = [state for state in transitions if state['js_state']['hasProgressIndicators']]
+        progress_states = [state for state in transitions if state["js_state"]["hasProgressIndicators"]]
         if progress_states:
             print(f"   🔄 Progress indicators at: {[s['time'] for s in progress_states]}s")
 
@@ -236,15 +235,19 @@ def analyze_form_submission_behavior(rpi_ip: str, visible=False):
 
         # Save detailed log
         log_file = f"js_transition_log_{int(time.time())}.json"
-        with open(log_file, 'w') as f:
-            json.dump({
-                'rpi_ip': rpi_ip,
-                'visible_browser': visible,
-                'initial_state': initial_state,
-                'pre_submit_state': pre_submit_state,
-                'transitions': transitions,
-                'final_state': final_state
-            }, f, indent=2)
+        with open(log_file, "w") as f:
+            json.dump(
+                {
+                    "rpi_ip": rpi_ip,
+                    "visible_browser": visible,
+                    "initial_state": initial_state,
+                    "pre_submit_state": pre_submit_state,
+                    "transitions": transitions,
+                    "final_state": final_state,
+                },
+                f,
+                indent=2,
+            )
 
         print(f"\n💾 Detailed log saved to: {log_file}")
 
