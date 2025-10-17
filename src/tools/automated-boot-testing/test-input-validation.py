@@ -71,13 +71,13 @@ def test_timeout_validation():
 
     # Invalid timeouts
     invalid_timeouts = [
-        0,      # Too small
-        -1,     # Negative
-        61,     # Too large
-        100,    # Too large
-        "10",   # String
-        10.5,   # Float
-        None,   # None
+        0,  # Too small
+        -1,  # Negative
+        61,  # Too large
+        100,  # Too large
+        "10",  # String
+        10.5,  # Float
+        None,  # None
     ]
 
     for timeout in invalid_timeouts:
@@ -94,7 +94,7 @@ def test_url_character_validation():
     """Test URL character validation."""
     print("\nTesting URL character validation...")
 
-    dangerous_chars = [';', '&', '|', '`', '$', '\n', '\r']
+    dangerous_chars = [";", "&", "|", "`", "$", "\n", "\r"]
 
     # Valid URLs
     valid_urls = [
@@ -166,9 +166,9 @@ def test_path_validation():
 
 def main():
     """Run all validation tests."""
-    print("="*70)
+    print("=" * 70)
     print("Input Validation Tests")
-    print("="*70)
+    print("=" * 70)
     print()
 
     tests = [
@@ -188,14 +188,14 @@ def main():
             failed = True
 
     print()
-    print("="*70)
+    print("=" * 70)
     if not failed:
         print("✅ All input validation tests passed!")
-        print("="*70)
+        print("=" * 70)
         return 0
     else:
         print("❌ Some tests failed")
-        print("="*70)
+        print("=" * 70)
         return 1
 
 
