@@ -225,16 +225,66 @@ class TestExecutor:
     """Executes the actual test using the test-feeder-image.py script."""
 
     def __init__(self, rpi_ip: str, kasa_ip: str, timeout_minutes: int = 10):
-        self.rpi_ip = rpi_ip
-        self.kasa_ip = kasa_ip
-        self.timeout_minutes = timeout_minutes
-        self.script_path = Path(__file__).parent / "test-feeder-image.py"
-        self.venv_python = Path(__file__).parent / "venv" / "bin" / "python"
+        # Validate all inputs at initialization - fail fast if invalid
+        self.rpi_ip = self._validate_ip(rpi_ip, "rpi_ip")
+        self.kasa_ip = self._validate_ip(kasa_ip, "kasa_ip")
+        self.timeout_minutes = self._validate_timeout(timeout_minutes)
+        self.script_path = self._validate_script_path()
+        self.venv_python = self._validate_python_path()
+
+    def _validate_ip(self, ip: str, name: str) -> str:
+        """Validate IP address format - simple and clear."""
+        import ipaddress
+        try:
+            ipaddress.ip_address(ip)
+            return ip
+        except ValueError:
+            raise ValueError(f"Invalid {name}: '{ip}' is not a valid IP address")
+
+    def _validate_timeout(self, timeout: int) -> int:
+        """Validate timeout is reasonable."""
+        if not isinstance(timeout, int) or timeout < 1 or timeout > 60:
+            raise ValueError(f"Timeout must be 1-60 minutes, got: {timeout}")
+        return timeout
+
+    def _validate_script_path(self) -> Path:
+        """Validate script exists and is in expected location."""
+        script = (Path(__file__).parent / "test-feeder-image.py").resolve()
+
+        if not script.exists():
+            raise ValueError(f"Test script not found: {script}")
+
+        # Ensure it's actually in our directory (prevent path traversal)
+        expected_dir = Path(__file__).parent.resolve()
+        if not script.is_relative_to(expected_dir):
+            raise ValueError(f"Test script must be in {expected_dir}")
+
+        return script
+
+    def _validate_python_path(self) -> Path:
+        """Validate venv python exists."""
+        python = (Path(__file__).parent / "venv" / "bin" / "python").resolve()
+
+        if not python.exists():
+            raise ValueError(
+                f"Virtual environment not found at {python}. "
+                "Run ./setup-dev.sh to create it."
+            )
+
+        return python
 
     def execute_test(self, test_item: Dict) -> Dict[str, str]:
         """Execute a test with timeout."""
         test_id = test_item["id"]
         url = test_item["url"]
+
+        # Validate URL doesn't contain shell metacharacters
+        dangerous_chars = [';', '&', '|', '`', '$', '\n', '\r']
+        if any(c in url for c in dangerous_chars):
+            return {
+                "success": False,
+                "message": f"URL contains invalid characters and was rejected for security"
+            }
 
         logging.info(f"Starting test {test_id} for URL: {url}")
 
