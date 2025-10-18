@@ -123,6 +123,8 @@ def extract_qualifying_binaries(release_data: Dict[str, Any]) -> List[Dict[str, 
     # Get assets from the release
     assets = release_data.get("release", {}).get("assets", [])
     name = release_data.get("changes", {}).get("name", {}).get("from", "")
+    if name == "":
+        name = release_data.get("release", {}).get("name", "")
 
     for asset in assets:
         asset_name = asset.get("name", "")
