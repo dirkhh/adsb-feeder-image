@@ -242,7 +242,7 @@ class TestExecutor:
         if not python.exists():
             raise ValueError(f"Virtual environment not found at {python}. Run ./setup-dev.sh to create it.")
 
-        return python
+        return Path(__file__).parent / "venv" / "bin" / "python"
 
     def execute_test(self, test_item: Dict) -> Dict[str, str]:
         """Execute a test with timeout."""
