@@ -158,8 +158,24 @@ async def trigger_boot_test(binary_url: str) -> bool:
         logger.error("BOOT_TEST_API_KEY not configured - cannot authenticate with boot test API")
         return False
 
-    # Warn if using HTTP instead of HTTPS (unless localhost)
-    if BOOT_TEST_API_URL.startswith("http://") and "localhost" not in BOOT_TEST_API_URL and "127.0.0.1" not in BOOT_TEST_API_URL:
+    # Warn if using HTTP instead of HTTPS (unless localhost or Tailscale)
+    # Tailscale uses 100.64.0.0/10 range (100.64.0.0 to 100.127.255.255)
+    parsed_url = urlparse(BOOT_TEST_API_URL)
+    is_localhost = parsed_url.hostname in ("localhost", "127.0.0.1", "::1")
+
+    # Check if hostname is in Tailscale 100.64.0.0/10 range
+    is_tailscale = False
+    if parsed_url.hostname:
+        try:
+            parts = parsed_url.hostname.split(".")
+            if len(parts) == 4 and parts[0] == "100":
+                second_octet = int(parts[1])
+                # 100.64.0.0/10 means second octet must be 64-127 (64 + 0-63)
+                is_tailscale = 64 <= second_octet <= 127
+        except (ValueError, IndexError):
+            pass
+
+    if BOOT_TEST_API_URL.startswith("http://") and not is_localhost and not is_tailscale:
         logger.warning(f"Boot test API URL uses HTTP (not HTTPS): {BOOT_TEST_API_URL}")
         logger.warning("API keys will be transmitted in plaintext - use HTTPS or Tailscale/VPN")
 
