@@ -745,16 +745,18 @@ Examples:
         success = wait_for_feeder_online(args.rpi_ip, expected_image_name, args.timeout)
         count = 1
         while not success and count < 3:
-            print(
-                "\nThe Feeder isn't online - on a DietPi feeder this can mean that the reboot failed because it got confused by iSCSI root filesystem!"
-            )
             if "dietpi" in expected_image_name:
+                print(
+                    "\nThe Feeder isn't online - on a DietPi feeder this can mean that the reboot "
+                    "failed because it got confused by iSCSI root filesystem!"
+                )
                 # power cycle and try again
                 control_kasa_switch(args.kasa_ip, False)
                 time.sleep(10)
                 control_kasa_switch(args.kasa_ip, True)
                 success = wait_for_feeder_online(args.rpi_ip, expected_image_name, args.timeout)
-                count += 1
+
+            count += 1
 
         if success:
             print("\n🎉 Feeder is online!")
