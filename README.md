@@ -1,7 +1,8 @@
 # ADS-B / SDR Feeder Image
 
-<a href="https://www.youtube.com/@adsb">intro videos</a> &nbsp;&nbsp;&nbsp;
-<a href="https://adsb.im/home"><img src="https://adsb.im/static/images/adsb.im.logo.png" height="30" alt="adsb.im homepage"></a>
+<a href="https://adsb.im/home"><img src="https://adsb.im/static/images/adsb.im.logo.png" height="200" alt="adsb.im homepage"></a>
+
+[Introduction Videos](https://www.youtube.com/@adsb)
 
 ## The easiest way to track nearby aircraft, ships, and weather balloons with your own hardware and share with others
 
@@ -9,6 +10,7 @@ Track aircraft around you broadcasting ADS-B messages on 1090 MHz (and, in the U
 
 This project provides an easy to use turn-key SD card image for a number of single board computers (or to run in an x86 VM).
 Currently we are building the following images:
+
 - Raspberry Pi Raspian based, supports Zero 2, 3a/b, 4, and 5 (frequently tested on Zero 2W, 3a, 3b, and 4 - note that Pi Zero W will NOT work)
 - Raspberry Pi DietPi based, supports Zero 2, 3a/b, and 4 (tested on 3b and 4 - note that Pi Zero W will NOT work)
 - Raspberry Pi 5, DietPi based (tested)
@@ -48,13 +50,13 @@ These ADS-B aggregators are also supported:
 - [Radar Virtuel](https://www.radarvirtuel.com)
 
 For ACARS / VDL2 / HFDL the image currently supports
-- [aiframes.io](https://airframes.io)
+- [airframes.io](https://airframes.io)
 - [ACARS Drama](https://acarsdrama.com/)
 - [adsb.lol](https://www.adsb.lol/docs/open-data/aircraft-data-links/)
 - [AVDelphi](https://avdelphi.com/)
 
 For AIS, the image currently supports these community aggregators
-- [aiframes.io](https://airframes.io)
+- [airframes.io](https://airframes.io)
 - [AIS Catcher](https://aiscatcher.org/)
 - [AIS Friends](https://aisfriends.com/)
 - [AISHub](https://www.aishub.net/)
@@ -71,11 +73,12 @@ As well as a number of commercial AIS aggregators
 
 ### Home page of an installed ADS-B Feeder Image
 
-![ADS-B Feeder home page](/../screenshots/screenshots/ADSB-im-v0.16.0.png "Feeder Home Page")
+![ADS-B Feeder home page](documentation/dashboard.png "Feeder Home Page")
 
 ### The goal of this project is to make things as simple as possible for the non-technical user.
 
 ## Feed from a Single Board Computer (like the Raspberry Pi)
+
 - buy one of the supported boards (Raspberry Pi 4b is by far the most commonly used one, the Orange Pi Zero 3 has a great price/value)
 - invest in a decent power supply - we strongly recommend against attempting to power these boards from a powered hub or a cheap 'charger' plug, not having a stable 5V power source tends to be the biggest cause of issues with these SBC
 - get an SDR and antenna. There are many many choices. Availability may differ depending on where you are. But often a generic SDR and
