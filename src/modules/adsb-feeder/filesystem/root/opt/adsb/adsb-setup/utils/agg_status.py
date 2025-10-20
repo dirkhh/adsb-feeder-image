@@ -589,7 +589,7 @@ class Healthcheck:
                 if not now or now < time.time() - 60:
                     fail.append("readsb stats.json out of date")
                 local = obj.get("total").get("local")
-                if local:
+                if local and self._d.env_by_tags("readsb_device_type") != "modesbeast":
                     samples = local.get("samples_processed")
                     if samples == self.lastReadsbSamples:
                         fail.append(f"1090 SDR hung (sample count: {samples})")
