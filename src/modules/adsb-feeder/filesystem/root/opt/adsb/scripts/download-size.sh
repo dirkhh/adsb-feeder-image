@@ -33,3 +33,6 @@ echo
 
 # check if baseimage layer is the same for all:
 for image in $(cat /opt/adsb/docker.image.versions | head -n-2 | cut -d= -f2); do echo $image; docker inspect $image -f '{{json .RootFS.Layers}}' | jq '.[1]'; done
+
+
+/opt/adsb/docker-compose-adsb up -d
