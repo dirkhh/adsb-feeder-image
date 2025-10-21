@@ -304,3 +304,17 @@ def get_plain_url(plain_url, method="GET", data=None):
     else:
         return response.text, response.status_code
     return None, status
+
+
+def __getattr__(name):
+    """
+    Provide backward compatibility for lazy-loaded module-level variables.
+
+    This allows existing code to import 'verbose' and 'idhash' as module attributes
+    even though they're now lazy-loaded via getter functions.
+    """
+    if name == 'verbose':
+        return get_verbose()
+    if name == 'idhash':
+        return get_idhash()
+    raise AttributeError(f"module 'util' has no attribute '{name}'")

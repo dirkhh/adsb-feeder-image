@@ -3,193 +3,282 @@ Centralized path configuration for adsb-setup application.
 
 This module provides configurable paths that can be overridden via environment variables
 for testing and different deployment scenarios.
+
+All paths are computed lazily from the base directory, eliminating the need for
+manual reinitialization when the base directory changes.
 """
 
 import os
 from pathlib import Path
 
-# Base directory - configurable via ADSB_BASE_DIR environment variable
-ADSB_BASE_DIR = Path(os.environ.get("ADSB_BASE_DIR", "/opt/adsb"))
 
-# Main directories
-ADSB_CONFIG_DIR = ADSB_BASE_DIR / "config"
-ADSB_DATA_DIR = ADSB_BASE_DIR / "data"
-ADSB_SCRIPTS_DIR = ADSB_BASE_DIR / "scripts"
-ADSB_LOGS_DIR = ADSB_BASE_DIR / "logs"
-ADSB_EXTRAS_DIR = ADSB_BASE_DIR / "extras"
-ADSB_RB_DIR = ADSB_BASE_DIR / "rb"
+class PathConfig:
+    """
+    Lazy-loading path configuration.
 
-# Configuration files
-VERBOSE_FILE = ADSB_CONFIG_DIR / "verbose"
-ENV_FILE = ADSB_CONFIG_DIR / ".env"
-USER_ENV_FILE = ADSB_CONFIG_DIR / ".env.user"
-CONFIG_JSON_FILE = ADSB_CONFIG_DIR / "config.json"
+    All paths are computed on-demand from the base directory, which can be
+    changed at runtime. This eliminates the need for manual reinitialization
+    of dozens of path constants.
+    """
 
-# System files
-MACHINE_ID_FILE = Path("/etc/machine-id")  # System file, not configurable
-SECURE_IMAGE_FILE = ADSB_BASE_DIR / "adsb.im.secure_image"
-FEEDER_IMAGE_NAME_FILE = ADSB_BASE_DIR / "feeder-image.name"
-PREVIOUS_VERSION_FILE = ADSB_BASE_DIR / "adsb.im.previous-version"
-HOTSPOT_DISABLED_FILE = ADSB_BASE_DIR / "adsb.im.hotspot_disabled"
-PASSWD_AND_KEYS_FILE = ADSB_BASE_DIR / "adsb.im.passwd.and.keys"
+    def __init__(self):
+        self._base_dir = None
+        self._skystats_db_data_path = None
 
-# Version files
-VERSION_FILE = ADSB_BASE_DIR / "adsb.im.version"
-OS_FEEDER_IMAGE_FILE = ADSB_BASE_DIR / "os.adsb.feeder.image"
-DOCKER_IMAGE_VERSIONS_FILE = ADSB_BASE_DIR / "docker.image.versions"
+    @property
+    def ADSB_BASE_DIR(self) -> Path:
+        """Base directory - configurable via ADSB_BASE_DIR environment variable."""
+        if self._base_dir is None:
+            self._base_dir = Path(os.environ.get("ADSB_BASE_DIR", "/opt/adsb"))
+        return self._base_dir
 
-# Application-specific paths
-ULTRAFEEDER_CONFIG_DIR = ADSB_CONFIG_DIR / "ultrafeeder"
-NANOFEEDER_CONFIG_DIR = ADSB_CONFIG_DIR / "nanofeeder"
-RESTORE_DIR = ADSB_CONFIG_DIR / "restore"
-ACARSHUB_DATA_DIR = ADSB_CONFIG_DIR / "acarshub_data"
+    @ADSB_BASE_DIR.setter
+    def ADSB_BASE_DIR(self, value: Path):
+        """Set the base directory (used by set_adsb_base_dir)."""
+        self._base_dir = Path(value)
+        # Clear cached skystats path when base dir changes
+        self._skystats_db_data_path = None
 
-# Script files
-MDNS_ALIAS_SETUP_SCRIPT = ADSB_SCRIPTS_DIR / "mdns-alias-setup.sh"
-PUSH_MULTIOUTLINE_SCRIPT = ADSB_BASE_DIR / "push_multioutline.sh"
-JOURNAL_SET_VOLATILE_SCRIPT = ADSB_SCRIPTS_DIR / "journal-set-volatile.sh"
-JOURNAL_SET_PERSIST_SCRIPT = ADSB_SCRIPTS_DIR / "journal-set-persist.sh"
-LOG_SANITIZER_SCRIPT = ADSB_BASE_DIR / "log-sanitizer.sh"
+    # Main directories
+    @property
+    def ADSB_CONFIG_DIR(self) -> Path:
+        return self.ADSB_BASE_DIR / "config"
 
-# Docker compose files
-DOCKER_COMPOSE_ADSB_SCRIPT = ADSB_BASE_DIR / "docker-compose-adsb"
-DOCKER_COMPOSE_START_SCRIPT = ADSB_BASE_DIR / "docker-compose-start"
+    @property
+    def ADSB_DATA_DIR(self) -> Path:
+        return self.ADSB_BASE_DIR / "data"
 
-# Log files
-NETDOG_LOG_FILE = ADSB_LOGS_DIR / "netdog.log"
+    @property
+    def ADSB_SCRIPTS_DIR(self) -> Path:
+        return self.ADSB_BASE_DIR / "scripts"
 
-# Template files
-DOZZLE_TEMPLATE_FILE = ADSB_CONFIG_DIR / "dozzle_template.yml"
-DOZZLE_CONFIG_FILE = ADSB_CONFIG_DIR / "dozzle.yml"
+    @property
+    def ADSB_LOGS_DIR(self) -> Path:
+        return self.ADSB_BASE_DIR / "logs"
 
-# HFDL Observer paths
-HFDLOBSERVER_COMPOSE_DIR = ADSB_BASE_DIR / "hfdlobserver" / "compose"
-HFDLOBSERVER_SETTINGS_TEMPLATE = HFDLOBSERVER_COMPOSE_DIR / "settings.yaml.sample"
-HFDLOBSERVER_SETTINGS_FILE = HFDLOBSERVER_COMPOSE_DIR / "settings.yaml"
-HFDLOBSERVER_SETTINGS_BACKUP = HFDLOBSERVER_COMPOSE_DIR / "settings.yaml.bak"
+    @property
+    def ADSB_EXTRAS_DIR(self) -> Path:
+        return self.ADSB_BASE_DIR / "extras"
 
-# Radiosonde paths
-RADIOSONDE_STATION_TEMPLATE = ADSB_BASE_DIR / "radiosonde" / "station.cfg.template"
-RADIOSONDE_STATION_CONFIG = ADSB_BASE_DIR / "radiosonde" / "station.cfg"
-RADIOSONDE_STATION_BACKUP = ADSB_BASE_DIR / "radiosonde" / "station.cfg.bak"
+    @property
+    def ADSB_RB_DIR(self) -> Path:
+        return self.ADSB_BASE_DIR / "rb"
 
-# Temperature monitoring
-ADSB_TEMPERATURE_DEFAULT = ADSB_EXTRAS_DIR / "adsb-temperature.default"
+    # Configuration files
+    @property
+    def VERBOSE_FILE(self) -> Path:
+        return self.ADSB_CONFIG_DIR / "verbose"
 
-# State files
-COMPOSE_UP_FAILED_STATE = ADSB_BASE_DIR / "state" / "compose_up_failed"
+    @property
+    def ENV_FILE(self) -> Path:
+        return self.ADSB_CONFIG_DIR / ".env"
 
-# Data files
-PLANES_SEEN_PER_DAY_FILE = ADSB_BASE_DIR / "adsb_planes_seen_per_day.json.gz"
+    @property
+    def USER_ENV_FILE(self) -> Path:
+        return self.ADSB_CONFIG_DIR / ".env.user"
 
-# Fake files for testing/simulation
-FAKE_CPUINFO_DIR = ADSB_RB_DIR
-FAKE_THERMAL_ZONE_DIR = ADSB_RB_DIR / "thermal_zone0"
-FAKE_THERMAL_TEMP_FILE = FAKE_THERMAL_ZONE_DIR / "temp"
+    @property
+    def CONFIG_JSON_FILE(self) -> Path:
+        return self.ADSB_CONFIG_DIR / "config.json"
 
-# Skystats
-SKYSTATS_DB_DATA_PATH = Path(os.environ.get("SKYSTATS_DB_DATA_PATH", str(ADSB_BASE_DIR / "skystats-db")))
+    # System files
+    @property
+    def MACHINE_ID_FILE(self) -> Path:
+        """System file, not configurable."""
+        return Path("/etc/machine-id")
+
+    @property
+    def SECURE_IMAGE_FILE(self) -> Path:
+        return self.ADSB_BASE_DIR / "adsb.im.secure_image"
+
+    @property
+    def FEEDER_IMAGE_NAME_FILE(self) -> Path:
+        return self.ADSB_BASE_DIR / "feeder-image.name"
+
+    @property
+    def PREVIOUS_VERSION_FILE(self) -> Path:
+        return self.ADSB_BASE_DIR / "adsb.im.previous-version"
+
+    @property
+    def HOTSPOT_DISABLED_FILE(self) -> Path:
+        return self.ADSB_BASE_DIR / "adsb.im.hotspot_disabled"
+
+    @property
+    def PASSWD_AND_KEYS_FILE(self) -> Path:
+        return self.ADSB_BASE_DIR / "adsb.im.passwd.and.keys"
+
+    # Version files
+    @property
+    def VERSION_FILE(self) -> Path:
+        return self.ADSB_BASE_DIR / "adsb.im.version"
+
+    @property
+    def OS_FEEDER_IMAGE_FILE(self) -> Path:
+        return self.ADSB_BASE_DIR / "os.adsb.feeder.image"
+
+    @property
+    def DOCKER_IMAGE_VERSIONS_FILE(self) -> Path:
+        return self.ADSB_BASE_DIR / "docker.image.versions"
+
+    # Application-specific paths
+    @property
+    def ULTRAFEEDER_CONFIG_DIR(self) -> Path:
+        return self.ADSB_CONFIG_DIR / "ultrafeeder"
+
+    @property
+    def NANOFEEDER_CONFIG_DIR(self) -> Path:
+        return self.ADSB_CONFIG_DIR / "nanofeeder"
+
+    @property
+    def RESTORE_DIR(self) -> Path:
+        return self.ADSB_CONFIG_DIR / "restore"
+
+    @property
+    def ACARSHUB_DATA_DIR(self) -> Path:
+        return self.ADSB_CONFIG_DIR / "acarshub_data"
+
+    # Script files
+    @property
+    def MDNS_ALIAS_SETUP_SCRIPT(self) -> Path:
+        return self.ADSB_SCRIPTS_DIR / "mdns-alias-setup.sh"
+
+    @property
+    def PUSH_MULTIOUTLINE_SCRIPT(self) -> Path:
+        return self.ADSB_BASE_DIR / "push_multioutline.sh"
+
+    @property
+    def JOURNAL_SET_VOLATILE_SCRIPT(self) -> Path:
+        return self.ADSB_SCRIPTS_DIR / "journal-set-volatile.sh"
+
+    @property
+    def JOURNAL_SET_PERSIST_SCRIPT(self) -> Path:
+        return self.ADSB_SCRIPTS_DIR / "journal-set-persist.sh"
+
+    @property
+    def LOG_SANITIZER_SCRIPT(self) -> Path:
+        return self.ADSB_BASE_DIR / "log-sanitizer.sh"
+
+    # Docker compose files
+    @property
+    def DOCKER_COMPOSE_ADSB_SCRIPT(self) -> Path:
+        return self.ADSB_BASE_DIR / "docker-compose-adsb"
+
+    @property
+    def DOCKER_COMPOSE_START_SCRIPT(self) -> Path:
+        return self.ADSB_BASE_DIR / "docker-compose-start"
+
+    # Log files
+    @property
+    def NETDOG_LOG_FILE(self) -> Path:
+        return self.ADSB_LOGS_DIR / "netdog.log"
+
+    # Template files
+    @property
+    def DOZZLE_TEMPLATE_FILE(self) -> Path:
+        return self.ADSB_CONFIG_DIR / "dozzle_template.yml"
+
+    @property
+    def DOZZLE_CONFIG_FILE(self) -> Path:
+        return self.ADSB_CONFIG_DIR / "dozzle.yml"
+
+    # HFDL Observer paths
+    @property
+    def HFDLOBSERVER_COMPOSE_DIR(self) -> Path:
+        return self.ADSB_BASE_DIR / "hfdlobserver" / "compose"
+
+    @property
+    def HFDLOBSERVER_SETTINGS_TEMPLATE(self) -> Path:
+        return self.HFDLOBSERVER_COMPOSE_DIR / "settings.yaml.sample"
+
+    @property
+    def HFDLOBSERVER_SETTINGS_FILE(self) -> Path:
+        return self.HFDLOBSERVER_COMPOSE_DIR / "settings.yaml"
+
+    @property
+    def HFDLOBSERVER_SETTINGS_BACKUP(self) -> Path:
+        return self.HFDLOBSERVER_COMPOSE_DIR / "settings.yaml.bak"
+
+    # Radiosonde paths
+    @property
+    def RADIOSONDE_STATION_TEMPLATE(self) -> Path:
+        return self.ADSB_BASE_DIR / "radiosonde" / "station.cfg.template"
+
+    @property
+    def RADIOSONDE_STATION_CONFIG(self) -> Path:
+        return self.ADSB_BASE_DIR / "radiosonde" / "station.cfg"
+
+    @property
+    def RADIOSONDE_STATION_BACKUP(self) -> Path:
+        return self.ADSB_BASE_DIR / "radiosonde" / "station.cfg.bak"
+
+    # Temperature monitoring
+    @property
+    def ADSB_TEMPERATURE_DEFAULT(self) -> Path:
+        return self.ADSB_EXTRAS_DIR / "adsb-temperature.default"
+
+    # State files
+    @property
+    def COMPOSE_UP_FAILED_STATE(self) -> Path:
+        return self.ADSB_BASE_DIR / "state" / "compose_up_failed"
+
+    # Data files
+    @property
+    def PLANES_SEEN_PER_DAY_FILE(self) -> Path:
+        return self.ADSB_BASE_DIR / "adsb_planes_seen_per_day.json.gz"
+
+    # Fake files for testing/simulation
+    @property
+    def FAKE_CPUINFO_DIR(self) -> Path:
+        return self.ADSB_RB_DIR
+
+    @property
+    def FAKE_THERMAL_ZONE_DIR(self) -> Path:
+        return self.ADSB_RB_DIR / "thermal_zone0"
+
+    @property
+    def FAKE_THERMAL_TEMP_FILE(self) -> Path:
+        return self.FAKE_THERMAL_ZONE_DIR / "temp"
+
+    # Skystats
+    @property
+    def SKYSTATS_DB_DATA_PATH(self) -> Path:
+        """Skystats DB path - configurable via SKYSTATS_DB_DATA_PATH environment variable."""
+        if self._skystats_db_data_path is None:
+            self._skystats_db_data_path = Path(
+                os.environ.get("SKYSTATS_DB_DATA_PATH", str(self.ADSB_BASE_DIR / "skystats-db"))
+            )
+        return self._skystats_db_data_path
 
 
+# Singleton instance
+_config = PathConfig()
+
+
+# Public API functions
 def get_adsb_base_dir() -> Path:
     """Get the current ADS-B base directory."""
-    return ADSB_BASE_DIR
+    return _config.ADSB_BASE_DIR
 
 
 def get_config_dir() -> Path:
     """Get the current configuration directory."""
-    return ADSB_CONFIG_DIR
+    return _config.ADSB_CONFIG_DIR
 
 
 def set_adsb_base_dir(base_dir: str) -> None:
     """
     Set the ADS-B base directory.
 
-    Note: This should be called at application startup before any other modules
-    import the path constants.
+    All derived paths are automatically recalculated due to lazy evaluation.
+    No manual reinitialization needed.
     """
-    global ADSB_BASE_DIR
-    ADSB_BASE_DIR = Path(base_dir)
-    # Re-initialize all derived paths
-    _reinitialize_paths()
+    _config.ADSB_BASE_DIR = Path(base_dir)
 
 
-def _reinitialize_paths():
-    """Re-initialize all path constants after base directory change."""
-    global ADSB_CONFIG_DIR, ADSB_DATA_DIR, ADSB_SCRIPTS_DIR, ADSB_LOGS_DIR
-    global ADSB_EXTRAS_DIR, ADSB_RB_DIR, VERBOSE_FILE, ENV_FILE, USER_ENV_FILE
-    global CONFIG_JSON_FILE, SECURE_IMAGE_FILE, FEEDER_IMAGE_NAME_FILE
-    global PREVIOUS_VERSION_FILE, HOTSPOT_DISABLED_FILE, PASSWD_AND_KEYS_FILE
-    global VERSION_FILE, OS_FEEDER_IMAGE_FILE, DOCKER_IMAGE_VERSIONS_FILE, ULTRAFEEDER_CONFIG_DIR
-    global NANOFEEDER_CONFIG_DIR, RESTORE_DIR, ACARSHUB_DATA_DIR
-    global MDNS_ALIAS_SETUP_SCRIPT, PUSH_MULTIOUTLINE_SCRIPT
-    global JOURNAL_SET_VOLATILE_SCRIPT, JOURNAL_SET_PERSIST_SCRIPT
-    global LOG_SANITIZER_SCRIPT, DOCKER_COMPOSE_ADSB_SCRIPT
-    global DOCKER_COMPOSE_START_SCRIPT, NETDOG_LOG_FILE
-    global DOZZLE_TEMPLATE_FILE, DOZZLE_CONFIG_FILE
-    global HFDLOBSERVER_COMPOSE_DIR, HFDLOBSERVER_SETTINGS_TEMPLATE
-    global HFDLOBSERVER_SETTINGS_FILE, HFDLOBSERVER_SETTINGS_BACKUP
-    global RADIOSONDE_STATION_TEMPLATE, RADIOSONDE_STATION_CONFIG
-    global RADIOSONDE_STATION_BACKUP, ADSB_TEMPERATURE_DEFAULT
-    global COMPOSE_UP_FAILED_STATE, PLANES_SEEN_PER_DAY_FILE
-    global FAKE_CPUINFO_DIR, FAKE_THERMAL_ZONE_DIR, FAKE_THERMAL_TEMP_FILE
-
-    ADSB_CONFIG_DIR = ADSB_BASE_DIR / "config"
-    ADSB_DATA_DIR = ADSB_BASE_DIR / "data"
-    ADSB_SCRIPTS_DIR = ADSB_BASE_DIR / "scripts"
-    ADSB_LOGS_DIR = ADSB_BASE_DIR / "logs"
-    ADSB_EXTRAS_DIR = ADSB_BASE_DIR / "extras"
-    ADSB_RB_DIR = ADSB_BASE_DIR / "rb"
-
-    VERBOSE_FILE = ADSB_CONFIG_DIR / "verbose"
-    ENV_FILE = ADSB_CONFIG_DIR / ".env"
-    USER_ENV_FILE = ADSB_CONFIG_DIR / ".env.user"
-    CONFIG_JSON_FILE = ADSB_CONFIG_DIR / "config.json"
-
-    SECURE_IMAGE_FILE = ADSB_BASE_DIR / "adsb.im.secure_image"
-    FEEDER_IMAGE_NAME_FILE = ADSB_BASE_DIR / "feeder-image.name"
-    PREVIOUS_VERSION_FILE = ADSB_BASE_DIR / "adsb.im.previous-version"
-    HOTSPOT_DISABLED_FILE = ADSB_BASE_DIR / "adsb.im.hotspot_disabled"
-    PASSWD_AND_KEYS_FILE = ADSB_BASE_DIR / "adsb.im.passwd.and.keys"
-
-    VERSION_FILE = ADSB_BASE_DIR / "adsb.im.version"
-    OS_FEEDER_IMAGE_FILE = ADSB_BASE_DIR / "os.adsb.feeder.image"
-    DOCKER_IMAGE_VERSIONS_FILE = ADSB_BASE_DIR / "docker.image.versions"
-
-    ULTRAFEEDER_CONFIG_DIR = ADSB_CONFIG_DIR / "ultrafeeder"
-    NANOFEEDER_CONFIG_DIR = ADSB_CONFIG_DIR / "nanofeeder"
-    RESTORE_DIR = ADSB_CONFIG_DIR / "restore"
-    ACARSHUB_DATA_DIR = ADSB_CONFIG_DIR / "acarshub_data"
-
-    MDNS_ALIAS_SETUP_SCRIPT = ADSB_SCRIPTS_DIR / "mdns-alias-setup.sh"
-    PUSH_MULTIOUTLINE_SCRIPT = ADSB_BASE_DIR / "push_multioutline.sh"
-    JOURNAL_SET_VOLATILE_SCRIPT = ADSB_SCRIPTS_DIR / "journal-set-volatile.sh"
-    JOURNAL_SET_PERSIST_SCRIPT = ADSB_SCRIPTS_DIR / "journal-set-persist.sh"
-    LOG_SANITIZER_SCRIPT = ADSB_BASE_DIR / "log-sanitizer.sh"
-
-    DOCKER_COMPOSE_ADSB_SCRIPT = ADSB_BASE_DIR / "docker-compose-adsb"
-    DOCKER_COMPOSE_START_SCRIPT = ADSB_BASE_DIR / "docker-compose-start"
-
-    NETDOG_LOG_FILE = ADSB_LOGS_DIR / "netdog.log"
-
-    DOZZLE_TEMPLATE_FILE = ADSB_CONFIG_DIR / "dozzle_template.yml"
-    DOZZLE_CONFIG_FILE = ADSB_CONFIG_DIR / "dozzle.yml"
-
-    HFDLOBSERVER_COMPOSE_DIR = ADSB_BASE_DIR / "hfdlobserver" / "compose"
-    HFDLOBSERVER_SETTINGS_TEMPLATE = HFDLOBSERVER_COMPOSE_DIR / "settings.yaml.sample"
-    HFDLOBSERVER_SETTINGS_FILE = HFDLOBSERVER_COMPOSE_DIR / "settings.yaml"
-    HFDLOBSERVER_SETTINGS_BACKUP = HFDLOBSERVER_COMPOSE_DIR / "settings.yaml.bak"
-
-    RADIOSONDE_STATION_TEMPLATE = ADSB_BASE_DIR / "radiosonde" / "station.cfg.template"
-    RADIOSONDE_STATION_CONFIG = ADSB_BASE_DIR / "radiosonde" / "station.cfg"
-    RADIOSONDE_STATION_BACKUP = ADSB_BASE_DIR / "radiosonde" / "station.cfg.bak"
-
-    ADSB_TEMPERATURE_DEFAULT = ADSB_EXTRAS_DIR / "adsb-temperature.default"
-
-    COMPOSE_UP_FAILED_STATE = ADSB_BASE_DIR / "state" / "compose_up_failed"
-
-    PLANES_SEEN_PER_DAY_FILE = ADSB_BASE_DIR / "adsb_planes_seen_per_day.json.gz"
-
-    FAKE_CPUINFO_DIR = ADSB_RB_DIR
-    FAKE_THERMAL_ZONE_DIR = ADSB_RB_DIR / "thermal_zone0"
-    FAKE_THERMAL_TEMP_FILE = FAKE_THERMAL_ZONE_DIR / "temp"
+# Backward compatibility: expose paths as module-level attributes
+# This allows existing code to continue using: from .paths import VERBOSE_FILE
+def __getattr__(name):
+    """Delegate attribute access to the singleton PathConfig instance."""
+    if hasattr(_config, name):
+        return getattr(_config, name)
+    raise AttributeError(f"module 'paths' has no attribute '{name}'")
