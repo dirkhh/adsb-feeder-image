@@ -29,10 +29,33 @@ except ImportError:
     FAKE_THERMAL_ZONE_DIR = FAKE_CPUINFO_DIR / "thermal_zone0"
     FAKE_THERMAL_TEMP_FILE = FAKE_THERMAL_ZONE_DIR / "temp"
 
-verbose = 0 if not VERBOSE_FILE.exists() else int(VERBOSE_FILE.read_text().strip())
+# Lazy-loaded globals to avoid circular imports
+# Instead of initializing at module level, these are initialized on first access
+_verbose = None
+_idhash = None
 
-# create a board unique but otherwise random / anonymous ID
-idhash = hashlib.md5(MACHINE_ID_FILE.read_text().encode()).hexdigest()
+
+def get_verbose():
+    """Get verbose level (lazy initialization to avoid circular imports)."""
+    global _verbose
+    if _verbose is None:
+        try:
+            _verbose = int(VERBOSE_FILE.read_text().strip()) if VERBOSE_FILE.exists() else 0
+        except (ValueError, OSError):
+            _verbose = 0
+    return _verbose
+
+
+def get_idhash():
+    """Get board unique ID hash (lazy initialization to avoid circular imports)."""
+    global _idhash
+    if _idhash is None:
+        try:
+            _idhash = hashlib.md5(MACHINE_ID_FILE.read_text().encode()).hexdigest()
+        except (OSError, UnicodeDecodeError):
+            # Fallback to a default hash if machine-id is not available
+            _idhash = "00000000000000000000000000000000"
+    return _idhash
 
 
 def stack_info(msg=""):
@@ -63,7 +86,7 @@ def cleanup_str(s):
 
 def print_err(*args, **kwargs):
     level = int(kwargs.pop("level", 0))
-    if level > 0 and int(verbose) & int(level) == 0:
+    if level > 0 and get_verbose() & int(level) == 0:
         return
     timestamp = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()) + ".{0:03.0f}Z".format(math.modf(time.time())[0] * 1000)
     print(*((timestamp,) + args), file=sys.stderr, **kwargs)
@@ -103,7 +126,7 @@ def generic_get_json(url: str, data=None, timeout=5.0):
         url = url.replace("host.docker.internal", "localhost")
     # use image specific but random value for user agent to distinguish
     # between requests from the same IP but different feeders
-    agent = f"ADS-B Image-{idhash[:8]}"
+    agent = f"ADS-B Image-{get_idhash()[:8]}"
     status = -1
     try:
         response = requests.request(
