@@ -319,3 +319,17 @@ def is_uuid(uuid):
         print_err(traceback.format_exception_only(exc))
         print_err(f"not a valid UUID: {uuid}")
         return False
+
+
+def __getattr__(name):
+    """
+    Provide backward compatibility for lazy-loaded module-level variables.
+
+    This allows existing code to import 'verbose' and 'idhash' as module attributes
+    even though they're now lazy-loaded via getter functions.
+    """
+    if name == 'verbose':
+        return get_verbose()
+    if name == 'idhash':
+        return get_idhash()
+    raise AttributeError(f"module 'util' has no attribute '{name}'")
