@@ -11,6 +11,7 @@ import sys
 import tempfile
 import time
 import traceback
+from typing import Any, Optional, Union
 from uuid import UUID
 
 import requests
@@ -36,7 +37,7 @@ _verbose = None
 _idhash = None
 
 
-def get_verbose():
+def get_verbose() -> int:
     """Get verbose level (lazy initialization to avoid circular imports)."""
     global _verbose
     if _verbose is None:
@@ -47,7 +48,7 @@ def get_verbose():
     return _verbose
 
 
-def get_idhash():
+def get_idhash() -> str:
     """Get board unique ID hash (lazy initialization to avoid circular imports)."""
     global _idhash
     if _idhash is None:
@@ -59,7 +60,8 @@ def get_idhash():
     return _idhash
 
 
-def stack_info(msg=""):
+def stack_info(msg: str = "") -> None:
+    """Print stack trace information for debugging."""
     framenr = 0
     fname = ""
     for frame, filename, line_num, func, source_code, source_index in inspect.stack():
@@ -81,11 +83,19 @@ _clean_control_chars = "".join(map(chr, itertools.chain(range(0x00, 0x20), range
 _clean_control_char_re = re.compile("[%s]" % re.escape(_clean_control_chars))
 
 
-def cleanup_str(s):
+def cleanup_str(s: str) -> str:
+    """Remove control characters from string."""
     return _clean_control_char_re.sub("", s)
 
 
-def print_err(*args, **kwargs):
+def print_err(*args: Any, **kwargs: Any) -> None:
+    """
+    Print timestamped message to stderr with optional verbosity filtering.
+
+    Args:
+        *args: Arguments to print
+        **kwargs: Keyword arguments including 'level' for verbosity filtering
+    """
     level = int(kwargs.pop("level", 0))
     if level > 0 and get_verbose() & int(level) == 0:
         return
@@ -93,7 +103,8 @@ def print_err(*args, **kwargs):
     print(*((timestamp,) + args), file=sys.stderr, **kwargs)
 
 
-def report_issue(msg):
+def report_issue(msg: str) -> None:
+    """Report issue by logging and flashing message to user."""
     print_err(msg, level=1)
     try:
         flash(msg)
@@ -102,18 +113,26 @@ def report_issue(msg):
 
 
 # this is based on https://www.regular-expressions.info/email.html
-def is_email(text: str):
+def is_email(text: str) -> Optional[re.Match]:
+    """Validate email address format."""
     return re.match(r"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}", text, flags=re.IGNORECASE)
 
 
 # extend the truthy concept to exclude all non-empty string except a few specific ones ([Tt]rue, [Oo]n, 1)
-def is_true(value):
+def is_true(value: Any) -> bool:
+    """
+    Check if value is truthy using strict rules.
+
+    For strings, only 'true', 'on', '1' (case-insensitive) are considered true.
+    For other types, uses standard bool() conversion.
+    """
     if type(value) == str:
         return value.lower() in ["true", "on", "1"]
     return bool(value)
 
 
-def make_int(value):
+def make_int(value: Any) -> int:
+    """Convert value to int, returning 0 on failure."""
     try:
         return int(value)
     except Exception:
@@ -121,7 +140,18 @@ def make_int(value):
         return 0
 
 
-def generic_get_json(url: str, data=None, timeout=5.0):
+def generic_get_json(url: str, data: Optional[Any] = None, timeout: float = 5.0) -> tuple[Optional[Any], int]:
+    """
+    Make JSON GET/POST request with custom user agent.
+
+    Args:
+        url: URL to fetch
+        data: Optional data for POST request (None = GET request)
+        timeout: Request timeout in seconds
+
+    Returns:
+        Tuple of (json_response or None, status_code or error_number)
+    """
     requests.packages.urllib3.util.connection.HAS_IPV6 = False  # type: ignore[attr-defined]
     if "host.docker.internal" in url:
         url = url.replace("host.docker.internal", "localhost")
@@ -157,7 +187,7 @@ def generic_get_json(url: str, data=None, timeout=5.0):
     return None, status
 
 
-def create_fake_info(indices):
+def create_fake_info(indices: list[Optional[int]]) -> bool:
     # instead of trying to figure out if we need this and creating it only in that case,
     # let's just make sure the fake files are there and move on
     os.makedirs(FAKE_THERMAL_ZONE_DIR, exist_ok=True)
@@ -207,7 +237,16 @@ def create_fake_info(indices):
     return not pathlib.Path("/sys/class/thermal/thermal_zone0/temp").exists()
 
 
-def mf_get_ip_and_triplet(ip):
+def mf_get_ip_and_triplet(ip: str) -> tuple[str, str]:
+    """
+    Parse microproxy IP specification into (ip, triplet) format.
+
+    Args:
+        ip: Either IP address or "ip,port,protocol" triplet, or special "local"/"local2"
+
+    Returns:
+        Tuple of (ip_address, triplet_string)
+    """
     # mf_ip for microproxies can either be an IP or a triplet of ip,port,protocol
     split = ip.split(",")
     if len(split) != 1:
@@ -233,7 +272,17 @@ def mf_get_ip_and_triplet(ip):
     return (ip, triplet)
 
 
-def run_shell_captured(command="", timeout=1800):
+def run_shell_captured(command: str = "", timeout: int = 1800) -> tuple[bool, str]:
+    """
+    Run shell command and capture output.
+
+    Args:
+        command: Shell command to execute
+        timeout: Timeout in seconds
+
+    Returns:
+        Tuple of (success: bool, output: str)
+    """
     try:
         result = subprocess.run(
             command,
@@ -259,7 +308,15 @@ def run_shell_captured(command="", timeout=1800):
     return (True, output)
 
 
-def string2file(path: str = "", string: str = "", verbose: bool = False):
+def string2file(path: str = "", string: str = "", verbose: bool = False) -> None:
+    """
+    Atomically write string to file using temporary file and rename.
+
+    Args:
+        path: Target file path
+        string: String content to write
+        verbose: If True, log successful writes
+    """
     try:
         fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path))
         with os.fdopen(fd, "w") as file:
@@ -273,7 +330,18 @@ def string2file(path: str = "", string: str = "", verbose: bool = False):
             print_err(f'wrote "{string}" to {path}')
 
 
-def get_plain_url(plain_url, method="GET", data=None):
+def get_plain_url(plain_url: str, method: str = "GET", data: Optional[str] = None) -> tuple[Optional[str], int]:
+    """
+    Fetch URL with browser-like headers.
+
+    Args:
+        plain_url: URL to fetch
+        method: HTTP method (GET or POST)
+        data: Optional request body
+
+    Returns:
+        Tuple of (response_text or None, status_code or error_number)
+    """
     requests.packages.urllib3.util.connection.HAS_IPV6 = False  # type: ignore[attr-defined]
     status = -1
     headers = {
