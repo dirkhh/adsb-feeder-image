@@ -1,6 +1,7 @@
 import copy
 import filecmp
 import gzip
+import io
 import json
 import math
 import os
@@ -297,6 +298,7 @@ class AdsbIm:
         self.app.add_url_rule("/backupexecutefull", "backupexecutefull", self.backup_execute_full)
         self.app.add_url_rule("/backupexecutegraphs", "backupexecutegraphs", self.backup_execute_graphs)
         self.app.add_url_rule("/backupexecuteconfig", "backupexecuteconfig", self.backup_execute_config)
+        self.app.add_url_rule("/backupexecuteskystatsdb", "backupexecuteskystatsdb", self.backup_execute_skystats_db)
         self.app.add_url_rule("/restore", "restore", self.restore, methods=["GET", "POST"])
         self.app.add_url_rule("/executerestore", "executerestore", self.executerestore, methods=["GET", "POST"])
         self.app.add_url_rule("/sdr_setup", "sdr_setup", self.sdr_setup, methods=["GET", "POST"])
@@ -824,6 +826,50 @@ class AdsbIm:
 
     def backup_execute_full(self):
         return self.create_backup_zip(include_graphs=True, include_heatmap=True)
+
+    def backup_execute_skystats_db(self):
+        db_user = self._d.env_by_tags("skystats_db_user").value
+        db_password = self._d.env_by_tags("skystats_db_password").value
+        db_name = self._d.env_by_tags("skystats_db_name").value
+
+        site_name = self._d.env_by_tags("site_name_sanitized").list_get(0)
+        if self._d.is_enabled("stage2"):
+            site_name = f"stage2-{site_name}"
+        now = datetime.now().replace(microsecond=0).isoformat().replace(":", "-")
+        dump_filename = f"skystats-db-{site_name}-{now}.sql"
+
+        dump_cmd = [
+            "docker",
+            "exec",
+            "-e",
+            f"PGPASSWORD={db_password}",
+            "skystats-db",
+            "pg_dump",
+            "-h",
+            "localhost",
+            "-U",
+            db_user,
+            "-d",
+            db_name,
+            "--no-owner",
+            "--no-privileges",
+        ]
+
+        result = subprocess.run(dump_cmd, capture_output=True, text=True, check=False)
+
+        if result.returncode != 0:
+            flash(f"Failed to create database backup: {result.stderr}")
+            return redirect(url_for("backup"))
+
+        dump_data = result.stdout.encode("utf-8")
+        dump_file = io.BytesIO(dump_data)
+
+        return send_file(
+            dump_file,
+            mimetype="application/sql",
+            as_attachment=True,
+            download_name=dump_filename,
+        )
 
     def create_backup_zip(self, include_graphs=False, include_heatmap=False):
         adsb_path = self._d.config_path
