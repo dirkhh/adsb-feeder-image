@@ -3,6 +3,7 @@ import subprocess
 import threading
 import time
 from time import sleep
+from typing import Callable, Optional
 
 import requests
 
@@ -12,36 +13,51 @@ from .util import print_err, run_shell_captured
 
 
 class Lock:
-    # This class is used to lock the system from being modified while
-    # pending changes are being made.
-    def __init__(self):
+    """Lock wrapper to prevent system modifications while pending changes are being made."""
+
+    def __init__(self) -> None:
         self.lock = threading.Lock()
 
-    def acquire(self, blocking=True, timeout=-1.0):
+    def acquire(self, blocking: bool = True, timeout: float = -1.0) -> bool:
+        """Acquire the lock."""
         return self.lock.acquire(blocking=blocking, timeout=timeout)
 
-    def release(self):
+    def release(self) -> None:
+        """Release the lock."""
         return self.lock.release()
 
-    def locked(self):
+    def locked(self) -> bool:
+        """Check if the lock is currently held."""
         return self.lock.locked()
 
     # make sure we can use "with Lock() as lock:"
 
-    def __enter__(self):
+    def __enter__(self) -> "Lock":
         self.acquire()
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
         self.release()
 
 
 class Restart:
-    def __init__(self, lock: Lock):
+    """Manage system restart operations with locking."""
+
+    def __init__(self, lock: Lock) -> None:
         self.lock = lock
 
-    def bg_run(self, cmdline=None, func=None, silent=False):
+    def bg_run(self, cmdline: Optional[str] = None, func: Optional[Callable] = None, silent: bool = False) -> bool:
+        """
+        Run a command or function in background with lock protection.
 
+        Args:
+            cmdline: Shell command to execute
+            func: Python function to call
+            silent: If True, capture command output
+
+        Returns:
+            True if started successfully, False if lock couldn't be acquired
+        """
         if not cmdline and not func:
             print_err(f"WARNING: bg_run called without something to do")
             return False
@@ -55,7 +71,7 @@ class Restart:
 
         # we have acquired the lock
 
-        def do_restart():
+        def do_restart() -> None:
             try:
                 if cmdline:
                     print_err(f"Calling {cmdline}")
@@ -73,24 +89,29 @@ class Restart:
 
         return True
 
-    def wait_restart_done(self, timeout=-1.0):
+    def wait_restart_done(self, timeout: float = -1.0) -> None:
+        """Wait for restart operation to complete."""
         # acquire and release the lock immediately
         if self.lock.acquire(blocking=True, timeout=timeout):
             self.lock.release()
 
     @property
-    def state(self):
+    def state(self) -> str:
+        """Get current restart state ('busy' or 'done')."""
         if self.lock.locked():
             return "busy"
         return "done"
 
     @property
-    def is_restarting(self):
+    def is_restarting(self) -> bool:
+        """Check if a restart operation is in progress."""
         return self.lock.locked()
 
 
 class System:
-    def __init__(self, data: Data):
+    """System operations for managing containers, network, and OS updates."""
+
+    def __init__(self, data: Data) -> None:
         self._restart_lock = Lock()
         self._restart = Restart(self._restart_lock)
         self._d = data
@@ -102,10 +123,11 @@ class System:
         self.dockerPsCache: dict[str, str] = dict()
 
     @property
-    def restart(self):
+    def restart(self) -> Restart:
+        """Get the restart manager instance."""
         return self._restart
 
-    def shutdown_action(self, action: str = "", delay: float = 0.0):
+    def shutdown_action(self, action: str = "", delay: float = 0.0) -> None:
         if action == "shutdown":
             cmd = "shutdown now"
         elif action == "reboot":
@@ -139,7 +161,8 @@ class System:
     def os_update(self) -> None:
         subprocess.call(f"systemd-run --wait -u adsb-feeder-update-os /bin/bash {ADSB_SCRIPTS_DIR}/update-os", shell=True)
 
-    def check_dns(self):
+    def check_dns(self) -> bool:
+        """Check if DNS resolution is working."""
         try:
             responses = list(
                 i[4][0]  # raw socket structure/internet protocol info/address
@@ -151,7 +174,8 @@ class System:
             return False
         return responses != list()
 
-    def is_ipv6_broken(self):
+    def is_ipv6_broken(self) -> bool:
+        """Check if IPv6 connectivity is broken despite having an IPv6 address."""
         success, output = run_shell_captured(
             "ip -6 addr show scope global $(ip -j route get 1.2.3.4 | jq '.[0].dev' -r) | grep inet6 | grep -v 'inet6 f'",
             timeout=2,
@@ -169,7 +193,13 @@ class System:
         # we have an ipv6 address but curl -6 isn't working
         return True
 
-    def check_ip(self):
+    def check_ip(self) -> tuple[Optional[str], int]:
+        """
+        Check external IP address.
+
+        Returns:
+            Tuple of (IP address or None, HTTP status code or error number)
+        """
         requests.packages.urllib3.util.connection.HAS_IPV6 = False  # type: ignore[attr-defined]
         status = -1
         try:
@@ -193,7 +223,7 @@ class System:
             return response.text, response.status_code
         return None, status
 
-    def check_gpsd(self):
+    def check_gpsd(self) -> bool:
         # gateway IP shouldn't change on a system, buffer it for the duration the program runs
         if self.gateway_ips:
             gateway_ips = self.gateway_ips
@@ -227,7 +257,13 @@ class System:
                 s.close()
         return False
 
-    def list_containers(self):
+    def list_containers(self) -> list[str]:
+        """
+        List all running Docker containers.
+
+        Returns:
+            List of container names
+        """
         containers = []
         try:
             result = subprocess.run(
@@ -244,14 +280,16 @@ class System:
             print_err(f"docker ps failed {e}")
         return containers
 
-    def restart_containers(self, containers):
+    def restart_containers(self, containers: list[str]) -> None:
+        """Restart specified Docker containers."""
         print_err(f"restarting {containers}")
         try:
             subprocess.run([str(DOCKER_COMPOSE_ADSB_SCRIPT), "restart"] + containers)
         except Exception:
             print_err("docker compose restart failed")
 
-    def recreate_containers(self, containers):
+    def recreate_containers(self, containers: list[str]) -> None:
+        """Recreate specified Docker containers (down + up --force-recreate)."""
         print_err(f"recreating {containers}")
         try:
             subprocess.run([str(DOCKER_COMPOSE_ADSB_SCRIPT), "down", "--remove-orphans", "-t", "30"] + containers)
@@ -259,21 +297,24 @@ class System:
         except Exception:
             print_err("docker compose recreate failed")
 
-    def stop_containers(self, containers: list[str]):
+    def stop_containers(self, containers: list[str]) -> None:
+        """Stop specified Docker containers."""
         print_err(f"stopping {containers}")
         try:
             subprocess.run([str(DOCKER_COMPOSE_ADSB_SCRIPT), "down", "-t", "30"] + containers)
         except Exception:
             print_err(f"docker compose down {containers} failed")
 
-    def start_containers(self):
+    def start_containers(self) -> None:
+        """Start all Docker containers."""
         print_err("starting all containers")
         try:
             subprocess.run([str(DOCKER_COMPOSE_START_SCRIPT)])
         except Exception:
             print_err("docker compose start failed")
 
-    def refreshDockerPs(self):
+    def refreshDockerPs(self) -> None:
+        """Refresh the Docker container status cache."""
         with self.containerCheckLock:
             now = time.time()
             if now - self.lastContainerCheck < 10:
@@ -293,7 +334,16 @@ class System:
                     name, status = line.split(";")
                     self.dockerPsCache[name] = status
 
-    def getContainerStatus(self, name):
+    def getContainerStatus(self, name: str) -> str:
+        """
+        Get the status of a Docker container.
+
+        Args:
+            name: Container name
+
+        Returns:
+            Status string: 'down', 'up', or 'up for N' (seconds)
+        """
         with self.containerCheckLock:
 
             self.refreshDockerPs()
