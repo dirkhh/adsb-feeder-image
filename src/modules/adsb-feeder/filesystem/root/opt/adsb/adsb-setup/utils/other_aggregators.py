@@ -1,4 +1,5 @@
 import re
+import shlex
 import subprocess
 from typing import Optional
 
@@ -145,6 +146,13 @@ class Flightradar24(Aggregator):
         )
 
     def _request_fr24_sharing_key(self, email: str):
+        """Request FR24 sharing key with input validation to prevent command injection."""
+        # Validate email format before using in command
+        if not is_email(email):
+            print_err(f"Invalid email format: {email}")
+            flash("Invalid email format for FR24 signup")
+            return None
+
         if not self._download_docker_container(self.container):
             report_issue("failed to download the FR24 docker image")
             return None
@@ -164,19 +172,25 @@ class Flightradar24(Aggregator):
         if abs(lon) < 0.11:
             lon = 0.11
 
+        # Sanitize all inputs to prevent command injection
+        safe_email = shlex.quote(email.lower())
+        safe_lat = shlex.quote(str(lat))
+        safe_lon = shlex.quote(str(lon))
+        safe_alt = shlex.quote(str(self.alt_ft))
+        safe_container = shlex.quote(self.container)
+
         adsb_signup_command = (
             f"docker run --entrypoint /bin/bash --rm "
-            f'-e FEEDER_LAT="{lat}" -e FEEDER_LONG="{lon}" -e FEEDER_ALT_FT="{self.alt_ft}" '
-            f'-e FR24_EMAIL="{email.lower()}" {self.container} '
+            f"-e FEEDER_LAT={safe_lat} -e FEEDER_LONG={safe_lon} -e FEEDER_ALT_FT={safe_alt} "
+            f"-e FR24_EMAIL={safe_email} {safe_container} "
             f'-c "apt update && apt install -y expect && $(cat handsoff_signup_expect.sh)"'
         )
         open(ADSB_BASE_DIR / "handsoff_signup.sh", "w").write(f"#!/bin/bash\n{adsb_signup_command}")
         try:
             output = subprocess.run(
-                f"bash {ADSB_BASE_DIR}/handsoff_signup.sh",
+                ["bash", str(ADSB_BASE_DIR / "handsoff_signup.sh")],
                 cwd=str(ADSB_BASE_DIR),
                 timeout=180.0,
-                shell=True,
                 text=True,
                 capture_output=True,
             ).stdout
@@ -200,23 +214,36 @@ class Flightradar24(Aggregator):
         return adsb_key
 
     def _request_fr24_uat_sharing_key(self, email: str):
+        """Request FR24 UAT sharing key with input validation to prevent command injection."""
+        # Validate email format before using in command
+        if not is_email(email):
+            print_err(f"Invalid email format: {email}")
+            flash("Invalid email format for FR24 UAT signup")
+            return None
+
         if not self._download_docker_container(self.container):
             report_issue("failed to download the FR24 docker image")
             return None
 
+        # Sanitize all inputs to prevent command injection
+        safe_email = shlex.quote(email)
+        safe_lat = shlex.quote(str(self.lat))
+        safe_lon = shlex.quote(str(self.lon))
+        safe_alt = shlex.quote(str(self.alt_ft))
+        safe_container = shlex.quote(self.container)
+
         uat_signup_command = (
             f"docker run --entrypoint /bin/bash --rm "
-            f'-e FEEDER_LAT="{self.lat}" -e FEEDER_LONG="{self.lon}" -e FEEDER_ALT_FT="{self.alt_ft}" '
-            f'-e FR24_EMAIL="{email}" {self.container} '
+            f"-e FEEDER_LAT={safe_lat} -e FEEDER_LONG={safe_lon} -e FEEDER_ALT_FT={safe_alt} "
+            f"-e FR24_EMAIL={safe_email} {safe_container} "
             f'-c "apt update && apt install -y expect && $(cat handsoff_signup_expect_uat.sh)"'
         )
         open(ADSB_BASE_DIR / "handsoff_signup_uat.sh", "w").write(f"#!/bin/bash\n{uat_signup_command}")
         try:
             output = subprocess.run(
-                f"bash {ADSB_BASE_DIR}/handsoff_signup_uat.sh",
+                ["bash", str(ADSB_BASE_DIR / "handsoff_signup_uat.sh")],
                 cwd=str(ADSB_BASE_DIR),
                 timeout=180.0,
-                shell=True,
                 text=True,
                 capture_output=True,
             ).stdout
