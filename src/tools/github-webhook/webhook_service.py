@@ -19,16 +19,26 @@ from urllib.parse import urlparse
 import aiohttp
 from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.responses import JSONResponse
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+
+# Configure rate limiting
+limiter = Limiter(key_func=get_remote_address)
 
 app = FastAPI(
     title="GitHub Webhook Service",
     description="Service for processing GitHub release webhooks and filtering binaries",
     version="1.0.0",
 )
+
+# Add rate limiting to FastAPI
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Configuration
 WEBHOOK_SECRET = os.getenv("GITHUB_WEBHOOK_SECRET")
@@ -207,6 +217,7 @@ async def trigger_boot_test(binary_url: str) -> bool:
 
 
 @app.post("/cicd-webhook/binary-test")
+@limiter.limit("10/minute")
 async def handle_webhook(
     request: Request,
     x_github_event: str = Header(..., alias="X-GitHub-Event"),
@@ -214,8 +225,17 @@ async def handle_webhook(
 ):
     """
     Handle GitHub webhook POST requests for release binary processing.
+
+    Rate limit: 10 requests per minute per IP address.
+    Max payload size: 1 MB.
     """
     try:
+        # Check request size (1 MB limit)
+        content_length = request.headers.get("content-length")
+        if content_length and int(content_length) > 1_000_000:
+            logger.warning(f"Request payload too large: {content_length} bytes")
+            raise HTTPException(status_code=413, detail="Payload too large (max 1 MB)")
+
         # Get raw payload for signature verification
         payload_body = await request.body()
 
