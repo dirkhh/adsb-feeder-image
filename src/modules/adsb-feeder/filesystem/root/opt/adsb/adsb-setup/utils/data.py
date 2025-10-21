@@ -1,4 +1,5 @@
 # dataclass
+import os
 from dataclasses import dataclass, field
 
 from utils.config import read_values_from_env_file
@@ -834,8 +835,19 @@ class Data:
                 entry.value = value  # always use value from docker.image.versions as definitive source
                 _env.add(entry)  # add to _env set
     except FileNotFoundError:
-        # File doesn't exist (e.g., in test environment) - skip loading container versions
-        pass
+        # Distinguish between test environment (expected) and production (critical error)
+        if os.environ.get("ADSB_TEST_ENV"):
+            # Expected in test environment - no action needed
+            pass
+        else:
+            # CRITICAL in production - log error for monitoring/debugging
+            print_err(f"CRITICAL: Missing {DOCKER_IMAGE_VERSIONS_FILE}")
+            print_err("Container versions not loaded - system may be unstable")
+            print_err("This file should exist in production deployments")
+    except Exception as e:
+        # Unexpected errors should always be logged
+        print_err(f"Error loading container versions from {DOCKER_IMAGE_VERSIONS_FILE}: {e}")
+        # Don't raise - allow system to continue with degraded functionality
 
     @property
     def envs_for_envfile(self):
