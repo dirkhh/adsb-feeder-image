@@ -7,12 +7,6 @@ import threading
 from .paths import ADSB_CONFIG_DIR, CONFIG_JSON_FILE, ENV_FILE, USER_ENV_FILE
 from .util import print_err
 
-# Backward compatibility - use new path system
-CONF_DIR = str(ADSB_CONFIG_DIR)
-ENV_FILE_PATH = str(ENV_FILE)
-USER_ENV_FILE_PATH = str(USER_ENV_FILE)
-JSON_FILE_PATH = str(CONFIG_JSON_FILE)
-
 config_lock = threading.Lock()
 
 log_consistency_warnings = True
@@ -25,7 +19,7 @@ def log_consistency_warning(value: bool):
 
 def read_values_from_config_json(check_integrity=False):
     # print_err("reading .json file")
-    if not os.path.exists(JSON_FILE_PATH):
+    if not os.path.exists(CONFIG_JSON_FILE):
         # this must be either a first run after an install,
         # or the first run after an upgrade from a version that didn't use the config.json
         print_err("WARNING: config.json doesn't exist, populating from .env")
@@ -34,7 +28,7 @@ def read_values_from_config_json(check_integrity=False):
 
     ret = {}
     try:
-        ret = json.load(open(JSON_FILE_PATH, "r"))
+        ret = json.load(open(CONFIG_JSON_FILE, "r"))
     except Exception:
         print_err("Failed to read .json file")
     return ret
@@ -43,19 +37,19 @@ def read_values_from_config_json(check_integrity=False):
 def write_values_to_config_json(data: dict, reason="no reason provided"):
     try:
         print_err(f"config.json write: {reason}")
-        fd, tmp = tempfile.mkstemp(dir=CONF_DIR)
+        fd, tmp = tempfile.mkstemp(dir=str(ADSB_CONFIG_DIR))
         with os.fdopen(fd, "w") as f:
             json.dump(data, f, indent=2)
-        os.rename(tmp, JSON_FILE_PATH)
+        os.rename(tmp, CONFIG_JSON_FILE)
     except Exception:
-        print_err(f"Error writing config.json to {JSON_FILE_PATH}")
+        print_err(f"Error writing config.json to {CONFIG_JSON_FILE}")
 
 
 def read_values_from_env_file():
     # print_err("reading .env file")
     ret = {}
     try:
-        with open(ENV_FILE_PATH, "r") as f:
+        with open(ENV_FILE, "r") as f:
             for line in f.readlines():
                 if line.strip().startswith("#"):
                     continue
@@ -71,7 +65,7 @@ def read_values_from_env_file():
 def write_values_to_env_file(values):
     # print_err("writing .env file")
 
-    fd, tmp = tempfile.mkstemp(dir=CONF_DIR)
+    fd, tmp = tempfile.mkstemp(dir=str(ADSB_CONFIG_DIR))
     with os.fdopen(fd, "w") as f:
         for key, value in sorted(values.items()):
             key = key.strip()
@@ -90,17 +84,17 @@ def write_values_to_env_file(values):
                 f.write(env_line)
                 print_err(f"wrote {env_line} to .env", level=8)
 
-    os.rename(tmp, ENV_FILE_PATH)
+    os.rename(tmp, ENV_FILE)
 
     # write the user env in the form that can be easily inserted into the yml file
     # using the name here so it comes from the values passed in
     val = values.get("_ADSBIM_STATE_EXTRA_ENV", None)
-    if not val and os.path.isfile(USER_ENV_FILE_PATH):
+    if not val and os.path.isfile(USER_ENV_FILE):
         # truncate the file if it exists and no value is set
-        with open(USER_ENV_FILE_PATH, "w") as f:
+        with open(USER_ENV_FILE, "w") as f:
             pass
     if val:
-        with open(USER_ENV_FILE_PATH, "w") as f:
+        with open(USER_ENV_FILE, "w") as f:
             lines = val.split("\r\n")
             for line in lines:
                 if line.strip():
