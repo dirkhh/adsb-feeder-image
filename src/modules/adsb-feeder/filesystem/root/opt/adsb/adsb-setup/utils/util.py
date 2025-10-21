@@ -139,8 +139,29 @@ def create_fake_info(indices):
     os.makedirs(FAKE_THERMAL_ZONE_DIR, exist_ok=True)
 
     for idx in indices:
+        # Validate idx to prevent path traversal attacks
+        if idx is not None:
+            # idx must be an integer
+            if not isinstance(idx, int):
+                raise ValueError(f"Index must be an integer or None, got {type(idx).__name__}: {idx}")
+            # idx must be in safe range (0-99)
+            if idx < 0 or idx > 99:
+                raise ValueError(f"Index must be in range 0-99, got {idx}")
+
         suffix = f"_{idx}" if idx else ""
         cpuinfo = FAKE_CPUINFO_DIR / f"cpuinfo{suffix}"
+
+        # Verify path stays within FAKE_CPUINFO_DIR to prevent path traversal
+        # resolve() makes the path absolute and resolves any '..' components
+        resolved_cpuinfo = cpuinfo.resolve()
+        resolved_base = FAKE_CPUINFO_DIR.resolve()
+
+        # Check if the resolved path is within the base directory
+        try:
+            resolved_cpuinfo.relative_to(resolved_base)
+        except ValueError:
+            raise ValueError(f"Path traversal detected: {cpuinfo} resolves to {resolved_cpuinfo}, outside {resolved_base}")
+
         # when docker tries to mount this file without it existing, it creates a directory
         # in case that has happened, remove it
         if cpuinfo.is_dir():
