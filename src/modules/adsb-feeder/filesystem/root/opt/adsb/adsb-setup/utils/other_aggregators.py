@@ -1,7 +1,7 @@
 import re
 import shlex
 import subprocess
-from typing import Optional
+from typing import Any, Optional
 
 from flask import flash
 
@@ -11,12 +11,14 @@ from .util import is_email, make_int, print_err, report_issue
 
 
 class Aggregator:
+    """Base class for ADS-B aggregator integrations."""
+
     def __init__(
         self,
         name: str,
         system: System,
-        tags: list = [],
-    ):
+        tags: list[str] = [],
+    ) -> None:
         self._name = name
         self._tags = tags
         self._system = system
@@ -24,50 +26,62 @@ class Aggregator:
         self._idx = 0
 
     @property
-    def name(self):
+    def name(self) -> str:
+        """Get aggregator name."""
         return self._name
 
     @property
-    def tags(self):
+    def tags(self) -> list[str]:
+        """Get aggregator tags."""
         return self._tags
 
     @property
-    def _key_tags(self):
+    def _key_tags(self) -> list[str]:
+        """Get tags for API key lookup."""
         return ["key"] + self.tags
 
     @property
-    def _enabled_tags(self):
+    def _enabled_tags(self) -> list[str]:
+        """Get tags for enabled status lookup."""
         return ["is_enabled", "other_aggregator"] + self.tags
 
     @property
-    def lat(self):
+    def lat(self) -> Any:
+        """Get latitude from configuration."""
         return self._d.env_by_tags("lat").list_get(self._idx)
 
     @property
-    def lon(self):
+    def lon(self) -> Any:
+        """Get longitude from configuration."""
         return self._d.env_by_tags("lon").list_get(self._idx)
 
     @property
-    def alt(self):
+    def alt(self) -> Any:
+        """Get altitude from configuration."""
         return self._d.env_by_tags("alt").list_get(self._idx)
 
     @property
-    def alt_ft(self):
+    def alt_ft(self) -> int:
+        """Get altitude in feet."""
         return int(int(self.alt) / 0.308)
 
     @property
-    def container(self):
+    def container(self) -> str:
+        """Get Docker container name."""
         # we know that the container Env is always a string
         return self._d.env_by_tags(self.tags + ["container"]).valuestr
 
     @property
-    def is_enabled(self, idx=0):
+    def is_enabled(self, idx: int = 0) -> Any:
+        """Check if aggregator is enabled."""
         return self._d.env_by_tags(self._enabled_tags).list_get(self._idx)
 
-    def _activate(self, user_input: str, idx: int):
+    def _activate(self, user_input: str, idx: int) -> bool:
+        """Activate aggregator with user credentials (to be implemented by subclasses)."""
         raise NotImplementedError
 
-    def _deactivate(self):
+    def _deactivate(self) -> bool:
+        """Deactivate aggregator (to be implemented by subclasses)."""
         raise NotImplementedError
 
     def _download_docker_container(self, container: str) -> bool:
@@ -80,7 +94,8 @@ class Aggregator:
         return True
 
     def _docker_run_with_timeout(self, cmdline: str, timeout: float) -> str:
-        def force_remove_container(name):
+        """Run Docker container with timeout and return output."""
+        def force_remove_container(name: str) -> None:
             try:
                 subprocess.run(
                     f"docker rm -f {name}",
@@ -117,7 +132,17 @@ class Aggregator:
         return output
 
     # the default case is straight forward. Remember the key and enable the aggregator
-    def _simple_activate(self, user_input: str, idx=0):
+    def _simple_activate(self, user_input: str, idx: int = 0) -> bool:
+        """
+        Simple activation: store user key and enable aggregator.
+
+        Args:
+            user_input: API key or user credential
+            idx: Index for multi-instance configurations
+
+        Returns:
+            True if activation successful, False otherwise
+        """
         if not user_input:
             return False
         self._d.env_by_tags(self._key_tags).list_set(idx, user_input)
@@ -126,26 +151,30 @@ class Aggregator:
 
 
 class ADSBHub(Aggregator):
-    def __init__(self, system: System):
+    """ADSBHub aggregator integration."""
+
+    def __init__(self, system: System) -> None:
         super().__init__(
             name="ADSBHub",
             tags=["adsb_hub"],
             system=system,
         )
 
-    def _activate(self, user_input: str, idx=0):
+    def _activate(self, user_input: str, idx: int = 0) -> bool:
         return self._simple_activate(user_input, idx)
 
 
 class FlightRadar24(Aggregator):
-    def __init__(self, system: System):
+    """FlightRadar24 aggregator integration."""
+
+    def __init__(self, system: System) -> None:
         super().__init__(
             name="FlightRadar24",
             tags=["flightradar"],
             system=system,
         )
 
-    def _request_fr24_sharing_key(self, email: str):
+    def _request_fr24_sharing_key(self, email: str) -> Optional[str]:
         """Request FR24 sharing key with input validation to prevent command injection."""
         # Validate email format before using in command
         if not is_email(email):
@@ -213,7 +242,7 @@ class FlightRadar24(Aggregator):
         print_err(f"found adsb sharing key {adsb_key} in the container output")
         return adsb_key
 
-    def _request_fr24_uat_sharing_key(self, email: str):
+    def _request_fr24_uat_sharing_key(self, email: str) -> Optional[str]:
         """Request FR24 UAT sharing key with input validation to prevent command injection."""
         # Validate email format before using in command
         if not is_email(email):
@@ -265,7 +294,7 @@ class FlightRadar24(Aggregator):
         print_err(f"found uat sharing key {uat_key} in the container output")
         return uat_key
 
-    def _activate(self, user_input: str, idx=0):
+    def _activate(self, user_input: str, idx: int = 0) -> bool:
         if not user_input:
             return False
         input_values = user_input.count("::")
@@ -314,26 +343,30 @@ class FlightRadar24(Aggregator):
 
 
 class PlaneWatch(Aggregator):
-    def __init__(self, system: System):
+    """PlaneWatch aggregator integration."""
+
+    def __init__(self, system: System) -> None:
         super().__init__(
             name="PlaneWatch",
             tags=["planewatch"],
             system=system,
         )
 
-    def _activate(self, user_input: str, idx=0):
+    def _activate(self, user_input: str, idx: int = 0) -> bool:
         return self._simple_activate(user_input, idx)
 
 
 class FlightAware(Aggregator):
-    def __init__(self, system: System):
+    """FlightAware aggregator integration."""
+
+    def __init__(self, system: System) -> None:
         super().__init__(
             name="FlightAware",
             tags=["flightaware"],
             system=system,
         )
 
-    def _request_fa_feeder_id(self):
+    def _request_fa_feeder_id(self) -> Optional[str]:
         if not self._download_docker_container(self.container):
             report_issue("failed to download the piaware docker image")
             return None
@@ -347,7 +380,7 @@ class FlightAware(Aggregator):
         flash("FlightAware: couldn't find a feeder ID in server response")
         return None
 
-    def _activate(self, user_input: str, idx=0):
+    def _activate(self, user_input: str, idx: int = 0) -> bool:
         self._idx = make_int(idx)
         if re.match("[0-9a-zA-Z]+", user_input):
             # that might be a valid key
@@ -364,14 +397,16 @@ class FlightAware(Aggregator):
 
 
 class RadarBox(Aggregator):
-    def __init__(self, system: System):
+    """AirNav RadarBox aggregator integration."""
+
+    def __init__(self, system: System) -> None:
         super().__init__(
             name="AirNav Radar",
             tags=["radarbox"],
             system=system,
         )
 
-    def _request_rb_sharing_key(self, idx):
+    def _request_rb_sharing_key(self, idx: int) -> Optional[str]:
         # we know that the container Env is always a string
         docker_image = self._d.env_by_tags(["radarbox", "container"]).valuestr
 
@@ -398,7 +433,7 @@ class RadarBox(Aggregator):
 
         return sharing_key_match.group(1)
 
-    def _activate(self, user_input: str, idx=0):
+    def _activate(self, user_input: str, idx: int = 0) -> bool:
         self._idx = make_int(idx)
         if re.match("[0-9a-zA-Z]+", user_input):
             # that might be a valid key
@@ -415,14 +450,16 @@ class RadarBox(Aggregator):
 
 
 class OpenSky(Aggregator):
-    def __init__(self, system: System):
+    """OpenSky Network aggregator integration."""
+
+    def __init__(self, system: System) -> None:
         super().__init__(
             name="OpenSky Network",
             tags=["opensky"],
             system=system,
         )
 
-    def _request_fr_serial(self, user):
+    def _request_fr_serial(self, user: str) -> Optional[str]:
         # we know that the container Env is always a string
         docker_image = self._d.env_by_tags(["opensky", "container"]).valuestr
 
@@ -443,7 +480,7 @@ class OpenSky(Aggregator):
 
         return serial_match.group(1)
 
-    def _activate(self, user_input: str, idx=0):
+    def _activate(self, user_input: str, idx: int = 0) -> bool:
         self._idx = make_int(idx)
         serial, user = user_input.split("::")
         print_err(f"passed in {user_input} seeing user |{user}| and serial |{serial}|")
@@ -463,50 +500,58 @@ class OpenSky(Aggregator):
 
 
 class RadarVirtuel(Aggregator):
-    def __init__(self, system: System):
+    """RadarVirtuel aggregator integration."""
+
+    def __init__(self, system: System) -> None:
         super().__init__(
             name="RadarVirtuel",
             tags=["radarvirtuel"],
             system=system,
         )
 
-    def _activate(self, user_input: str, idx=0):
+    def _activate(self, user_input: str, idx: int = 0) -> bool:
         return self._simple_activate(user_input, idx)
 
 
 class PlaneFinder(Aggregator):
-    def __init__(self, system: System):
+    """PlaneFinder aggregator integration."""
+
+    def __init__(self, system: System) -> None:
         super().__init__(
             name="PlaneFinder",
             tags=["planefinder"],
             system=system,
         )
 
-    def _activate(self, user_input: str, idx=0):
+    def _activate(self, user_input: str, idx: int = 0) -> bool:
         return self._simple_activate(user_input, idx)
 
 
 class Uk1090(Aggregator):
-    def __init__(self, system: System):
+    """1090Mhz UK aggregator integration."""
+
+    def __init__(self, system: System) -> None:
         super().__init__(
             name="1090Mhz UK",
             tags=["1090uk"],
             system=system,
         )
 
-    def _activate(self, user_input: str, idx=0):
+    def _activate(self, user_input: str, idx: int = 0) -> bool:
         return self._simple_activate(user_input, idx)
 
 
 class Sdrmap(Aggregator):
-    def __init__(self, system: System):
+    """Sdrmap aggregator integration."""
+
+    def __init__(self, system: System) -> None:
         super().__init__(
             name="sdrmap",
             tags=["sdrmap"],
             system=system,
         )
 
-    def _activate(self, user_input: str, idx=0):
+    def _activate(self, user_input: str, idx: int = 0) -> bool:
         self._idx = make_int(idx)
         password, user = user_input.split("::")
         print_err(f"passed in {user_input} seeing user |{user}| and password |{password}|")
