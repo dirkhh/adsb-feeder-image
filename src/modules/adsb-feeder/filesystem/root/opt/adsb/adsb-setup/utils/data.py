@@ -1,6 +1,7 @@
 # dataclass
 import os
 from dataclasses import dataclass, field
+from typing import Any, Optional, Union
 
 from utils.config import read_values_from_env_file
 
@@ -21,7 +22,9 @@ from .util import is_true, print_err
 
 @dataclass
 class Data:
-    def __new__(cls):
+    """Singleton dataclass for application configuration and state."""
+
+    def __new__(cls) -> "Data":
         if not hasattr(cls, "instance"):
             cls.instance = super(Data, cls).__new__(cls)
         return cls.instance
@@ -63,7 +66,7 @@ class Data:
     ]
 
     @property
-    def proxy_routes(self):
+    def proxy_routes(self) -> list[list[Union[str, int]]]:
         ret = []
         for [endpoint, _env, path] in self._proxy_routes:
             env_name = "AF_" + _env.upper() + "_PORT"
@@ -854,24 +857,24 @@ class Data:
         # Don't raise - allow system to continue with degraded functionality
 
     @property
-    def envs_for_envfile(self):
-
+    def envs_for_envfile(self) -> dict[str, Any]:
+        """Generate environment variables dictionary for .env file."""
         # read old values from env file so we can debug print only those that have changed
         old_values = read_values_from_env_file()
 
-        def adjust_bool_impl(e, value):
+        def adjust_bool_impl(e: Env, value: Any) -> Union[str, bool]:
             if "false_is_zero" in e.tags:
                 return "1" if is_true(value) else "0"
             if "false_is_empty" in e.tags:
                 return "1" if is_true(value) else ""
             return is_true(value)
 
-        def adjust_bool(e, value):
+        def adjust_bool(e: Env, value: Any) -> Union[str, bool]:
             v = adjust_bool_impl(e, value)
             print_err(f"adjust_bool({e}, {e.tags}) = {v}", level=8)
             return v
 
-        def adjust_heywhatsthat(value):
+        def adjust_heywhatsthat(value: list[Any]) -> list[str]:
             enabled = self.env_by_tags(["heywhatsthat", "is_enabled"])._value
             if type(enabled) != list:
                 enabled = [enabled]
@@ -880,7 +883,7 @@ class Data:
                 new_value.append(value[i] if enabled[i] else "")
             return new_value
 
-        def value_for_env(e, value):
+        def value_for_env(e: Env, value: Any) -> Union[str, bool]:
             if type(value) == bool or "is_enabled" in e.tags:
                 value = adjust_bool(e, value)
 
@@ -901,7 +904,7 @@ class Data:
         ret = {}
         for e in self._env:
 
-            def printChanged(descriptor, envKey, newValue, oldValue):
+            def printChanged(descriptor: str, envKey: str, newValue: Any, oldValue: Any) -> None:
                 # omit state vars as they are never in the env file so we don't know if they changed
                 oldValue = str(oldValue)
                 newValue = str(newValue)
@@ -951,15 +954,17 @@ class Data:
         # fmt: on
 
     @property
-    def env_values(self):
+    def env_values(self) -> dict[str, Any]:
+        """Get dictionary of environment variable names to values."""
         return {e.name: e._value for e in self._env}
 
     @property
-    def stage2_envs(self):
+    def stage2_envs(self) -> list[Env]:
+        """Get list of environment variables that are lists (for stage2)."""
         return [e for e in self._env if e.is_list]
 
     # helper function to find env by name
-    def env(self, name: str):
+    def env(self, name: str) -> Optional[Env]:
         for e in self._env:
             if e.name == name:
                 return e
@@ -968,7 +973,7 @@ class Data:
     # helper function to find env by tags
     # Return only if there is one env with all the tags,
     # Raise error if there are more than one match
-    def env_by_tags(self, _tags):
+    def env_by_tags(self, _tags: Union[str, list[str]]) -> Env:
         if type(_tags) == str:
             tags = [_tags]
         elif type(_tags) == list:
@@ -1000,14 +1005,16 @@ class Data:
         self._env_by_tags_dict[tags_tuple] = matches[0]
         return matches[0]
 
-    def _get_enabled_env_by_tags(self, tags):
+    def _get_enabled_env_by_tags(self, tags: list[str]) -> Env:
+        """Get environment variable with is_enabled tag appended."""
         # we append is_enabled to tags
         tags.append("is_enabled")
         # stack_info(f"taglist {tags} gets us env {self.env_by_tags(tags)}")
         return self.env_by_tags(tags)
 
     # helper function to see if something is enabled
-    def is_enabled(self, tags):
+    def is_enabled(self, tags: Union[str, list[str]]) -> bool:
+        """Check if feature/aggregator is enabled by tags."""
         if type(tags) != list:
             tags = [tags]
         e = self._get_enabled_env_by_tags(tags)
@@ -1018,7 +1025,8 @@ class Data:
         return e and is_true(e._value)
 
     # helper function to see if list element is enabled
-    def list_is_enabled(self, tags, idx):
+    def list_is_enabled(self, tags: Union[str, list[str]], idx: int) -> bool:
+        """Check if list element at index is enabled by tags."""
         if type(tags) != list:
             tags = [tags]
         e = self._get_enabled_env_by_tags(tags)
