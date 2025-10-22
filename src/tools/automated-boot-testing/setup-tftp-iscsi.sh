@@ -40,7 +40,8 @@ if [ ! -f "$IMAGE_FILE" ]; then
     exit 1
 fi
 
-# make sure the image has an extended root partition
+# Check and expand root partition if needed
+echo -e "${YELLOW}Checking root partition size...${NC}"
 MIN_SIZE_MB=8200
 
 # Get current size of partition 2 in MB
@@ -48,6 +49,8 @@ CURRENT_SIZE_MB=$(sfdisk --json $IMAGE_FILE | jq -r '.partitiontable.partitions[
 
 echo "Current partition 2 size: ${CURRENT_SIZE_MB} MB"
 echo "Minimum required size: ${MIN_SIZE_MB} MB"
+
+PARTITION_EXPANDED=false
 
 if [ "$CURRENT_SIZE_MB" -lt "$MIN_SIZE_MB" ]; then
     echo "Partition too small, expanding..."
@@ -83,8 +86,40 @@ if [ "$CURRENT_SIZE_MB" -lt "$MIN_SIZE_MB" ]; then
     NEW_SIZE_MB=$(sudo sfdisk --json $IMAGE_FILE | jq -r '.partitiontable.partitions[1].size / 2048 | floor')
     echo "New partition 2 size: ${NEW_SIZE_MB} MB"
     echo "Partition expanded successfully!"
+    PARTITION_EXPANDED=true
 else
-    echo "Partition size is sufficient, no expansion needed."
+    echo "Partition size is sufficient."
+
+    # Still need to check if filesystem matches partition size
+    LOOP_DEV=$(sudo losetup -fP --show $IMAGE_FILE)
+    echo "Loop device: $LOOP_DEV (checking filesystem)"
+
+    # Get filesystem size
+    FS_SIZE_BLOCKS=$(sudo tune2fs -l ${LOOP_DEV}p2 | grep "Block count:" | awk '{print $3}')
+    FS_BLOCK_SIZE=$(sudo tune2fs -l ${LOOP_DEV}p2 | grep "Block size:" | awk '{print $3}')
+    FS_SIZE_MB=$((FS_SIZE_BLOCKS * FS_BLOCK_SIZE / 1024 / 1024))
+
+    # Get partition size in MB
+    PART_SIZE_MB=$(sfdisk --json $IMAGE_FILE | jq -r '.partitiontable.partitions[1].size / 2048 | floor')
+
+    echo "Filesystem size: ${FS_SIZE_MB} MB"
+    echo "Partition size: ${PART_SIZE_MB} MB"
+
+    # Allow 1% difference for block alignment
+    SIZE_DIFF=$((PART_SIZE_MB - FS_SIZE_MB))
+    SIZE_DIFF_PCT=$((SIZE_DIFF * 100 / PART_SIZE_MB))
+
+    if [ $SIZE_DIFF_PCT -gt 1 ]; then
+        echo "Filesystem size doesn't match partition size, resizing filesystem..."
+        sudo e2fsck -y -f ${LOOP_DEV}p2
+        sudo resize2fs ${LOOP_DEV}p2
+        echo "Filesystem resized to match partition"
+        PARTITION_EXPANDED=true
+    else
+        echo "Filesystem size matches partition size"
+    fi
+
+    sudo losetup -d $LOOP_DEV
 fi
 
 # Cleanup function
@@ -154,8 +189,43 @@ mount -o bind /dev/pts "$MOUNT_ROOT/dev/pts"
 # Copy DNS resolution
 cp /etc/resolv.conf "$MOUNT_ROOT/etc/resolv.conf"
 
-# Create initramfs configuration files
-echo -e "${YELLOW}Creating initramfs configuration files...${NC}"
+# Check if image has already been configured for iSCSI boot
+NEEDS_ISCSI_SETUP=true
+NEEDS_INITRAMFS_REBUILD=false
+
+if [ -f "$MOUNT_ROOT/etc/initramfs-tools/scripts/local-top/iscsi" ]; then
+    echo -e "${YELLOW}Checking if iSCSI boot is already configured...${NC}"
+
+    # Check if the iSCSI script exists and looks correct
+    if grep -q "iscsistart" "$MOUNT_ROOT/etc/initramfs-tools/scripts/local-top/iscsi" 2>/dev/null; then
+        echo -e "${GREEN}iSCSI boot script already exists${NC}"
+
+        # Check if initramfs exists
+        if [ -f "$MOUNT_BOOT/initramfs.img" ]; then
+            echo -e "${GREEN}Initramfs already exists - skipping iSCSI setup${NC}"
+            NEEDS_ISCSI_SETUP=false
+        else
+            echo -e "${YELLOW}Initramfs missing - will rebuild${NC}"
+            NEEDS_INITRAMFS_REBUILD=true
+        fi
+    else
+        echo -e "${YELLOW}iSCSI script exists but looks incomplete - will reconfigure${NC}"
+    fi
+else
+    echo -e "${YELLOW}iSCSI boot not configured - will set up${NC}"
+fi
+
+if [ "$NEEDS_ISCSI_SETUP" = "true" ]; then
+    # Create initramfs configuration files
+    echo -e "${YELLOW}Creating initramfs configuration files...${NC}"
+elif [ "$NEEDS_INITRAMFS_REBUILD" = "true" ]; then
+    echo -e "${YELLOW}Will rebuild initramfs only...${NC}"
+else
+    echo -e "${GREEN}Skipping iSCSI setup - already configured${NC}"
+fi
+
+# Only create configuration files if needed
+if [ "$NEEDS_ISCSI_SETUP" = "true" ]; then
 
 # Create modules file
 cat > "$MOUNT_ROOT/etc/initramfs-tools/modules" << 'EOF'
@@ -269,10 +339,17 @@ chmod +x "$MOUNT_ROOT/etc/initramfs-tools/scripts/local-top/iscsi"
 
 echo -e "${GREEN}Configuration files created${NC}"
 
-# Chroot and build initramfs
-echo -e "${YELLOW}Building initramfs in chroot...${NC}"
+fi  # End of NEEDS_ISCSI_SETUP
 
-# Find the kernel version
+# Install packages and build initramfs if needed
+if [ "$NEEDS_ISCSI_SETUP" = "true" ] || [ "$NEEDS_INITRAMFS_REBUILD" = "true" ]; then
+    # Chroot and build initramfs
+    echo -e "${YELLOW}Building initramfs in chroot...${NC}"
+else
+    echo -e "${GREEN}Skipping initramfs build - already configured${NC}"
+fi
+
+# Find the kernel version (needed for initramfs and summary)
 KERNEL_VERSION=$(ls "$MOUNT_ROOT/lib/modules" | grep -E '^[0-9]+\.[0-9]+' | sort -V | tail -n1)
 
 if [ -z "$KERNEL_VERSION" ]; then
@@ -281,6 +358,8 @@ if [ -z "$KERNEL_VERSION" ]; then
 fi
 
 echo -e "${GREEN}Using kernel version: $KERNEL_VERSION${NC}"
+
+if [ "$NEEDS_ISCSI_SETUP" = "true" ] || [ "$NEEDS_INITRAMFS_REBUILD" = "true" ]; then
 
 
 # Install required packages if not present
@@ -319,6 +398,8 @@ ls -lh /boot/firmware/initramfs.img
 CHROOT_EOF2
 
 echo -e "${GREEN}Initramfs built successfully${NC}"
+
+fi  # End of initramfs building
 
 # Install SSH public key if provided
 if [ -n "$SSH_PUBLIC_KEY" ]; then
@@ -383,8 +464,19 @@ enable_uart=1
 EOF
 fi
 
-# Create cmdline.txt
-echo "$CMDLINE" > "$TFTP_DEST/cmdline.txt"
+# Create or update cmdline.txt
+if [ -f "$TFTP_DEST/cmdline.txt" ]; then
+    EXISTING_CMDLINE=$(cat "$TFTP_DEST/cmdline.txt")
+    if [ "$EXISTING_CMDLINE" = "$CMDLINE" ]; then
+        echo -e "${GREEN}cmdline.txt already has correct content${NC}"
+    else
+        echo -e "${YELLOW}Updating cmdline.txt${NC}"
+        echo "$CMDLINE" > "$TFTP_DEST/cmdline.txt"
+    fi
+else
+    echo -e "${YELLOW}Creating cmdline.txt${NC}"
+    echo "$CMDLINE" > "$TFTP_DEST/cmdline.txt"
+fi
 
 # Set proper permissions
 chown -R tftp:tftp "$TFTP_DEST"
@@ -395,18 +487,71 @@ find "$TFTP_DEST" -type d -exec chmod 755 {} \;
 
 echo -e "${GREEN}Boot files copied successfully${NC}"
 
+# Configure iSCSI target (tgt)
+echo -e "${YELLOW}Configuring iSCSI target...${NC}"
+
+# Get absolute path for IMAGE_FILE
+IMAGE_FILE_ABS=$(realpath "$IMAGE_FILE")
+
+# Create tgt configuration
+TGT_CONF="/etc/tgt/conf.d/adsb.conf"
+
+# Create configuration content
+cat > "$TGT_CONF" << EOF
+# ADS-B Feeder Image iSCSI Target Configuration
+# This configuration provides the boot image via iSCSI for network boot testing
+#
+# Image: $IMAGE_FILE_ABS
+# Generated: $(date)
+
+<target iqn.2025-10.im.adsb:adsbim-test.root>
+    # Backing storage - the actual image file
+    backing-store $IMAGE_FILE_ABS
+
+    # Allow access from the test Pi
+    initiator-address 192.168.77.0/24
+
+    # Enable write-through caching for consistency
+    write-cache off
+</target>
+EOF
+
+echo -e "${GREEN}iSCSI target configuration created: $TGT_CONF${NC}"
+echo -e "Target: ${YELLOW}iqn.2025-10.im.adsb:adsbim-test.root${NC}"
+echo -e "Backing store: ${YELLOW}$IMAGE_FILE_ABS${NC}"
+
+# Restart tgt service to pick up new configuration
+echo -e "${YELLOW}Restarting tgt service...${NC}"
 systemctl restart tgt
+
+# Wait for tgt to start
+sleep 2
+
+# Verify target is active
+if tgtadm --mode target --op show 2>/dev/null | grep -q "iqn.2025-10.im.adsb:adsbim-test.root"; then
+    echo -e "${GREEN}iSCSI target is active and ready${NC}"
+else
+    echo -e "${RED}Warning: iSCSI target may not be active${NC}"
+    echo -e "${YELLOW}Check with: tgtadm --mode target --op show${NC}"
+fi
 # Summary
 echo -e "${GREEN}=== Summary ===${NC}"
-echo -e "Image: ${YELLOW}$IMAGE_FILE${NC}"
-echo -e "Kernel: ${YELLOW}$KERNEL_VERSION${NC}"
+echo -e "Image: ${YELLOW}$IMAGE_FILE_ABS${NC}"
+if [ -n "$KERNEL_VERSION" ]; then
+    echo -e "Kernel: ${YELLOW}$KERNEL_VERSION${NC}"
+fi
 echo -e "TFTP destination: ${YELLOW}$TFTP_DEST${NC}"
+echo -e "iSCSI target: ${YELLOW}iqn.2025-10.im.adsb:adsbim-test.root${NC}"
+echo -e "Partition expanded: ${YELLOW}$PARTITION_EXPANDED${NC}"
+echo -e "iSCSI setup performed: ${YELLOW}$NEEDS_ISCSI_SETUP${NC}"
 echo -e ""
 echo -e "${GREEN}Files in $TFTP_DEST:${NC}"
 ls -lh "$TFTP_DEST"
 
 echo -e ""
 echo -e "${GREEN}=== Done! ===${NC}"
-echo -e "You can now configure your TFTP server to use ${YELLOW}$TFTP_DEST${NC}"
+echo -e "Image ready for network boot testing"
+echo -e "TFTP server: ${YELLOW}$TFTP_DEST${NC}"
+echo -e "iSCSI target: ${YELLOW}iqn.2025-10.im.adsb:adsbim-test.root${NC}"
 
 # Cleanup will happen automatically via trap

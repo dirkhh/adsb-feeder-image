@@ -136,8 +136,12 @@ def setup_iscsi_image(cached_decompressed: Path, ssh_public_key: str = None) -> 
                        If provided, this key will be installed to /root/.ssh/authorized_keys
                        in the test image, allowing passwordless SSH access.
     """
-    target_path = Path("/srv/iscsi/adsbim.img")
+    # Use basename of cached image for unique target path
+    # This allows multiple different images to coexist in /srv/iscsi/
+    target_filename = cached_decompressed.name
+    target_path = Path("/srv/iscsi") / target_filename
     target_path.parent.mkdir(parents=True, exist_ok=True)
+
     print(f"Copying image to {target_path}...")
     shutil.copy(str(cached_decompressed), str(target_path))
     print(f"Image successfully copied to {target_path}")
