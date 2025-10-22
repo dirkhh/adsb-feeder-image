@@ -95,6 +95,7 @@ class Aggregator:
 
     def _docker_run_with_timeout(self, cmdline: str, timeout: float) -> str:
         """Run Docker container with timeout and return output."""
+
         def force_remove_container(name: str) -> None:
             try:
                 subprocess.run(
