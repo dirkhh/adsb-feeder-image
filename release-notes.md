@@ -1,5 +1,11 @@
 Changes since v3.0.5
 =======
+=======
+- infrastructure: add automated boot test / basic functionality test support
+- beta-notes: security: fix potential command injection vulnerability in FlightRadar24 signup
+- beta-notes: security: add input validation to prevent path traversal attacks
+- beta-notes: core: improve error logging for missing container version file
+- beta-notes: infrastructure: comprehensive code quality improvements (type hints, test coverage, modernized architecture)
 - switch to latest DietPi images and prepare for next release
 - data sharing page: add capability to change UUID for account-less aggregators
 - add ability to backup Skystats database. NOTE: no restore from the UI (yet)
