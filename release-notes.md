@@ -1,5 +1,8 @@
 Changes since v3.0.5
 =======
+- beta-notes: update Skystats to v0.1.11
+- add ability to backup Skystats database. NOTE: no restore from the UI (yet)
+- beta-notes: small updates to the README
 - beta-notes: update Skystats to v0.1.10
 - beta-notes: update ultrafeeder and telegraf containers to fix Mode-S Beast message counting issue
 - acarshub: make sure /run size is increased before restoring data from disk
