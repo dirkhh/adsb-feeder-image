@@ -1,5 +1,11 @@
 Changes since v3.0.6
 =======
+
+- infrastructure: add automated boot test / basic functionality test support
+- security: fix potential command injection vulnerability in FlightRadar24 signup
+- security: add input validation to prevent path traversal attacks
+- core: improve error logging for missing container version file
+- core: comprehensive code quality improvements (type hints, test coverage, modernized architecture)
 - systemd services: define active services in one place so this doesn't get out of sync (again)
 - initial support for planefinder radar stick, no MLAT yet, PF data sharing needs to be enabled
 - stage2: multioutline: don't launch another script instance if previous one is still running
