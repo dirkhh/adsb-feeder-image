@@ -1,5 +1,10 @@
 Changes since v3.0.5
 =======
+- infrastructure: add automated boot test / basic functionality test support
+- beta-notes: security: fix potential command injection vulnerability in FlightRadar24 signup
+- beta-notes: security: add input validation to prevent path traversal attacks
+- beta-notes: core: improve error logging for missing container version file
+- beta-notes: infrastructure: comprehensive code quality improvements (type hints, test coverage, modernized architecture)
 - beta-notes: fix compose up failure related to docker network creation
 - beta-notes: fix SDRPlay SDR Setup for 1090 bug
 - beta-notes: update Skystats to v0.1.11
