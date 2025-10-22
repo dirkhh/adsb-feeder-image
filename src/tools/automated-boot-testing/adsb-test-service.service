@@ -21,7 +21,7 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=/etc/adsb-test-service /tmp /srv/iscsi /opt/adsb-test-service/test-images
+ReadWritePaths=/etc/adsb-test-service /tmp /srv/iscsi /srv/tftp /etc/tgt /mnt /opt/adsb-test-service/test-images
 
 # Environment
 Environment=PYTHONPATH=/opt/adsb-test-service
