@@ -1,8 +1,8 @@
 name: Test Suite
 
 # This workflow runs the test suite on multiple Python versions
-# Known failing tests (13 total) are run separately with continue-on-error
-# All other tests (377 passing) must pass for CI to succeed
+# Known failing tests (11 total) are run separately with continue-on-error
+# All other tests (371 passing) must pass for CI to succeed
 # See tests/TEST_STATUS.md for details on known failures
 
 on:
@@ -44,7 +44,7 @@ jobs:
 
     - name: Run known failing tests (informational only)
       run: |
-        # These 13 tests have known failures documented in tests/TEST_STATUS.md
+        # These 11 tests have known failures documented in tests/TEST_STATUS.md
         # Run them separately to track status without blocking CI
         uv run pytest -v \
           tests/integration/test_system_integration.py::TestSystemIntegration::test_config_environment_integration \
@@ -58,14 +58,12 @@ jobs:
           tests/integration/test_system_integration.py::TestConfigurationIntegration::test_config_consistency \
           tests/integration/test_system_integration.py::TestConfigurationIntegration::test_config_type_conversion \
           tests/unit/test_config.py::TestReadValuesFromEnvFile::test_read_env_file_missing \
-          tests/unit/test_util.py::TestCreateFakeInfo::test_create_fake_info_structure \
-          tests/unit/test_util.py::TestCreateFakeInfo::test_create_fake_info_with_multiple_indices \
-          || echo "Known failures (13 tests) - see tests/TEST_STATUS.md"
+          || echo "Known failures (11 tests) - see tests/TEST_STATUS.md"
       continue-on-error: true
 
     - name: Run all passing tests with coverage (must pass)
       run: |
-        # Run all tests EXCEPT the 13 known failures
+        # Run all tests EXCEPT the 11 known failures
         # These tests MUST pass for CI to succeed
         uv run pytest tests/ -v \
           --cov=src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup \
@@ -82,9 +80,7 @@ jobs:
           --deselect=tests/integration/test_system_integration.py::TestConfigurationIntegration::test_config_file_roundtrip \
           --deselect=tests/integration/test_system_integration.py::TestConfigurationIntegration::test_config_consistency \
           --deselect=tests/integration/test_system_integration.py::TestConfigurationIntegration::test_config_type_conversion \
-          --deselect=tests/unit/test_config.py::TestReadValuesFromEnvFile::test_read_env_file_missing \
-          --deselect=tests/unit/test_util.py::TestCreateFakeInfo::test_create_fake_info_structure \
-          --deselect=tests/unit/test_util.py::TestCreateFakeInfo::test_create_fake_info_with_multiple_indices
+          --deselect=tests/unit/test_config.py::TestReadValuesFromEnvFile::test_read_env_file_missing
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
