@@ -236,11 +236,14 @@ class TestCreateFakeInfo:
         import importlib
         import utils.paths
         import utils.util
-        from utils.config import write_values_to_config_json
+        import utils.config
 
         # Reload to pick up test environment
         importlib.reload(utils.paths)
+        importlib.reload(utils.config)
         importlib.reload(utils.util)
+
+        from utils.config import write_values_to_config_json
 
         # Write minimal config
         write_values_to_config_json({}, reason="test")
@@ -264,11 +267,14 @@ class TestCreateFakeInfo:
         import importlib
         import utils.paths
         import utils.util
-        from utils.config import write_values_to_config_json
+        import utils.config
 
         # Reload to pick up test environment
         importlib.reload(utils.paths)
+        importlib.reload(utils.config)
         importlib.reload(utils.util)
+
+        from utils.config import write_values_to_config_json
 
         # Write minimal config
         write_values_to_config_json({}, reason="test")

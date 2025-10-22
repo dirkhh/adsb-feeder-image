@@ -20,23 +20,46 @@ class TestPathConfiguration:
 
     def test_default_paths(self):
         """Test that default paths use /opt/adsb"""
-        # Reset to default
-        os.environ.pop('ADSB_BASE_DIR', None)
-        
-        # Import fresh to get defaults
-        import importlib
-        import utils.paths
-        importlib.reload(utils.paths)
-        
-        assert utils.paths.ADSB_BASE_DIR == Path("/opt/adsb")
-        assert utils.paths.ADSB_CONFIG_DIR == Path("/opt/adsb/config")
-        assert utils.paths.ENV_FILE == Path("/opt/adsb/config/.env")
+        # Save original ADSB_BASE_DIR
+        original_base_dir = os.environ.get('ADSB_BASE_DIR')
+
+        try:
+            # Reset to default
+            os.environ.pop('ADSB_BASE_DIR', None)
+
+            # Import fresh to get defaults
+            import importlib
+            import utils.paths
+            importlib.reload(utils.paths)
+
+            assert utils.paths.ADSB_BASE_DIR == Path("/opt/adsb")
+            assert utils.paths.ADSB_CONFIG_DIR == Path("/opt/adsb/config")
+            assert utils.paths.ENV_FILE == Path("/opt/adsb/config/.env")
+
+        finally:
+            # Restore original ADSB_BASE_DIR
+            if original_base_dir is not None:
+                os.environ['ADSB_BASE_DIR'] = original_base_dir
+
+            # Restore modules to session fixture state
+            import importlib
+            import utils.paths
+            import utils.config
+            import utils.util
+            importlib.reload(utils.paths)
+            importlib.reload(utils.config)
+            importlib.reload(utils.util)
 
     def test_environment_variable_configuration(self):
         """Test that paths can be configured via environment variable"""
         test_dir = "/tmp/adsb-test"
 
-        with patch.dict(os.environ, {'ADSB_BASE_DIR': test_dir}):
+        # Save original ADSB_BASE_DIR
+        original_base_dir = os.environ.get('ADSB_BASE_DIR')
+
+        try:
+            os.environ['ADSB_BASE_DIR'] = test_dir
+
             # Import fresh to pick up environment variable
             import importlib
             import utils.paths
@@ -46,14 +69,21 @@ class TestPathConfiguration:
             assert utils.paths.ADSB_CONFIG_DIR == Path(f"{test_dir}/config")
             assert utils.paths.ENV_FILE == Path(f"{test_dir}/config/.env")
 
-        # Restore modules to session fixture state after test
-        import importlib
-        import utils.paths
-        import utils.config
-        import utils.util
-        importlib.reload(utils.paths)
-        importlib.reload(utils.config)
-        importlib.reload(utils.util)
+        finally:
+            # Restore original ADSB_BASE_DIR
+            if original_base_dir is not None:
+                os.environ['ADSB_BASE_DIR'] = original_base_dir
+            elif 'ADSB_BASE_DIR' in os.environ:
+                del os.environ['ADSB_BASE_DIR']
+
+            # Restore modules to session fixture state after test
+            import importlib
+            import utils.paths
+            import utils.config
+            import utils.util
+            importlib.reload(utils.paths)
+            importlib.reload(utils.config)
+            importlib.reload(utils.util)
 
     def test_set_adsb_base_dir_function(self):
         """Test the set_adsb_base_dir function"""
@@ -125,7 +155,12 @@ class TestPathIntegration:
         """Test that config module uses the new path system"""
         test_dir = "/tmp/adsb-test-config"
 
-        with patch.dict(os.environ, {'ADSB_BASE_DIR': test_dir}):
+        # Save original ADSB_BASE_DIR
+        original_base_dir = os.environ.get('ADSB_BASE_DIR')
+
+        try:
+            os.environ['ADSB_BASE_DIR'] = test_dir
+
             # Import fresh modules - reload paths first, then config
             import importlib
             import utils.paths
@@ -138,24 +173,37 @@ class TestPathIntegration:
             assert utils.paths.ADSB_CONFIG_DIR == Path(test_dir) / "config"
             assert utils.paths.ENV_FILE == Path(test_dir) / "config" / ".env"
 
-        # Restore modules to session fixture state after test
-        import importlib
-        import utils.paths
-        import utils.config
-        import utils.util
-        importlib.reload(utils.paths)
-        importlib.reload(utils.config)
-        importlib.reload(utils.util)
+        finally:
+            # Restore original ADSB_BASE_DIR
+            if original_base_dir is not None:
+                os.environ['ADSB_BASE_DIR'] = original_base_dir
+            elif 'ADSB_BASE_DIR' in os.environ:
+                del os.environ['ADSB_BASE_DIR']
+
+            # Restore modules to session fixture state after test
+            import importlib
+            import utils.paths
+            import utils.config
+            import utils.util
+            importlib.reload(utils.paths)
+            importlib.reload(utils.config)
+            importlib.reload(utils.util)
 
     def test_data_module_integration(self):
         """Test that data module uses the new path system"""
         test_dir = "/tmp/adsb-test-data"
 
-        with patch.dict(os.environ, {'ADSB_BASE_DIR': test_dir}):
+        # Save original ADSB_BASE_DIR
+        original_base_dir = os.environ.get('ADSB_BASE_DIR')
+
+        try:
+            os.environ['ADSB_BASE_DIR'] = test_dir
+
             # Import fresh modules - reload paths first, then data
             import importlib
             import utils.paths
             import utils.data
+            from pathlib import Path
             importlib.reload(utils.paths)
             importlib.reload(utils.data)
 
@@ -168,13 +216,20 @@ class TestPathIntegration:
             assert data.data_path == Path(test_dir)
             assert data.config_path == Path(f"{test_dir}/config")
 
-        # Restore modules to session fixture state after test
-        import importlib
-        import utils.paths
-        import utils.data
-        import utils.config
-        import utils.util
-        importlib.reload(utils.paths)
-        importlib.reload(utils.config)
-        importlib.reload(utils.data)
-        importlib.reload(utils.util)
+        finally:
+            # Restore original ADSB_BASE_DIR
+            if original_base_dir is not None:
+                os.environ['ADSB_BASE_DIR'] = original_base_dir
+            elif 'ADSB_BASE_DIR' in os.environ:
+                del os.environ['ADSB_BASE_DIR']
+
+            # Restore modules to session fixture state after test
+            import importlib
+            import utils.paths
+            import utils.data
+            import utils.config
+            import utils.util
+            importlib.reload(utils.paths)
+            importlib.reload(utils.config)
+            importlib.reload(utils.data)
+            importlib.reload(utils.util)
