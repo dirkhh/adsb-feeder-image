@@ -20,9 +20,8 @@ def reset_data_singleton():
     importlib.reload(utils.paths)
     importlib.reload(utils.config)
 
-    # Reset the singleton
-    if hasattr(Data, 'instance'):
-        delattr(Data, 'instance')
+    # Use the new reset_for_testing method
+    Data.reset_for_testing()
 
 
 class TestDataClass:
@@ -33,6 +32,36 @@ class TestDataClass:
         data1 = Data()
         data2 = Data()
         assert data1 is data2
+
+    def test_reset_for_testing(self, adsb_test_env):
+        """Test that reset_for_testing properly resets the singleton"""
+        # Create first instance
+        data1 = Data()
+        data1.previous_version = "1.0.0"
+        data1._env_by_tags_dict[("test",)] = "test_value"
+
+        # Verify it's a singleton
+        data2 = Data()
+        assert data1 is data2
+        assert data2.previous_version == "1.0.0"
+
+        # Reset the singleton
+        Data.reset_for_testing()
+
+        # Create new instance - should be a different object
+        data3 = Data()
+        assert data3 is not data1
+        assert data3.previous_version == ""
+        assert data3._env_by_tags_dict == {}
+
+    def test_reset_for_testing_requires_test_env(self, monkeypatch):
+        """Test that reset_for_testing raises error outside test environment"""
+        # Remove ADSB_TEST_ENV to simulate production
+        monkeypatch.delenv("ADSB_TEST_ENV", raising=False)
+
+        # Should raise RuntimeError
+        with pytest.raises(RuntimeError, match="can only be called in test environment"):
+            Data.reset_for_testing()
 
     def test_data_paths(self):
         """Test that Data has correct paths"""

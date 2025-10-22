@@ -29,6 +29,27 @@ class Data:
             cls.instance = super(Data, cls).__new__(cls)
         return cls.instance
 
+    @classmethod
+    def reset_for_testing(cls) -> None:
+        """
+        Reset singleton state for testing. DO NOT USE IN PRODUCTION.
+
+        This method clears the singleton instance and any cached state,
+        allowing tests to start with a fresh Data instance.
+
+        Raises:
+            RuntimeError: If called outside of test environment
+        """
+        if not os.environ.get("ADSB_TEST_ENV"):
+            raise RuntimeError("reset_for_testing() can only be called in test environment (ADSB_TEST_ENV must be set)")
+
+        # Delete the singleton instance if it exists
+        if hasattr(cls, "instance"):
+            # Clear the _env_by_tags_dict cache if instance exists
+            if hasattr(cls.instance, "_env_by_tags_dict"):
+                cls.instance._env_by_tags_dict.clear()
+            delattr(cls, "instance")
+
     data_path = ADSB_BASE_DIR
     config_path = ADSB_CONFIG_DIR
     env_file_path = ENV_FILE
