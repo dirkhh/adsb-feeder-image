@@ -1,8 +1,20 @@
 #!/bin/bash
+#
+# Setup TFTP/iSCSI boot for Raspberry Pi test image
+#
+# Usage: setup-tftp-iscsi.sh <image_file> [ssh_public_key]
+#
+# Arguments:
+#   image_file      - Path to the Raspberry Pi image file (.img)
+#   ssh_public_key  - Optional: Path to SSH public key to install in /root/.ssh/authorized_keys
+#                     for passwordless access. If using test-feeder-image.py with --ssh-key,
+#                     the public key is assumed to be at <private_key_path>.pub
+#
 set -e  # Exit on any error
 
 # Configuration
 IMAGE_FILE="$1"
+SSH_PUBLIC_KEY="$2"  # Optional: SSH public key to install for passwordless access
 MOUNT_BOOT="/mnt/rpi-prep-root/boot/firmware"
 MOUNT_ROOT="/mnt/rpi-prep-root"
 TFTP_DEST="/srv/tftp"
@@ -307,6 +319,29 @@ ls -lh /boot/firmware/initramfs.img
 CHROOT_EOF2
 
 echo -e "${GREEN}Initramfs built successfully${NC}"
+
+# Install SSH public key if provided
+if [ -n "$SSH_PUBLIC_KEY" ]; then
+    if [ -f "$SSH_PUBLIC_KEY" ]; then
+        echo -e "${YELLOW}Installing SSH public key for passwordless access...${NC}"
+
+        # Create .ssh directory in root's home
+        mkdir -p "$MOUNT_ROOT/root/.ssh"
+        chmod 700 "$MOUNT_ROOT/root/.ssh"
+
+        # Copy the public key to authorized_keys
+        cp "$SSH_PUBLIC_KEY" "$MOUNT_ROOT/root/.ssh/authorized_keys"
+        chmod 600 "$MOUNT_ROOT/root/.ssh/authorized_keys"
+
+        echo -e "${GREEN}SSH public key installed to /root/.ssh/authorized_keys${NC}"
+        echo -e "Key: ${YELLOW}$(head -n1 "$SSH_PUBLIC_KEY" | cut -c1-50)...${NC}"
+    else
+        echo -e "${YELLOW}Warning: SSH public key file not found at $SSH_PUBLIC_KEY${NC}"
+        echo -e "${YELLOW}Skipping SSH key installation${NC}"
+    fi
+else
+    echo -e "${YELLOW}No SSH public key provided - skipping SSH key installation${NC}"
+fi
 
 # Prepare TFTP destination
 echo -e "${YELLOW}Preparing TFTP destination...${NC}"
