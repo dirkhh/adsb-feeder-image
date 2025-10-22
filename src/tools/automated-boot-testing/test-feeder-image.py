@@ -148,9 +148,14 @@ def setup_iscsi_image(cached_decompressed: Path, ssh_public_key: str = None) -> 
     target_path = Path("/srv/iscsi") / target_filename
     target_path.parent.mkdir(parents=True, exist_ok=True)
 
-    print(f"Copying image to {target_path}...")
-    shutil.copy(str(cached_decompressed), str(target_path))
-    print(f"Image successfully copied to {target_path}")
+    # Only copy if target doesn't exist - reuse modified image for subsequent runs
+    if target_path.exists():
+        print(f"Target image already exists at {target_path}, reusing it (idempotent)")
+        print(f"  (To force fresh copy, delete {target_path})")
+    else:
+        print(f"Copying image to {target_path}...")
+        shutil.copy(str(cached_decompressed), str(target_path))
+        print(f"Image successfully copied to {target_path}")
 
     print(f"Running setup-tftp-iscsi.sh...")
     print("=" * 70)
