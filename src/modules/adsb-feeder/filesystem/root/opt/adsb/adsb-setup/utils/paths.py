@@ -244,9 +244,7 @@ class PathConfig:
     def SKYSTATS_DB_DATA_PATH(self) -> Path:
         """Skystats DB path - configurable via SKYSTATS_DB_DATA_PATH environment variable."""
         if self._skystats_db_data_path is None:
-            self._skystats_db_data_path = Path(
-                os.environ.get("SKYSTATS_DB_DATA_PATH", str(self.ADSB_BASE_DIR / "skystats-db"))
-            )
+            self._skystats_db_data_path = Path(os.environ.get("SKYSTATS_DB_DATA_PATH", str(self.ADSB_BASE_DIR / "skystats-db")))
         return self._skystats_db_data_path
 
 
