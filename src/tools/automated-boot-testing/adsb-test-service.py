@@ -293,35 +293,52 @@ class TestExecutor:
 
             logging.info(f"Executing command: {' '.join(cmd)}")
 
-            # Execute with timeout
+            # Execute with timeout and real-time output forwarding
             start_time = time.time()
-            result = subprocess.run(
+
+            # Use Popen to capture output in real-time for journalctl
+            process = subprocess.Popen(
                 cmd,
-                capture_output=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
                 text=True,
-                timeout=self.timeout_minutes * 60,  # Convert to seconds
+                bufsize=1,  # Line buffered
             )
 
-            duration = time.time() - start_time
+            # Forward output in real-time to journalctl
+            output_lines = []
+            try:
+                for line in process.stdout:
+                    # Log to journalctl in real-time
+                    logging.info(line.rstrip())
+                    output_lines.append(line)
 
-            if result.returncode == 0:
+                # Wait for process to complete with timeout
+                returncode = process.wait(timeout=self.timeout_minutes * 60)
+
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait()
+                return {"success": False, "message": f"Test timed out after {self.timeout_minutes} minutes"}
+
+            duration = time.time() - start_time
+            output = ''.join(output_lines)
+
+            if returncode == 0:
                 return {
                     "success": True,
                     "message": f"Test completed successfully in {duration:.1f}s",
-                    "stdout": result.stdout,
+                    "stdout": output,
                     "duration": duration,
                 }
             else:
                 return {
                     "success": False,
-                    "message": f"Test failed with return code {result.returncode}",
-                    "stderr": result.stderr,
-                    "stdout": result.stdout,
+                    "message": f"Test failed with return code {returncode}",
+                    "stdout": output,
                     "duration": duration,
                 }
 
-        except subprocess.TimeoutExpired:
-            return {"success": False, "message": f"Test timed out after {self.timeout_minutes} minutes"}
         except Exception as e:
             return {"success": False, "message": f"Test execution error: {str(e)}"}
 
@@ -488,6 +505,10 @@ class ADSBTestService:
 
 def setup_logging(log_level: str = "INFO"):
     """Setup logging configuration for systemd service."""
+    # Configure line-buffered output for real-time journalctl logging
+    sys.stdout.reconfigure(line_buffering=True)
+    sys.stderr.reconfigure(line_buffering=True)
+
     logging.basicConfig(
         level=getattr(logging, log_level.upper()),
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
