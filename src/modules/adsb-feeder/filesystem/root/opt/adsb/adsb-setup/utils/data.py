@@ -853,19 +853,19 @@ class Data:
         # Don't raise - allow system to continue with degraded functionality
 
     @property
-    def envs_for_envfile(self) -> dict[str, Any]:
+    def envs_for_envfile(self) -> dict[str, Union[str, int, bool]]:
         """Generate environment variables dictionary for .env file."""
         # read old values from env file so we can debug print only those that have changed
         old_values = read_values_from_env_file()
 
-        def adjust_bool_impl(e: Env, value: Any) -> Union[str, bool]:
+        def adjust_bool_impl(e: Env, value: Any) -> Union[str, bool, int]:
             if "false_is_zero" in e.tags:
                 return "1" if is_true(value) else "0"
             if "false_is_empty" in e.tags:
                 return "1" if is_true(value) else ""
             return is_true(value)
 
-        def adjust_bool(e: Env, value: Any) -> Union[str, bool]:
+        def adjust_bool(e: Env, value: Any) -> Union[str, bool, int]:
             v = adjust_bool_impl(e, value)
             print_err(f"adjust_bool({e}, {e.tags}) = {v}", level=8)
             return v
@@ -879,7 +879,7 @@ class Data:
                 new_value.append(value[i] if enabled[i] else "")
             return new_value
 
-        def value_for_env(e: Env, value: Any) -> Union[str, bool]:
+        def value_for_env(e: Env, value: Any) -> Union[str, bool, int]:
             if type(value) == bool or "is_enabled" in e.tags:
                 value = adjust_bool(e, value)
 
@@ -1011,21 +1011,25 @@ class Data:
     # helper function to see if something is enabled
     def is_enabled(self, tags: Union[str, list[str]]) -> bool:
         """Check if feature/aggregator is enabled by tags."""
-        if type(tags) != list:
-            tags = [tags]
-        e = self._get_enabled_env_by_tags(tags)
+        if isinstance(tags, str):
+            tags_list: list[str] = [tags]
+        else:
+            tags_list = tags
+        e = self._get_enabled_env_by_tags(tags_list)
         if type(e._value) == list:
-            ret = e and is_true(e.list_get(0))
+            ret = is_true(e.list_get(0))
             print_err(f"is_enabled called on list: {e}[0] = {ret}")
             return ret
-        return e and is_true(e._value)
+        return is_true(e._value)
 
     # helper function to see if list element is enabled
     def list_is_enabled(self, tags: Union[str, list[str]], idx: int) -> bool:
         """Check if list element at index is enabled by tags."""
-        if type(tags) != list:
-            tags = [tags]
-        e = self._get_enabled_env_by_tags(tags)
+        if isinstance(tags, str):
+            tags_list: list[str] = [tags]
+        else:
+            tags_list = tags
+        e = self._get_enabled_env_by_tags(tags_list)
         ret = is_true(e.list_get(idx)) if e else False
         print_err(f"list_is_enabled: {e}[{idx}] = {ret}", level=8)
         return ret
