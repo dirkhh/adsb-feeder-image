@@ -382,6 +382,7 @@ class FlightAware(Aggregator):
 
     def _activate(self, user_input: str, idx: int = 0) -> bool:
         self._idx = make_int(idx)
+        feeder_id: Optional[str]
         if re.match("[0-9a-zA-Z]+", user_input):
             # that might be a valid key
             feeder_id = user_input
@@ -435,6 +436,7 @@ class RadarBox(Aggregator):
 
     def _activate(self, user_input: str, idx: int = 0) -> bool:
         self._idx = make_int(idx)
+        sharing_key: Optional[str]
         if re.match("[0-9a-zA-Z]+", user_input):
             # that might be a valid key
             sharing_key = user_input
@@ -487,14 +489,15 @@ class OpenSky(Aggregator):
         if not user:
             print_err(f"missing user name for OpenSky")
             return False
+        serial_value: Optional[str] = serial
         if not serial:
             print_err(f"need to request serial for OpenSky")
-            serial = self._request_fr_serial(user)
-            if not serial:
+            serial_value = self._request_fr_serial(user)
+            if not serial_value:
                 print_err("failed to get OpenSky serial")
                 return False
         self._d.env_by_tags(self.tags + ["user"]).list_set(idx, user)
-        self._d.env_by_tags(self.tags + ["key"]).list_set(idx, serial)
+        self._d.env_by_tags(self.tags + ["key"]).list_set(idx, serial_value)
         self._d.env_by_tags(self.tags + ["is_enabled"]).list_set(idx, True)
         return True
 
