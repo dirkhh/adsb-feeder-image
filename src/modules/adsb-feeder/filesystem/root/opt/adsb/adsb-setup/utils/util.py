@@ -11,7 +11,7 @@ import sys
 import tempfile
 import time
 import traceback
-from typing import Any, Optional, Union
+from typing import Any, Optional, Sequence
 from uuid import UUID
 
 import requests
@@ -187,7 +187,7 @@ def generic_get_json(url: str, data: Optional[Any] = None, timeout: float = 5.0)
     return None, status
 
 
-def create_fake_info(indices: list[Optional[int]]) -> bool:
+def create_fake_info(indices: Sequence[Optional[int]]) -> bool:
     # instead of trying to figure out if we need this and creating it only in that case,
     # let's just make sure the fake files are there and move on
     os.makedirs(FAKE_THERMAL_ZONE_DIR, exist_ok=True)
@@ -396,8 +396,8 @@ def __getattr__(name):
     This allows existing code to import 'verbose' and 'idhash' as module attributes
     even though they're now lazy-loaded via getter functions.
     """
-    if name == 'verbose':
+    if name == "verbose":
         return get_verbose()
-    if name == 'idhash':
+    if name == "idhash":
         return get_idhash()
     raise AttributeError(f"module 'util' has no attribute '{name}'")
