@@ -101,7 +101,7 @@ class TestPathConfiguration:
             assert str(utils.paths.ADSB_BASE_DIR).startswith(temp_dir)
 
     def test_backward_compatibility(self):
-        """Test that the path system maintains backward compatibility"""
+        """Test that the new path system works correctly"""
         # Reload modules to ensure they use the current ADSB_BASE_DIR
         import importlib
         import utils.paths
@@ -110,12 +110,12 @@ class TestPathConfiguration:
         importlib.reload(utils.paths)
         importlib.reload(utils.config)
 
-        # Test that the old constant names still work
-        from utils.config import CONF_DIR, ENV_FILE_PATH
-
-        # These should now use the configurable paths
-        assert CONF_DIR == str(utils.paths.ADSB_CONFIG_DIR)
-        assert ENV_FILE_PATH == str(utils.paths.ENV_FILE)
+        # Verify the new path constants exist and are Path objects
+        from pathlib import Path
+        assert hasattr(utils.paths, 'ADSB_CONFIG_DIR')
+        assert hasattr(utils.paths, 'ENV_FILE')
+        assert isinstance(utils.paths.ADSB_CONFIG_DIR, Path)
+        assert isinstance(utils.paths.ENV_FILE, Path)
 
 
 class TestPathIntegration:
@@ -130,11 +130,13 @@ class TestPathIntegration:
             import importlib
             import utils.paths
             import utils.config
+            from pathlib import Path
             importlib.reload(utils.paths)
             importlib.reload(utils.config)
 
-            assert utils.config.CONF_DIR == f"{test_dir}/config"
-            assert utils.config.ENV_FILE_PATH == f"{test_dir}/config/.env"
+            # Verify paths are updated correctly
+            assert utils.paths.ADSB_CONFIG_DIR == Path(test_dir) / "config"
+            assert utils.paths.ENV_FILE == Path(test_dir) / "config" / ".env"
 
         # Restore modules to session fixture state after test
         import importlib

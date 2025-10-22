@@ -126,7 +126,7 @@ class TestWriteValuesToConfigJson:
         test_data = {"test": "value"}
         write_values_to_config_json(test_data, "test reason")
 
-        mock_mkstemp.assert_called_once_with(dir=CONF_DIR)
+        mock_mkstemp.assert_called_once_with(dir=str(ADSB_CONFIG_DIR))
         mock_json_dump.assert_called_once()
         mock_rename.assert_called_once()
 
@@ -218,7 +218,7 @@ class TestWriteValuesToEnvFile:
         test_data = {"TEST_VAR": "test_value", "ANOTHER_VAR": "another_value"}
         write_values_to_env_file(test_data)
 
-        mock_mkstemp.assert_called_once_with(dir=CONF_DIR)
+        mock_mkstemp.assert_called_once_with(dir=str(ADSB_CONFIG_DIR))
         mock_rename.assert_called_once()
 
     @patch('tempfile.mkstemp')
