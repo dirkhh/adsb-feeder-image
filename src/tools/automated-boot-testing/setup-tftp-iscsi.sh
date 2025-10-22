@@ -431,7 +431,7 @@ mkdir -p "$TFTP_DEST"
 # Copy boot files
 echo -e "${YELLOW}Copying boot files to $TFTP_DEST...${NC}"
 
-# Copy kernel and initramfs
+# Copy as root (can read from mounted filesystem), then chown to tftp:tftp
 cp "$MOUNT_BOOT/kernel8.img" "$TFTP_DEST/"
 cp "$MOUNT_BOOT/initramfs.img" "$TFTP_DEST/"
 
@@ -478,9 +478,8 @@ else
     echo "$CMDLINE" > "$TFTP_DEST/cmdline.txt"
 fi
 
-# Set proper permissions
+# Set proper permissions for TFTP server (change ownership to tftp:tftp)
 chown -R tftp:tftp "$TFTP_DEST"
-chmod -R 755 "$TFTP_DEST"
 # Set files to 644, but keep directories at 755
 find "$TFTP_DEST" -type f -exec chmod 644 {} \;
 find "$TFTP_DEST" -type d -exec chmod 755 {} \;
