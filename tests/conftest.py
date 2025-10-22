@@ -10,7 +10,7 @@ from unittest.mock import patch, MagicMock
 
 import pytest
 
-# IMPORTANT: Set ADSB_BASE_DIR at module import time, before any application code is imported.
+# IMPORTANT: Set ADSB_BASE_DIR and ADSB_TEST_ENV at module import time, before any application code is imported.
 # This ensures that when test files import application modules, the paths.py module reads
 # this environment variable instead of defaulting to /opt/adsb
 # The session-scoped adsb_test_env fixture will create the actual directory structure
@@ -19,6 +19,9 @@ if 'ADSB_BASE_DIR' not in os.environ:
     # This gets set once when conftest.py is loaded and the fixture will populate it
     _TEST_ADSB_BASE_DIR = tempfile.mkdtemp(prefix="adsb_test_session_")
     os.environ['ADSB_BASE_DIR'] = _TEST_ADSB_BASE_DIR
+
+# Set ADSB_TEST_ENV to allow Data.reset_for_testing() to work
+os.environ['ADSB_TEST_ENV'] = '1'
 
 # Add the adsb-setup directory to the Python path
 adsb_setup_path = Path(__file__).parent.parent / "src" / "modules" / "adsb-feeder" / "filesystem" / "root" / "opt" / "adsb" / "adsb-setup"

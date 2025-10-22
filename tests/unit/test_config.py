@@ -10,11 +10,8 @@ from unittest.mock import patch, mock_open, MagicMock
 
 import pytest
 
+from utils.paths import ADSB_CONFIG_DIR, ENV_FILE, USER_ENV_FILE, CONFIG_JSON_FILE
 from utils.config import (
-    CONF_DIR,
-    ENV_FILE_PATH,
-    USER_ENV_FILE_PATH,
-    JSON_FILE_PATH,
     config_lock,
     log_consistency_warnings,
     log_consistency_warning,
@@ -34,10 +31,11 @@ class TestConfigConstants:
         base_dir = os.environ.get('ADSB_BASE_DIR', '/opt/adsb')
 
         # Verify paths use the correct base directory and subdirectory structure
-        assert CONF_DIR == str(Path(base_dir) / "config")
-        assert ENV_FILE_PATH == str(Path(base_dir) / "config" / ".env")
-        assert USER_ENV_FILE_PATH == str(Path(base_dir) / "config" / ".env.user")
-        assert JSON_FILE_PATH == str(Path(base_dir) / "config" / "config.json")
+        # New path constants are Path objects, so compare with Path
+        assert ADSB_CONFIG_DIR == Path(base_dir) / "config"
+        assert ENV_FILE == Path(base_dir) / "config" / ".env"
+        assert USER_ENV_FILE == Path(base_dir) / "config" / ".env.user"
+        assert CONFIG_JSON_FILE == Path(base_dir) / "config" / "config.json"
 
     def test_config_lock(self):
         """Test that config_lock is a threading lock"""
