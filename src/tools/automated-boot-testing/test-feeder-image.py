@@ -35,6 +35,11 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.firefox import GeckoDriverManager
 
+# Configure line-buffered output for real-time logging when running as a systemd service
+# This ensures all output appears immediately in journalctl without manual flush() calls
+sys.stdout.reconfigure(line_buffering=True)
+sys.stderr.reconfigure(line_buffering=True)
+
 
 def try_ssh_shutdown(rpi_ip: str, user: str = "root", ssh_key: str = "", timeout: int = 10) -> bool:
     """Try to shutdown the system via SSH."""
@@ -120,6 +125,7 @@ def download_and_decompress_image(url: str, force_download: bool = False, cache_
         print(f"Downloaded {cached_compressed.stat().st_size / 1024 / 1024:.1f} MB")
 
         # Decompress the file
+        print("Decompressing image...")
         with open(cached_decompressed, "wb") as out_file:
             subprocess.run(["xz", "-d", "-c", str(cached_compressed)], stdout=out_file, check=True)
         print(f"Decompressed to {cached_decompressed.stat().st_size / 1024 / 1024:.1f} MB")
@@ -145,15 +151,35 @@ def setup_iscsi_image(cached_decompressed: Path, ssh_public_key: str = None) -> 
     print(f"Copying image to {target_path}...")
     shutil.copy(str(cached_decompressed), str(target_path))
     print(f"Image successfully copied to {target_path}")
+
     print(f"Running setup-tftp-iscsi.sh...")
+    print("=" * 70)
 
     # Build command with optional public key parameter
-    cmd = ["bash", str(Path(__file__).parent / "setup-tftp-iscsi.sh"), str(target_path)]
+    # Use stdbuf to force line-buffered output from bash (otherwise bash fully buffers when stdout is a pipe)
+    cmd = ["stdbuf", "-oL", "bash", str(Path(__file__).parent / "setup-tftp-iscsi.sh"), str(target_path)]
     if ssh_public_key:
         cmd.append(ssh_public_key)
 
-    subprocess.run(cmd, check=True)
-    print(f"setup-tftp-iscsi.sh completed")
+    # Run with real-time output forwarding to ensure all output appears in journal logs
+    process = subprocess.Popen(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        bufsize=1,  # Line buffered
+    )
+
+    # Forward each line of output immediately to journal
+    for line in process.stdout:
+        print(line, end="", flush=True)
+
+    returncode = process.wait()
+    if returncode != 0:
+        raise subprocess.CalledProcessError(returncode, cmd)
+
+    print("=" * 70)
+    print(f"setup-tftp-iscsi.sh completed successfully")
 
 
 def wait_for_system_down(rpi_ip: str, timeout_seconds: int = 60) -> bool:
