@@ -126,14 +126,29 @@ def download_and_decompress_image(url: str, force_download: bool = False, cache_
     return expected_image_name
 
 
-def setup_iscsi_image(cached_decompressed: Path) -> None:
+def setup_iscsi_image(cached_decompressed: Path, ssh_public_key: str = None) -> None:
+    """
+    Setup the iSCSI image for boot testing.
+
+    Args:
+        cached_decompressed: Path to the decompressed image file
+        ssh_public_key: Optional path to SSH public key to install in the image.
+                       If provided, this key will be installed to /root/.ssh/authorized_keys
+                       in the test image, allowing passwordless SSH access.
+    """
     target_path = Path("/srv/iscsi/adsbim.img")
     target_path.parent.mkdir(parents=True, exist_ok=True)
     print(f"Copying image to {target_path}...")
     shutil.copy(str(cached_decompressed), str(target_path))
     print(f"Image successfully copied to {target_path}")
     print(f"Running setup-tftp-iscsi.sh...")
-    subprocess.run(["bash", Path(__file__).parent / "setup-tftp-iscsi.sh", str(target_path)])
+
+    # Build command with optional public key parameter
+    cmd = ["bash", str(Path(__file__).parent / "setup-tftp-iscsi.sh"), str(target_path)]
+    if ssh_public_key:
+        cmd.append(ssh_public_key)
+
+    subprocess.run(cmd, check=True)
     print(f"setup-tftp-iscsi.sh completed")
 
 
@@ -740,7 +755,18 @@ Examples:
             wait_for_system_down(args.rpi_ip, args.shutdown_timeout)
 
         control_kasa_switch(args.kasa_ip, False)
-        setup_iscsi_image(cached_image_path)
+
+        # Derive public key path from private key path (assumes public key is at private_key + '.pub')
+        ssh_public_key = None
+        if args.ssh_key:
+            ssh_public_key_path = Path(args.ssh_key).with_suffix(Path(args.ssh_key).suffix + ".pub")
+            if ssh_public_key_path.exists():
+                ssh_public_key = str(ssh_public_key_path)
+                print(f"Using SSH public key: {ssh_public_key}")
+            else:
+                print(f"⚠ SSH private key provided but public key not found at: {ssh_public_key_path}")
+
+        setup_iscsi_image(cached_image_path, ssh_public_key)
         control_kasa_switch(args.kasa_ip, True)
         success = wait_for_feeder_online(args.rpi_ip, expected_image_name, args.timeout)
         count = 1
