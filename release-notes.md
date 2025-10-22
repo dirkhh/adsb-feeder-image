@@ -1,5 +1,10 @@
 Changes since v3.0.6
 =======
+- infrastructure: add automated boot test / basic functionality test support
+- security: fix potential command injection vulnerability in FlightRadar24 signup
+- security: add input validation to prevent path traversal attacks
+- core: improve error logging for missing container version file
+- core: comprehensive code quality improvements (type hints, test coverage, modernized architecture)
 - support WiFi networks with protected management frames on DietPi
 - fix Mode S Beast support
 - fix app install / DietPi install issue
