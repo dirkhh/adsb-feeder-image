@@ -35,10 +35,28 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.firefox import GeckoDriverManager
 
+try:
+    from metrics import TestMetrics
+    METRICS_AVAILABLE = True
+except ImportError:
+    METRICS_AVAILABLE = False
+
 # Configure line-buffered output for real-time logging when running as a systemd service
 # This ensures all output appears immediately in journalctl without manual flush() calls
 sys.stdout.reconfigure(line_buffering=True)
 sys.stderr.reconfigure(line_buffering=True)
+
+
+def update_metrics_stage(metrics_id: int, metrics_db: str, stage: str, status: str):
+    """Update metrics stage if metrics tracking is enabled."""
+    if not METRICS_AVAILABLE or metrics_id is None:
+        return
+
+    try:
+        metrics = TestMetrics(db_path=metrics_db)
+        metrics.update_stage(metrics_id, stage, status)
+    except Exception as e:
+        print(f"⚠️  Failed to update metrics: {e}")
 
 
 def try_ssh_shutdown(rpi_ip: str, user: str = "root", ssh_key: str = "", timeout: int = 10) -> bool:
@@ -859,6 +877,8 @@ Examples:
     parser.add_argument("--test-setup", action="store_true", help="Run basic setup test after feeder comes online")
     parser.add_argument("--test-only", action="store_true", help="Don't run install / boot, just the tests")
     parser.add_argument("--visible-browser", action="store_true", help="Use visible browser for debugging JavaScript behavior")
+    parser.add_argument("--metrics-id", type=int, help="Metrics test ID for tracking progress")
+    parser.add_argument("--metrics-db", default="/var/lib/adsb-test-service/metrics.db", help="Path to metrics database")
 
     args = parser.parse_args()
 
@@ -866,6 +886,10 @@ Examples:
     cache_dir = script_dir / "test-images"
     expected_image_name = download_and_decompress_image(args.image_url, args.force_download, cache_dir)
     cached_image_path = cache_dir / expected_image_name
+
+    # Update metrics: download stage completed
+    update_metrics_stage(args.metrics_id, args.metrics_db, "download", "passed")
+
     if args.test_only:
         print("\n🧪 Running basic setup test...")
         if args.visible_browser:
@@ -901,6 +925,10 @@ Examples:
                 print(f"⚠ SSH private key provided but public key not found at: {ssh_public_key_path}")
 
         setup_iscsi_image(cached_image_path, ssh_public_key)
+
+        # Update metrics: boot stage starting
+        update_metrics_stage(args.metrics_id, args.metrics_db, "boot", "running")
+
         control_kasa_switch(args.kasa_ip, True)
         count = 0
         success = False
@@ -928,9 +956,17 @@ Examples:
         if success:
             print("\n🎉 Feeder is online!")
 
+            # Update metrics: boot and network stages passed
+            update_metrics_stage(args.metrics_id, args.metrics_db, "boot", "passed")
+            update_metrics_stage(args.metrics_id, args.metrics_db, "network", "passed")
+
             # Run basic setup test if requested
             if args.test_setup:
                 print("\n🧪 Running basic setup test...")
+
+                # Update metrics: browser_test stage starting
+                update_metrics_stage(args.metrics_id, args.metrics_db, "browser_test", "running")
+
                 if args.visible_browser:
                     setup_success = test_basic_setup_with_visible_browser(args.rpi_ip)
                 else:
@@ -939,16 +975,21 @@ Examples:
                         print("\n⚠ Selenium test failed, trying simple fallback test...")
                         setup_success = test_basic_setup_simple(args.rpi_ip)
 
+                # Update metrics: browser_test stage result
                 if setup_success:
+                    update_metrics_stage(args.metrics_id, args.metrics_db, "browser_test", "passed")
                     print("\n🎉 All tests completed successfully!")
                     sys.exit(0)
                 else:
+                    update_metrics_stage(args.metrics_id, args.metrics_db, "browser_test", "failed")
                     print("\n❌ Basic setup test failed!")
                     sys.exit(1)
             else:
                 print("\n🎉 Test completed successfully!")
                 sys.exit(0)
         else:
+            # Update metrics: boot or network failed
+            update_metrics_stage(args.metrics_id, args.metrics_db, "boot", "failed")
             print("\n❌ Test failed!")
             sys.exit(1)
 

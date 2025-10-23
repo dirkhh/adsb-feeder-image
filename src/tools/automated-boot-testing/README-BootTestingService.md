@@ -11,6 +11,7 @@ A systemd service that provides a web API for triggering automated feeder image 
 - **Timeout Protection**: Each test has a 10-minute timeout to prevent hanging
 - **Systemd Integration**: Proper logging to stdout/stderr for journald
 - **Comprehensive Logging**: Detailed logs for debugging and monitoring
+- **Metrics Tracking**: SQLite-based metrics tracking with CLI query tool
 
 ## Installation
 
@@ -260,6 +261,64 @@ sudo netstat -tlnp | grep 9456
 curl http://localhost:9456/health
 ```
 
+## Test Metrics
+
+The service includes SQLite-based metrics tracking to monitor test results over time.
+
+### Viewing Metrics
+
+```bash
+# Show recent test results (default view)
+sudo /opt/adsb-test-service/boot-test-metrics-cli.py
+
+# Show last 20 tests
+sudo /opt/adsb-test-service/boot-test-metrics-cli.py --recent 20
+
+# Show statistics for last 7 days
+sudo /opt/adsb-test-service/boot-test-metrics-cli.py --stats 7
+
+# Show only failures
+sudo /opt/adsb-test-service/boot-test-metrics-cli.py --failures
+
+# Filter by version
+sudo /opt/adsb-test-service/boot-test-metrics-cli.py --version "v3.0.6-beta.8"
+
+# Show details for specific test
+sudo /opt/adsb-test-service/boot-test-metrics-cli.py --details 42
+```
+
+### Metrics Database
+
+- **Location**: `/var/lib/adsb-test-service/metrics.db`
+- **Format**: SQLite database
+- **Auto-created** on first test run
+- **Tracks**: Image URL, version, test stages, duration, pass/fail, error details
+
+### Direct Database Queries
+
+```bash
+# Open database
+sqlite3 /var/lib/adsb-test-service/metrics.db
+
+# View recent tests
+SELECT image_version, status, duration_seconds, started_at
+FROM test_runs
+ORDER BY started_at DESC
+LIMIT 10;
+
+# Get pass rate by version
+SELECT
+  image_version,
+  COUNT(*) as total,
+  SUM(CASE WHEN status = 'passed' THEN 1 ELSE 0 END) as passed
+FROM test_runs
+GROUP BY image_version;
+```
+
+### Integration Guide
+
+See [METRICS_INTEGRATION.md](METRICS_INTEGRATION.md) for detailed integration instructions.
+
 ## Integration
 
 This service can be integrated with:
@@ -282,6 +341,10 @@ src/tools/automated-boot-testing/
 ├── requirements.txt             # Python dependencies
 ├── test-api.py                  # API testing script
 ├── test-feeder-image.py         # Core test script (source)
+├── run-selenium-test.py         # Selenium test runner (non-root)
+├── metrics.py                   # Metrics tracking module (NEW)
+├── boot-test-metrics-cli.py     # Metrics CLI query tool (NEW)
+├── METRICS_INTEGRATION.md       # Metrics integration guide (NEW)
 ├── analyze-js-behavior.py       # JavaScript analysis tool
 └── debug-js-transitions.py      # Transition debugging tool
 ```
