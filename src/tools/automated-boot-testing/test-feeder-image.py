@@ -469,18 +469,11 @@ def test_basic_setup(rpi_ip: str, timeout_seconds: int = 90) -> bool:
             return False
 
     # Prepare test environment for testuser
-    test_script = Path(__file__).parent / "run-selenium-test.py"
+    base_dir = Path(__file__).parent
+    test_script = base_dir / "run-selenium-test.py"
     if not test_script.exists():
         print(f"✗ Test script not found: {test_script}")
         return False
-
-    # Make script executable
-    test_script.chmod(0o755)
-
-    # Ensure testuser can access necessary directories
-    for dir_path in ["/tmp", "/home/testuser"]:
-        Path(dir_path).mkdir(parents=True, exist_ok=True)
-    subprocess.run(["chown", "testuser:testuser", "/home/testuser"], check=False)
 
     # Run Selenium test as testuser (not root - security requirement)
     print("Running browser test as non-root user (testuser)...")
@@ -492,7 +485,7 @@ def test_basic_setup(rpi_ip: str, timeout_seconds: int = 90) -> bool:
             [
                 "sudo", "-u", "testuser",
                 "env", f"HOME=/home/testuser",
-                "python3", str(test_script),
+                f"{base_dir}/venv/bin/python3", str(test_script),
                 rpi_ip,
                 "--timeout", str(timeout_seconds)
             ],
@@ -503,8 +496,11 @@ def test_basic_setup(rpi_ip: str, timeout_seconds: int = 90) -> bool:
         )
 
         # Forward each line of output immediately to journal
-        for line in process.stdout:
-            print(line, end="", flush=True)
+        if process and process.stdout:
+            for line in process.stdout:
+                print(line, end="", flush=True)
+        else:
+            print("No output from process")
 
         returncode = process.wait(timeout=timeout_seconds + 30)
         print("=" * 70)
