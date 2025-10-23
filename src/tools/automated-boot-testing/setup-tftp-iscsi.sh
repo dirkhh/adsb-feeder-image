@@ -19,7 +19,7 @@ SSH_PUBLIC_KEY="$3"  # Optional: SSH public key to install for passwordless acce
 MOUNT_BOOT="/mnt/rpi-prep-root/boot/firmware"
 MOUNT_ROOT="/mnt/rpi-prep-root"
 TFTP_DEST="/srv/tftp"
-CMDLINE="console=tty1 ip=dhcp ISCSI_INITIATOR=iqn.2025-10.im.adsb.testrpi:rpi4 ISCSI_TARGET_NAME=iqn.2025-10.im.adsb:adsbim-test.root ISCSI_TARGET_IP=192.168.66.109 ISCSI_TARGET_PORT=3260 root=/dev/sda2 rw rootwait elevator=deadline cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1"
+CMDLINE="console=serial0,115200 console=tty1 ip=dhcp ISCSI_INITIATOR=iqn.2025-10.im.adsb.testrpi:rpi4 ISCSI_TARGET_NAME=iqn.2025-10.im.adsb:adsbim-test.root ISCSI_TARGET_IP=192.168.66.109 ISCSI_TARGET_PORT=3260 root=/dev/sda2 rw rootwait elevator=deadline cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1"
 
 # Colors for output
 RED='\033[0;31m'
@@ -454,18 +454,26 @@ fi
 
 # Copy or create config.txt
 if [ -f "$MOUNT_BOOT/config.txt" ]; then
+    echo "Copying config.txt from $MOUNT_BOOT to $TFTP_DEST"
     cp "$MOUNT_BOOT/config.txt" "$TFTP_DEST/"
     # Ensure initramfs line is present
     if ! grep -q "^initramfs" "$TFTP_DEST/config.txt"; then
+        echo "Adding initramfs line to config.txt"
         echo "initramfs initramfs.img followkernel" >> "$TFTP_DEST/config.txt"
+    fi
+    if ! grep -q "^dtoverlay=disable-bt" "$TFTP_DEST/config.txt"; then
+        echo "Adding dtoverlay=disable-bt to config.txt"
+        echo "dtoverlay=disable-bt" >> "$TFTP_DEST/config.txt"
     fi
 else
     # Create minimal config.txt
+    echo "Creating minimal config.txt"
     cat > "$TFTP_DEST/config.txt" << 'EOF'
 arm_64bit=1
 kernel=kernel8.img
 initramfs initramfs.img followkernel
 enable_uart=1
+dtoverlay=disable-bt
 EOF
 fi
 
