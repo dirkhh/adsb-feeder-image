@@ -135,10 +135,10 @@ class ADSBHub(Aggregator):
         return self._simple_activate(user_input, idx)
 
 
-class FlightRadar24(Aggregator):
+class Flightradar24(Aggregator):
     def __init__(self, system: System):
         super().__init__(
-            name="FlightRadar24",
+            name="Flightradar24",
             tags=["flightradar"],
             system=system,
         )
