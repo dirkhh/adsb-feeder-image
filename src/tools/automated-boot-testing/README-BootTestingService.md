@@ -37,9 +37,35 @@ Edit `/etc/adsb-test-service/config.json`:
   "timeout_minutes": 10,
   "host": "0.0.0.0",
   "port": 9456,
-  "log_level": "INFO"
+  "log_level": "INFO",
+  "ssh_key": "/etc/adsb-test-service/ssh_key"
 }
 ```
+
+### SSH Key Configuration
+
+The `ssh_key` parameter is **required** for automated testing:
+
+- **Purpose**: Enables passwordless SSH access to test images for verification and debugging
+- **Value**: Path to the private SSH key file (e.g., `/etc/adsb-test-service/ssh_key`)
+- **Public key requirement**: The public key (`.pub` extension) must exist alongside the private key
+- **Validation**: On service startup, the private and public keys are validated to ensure they match using fingerprint comparison
+- **Installation**: The public key is automatically copied to `/root/.ssh/authorized_keys` in the test image during boot preparation
+
+**Example setup:**
+```bash
+# Generate SSH key pair
+ssh-keygen -t ed25519 -f /etc/adsb-test-service/ssh_key -N ""
+
+# Set proper permissions
+chmod 600 /etc/adsb-test-service/ssh_key
+chmod 644 /etc/adsb-test-service/ssh_key.pub
+```
+
+**Security notes:**
+- The private key should only be readable by the service user
+- The service validates that the private and public keys match before running tests
+- If keys don't match or don't exist, the service will fail to start with a clear error message
 
 ## Usage
 
