@@ -14,7 +14,8 @@ set -e  # Exit on any error
 
 # Configuration
 IMAGE_FILE="$1"
-SSH_PUBLIC_KEY="$2"  # Optional: SSH public key to install for passwordless access
+WORKING_IMAGE_FILE="$2"
+SSH_PUBLIC_KEY="$3"  # Optional: SSH public key to install for passwordless access
 MOUNT_BOOT="/mnt/rpi-prep-root/boot/firmware"
 MOUNT_ROOT="/mnt/rpi-prep-root"
 TFTP_DEST="/srv/tftp"
@@ -37,6 +38,11 @@ fi
 # Check if image exists
 if [ ! -f "$IMAGE_FILE" ]; then
     echo -e "${RED}Error: Image file $IMAGE_FILE not found${NC}"
+    exit 1
+fi
+
+if [ "$WORKING_IMAGE_FILE" = "" ]; then
+    echo -e "${RED}Error: Working image file not provided${NC}"
     exit 1
 fi
 
@@ -434,7 +440,6 @@ echo -e "${YELLOW}Copying boot files to $TFTP_DEST...${NC}"
 # Copy as root (can read from mounted filesystem), then chown to tftp:tftp
 cp "$MOUNT_BOOT/kernel8.img" "$TFTP_DEST/"
 cp "$MOUNT_BOOT/initramfs.img" "$TFTP_DEST/"
-
 # Copy firmware files
 cp $MOUNT_BOOT/*.elf "$TFTP_DEST/"
 cp $MOUNT_BOOT/fixup*.dat "$TFTP_DEST/"
@@ -491,6 +496,11 @@ echo -e "${YELLOW}Configuring iSCSI target...${NC}"
 
 # Get absolute path for IMAGE_FILE
 IMAGE_FILE_ABS=$(realpath "$IMAGE_FILE")
+
+# Copy clean but prepared image file to working image file (i.e., the iSCSI directory)
+cp "$IMAGE_FILE_ABS" "$WORKING_IMAGE_FILE"
+echo -e "${GREEN}Working image file copied successfully to $WORKING_IMAGE_FILE${NC}"
+
 
 # Create tgt configuration
 TGT_CONF="/etc/tgt/conf.d/adsb.conf"
