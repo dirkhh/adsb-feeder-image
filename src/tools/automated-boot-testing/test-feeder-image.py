@@ -418,7 +418,92 @@ def test_basic_setup_with_visible_browser(rpi_ip: str, timeout_seconds: int = 90
 
 
 def test_basic_setup(rpi_ip: str, timeout_seconds: int = 90) -> bool:
-    """Test the basic setup process using Selenium."""
+    """
+    Test the basic setup process using Selenium.
+
+    SECURITY: Runs browser as 'testuser' (non-root) for security.
+    Browsers should never run as root due to security risks.
+    """
+    print(f"Testing basic setup on http://{rpi_ip}/setup...")
+
+    # Ensure testuser exists
+    try:
+        import pwd
+        pwd.getpwnam('testuser')
+        print("✓ testuser exists")
+    except KeyError:
+        print("⚠ testuser does not exist - creating it")
+        try:
+            subprocess.run([
+                "useradd", "-r", "-m", "-s", "/bin/bash",
+                "-c", "User for running browser tests",
+                "testuser"
+            ], check=True, capture_output=True)
+            print("✓ testuser created")
+        except subprocess.CalledProcessError as e:
+            print(f"✗ Failed to create testuser: {e.stderr.decode()}")
+            print("  Cannot run browser tests as root - security risk")
+            return False
+
+    # Prepare test environment for testuser
+    test_script = Path(__file__).parent / "run-selenium-test.py"
+    if not test_script.exists():
+        print(f"✗ Test script not found: {test_script}")
+        return False
+
+    # Make script executable
+    test_script.chmod(0o755)
+
+    # Ensure testuser can access necessary directories
+    for dir_path in ["/tmp", "/home/testuser"]:
+        Path(dir_path).mkdir(parents=True, exist_ok=True)
+    subprocess.run(["chown", "testuser:testuser", "/home/testuser"], check=False)
+
+    # Run Selenium test as testuser (not root - security requirement)
+    print("Running browser test as non-root user (testuser)...")
+    print("=" * 70)
+    try:
+        # Use Popen with real-time output forwarding (same as shell script)
+        process = subprocess.Popen(
+            [
+                "sudo", "-u", "testuser",
+                "env", f"HOME=/home/testuser",
+                "python3", str(test_script),
+                rpi_ip,
+                "--timeout", str(timeout_seconds)
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,  # Line buffered
+        )
+
+        # Forward each line of output immediately to journal
+        for line in process.stdout:
+            print(line, end="", flush=True)
+
+        returncode = process.wait(timeout=timeout_seconds + 30)
+        print("=" * 70)
+
+        return returncode == 0
+
+    except subprocess.TimeoutExpired:
+        process.kill()
+        process.wait()
+        print("=" * 70)
+        print(f"✗ Test timed out after {timeout_seconds} seconds")
+        return False
+    except Exception as e:
+        print("=" * 70)
+        print(f"✗ Error running test: {e}")
+        return False
+
+
+def _test_basic_setup_old(rpi_ip: str, timeout_seconds: int = 90) -> bool:
+    """
+    OLD VERSION - Runs as root (SECURITY RISK - DO NOT USE)
+    Kept for reference only.
+    """
     print(f"Testing basic setup on http://{rpi_ip}/setup...")
 
     driver = None
