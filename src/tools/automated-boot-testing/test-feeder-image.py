@@ -114,6 +114,7 @@ def download_and_decompress_image(url: str, force_download: bool = False, cache_
         print(f"Cache file size: {cached_compressed.stat().st_size / 1024 / 1024:.1f} MB")
     else:
         cached_compressed.unlink(missing_ok=True)
+        cached_decompressed.unlink(missing_ok=True)
         print(f"Downloading {filename} to cache...")
         response = requests.get(url, stream=True)
         response.raise_for_status()
@@ -124,6 +125,11 @@ def download_and_decompress_image(url: str, force_download: bool = False, cache_
 
         print(f"Downloaded {cached_compressed.stat().st_size / 1024 / 1024:.1f} MB")
 
+    if cached_decompressed.exists():
+        print(f"Using cached decompressed image: {cached_decompressed}")
+        print(f"Cache file size: {cached_decompressed.stat().st_size / 1024 / 1024:.1f} MB")
+    else:
+        cached_decompressed.unlink(missing_ok=True)
         # Decompress the file
         print("Decompressing image...")
         with open(cached_decompressed, "wb") as out_file:
