@@ -26,8 +26,3 @@ services:
       - RADIUS=${SKYSTATS_RADIUS}
       - ABOVE_RADIUS=${SKYSTATS_ABOVE_RADIUS}
       - DOMESTIC_COUNTRY_ISO=${SKYSTATS_DOMESTIC_COUNTRY_ISO}
-
-networks:
-  adsb_im_bridge:
-    external: true
-
