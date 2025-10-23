@@ -35,7 +35,7 @@ sudo ./src/tools/automated-boot-testing/setup-tftp-iscsi.sh /path/to/image.img
 - **`requirements.txt`** - Python dependencies
 - **`config.json.example`** - Configuration template
 - **`test-api.py`** - API testing utility
-- **`README-API-Service.md`** - Detailed documentation
+- **`README-BootTestingService.md`** - Detailed documentation
 
 ## Debugging Tools
 
@@ -44,7 +44,7 @@ sudo ./src/tools/automated-boot-testing/setup-tftp-iscsi.sh /path/to/image.img
 
 ## Documentation
 
-See `README-API-Service.md` for comprehensive documentation including:
+See `README-BootTestingService.md` for comprehensive documentation including:
 - Installation instructions
 - Configuration options
 - API usage examples
