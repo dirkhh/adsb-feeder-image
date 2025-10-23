@@ -5,7 +5,7 @@ Test script for booting and running the feeder image on actual hardware.
 This script:
 1. Downloads and decompresses a feeder image if needed
 2. shuts down and powers off the test system (using a local Kasa smart switch)
-2. Copies the fresh image to /srv/iscsi/adsbim.img -- so yes, this assumes that you have a TFTP/iSCSI setup to boot an RPi from
+2. Copies the fresh image to /srv/iscsi/<image_name>.img -- so yes, this assumes that you have a TFTP/iSCSI setup to boot an RPi from
 3. Turns on / reboots the test system
 4. Waits for the feeder to come online and verifies the correct image is running
 
@@ -148,21 +148,12 @@ def setup_iscsi_image(cached_decompressed: Path, ssh_public_key: str = None) -> 
     target_path = Path("/srv/iscsi") / target_filename
     target_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # Only copy if target doesn't exist - reuse modified image for subsequent runs
-    if target_path.exists():
-        print(f"Target image already exists at {target_path}, reusing it (idempotent)")
-        print(f"  (To force fresh copy, delete {target_path})")
-    else:
-        print(f"Copying image to {target_path}...")
-        shutil.copy(str(cached_decompressed), str(target_path))
-        print(f"Image successfully copied to {target_path}")
-
     print(f"Running setup-tftp-iscsi.sh...")
     print("=" * 70)
 
     # Build command with optional public key parameter
     # Use stdbuf to force line-buffered output from bash (otherwise bash fully buffers when stdout is a pipe)
-    cmd = ["stdbuf", "-oL", "bash", str(Path(__file__).parent / "setup-tftp-iscsi.sh"), str(target_path)]
+    cmd = ["stdbuf", "-oL", "bash", str(Path(__file__).parent / "setup-tftp-iscsi.sh"), str(cached_decompressed), str(target_path)]
     if ssh_public_key:
         cmd.append(ssh_public_key)
 
