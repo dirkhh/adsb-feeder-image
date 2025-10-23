@@ -17,7 +17,10 @@
 <p>
   Config Backup: creates a zip file with your configuration settings<br>
   Config + Graphs Backup: adds the data used to generate the statistical graphs (roughly +15MB)<br>
-  Full Backup: adds on top of all that the replay / heatmap data
+  Full Backup: adds on top of all that the replay / heatmap data<br>
+  {% if is_enabled('skystats_db') %}
+  Skystats DB Backup: creates a SQL dump of the Skystats PostgreSQL database
+  {% endif %}
 </p>
 <p>
   Depending on the amount of historic replay / heatmap data you have, a Full Backup can take a signficant amount of time
@@ -29,5 +32,8 @@
   <a class="mb-3 btn btn-primary" href="/backupexecuteconfig">Config Backup</a>
   <a class="mb-3 btn btn-primary" href="/backupexecutegraphs">Config + Graphs Backup</a>
   <a class="mb-3 btn btn-primary" href="/backupexecutefull">Full Backup</a>
+  {% if is_enabled('skystats_db') %}
+  <a class="mb-3 btn btn-primary" href="/backupexecuteskystatsdb">Skystats DB Backup</a>
+  {% endif %}
 </form>
 {% endblock %}
