@@ -238,6 +238,8 @@ def wait_for_feeder_online(rpi_ip: str, expected_image_name: str, timeout_minute
                     status_string += f" - correct image: {expected_image_name}"
                     print(status_string)
                     return True, "success"
+                elif "boot of ADS-B Feeder System" in title:
+                    status_string += f" - first boot"
                 else:
                     status_string += f" - can't find expected image: {expected_image_name}"
                     print(status_string)
@@ -905,6 +907,8 @@ Examples:
         status_string = ""
         while not success and count < 3:
             success, status_string = wait_for_feeder_online(args.rpi_ip, expected_image_name, args.timeout)
+            if success:
+                break
 
             if "dietpi" in expected_image_name:
                 if status_string == "ping down":
