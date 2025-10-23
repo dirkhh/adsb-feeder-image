@@ -61,7 +61,7 @@ from utils.netconfig import UltrafeederConfig
 from utils.other_aggregators import (
     ADSBHub,
     FlightAware,
-    FlightRadar24,
+    Flightradar24,
     OpenSky,
     PlaneFinder,
     PlaneWatch,
@@ -217,7 +217,7 @@ class AdsbIm:
         self._other_aggregators = {
             "adsbhub--submit": ADSBHub(self._system),
             "flightaware--submit": FlightAware(self._system),
-            "flightradar--submit": FlightRadar24(self._system),
+            "flightradar--submit": Flightradar24(self._system),
             "opensky--submit": OpenSky(self._system),
             "planefinder--submit": PlaneFinder(self._system),
             "planewatch--submit": PlaneWatch(self._system),
