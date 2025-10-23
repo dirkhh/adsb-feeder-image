@@ -62,12 +62,19 @@ cp "$SOURCE_DIR/adsb-test-service.py" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/test-feeder-image.py" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/run-selenium-test.py" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/setup-tftp-iscsi.sh" "$INSTALL_DIR/"
+cp "$SOURCE_DIR/metrics.py" "$INSTALL_DIR/"
+cp "$SOURCE_DIR/boot-test-metrics-cli.py" "$INSTALL_DIR/"
 chmod +x "$INSTALL_DIR"/*.py
 chmod +x "$INSTALL_DIR"/*.sh
 
 # Create test images directory
 echo "📁 Creating test images directory..."
 mkdir -p "$INSTALL_DIR/test-images"
+
+# Create metrics database directory
+echo "📁 Creating metrics database directory..."
+mkdir -p /var/lib/adsb-test-service
+chmod 755 /var/lib/adsb-test-service
 
 # Install systemd service
 echo "🔧 Installing systemd service..."
@@ -93,6 +100,7 @@ echo "   Service files: $INSTALL_DIR/"
 echo "   Virtual env:   $INSTALL_DIR/venv/"
 echo "   Test images:   $INSTALL_DIR/test-images/"
 echo "   Config:        $CONFIG_DIR/config.json"
+echo "   Metrics DB:    /var/lib/adsb-test-service/metrics.db"
 echo ""
 echo "Next steps:"
 echo "1. Edit the configuration file:"
@@ -115,7 +123,12 @@ echo "   curl -X POST http://localhost:9456/api/trigger-boot-test \\"
 echo "        -H 'Content-Type: application/json' \\"
 echo "        -d '{\"url\": \"https://github.com/dirkhh/adsb-feeder-image/releases/download/v3.0.6-beta.6/adsb-im-raspberrypi64-pi-2-3-4-5-v3.0.6-beta.6.img.xz\"}'"
 echo ""
-echo "7. Manual service management:"
+echo "7. View metrics:"
+echo "   sudo $INSTALL_DIR/boot-test-metrics-cli.py"
+echo "   sudo $INSTALL_DIR/boot-test-metrics-cli.py --stats 7"
+echo "   sudo $INSTALL_DIR/boot-test-metrics-cli.py --failures"
+echo ""
+echo "8. Manual service management:"
 echo "   sudo systemctl stop $SERVICE_NAME"
 echo "   sudo systemctl restart $SERVICE_NAME"
 echo "   sudo systemctl disable $SERVICE_NAME"
