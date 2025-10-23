@@ -33,6 +33,8 @@ from urllib.parse import urlparse
 
 from flask import Flask, jsonify, request
 
+from metrics import TestMetrics
+
 
 class APIKeyAuth:
     """Simple API key authentication with timing-safe comparison."""
@@ -103,7 +105,7 @@ class TestQueue:
         self.duplicate_window = timedelta(hours=1)
         self._lock = threading.Lock()
 
-    def add_test(self, url: str, requester_ip: str = "unknown") -> Dict[str, str]:
+    def add_test(self, url: str, requester_ip: str = "unknown", triggered_by: str = "api", trigger_source: str = None) -> Dict[str, str]:
         """Add a test to the queue if not a duplicate."""
         with self._lock:
             now = datetime.now()
@@ -124,6 +126,8 @@ class TestQueue:
             test_item = {
                 "url": url,
                 "requester_ip": requester_ip,
+                "triggered_by": triggered_by,
+                "trigger_source": trigger_source,
                 "added_at": now.isoformat(),
                 "id": f"test_{int(time.time())}_{len(url_key)}",
             }
@@ -293,7 +297,7 @@ class TestExecutor:
 
         return Path(__file__).parent / "venv" / "bin" / "python"
 
-    def execute_test(self, test_item: Dict) -> Dict[str, str]:
+    def execute_test(self, test_item: Dict, metrics_id: int = None) -> Dict[str, str]:
         """Execute a test with timeout."""
         test_id = test_item["id"]
         url = test_item["url"]
@@ -315,10 +319,14 @@ class TestExecutor:
                 str(self.timeout_minutes),
                 "--ssh-key",
                 str(self.ssh_key),
-                url,
-                self.rpi_ip,
-                self.kasa_ip,
             ]
+
+            # Add metrics tracking if available
+            if metrics_id is not None:
+                cmd.extend(["--metrics-id", str(metrics_id)])
+
+            # Add positional arguments
+            cmd.extend([url, self.rpi_ip, self.kasa_ip])
 
             logging.info(f"Executing command: {' '.join(cmd)}")
 
@@ -387,6 +395,10 @@ class ADSBTestService:
         api_keys = config.get("api_keys", {})
         self.auth = APIKeyAuth(api_keys)
 
+        # Metrics tracking
+        self.metrics = TestMetrics()
+        logging.info("Metrics tracking initialized")
+
         # Flask app
         self.app = Flask(__name__)
         self.setup_routes()
@@ -419,8 +431,13 @@ class ADSBTestService:
                 if not validation["valid"]:
                     return jsonify({"error": f"Invalid URL: {validation['error']}"}), 400
 
-                # Add to queue
-                result = self.test_queue.add_test(url, requester_ip)
+                # Add to queue with trigger information
+                result = self.test_queue.add_test(
+                    url,
+                    requester_ip=requester_ip,
+                    triggered_by="api",
+                    trigger_source=user_id
+                )
 
                 logging.info(f"Test request from {user_id} ({requester_ip}): {result}")
                 return jsonify(result)
@@ -471,6 +488,30 @@ class ADSBTestService:
             """Health check endpoint (unauthenticated for monitoring)."""
             return jsonify({"status": "healthy"}), 200
 
+        @self.app.route("/api/metrics/recent", methods=["GET"])
+        @self.auth.require_auth
+        def get_recent_metrics():
+            """Get recent test metrics (requires authentication)."""
+            limit = request.args.get("limit", 10, type=int)
+            results = self.metrics.get_recent_results(limit=limit)
+            return jsonify(results)
+
+        @self.app.route("/api/metrics/stats", methods=["GET"])
+        @self.auth.require_auth
+        def get_stats():
+            """Get test statistics (requires authentication)."""
+            days = request.args.get("days", 7, type=int)
+            stats = self.metrics.get_stats(days=days)
+            return jsonify(stats)
+
+        @self.app.route("/api/metrics/failures", methods=["GET"])
+        @self.auth.require_auth
+        def get_failures():
+            """Get recent failures (requires authentication)."""
+            limit = request.args.get("limit", 10, type=int)
+            failures = self.metrics.get_failures(limit=limit)
+            return jsonify(failures)
+
     def start_queue_processor(self):
         """Start the queue processing thread."""
         if self.processor_thread and self.processor_thread.is_alive():
@@ -490,17 +531,46 @@ class ADSBTestService:
                 if test_item:
                     logging.info(f"Processing test {test_item['id']}")
 
-                    # Execute test
-                    result = self.test_executor.execute_test(test_item)
+                    # Start metrics tracking
+                    metrics_id = self.metrics.start_test(
+                        image_url=test_item["url"],
+                        triggered_by=test_item.get("triggered_by", "unknown"),
+                        trigger_source=test_item.get("trigger_source"),
+                        rpi_ip=self.config.get("rpi_ip")
+                    )
+                    logging.info(f"Started metrics tracking with ID: {metrics_id}")
 
-                    # Mark as completed
-                    self.test_queue.mark_completed(test_item["id"], result["success"], result["message"])
+                    try:
+                        # Execute test (pass metrics_id for stage tracking)
+                        result = self.test_executor.execute_test(test_item, metrics_id=metrics_id)
 
-                    # Log result
-                    if result["success"]:
-                        logging.info(f"✅ Test {test_item['id']} PASSED")
-                    else:
-                        logging.error(f"❌ Test {test_item['id']} FAILED: {result['message']}")
+                        # Mark as completed in queue
+                        self.test_queue.mark_completed(test_item["id"], result["success"], result["message"])
+
+                        # Update metrics
+                        if result["success"]:
+                            self.metrics.complete_test(metrics_id, "passed")
+                            logging.info(f"✅ Test {test_item['id']} PASSED")
+                        else:
+                            # Extract error information from result
+                            error_msg = result.get("message", "Test failed")
+                            self.metrics.complete_test(
+                                metrics_id,
+                                "failed",
+                                error_message=error_msg,
+                                error_stage="unknown"
+                            )
+                            logging.error(f"❌ Test {test_item['id']} FAILED: {result['message']}")
+
+                    except Exception as e:
+                        # Mark as error in metrics
+                        self.metrics.complete_test(
+                            metrics_id,
+                            "error",
+                            error_message=str(e),
+                            error_stage="execution"
+                        )
+                        raise
 
                 else:
                     # No tests in queue, wait a bit
