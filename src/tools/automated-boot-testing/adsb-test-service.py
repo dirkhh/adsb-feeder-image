@@ -27,6 +27,7 @@ from datetime import datetime, timedelta
 from functools import wraps
 from pathlib import Path
 from queue import Empty, Queue
+from subprocess import check_output, DEVNULL
 from typing import Dict, Optional
 from urllib.parse import urlparse
 
@@ -219,10 +220,11 @@ class GitHubValidator:
 class TestExecutor:
     """Executes the actual test using the test-feeder-image.py script."""
 
-    def __init__(self, rpi_ip: str, kasa_ip: str, timeout_minutes: int = 10):
+    def __init__(self, rpi_ip: str, kasa_ip: str, ssh_key: str, timeout_minutes: int = 10):
         # Validate all inputs at initialization - fail fast if invalid
         self.rpi_ip = self._validate_ip(rpi_ip, "rpi_ip")
         self.kasa_ip = self._validate_ip(kasa_ip, "kasa_ip")
+        self.ssh_key = self._validate_ssh_key(ssh_key)
         self.timeout_minutes = self._validate_timeout(timeout_minutes)
         self.script_path = self._validate_script_path()
         self.venv_python = self._validate_python_path()
@@ -236,6 +238,31 @@ class TestExecutor:
             return ip
         except ValueError:
             raise ValueError(f"Invalid {name}: '{ip}' is not a valid IP address")
+
+
+
+    def _validate_ssh_key(self, ssh_key: str) -> str:
+        """Validate SSH key argument -- a file path to the SSH key."""
+        if not ssh_key:
+            raise ValueError("SSH key is required")
+        ssh_key_path = Path(ssh_key)
+        ssh_pub_key_path = ssh_key_path.with_suffix(".pub")
+        if not ssh_key_path.exists():
+            raise ValueError(f"SSH key file not found: {ssh_key_path}")
+        if not ssh_key_path.is_file():
+            raise ValueError(f"SSH key is not a file: {ssh_key_path}")
+        if not ssh_pub_key_path.exists():
+            raise ValueError(f"SSH public key file not found: {ssh_pub_key_path}")
+        if not ssh_pub_key_path.is_file():
+            raise ValueError(f"SSH public key is not a file: {ssh_pub_key_path}")
+        # test if private and public keys match
+        keys_match = lambda priv, pub: (
+            check_output(['ssh-keygen', '-lf', str(priv)], stderr=DEVNULL, text=True).split()[1] ==
+            check_output(['ssh-keygen', '-lf', pub], stderr=DEVNULL, text=True).split()[1]
+        )
+        if not keys_match(ssh_key_path, ssh_pub_key_path):
+            raise ValueError(f"SSH key and public key do not match: {ssh_key_path} {ssh_pub_key_path}")
+        return ssh_key_path
 
     def _validate_timeout(self, timeout: int) -> int:
         """Validate timeout is reasonable."""
@@ -286,6 +313,8 @@ class TestExecutor:
                 "--test-setup",  # Include the web UI test
                 "--timeout",
                 str(self.timeout_minutes),
+                "--ssh-key",
+                str(self.ssh_key),
                 url,
                 self.rpi_ip,
                 self.kasa_ip,
@@ -351,7 +380,7 @@ class ADSBTestService:
         self.test_queue = TestQueue()
         self.url_validator = GitHubValidator()
         self.test_executor = TestExecutor(
-            rpi_ip=config["rpi_ip"], kasa_ip=config["kasa_ip"], timeout_minutes=config.get("timeout_minutes", 10)
+            rpi_ip=config["rpi_ip"], kasa_ip=config["kasa_ip"], ssh_key=config["ssh_key"], timeout_minutes=config.get("timeout_minutes", 10)
         )
 
         # API key authentication
@@ -525,6 +554,7 @@ def load_config(config_file: str = "/etc/adsb-test-service/config.json") -> Dict
         default_config = {
             "rpi_ip": "192.168.77.190",
             "kasa_ip": "192.168.22.147",
+            "ssh_key": "/etc/adsb-test-service/ssh_key",
             "timeout_minutes": 10,
             "host": "0.0.0.0",
             "port": 8080,
