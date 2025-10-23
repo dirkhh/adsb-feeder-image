@@ -132,7 +132,7 @@ def download_and_decompress_image(url: str, force_download: bool = False, cache_
     return expected_image_name
 
 
-def setup_iscsi_image(cached_decompressed: Path, ssh_public_key: str = None) -> None:
+def setup_iscsi_image(cached_decompressed: Path, ssh_public_key: str) -> None:
     """
     Setup the iSCSI image for boot testing.
 
@@ -148,13 +148,13 @@ def setup_iscsi_image(cached_decompressed: Path, ssh_public_key: str = None) -> 
     target_path = Path("/srv/iscsi") / target_filename
     target_path.parent.mkdir(parents=True, exist_ok=True)
 
-    print(f"Running setup-tftp-iscsi.sh...")
+    print(f"Running setup-tftp-iscsi.sh {cached_decompressed} {target_path} {ssh_public_key}")
     print("=" * 70)
 
     # Build command with optional public key parameter
     # Use stdbuf to force line-buffered output from bash (otherwise bash fully buffers when stdout is a pipe)
     cmd = ["stdbuf", "-oL", "bash", str(Path(__file__).parent / "setup-tftp-iscsi.sh"), str(cached_decompressed), str(target_path)]
-    if ssh_public_key:
+    if ssh_public_key != "":
         cmd.append(ssh_public_key)
 
     # Run with real-time output forwarding to ensure all output appears in journal logs
@@ -199,7 +199,7 @@ def wait_for_system_down(rpi_ip: str, timeout_seconds: int = 60) -> bool:
     return False
 
 
-def wait_for_feeder_online(rpi_ip: str, expected_image_name: str, timeout_minutes: int = 5) -> bool:
+def wait_for_feeder_online(rpi_ip: str, expected_image_name: str, timeout_minutes: int = 5) -> tuple[bool, str]:
     """Wait for the feeder to come online and verify the correct image is running."""
     print(f"Waiting for feeder at {rpi_ip} to come online (timeout: {timeout_minutes} minutes)...")
 
@@ -207,31 +207,48 @@ def wait_for_feeder_online(rpi_ip: str, expected_image_name: str, timeout_minute
     timeout_seconds = timeout_minutes * 60
 
     while time.time() - start_time < timeout_seconds:
+        status_string = ""
         try:
+            # ping the RPi to see if it's online
+            result = subprocess.run(["ping", "-c", "1", "-W", "2", rpi_ip], capture_output=True, text=True, timeout=5)
+            if result.returncode != 0:
+                status_string = "ping down"
+                print("ping down - wait 10 seconds")
+                time.sleep(10)
+                continue
+            status_string = "ping up"
+
             # Try to fetch the main page
             response = requests.get(f"http://{rpi_ip}/", timeout=10)
-
+            status_string += f" HTTP response {response.status_code}"
             if response.status_code == 200:
-                print("Feeder responded! Checking image version...")
+                content = response.text
+                # grab the title from the response
+                title = content.split("<title>")[1].split("</title>")[0]
+                status_string += f" title: {title.strip()}"
 
                 # Look for the footer line with the image name
-                content = response.text
                 if expected_image_name in content:
-                    print(f"✓ SUCCESS: Feeder is running the correct image: {expected_image_name}")
-                    return True
+                    status_string += f" - correct image: {expected_image_name}"
+                    print(status_string)
+                    return True, "success"
                 else:
-                    print(f"Feeder responded but wrong image. Expected: {expected_image_name}")
-                    print("Page content preview:")
-                    print(content[:500] + "..." if len(content) > 500 else content)
+                    status_string += f" - can't find expected image: {expected_image_name}"
+                    print(status_string)
+                    return False, "expected image not found"
 
-        except requests.exceptions.RequestException as e:
-            print(f"Connection attempt failed: {e}")
+        # time out
+        except TimeoutException:
+            status_string += " timeout during http request"
 
-        print("Waiting 10 seconds before next attempt...")
+        except Exception:
+            status_string += " exception during http request"
+
+        print(f"{status_string} - wait 10 seconds")
         time.sleep(10)
 
-    print(f"✗ FAILURE: Feeder did not come online within {timeout_minutes} minutes")
-    return False
+    print(f"Feeder did not come online within {timeout_minutes} minutes")
+    return False, "timeout" if status_string != "ping down" else "ping down"
 
 
 def log_browser_activity(driver, description: str):
@@ -462,6 +479,7 @@ def test_basic_setup(rpi_ip: str, timeout_seconds: int = 90) -> bool:
     # Run Selenium test as testuser (not root - security requirement)
     print("Running browser test as non-root user (testuser)...")
     print("=" * 70)
+    process = None
     try:
         # Use Popen with real-time output forwarding (same as shell script)
         process = subprocess.Popen(
@@ -488,8 +506,9 @@ def test_basic_setup(rpi_ip: str, timeout_seconds: int = 90) -> bool:
         return returncode == 0
 
     except subprocess.TimeoutExpired:
-        process.kill()
-        process.wait()
+        if process:
+            process.kill()
+            process.wait()
         print("=" * 70)
         print(f"✗ Test timed out after {timeout_seconds} seconds")
         return False
@@ -868,7 +887,7 @@ Examples:
         control_kasa_switch(args.kasa_ip, False)
 
         # Derive public key path from private key path (assumes public key is at private_key + '.pub')
-        ssh_public_key = None
+        ssh_public_key = ""
         if args.ssh_key:
             ssh_public_key_path = Path(args.ssh_key).with_suffix(Path(args.ssh_key).suffix + ".pub")
             if ssh_public_key_path.exists():
@@ -879,20 +898,25 @@ Examples:
 
         setup_iscsi_image(cached_image_path, ssh_public_key)
         control_kasa_switch(args.kasa_ip, True)
-        success = wait_for_feeder_online(args.rpi_ip, expected_image_name, args.timeout)
-        count = 1
+        count = 0
+        success = False
+        status_string = ""
         while not success and count < 3:
-            if "dietpi" in expected_image_name:
-                print(
-                    "\nThe Feeder isn't online - on a DietPi feeder this can mean that the reboot "
-                    "failed because it got confused by iSCSI root filesystem!"
-                )
-                # power cycle and try again
-                control_kasa_switch(args.kasa_ip, False)
-                time.sleep(10)
-                control_kasa_switch(args.kasa_ip, True)
-                success = wait_for_feeder_online(args.rpi_ip, expected_image_name, args.timeout)
+            success, status_string = wait_for_feeder_online(args.rpi_ip, expected_image_name, args.timeout)
 
+            if "dietpi" in expected_image_name:
+                if status_string == "ping down":
+                    print("with DietPi we could be hung because of iSCSI root filesystem and shutdown failure")
+                    # power cycle and try again
+                    control_kasa_switch(args.kasa_ip, False)
+                    time.sleep(10)
+                    control_kasa_switch(args.kasa_ip, True)
+                else:
+                    print(f"with DietPi this can take 20+ minutes because of iSCSI root filesystem and shutdown failure -- keep waiting")
+
+            else:
+                print(f"no success in {args.timeout} minutes")
+                break
             count += 1
 
         if success:
