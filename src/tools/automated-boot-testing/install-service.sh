@@ -60,6 +60,7 @@ fi
 echo "📋 Copying service files..."
 cp "$SOURCE_DIR/adsb-test-service.py" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/test-feeder-image.py" "$INSTALL_DIR/"
+cp "$SOURCE_DIR/run-selenium-test.py" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/setup-tftp-iscsi.sh" "$INSTALL_DIR/"
 chmod +x "$INSTALL_DIR"/*.py
 chmod +x "$INSTALL_DIR"/*.sh
