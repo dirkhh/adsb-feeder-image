@@ -5,6 +5,7 @@
   "host": "100.x.x.x",
   "port": 9456,
   "log_level": "INFO",
+  "ssh_key": "/etc/adsb-test-service/ssh_key",
   "api_keys": {
     "REPLACE_WITH_SECURE_KEY_1": "github-ci",
     "REPLACE_WITH_SECURE_KEY_2": "developer1"
