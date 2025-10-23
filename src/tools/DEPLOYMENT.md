@@ -168,7 +168,7 @@ BOOT_TEST_HOST=root@boottest.example.com
 - `install-service.sh` - Installation script
 - Configuration and utility scripts
 
-**Installed to:** `/opt/automated-boot-testing`
+**Installed to:** `/opt/adsb-test-service`
 
 ## Deployment Process
 
