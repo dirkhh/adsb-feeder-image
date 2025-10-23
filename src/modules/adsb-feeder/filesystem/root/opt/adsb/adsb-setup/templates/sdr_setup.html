@@ -300,12 +300,12 @@
     '1090': {
       'rtlsdr': ['enter a value between 0 and 50 or "auto"', validate_0_50_auto],
       'airspy': ['enter a value between 0 and 21 or "auto"', validate_0_21_auto],
-      'sdrplay': 'leave empty as this is auto-configured',
+      'sdrplay': ['always uses agc - leave empty', validate_empty],
     },
     '1090_2': {
       'rtlsdr': ['enter a value between 0 and 50 or "auto"', validate_0_50_auto],
       'airspy': ['enter a value between 0 and 21 or "auto"', validate_0_21_auto],
-      'sdrplay': 'leave empty as this is auto-configured',
+      'sdrplay': ['always uses agc - leave empty', validate_empty],
     },
     '978': {
       'rtlsdr': ['enter a value between 0 and 50 or "auto"', validate_0_50_auto],
@@ -423,8 +423,8 @@
     let purpose = $('input[name="usage"]:checked').val();
     let type = sdrs[sdr]['type'];
     if (Object.keys(gain_text).includes(purpose) && Object.keys(gain_text[purpose]).includes(type)) {
-      let v = gain_text[purpose][type][1];
-      if (!v(gain)) {
+      const validate = gain_text[purpose][type][1];
+      if (!validate(gain)) {
         alert(gain_text[purpose][type][0]);
         return false;
       }

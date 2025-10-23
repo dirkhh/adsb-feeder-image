@@ -1,5 +1,6 @@
 Changes since v3.0.5
 =======
+- beta-notes: fix SDRPlay SDR Setup for 1090 bug
 - beta-notes: update Skystats to v0.1.11
 - add ability to backup Skystats database. NOTE: no restore from the UI (yet)
 - beta-notes: small updates to the README
