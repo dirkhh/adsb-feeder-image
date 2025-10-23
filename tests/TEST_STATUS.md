@@ -1,35 +1,39 @@
-# Test Suite Status Report
+# Test Suite Status & Coverage Plan
 
-**Date:** 2025-10-21
-**Last Updated By:** Claude Code Testing Initiative
+**Last Updated:** 2025-10-23
+**Test Suite Status:** 377 passing tests, 39% coverage
+
+This document tracks current test coverage, recent improvements, known issues, and planned enhancements.
+
+## Table of Contents
+
+1. [Executive Summary](#executive-summary)
+2. [Coverage by Module](#coverage-by-module)
+3. [Recent Improvements](#recent-improvements)
+4. [Known Issues](#known-issues)
+5. [Planned Improvements](#planned-improvements)
+6. [Priority Matrix](#priority-matrix)
+7. [Implementation Roadmap](#implementation-roadmap)
+8. [Metrics Dashboard](#metrics-dashboard)
+9. [Commands Reference](#commands-reference)
+
+---
 
 ## Executive Summary
 
-| Metric | Before | After | Change |
-|--------|--------|-------|--------|
-| **Total Tests** | 318 passing | 377 passing | +59 tests (+18.6%) |
+| Metric | Before | Current | Change |
+|--------|--------|---------|--------|
+| **Total Tests** | 318 | 377 | +59 tests (+18.6%) |
 | **Overall Coverage** | 36% | 39% | +3% |
 | **Failing Unit Tests** | 8 | 0 | ✅ All fixed |
 | **system.py Coverage** | 21% | 95% | +74% 🎉 |
 
----
-
-## Test Suite Improvements
-
-### New Test Files Created
-
-#### ✅ tests/unit/test_system.py
-- **54 comprehensive tests** covering all critical security and reliability aspects
-- **95% coverage** of system.py (up from 21%)
-- **All tests passing** ✓
-
-**Test Coverage Includes:**
-- Lock class (6 tests) - Thread safety, concurrent access
-- Restart class (11 tests) - Background execution, state management
-- System shutdown/reboot (7 tests) - Command execution, validation
-- Network operations (12 tests) - DNS, IPv6, IP checking, GPSD
-- Docker operations (14 tests) - Container management, status parsing
-- Thread safety (4 tests) - Concurrent access patterns
+### Test Suite Health
+- ✅ **367 unit tests** passing (100% pass rate)
+- ⚠️ **10 integration tests** failing (known architectural issues)
+- ✅ **Comprehensive test patterns** documented in README.md
+- ✅ **Good mocking strategy** across all test files
+- ⚠️ **Coverage gaps** in critical modules (agg_status, background)
 
 ---
 
@@ -66,9 +70,22 @@
 
 ---
 
-## Issues Fixed
+## Recent Improvements
 
-### Unit Test Failures (8 → 0) ✅
+### ✅ test_system.py Created (2025-10-21)
+- **54 comprehensive tests** covering all critical security and reliability aspects
+- **95% coverage** of system.py (up from 21%)
+- **All tests passing** ✓
+
+**Test Coverage Includes:**
+- Lock class (6 tests) - Thread safety, concurrent access
+- Restart class (11 tests) - Background execution, state management
+- System shutdown/reboot (7 tests) - Command execution, validation
+- Network operations (12 tests) - DNS, IPv6, IP checking, GPSD
+- Docker operations (14 tests) - Container management, status parsing
+- Thread safety (4 tests) - Concurrent access patterns
+
+### ✅ Unit Test Failures Fixed (8 → 0)
 
 #### conftest.py
 **Issue:** FileExistsError when session fixture created directories multiple times
@@ -85,16 +102,21 @@
 **Fix:** Clear `config.json` before creating Env objects in tests
 **Files Changed:** `tests/unit/test_environment.py` (4 test methods)
 
-#### test_system.py (NEW FILE)
-**Issue:** No tests for critical security module
-**Fix:** Created comprehensive test suite with 54 tests
-**Files Changed:** `tests/unit/test_system.py` (new file, 880 lines)
+### ✅ Comprehensive Documentation
+- Created `tests/README.md` - Complete testing guide with patterns and best practices
+- Created this `tests/TEST_STATUS.md` - Current status and improvement plan
+- Documented all common pitfalls and solutions
+- Provided comprehensive examples from test_system.py
+
+### ✅ Tool Security Tests (2025-10-19)
+- `src/tools/github-webhook/test_webhook_security.py` - 20 passing tests, 2 skipped
+- `src/tools/automated-boot-testing/test_boot_service_security.py` - 16 passing tests, 1 skipped
 
 ---
 
 ## Known Issues
 
-### Integration Tests (10 failing)
+### 1. Integration Tests (10 failing)
 
 **Status:** Known architectural issues requiring larger refactoring (Priority 5)
 
@@ -109,7 +131,17 @@
 
 **Workaround:** Focus on unit tests first; integration tests require architectural changes
 
-### Test Ordering Sensitivity (1 test)
+**To Fix (Future Work):**
+```python
+# Add reset method to Data class
+def reset_for_testing(self):
+    """Reset singleton state for testing"""
+    self._envs = {}
+    self._config = {}
+    # ... reset other state
+```
+
+### 2. Test Ordering Sensitivity (1 test)
 
 **Issue:** Pass individually but fail in full suite due to cross-file interference
 
@@ -125,37 +157,9 @@
 
 ---
 
-## Test Patterns Documented
+## Planned Improvements
 
-Created comprehensive `TESTING.md` guide covering:
-
-### ✅ Best Practices
-1. Module reloading pattern (fixing path pollution)
-2. Config isolation pattern (preventing value pollution)
-3. Mock patch paths (import location, not definition)
-4. Thread safety testing patterns
-5. Background operation testing
-6. Network operation mocking
-
-### ✅ Common Pitfalls
-1. Wrong mock patch paths
-2. Not clearing config between tests
-3. Not restoring module state
-4. Forgetting `exist_ok=True`
-5. Testing `threading.Lock` type incorrectly
-6. Not using `adsb_test_env` fixture
-7. Not waiting for background threads
-
-### ✅ Code Examples
-- Comprehensive examples from `test_system.py` (95% coverage)
-- Before/after comparisons for each pitfall
-- Complete test templates for new contributors
-
----
-
-## Next Steps & Recommendations
-
-### Priority 1: Critical Missing Tests (Week 1)
+### Priority 1: Critical Missing Tests (Week 1) ⚠️
 
 #### A. Create tests/unit/test_agg_status.py
 **Impact:** 374 uncovered lines → ~100 uncovered lines
@@ -164,25 +168,25 @@ Created comprehensive `TESTING.md` guide covering:
 **Recommended Tests:**
 ```python
 class TestAggStatus:
-    - test_aggstatus_initialization()
-    - test_beast_property_states()
-    - test_mlat_property_states()
-    - test_check_method_caching()
+    test_aggstatus_initialization()
+    test_beast_property_states()
+    test_mlat_property_states()
+    test_check_method_caching()
 
 class TestStatusTransitions:
-    - test_status_disconnected_to_good()
-    - test_status_good_to_bad()
-    - test_status_warning_states()
-    - test_status_disabled()
+    test_status_disconnected_to_good()
+    test_status_good_to_bad()
+    test_status_warning_states()
+    test_status_disabled()
 
 class TestMLATStatus:
-    - test_get_mlat_status_disabled()
-    - test_get_mlat_status_enabled()
-    - test_get_mlat_status_file_parsing()
+    test_get_mlat_status_disabled()
+    test_get_mlat_status_enabled()
+    test_get_mlat_status_file_parsing()
 
 class TestThreadSafety:
-    - test_concurrent_status_checks()
-    - test_lock_acquisition()
+    test_concurrent_status_checks()
+    test_lock_acquisition()
 ```
 
 **Estimated:** ~80-100 tests, 2-3 days work
@@ -194,16 +198,16 @@ class TestThreadSafety:
 **Recommended Tests:**
 ```python
 class TestBackgroundTasks:
-    - test_task_initialization()
-    - test_task_execution()
-    - test_task_error_handling()
-    - test_task_cancellation()
-    - test_concurrent_tasks()
+    test_task_initialization()
+    test_task_execution()
+    test_task_error_handling()
+    test_task_cancellation()
+    test_concurrent_tasks()
 ```
 
 **Estimated:** ~10-15 tests, 1 day work
 
-### Priority 2: Expand Existing Coverage (Week 2-3)
+### Priority 2: Expand Existing Coverage (Week 2-3) ⏭️
 
 #### C. Expand tests/unit/test_netconfig.py
 **Target:** 29% → 75% coverage
@@ -215,14 +219,48 @@ class TestBackgroundTasks:
 **Focus:** Each aggregator type (10 total), connection handling, data parsing
 **Estimated:** +50 tests
 
+**Missing Coverage:**
+- Network timeout scenarios
+- Malformed API responses
+- Rate limiting
+- Error recovery mechanisms
+
+**Tests to Add:**
+```python
+test_aggregator_network_timeout_recovery()
+test_aggregator_malformed_api_response()
+test_aggregator_rate_limit_handling()
+test_aggregator_connection_retry_logic()
+test_aggregator_partial_data_handling()
+```
+
 #### E. Expand tests/unit/test_app.py
 **Target:** 24% → 50% coverage
 **Focus:** POST routes, API endpoints, input validation, error handling
 **Estimated:** +100 tests
 
-### Priority 3: Fix Architectural Issues (Week 4)
+**Missing Coverage:**
+- POST data injection prevention
+- File upload validation
+- Session security
+- Error page information disclosure
+- CSRF protection
 
-#### F. Fix Integration Tests
+**Tests to Add:**
+```python
+class TestAppSecurity:
+    test_app_post_sql_injection_prevention()
+    test_app_post_command_injection_prevention()
+    test_app_file_upload_path_traversal()
+    test_app_file_upload_size_limit()
+    test_app_session_security()
+    test_app_csrf_protection()
+    test_app_error_page_information_disclosure()
+```
+
+### Priority 3: Integration Tests (Week 4) 📋
+
+#### F. Fix Integration Test Architecture
 **Required Changes:**
 1. ✅ Add `reset_for_testing()` method to Data class (Completed 2025-10-21)
 2. Make path configuration more testable
@@ -235,6 +273,72 @@ class TestBackgroundTasks:
 - ✅ Updated test_data.py to use new reset method
 - ✅ Fixed TestCreateFakeInfo tests (proper module reloading)
 
+#### G. Create tests/integration/test_e2e_workflows.py (NEW)
+**Missing Scenarios:**
+- Complete setup workflow (initial config → SDR detection → aggregator setup)
+- Multi-SDR configuration
+- Aggregator fail-over
+- Configuration backup/restore
+
+#### H. Create tests/integration/test_security_integration.py (NEW)
+**Missing Scenarios:**
+- Config injection across components
+- File upload security (backup restore)
+- Concurrent configuration changes
+- Authentication flow security
+
+---
+
+## Priority Matrix
+
+### Security-Critical (Must Have)
+| Test File | Impact | Effort | Priority |
+|-----------|--------|--------|----------|
+| test_agg_status.py | High | 2-3 days | P1 |
+| test_background.py | Medium | 1 day | P1 |
+| test_app.py (security) | High | 3-4 days | P2 |
+
+### Feature Coverage (Should Have)
+| Test File | Impact | Effort | Priority |
+|-----------|--------|--------|----------|
+| test_netconfig.py (expand) | Medium | 2 days | P2 |
+| test_aggregators.py (expand) | Medium | 3 days | P2 |
+| test_app.py (routes) | High | 5 days | P2 |
+
+### Integration (Nice to Have)
+| Test File | Impact | Effort | Priority |
+|-----------|--------|--------|----------|
+| Fix integration tests | Medium | 2-3 days | P3 |
+| test_e2e_workflows.py | Medium | 3-4 days | P3 |
+| test_security_integration.py | Medium | 2-3 days | P3 |
+
+---
+
+## Implementation Roadmap
+
+### Week 1: Security-Critical Tests ⚠️
+- [ ] Create `test_agg_status.py` with status tracking tests
+- [ ] Create `test_background.py` with task management tests
+- [ ] Run coverage report and identify remaining gaps
+
+**Target Coverage:** 45-50%
+
+### Week 2-3: Feature Coverage ⏭️
+- [ ] Extend `test_netconfig.py` with connection/timeout tests
+- [ ] Extend `test_aggregators.py` with error handling tests
+- [ ] Extend `test_app.py` with security tests
+- [ ] Run coverage report and verify improvements
+
+**Target Coverage:** 55-65%
+
+### Week 4: Integration & Cleanup 📋
+- [ ] Fix integration test architecture issues
+- [ ] Create `test_e2e_workflows.py`
+- [ ] Create `test_security_integration.py`
+- [ ] Run full test suite and verify targets met
+
+**Target Coverage:** 70-75%
+
 ### Coverage Goals
 
 | Timeframe | Target Coverage | Key Achievements |
@@ -243,69 +347,6 @@ class TestBackgroundTasks:
 | **Week 1** | 45-50% | test_agg_status.py, test_background.py |
 | **Week 2-3** | 55-65% | Expanded netconfig, aggregators, app tests |
 | **Month 1** | 70-75% | All priority modules covered |
-
----
-
-## Test Infrastructure Health
-
-### ✅ Strengths
-- Comprehensive `conftest.py` with `adsb_test_env` fixture
-- Good test organization (unit vs integration)
-- Consistent naming conventions
-- Proper use of mocking in existing tests
-- Excellent example in `test_system.py` (95% coverage)
-
-### ⚠️ Areas for Improvement
-- Some cross-test interference (ordering sensitivity)
-- Integration tests have architectural blockers
-- Coverage gaps in critical modules (agg_status, background)
-- Large surface area in app.py with low coverage
-
-### 🔧 Recent Improvements
-- Added comprehensive `TESTING.md` guide
-- Fixed all unit test failures (8 → 0)
-- Created `test_system.py` with 54 tests
-- Documented test patterns and pitfalls
-- Improved fixture usage documentation
-- **2025-10-21:** Added comprehensive type hints to util.py, other_aggregators.py, data.py
-- **2025-10-21:** Implemented `Data.reset_for_testing()` for proper test isolation
-- **2025-10-21:** Fixed TestCreateFakeInfo test ordering issues (2 tests now passing)
-- **2025-10-21:** All 371 unit tests now passing (100% unit test pass rate)
-
----
-
-## Commands Reference
-
-### Run All Tests
-```bash
-uv run pytest tests/ -v
-```
-
-### Run Only Unit Tests (Recommended)
-```bash
-uv run pytest tests/unit/ -v
-```
-
-### Coverage Report
-```bash
-uv run pytest --cov=src --cov-report=term-missing tests/
-```
-
-### Coverage HTML Report
-```bash
-uv run pytest --cov=src --cov-report=html tests/
-# Open coverage_html_report/index.html
-```
-
-### Run Specific Module Tests
-```bash
-uv run pytest tests/unit/test_system.py -v
-```
-
-### Run With Coverage for Specific Module
-```bash
-uv run pytest --cov=src --cov-report=term-missing tests/unit/test_system.py
-```
 
 ---
 
@@ -380,27 +421,63 @@ uv run pytest --cov=src --cov-report=term-missing tests/unit/test_system.py
 
 ---
 
+## Commands Reference
+
+### Run All Tests
+```bash
+uv run pytest tests/ -v
+```
+
+### Run Only Unit Tests (Recommended)
+```bash
+uv run pytest tests/unit/ -v
+```
+
+### Coverage Report
+```bash
+uv run pytest --cov=src --cov-report=term-missing tests/
+```
+
+### Coverage HTML Report
+```bash
+uv run pytest --cov=src --cov-report=html tests/
+# Open coverage_html_report/index.html
+```
+
+### Run Specific Module Tests
+```bash
+uv run pytest tests/unit/test_system.py -v
+```
+
+### Run With Coverage for Specific Module
+```bash
+uv run pytest --cov=src --cov-report=term-missing tests/unit/test_system.py
+```
+
+---
+
 ## Contributors
 
 **Testing Initiative Lead:** Claude Code
-**Date:** October 2025
-**Commits:**
+**Last Major Update:** October 2025
+**Key Achievements:**
 - Created `tests/unit/test_system.py` (54 tests, 95% coverage)
 - Fixed 8 unit test failures
-- Created `tests/TESTING.md` guide
-- Created this status report
+- Created comprehensive `tests/README.md` guide
+- Created this consolidated status & planning document
+- Security tests for tools (webhook, boot service)
 
 ---
 
 ## For More Information
 
-- **Testing Guide:** See `tests/TESTING.md`
-- **Test Examples:** See `tests/unit/test_system.py`
+- **Testing Guide:** See [README.md](README.md) for comprehensive testing documentation
+- **Test Examples:** See `tests/unit/test_system.py` for excellent test patterns
 - **Coverage Reports:** Run `uv run pytest --cov=src --cov-report=html tests/`
 
 **Questions?** Open an issue with the `testing` label.
 
 ---
 
-**Last Updated:** 2025-10-21
+**Last Updated:** 2025-10-23
 **Next Review:** After Priority 1 tasks completed (Week 1)
