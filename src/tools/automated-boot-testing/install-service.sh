@@ -64,12 +64,17 @@ cp "$SOURCE_DIR/run-selenium-test.py" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/setup-tftp-iscsi.sh" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/metrics.py" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/boot-test-metrics-cli.py" "$INSTALL_DIR/"
+cp "$SOURCE_DIR/serial_console_reader.py" "$INSTALL_DIR/"
 chmod +x "$INSTALL_DIR"/*.py
 chmod +x "$INSTALL_DIR"/*.sh
 
 # Create test images directory
 echo "📁 Creating test images directory..."
 mkdir -p "$INSTALL_DIR/test-images"
+
+# Create serial logs directory
+echo "📁 Creating serial logs directory..."
+mkdir -p "$INSTALL_DIR/serial-logs"
 
 # Create metrics database directory
 echo "📁 Creating metrics database directory..."

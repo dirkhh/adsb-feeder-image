@@ -224,7 +224,7 @@ class GitHubValidator:
 class TestExecutor:
     """Executes the actual test using the test-feeder-image.py script."""
 
-    def __init__(self, rpi_ip: str, kasa_ip: str, ssh_key: str, timeout_minutes: int = 10):
+    def __init__(self, rpi_ip: str, kasa_ip: str, ssh_key: str, timeout_minutes: int = 10, config: Dict = None):
         # Validate all inputs at initialization - fail fast if invalid
         self.rpi_ip = self._validate_ip(rpi_ip, "rpi_ip")
         self.kasa_ip = self._validate_ip(kasa_ip, "kasa_ip")
@@ -232,6 +232,7 @@ class TestExecutor:
         self.timeout_minutes = self._validate_timeout(timeout_minutes)
         self.script_path = self._validate_script_path()
         self.venv_python = self._validate_python_path()
+        self.config = config or {}
 
     def _validate_ip(self, ip: str, name: str) -> str:
         """Validate IP address format - simple and clear."""
@@ -325,6 +326,16 @@ class TestExecutor:
             if metrics_id is not None:
                 cmd.extend(["--metrics-id", str(metrics_id)])
 
+            # Add serial console if configured
+            serial_console = self.config.get("serial_console", "")
+            if serial_console:
+                cmd.extend(["--serial-console", serial_console])
+                serial_baud = self.config.get("serial_baud", 115200)
+                cmd.extend(["--serial-baud", str(serial_baud)])
+                # Add log-all-serial flag if configured
+                if self.config.get("log_all_serial", False):
+                    cmd.append("--log-all-serial")
+
             # Add positional arguments
             cmd.extend([url, self.rpi_ip, self.kasa_ip])
 
@@ -388,7 +399,11 @@ class ADSBTestService:
         self.test_queue = TestQueue()
         self.url_validator = GitHubValidator()
         self.test_executor = TestExecutor(
-            rpi_ip=config["rpi_ip"], kasa_ip=config["kasa_ip"], ssh_key=config["ssh_key"], timeout_minutes=config.get("timeout_minutes", 10)
+            rpi_ip=config["rpi_ip"],
+            kasa_ip=config["kasa_ip"],
+            ssh_key=config["ssh_key"],
+            timeout_minutes=config.get("timeout_minutes", 10),
+            config=config
         )
 
         # API key authentication
