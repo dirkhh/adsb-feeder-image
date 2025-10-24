@@ -132,8 +132,18 @@ class TestMetrics:
         conn.close()
 
     def _extract_version(self, url: str) -> Optional[str]:
-        """Extract version from image URL"""
-        match = re.search(r"v?\d+\.\d+\.\d+(?:-beta\.\d+)?", url)
+        """
+        Extract version from image filename (not path).
+
+        Example URL:
+        https://github.com/.../releases/download/v3.0.6-beta.6/adsb-im-...-v3.0.6-beta.9.img.xz
+        Should extract: v3.0.6-beta.9 (from filename, not from path)
+        """
+        # Extract filename from URL (last component after /)
+        filename = url.split('/')[-1]
+
+        # Extract version from filename only
+        match = re.search(r"v?\d+\.\d+\.\d+(?:-beta\.\d+)?", filename)
         return match.group(0) if match else None
 
     def get_recent_results(self, limit: int = 10) -> List[Dict[str, Any]]:
