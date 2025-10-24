@@ -3352,7 +3352,7 @@ class AdsbIm:
                     continue
                 if key.startswith("temp_sensor_") and value == "go":
                     self._d.env_by_tags("temp_sensor").value = form.get("temp_sensor", "") if key.endswith("enable") else ""
-                    self.handle_temp_sensor(self._d.env_by_tags("temp_sensor"), int(form.get("dht22_pin", "4")))
+                    self.handle_temp_sensor(self._d.env_by_tags("temp_sensor"), make_int(form.get("dht22_pin", "4")))
                     self._next_url_from_director = request.url
                     continue
 
