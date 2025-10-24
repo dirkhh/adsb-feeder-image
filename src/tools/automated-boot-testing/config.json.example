@@ -1,6 +1,5 @@
 {
   "rpi_ip": "192.168.77.190",
-  "kasa_ip": "192.168.22.147",
   "timeout_minutes": 10,
   "host": "100.x.x.x",
   "port": 9456,
@@ -9,6 +8,14 @@
   "serial_console": "",
   "serial_baud": 115200,
   "log_all_serial": false,
+  "power_toggle_script": "/opt/adsb-test-service/power-toggle-kasa.py",
+  "kasa_ip": "192.168.22.147",
+  "unifi_controller": "",
+  "unifi_username": "",
+  "unifi_password": "",
+  "unifi_site": "default",
+  "unifi_switch_mac": "",
+  "unifi_port_idx": 0,
   "api_keys": {
     "REPLACE_WITH_SECURE_KEY_1": "github-ci",
     "REPLACE_WITH_SECURE_KEY_2": "developer1"
@@ -21,5 +28,15 @@
     "serial_console": "Path to serial device (e.g., /dev/ttyUSB0). Leave empty \"\" to disable serial monitoring.",
     "serial_baud": "Serial baud rate (default: 115200). Typical values: 9600, 19200, 38400, 57600, 115200.",
     "log_all_serial": "If true, save serial console logs for ALL tests. If false, only save on failures (default: false)."
+  },
+  "_power_toggle_notes": {
+    "power_toggle_script": "Path to power toggle script. Options: power-toggle-kasa.py (Kasa smart plug) or power-toggle-unifi.py (UniFi PoE port)",
+    "kasa_ip": "For Kasa: IP address of Kasa smart plug",
+    "unifi_controller": "For UniFi: IP/hostname of UniFi controller (leave empty if using Kasa)",
+    "unifi_username": "For UniFi: Controller username",
+    "unifi_password": "For UniFi: Controller password",
+    "unifi_site": "For UniFi: Site name (usually 'default')",
+    "unifi_switch_mac": "For UniFi: MAC address of switch (e.g., 'aa:bb:cc:dd:ee:ff')",
+    "unifi_port_idx": "For UniFi: Port number to control (1-based, e.g., 5 for port 5)"
   }
 }

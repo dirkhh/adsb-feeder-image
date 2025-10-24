@@ -18,8 +18,9 @@ webdriver-manager>=4.0.0
 # HTML Parsing
 beautifulsoup4>=4.14.0
 
-# Smart Home Automation (Kasa switches)
-python-kasa>=0.5.0
+# Smart Home Automation
+python-kasa>=0.5.0  # TP-Link Kasa smart plugs
+pyunifi>=2.21      # UniFi Controller API for PoE control
 
 # Serial Console Monitoring
 pyserial>=3.5

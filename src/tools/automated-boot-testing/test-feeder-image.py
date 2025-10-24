@@ -10,7 +10,7 @@ This script:
 4. Waits for the feeder to come online and verifies the correct image is running
 
 Usage:
-    python3 test-feeder-image.py <image_url> <rpi_ip> <kasa_ip>
+    python3 test-feeder-image.py <image_url> <rpi_ip> <power_toggle_script>
 """
 
 import argparse
@@ -26,7 +26,6 @@ from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
-from kasa import SmartPlug
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
@@ -116,31 +115,51 @@ def try_ssh_shutdown(rpi_ip: str, user: str = "root", ssh_key: str = "", timeout
         return False
 
 
-async def control_kasa_switch_async(kasa_ip: str, turn_on: bool) -> bool:
-    """Control a Kasa smart switch."""
+def power_toggle(script_path: str, turn_on: bool) -> bool:
+    """
+    Toggle power using external script.
+
+    Args:
+        script_path: Path to power toggle script
+        turn_on: True to turn on, False to turn off
+
+    Returns:
+        True on success, False on failure
+    """
+    action = "on" if turn_on else "off"
+    base_dir = Path(__file__).parent
+    python_venv = base_dir / "venv/bin/python3"
     try:
-        plug = SmartPlug(kasa_ip)
-        await plug.update()
+        # Use Popen for real-time output forwarding to systemd journal
+        process = subprocess.Popen(
+            [str(python_venv), script_path, action],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,  # Line buffered
+        )
 
-        if turn_on:
-            print(f"Turning on Kasa switch at {kasa_ip}...")
-            await plug.turn_on()
-            print("✓ Kasa switch turned on")
+        # Forward output in real-time to journal
+        for line in process.stdout:
+            print(line, end="", flush=True)
+
+        # Wait for process to complete with timeout
+        returncode = process.wait(timeout=30)
+
+        if returncode == 0:
+            return True
         else:
-            print(f"Turning off Kasa switch at {kasa_ip}...")
-            await plug.turn_off()
-            print("✓ Kasa switch turned off")
+            print(f"Power toggle script failed with exit code {returncode}")
+            return False
 
-        return True
-
-    except Exception as e:
-        print(f"✗ Error controlling Kasa switch: {e}")
+    except subprocess.TimeoutExpired:
+        process.kill()
+        process.wait()
+        print(f"Power toggle script timed out after 30 seconds")
         return False
-
-
-def control_kasa_switch(kasa_ip: str, turn_on: bool) -> bool:
-    """Control a Kasa smart switch (sync wrapper)."""
-    return asyncio.run(control_kasa_switch_async(kasa_ip, turn_on))
+    except Exception as e:
+        print(f"Error running power toggle script: {e}")
+        return False
 
 
 def validate_image_filename(filename: str) -> str:
@@ -898,15 +917,15 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-    .venv/bin/python test-feeder-image.py https://example.com/adsb-im-raspberrypi64-pi-2-3-4-5-v3.0.6-beta.6.img.xz 192.168.1.100 192.168.1.200
-    .venv/bin/python test-feeder-image.py --test-setup https://example.com/adsb-im-raspberrypi64-pi-2-3-4-5-v3.0.6-beta.6.img.xz 192.168.1.100 192.168.1.200
-    .venv/bin/python test-feeder-image.py --test-only --visible-browser --test-setup https://example.com/adsb-im-raspberrypi64-pi-2-3-4-5-v3.0.6-beta.6.img.xz 192.168.1.100 192.168.1.200
+    .venv/bin/python test-feeder-image.py https://example.com/adsb-im-raspberrypi64-pi-2-3-4-5-v3.0.6-beta.6.img.xz 192.168.1.100 /opt/adsb-test-service/power-toggle-kasa.py
+    .venv/bin/python test-feeder-image.py --test-setup https://example.com/adsb-im-raspberrypi64-pi-2-3-4-5-v3.0.6-beta.6.img.xz 192.168.1.100 /opt/adsb-test-service/power-toggle-kasa.py
+    .venv/bin/python test-feeder-image.py --test-only --visible-browser --test-setup https://example.com/adsb-im-raspberrypi64-pi-2-3-4-5-v3.0.6-beta.6.img.xz 192.168.1.100 /opt/adsb-test-service/power-toggle-kasa.py
         """,
     )
 
     parser.add_argument("image_url", help="URL or file path to the .img.xz image file")
     parser.add_argument("rpi_ip", help="IP address of the Raspberry Pi")
-    parser.add_argument("kasa_ip", help="IP address of the Kasa smart switch")
+    parser.add_argument("power_toggle_script", help="Path to power toggle script")
     parser.add_argument("--force-download", action="store_true", help="Force re-download even if cached files exist")
     parser.add_argument("--force-off", action="store_true", help="Force shutdown and turn off power")
     parser.add_argument("--user", default="root", help="SSH user (default: root)")
@@ -977,7 +996,7 @@ Examples:
             try_ssh_shutdown(args.rpi_ip, args.user, args.ssh_key, args.shutdown_timeout)
             wait_for_system_down(args.rpi_ip, args.shutdown_timeout)
 
-        control_kasa_switch(args.kasa_ip, False)
+        power_toggle(args.power_toggle_script, False)
 
         # Derive public key path from private key path (assumes public key is at private_key + '.pub')
         ssh_public_key = ""
@@ -994,7 +1013,7 @@ Examples:
         # Update metrics: boot stage starting
         update_metrics_stage(args.metrics_id, args.metrics_db, "boot", "running")
 
-        control_kasa_switch(args.kasa_ip, True)
+        power_toggle(args.power_toggle_script, True)
         count = 0
         success = False
         status_string = ""
@@ -1007,9 +1026,9 @@ Examples:
                 if status_string == "ping down":
                     print("with DietPi we could be hung because of iSCSI root filesystem and shutdown failure")
                     # power cycle and try again
-                    control_kasa_switch(args.kasa_ip, False)
+                    power_toggle(args.power_toggle_script, False)
                     time.sleep(10)
-                    control_kasa_switch(args.kasa_ip, True)
+                    power_toggle(args.power_toggle_script, True)
                 else:
                     print(f"with DietPi this can take 20+ minutes because of iSCSI root filesystem and shutdown failure -- keep waiting")
 
