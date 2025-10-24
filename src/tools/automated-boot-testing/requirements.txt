@@ -21,6 +21,9 @@ beautifulsoup4>=4.14.0
 # Smart Home Automation (Kasa switches)
 python-kasa>=0.5.0
 
+# Serial Console Monitoring
+pyserial>=3.5
+
 # Standard Library Extensions
 pathlib2>=2.3.7; python_version < '3.4'
 

@@ -41,6 +41,12 @@ try:
 except ImportError:
     METRICS_AVAILABLE = False
 
+try:
+    from serial_console_reader import SerialConsoleReader
+    SERIAL_AVAILABLE = True
+except ImportError:
+    SERIAL_AVAILABLE = False
+
 # Configure line-buffered output for real-time logging when running as a systemd service
 # This ensures all output appears immediately in journalctl without manual flush() calls
 sys.stdout.reconfigure(line_buffering=True)
@@ -57,6 +63,34 @@ def update_metrics_stage(metrics_id: int, metrics_db: str, stage: str, status: s
         metrics.update_stage(metrics_id, stage, status)
     except Exception as e:
         print(f"⚠️  Failed to update metrics: {e}")
+
+
+def save_serial_log_on_failure(serial_reader, metrics_id: int = None, script_dir: Path = None):
+    """Save serial console log to file on test failure."""
+    if not serial_reader or not serial_reader.is_running():
+        return
+
+    try:
+        # Create logs directory if needed
+        log_dir = script_dir / "serial-logs" if script_dir else Path("serial-logs")
+        log_dir.mkdir(exist_ok=True)
+
+        # Generate log filename with metrics ID if available
+        if metrics_id:
+            log_file = log_dir / f"serial-console-test-{metrics_id}.log"
+        else:
+            import time
+            timestamp = int(time.time())
+            log_file = log_dir / f"serial-console-{timestamp}.log"
+
+        # Save the log
+        if serial_reader.save_to_file(str(log_file)):
+            print(f"📝 Serial console log saved to: {log_file}")
+        else:
+            print(f"⚠️  Failed to save serial console log")
+
+    except Exception as e:
+        print(f"⚠️  Error saving serial log: {e}")
 
 
 def try_ssh_shutdown(rpi_ip: str, user: str = "root", ssh_key: str = "", timeout: int = 10) -> bool:
@@ -884,8 +918,27 @@ Examples:
     parser.add_argument("--visible-browser", action="store_true", help="Use visible browser for debugging JavaScript behavior")
     parser.add_argument("--metrics-id", type=int, help="Metrics test ID for tracking progress")
     parser.add_argument("--metrics-db", default="/var/lib/adsb-test-service/metrics.db", help="Path to metrics database")
+    parser.add_argument("--serial-console", default="", help="Path to serial console device (e.g., /dev/ttyUSB0), empty to disable")
+    parser.add_argument("--serial-baud", type=int, default=115200, help="Serial console baud rate (default: 115200)")
+    parser.add_argument("--log-all-serial", action="store_true", help="Save serial console logs for all tests (not just failures)")
 
     args = parser.parse_args()
+
+    # Start serial console reader if configured
+    serial_reader = None
+    if args.serial_console and SERIAL_AVAILABLE:
+        serial_reader = SerialConsoleReader(
+            device_path=args.serial_console,
+            baud_rate=args.serial_baud,
+            log_prefix=f"serial-{args.metrics_id}" if args.metrics_id else "serial"
+        )
+        if serial_reader.start():
+            print(f"✓ Serial console monitoring enabled: {args.serial_console}")
+        else:
+            print(f"⚠️  Serial console monitoring failed to start")
+            serial_reader = None
+    elif args.serial_console and not SERIAL_AVAILABLE:
+        print("⚠️  Serial console requested but serial_console_reader not available")
 
     script_dir = Path(__file__).parent
     cache_dir = script_dir / "test-images"
@@ -907,9 +960,16 @@ Examples:
 
         if setup_success:
             print("\n🎉 All tests completed successfully!")
+            if args.log_all_serial:
+                save_serial_log_on_failure(serial_reader, args.metrics_id, script_dir)
+            if serial_reader:
+                serial_reader.stop()
             sys.exit(0)
         else:
             print("\n❌ Basic setup test failed!")
+            save_serial_log_on_failure(serial_reader, args.metrics_id, script_dir)
+            if serial_reader:
+                serial_reader.stop()
             sys.exit(1)
 
     try:
@@ -984,22 +1044,39 @@ Examples:
                 if setup_success:
                     update_metrics_stage(args.metrics_id, args.metrics_db, "browser_test", "passed")
                     print("\n🎉 All tests completed successfully!")
+                    if args.log_all_serial:
+                        save_serial_log_on_failure(serial_reader, args.metrics_id, script_dir)
+                    if serial_reader:
+                        serial_reader.stop()
                     sys.exit(0)
                 else:
                     update_metrics_stage(args.metrics_id, args.metrics_db, "browser_test", "failed")
                     print("\n❌ Basic setup test failed!")
+                    save_serial_log_on_failure(serial_reader, args.metrics_id, script_dir)
+                    if serial_reader:
+                        serial_reader.stop()
                     sys.exit(1)
             else:
                 print("\n🎉 Test completed successfully!")
+                if args.log_all_serial:
+                    save_serial_log_on_failure(serial_reader, args.metrics_id, script_dir)
+                if serial_reader:
+                    serial_reader.stop()
                 sys.exit(0)
         else:
             # Update metrics: boot or network failed
             update_metrics_stage(args.metrics_id, args.metrics_db, "boot", "failed")
             print("\n❌ Test failed!")
+            save_serial_log_on_failure(serial_reader, args.metrics_id, script_dir)
+            if serial_reader:
+                serial_reader.stop()
             sys.exit(1)
 
     except Exception as e:
         print(f"\n❌ Error: {e}")
+        save_serial_log_on_failure(serial_reader, args.metrics_id, script_dir)
+        if serial_reader:
+            serial_reader.stop()
         sys.exit(1)
 
 
