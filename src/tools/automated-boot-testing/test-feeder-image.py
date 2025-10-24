@@ -229,7 +229,7 @@ def wait_for_feeder_online(rpi_ip: str, expected_image_name: str, timeout_minute
 
     start_time = time.time()
     timeout_seconds = timeout_minutes * 60
-
+    watching_first_boot = -1
     while time.time() - start_time < timeout_seconds:
         status_string = ""
         try:
@@ -238,6 +238,10 @@ def wait_for_feeder_online(rpi_ip: str, expected_image_name: str, timeout_minute
             if result.returncode != 0:
                 status_string = "ping down"
                 print("ping down - wait 10 seconds")
+                if watching_first_boot >= 0:
+                    watching_first_boot += 1
+                    if watching_first_boot > 10:
+                        return False, "ping down"
                 time.sleep(10)
                 continue
             status_string = "ping up"
@@ -257,7 +261,8 @@ def wait_for_feeder_online(rpi_ip: str, expected_image_name: str, timeout_minute
                     print(status_string)
                     return True, "success"
                 elif "boot of ADS-B Feeder System" in title:
-                    status_string += f" - first boot"
+                    if watching_first_boot < 0:
+                        watching_first_boot = 0
                 else:
                     status_string += f" - can't find expected image: {expected_image_name}"
                     print(status_string)
