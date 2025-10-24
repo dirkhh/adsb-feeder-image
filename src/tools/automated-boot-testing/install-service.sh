@@ -65,6 +65,8 @@ cp "$SOURCE_DIR/setup-tftp-iscsi.sh" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/metrics.py" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/boot-test-metrics-cli.py" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/serial_console_reader.py" "$INSTALL_DIR/"
+cp "$SOURCE_DIR/power-toggle-kasa.py" "$INSTALL_DIR/"
+cp "$SOURCE_DIR/power-toggle-unifi.py" "$INSTALL_DIR/"
 chmod +x "$INSTALL_DIR"/*.py
 chmod +x "$INSTALL_DIR"/*.sh
 
@@ -111,7 +113,7 @@ echo "Next steps:"
 echo "1. Edit the configuration file:"
 echo "   sudo nano $CONFIG_DIR/config.json"
 echo ""
-echo "2. Set your IP addresses (rpi_ip and kasa_ip)"
+echo "2. Set your IP addresses (rpi_ip) and power toggle script (power_toggle_script)"
 echo ""
 echo "3. Start the service:"
 echo "   sudo systemctl start $SERVICE_NAME"

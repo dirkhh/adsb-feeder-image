@@ -224,10 +224,10 @@ class GitHubValidator:
 class TestExecutor:
     """Executes the actual test using the test-feeder-image.py script."""
 
-    def __init__(self, rpi_ip: str, kasa_ip: str, ssh_key: str, timeout_minutes: int = 10, config: Dict = None):
+    def __init__(self, rpi_ip: str, power_toggle_script: str, ssh_key: str, timeout_minutes: int = 10, config: Dict = None):
         # Validate all inputs at initialization - fail fast if invalid
         self.rpi_ip = self._validate_ip(rpi_ip, "rpi_ip")
-        self.kasa_ip = self._validate_ip(kasa_ip, "kasa_ip")
+        self.power_toggle_script = self._validate_power_toggle_script(power_toggle_script)
         self.ssh_key = self._validate_ssh_key(ssh_key)
         self.timeout_minutes = self._validate_timeout(timeout_minutes)
         self.script_path = self._validate_script_path()
@@ -268,6 +268,19 @@ class TestExecutor:
         if not keys_match(ssh_key_path, ssh_pub_key_path):
             raise ValueError(f"SSH key and public key do not match: {ssh_key_path} {ssh_pub_key_path}")
         return ssh_key_path
+
+    def _validate_power_toggle_script(self, script_path: str) -> str:
+        """Validate power toggle script path."""
+        if not script_path:
+            raise ValueError("Power toggle script path is required")
+        script = Path(script_path)
+        if not script.exists():
+            raise ValueError(f"Power toggle script not found: {script}")
+        if not script.is_file():
+            raise ValueError(f"Power toggle script is not a file: {script}")
+        if not os.access(script, os.X_OK):
+            raise ValueError(f"Power toggle script is not executable: {script}")
+        return str(script)
 
     def _validate_timeout(self, timeout: int) -> int:
         """Validate timeout is reasonable."""
@@ -337,7 +350,7 @@ class TestExecutor:
                     cmd.append("--log-all-serial")
 
             # Add positional arguments
-            cmd.extend([url, self.rpi_ip, self.kasa_ip])
+            cmd.extend([url, self.rpi_ip, self.power_toggle_script])
 
             logging.info(f"Executing command: {' '.join(cmd)}")
 
@@ -400,7 +413,7 @@ class ADSBTestService:
         self.url_validator = GitHubValidator()
         self.test_executor = TestExecutor(
             rpi_ip=config["rpi_ip"],
-            kasa_ip=config["kasa_ip"],
+            power_toggle_script=config["power_toggle_script"],
             ssh_key=config["ssh_key"],
             timeout_minutes=config.get("timeout_minutes", 10),
             config=config
@@ -477,7 +490,7 @@ class ADSBTestService:
                     "processing": self.processing,
                     "config": {
                         "rpi_ip": self.config["rpi_ip"],
-                        "kasa_ip": self.config["kasa_ip"],
+                        "power_toggle_script": self.config["power_toggle_script"],
                         "timeout_minutes": self.config.get("timeout_minutes", 10),
                     },
                 }
@@ -605,7 +618,7 @@ class ADSBTestService:
     def run(self, host: str = "0.0.0.0", port: int = 8080):
         """Run the Flask service."""
         logging.info(f"Starting ADS-B Test Service on {host}:{port}")
-        logging.info(f"Configuration: RPi={self.config['rpi_ip']}, Kasa={self.config['kasa_ip']}")
+        logging.info(f"Configuration: RPi={self.config['rpi_ip']}, Power Toggle={self.config['power_toggle_script']}")
 
         self.start_queue_processor()
 
@@ -638,7 +651,7 @@ def load_config(config_file: str = "/etc/adsb-test-service/config.json") -> Dict
         # Create default config
         default_config = {
             "rpi_ip": "192.168.77.190",
-            "kasa_ip": "192.168.22.147",
+            "power_toggle_script": "/opt/adsb-test-service/power-toggle-kasa.py",
             "ssh_key": "/etc/adsb-test-service/ssh_key",
             "timeout_minutes": 10,
             "host": "0.0.0.0",
