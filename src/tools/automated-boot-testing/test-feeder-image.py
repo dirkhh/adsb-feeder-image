@@ -930,7 +930,7 @@ Examples:
     parser.add_argument("--force-off", action="store_true", help="Force shutdown and turn off power")
     parser.add_argument("--user", default="root", help="SSH user (default: root)")
     parser.add_argument("--ssh-key", help="Path to SSH private key")
-    parser.add_argument("--shutdown-timeout", type=int, default=10, help="SSH connection timeout in seconds (default: 10)")
+    parser.add_argument("--shutdown-timeout", type=int, default=20, help="SSH connection timeout in seconds (default: 20)")
     parser.add_argument("--timeout", type=int, default=5, help="Timeout in minutes (default: 5)")
     parser.add_argument("--test-setup", action="store_true", help="Run basic setup test after feeder comes online")
     parser.add_argument("--test-only", action="store_true", help="Don't run install / boot, just the tests")
