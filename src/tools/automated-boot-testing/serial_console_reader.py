@@ -63,6 +63,7 @@ class SerialConsoleReader:
         # Deduplication tracking (suppress consecutive identical lines)
         self._last_line = None
         self._repeat_count = 0
+        self._recent_read = 0
 
     def start(self) -> bool:
         """
@@ -245,7 +246,7 @@ class SerialConsoleReader:
         """Check if background thread is running."""
         return self._running and self._thread and self._thread.is_alive()
 
-    def get_recent(self, n: int = 100) -> List[str]:
+    def get_recent(self, n: int = 100, start_from_last: bool = False) -> List[str]:
         """
         Get last N lines from buffer (thread-safe).
 
@@ -258,7 +259,11 @@ class SerialConsoleReader:
         with self._buffer_lock:
             # deque doesn't support negative indexing, so convert to list
             buffer_list = list(self._buffer)
-
+            if start_from_last:
+                # only consider lines read since the last get_recent call with that flag set
+                entries_total = len(buffer_list)
+                buffer_list = buffer_list[self._recent_read:]
+                self._recent_read = entries_total
             # Return last N lines
             if n >= len(buffer_list):
                 return buffer_list
@@ -279,7 +284,7 @@ class SerialConsoleReader:
         Returns:
             True if pattern was found, False otherwise
         """
-        recent_lines = self.get_recent(max_lines)
+        recent_lines = self.get_recent(max_lines, start_from_last=True)
         if not recent_lines:
             return False
 

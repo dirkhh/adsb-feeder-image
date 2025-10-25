@@ -1086,6 +1086,7 @@ Examples:
                     power_toggle(args.power_toggle_script, False)
                     time.sleep(10)
                     power_toggle(args.power_toggle_script, True)
+                    time.sleep(20)  # give it time to boot and iSCSI to be initialized
                 else:
                     print(f"with DietPi this can take 20+ minutes because of iSCSI root filesystem and shutdown failure -- keep waiting")
 
