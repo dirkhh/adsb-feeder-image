@@ -1,0 +1,35 @@
+[Unit]
+Description=GitHub Test Results Reporter Service
+Documentation=https://github.com/dirkhh/adsb-feeder-image
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/opt/adsb-boot-test/github-reporter
+
+# Load environment from config file
+EnvironmentFile=/etc/adsb-boot-test/reporter.env
+
+# Python virtual environment and script
+ExecStart=/opt/adsb-boot-test/github-reporter/venv/bin/python3 /opt/adsb-boot-test/github-reporter/github_reporter.py
+
+# Restart configuration
+Restart=always
+RestartSec=10
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/adsb-boot-test
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=github-reporter
+
+[Install]
+WantedBy=multi-user.target

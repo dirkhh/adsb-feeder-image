@@ -319,7 +319,7 @@ def wait_for_feeder_online(rpi_ip: str, expected_image_name: str, timeout_minute
                     pattern = "|".join(re.escape(p) for p in shutdown_hang_patterns)
 
                     # Use start_from_last=True to only check new serial data since last poll
-                    if serial_reader.search_recent(pattern, max_lines=10, regex=True):
+                    if serial_reader.search_recent(pattern, max_lines=15, regex=True):
                         status_string += " - hang during shutdown"
                         print(status_string)
                         return False, status_string
@@ -361,7 +361,7 @@ def wait_for_feeder_online(rpi_ip: str, expected_image_name: str, timeout_minute
 
         except Exception:
             status_string += " exception during http request"
-            if serial_reader and serial_reader.search_recent("iSCSI driver not found", 10):
+            if serial_reader and serial_reader.search_recent("iSCSI driver not found", 15):
                 # oops, the initramdisk is missing iSCSI, let's rebuild the image
                 status_string += " - iSCSI driver not found"
                 print(status_string)

@@ -152,12 +152,13 @@ def extract_qualifying_binaries(release_data: Dict[str, Any]) -> List[Dict[str, 
     return qualifying_binaries
 
 
-async def trigger_boot_test(binary_url: str) -> bool:
+async def trigger_boot_test(binary_url: str, github_context: Optional[dict] = None) -> bool:
     """
     Trigger boot test for a qualifying binary URL.
 
     Args:
         binary_url: URL of the binary to test
+        github_context: Optional dict with GitHub event info (release_id, pr_number, commit_sha, etc.)
 
     Returns:
         True if boot test was triggered successfully, False otherwise
@@ -191,7 +192,7 @@ async def trigger_boot_test(binary_url: str) -> bool:
         logger.warning(f"Boot test API URL uses HTTP (not HTTPS): {BOOT_TEST_API_URL}")
         logger.warning("API keys will be transmitted in plaintext - use HTTPS or Tailscale/VPN")
 
-    payload = {"url": binary_url}
+    payload = {"url": binary_url, "github_context": github_context}
     headers = {"Content-Type": "application/json", "X-API-Key": BOOT_TEST_API_KEY}
 
     try:
@@ -267,8 +268,18 @@ async def handle_webhook(
         action = payload.get("action", "")
         logger.info(f"Processing release event: {action}")
 
-        name = payload.get("release", {}).get("name", "")
-        logger.info(f"Processing release: {name}")
+        # Extract GitHub context from release event
+        release = payload.get("release", {})
+        github_context = {
+            "event_type": "release",
+            "release_id": release.get("id"),
+            "commit_sha": release.get("target_commitish"),
+            "pr_number": None,
+            "workflow_run_id": None,
+        }
+
+        name = release.get("name", "")
+        logger.info(f"Processing release: {name}, ID: {github_context['release_id']}")
 
         # Extract qualifying binaries
         qualifying_binaries = extract_qualifying_binaries(payload)
@@ -276,13 +287,13 @@ async def handle_webhook(
         if qualifying_binaries:
             logger.info(f"Found {len(qualifying_binaries)} qualifying binaries")
 
-            # Trigger boot tests for each qualifying binary
+            # Trigger boot tests for each qualifying binary with GitHub context
             boot_test_results = []
             for binary in qualifying_binaries:
                 print(f"QUALIFYING BINARY: {binary['url']}")
 
-                # Trigger boot test
-                success = await trigger_boot_test(binary["url"])
+                # Trigger boot test with GitHub context
+                success = await trigger_boot_test(binary["url"], github_context)
                 boot_test_results.append({"url": binary["url"], "name": binary["name"], "boot_test_triggered": success})
 
             # Log summary
@@ -299,6 +310,7 @@ async def handle_webhook(
                 "action": action,
                 "qualifying_binaries": len(qualifying_binaries),
                 "boot_test_results": boot_test_results,
+                "github_context": github_context,
             },
             status_code=200,
         )
