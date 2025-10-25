@@ -217,7 +217,7 @@ class SerialConsoleReader:
 
     def search_recent(
         self, pattern: str, max_lines: int = 100, regex: bool = False
-    ) -> List[str]:
+    ) -> bool:
         """
         Search for string/pattern in last N lines.
 
@@ -227,27 +227,28 @@ class SerialConsoleReader:
             regex: If True, treat pattern as regex; if False, simple substring match
 
         Returns:
-            List of matching lines
+            True if pattern was found, False otherwise
         """
         recent_lines = self.get_recent(max_lines)
-        matches = []
+        if not recent_lines:
+            return False
 
         if regex:
             try:
                 compiled_pattern = re.compile(pattern)
                 for line in recent_lines:
                     if compiled_pattern.search(line):
-                        matches.append(line)
+                        return True
             except re.error as e:
                 print(f"⚠️  Invalid regex pattern '{pattern}': {e}")
-                return []
+                return False
         else:
             # Simple substring search
             for line in recent_lines:
                 if pattern in line:
-                    matches.append(line)
+                    return True
 
-        return matches
+        return False
 
     def wait_for_pattern(
         self, pattern: str, timeout: int = 30, regex: bool = False, check_interval: float = 0.5
