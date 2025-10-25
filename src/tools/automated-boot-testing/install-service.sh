@@ -3,14 +3,14 @@
 set -e
 
 # Configuration
-SERVICE_NAME="adsb-test-service"
-INSTALL_DIR="/opt/adsb-test-service"
-CONFIG_DIR="/etc/adsb-test-service"
-SERVICE_FILE="/etc/systemd/system/adsb-test-service.service"
+SERVICE_NAME="adsb-boot-test"
+INSTALL_DIR="/opt/adsb-boot-test"
+CONFIG_DIR="/etc/adsb-boot-test"
+SERVICE_FILE="/etc/systemd/system/adsb-boot-test.service"
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$(dirname "$(dirname "$SOURCE_DIR")")")"
 
-echo "🚀 Installing ADS-B Test Service to $INSTALL_DIR..."
+echo "🚀 Installing ADS-B Boot Test Service to $INSTALL_DIR..."
 
 # Check if running as root
 if [[ $EUID -ne 0 ]]; then
@@ -58,7 +58,7 @@ fi
 
 # Copy service files
 echo "📋 Copying service files..."
-cp "$SOURCE_DIR/adsb-test-service.py" "$INSTALL_DIR/"
+cp "$SOURCE_DIR/adsb-boot-test-service.py" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/test-feeder-image.py" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/run-selenium-test.py" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/setup-tftp-iscsi.sh" "$INSTALL_DIR/"
@@ -80,12 +80,12 @@ mkdir -p "$INSTALL_DIR/serial-logs"
 
 # Create metrics database directory
 echo "📁 Creating metrics database directory..."
-mkdir -p /var/lib/adsb-test-service
-chmod 755 /var/lib/adsb-test-service
+mkdir -p /var/lib/adsb-boot-test
+chmod 755 /var/lib/adsb-boot-test
 
 # Install systemd service
 echo "🔧 Installing systemd service..."
-cp "$SOURCE_DIR/adsb-test-service.service" "$SERVICE_FILE"
+cp "$SOURCE_DIR/adsb-boot-test.service" "$SERVICE_FILE"
 
 # Setup logging (systemd will handle log collection)
 echo "📝 Setting up logging..."
@@ -107,7 +107,7 @@ echo "   Service files: $INSTALL_DIR/"
 echo "   Virtual env:   $INSTALL_DIR/venv/"
 echo "   Test images:   $INSTALL_DIR/test-images/"
 echo "   Config:        $CONFIG_DIR/config.json"
-echo "   Metrics DB:    /var/lib/adsb-test-service/metrics.db"
+echo "   Metrics DB:    /var/lib/adsb-boot-test/metrics.db"
 echo ""
 echo "Next steps:"
 echo "1. Edit the configuration file:"

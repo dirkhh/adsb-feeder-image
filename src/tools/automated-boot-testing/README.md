@@ -10,7 +10,7 @@ This directory contains tools for automated testing of ADS-B feeder images, incl
 ./src/tools/automated-boot-testing/setup-dev.sh
 
 # Run the service manually
-.venv/bin/python src/tools/automated-boot-testing/adsb-test-service.py --help
+.venv/bin/python src/tools/automated-boot-testing/adsb-boot-test-service.py --help
 ```
 
 ### Production Installation
@@ -27,7 +27,7 @@ sudo ./src/tools/automated-boot-testing/setup-tftp-iscsi.sh /path/to/image.img
 
 ## Files
 
-- **`adsb-test-service.py`** - Main web service API
+- **`adsb-boot-test-service.py`** - Main web service API
 - **`test-feeder-image.py`** - Core test script for image validation
 - **`install-service.sh`** - Production installation script
 - **`setup-dev.sh`** - Development environment setup

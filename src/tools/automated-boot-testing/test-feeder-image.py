@@ -949,9 +949,9 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-    .venv/bin/python test-feeder-image.py https://example.com/adsb-im-raspberrypi64-pi-2-3-4-5-v3.0.6-beta.6.img.xz 192.168.1.100 /opt/adsb-test-service/power-toggle-kasa.py
-    .venv/bin/python test-feeder-image.py --test-setup https://example.com/adsb-im-raspberrypi64-pi-2-3-4-5-v3.0.6-beta.6.img.xz 192.168.1.100 /opt/adsb-test-service/power-toggle-kasa.py
-    .venv/bin/python test-feeder-image.py --test-only --visible-browser --test-setup https://example.com/adsb-im-raspberrypi64-pi-2-3-4-5-v3.0.6-beta.6.img.xz 192.168.1.100 /opt/adsb-test-service/power-toggle-kasa.py
+    .venv/bin/python test-feeder-image.py https://example.com/adsb-im-raspberrypi64-pi-2-3-4-5-v3.0.6-beta.6.img.xz 192.168.1.100 /opt/adsb-boot-test/power-toggle-kasa.py
+    .venv/bin/python test-feeder-image.py --test-setup https://example.com/adsb-im-raspberrypi64-pi-2-3-4-5-v3.0.6-beta.6.img.xz 192.168.1.100 /opt/adsb-boot-test/power-toggle-kasa.py
+    .venv/bin/python test-feeder-image.py --test-only --visible-browser --test-setup https://example.com/adsb-im-raspberrypi64-pi-2-3-4-5-v3.0.6-beta.6.img.xz 192.168.1.100 /opt/adsb-boot-test/power-toggle-kasa.py
         """,
     )
 
@@ -968,7 +968,7 @@ Examples:
     parser.add_argument("--test-only", action="store_true", help="Don't run install / boot, just the tests")
     parser.add_argument("--visible-browser", action="store_true", help="Use visible browser for debugging JavaScript behavior")
     parser.add_argument("--metrics-id", type=int, help="Metrics test ID for tracking progress")
-    parser.add_argument("--metrics-db", default="/var/lib/adsb-test-service/metrics.db", help="Path to metrics database")
+    parser.add_argument("--metrics-db", default="/var/lib/adsb-boot-test/metrics.db", help="Path to metrics database")
     parser.add_argument("--serial-console", default="", help="Path to serial console device (e.g., /dev/ttyUSB0), empty to disable")
     parser.add_argument("--serial-baud", type=int, default=115200, help="Serial console baud rate (default: 115200)")
     parser.add_argument("--log-all-serial", action="store_true", help="Save serial console logs for all tests (not just failures)")
