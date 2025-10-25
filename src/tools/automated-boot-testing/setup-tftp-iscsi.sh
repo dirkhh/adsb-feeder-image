@@ -477,6 +477,15 @@ dtoverlay=disable-bt
 EOF
 fi
 
+if [ -f "$MOUNT_BOOT/dietpi.txt" ]; then
+    echo "Copying dietpi.txt from $MOUNT_BOOT to $TFTP_DEST"
+    cp "$MOUNT_BOOT/dietpi.txt" "$TFTP_DEST/"
+    sed -i "s/CONFIG_SERIAL_CONSOLE_ENABLE=0/CONFIG_SERIAL_CONSOLE_ENABLE=1/" "$TFTP_DEST/dietpi.txt"
+    if ! grep -q "^CONFIG_SERIAL_CONSOLE_ENABLED" "$TFTP_DEST/dietpi.txt"; then
+        echo "CONFIG_SERIAL_CONSOLE_ENABLED=1" >> "$TFTP_DEST/dietpi.txt"
+    fi
+fi
+
 # Create or update cmdline.txt
 if [ -f "$TFTP_DEST/cmdline.txt" ]; then
     EXISTING_CMDLINE=$(cat "$TFTP_DEST/cmdline.txt")
