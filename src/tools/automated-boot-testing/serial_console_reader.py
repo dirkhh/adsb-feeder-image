@@ -32,6 +32,7 @@ class SerialConsoleReader:
         baud_rate: int = 115200,
         max_buffer_lines: int = 1000,
         log_prefix: str = "serial",
+        realtime_log_file: Optional[str] = None,
     ):
         """
         Initialize serial console reader.
@@ -41,11 +42,13 @@ class SerialConsoleReader:
             baud_rate: Serial baud rate (default: 115200)
             max_buffer_lines: Max lines to keep in buffer (older lines dropped)
             log_prefix: Prefix for log files (default: "serial")
+            realtime_log_file: Optional path to write logs in real-time (for monitoring)
         """
         self.device_path = device_path
         self.baud_rate = baud_rate
         self.max_buffer_lines = max_buffer_lines
         self.log_prefix = log_prefix
+        self.realtime_log_file = realtime_log_file
 
         # Thread-safe circular buffer
         self._buffer = deque(maxlen=max_buffer_lines)
@@ -55,6 +58,7 @@ class SerialConsoleReader:
         self._thread = None
         self._running = False
         self._serial_port = None
+        self._log_file_handle = None
 
         # Deduplication tracking (suppress consecutive identical lines)
         self._last_line = None
@@ -97,6 +101,20 @@ class SerialConsoleReader:
             print(f"⚠️  Unexpected error opening {self.device_path}: {e}")
             return False
 
+        # Open real-time log file if configured
+        if self.realtime_log_file:
+            try:
+                # Create directory if needed
+                log_path = Path(self.realtime_log_file)
+                log_path.parent.mkdir(parents=True, exist_ok=True)
+
+                # Open file for writing (unbuffered for real-time monitoring)
+                self._log_file_handle = open(self.realtime_log_file, 'w', buffering=1)
+                print(f"✓ Opened real-time serial log: {self.realtime_log_file}")
+            except Exception as e:
+                print(f"⚠️  Failed to open real-time log file {self.realtime_log_file}: {e}")
+                self._log_file_handle = None
+
         # Start background thread
         self._running = True
         self._thread = threading.Thread(target=self._read_loop, daemon=True)
@@ -122,7 +140,23 @@ class SerialConsoleReader:
             if self._repeat_count > 0:
                 summary = f"[previous line repeated {self._repeat_count} times]"
                 self._buffer.append(summary)
+                # Write final summary to log file too
+                if self._log_file_handle:
+                    try:
+                        self._log_file_handle.write(summary + '\n')
+                        self._log_file_handle.flush()
+                    except Exception:
+                        pass
                 self._repeat_count = 0
+
+        # Close real-time log file
+        if self._log_file_handle:
+            try:
+                self._log_file_handle.close()
+                print(f"✓ Closed real-time serial log")
+            except Exception as e:
+                print(f"⚠️  Error closing log file: {e}")
+            self._log_file_handle = None
 
         # Close serial port
         if self._serial_port:
@@ -164,11 +198,27 @@ class SerialConsoleReader:
                                     if self._repeat_count > 0:
                                         summary = f"[previous line repeated {self._repeat_count} times]"
                                         self._buffer.append(summary)
+                                        # Write summary to real-time log
+                                        if self._log_file_handle:
+                                            try:
+                                                self._log_file_handle.write(summary + '\n')
+                                                self._log_file_handle.flush()
+                                            except Exception:
+                                                pass
                                         self._repeat_count = 0
 
                                     # Add the new line
                                     self._buffer.append(line_str)
                                     self._last_line = line_str
+
+                                    # Write to real-time log file
+                                    if self._log_file_handle:
+                                        try:
+                                            self._log_file_handle.write(line_str + '\n')
+                                            self._log_file_handle.flush()
+                                        except Exception:
+                                            # Silently ignore write errors to avoid spam
+                                            pass
 
                     else:
                         # No data available, sleep briefly to avoid busy-waiting
