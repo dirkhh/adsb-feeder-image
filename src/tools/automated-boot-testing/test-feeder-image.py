@@ -276,7 +276,22 @@ def wait_for_system_down(rpi_ip: str, timeout_seconds: int = 60) -> bool:
     return False
 
 
-def wait_for_feeder_online(rpi_ip: str, expected_image_name: str, timeout_minutes: int = 5) -> tuple[bool, str]:
+def show_serial_context(serial_reader, num_lines: int = 3):
+    """Show the last N lines from serial console for debugging."""
+    if not serial_reader or not serial_reader.is_running():
+        return
+
+    try:
+        recent_lines = serial_reader.get_recent(num_lines)
+        if recent_lines:
+            print(f"  Serial console (last {len(recent_lines)} lines):")
+            for line in recent_lines:
+                print(f"    {line}")
+    except Exception as e:
+        print(f"  (Could not read serial console: {e})")
+
+
+def wait_for_feeder_online(rpi_ip: str, expected_image_name: str, timeout_minutes: int = 5, serial_reader=None) -> tuple[bool, str]:
     """Wait for the feeder to come online and verify the correct image is running."""
     print(f"Waiting for feeder at {rpi_ip} to come online (timeout: {timeout_minutes} minutes)...")
 
@@ -291,6 +306,7 @@ def wait_for_feeder_online(rpi_ip: str, expected_image_name: str, timeout_minute
             if result.returncode != 0:
                 status_string = "ping down"
                 print("ping down - wait 10 seconds")
+                show_serial_context(serial_reader)
                 if watching_first_boot >= 0:
                     watching_first_boot += 1
                     if watching_first_boot > 10:
@@ -329,6 +345,7 @@ def wait_for_feeder_online(rpi_ip: str, expected_image_name: str, timeout_minute
             status_string += " exception during http request"
 
         print(f"{status_string} - wait 10 seconds")
+        show_serial_context(serial_reader)
         time.sleep(10)
 
     print(f"Feeder did not come online within {timeout_minutes} minutes")
@@ -1018,7 +1035,7 @@ Examples:
         success = False
         status_string = ""
         while not success and count < 3:
-            success, status_string = wait_for_feeder_online(args.rpi_ip, expected_image_name, args.timeout)
+            success, status_string = wait_for_feeder_online(args.rpi_ip, expected_image_name, args.timeout, serial_reader)
             if success:
                 break
 
