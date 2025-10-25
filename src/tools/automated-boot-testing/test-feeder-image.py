@@ -977,21 +977,34 @@ Examples:
 
     # Start serial console reader if configured
     serial_reader = None
+    script_dir = Path(__file__).parent
     if args.serial_console and SERIAL_AVAILABLE:
+        # Determine log file path if real-time logging is enabled
+        realtime_log_file = None
+        if args.log_all_serial:
+            log_dir = script_dir / "serial-logs"
+            log_dir.mkdir(exist_ok=True)
+            if args.metrics_id:
+                realtime_log_file = str(log_dir / f"serial-console-test-{args.metrics_id}.log")
+            else:
+                timestamp = int(time.time())
+                realtime_log_file = str(log_dir / f"serial-console-{timestamp}.log")
+
         serial_reader = SerialConsoleReader(
             device_path=args.serial_console,
             baud_rate=args.serial_baud,
-            log_prefix=f"serial-{args.metrics_id}" if args.metrics_id else "serial"
+            log_prefix=f"serial-{args.metrics_id}" if args.metrics_id else "serial",
+            realtime_log_file=realtime_log_file
         )
         if serial_reader.start():
             print(f"✓ Serial console monitoring enabled: {args.serial_console}")
+            if realtime_log_file:
+                print(f"✓ Real-time serial logging to: {realtime_log_file}")
         else:
             print(f"⚠️  Serial console monitoring failed to start")
             serial_reader = None
     elif args.serial_console and not SERIAL_AVAILABLE:
         print("⚠️  Serial console requested but serial_console_reader not available")
-
-    script_dir = Path(__file__).parent
     cache_dir = script_dir / "test-images"
     expected_image_name = download_and_decompress_image(args.image_url, args.force_download, cache_dir)
     cached_image_path = cache_dir / expected_image_name
