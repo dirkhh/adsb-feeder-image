@@ -28,7 +28,7 @@ from functools import wraps
 from pathlib import Path
 from queue import Empty, Queue
 from subprocess import check_output, DEVNULL
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 from urllib.parse import urlparse
 
 from flask import Flask, jsonify, request
@@ -105,7 +105,9 @@ class TestQueue:
         self.duplicate_window = timedelta(hours=1)
         self._lock = threading.Lock()
 
-    def add_test(self, url: str, requester_ip: str = "unknown", triggered_by: str = "api", trigger_source: str = None) -> Dict[str, str]:
+    def add_test(
+        self, url: str, requester_ip: str = "unknown", triggered_by: str = "api", trigger_source: str = None
+    ) -> Dict[str, str]:
         """Add a test to the queue if not a duplicate."""
         with self._lock:
             now = datetime.now()
@@ -244,8 +246,6 @@ class TestExecutor:
         except ValueError:
             raise ValueError(f"Invalid {name}: '{ip}' is not a valid IP address")
 
-
-
     def _validate_ssh_key(self, ssh_key: str) -> str:
         """Validate SSH key argument -- a file path to the SSH key."""
         if not ssh_key:
@@ -262,8 +262,8 @@ class TestExecutor:
             raise ValueError(f"SSH public key is not a file: {ssh_pub_key_path}")
         # test if private and public keys match
         keys_match = lambda priv, pub: (
-            check_output(['ssh-keygen', '-lf', str(priv)], stderr=DEVNULL, text=True).split()[1] ==
-            check_output(['ssh-keygen', '-lf', pub], stderr=DEVNULL, text=True).split()[1]
+            check_output(["ssh-keygen", "-lf", str(priv)], stderr=DEVNULL, text=True).split()[1]
+            == check_output(["ssh-keygen", "-lf", pub], stderr=DEVNULL, text=True).split()[1]
         )
         if not keys_match(ssh_key_path, ssh_pub_key_path):
             raise ValueError(f"SSH key and public key do not match: {ssh_key_path} {ssh_pub_key_path}")
@@ -383,7 +383,7 @@ class TestExecutor:
                 return {"success": False, "message": f"Test timed out after {self.timeout_minutes} minutes"}
 
             duration = time.time() - start_time
-            output = ''.join(output_lines)
+            output = "".join(output_lines)
 
             if returncode == 0:
                 return {
@@ -416,7 +416,7 @@ class ADSBTestService:
             power_toggle_script=config["power_toggle_script"],
             ssh_key=config["ssh_key"],
             timeout_minutes=config.get("timeout_minutes", 10),
-            config=config
+            config=config,
         )
 
         # API key authentication
@@ -441,7 +441,12 @@ class ADSBTestService:
         @self.app.route("/api/trigger-boot-test", methods=["POST"])
         @self.auth.require_auth
         def trigger_test():
-            """API endpoint to trigger a boot test (requires authentication)."""
+            """
+            API endpoint to trigger a boot test (requires authentication).
+
+            The test will be queued in the database and processed by the test executor.
+            GitHub context is optional and used for posting results back to GitHub.
+            """
             try:
                 data = request.get_json()
                 if not data:
@@ -451,6 +456,9 @@ class ADSBTestService:
                 if not url:
                     return jsonify({"error": "No 'url' field provided"}), 400
 
+                # Extract GitHub context if provided
+                github_context = data.get("github_context", {})
+
                 requester_ip = request.environ.get("REMOTE_ADDR", "unknown")
                 user_id = getattr(request, "user_id", "unknown")
 
@@ -459,16 +467,29 @@ class ADSBTestService:
                 if not validation["valid"]:
                     return jsonify({"error": f"Invalid URL: {validation['error']}"}), 400
 
-                # Add to queue with trigger information
-                result = self.test_queue.add_test(
-                    url,
-                    requester_ip=requester_ip,
-                    triggered_by="api",
-                    trigger_source=user_id
+                # Create test record in 'queued' state
+                test_id = self.metrics.start_test(
+                    image_url=url,
+                    triggered_by="github_webhook" if github_context else "api",
+                    trigger_source=github_context.get("commit_sha") or user_id,
+                    rpi_ip=self.config["rpi_ip"],
+                    github_event_type=github_context.get("event_type"),
+                    github_release_id=github_context.get("release_id"),
+                    github_pr_number=github_context.get("pr_number"),
+                    github_commit_sha=github_context.get("commit_sha"),
+                    github_workflow_run_id=github_context.get("workflow_run_id"),
                 )
 
-                logging.info(f"Test request from {user_id} ({requester_ip}): {result}")
-                return jsonify(result)
+                logging.info(f"Test queued: ID={test_id}, URL={url}, GitHub={github_context.get('event_type', 'none')}")
+
+                return jsonify(
+                    {
+                        "test_id": test_id,
+                        "status": "queued",
+                        "message": "Test queued successfully",
+                        "github_context": github_context if github_context else None,
+                    }
+                )
 
             except Exception as e:
                 logging.error(f"Error processing test request: {e}")
@@ -505,7 +526,9 @@ class ADSBTestService:
                 flushed_count = self.test_queue.flush()
 
                 logging.info(f"Queue flushed by {user_id}: {flushed_count} items removed")
-                return jsonify({"success": True, "flushed_count": flushed_count, "message": f"Flushed {flushed_count} items from queue"})
+                return jsonify(
+                    {"success": True, "flushed_count": flushed_count, "message": f"Flushed {flushed_count} items from queue"}
+                )
 
             except Exception as e:
                 logging.error(f"Error flushing queue: {e}")
@@ -552,61 +575,143 @@ class ADSBTestService:
         logging.info("Queue processor started")
 
     def _process_queue(self):
-        """Process the test queue."""
+        """Process the test queue - polls database for queued tests."""
+        logging.info("Queue processor started - polling for queued tests")
+
         while self.processing:
             try:
-                test_item = self.test_queue.get_next_test()
-                if test_item:
-                    logging.info(f"Processing test {test_item['id']}")
+                # Get queued tests from database
+                queued_tests = self.metrics.get_queued_tests()
 
-                    # Start metrics tracking
-                    metrics_id = self.metrics.start_test(
-                        image_url=test_item["url"],
-                        triggered_by=test_item.get("triggered_by", "unknown"),
-                        trigger_source=test_item.get("trigger_source"),
-                        rpi_ip=self.config.get("rpi_ip")
-                    )
-                    logging.info(f"Started metrics tracking with ID: {metrics_id}")
+                if queued_tests:
+                    logging.info(f"Found {len(queued_tests)} queued test(s)")
+
+                    # Process first test (FIFO)
+                    test = queued_tests[0]
+                    test_id = test["id"]
+
+                    # Mark test as running
+                    self.metrics.update_test_status(test_id, "running")
+                    logging.info(f"Starting test {test_id}: {test['image_url']}")
 
                     try:
-                        # Execute test (pass metrics_id for stage tracking)
-                        result = self.test_executor.execute_test(test_item, metrics_id=metrics_id)
+                        # Execute test
+                        result = self._execute_test(test)
 
-                        # Mark as completed in queue
-                        self.test_queue.mark_completed(test_item["id"], result["success"], result["message"])
+                        # Mark as passed or failed
+                        final_status = "passed" if result["success"] else "failed"
+                        self.metrics.complete_test(
+                            test_id, status=final_status, error_message=result.get("error"), error_stage=result.get("error_stage")
+                        )
 
-                        # Update metrics
                         if result["success"]:
-                            self.metrics.complete_test(metrics_id, "passed")
-                            logging.info(f"✅ Test {test_item['id']} PASSED")
+                            logging.info(f"✅ Test {test_id} PASSED")
                         else:
-                            # Extract error information from result
-                            error_msg = result.get("message", "Test failed")
-                            self.metrics.complete_test(
-                                metrics_id,
-                                "failed",
-                                error_message=error_msg,
-                                error_stage="unknown"
-                            )
-                            logging.error(f"❌ Test {test_item['id']} FAILED: {result['message']}")
+                            logging.error(f"❌ Test {test_id} FAILED: {result.get('error')}")
 
                     except Exception as e:
-                        # Mark as error in metrics
-                        self.metrics.complete_test(
-                            metrics_id,
-                            "error",
-                            error_message=str(e),
-                            error_stage="execution"
-                        )
-                        raise
+                        logging.error(f"Test {test_id} failed with exception: {e}")
+                        self.metrics.complete_test(test_id, status="failed", error_message=str(e), error_stage="executor")
 
                 else:
                     # No tests in queue, wait a bit
-                    time.sleep(5)
+                    time.sleep(10)
 
             except Exception as e:
                 logging.error(f"Error in queue processor: {e}")
                 time.sleep(10)
+
+    def _execute_test(self, test: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Execute a single boot test.
+
+        Returns dict with success, error, error_stage.
+        """
+        test_id = test["id"]
+        image_url = test["image_url"]
+
+        # Validate URL doesn't contain shell metacharacters
+        dangerous_chars = [";", "&", "|", "`", "$", "\n", "\r"]
+        if any(c in image_url for c in dangerous_chars):
+            return {
+                "success": False,
+                "error": "URL contains invalid characters and was rejected for security",
+                "error_stage": "validation",
+            }
+
+        try:
+            # Build test command
+            cmd = [
+                str(self.test_executor.venv_python),
+                str(self.test_executor.script_path),
+                image_url,
+                self.config["rpi_ip"],
+                self.config["power_toggle_script"],
+                "--metrics-id",
+                str(test_id),
+                "--metrics-db",
+                str(self.metrics.db_path),
+                "--test-setup",
+                "--timeout",
+                str(self.test_executor.timeout_minutes),
+                "--ssh-key",
+                str(self.test_executor.ssh_key),
+            ]
+
+            # Add optional arguments
+            if self.config.get("serial_console"):
+                cmd.extend(["--serial-console", self.config["serial_console"]])
+                cmd.extend(["--serial-baud", str(self.config.get("serial_baud", 115200))])
+                if self.config.get("log_all_serial", False):
+                    cmd.append("--log-all-serial")
+
+            logging.info(f"Executing command: {' '.join(cmd)}")
+
+            # Execute with timeout and real-time output forwarding
+            start_time = time.time()
+
+            # Use Popen to capture output in real-time for journalctl
+            process = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1,  # Line buffered
+            )
+
+            # Forward output in real-time to journalctl
+            output_lines = []
+            try:
+                for line in process.stdout:
+                    # Log to journalctl in real-time
+                    logging.info(line.rstrip())
+                    output_lines.append(line)
+
+                # Wait for process to complete with timeout
+                returncode = process.wait(timeout=self.test_executor.timeout_minutes * 60)
+
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait()
+                return {
+                    "success": False,
+                    "error": f"Test timed out after {self.test_executor.timeout_minutes} minutes",
+                    "error_stage": "timeout",
+                }
+
+            duration = time.time() - start_time
+
+            # Check exit code
+            success = returncode == 0
+            return {
+                "success": success,
+                "error": None if success else "Test script failed",
+                "error_stage": None if success else "test_execution",
+                "duration": duration,
+            }
+
+        except Exception as e:
+            return {"success": False, "error": str(e), "error_stage": "executor", "duration": duration,}
 
     def stop_queue_processor(self):
         """Stop the queue processor."""
