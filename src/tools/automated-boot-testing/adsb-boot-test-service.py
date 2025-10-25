@@ -643,7 +643,7 @@ def setup_logging(log_level: str = "INFO"):
     )
 
 
-def load_config(config_file: str = "/etc/adsb-test-service/config.json") -> Dict:
+def load_config(config_file: str = "/etc/adsb-boot-test/config.json") -> Dict:
     """Load configuration from file."""
     config_path = Path(config_file)
 
@@ -651,8 +651,8 @@ def load_config(config_file: str = "/etc/adsb-test-service/config.json") -> Dict
         # Create default config
         default_config = {
             "rpi_ip": "192.168.77.190",
-            "power_toggle_script": "/opt/adsb-test-service/power-toggle-kasa.py",
-            "ssh_key": "/etc/adsb-test-service/ssh_key",
+            "power_toggle_script": "/opt/adsb-boot-test/power-toggle-kasa.py",
+            "ssh_key": "/etc/adsb-boot-test/ssh_key",
             "timeout_minutes": 10,
             "host": "0.0.0.0",
             "port": 8080,
@@ -681,7 +681,7 @@ def load_config(config_file: str = "/etc/adsb-test-service/config.json") -> Dict
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(description="ADS-B Test Service")
-    parser.add_argument("--config", default="/etc/adsb-test-service/config.json", help="Configuration file path")
+    parser.add_argument("--config", default="/etc/adsb-boot-test/config.json", help="Configuration file path")
     parser.add_argument("--host", help="Host to bind to (overrides config)")
     parser.add_argument("--port", type=int, help="Port to bind to (overrides config)")
     parser.add_argument("--log-level", help="Log level (overrides config)")

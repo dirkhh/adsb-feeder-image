@@ -50,5 +50,5 @@ echo "To generate API keys:"
 echo "  ./venv/bin/python generate-api-key.py <user-id>"
 echo
 echo "To run the service:"
-echo "  ./venv/bin/python adsb-test-service.py --config config.json"
+echo "  ./venv/bin/python adsb-boot-test-service.py --config config.json"
 echo
