@@ -3,7 +3,7 @@
 UniFi PoE Port Power Toggle
 
 Controls PoE power on a specific port of a UniFi switch via the UniFi Controller API.
-Reads configuration from /etc/adsb-test-service/config.json
+Reads configuration from /etc/adsb-boot-test/config.json
 
 Configuration required in config.json:
   "unifi_controller": "192.168.1.1"     # Controller IP/hostname
@@ -197,7 +197,7 @@ def control_unifi_port(
         return False
 
 
-def load_config(config_path: str = "/etc/adsb-test-service/config.json") -> dict:
+def load_config(config_path: str = "/etc/adsb-boot-test/config.json") -> dict:
     """Load configuration from file"""
     try:
         with open(config_path, "r") as f:

@@ -13,7 +13,7 @@ from typing import Optional, Dict, Any, List
 class TestMetrics:
     """Simple metrics tracking for boot tests"""
 
-    def __init__(self, db_path: str = "/var/lib/adsb-test-service/metrics.db"):
+    def __init__(self, db_path: str = "/var/lib/adsb-boot-test/metrics.db"):
         self.db_path = Path(db_path)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._init_db()

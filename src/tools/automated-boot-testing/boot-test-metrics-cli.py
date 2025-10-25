@@ -190,8 +190,8 @@ Examples:
     )
     parser.add_argument(
         "--db",
-        default="/var/lib/adsb-test-service/metrics.db",
-        help="Path to metrics database (default: /var/lib/adsb-test-service/metrics.db)",
+        default="/var/lib/adsb-boot-test/metrics.db",
+        help="Path to metrics database (default: /var/lib/adsb-boot-test/metrics.db)",
     )
 
     args = parser.parse_args()
