@@ -305,6 +305,16 @@ def wait_for_feeder_online(rpi_ip: str, expected_image_name: str, timeout_minute
             result = subprocess.run(["ping", "-c", "1", "-W", "2", rpi_ip], capture_output=True, text=True, timeout=5)
             if result.returncode != 0:
                 status_string = "ping down"
+                # let's check if the serial console data indicates a hang during shutdown
+                if serial_reader:
+                    if (
+                        serial_reader.search_recent("Failed to send WATCHDOG", 10) or
+                        serial_reader.search_recent("Syncing filesystems and block devices - timed out, issuing SIGKILL", 10) or
+                        serial_reader.search_recent("rejecting I/O to offline device", 10)
+                    ):
+                        status_string += " - hang during shutdown"
+                        print(status_string)
+                        return False, status_string
                 print("ping down - wait 10 seconds")
                 show_serial_context(serial_reader)
                 if watching_first_boot >= 0:
@@ -1040,7 +1050,7 @@ Examples:
                 break
 
             if "dietpi" in expected_image_name:
-                if status_string == "ping down":
+                if "ping down" in status_string:
                     print("with DietPi we could be hung because of iSCSI root filesystem and shutdown failure")
                     # power cycle and try again
                     power_toggle(args.power_toggle_script, False)
