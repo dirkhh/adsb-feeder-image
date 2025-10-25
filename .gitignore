@@ -3,6 +3,7 @@
 __pycache__/
 vagrant/
 workspace*/
+worktrees/
 image*/
 !image/README
 build.log
