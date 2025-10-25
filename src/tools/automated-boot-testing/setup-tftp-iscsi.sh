@@ -19,7 +19,7 @@ SSH_PUBLIC_KEY="$3"  # Optional: SSH public key to install for passwordless acce
 MOUNT_BOOT="/mnt/rpi-prep-root/boot/firmware"
 MOUNT_ROOT="/mnt/rpi-prep-root"
 TFTP_DEST="/srv/tftp"
-CMDLINE="console=serial0,115200 console=tty1 ip=dhcp ISCSI_INITIATOR=iqn.2025-10.im.adsb.testrpi:rpi4 ISCSI_TARGET_NAME=iqn.2025-10.im.adsb:adsbim-test.root ISCSI_TARGET_IP=192.168.66.109 ISCSI_TARGET_PORT=3260 root=/dev/sda2 rw rootwait elevator=deadline cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1 systemd.getty_auto=0"
+CMDLINE="console=serial0,115200 ip=dhcp ISCSI_INITIATOR=iqn.2025-10.im.adsb.testrpi:rpi4 ISCSI_TARGET_NAME=iqn.2025-10.im.adsb:adsbim-test.root ISCSI_TARGET_IP=192.168.66.109 ISCSI_TARGET_PORT=3260 root=/dev/sda2 rw rootwait elevator=deadline cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1 systemd.getty_auto=0"
 
 # Colors for output
 RED='\033[0;31m'
