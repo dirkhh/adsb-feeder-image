@@ -353,6 +353,11 @@ def wait_for_feeder_online(rpi_ip: str, expected_image_name: str, timeout_minute
 
         except Exception:
             status_string += " exception during http request"
+            if serial_reader and serial_reader.search_recent("iSCSI driver not found", 10):
+                # oops, the initramdisk is missing iSCSI, let's rebuild the image
+                status_string += " - iSCSI driver not found"
+                print(status_string)
+                return False, status_string
 
         print(f"{status_string} - wait 10 seconds")
         show_serial_context(serial_reader)
@@ -1048,6 +1053,18 @@ Examples:
             success, status_string = wait_for_feeder_online(args.rpi_ip, expected_image_name, args.timeout, serial_reader)
             if success:
                 break
+
+            if "iSCSI driver not found" in status_string:
+                print("iSCSI driver not found, rebuilding image")
+                # power cycle, recreate the image from the compressed original, and try again
+                power_toggle(args.power_toggle_script, False)
+                cached_image_path.unlink()
+                expected_image_name = download_and_decompress_image(args.image_url, False, cache_dir)
+                cached_image_path = cache_dir / expected_image_name
+                setup_iscsi_image(cached_image_path, ssh_public_key)
+                power_toggle(args.power_toggle_script, True)
+                time.sleep(10)
+                continue
 
             if "dietpi" in expected_image_name:
                 if "ping down" in status_string:
