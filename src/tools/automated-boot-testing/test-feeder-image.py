@@ -307,11 +307,19 @@ def wait_for_feeder_online(rpi_ip: str, expected_image_name: str, timeout_minute
                 status_string = "ping down"
                 # let's check if the serial console data indicates a hang during shutdown
                 if serial_reader:
-                    if (
-                        serial_reader.search_recent("Failed to send WATCHDOG", 10) or
-                        serial_reader.search_recent("Syncing filesystems and block devices - timed out, issuing SIGKILL", 10) or
-                        serial_reader.search_recent("rejecting I/O to offline device", 10)
-                    ):
+                    # Patterns indicating shutdown hangs or failures
+                    # Add new patterns here as they are discovered
+                    shutdown_hang_patterns = [
+                        "Failed to send WATCHDOG",
+                        "Syncing filesystems and block devices - timed out, issuing SIGKILL",
+                        "rejecting I/O to offline device",
+                        "Failed to execute shutdown binary",
+                    ]
+                    # Combine into single regex pattern (escape special chars for literal matching)
+                    pattern = "|".join(re.escape(p) for p in shutdown_hang_patterns)
+
+                    # Use start_from_last=True to only check new serial data since last poll
+                    if serial_reader.search_recent(pattern, max_lines=10, regex=True):
                         status_string += " - hang during shutdown"
                         print(status_string)
                         return False, status_string
