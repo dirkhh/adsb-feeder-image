@@ -16,7 +16,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 # Import the service module (has hyphens in filename)
-service_path = Path(__file__).parent / "adsb-test-service.py"
+service_path = Path(__file__).parent / "adsb-boot-test-service.py"
 spec = importlib.util.spec_from_file_location("adsb_test_service", service_path)
 adsb_test_service = importlib.util.module_from_spec(spec)
 sys.modules["adsb_test_service"] = adsb_test_service

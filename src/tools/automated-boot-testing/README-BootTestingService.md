@@ -21,15 +21,15 @@ sudo ./src/tools/automated-boot-testing/install-service.sh
 ```
 
 This will:
-1. Create `/opt/adsb-test-service/` with dedicated virtual environment
+1. Create `/opt/adsb-boot-test/` with dedicated virtual environment
 2. Install Python dependencies from `requirements.txt`
-3. Copy service files to `/opt/adsb-test-service/`
-4. Create `/etc/adsb-test-service/config.json`
+3. Copy service files to `/opt/adsb-boot-test/`
+4. Create `/etc/adsb-boot-test/config.json`
 5. Install and enable systemd service
 
 ## Configuration
 
-Edit `/etc/adsb-test-service/config.json`:
+Edit `/etc/adsb-boot-test/config.json`:
 
 ```json
 {
@@ -39,7 +39,7 @@ Edit `/etc/adsb-test-service/config.json`:
   "host": "0.0.0.0",
   "port": 9456,
   "log_level": "INFO",
-  "ssh_key": "/etc/adsb-test-service/ssh_key"
+  "ssh_key": "/etc/adsb-boot-test/ssh_key"
 }
 ```
 
@@ -48,7 +48,7 @@ Edit `/etc/adsb-test-service/config.json`:
 The `ssh_key` parameter is **required** for automated testing:
 
 - **Purpose**: Enables passwordless SSH access to test images for verification and debugging
-- **Value**: Path to the private SSH key file (e.g., `/etc/adsb-test-service/ssh_key`)
+- **Value**: Path to the private SSH key file (e.g., `/etc/adsb-boot-test/ssh_key`)
 - **Public key requirement**: The public key (`.pub` extension) must exist alongside the private key
 - **Validation**: On service startup, the private and public keys are validated to ensure they match using fingerprint comparison
 - **Installation**: The public key is automatically copied to `/root/.ssh/authorized_keys` in the test image during boot preparation
@@ -56,11 +56,11 @@ The `ssh_key` parameter is **required** for automated testing:
 **Example setup:**
 ```bash
 # Generate SSH key pair
-ssh-keygen -t ed25519 -f /etc/adsb-test-service/ssh_key -N ""
+ssh-keygen -t ed25519 -f /etc/adsb-boot-test/ssh_key -N ""
 
 # Set proper permissions
-chmod 600 /etc/adsb-test-service/ssh_key
-chmod 644 /etc/adsb-test-service/ssh_key.pub
+chmod 600 /etc/adsb-boot-test/ssh_key
+chmod 644 /etc/adsb-boot-test/ssh_key.pub
 ```
 
 **Security notes:**
@@ -73,21 +73,21 @@ chmod 644 /etc/adsb-test-service/ssh_key.pub
 ### Start the Service
 
 ```bash
-sudo systemctl start adsb-test-service
-sudo systemctl status adsb-test-service
+sudo systemctl start adsb-boot-test
+sudo systemctl status adsb-boot-test
 ```
 
 ### View Logs
 
 ```bash
 # Follow logs in real-time
-sudo journalctl -u adsb-test-service -f
+sudo journalctl -u adsb-boot-test -f
 
 # View logs from last hour
-sudo journalctl -u adsb-test-service --since '1 hour ago'
+sudo journalctl -u adsb-boot-test --since '1 hour ago'
 
 # View recent logs
-sudo journalctl -u adsb-test-service -n 100
+sudo journalctl -u adsb-boot-test -n 100
 ```
 
 ### API Endpoints
@@ -215,13 +215,13 @@ If binding to `0.0.0.0` (all interfaces):
 ### Authentication Security
 
 - API key authentication using timing-safe comparison
-- Keys stored in `/etc/adsb-test-service/config.json` (readable by service only)
+- Keys stored in `/etc/adsb-boot-test/config.json` (readable by service only)
 - Generate secure keys with: `python3 generate-api-key.py`
 
 **Important:**
 - Never use example keys from `config.json.example`
 - Rotate keys if compromised
-- Keep config file permissions restrictive: `chmod 600 /etc/adsb-test-service/config.json`
+- Keep config file permissions restrictive: `chmod 600 /etc/adsb-boot-test/config.json`
 
 ### Systemd Hardening
 
@@ -230,17 +230,17 @@ The service runs with systemd security features:
 - `PrivateTmp=true` - Isolated /tmp directory
 - `ProtectSystem=strict` - Read-only system directories
 - `ProtectHome=true` - No access to user home directories
-- Limited write access to `/opt/adsb-test-service/` only
+- Limited write access to `/opt/adsb-boot-test/` only
 
 ## Troubleshooting
 
 ### Service Won't Start
 ```bash
 # Check service status
-sudo systemctl status adsb-test-service
+sudo systemctl status adsb-boot-test
 
 # Check logs for errors
-sudo journalctl -u adsb-test-service -n 50
+sudo journalctl -u adsb-boot-test -n 50
 ```
 
 ### Tests Failing
@@ -269,27 +269,27 @@ The service includes SQLite-based metrics tracking to monitor test results over 
 
 ```bash
 # Show recent test results (default view)
-sudo /opt/adsb-test-service/boot-test-metrics-cli.py
+sudo /opt/adsb-boot-test/boot-test-metrics-cli.py
 
 # Show last 20 tests
-sudo /opt/adsb-test-service/boot-test-metrics-cli.py --recent 20
+sudo /opt/adsb-boot-test/boot-test-metrics-cli.py --recent 20
 
 # Show statistics for last 7 days
-sudo /opt/adsb-test-service/boot-test-metrics-cli.py --stats 7
+sudo /opt/adsb-boot-test/boot-test-metrics-cli.py --stats 7
 
 # Show only failures
-sudo /opt/adsb-test-service/boot-test-metrics-cli.py --failures
+sudo /opt/adsb-boot-test/boot-test-metrics-cli.py --failures
 
 # Filter by version
-sudo /opt/adsb-test-service/boot-test-metrics-cli.py --version "v3.0.6-beta.8"
+sudo /opt/adsb-boot-test/boot-test-metrics-cli.py --version "v3.0.6-beta.8"
 
 # Show details for specific test
-sudo /opt/adsb-test-service/boot-test-metrics-cli.py --details 42
+sudo /opt/adsb-boot-test/boot-test-metrics-cli.py --details 42
 ```
 
 ### Metrics Database
 
-- **Location**: `/var/lib/adsb-test-service/metrics.db`
+- **Location**: `/var/lib/adsb-boot-test/metrics.db`
 - **Format**: SQLite database
 - **Auto-created** on first test run
 - **Tracks**: Image URL, version, test stages, duration, pass/fail, error details
@@ -298,7 +298,7 @@ sudo /opt/adsb-test-service/boot-test-metrics-cli.py --details 42
 
 ```bash
 # Open database
-sqlite3 /var/lib/adsb-test-service/metrics.db
+sqlite3 /var/lib/adsb-boot-test/metrics.db
 
 # View recent tests
 SELECT image_version, status, duration_seconds, started_at
@@ -332,8 +332,8 @@ This service can be integrated with:
 ### Development Files (in project)
 ```
 src/tools/automated-boot-testing/
-├── adsb-test-service.py          # Main service (source)
-├── adsb-test-service.service     # Systemd service file
+├── adsb-boot-test-service.py          # Main service (source)
+├── adsb-boot-test.service     # Systemd service file
 ├── config.json.example          # Configuration template
 ├── install-service.sh           # Production installation script
 ├── setup-dev.sh                 # Development setup script
@@ -351,19 +351,19 @@ src/tools/automated-boot-testing/
 
 ### Production Installation (after install)
 ```
-/opt/adsb-test-service/
-├── adsb-test-service.py         # Main service (installed)
+/opt/adsb-boot-test/
+├── adsb-boot-test-service.py         # Main service (installed)
 ├── test-feeder-image.py         # Core test script (installed)
 ├── setup-tftp-iscsi.sh         # TFTP/iSCSI setup script (installed)
 ├── venv/                        # Dedicated virtual environment
 │   └── bin/python              # Service Python interpreter
 └── test-images/                 # Cached test images
 
-/etc/adsb-test-service/
+/etc/adsb-boot-test/
 └── config.json                 # Service configuration
 
 /etc/systemd/system/
-└── adsb-test-service.service   # Systemd service file
+└── adsb-boot-test.service   # Systemd service file
 ```
 
 ## Updating the Service
@@ -372,13 +372,13 @@ To update the service with new code:
 
 ```bash
 # Stop the service
-sudo systemctl stop adsb-test-service
+sudo systemctl stop adsb-boot-test
 
 # Run the install script again (it will update files)
 sudo ./src/tools/automated-boot-testing/install-service.sh
 
 # Start the service
-sudo systemctl start adsb-test-service
+sudo systemctl start adsb-boot-test
 ```
 
 The installation script is idempotent - it can be run multiple times safely.
@@ -401,7 +401,7 @@ All Python dependencies are listed in `requirements.txt` and automatically insta
 - python-kasa (smart switch control)
 
 ### Installation
-Dependencies are automatically installed in the dedicated virtual environment at `/opt/adsb-test-service/venv/`
+Dependencies are automatically installed in the dedicated virtual environment at `/opt/adsb-boot-test/venv/`
 
 ### Development Setup
 For development, use the setup script:

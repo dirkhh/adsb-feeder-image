@@ -18,8 +18,8 @@ from unittest.mock import patch, MagicMock
 
 import pytest
 
-# Import the adsb-test-service module (has dashes, so use importlib)
-service_path = Path(__file__).parent / "adsb-test-service.py"
+# Import the adsb-boot-test-service module (has dashes, so use importlib)
+service_path = Path(__file__).parent / "adsb-boot-test-service.py"
 spec = importlib.util.spec_from_file_location("adsb_test_service", service_path)
 service = importlib.util.module_from_spec(spec)
 sys.modules["adsb_test_service"] = service
@@ -128,7 +128,7 @@ class TestGitHubURLValidation:
             assert result["valid"] is False, f"Failed to reject non-GitHub domain: {url}"
 
     # SECURITY IMPROVEMENT NEEDED: The following test documents a security gap
-    # that should be addressed in the adsb-test-service.py implementation
+    # that should be addressed in the adsb-boot-test-service.py implementation
 
     @pytest.mark.skip(reason="SECURITY IMPROVEMENT NEEDED: Strict release URL validation")
     def test_missing_release_pattern_rejected(self):

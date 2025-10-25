@@ -3,7 +3,7 @@
 Kasa Smart Plug Power Toggle
 
 Turns a TP-Link Kasa smart plug on or off.
-Reads configuration from /etc/adsb-test-service/config.json
+Reads configuration from /etc/adsb-boot-test/config.json
 
 Exit codes:
   0 - Success
@@ -49,7 +49,7 @@ def control_kasa(ip: str, turn_on: bool) -> bool:
     return asyncio.run(control_kasa_async(ip, turn_on))
 
 
-def load_config(config_path: str = "/etc/adsb-test-service/config.json") -> dict:
+def load_config(config_path: str = "/etc/adsb-boot-test/config.json") -> dict:
     """Load configuration from file"""
     try:
         with open(config_path, "r") as f:

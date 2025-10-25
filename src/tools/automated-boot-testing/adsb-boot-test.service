@@ -1,0 +1,31 @@
+[Unit]
+Description=ADS-B Feeder Boot Test Service
+Documentation=https://github.com/dirkhh/adsb-feeder-image
+After=network.target network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/opt/adsb-boot-test
+ExecStart=/opt/adsb-boot-test/venv/bin/python /opt/adsb-boot-test/adsb-boot-test-service.py --config /etc/adsb-boot-test/config.json
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=adsb-boot-test
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/etc/adsb-boot-test /tmp /srv/iscsi /srv/tftp /etc/tgt /mnt /opt/adsb-boot-test/test-images /opt/adsb-boot-test/serial-logs /home/testuser /var/lib/adsb-boot-test
+
+# Environment
+Environment=PYTHONPATH=/opt/adsb-boot-test
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
