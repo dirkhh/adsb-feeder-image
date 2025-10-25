@@ -465,6 +465,11 @@ if [ -f "$MOUNT_BOOT/config.txt" ]; then
         echo "Adding dtoverlay=disable-bt to config.txt"
         echo "dtoverlay=disable-bt" >> "$TFTP_DEST/config.txt"
     fi
+    if ! grep -q "^enable_uart=1" "$TFTP_DEST/config.txt"; then
+        sed -i "/^enable_uart=/d" "$TFTP_DEST/config.txt"
+        echo "Adding enable_uart=1 to config.txt"
+        echo "enable_uart=1" >> "$TFTP_DEST/config.txt"
+    fi
 else
     # Create minimal config.txt
     echo "Creating minimal config.txt"
@@ -481,9 +486,11 @@ if [ -f "$MOUNT_BOOT/dietpi.txt" ]; then
     echo "Copying dietpi.txt from $MOUNT_BOOT to $TFTP_DEST"
     cp "$MOUNT_BOOT/dietpi.txt" "$TFTP_DEST/"
     sed -i "s/CONFIG_SERIAL_CONSOLE_ENABLE=0/CONFIG_SERIAL_CONSOLE_ENABLE=1/" "$TFTP_DEST/dietpi.txt"
-    if ! grep -q "^CONFIG_SERIAL_CONSOLE_ENABLED" "$TFTP_DEST/dietpi.txt"; then
-        echo "CONFIG_SERIAL_CONSOLE_ENABLED=1" >> "$TFTP_DEST/dietpi.txt"
+    if ! grep -q "^CONFIG_SERIAL_CONSOLE_ENABLE" "$TFTP_DEST/dietpi.txt"; then
+        echo "CONFIG_SERIAL_CONSOLE_ENABLE=1" >> "$TFTP_DEST/dietpi.txt"
     fi
+    # we also need to modify the command line to use the correct device for the serial console
+    sed -i "s/console=serial0,115200/console=ttyS0,115200/" "$TFTP_DEST/cmdline.txt"
 fi
 
 # Create or update cmdline.txt
