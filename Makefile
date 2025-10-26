@@ -6,23 +6,39 @@ export PATH := .venv/bin:$(PATH)
 run-checks:
 # run the Python linter checks locally
 	@echo "Running Python linter checks..."
-	@if [ -d .venv/bin ]; then \
+	@if command -v uv >/dev/null 2>&1; then \
+		echo "Using uv run"; \
+		FLAKE8="uv run flake8"; MYPY="uv run mypy"; BLACK="uv run black"; RUFF="uv run ruff"; \
+	elif [ -d .venv/bin ]; then \
 		echo "Using .venv virtual environment"; \
 		export PATH=.venv/bin:$$PATH; \
 		FLAKE8=flake8; MYPY=mypy; BLACK=black; RUFF=ruff; \
 	else \
-		echo "Using uv run"; \
-		FLAKE8="uv run flake8"; MYPY="uv run mypy"; BLACK="uv run black"; RUFF="uv run ruff"; \
+		echo "ERROR: Neither 'uv' command nor .venv/bin found!"; \
+		echo "Install uv: curl -LsSf https://astral.sh/uv/install.sh | sh"; \
+		echo "Or create venv: make create-venv"; \
+		exit 1; \
 	fi; \
 	echo "=== Running flake8 ==="; \
-	$$FLAKE8 src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup --extend-ignore=E501,E203,E711,E721,F541 --show-source --statistics --count; \
+	$$FLAKE8 src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup --extend-ignore=E501,E203,E711,E721,F541 --show-source --statistics --count || FAILURES="$$FAILURES flake8 in adsb-setup,"; \
+	$$FLAKE8 src/tools --extend-ignore=E501,E203,E711,E721,F541 --show-source --statistics --count --exclude=venv,__pycache__,.git || FAILURES="$$FAILURES flake8 in tools,"; \
 	echo "=== Running mypy ==="; \
-	$$MYPY src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup --config-file=pyproject.toml; \
+	$$MYPY src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup --config-file=pyproject.toml || FAILURES="$$FAILURES mypy in adsb-setup,"; \
+	$$MYPY src/tools --config-file=pyproject.toml --exclude venv --exclude __pycache__ || FAILURES="$$FAILURES mypy in tools,"; \
 	echo "=== Running black ==="; \
-	$$BLACK --diff --check --line-length 130 src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup; \
+	$$BLACK --diff --check --line-length 130 src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup || FAILURES="$$FAILURES black in adsb-setup,"; \
+	$$BLACK --diff --check --line-length 130 src/tools --exclude venv --exclude __pycache__ || FAILURES="$$FAILURES black in tools,"; \
 	echo "=== Running ruff ==="; \
-	$$RUFF check src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup --config=pyproject.toml; \
-	echo "All linter checks completed successfully!"
+	$$RUFF check src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup --config=pyproject.toml || FAILURES="$$FAILURES ruff in adsb-setup,"; \
+	$$RUFF check src/tools --config=pyproject.toml --exclude venv --exclude __pycache__ || FAILURES="$$FAILURES ruff in tools,"; \
+	echo "=========================================="; \
+	if [ -z "$$FAILURES" ]; then \
+		echo "All tests passed"; \
+	else \
+		SUMMARY=$${FAILURES%,}; \
+		echo "Errors found with: $$SUMMARY"; \
+		exit 1; \
+	fi
 
 create-venv:
 # create virtual environment necessary to run linter checks

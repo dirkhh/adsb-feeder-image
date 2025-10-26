@@ -6,6 +6,7 @@ Tests the API without requiring actual serial hardware.
 """
 
 import time
+
 from serial_console_reader import SerialConsoleReader
 
 
@@ -53,28 +54,45 @@ def test_buffer_api():
 
     # Test search_recent - simple string
     print("\n3. Testing search_recent() with simple string...")
-    matches = reader.search_recent("iSCSI", max_lines=100)
+    reader._recent_read = 0  # Reset for fresh search
+    found = reader.search_recent("iSCSI", max_lines=100)
+    # Manually filter to verify count
+    recent_lines = reader.get_recent(100)
+    matches = [line for line in recent_lines if "iSCSI" in line]
     print(f"   Found {len(matches)} lines containing 'iSCSI':")
     for line in matches:
         print(f"     - {line}")
+    assert found, "search_recent should return True"
     assert len(matches) == 2, "Should find 2 lines with 'iSCSI'"
     print("   ✓ search_recent() string search working")
 
     # Test search_recent - regex
     print("\n4. Testing search_recent() with regex...")
-    matches = reader.search_recent(r"DietPi-Boot: Phase \d", max_lines=100, regex=True)
+    import re
+
+    reader._recent_read = 0  # Reset for fresh search
+    found = reader.search_recent(r"DietPi-Boot: Phase \d", max_lines=100, regex=True)
+    # Manually filter to verify count (search entire buffer, not just new lines)
+    recent_lines = reader.get_recent(100)
+    matches = [line for line in recent_lines if re.search(r"DietPi-Boot: Phase \d", line)]
     print(f"   Found {len(matches)} lines matching regex:")
     for line in matches:
         print(f"     - {line}")
+    assert found, "search_recent should return True"
     assert len(matches) == 2, "Should find 2 DietPi boot phase lines"
     print("   ✓ search_recent() regex search working")
 
     # Test search_recent - USB devices
     print("\n5. Testing search for USB devices...")
-    matches = reader.search_recent(r"USB \d+-\d+", max_lines=100, regex=True)
+    reader._recent_read = 0  # Reset for fresh search
+    found = reader.search_recent(r"USB \d+-\d+", max_lines=100, regex=True)
+    # Manually filter to verify count (search entire buffer, not just new lines)
+    recent_lines = reader.get_recent(100)
+    matches = [line for line in recent_lines if re.search(r"USB \d+-\d+", line)]
     print(f"   Found {len(matches)} USB device messages:")
     for line in matches:
         print(f"     - {line}")
+    assert found, "search_recent should return True"
     assert len(matches) == 1, "Should find 1 USB message"
     print("   ✓ USB device search working")
 
@@ -117,7 +135,7 @@ def test_buffer_api():
     if found:
         print(f"   Matching line: {matching_line}")
     assert found, "Should find login: pattern"
-    assert "DietPi login:" in matching_line, "Should match correct line"
+    assert matching_line is not None and "DietPi login:" in matching_line, "Should match correct line"
     print("   ✓ wait_for_pattern() working")
 
     # Test wait_for_pattern timeout
@@ -131,7 +149,7 @@ def test_buffer_api():
     print("\n9. Testing save_to_file()...")
     import tempfile
 
-    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".log") as f:
+    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".log") as f:  # type: ignore[assignment]
         temp_file = f.name
 
     reader._buffer.clear()
@@ -143,7 +161,7 @@ def test_buffer_api():
     assert success, "Should save successfully"
 
     # Verify file contents
-    with open(temp_file, "r") as f:
+    with open(temp_file, "r") as f:  # type: ignore[assignment]
         contents = f.read()
     assert "Line 1" in contents, "Should contain Line 1"
     assert "Line 3" in contents, "Should contain Line 3"
