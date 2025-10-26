@@ -126,6 +126,28 @@ def test_check_duplicate_returns_none_when_no_match():
     assert result is None
 
 
+def test_check_duplicate_detects_recent_duplicate():
+    """Should detect duplicate within time window"""
+    metrics = TestMetrics(db_path=":memory:")
+
+    url = "https://example.com/test.img"
+    release_id = 456
+
+    # Create first test
+    test_id = metrics.start_test(
+        image_url=url,
+        github_release_id=release_id
+    )
+
+    # Check for duplicate (should find it)
+    result = metrics.check_duplicate(url, release_id)
+
+    assert result is not None
+    assert result["test_id"] == test_id
+    assert result["minutes_ago"] == 0  # Just created
+    assert "started_at" in result
+
+
 if __name__ == "__main__":
     try:
         test_metrics()
