@@ -261,6 +261,7 @@ class GitHubReporter:
             release.update_release(name=release.title, message=new_body)
 
             logger.info(f"✓ Updated release {release.title} with test results ({len(tests)} tests)")
+            logger.info(f"Test results: {results_markdown}")
 
             # Mark tests as reported ONLY if in final state
             # Tests still queued or running will be updated again on next poll
