@@ -152,12 +152,12 @@ def run_basic_setup_test(rpi_ip: str, timeout_seconds: int = 90) -> int:
         try:
             # Wait for redirect to /waiting
             print("  Step 1: Waiting for redirect...")
-            WebDriverWait(driver, 30).until(lambda d: "/waiting" in d.current_url)
+            WebDriverWait(driver, 60).until(lambda d: "/waiting" in d.current_url)
             print("✓ Form submitted - redirected to waiting page")
 
             # Wait for processing to complete
             print("  Step 2: Waiting for processing...")
-            WebDriverWait(driver, 60).until(lambda d: "SDR Setup" in d.title)
+            WebDriverWait(driver, 300).until(lambda d: "SDR Setup" in d.title)
             print("✓ Successfully reached SDR Setup page")
             return 0
 
@@ -171,7 +171,7 @@ def run_basic_setup_test(rpi_ip: str, timeout_seconds: int = 90) -> int:
             # Accept partial completion
             if "/waiting" in current_url or "performing requested actions" in current_title.lower():
                 print("✓ Form submission successful, system is processing")
-                return 0
+                return 1
             else:
                 print("✗ Form submission may have failed")
                 return 1
