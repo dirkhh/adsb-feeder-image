@@ -112,6 +112,20 @@ def test_check_duplicate_skips_when_release_id_none():
     assert result is None
 
 
+def test_check_duplicate_returns_none_when_no_match():
+    """Should return None when no matching records exist"""
+    metrics = TestMetrics(db_path=":memory:")
+
+    # Don't create any test records
+
+    result = metrics.check_duplicate(
+        image_url="https://example.com/test.img",
+        github_release_id=123
+    )
+
+    assert result is None
+
+
 if __name__ == "__main__":
     try:
         test_metrics()
