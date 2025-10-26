@@ -973,7 +973,6 @@ Examples:
     parser.add_argument("--shutdown-timeout", type=int, default=20, help="SSH connection timeout in seconds (default: 20)")
     parser.add_argument("--timeout", type=int, default=5, help="Timeout in minutes (default: 5)")
     parser.add_argument("--test-setup", action="store_true", help="Run basic setup test after feeder comes online")
-    parser.add_argument("--test-only", action="store_true", help="Don't run install / boot, just the tests")
     parser.add_argument("--visible-browser", action="store_true", help="Use visible browser for debugging JavaScript behavior")
     parser.add_argument("--metrics-id", type=int, help="Metrics test ID for tracking progress")
     parser.add_argument("--metrics-db", default="/var/lib/adsb-boot-test/metrics.db", help="Path to metrics database")
@@ -1020,29 +1019,6 @@ Examples:
     # Update metrics: download stage completed
     update_metrics_stage(args.metrics_id, args.metrics_db, "download", "passed")
 
-    if args.test_only:
-        print("\n🧪 Running basic setup test...")
-        if args.visible_browser:
-            setup_success = test_basic_setup_with_visible_browser(args.rpi_ip)
-        else:
-            setup_success = test_basic_setup(args.rpi_ip)
-            if not setup_success:
-                print("\n⚠ Selenium test failed, trying simple fallback test...")
-                setup_success = test_basic_setup_simple(args.rpi_ip)
-
-        if setup_success:
-            print("\n🎉 All tests completed successfully!")
-            if args.log_all_serial:
-                save_serial_log_on_failure(serial_reader, args.metrics_id, script_dir)
-            if serial_reader:
-                serial_reader.stop()
-            sys.exit(0)
-        else:
-            print("\n❌ Basic setup test failed!")
-            save_serial_log_on_failure(serial_reader, args.metrics_id, script_dir)
-            if serial_reader:
-                serial_reader.stop()
-            sys.exit(1)
 
     try:
         if not args.force_off:
