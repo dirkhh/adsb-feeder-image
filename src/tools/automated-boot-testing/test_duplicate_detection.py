@@ -134,3 +134,41 @@ def test_different_release_ids_both_allowed(app):
     assert response2.status_code == 200
     data2 = json.loads(response2.data)
     assert data2['status'] == 'queued'  # Should be queued, not ignored
+
+
+def test_no_release_id_skips_duplicate_check(app):
+    """Requests without release_id should always be queued"""
+    client = app.test_client()
+
+    payload = {
+        "url": "https://github.com/dirkhh/adsb-feeder-image/releases/download/v1.0.0/test.img.xz",
+        "github_context": {
+            "event_type": "manual"
+            # No release_id
+        }
+    }
+
+    # First request
+    response1 = client.post(
+        '/api/trigger-boot-test',
+        data=json.dumps(payload),
+        content_type='application/json',
+        headers={'X-API-Key': 'test_key_123'}
+    )
+
+    assert response1.status_code == 200
+    data1 = json.loads(response1.data)
+    assert data1['status'] == 'queued'
+
+    # Second request with same URL but no release_id
+    # Should also be queued (duplicate check skipped)
+    response2 = client.post(
+        '/api/trigger-boot-test',
+        data=json.dumps(payload),
+        content_type='application/json',
+        headers={'X-API-Key': 'test_key_123'}
+    )
+
+    assert response2.status_code == 200
+    data2 = json.loads(response2.data)
+    assert data2['status'] == 'queued'  # Not ignored, because no release_id
