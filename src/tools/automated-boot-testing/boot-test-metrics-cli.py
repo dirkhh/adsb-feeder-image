@@ -7,11 +7,12 @@ import argparse
 import sys
 from datetime import datetime
 from pathlib import Path
+from typing import Optional
 
 # Add current directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
 
-from metrics import TestMetrics
+from metrics import TestMetrics  # noqa: E402
 
 
 def format_status_emoji(status: str) -> str:
@@ -50,7 +51,7 @@ def show_stats(metrics: TestMetrics, days: int):
     print()
 
 
-def show_recent(metrics: TestMetrics, limit: int, failures_only: bool = False, version: str = None):
+def show_recent(metrics: TestMetrics, limit: int, failures_only: bool = False, version: Optional[str] = None):
     """Show recent test results"""
     if version:
         results = metrics.get_version_results(version, limit=limit)
@@ -175,19 +176,11 @@ Examples:
         """,
     )
 
-    parser.add_argument(
-        "--recent", type=int, metavar="N", help="Show N most recent tests (default: 10)"
-    )
-    parser.add_argument(
-        "--stats", type=int, metavar="DAYS", help="Show statistics for last N days"
-    )
-    parser.add_argument(
-        "--failures", action="store_true", help="Show only failed tests"
-    )
+    parser.add_argument("--recent", type=int, metavar="N", help="Show N most recent tests (default: 10)")
+    parser.add_argument("--stats", type=int, metavar="DAYS", help="Show statistics for last N days")
+    parser.add_argument("--failures", action="store_true", help="Show only failed tests")
     parser.add_argument("--version", metavar="VERSION", help="Filter by version")
-    parser.add_argument(
-        "--details", type=int, metavar="ID", help="Show details for specific test ID"
-    )
+    parser.add_argument("--details", type=int, metavar="ID", help="Show details for specific test ID")
     parser.add_argument(
         "--db",
         default="/var/lib/adsb-boot-test/metrics.db",
@@ -215,9 +208,7 @@ Examples:
     # Show recent results (default or explicit)
     limit = args.recent if args.recent is not None else (10 if not args.stats else 0)
     if limit > 0:
-        show_recent(
-            metrics, limit=limit, failures_only=args.failures, version=args.version
-        )
+        show_recent(metrics, limit=limit, failures_only=args.failures, version=args.version)
 
     # If no options given, show default view
     if not any([args.stats, args.recent, args.failures, args.version, args.details]):

@@ -19,19 +19,20 @@ import sys
 import threading
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from github import Auth, Github, GithubException
 
-# Add script directory to path for metrics import
+# Import metrics module
 # In production, metrics.py is copied to the same directory as this script
 sys.path.insert(0, str(Path(__file__).parent))
 # For development, also check the automated-boot-testing directory
 sys.path.insert(0, str(Path(__file__).parent.parent / "automated-boot-testing"))
-from metrics import TestMetrics
+
+from metrics import TestMetrics  # type: ignore # noqa: E402
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -60,10 +61,12 @@ async def health_check():
             try:
                 rate_limit = reporter_instance.github.get_rate_limit()
                 # Handle different PyGithub versions
-                if hasattr(rate_limit, 'core'):
-                    rate_limit_info = {"remaining": rate_limit.core.remaining, "limit": rate_limit.core.limit}
-                elif hasattr(rate_limit, 'rate'):
-                    rate_limit_info = {"remaining": rate_limit.rate.remaining, "limit": rate_limit.rate.limit}
+                if hasattr(rate_limit, "core"):
+                    core = getattr(rate_limit, "core")  # type: ignore[attr-defined]
+                    rate_limit_info = {"remaining": core.remaining, "limit": core.limit}
+                elif hasattr(rate_limit, "rate"):
+                    rate = getattr(rate_limit, "rate")  # type: ignore[attr-defined]
+                    rate_limit_info = {"remaining": rate.remaining, "limit": rate.limit}
             except Exception:
                 pass  # Ignore rate limit errors in health check
 
@@ -93,7 +96,7 @@ class GitHubReporter:
         self.metrics = TestMetrics(metrics_db)
         self.poll_interval = poll_interval
         self.repo_name = repo_name
-        self.last_poll_time = None
+        self.last_poll_time: Optional[str] = None
 
         logger.info(f"GitHub Reporter initialized for repository: {repo_name}")
 
@@ -110,16 +113,18 @@ class GitHubReporter:
             try:
                 rate_limit = self.github.get_rate_limit()
                 # Try to access core rate limit (API may vary by version)
-                if hasattr(rate_limit, 'core'):
-                    remaining = rate_limit.core.remaining
-                    limit = rate_limit.core.limit
-                elif hasattr(rate_limit, 'rate'):
-                    remaining = rate_limit.rate.remaining
-                    limit = rate_limit.rate.limit
+                if hasattr(rate_limit, "core"):
+                    core = getattr(rate_limit, "core")  # type: ignore[attr-defined]
+                    remaining = core.remaining
+                    limit = core.limit
+                elif hasattr(rate_limit, "rate"):
+                    rate = getattr(rate_limit, "rate")  # type: ignore[attr-defined]
+                    remaining = rate.remaining
+                    limit = rate.limit
                 else:
                     # Fallback if structure is different
-                    remaining = getattr(rate_limit, 'remaining', None)
-                    limit = getattr(rate_limit, 'limit', None)
+                    remaining = getattr(rate_limit, "remaining", None)
+                    limit = getattr(rate_limit, "limit", None)
 
                 if remaining is not None and limit is not None:
                     logger.info(f"✓ Rate limit: {remaining}/{limit}")

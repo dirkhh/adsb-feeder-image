@@ -13,14 +13,8 @@ Exit codes:
 import asyncio
 import json
 import sys
-from pathlib import Path
 
-try:
-    from kasa import SmartPlug
-except ImportError:
-    print("ERROR: python-kasa not installed", file=sys.stderr)
-    print("Install with: pip install python-kasa", file=sys.stderr)
-    sys.exit(1)
+from kasa import SmartPlug
 
 
 async def control_kasa_async(ip: str, turn_on: bool) -> bool:

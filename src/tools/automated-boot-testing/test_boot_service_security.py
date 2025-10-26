@@ -11,23 +11,27 @@ These tests verify security-critical behavior of the boot test API including:
 Note: These are integration-style tests that test behavior, not implementation details.
 """
 
-import sys
 import importlib.util
+import sys
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 import pytest
 
 # Import the adsb-boot-test-service module (has dashes, so use importlib)
 service_path = Path(__file__).parent / "adsb-boot-test-service.py"
 spec = importlib.util.spec_from_file_location("adsb_test_service", service_path)
+if spec is None:
+    raise ImportError(f"Could not load module from {service_path}")
 service = importlib.util.module_from_spec(spec)
 sys.modules["adsb_test_service"] = service
-spec.loader.exec_module(service)
+if spec.loader:
+    spec.loader.exec_module(service)
+else:
+    raise ImportError(f"Could not load module from {service_path}")
 
 # Now we can import the classes
 APIKeyAuth = service.APIKeyAuth
-TestQueue = service.TestQueue
 GitHubValidator = service.GitHubValidator
 TestExecutor = service.TestExecutor
 
@@ -154,10 +158,13 @@ class TestGitHubURLValidation:
 class TestInputValidation:
     """Test input validation and injection prevention."""
 
-    @patch('pathlib.Path.exists', return_value=True)  # Mock venv and script existence
-    def test_shell_metacharacters_rejected(self, mock_exists):
+    @patch.object(service, "keys_match", return_value=True)
+    @patch("os.access", return_value=True)
+    @patch("pathlib.Path.is_file", return_value=True)
+    @patch("pathlib.Path.exists", return_value=True)
+    def test_shell_metacharacters_rejected(self, mock_exists, mock_is_file, mock_access, mock_keys_match):
         """Test that URLs with shell metacharacters are rejected."""
-        executor = TestExecutor("192.168.1.100", "192.168.1.101", 10)
+        executor = TestExecutor("192.168.1.100", "/mock/power.sh", "/mock/key.pem", 10)
 
         dangerous_chars = [";", "&", "|", "`", "$", "\n", "\r"]
         base_url = "https://github.com/user/repo/releases/download/v1.0/file.img.xz"
@@ -171,113 +178,47 @@ class TestInputValidation:
             assert result["success"] is False
             assert "invalid characters" in result["message"].lower()
 
-    @patch('pathlib.Path.exists', return_value=True)  # Mock venv and script existence
-    def test_ip_address_validation(self, mock_exists):
+    @patch.object(service, "keys_match", return_value=True)
+    @patch("os.access", return_value=True)
+    @patch("pathlib.Path.is_file", return_value=True)
+    @patch("pathlib.Path.exists", return_value=True)
+    def test_ip_address_validation(self, mock_exists, mock_is_file, mock_access, mock_keys_match):
         """Test that invalid IP addresses are rejected."""
         # Valid IPs should be accepted
-        executor = TestExecutor("192.168.1.100", "192.168.1.101", 10)
+        executor = TestExecutor("192.168.1.100", "/mock/power.sh", "/mock/key.pem", 10)
         assert executor.rpi_ip == "192.168.1.100"
 
         # Invalid IPs should raise ValueError
         with pytest.raises(ValueError, match="not a valid IP address"):
-            TestExecutor("not-an-ip", "192.168.1.101", 10)
+            TestExecutor("not-an-ip", "/mock/power.sh", "/mock/key.pem", 10)
 
         with pytest.raises(ValueError, match="not a valid IP address"):
-            TestExecutor("999.999.999.999", "192.168.1.101", 10)
+            TestExecutor("999.999.999.999", "/mock/power.sh", "/mock/key.pem", 10)
 
         with pytest.raises(ValueError, match="not a valid IP address"):
-            TestExecutor("192.168.1.100; rm -rf /", "192.168.1.101", 10)
+            TestExecutor("192.168.1.100; rm -rf /", "/mock/power.sh", "/mock/key.pem", 10)
 
-    @patch('pathlib.Path.exists', return_value=True)  # Mock venv and script existence
-    def test_timeout_validation(self, mock_exists):
+    @patch.object(service, "keys_match", return_value=True)
+    @patch("os.access", return_value=True)
+    @patch("pathlib.Path.is_file", return_value=True)
+    @patch("pathlib.Path.exists", return_value=True)
+    def test_timeout_validation(self, mock_exists, mock_is_file, mock_access, mock_keys_match):
         """Test that invalid timeouts are rejected."""
         # Valid timeout
-        executor = TestExecutor("192.168.1.100", "192.168.1.101", 10)
+        executor = TestExecutor("192.168.1.100", "/mock/power.sh", "/mock/key.pem", 10)
         assert executor.timeout_minutes == 10
 
         # Too small
         with pytest.raises(ValueError, match="Timeout must be"):
-            TestExecutor("192.168.1.100", "192.168.1.101", 0)
+            TestExecutor("192.168.1.100", "/mock/power.sh", "/mock/key.pem", 0)
 
         # Too large
         with pytest.raises(ValueError, match="Timeout must be"):
-            TestExecutor("192.168.1.100", "192.168.1.101", 100)
+            TestExecutor("192.168.1.100", "/mock/power.sh", "/mock/key.pem", 100)
 
 
-class TestQueueSecurity:
-    """Test queue management security."""
-
-    def test_duplicate_prevention(self):
-        """Test that duplicate URLs are prevented within time window."""
-        queue = TestQueue()
-
-        url = "https://github.com/user/repo/releases/download/v1.0/file.img.xz"
-
-        # First addition should succeed
-        result1 = queue.add_test(url, "192.168.1.1")
-        assert result1["status"] == "queued"
-
-        # Duplicate within window should be rejected
-        result2 = queue.add_test(url, "192.168.1.1")
-        assert result2["status"] == "duplicate"
-
-    def test_case_insensitive_duplicate_detection(self):
-        """Test that duplicate detection is case-insensitive."""
-        queue = TestQueue()
-
-        url1 = "https://github.com/user/repo/releases/download/v1.0/FILE.img.xz"
-        url2 = "https://github.com/user/repo/releases/download/v1.0/file.img.xz"
-
-        result1 = queue.add_test(url1, "192.168.1.1")
-        assert result1["status"] == "queued"
-
-        result2 = queue.add_test(url2, "192.168.1.1")
-        assert result2["status"] == "duplicate"
-
-    def test_whitespace_stripped_in_duplicate_detection(self):
-        """Test that whitespace is stripped before duplicate detection."""
-        queue = TestQueue()
-
-        url1 = "https://github.com/user/repo/releases/download/v1.0/file.img.xz"
-        url2 = "  https://github.com/user/repo/releases/download/v1.0/file.img.xz  "
-
-        result1 = queue.add_test(url1, "192.168.1.1")
-        assert result1["status"] == "queued"
-
-        result2 = queue.add_test(url2, "192.168.1.1")
-        assert result2["status"] == "duplicate"
-
-    def test_flush_clears_queue_and_cache(self):
-        """Test that flush clears both queue and processed URLs cache."""
-        queue = TestQueue()
-
-        # Add some items
-        queue.add_test("https://github.com/user/repo/releases/download/v1.0/file1.img.xz", "192.168.1.1")
-        queue.add_test("https://github.com/user/repo/releases/download/v1.0/file2.img.xz", "192.168.1.1")
-
-        assert queue.queue.qsize() == 2
-        assert len(queue.processed_urls) == 2
-
-        # Flush
-        flushed_count = queue.flush()
-
-        assert flushed_count == 2
-        assert queue.queue.qsize() == 0
-        assert len(queue.processed_urls) == 0
-
-    def test_get_queued_items_does_not_modify_queue(self):
-        """Test that getting queued items doesn't remove them from queue."""
-        queue = TestQueue()
-
-        url = "https://github.com/user/repo/releases/download/v1.0/file.img.xz"
-        queue.add_test(url, "192.168.1.1")
-
-        # Get items
-        items = queue.get_queued_items()
-
-        # Queue should still have the item
-        assert len(items) == 1
-        assert queue.queue.qsize() == 1
+# NOTE: TestQueueSecurity tests removed - TestQueue class no longer exists
+# Duplicate detection is now handled via database in test_duplicate_detection.py
 
 
 if __name__ == "__main__":

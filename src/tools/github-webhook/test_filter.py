@@ -9,7 +9,7 @@ import sys
 # Add the current directory to Python path to import webhook_service
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from webhook_service import matches_binary_filter
+from webhook_service import matches_binary_filter  # noqa: E402
 
 
 def test_binary_filter():
@@ -44,7 +44,7 @@ def test_binary_filter():
     failed = 0
 
     for binary_name, expected, description in test_cases:
-        result = matches_binary_filter(binary_name)
+        result = matches_binary_filter(binary_name, "v1.0.0")  # Use dummy release name for basic filter testing
         status = "✅ PASS" if result == expected else "❌ FAIL"
 
         print(f"{status} | {binary_name}")
@@ -62,11 +62,15 @@ def test_binary_filter():
 
     if failed > 0:
         print("❌ Some tests failed!")
-        sys.exit(1)
+        # Use assertion for pytest compatibility
+        assert False, f"{failed} test cases failed"
     else:
         print("✅ All tests passed!")
-        sys.exit(0)
 
 
 if __name__ == "__main__":
-    test_binary_filter()
+    try:
+        test_binary_filter()
+        sys.exit(0)
+    except AssertionError:
+        sys.exit(1)

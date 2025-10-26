@@ -7,13 +7,13 @@ based on naming patterns to determine which ones qualify for additional tests.
 """
 
 import asyncio
-from datetime import datetime, timedelta
 import hashlib
 import hmac
 import json
 import logging
 import os
 import re
+from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
 
@@ -39,7 +39,7 @@ app = FastAPI(
 
 # Add rate limiting to FastAPI
 app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]
 
 # Configuration
 WEBHOOK_SECRET = os.getenv("GITHUB_WEBHOOK_SECRET")
@@ -151,7 +151,7 @@ def extract_qualifying_binaries(release_data: Dict[str, Any]) -> List[Dict[str, 
             # compare that timestamp with the current time and if it is more than 1 hour old, ignore the release
             if created_at:
                 # Parse ISO timestamp (may include 'Z' for UTC or timezone info)
-                asset_time = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
+                asset_time = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
                 current_time = datetime.now(asset_time.tzinfo) if asset_time.tzinfo else datetime.now()
 
                 # Check if timestamp is more than 1 hour old

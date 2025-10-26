@@ -2,7 +2,7 @@
 #
 # Remote Deployment Script for Test Services
 #
-# Deploys github-webhook and adsb-test-service to remote servers.
+# Deploys github-webhook and adsb-boot-test to remote servers.
 # Reads target hosts from .env file in the same directory.
 #
 # Usage:
@@ -180,11 +180,11 @@ deploy_webhook() {
     log_success "github-webhook deployment completed successfully"
 }
 
-# Function to deploy adsb-test-service
+# Function to deploy adsb-boot-test
 deploy_boot_test() {
     local host=$(parse_host "$BOOT_TEST_HOST")
 
-    log_info "Deploying adsb-test-service to $host"
+    log_info "Deploying adsb-boot-test to $host"
 
     # Test SSH connection
     if ! test_ssh "$host"; then
@@ -210,15 +210,15 @@ deploy_boot_test() {
     ssh "$host" "cd $REMOTE_STAGE_DIR/automated-boot-testing && bash install-service.sh"
 
     # Restart service
-    log_info "Restarting adsb-test-service..."
-    ssh "$host" "systemctl restart adsb-test-service"
+    log_info "Restarting adsb-boot-test..."
+    ssh "$host" "systemctl restart adsb-boot-test"
 
     # Check service status
-    if ssh "$host" "systemctl is-active --quiet adsb-test-service"; then
-        log_success "adsb-test-service is running"
+    if ssh "$host" "systemctl is-active --quiet adsb-boot-test"; then
+        log_success "adsb-boot-test is running"
     else
-        log_error "adsb-test-service failed to start"
-        ssh "$host" "journalctl -u adsb-test-service -n 20 --no-pager"
+        log_error "adsb-boot-test failed to start"
+        ssh "$host" "journalctl -u adsb-boot-test -n 20 --no-pager"
         return 1
     fi
 
@@ -226,7 +226,7 @@ deploy_boot_test() {
     log_info "Cleaning up remote staging directory..."
     ssh "$host" "rm -rf $REMOTE_STAGE_DIR"
 
-    log_success "adsb-test-service deployment completed successfully"
+    log_success "adsb-boot-test deployment completed successfully"
 }
 
 # Main function
@@ -278,7 +278,7 @@ main() {
                     failed=1
                 fi
             else
-                log_warning "BOOT_TEST_HOST not set in .env - skipping adsb-test-service deployment"
+                log_warning "BOOT_TEST_HOST not set in .env - skipping adsb-boot-test deployment"
             fi
 
             if [[ $failed -eq 1 ]]; then
@@ -293,7 +293,7 @@ main() {
             echo "Usage: $0 [webhook|boot-test|all]"
             echo
             echo "  webhook    - Deploy github-webhook service only"
-            echo "  boot-test  - Deploy adsb-test-service only"
+            echo "  boot-test  - Deploy adsb-boot-test only"
             echo "  all        - Deploy both services (default)"
             exit 1
             ;;

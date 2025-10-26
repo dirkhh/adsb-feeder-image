@@ -14,47 +14,29 @@ Usage:
 """
 
 import argparse
-import asyncio
 import os
 import re
-import shutil
 import subprocess
 import sys
 import time
 import urllib.parse
 from pathlib import Path
+from typing import Optional
 
 import requests
-from bs4 import BeautifulSoup
-from selenium import webdriver
+from metrics import TestMetrics  # type: ignore # noqa: E402
 from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.common.by import By
-from selenium.webdriver.firefox.service import Service as FirefoxService
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-from webdriver_manager.firefox import GeckoDriverManager
-
-try:
-    from metrics import TestMetrics
-    METRICS_AVAILABLE = True
-except ImportError:
-    METRICS_AVAILABLE = False
-
-try:
-    from serial_console_reader import SerialConsoleReader
-    SERIAL_AVAILABLE = True
-except ImportError:
-    SERIAL_AVAILABLE = False
+from serial_console_reader import SerialConsoleReader  # type: ignore # noqa: E402
 
 # Configure line-buffered output for real-time logging when running as a systemd service
 # This ensures all output appears immediately in journalctl without manual flush() calls
-sys.stdout.reconfigure(line_buffering=True)
-sys.stderr.reconfigure(line_buffering=True)
+sys.stdout.reconfigure(line_buffering=True)  # type: ignore[union-attr,attr-defined]
+sys.stderr.reconfigure(line_buffering=True)  # type: ignore[union-attr,attr-defined]
 
 
 def update_metrics_stage(metrics_id: int, metrics_db: str, stage: str, status: str):
     """Update metrics stage if metrics tracking is enabled."""
-    if not METRICS_AVAILABLE or metrics_id is None:
+    if metrics_id is None:
         return
 
     try:
@@ -64,7 +46,7 @@ def update_metrics_stage(metrics_id: int, metrics_db: str, stage: str, status: s
         print(f"⚠️  Failed to update metrics: {e}")
 
 
-def save_serial_log(serial_reader, metrics_id: int = None, script_dir: Path = None):
+def save_serial_log(serial_reader, metrics_id: Optional[int] = None, script_dir: Optional[Path] = None):
     """Save serial console log to file on test failure."""
     if not serial_reader or not serial_reader.is_running():
         return
@@ -79,6 +61,7 @@ def save_serial_log(serial_reader, metrics_id: int = None, script_dir: Path = No
             log_file = log_dir / f"serial-console-test-{metrics_id}.log"
         else:
             import time
+
             timestamp = int(time.time())
             log_file = log_dir / f"serial-console-{timestamp}.log"
 
@@ -129,6 +112,7 @@ def power_toggle(script_path: str, turn_on: bool) -> bool:
     action = "on" if turn_on else "off"
     base_dir = Path(__file__).parent
     python_venv = base_dir / "venv/bin/python3"
+    process: Optional[subprocess.Popen] = None
     try:
         # Use Popen for real-time output forwarding to systemd journal
         process = subprocess.Popen(
@@ -140,8 +124,9 @@ def power_toggle(script_path: str, turn_on: bool) -> bool:
         )
 
         # Forward output in real-time to journal
-        for line in process.stdout:
-            print(line, end="", flush=True)
+        if process.stdout:
+            for line in process.stdout:
+                print(line, end="", flush=True)
 
         # Wait for process to complete with timeout
         returncode = process.wait(timeout=30)
@@ -153,8 +138,9 @@ def power_toggle(script_path: str, turn_on: bool) -> bool:
             return False
 
     except subprocess.TimeoutExpired:
-        process.kill()
-        process.wait()
+        if process:
+            process.kill()
+            process.wait()
         print(f"Power toggle script timed out after 30 seconds")
         return False
     except Exception as e:
@@ -230,7 +216,14 @@ def setup_iscsi_image(cached_decompressed: Path, ssh_public_key: str) -> None:
 
     # Build command with optional public key parameter
     # Use stdbuf to force line-buffered output from bash (otherwise bash fully buffers when stdout is a pipe)
-    cmd = ["stdbuf", "-oL", "bash", str(Path(__file__).parent / "setup-tftp-iscsi.sh"), str(cached_decompressed), str(target_path)]
+    cmd = [
+        "stdbuf",
+        "-oL",
+        "bash",
+        str(Path(__file__).parent / "setup-tftp-iscsi.sh"),
+        str(cached_decompressed),
+        str(target_path),
+    ]
     if ssh_public_key != "":
         cmd.append(ssh_public_key)
 
@@ -244,8 +237,9 @@ def setup_iscsi_image(cached_decompressed: Path, ssh_public_key: str) -> None:
     )
 
     # Forward each line of output immediately to journal
-    for line in process.stdout:
-        print(line, end="", flush=True)
+    if process and process.stdout:
+        for line in process.stdout:
+            print(line, end="", flush=True)
 
     returncode = process.wait()
     if returncode != 0:
@@ -291,13 +285,16 @@ def show_serial_context(serial_reader, num_lines: int = 3):
         print(f"  (Could not read serial console: {e})")
 
 
-def wait_for_feeder_online(rpi_ip: str, expected_image_name: str, timeout_minutes: int = 5, serial_reader=None) -> tuple[bool, str]:
+def wait_for_feeder_online(
+    rpi_ip: str, expected_image_name: str, timeout_minutes: int = 5, serial_reader=None
+) -> tuple[bool, str]:
     """Wait for the feeder to come online and verify the correct image is running."""
     print(f"Waiting for feeder at {rpi_ip} to come online (timeout: {timeout_minutes} minutes)...")
 
     start_time = time.time()
     timeout_seconds = timeout_minutes * 60
     watching_first_boot = -1
+    status_string: str = ""
     while time.time() - start_time < timeout_seconds:
         status_string = ""
         try:
@@ -432,132 +429,6 @@ def execute_js_and_wait(driver, js_code: str, description: str, wait_seconds: in
         return None
 
 
-def test_basic_setup_with_visible_browser(rpi_ip: str, timeout_seconds: int = 90) -> bool:
-    """Test the basic setup process using Selenium with visible browser for debugging."""
-    print(f"Testing basic setup with VISIBLE browser on http://{rpi_ip}/setup...")
-
-    driver = None
-    try:
-        print("Starting Firefox browser in VISIBLE mode...")
-
-        # Setup Firefox with VISIBLE mode for debugging
-        firefox_service = FirefoxService(GeckoDriverManager().install())
-        firefox_options = webdriver.FirefoxOptions()
-        # Remove headless mode to see what's happening
-        # firefox_options.add_argument("--headless")  # Commented out for visible debugging
-
-        firefox_options.add_argument("--no-sandbox")
-        firefox_options.add_argument("--disable-dev-shm-usage")
-        firefox_options.add_argument("--disable-gpu")
-        firefox_options.add_argument("--disable-extensions")
-
-        # Set Firefox preferences for debugging
-        firefox_options.set_preference("dom.webnotifications.enabled", False)
-        firefox_options.set_preference("media.volume_scale", "0.0")
-
-        driver = webdriver.Firefox(service=firefox_service, options=firefox_options)
-        driver.set_page_load_timeout(30)
-
-        print("✓ Firefox browser started in VISIBLE mode with debugging enabled")
-        print("🔍 Watch the browser window to see what happens after form submission!")
-
-        # Navigate to the feeder page
-        driver.get(f"http://{rpi_ip}/setup")
-
-        # Wait for user to observe the page
-        input("Press Enter after you've observed the page to continue with form filling...")
-
-        # Continue with the rest of the test...
-        wait = WebDriverWait(driver, 10)
-
-        # Check page title
-        print("Checking page title...")
-        current_title = driver.title
-        if "Basic Setup" not in current_title:
-            print(f"✗ Wrong page title: {current_title}")
-            return False
-        else:
-            print(f"✓ Page title is correct ({current_title})")
-
-        # Fill form and submit (simplified version for debugging)
-        print("Filling form...")
-        site_name_input = wait.until(EC.presence_of_element_located((By.ID, "site_name")))
-        site_name_input.clear()
-        site_name_input.send_keys("automated test site")
-
-        lat_input = driver.find_element(By.ID, "lat")
-        lat_input.clear()
-        lat_input.send_keys("45.48")
-
-        lon_input = driver.find_element(By.ID, "lon")
-        lon_input.clear()
-        lon_input.send_keys("-122.66")
-
-        alt_input = driver.find_element(By.ID, "alt")
-        alt_input.clear()
-        alt_input.send_keys("30")
-
-        # Click ADSB checkbox
-        adsb_checkbox = driver.find_element(By.ID, "is_adsb_feeder")
-        driver.execute_script("arguments[0].scrollIntoView(true);", adsb_checkbox)
-        time.sleep(1)
-        adsb_checkbox.click()
-
-        print("✓ Form filled, about to submit...")
-        input("Press Enter to submit the form and watch the JavaScript magic...")
-
-        # Click submit button
-        submit_button = driver.find_element(By.XPATH, "//button[@type='submit'][@name='submit'][@value='go']")
-        driver.execute_script("arguments[0].scrollIntoView(true);", submit_button)
-        time.sleep(1)
-        submit_button.click()
-
-        print("✓ Form submitted! Watch what happens next...")
-
-        # Wait for the complete flow automatically
-        try:
-            # Step 1: Wait for URL change to /waiting
-            print("  Step 1: Waiting for form submission redirect...")
-            WebDriverWait(driver, 30).until(lambda d: "/waiting" in d.current_url)
-            print("✓ Form submitted successfully - redirected to waiting page")
-
-            # Step 2: Wait for the system to finish processing
-            print("  Step 2: Waiting for system to finish processing...")
-            WebDriverWait(driver, 60).until(lambda d: "SDR Setup" in d.title)
-            print("✓ Successfully reached SDR Setup page")
-
-            # Check final state
-            final_title = driver.title
-            final_url = driver.current_url
-            print(f"Final page title: {final_title}")
-            print(f"Final URL: {final_url}")
-
-            return True
-
-        except TimeoutException:
-            current_url = driver.current_url
-            current_title = driver.title
-            print(f"⚠ Did not complete the full flow within timeout")
-            print(f"Current URL: {current_url}")
-            print(f"Current title: {current_title}")
-
-            # Accept partial completion
-            if "/waiting" in current_url or "performing requested actions" in current_title.lower():
-                print("✓ Form submission was successful, system is processing")
-                return True
-            else:
-                print("✗ Form submission may have failed")
-                return False
-
-    except Exception as e:
-        print(f"✗ Error during visible browser test: {e}")
-        return False
-    finally:
-        if driver:
-            input("Press Enter to close the browser...")
-            driver.quit()
-
-
 def test_basic_setup(rpi_ip: str, timeout_seconds: int = 90) -> bool:
     """
     Test the basic setup process using Selenium.
@@ -570,16 +441,17 @@ def test_basic_setup(rpi_ip: str, timeout_seconds: int = 90) -> bool:
     # Ensure testuser exists
     try:
         import pwd
-        pwd.getpwnam('testuser')
+
+        pwd.getpwnam("testuser")
         print("✓ testuser exists")
     except KeyError:
         print("⚠ testuser does not exist - creating it")
         try:
-            subprocess.run([
-                "useradd", "-r", "-m", "-s", "/bin/bash",
-                "-c", "User for running browser tests",
-                "testuser"
-            ], check=True, capture_output=True)
+            subprocess.run(
+                ["useradd", "-r", "-m", "-s", "/bin/bash", "-c", "User for running browser tests", "testuser"],
+                check=True,
+                capture_output=True,
+            )
             print("✓ testuser created")
         except subprocess.CalledProcessError as e:
             print(f"✗ Failed to create testuser: {e.stderr.decode()}")
@@ -601,11 +473,16 @@ def test_basic_setup(rpi_ip: str, timeout_seconds: int = 90) -> bool:
         # Use Popen with real-time output forwarding (same as shell script)
         process = subprocess.Popen(
             [
-                "sudo", "-u", "testuser",
-                "env", f"HOME=/home/testuser",
-                f"{base_dir}/venv/bin/python3", str(test_script),
+                "sudo",
+                "-u",
+                "testuser",
+                "env",
+                f"HOME=/home/testuser",
+                f"{base_dir}/venv/bin/python3",
+                str(test_script),
                 rpi_ip,
-                "--timeout", str(timeout_seconds)
+                "--timeout",
+                str(timeout_seconds),
             ],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
@@ -638,319 +515,6 @@ def test_basic_setup(rpi_ip: str, timeout_seconds: int = 90) -> bool:
         return False
 
 
-def _test_basic_setup_old(rpi_ip: str, timeout_seconds: int = 90) -> bool:
-    """
-    OLD VERSION - Runs as root (SECURITY RISK - DO NOT USE)
-    Kept for reference only.
-    """
-    print(f"Testing basic setup on http://{rpi_ip}/setup...")
-
-    driver = None
-    try:
-        print("Attempting to start Firefox browser...")
-
-        # Setup Firefox with enhanced options
-        firefox_service = FirefoxService(GeckoDriverManager().install())
-        firefox_options = webdriver.FirefoxOptions()
-        firefox_options.add_argument("--headless")
-        firefox_options.add_argument("--no-sandbox")
-        firefox_options.add_argument("--disable-dev-shm-usage")
-        firefox_options.add_argument("--disable-gpu")
-        firefox_options.add_argument("--disable-extensions")
-        firefox_options.add_argument("--disable-background-timer-throttling")
-        firefox_options.add_argument("--disable-backgrounding-occluded-windows")
-        firefox_options.add_argument("--disable-renderer-backgrounding")
-        firefox_options.add_argument("--disable-features=TranslateUI")
-        firefox_options.add_argument("--disable-web-security")
-        firefox_options.add_argument("--allow-running-insecure-content")
-
-        # Set Firefox preferences for better headless operation
-        firefox_options.set_preference("dom.webnotifications.enabled", False)
-        firefox_options.set_preference("media.volume_scale", "0.0")
-        firefox_options.set_preference(
-            "general.useragent.override",
-            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-        )
-
-        driver = webdriver.Firefox(service=firefox_service, options=firefox_options)
-        driver.set_page_load_timeout(30)
-
-        print("✓ Firefox browser started successfully with debugging enabled")
-
-        wait = WebDriverWait(driver, 10)
-
-        # Navigate to the feeder page
-        driver.get(f"http://{rpi_ip}/setup")
-
-        # Check page title - it should be "Basic Setup"
-        print("Checking page title...")
-        current_title = driver.title
-
-        if "Basic Setup" not in current_title:
-            print(f"✗ Wrong page title: {current_title}")
-            return False
-        else:
-            print(f"✓ Page title is correct ({current_title})")
-
-        # Check CPU temperature
-        print("Checking CPU temperature...")
-        cpu_temp_block = wait.until(EC.presence_of_element_located((By.ID, "cpu_temp_block")))
-        cpu_temp_element = cpu_temp_block.find_element(By.ID, "cpu_temp")
-        temp_text = cpu_temp_element.text.strip()
-
-        # Extract temperature value (assuming format like "45.2°C" or "45.2")
-        temp_value = float("".join(filter(lambda x: x.isdigit() or x == ".", temp_text)))
-
-        if not (30 <= temp_value <= 85):
-            print(f"✗ CPU temperature out of range: {temp_value}°C")
-            return False
-        print(f"✓ CPU temperature is reasonable: {temp_value}°C")
-
-        # Fill in site information
-        print("Filling in site information...")
-
-        # Site name
-        site_name_input = wait.until(EC.element_to_be_clickable((By.ID, "site_name")))
-        site_name_input.clear()
-        site_name_input.send_keys("automated test site")
-
-        # Latitude
-        lat_input = driver.find_element(By.ID, "lat")
-        lat_input.clear()
-        lat_input.send_keys("45.48")
-
-        # Longitude
-        lon_input = driver.find_element(By.ID, "lon")
-        lon_input.clear()
-        lon_input.send_keys("-122.66")
-
-        # Altitude
-        alt_input = driver.find_element(By.ID, "alt")
-        alt_input.clear()
-        alt_input.send_keys("30")
-
-        print("✓ Site information filled")
-
-        # Click ADSB checkbox
-        print("Clicking ADSB checkbox...")
-        adsb_checkbox = wait.until(EC.presence_of_element_located((By.ID, "is_adsb_feeder")))
-
-        # Scroll element into view
-        driver.execute_script("arguments[0].scrollIntoView(true);", adsb_checkbox)
-
-        # Wait a bit for scroll to complete
-        time.sleep(1)
-
-        # Check if checkbox is already checked
-        is_checked = adsb_checkbox.is_selected()
-        print(f"ADSB checkbox current state: {'checked' if is_checked else 'unchecked'}")
-
-        # Only click if not already checked
-        if not is_checked:
-            # Try to click the checkbox
-            try:
-                adsb_checkbox.click()
-                print("✓ ADSB checkbox clicked successfully")
-            except Exception as e:
-                print(f"Direct click failed: {e}, trying JavaScript click...")
-                # If direct click fails, try JavaScript click
-                driver.execute_script("arguments[0].click();", adsb_checkbox)
-                print("✓ ADSB checkbox clicked via JavaScript")
-        else:
-            print("✓ ADSB checkbox was already checked")
-
-        # Click submit button - try multiple possible selectors
-        print("Looking for submit button...")
-        submit_button = None
-
-        # Try different selectors for the submit button
-        submit_selectors = [
-            "//button[@type='submit'][@name='submit'][@value='go']",
-            "//button[@type='submit']",
-        ]
-
-        for selector in submit_selectors:
-            try:
-                submit_button = driver.find_element(By.XPATH, selector)
-                print(f"✓ Found submit button with selector: {selector}")
-                break
-            except Exception:  # noqa: S110
-                continue
-
-        if not submit_button:
-            print("✗ Could not find submit button with any selector")
-            return False
-
-        # Scroll submit button into view
-        driver.execute_script("arguments[0].scrollIntoView(true);", submit_button)
-        time.sleep(1)
-
-        # Log browser activity before form submission
-        log_browser_activity(driver, "before form submission")
-
-        # Try to click the submit button
-        try:
-            submit_button.click()
-            print("✓ Submit button clicked successfully")
-        except Exception as e:
-            print(f"Direct click failed: {e}, trying JavaScript click...")
-            # If direct click fails, try JavaScript click
-            driver.execute_script("arguments[0].click();", submit_button)
-            print("✓ Submit button clicked via JavaScript")
-
-        # Monitor what happens after form submission
-        print("🔍 Monitoring post-submission activity...")
-        log_browser_activity(driver, "immediately after form submission")
-
-        # Check for any JavaScript timers or redirects
-        execute_js_and_wait(driver, "return window.location.href;", "get current URL")
-        execute_js_and_wait(driver, "return document.title;", "get current title")
-        execute_js_and_wait(driver, "return document.readyState;", "get document ready state")
-
-        # Check for any pending JavaScript timers
-        execute_js_and_wait(
-            driver,
-            """
-            var timers = [];
-            for (var i = 1; i < 10000; i++) {
-                if (window.clearTimeout.toString().indexOf(i) > -1) {
-                    timers.push(i);
-                }
-            }
-            return timers.length;
-        """,
-            "count active timers",
-        )
-
-        # Look for any JavaScript errors or console messages
-        execute_js_and_wait(
-            driver,
-            """
-            return window.console && window.console.error ? 'Console available' : 'No console errors captured';
-        """,
-            "check console availability",
-        )
-
-        # Wait for the complete form submission flow
-        print("Waiting for form submission to complete...")
-        try:
-            # Step 1: Wait for URL change to /waiting (indicates form was submitted)
-            print("  Step 1: Waiting for form submission redirect...")
-            WebDriverWait(driver, 30).until(lambda d: "/waiting" in d.current_url)
-            print("✓ Form submitted successfully - redirected to waiting page")
-
-            # Step 2: Wait for the system to finish processing
-            print("  Step 2: Waiting for system to finish processing...")
-            WebDriverWait(driver, 60).until(lambda d: "SDR Setup" in d.title)
-            print("✓ Successfully reached SDR Setup page")
-            return True
-
-        except TimeoutException:
-            current_url = driver.current_url
-            current_title = driver.title
-            print(f"✗ Did not complete the flow within timeout")
-            print(f"Current URL: {current_url}")
-            print(f"Current title: {current_title}")
-
-            # Check if we're in an acceptable intermediate state
-            if "/waiting" in current_url:
-                print("✓ Form was submitted and system is processing")
-                if "performing requested actions" in current_title.lower():
-                    print("✓ System is performing requested actions")
-                    return True
-                else:
-                    print("⚠ System is in waiting state but may need more time")
-                    return True
-            elif "performing requested actions" in current_title.lower():
-                print("✓ System is performing requested actions")
-                return True
-            else:
-                print("✗ Form submission may have failed or system is in unexpected state")
-                return False
-
-    except Exception as e:
-        print(f"✗ Error during basic setup test: {e}")
-        return False
-    finally:
-        if driver:
-            driver.quit()
-
-
-def test_basic_setup_simple(rpi_ip: str) -> bool:
-    """Simple fallback test using requests (no browser automation)."""
-    print(f"Running simple setup test on http://{rpi_ip}/...")
-
-    try:
-        # Get the page content
-        response = requests.get(f"http://{rpi_ip}/", timeout=10)
-        if response.status_code != 200:
-            print(f"✗ HTTP error: {response.status_code}")
-            return False
-
-        # Parse the page
-        soup = BeautifulSoup(response.content, "html.parser")
-
-        # Check page title - it might be "Basic Setup" or "SDR Setup"
-        title = soup.find("title")
-        title_text = title.get_text() if title else ""
-
-        if "SDR Setup" in title_text:
-            print("✓ Already on SDR Setup page (form was previously submitted)")
-            return True
-        elif not title or "Basic Setup" not in title_text:
-            print(f"✗ Wrong page title: {title_text if title else 'No title found'}")
-            return False
-        else:
-            print("✓ Page title is correct (Basic Setup)")
-
-        # Check CPU temperature - try multiple approaches
-        cpu_temp_value = None
-
-        # Try to find CPU temperature in different ways
-        cpu_temp_selectors = [
-            ("div", {"id": "cpu_temp"}),
-            ("div", {"id": "cpu_temp_block"}),
-            ("span", {"id": "cpu_temp"}),
-            ("span", {"id": "cpu_temp_block"}),
-        ]
-
-        for tag, attrs in cpu_temp_selectors:
-            cpu_temp_element = soup.find(tag, attrs)
-            if cpu_temp_element:
-                temp_text = cpu_temp_element.get_text().strip()
-                # Extract temperature value from text
-                temp_match = re.search(r"(\d+\.?\d*)", temp_text)
-                if temp_match:
-                    cpu_temp_value = float(temp_match.group(1))
-                    print(f"✓ Found CPU temperature: {cpu_temp_value}°C")
-                    break
-
-        if cpu_temp_value is None:
-            print("✗ CPU temperature element not found with any selector")
-            return False
-
-        if not (30 <= cpu_temp_value <= 85):
-            print(f"✗ CPU temperature out of range: {cpu_temp_value}°C")
-            return False
-        print(f"✓ CPU temperature is reasonable: {cpu_temp_value}°C")
-
-        # Check that required form elements exist
-        required_elements = ["site_name", "lat", "lon", "alt", "is_adsb_feeder"]
-        for element_id in required_elements:
-            element = soup.find(id=element_id)
-            if not element:
-                print(f"✗ Required element not found: {element_id}")
-                return False
-
-        print("✓ All required form elements found")
-        print("✓ Basic setup test passed (limited verification)")
-        return True
-
-    except Exception as e:
-        print(f"✗ Error during simple setup test: {e}")
-        return False
-
-
 def main():
     parser = argparse.ArgumentParser(
         description="Test feeder image on actual hardware",
@@ -973,19 +537,22 @@ Examples:
     parser.add_argument("--shutdown-timeout", type=int, default=20, help="SSH connection timeout in seconds (default: 20)")
     parser.add_argument("--timeout", type=int, default=5, help="Timeout in minutes (default: 5)")
     parser.add_argument("--test-setup", action="store_true", help="Run basic setup test after feeder comes online")
-    parser.add_argument("--visible-browser", action="store_true", help="Use visible browser for debugging JavaScript behavior")
     parser.add_argument("--metrics-id", type=int, help="Metrics test ID for tracking progress")
     parser.add_argument("--metrics-db", default="/var/lib/adsb-boot-test/metrics.db", help="Path to metrics database")
-    parser.add_argument("--serial-console", default="", help="Path to serial console device (e.g., /dev/ttyUSB0), empty to disable")
+    parser.add_argument(
+        "--serial-console", default="", help="Path to serial console device (e.g., /dev/ttyUSB0), empty to disable"
+    )
     parser.add_argument("--serial-baud", type=int, default=115200, help="Serial console baud rate (default: 115200)")
-    parser.add_argument("--log-all-serial", action="store_true", help="Save serial console logs for all tests (not just failures)")
+    parser.add_argument(
+        "--log-all-serial", action="store_true", help="Save serial console logs for all tests (not just failures)"
+    )
 
     args = parser.parse_args()
 
     # Start serial console reader if configured
     serial_reader = None
     script_dir = Path(__file__).parent
-    if args.serial_console and SERIAL_AVAILABLE:
+    if args.serial_console:
         # Determine log file path if real-time logging is enabled
         realtime_log_file = None
         if args.log_all_serial:
@@ -1001,7 +568,7 @@ Examples:
             device_path=args.serial_console,
             baud_rate=args.serial_baud,
             log_prefix=f"serial-{args.metrics_id}" if args.metrics_id else "serial",
-            realtime_log_file=realtime_log_file
+            realtime_log_file=realtime_log_file,
         )
         if serial_reader.start():
             print(f"✓ Serial console monitoring enabled: {args.serial_console}")
@@ -1010,15 +577,12 @@ Examples:
         else:
             print(f"⚠️  Serial console monitoring failed to start")
             serial_reader = None
-    elif args.serial_console and not SERIAL_AVAILABLE:
-        print("⚠️  Serial console requested but serial_console_reader not available")
     cache_dir = script_dir / "test-images"
     expected_image_name = download_and_decompress_image(args.image_url, args.force_download, cache_dir)
     cached_image_path = cache_dir / expected_image_name
 
     # Update metrics: download stage completed
     update_metrics_stage(args.metrics_id, args.metrics_db, "download", "passed")
-
 
     try:
         if not args.force_off:
@@ -1072,7 +636,9 @@ Examples:
                     power_toggle(args.power_toggle_script, True)
                     time.sleep(20)  # give it time to boot and iSCSI to be initialized
                 else:
-                    print(f"with DietPi this can take 20+ minutes because of iSCSI root filesystem and shutdown failure -- keep waiting")
+                    print(
+                        f"with DietPi this can take 20+ minutes because of iSCSI root filesystem and shutdown failure -- keep waiting"
+                    )
 
             else:
                 print(f"no success in {args.timeout} minutes")
@@ -1093,13 +659,7 @@ Examples:
                 # Update metrics: browser_test stage starting
                 update_metrics_stage(args.metrics_id, args.metrics_db, "browser_test", "running")
 
-                if args.visible_browser:
-                    setup_success = test_basic_setup_with_visible_browser(args.rpi_ip)
-                else:
-                    setup_success = test_basic_setup(args.rpi_ip)
-                    if not setup_success:
-                        print("\n⚠ Selenium test failed, trying simple fallback test...")
-                        setup_success = test_basic_setup_simple(args.rpi_ip)
+                setup_success = test_basic_setup(args.rpi_ip)
 
                 # Update metrics: browser_test stage result
                 if setup_success:
