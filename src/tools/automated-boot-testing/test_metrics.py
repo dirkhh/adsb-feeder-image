@@ -176,6 +176,21 @@ def test_check_duplicate_ignores_old_duplicates():
     assert result is None
 
 
+def test_check_duplicate_different_release_ids():
+    """Same URL with different release_id should not be duplicate"""
+    metrics = TestMetrics(db_path=":memory:")
+
+    url = "https://example.com/test.img"
+
+    # Create test with release_id=100
+    metrics.start_test(image_url=url, github_release_id=100)
+
+    # Check with different release_id=200
+    result = metrics.check_duplicate(url, github_release_id=200)
+
+    assert result is None  # Not a duplicate
+
+
 if __name__ == "__main__":
     try:
         test_metrics()
