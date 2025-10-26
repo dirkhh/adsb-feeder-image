@@ -6,7 +6,8 @@ A systemd service that provides a web API for triggering automated feeder image 
 
 - **RESTful API**: POST to `/api/trigger-boot-test` to trigger tests
 - **GitHub URL Validation**: Only accepts release artifacts from `dirkhh/adsb-feeder-image`
-- **Queue System**: Processes tests sequentially with duplicate prevention (1 hour window)
+- **Queue System**: Processes tests sequentially with duplicate detection (1 hour window)
+- **Duplicate Detection**: Prevents redundant tests for same URL + release_id within 1 hour
 - **Configurable**: IP addresses and timeouts via JSON config file
 - **Timeout Protection**: Each test has a 10-minute timeout to prevent hanging
 - **Systemd Integration**: Proper logging to stdout/stderr for journald
@@ -99,7 +100,7 @@ curl -X POST http://localhost:9456/api/trigger-boot-test \
      -d '{"url": "https://github.com/dirkhh/adsb-feeder-image/releases/download/v3.0.6-beta.6/adsb-im-raspberrypi64-pi-2-3-4-5-v3.0.6-beta.6.img.xz"}'
 ```
 
-**Response:**
+**Response (test queued):**
 ```json
 {
   "status": "queued",
@@ -108,6 +109,17 @@ curl -X POST http://localhost:9456/api/trigger-boot-test \
   "test_id": "test_1642345678_abc123"
 }
 ```
+
+**Response (duplicate ignored):**
+```json
+{
+  "status": "ignored",
+  "message": "Duplicate test from 15 minutes ago",
+  "previous_test_id": "test_1642345000_xyz789"
+}
+```
+
+The API automatically detects and rejects duplicate test submissions for the same URL + GitHub release ID combination within a 1-hour window. See "Duplicate Detection" section below for details.
 
 #### 2. Check Status
 ```bash
@@ -141,16 +153,88 @@ curl http://localhost:9456/health
 ## How It Works
 
 1. **Request Validation**: Validates GitHub release URLs from the correct repository
-2. **Duplicate Prevention**: Ignores duplicate URLs submitted within 1 hour
+2. **Duplicate Detection**: Checks for duplicate URL + release_id combinations within 1 hour
 3. **Queue Processing**: Processes tests sequentially to avoid conflicts
 4. **Test Execution**: Runs `test-feeder-image.py` with the provided URL
 5. **Timeout Protection**: Each test is limited to 10 minutes maximum
 6. **Result Logging**: Logs success/failure with detailed information
 
+## Duplicate Detection
+
+The service automatically detects and prevents duplicate test submissions to avoid wasting resources on redundant tests.
+
+### How It Works
+
+- **Detection Criteria**: Same URL + GitHub release_id combination
+- **Time Window**: 1 hour (hardcoded)
+- **Response**: HTTP 200 with `status: "ignored"` (not an error)
+- **Bypass**: Tests without `release_id` skip duplicate check (manual tests always allowed)
+
+### When Duplicates Occur
+
+Duplicates can happen due to:
+- GitHub webhook retries (network issues, service restarts)
+- Multiple workflow runs for same release
+- Manual re-submissions of the same release
+
+### API Behavior
+
+**First request (queued):**
+```bash
+curl -X POST http://localhost:9456/api/trigger-boot-test \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "url": "https://github.com/.../test.img.xz",
+    "github_context": {
+      "release_id": 12345,
+      "commit_sha": "abc123"
+    }
+  }'
+```
+
+Response: `{"status": "queued", "test_id": "test_123"}`
+
+**Second request within 1 hour (ignored):**
+```bash
+# Same URL and release_id
+curl -X POST http://localhost:9456/api/trigger-boot-test \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "url": "https://github.com/.../test.img.xz",
+    "github_context": {
+      "release_id": 12345,
+      "commit_sha": "abc123"
+    }
+  }'
+```
+
+Response: `{"status": "ignored", "message": "Duplicate test from 15 minutes ago", "previous_test_id": "test_123"}`
+
+### Storage
+
+Duplicate detection uses the same SQLite database as test metrics:
+- Database: `/opt/adsb/boot-test-metrics.db`
+- Table: `test_runs`
+- Query: Finds matching `image_url` + `github_release_id` within time window
+
+### Logging
+
+Duplicate detection is logged for monitoring:
+```
+INFO: Duplicate test ignored: URL=https://github.com/.../test.img.xz, release_id=12345, previous test_id=123, 15 minutes ago
+```
+
+### Error Handling
+
+The duplicate check includes fail-safe error handling:
+- If database query fails, test is **allowed to proceed**
+- Error is logged as WARNING
+- This prevents database issues from blocking legitimate tests
+
 ## Queue Behavior
 
 - Tests are processed **sequentially** (one at a time)
-- **Duplicate prevention**: Same URL ignored if submitted within 1 hour
+- **Duplicate detection**: Same URL + release_id ignored if submitted within 1 hour
 - **Timeout protection**: Each test limited to 10 minutes
 - **Queue status**: Available via `/api/status` endpoint
 
