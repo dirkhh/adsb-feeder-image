@@ -93,6 +93,25 @@ def test_metrics():
         return True
 
 
+def test_check_duplicate_skips_when_release_id_none():
+    """Should return None immediately when release_id is None"""
+    metrics = TestMetrics(db_path=":memory:")
+
+    # Create a test to potentially match
+    metrics.start_test(
+        image_url="https://example.com/test.img",
+        github_release_id=123
+    )
+
+    # Check with release_id=None should skip check entirely
+    result = metrics.check_duplicate(
+        image_url="https://example.com/test.img",
+        github_release_id=None
+    )
+
+    assert result is None
+
+
 if __name__ == "__main__":
     try:
         test_metrics()

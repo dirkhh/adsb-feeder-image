@@ -14,13 +14,28 @@ class TestMetrics:
     """Simple metrics tracking for boot tests"""
 
     def __init__(self, db_path: str = "/var/lib/adsb-boot-test/metrics.db"):
-        self.db_path = Path(db_path)
-        self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        self.db_path = db_path if db_path == ":memory:" else Path(db_path)
+        self._memory_conn = None  # Keep persistent connection for :memory: databases
+        if db_path != ":memory:":
+            Path(db_path).parent.mkdir(parents=True, exist_ok=True)
         self._init_db()
+
+    def _get_connection(self):
+        """Get database connection, reusing persistent connection for :memory:"""
+        if self.db_path == ":memory:":
+            if self._memory_conn is None:
+                self._memory_conn = sqlite3.connect(self.db_path)
+            return self._memory_conn
+        return sqlite3.connect(self.db_path)
+
+    def _close_connection(self, conn):
+        """Close connection unless it's the persistent :memory: connection"""
+        if conn is not self._memory_conn:
+            conn.close()
 
     def _init_db(self):
         """Initialize database schema"""
-        conn = sqlite3.connect(self.db_path)
+        conn = self._get_connection()
         conn.execute(
             """
             CREATE TABLE IF NOT EXISTS test_runs (
@@ -56,7 +71,7 @@ class TestMetrics:
         conn.execute("CREATE INDEX IF NOT EXISTS idx_github_report_status ON test_runs(github_report_status)")
         conn.execute("CREATE INDEX IF NOT EXISTS idx_github_event_type ON test_runs(github_event_type)")
         conn.commit()
-        conn.close()
+        self._close_connection(conn)
 
     def start_test(
         self,
@@ -81,7 +96,7 @@ class TestMetrics:
         # Determine initial report status
         report_status = "pending" if github_event_type else None
 
-        conn = sqlite3.connect(self.db_path)
+        conn = self._get_connection()
         cursor = conn.execute(
             """
             INSERT INTO test_runs
@@ -107,7 +122,7 @@ class TestMetrics:
         )
         test_id = cursor.lastrowid
         conn.commit()
-        conn.close()
+        self._close_connection(conn)
         if test_id is None:
             raise RuntimeError("Failed to create test record")
         return test_id
@@ -119,10 +134,10 @@ class TestMetrics:
             raise ValueError(f"Invalid stage: {stage}. Must be one of {valid_stages}")
 
         stage_column = f"{stage}_status"
-        conn = sqlite3.connect(self.db_path)
+        conn = self._get_connection()
         conn.execute(f"UPDATE test_runs SET {stage_column} = ? WHERE id = ?", (status, test_id))
         conn.commit()
-        conn.close()
+        self._close_connection(conn)
 
     def update_test_status(self, test_id: int, status: str):
         """Update overall test status (queued -> running -> passed/failed)"""
@@ -130,10 +145,10 @@ class TestMetrics:
         if status not in valid_statuses:
             raise ValueError(f"Invalid status: {status}. Must be one of {valid_statuses}")
 
-        conn = sqlite3.connect(self.db_path)
+        conn = self._get_connection()
         conn.execute("UPDATE test_runs SET status = ? WHERE id = ?", (status, test_id))
         conn.commit()
-        conn.close()
+        self._close_connection(conn)
 
     def complete_test(
         self,
@@ -143,7 +158,7 @@ class TestMetrics:
         error_stage: Optional[str] = None,
     ):
         """Record test completion"""
-        conn = sqlite3.connect(self.db_path)
+        conn = self._get_connection()
         completed_at = datetime.utcnow().isoformat()
 
         # Get start time to calculate duration
@@ -165,7 +180,7 @@ class TestMetrics:
             (completed_at, duration, status, error_message, error_stage, test_id),
         )
         conn.commit()
-        conn.close()
+        self._close_connection(conn)
 
     def _extract_version(self, url: str) -> Optional[str]:
         """
@@ -184,7 +199,7 @@ class TestMetrics:
 
     def get_recent_results(self, limit: int = 10) -> List[Dict[str, Any]]:
         """Get recent test results"""
-        conn = sqlite3.connect(self.db_path)
+        conn = self._get_connection()
         conn.row_factory = sqlite3.Row
         cursor = conn.execute(
             """
@@ -195,12 +210,12 @@ class TestMetrics:
             (limit,),
         )
         results = [dict(row) for row in cursor.fetchall()]
-        conn.close()
+        self._close_connection(conn)
         return results
 
     def get_stats(self, days: int = 7) -> Dict[str, Any]:
         """Get summary statistics for last N days"""
-        conn = sqlite3.connect(self.db_path)
+        conn = self._get_connection()
         since_dt = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
         since = (since_dt - timedelta(days=days)).isoformat()
 
@@ -218,7 +233,7 @@ class TestMetrics:
             (since,),
         )
         row = cursor.fetchone()
-        conn.close()
+        self._close_connection(conn)
 
         total = row[0] or 0
         passed = row[1] or 0
@@ -234,7 +249,7 @@ class TestMetrics:
 
     def get_version_results(self, version: str, limit: int = 10) -> List[Dict[str, Any]]:
         """Get test results for a specific version"""
-        conn = sqlite3.connect(self.db_path)
+        conn = self._get_connection()
         conn.row_factory = sqlite3.Row
         cursor = conn.execute(
             """
@@ -246,12 +261,12 @@ class TestMetrics:
             (f"%{version}%", limit),
         )
         results = [dict(row) for row in cursor.fetchall()]
-        conn.close()
+        self._close_connection(conn)
         return results
 
     def get_failures(self, limit: int = 10) -> List[Dict[str, Any]]:
         """Get recent failures"""
-        conn = sqlite3.connect(self.db_path)
+        conn = self._get_connection()
         conn.row_factory = sqlite3.Row
         cursor = conn.execute(
             """
@@ -263,12 +278,12 @@ class TestMetrics:
             (limit,),
         )
         results = [dict(row) for row in cursor.fetchall()]
-        conn.close()
+        self._close_connection(conn)
         return results
 
     def get_queued_tests(self) -> List[Dict[str, Any]]:
         """Get all tests in queued state (for persistent queue processing)"""
-        conn = sqlite3.connect(self.db_path)
+        conn = self._get_connection()
         conn.row_factory = sqlite3.Row
         cursor = conn.execute(
             """
@@ -278,7 +293,7 @@ class TestMetrics:
         """
         )
         results = [dict(row) for row in cursor.fetchall()]
-        conn.close()
+        self._close_connection(conn)
         return results
 
     def get_unreported_tests(self) -> List[Dict[str, Any]]:
@@ -290,7 +305,7 @@ class TestMetrics:
         - Haven't been reported yet (reported_at is NULL)
         - Or failed to report (report_status = 'failed')
         """
-        conn = sqlite3.connect(self.db_path)
+        conn = self._get_connection()
         conn.row_factory = sqlite3.Row
         cursor = conn.execute(
             """
@@ -302,7 +317,7 @@ class TestMetrics:
         """
         )
         results = [dict(row) for row in cursor.fetchall()]
-        conn.close()
+        self._close_connection(conn)
         return results
 
     def get_tests_by_github_context(
@@ -313,7 +328,7 @@ class TestMetrics:
 
         Used by reporter to group tests for batch updates.
         """
-        conn = sqlite3.connect(self.db_path)
+        conn = self._get_connection()
         conn.row_factory = sqlite3.Row
 
         if event_type == "release" and release_id:
@@ -337,11 +352,11 @@ class TestMetrics:
                 (pr_number,),
             )
         else:
-            conn.close()
+            self._close_connection(conn)
             return []
 
         results = [dict(row) for row in cursor.fetchall()]
-        conn.close()
+        self._close_connection(conn)
         return results
 
     def mark_reported(self, test_id: int, status: str = "posted"):
@@ -355,7 +370,7 @@ class TestMetrics:
         if status not in ["posted", "failed"]:
             raise ValueError(f"Invalid report status: {status}")
 
-        conn = sqlite3.connect(self.db_path)
+        conn = self._get_connection()
         conn.execute(
             """
             UPDATE test_runs
@@ -365,4 +380,69 @@ class TestMetrics:
             (datetime.utcnow().isoformat(), status, test_id),
         )
         conn.commit()
-        conn.close()
+        self._close_connection(conn)
+
+    def check_duplicate(
+        self,
+        image_url: str,
+        github_release_id: Optional[int],
+        window_hours: int = 1
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Check if this URL + release_id combination was tested recently.
+
+        Args:
+            image_url: The image URL to check
+            github_release_id: The GitHub release ID (None means skip check)
+            window_hours: Time window in hours (default 1)
+
+        Returns:
+            Dict with duplicate info if found, None if not a duplicate
+            {
+                "test_id": int,
+                "started_at": str,
+                "minutes_ago": int
+            }
+        """
+        # Skip check if release_id not provided
+        if github_release_id is None:
+            return None
+
+        try:
+            # Calculate cutoff time
+            cutoff = (datetime.utcnow() - timedelta(hours=window_hours)).isoformat()
+
+            conn = self._get_connection()
+            conn.row_factory = sqlite3.Row
+            cursor = conn.execute(
+                """
+                SELECT id, started_at, image_url
+                FROM test_runs
+                WHERE image_url = ?
+                  AND github_release_id = ?
+                  AND started_at >= ?
+                ORDER BY started_at DESC
+                LIMIT 1
+                """,
+                (image_url, github_release_id, cutoff)
+            )
+
+            row = cursor.fetchone()
+            self._close_connection(conn)
+
+            if row:
+                started_at = datetime.fromisoformat(row["started_at"])
+                minutes_ago = int((datetime.utcnow() - started_at).total_seconds() / 60)
+                return {
+                    "test_id": row["id"],
+                    "started_at": row["started_at"],
+                    "minutes_ago": minutes_ago
+                }
+
+            return None
+
+        except Exception as e:
+            # Fail-safe: Allow test to proceed but log warning
+            import logging
+            logging.warning(f"Duplicate check failed for URL={image_url}, release_id={github_release_id}: {e}")
+            return None
