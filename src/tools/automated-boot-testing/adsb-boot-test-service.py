@@ -468,6 +468,9 @@ class ADSBTestService:
                 validation = self.url_validator.validate_url(url)
                 if not validation["valid"]:
                     return jsonify({"error": f"Invalid URL: {validation['error']}"}), 400
+                if not github_context:
+                    logging.warning(f"No GitHub context provided for test {test_id}, URL: {url}")
+                    # return jsonify({"status": "ignored"}), 200
 
                 # Create test record in 'queued' state
                 test_id = self.metrics.start_test(
