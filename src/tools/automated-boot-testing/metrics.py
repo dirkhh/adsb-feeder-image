@@ -10,8 +10,9 @@ from pathlib import Path
 from typing import Optional, Dict, Any, List
 
 
-class Metrics:
+class TestMetrics:
     """Simple metrics tracking for boot tests"""
+    __test__ = False  # Tell pytest not to collect this as a test class
 
     def __init__(self, db_path: str = "/var/lib/adsb-boot-test/metrics.db"):
         self.db_path = db_path if db_path == ":memory:" else Path(db_path)

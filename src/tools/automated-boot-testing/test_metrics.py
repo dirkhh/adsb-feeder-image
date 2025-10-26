@@ -6,7 +6,7 @@ Simple test to verify metrics module works correctly
 import tempfile
 from pathlib import Path
 from datetime import datetime, timedelta
-from metrics import Metrics
+from metrics import TestMetrics
 
 
 def test_metrics():
@@ -14,7 +14,7 @@ def test_metrics():
     # Use temporary database
     with tempfile.TemporaryDirectory() as tmpdir:
         db_path = Path(tmpdir) / "test-metrics.db"
-        metrics = Metrics(db_path=str(db_path))
+        metrics = TestMetrics(db_path=str(db_path))
 
         print("✓ Metrics initialized")
 
@@ -95,7 +95,7 @@ def test_metrics():
 
 def test_check_duplicate_skips_when_release_id_none():
     """Should return None immediately when release_id is None"""
-    metrics = Metrics(db_path=":memory:")
+    metrics = TestMetrics(db_path=":memory:")
 
     # Create a test to potentially match
     metrics.start_test(
@@ -114,7 +114,7 @@ def test_check_duplicate_skips_when_release_id_none():
 
 def test_check_duplicate_returns_none_when_no_match():
     """Should return None when no matching records exist"""
-    metrics = Metrics(db_path=":memory:")
+    metrics = TestMetrics(db_path=":memory:")
 
     # Don't create any test records
 
@@ -128,7 +128,7 @@ def test_check_duplicate_returns_none_when_no_match():
 
 def test_check_duplicate_detects_recent_duplicate():
     """Should detect duplicate within time window"""
-    metrics = Metrics(db_path=":memory:")
+    metrics = TestMetrics(db_path=":memory:")
 
     url = "https://example.com/test.img"
     release_id = 456
@@ -153,7 +153,7 @@ def test_check_duplicate_ignores_old_duplicates():
     import time
     from unittest.mock import patch
 
-    metrics = Metrics(db_path=":memory:")
+    metrics = TestMetrics(db_path=":memory:")
 
     url = "https://example.com/test.img"
     release_id = 789
@@ -177,7 +177,7 @@ def test_check_duplicate_ignores_old_duplicates():
 
 def test_check_duplicate_different_release_ids():
     """Same URL with different release_id should not be duplicate"""
-    metrics = Metrics(db_path=":memory:")
+    metrics = TestMetrics(db_path=":memory:")
 
     url = "https://example.com/test.img"
 
