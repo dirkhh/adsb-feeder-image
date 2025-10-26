@@ -27,6 +27,7 @@ venv/
 .env.development/
 .env.test/
 .env.production/
+uv.lock
 
 # egg-info
 adsb_feeder_image.egg-info/

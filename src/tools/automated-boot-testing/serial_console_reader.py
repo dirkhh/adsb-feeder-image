@@ -10,14 +10,9 @@ import threading
 import time
 from collections import deque
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional, TextIO, Tuple
 
-try:
-    import serial
-    SERIAL_AVAILABLE = True
-except ImportError:
-    SERIAL_AVAILABLE = False
-    print("⚠️  pyserial not available - serial console monitoring disabled")
+import serial
 
 
 class SerialConsoleReader:
@@ -51,17 +46,17 @@ class SerialConsoleReader:
         self.realtime_log_file = realtime_log_file
 
         # Thread-safe circular buffer
-        self._buffer = deque(maxlen=max_buffer_lines)
+        self._buffer: deque[str] = deque(maxlen=max_buffer_lines)
         self._buffer_lock = threading.Lock()
 
         # Background thread control
-        self._thread = None
+        self._thread: Optional[threading.Thread] = None
         self._running = False
-        self._serial_port = None
-        self._log_file_handle = None
+        self._serial_port: Optional["serial.Serial"] = None
+        self._log_file_handle: Optional[TextIO] = None
 
         # Deduplication tracking (suppress consecutive identical lines)
-        self._last_line = None
+        self._last_line: Optional[str] = None
         self._repeat_count = 0
         self._recent_read = 0
 
@@ -72,10 +67,6 @@ class SerialConsoleReader:
         Returns:
             True if started successfully, False if device can't be opened
         """
-        if not SERIAL_AVAILABLE:
-            print("⚠️  pyserial not installed - cannot monitor serial console")
-            return False
-
         if not self.device_path:
             print("ℹ️  No serial device configured - serial monitoring disabled")
             return False
@@ -110,7 +101,7 @@ class SerialConsoleReader:
                 log_path.parent.mkdir(parents=True, exist_ok=True)
 
                 # Open file for writing (unbuffered for real-time monitoring)
-                self._log_file_handle = open(self.realtime_log_file, 'w', buffering=1)
+                self._log_file_handle = open(self.realtime_log_file, "w", buffering=1)
                 print(f"✓ Opened real-time serial log: {self.realtime_log_file}")
             except Exception as e:
                 print(f"⚠️  Failed to open real-time log file {self.realtime_log_file}: {e}")
@@ -144,7 +135,7 @@ class SerialConsoleReader:
                 # Write final summary to log file too
                 if self._log_file_handle:
                     try:
-                        self._log_file_handle.write(summary + '\n')
+                        self._log_file_handle.write(summary + "\n")
                         self._log_file_handle.flush()
                     except Exception:
                         pass
@@ -202,7 +193,7 @@ class SerialConsoleReader:
                                         # Write summary to real-time log
                                         if self._log_file_handle:
                                             try:
-                                                self._log_file_handle.write(summary + '\n')
+                                                self._log_file_handle.write(summary + "\n")
                                                 self._log_file_handle.flush()
                                             except Exception:
                                                 pass
@@ -215,7 +206,7 @@ class SerialConsoleReader:
                                     # Write to real-time log file
                                     if self._log_file_handle:
                                         try:
-                                            self._log_file_handle.write(line_str + '\n')
+                                            self._log_file_handle.write(line_str + "\n")
                                             self._log_file_handle.flush()
                                         except Exception:
                                             # Silently ignore write errors to avoid spam
@@ -244,7 +235,7 @@ class SerialConsoleReader:
 
     def is_running(self) -> bool:
         """Check if background thread is running."""
-        return self._running and self._thread and self._thread.is_alive()
+        return bool(self._running and self._thread and self._thread.is_alive())
 
     def get_recent(self, n: int = 100, start_from_last: bool = False) -> List[str]:
         """
@@ -262,7 +253,7 @@ class SerialConsoleReader:
             if start_from_last:
                 # only consider lines read since the last get_recent call with that flag set
                 entries_total = len(buffer_list)
-                buffer_list = buffer_list[self._recent_read:]
+                buffer_list = buffer_list[self._recent_read :]
                 self._recent_read = entries_total
             # Return last N lines
             if n >= len(buffer_list):
@@ -270,9 +261,7 @@ class SerialConsoleReader:
             else:
                 return buffer_list[-n:]
 
-    def search_recent(
-        self, pattern: str, max_lines: int = 100, regex: bool = False
-    ) -> bool:
+    def search_recent(self, pattern: str, max_lines: int = 100, regex: bool = False) -> bool:
         """
         Search for string/pattern in last N lines.
 

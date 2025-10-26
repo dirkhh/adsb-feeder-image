@@ -21,15 +21,9 @@ Exit codes:
 import json
 import sys
 import time
-import urllib3
-import requests
 
-try:
-    from pyunifi.controller import Controller
-except ImportError:
-    print("ERROR: pyunifi not installed", file=sys.stderr)
-    print("Install with: pip install pyunifi", file=sys.stderr)
-    sys.exit(1)
+import urllib3
+from pyunifi.controller import Controller  # type: ignore[import-untyped]
 
 # Disable SSL warnings for self-signed certs (UniFi uses self-signed by default)
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -116,10 +110,7 @@ def control_unifi_port(
         # If no override exists for this port, create one
         if not override_found:
             # Need to include required fields - copy structure from existing override if available
-            new_override = {
-                "port_idx": port_idx,  # 1-based, not 0-based!
-                "poe_mode": "auto" if turn_on else "off"
-            }
+            new_override = {"port_idx": port_idx, "poe_mode": "auto" if turn_on else "off"}  # 1-based, not 0-based!
             # If there are existing overrides, copy the structure/fields from one as template
             if current_overrides:
                 template = current_overrides[0]
@@ -136,11 +127,7 @@ def control_unifi_port(
         payload = {"port_overrides": new_overrides}
 
         # Use the controller's session which already has auth cookies
-        response = controller.session.put(
-            api_url,
-            json=payload,
-            verify=False  # Skip SSL verification for self-signed certs
-        )
+        response = controller.session.put(api_url, json=payload, verify=False)  # Skip SSL verification for self-signed certs
 
         if response.status_code != 200:
             print(f"ERROR: API request failed with status {response.status_code}")

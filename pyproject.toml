@@ -45,6 +45,9 @@ check_untyped_defs = true
 exclude = [
     "src/modules/adsb-feeder/filesystem/root/opt/adsb/extras/.*\\.py$",
 ]
+[[tool.mypy.overrides]]
+module = "metrics"
+ignore_missing_imports = true
 
 [project]
 name = "adsb-feeder-image"
@@ -74,6 +77,20 @@ dev = [
     "pytest-mock>=3.14.1",
     "ruff>=0.14.1",
     "typing-extensions>=4.13.2",
+]
+tools = [
+    "aiohttp",
+    "FastAPI",
+    "PyGithub",
+    "pyunifi",
+    "pyserial",
+    "python-kasa",
+    "selenium",
+    "slowapi",
+    "urllib3",
+    "uvicorn",
+    "types-pyserial",
+    "webdriver-manager",
 ]
 
 [tool.setuptools_scm]

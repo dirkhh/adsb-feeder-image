@@ -7,16 +7,17 @@ import re
 import sqlite3
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional, Dict, Any, List
+from typing import Any, Dict, List, Optional
 
 
 class TestMetrics:
     """Simple metrics tracking for boot tests"""
+
     __test__ = False  # Tell pytest not to collect this as a test class
 
     def __init__(self, db_path: str = "/var/lib/adsb-boot-test/metrics.db"):
         self.db_path = db_path if db_path == ":memory:" else Path(db_path)
-        self._memory_conn = None  # Keep persistent connection for :memory: databases
+        self._memory_conn: Optional[sqlite3.Connection] = None  # Keep persistent connection for :memory: databases
         if db_path != ":memory:":
             Path(db_path).parent.mkdir(parents=True, exist_ok=True)
         self._init_db()
@@ -384,10 +385,7 @@ class TestMetrics:
         self._close_connection(conn)
 
     def check_duplicate(
-        self,
-        image_url: str,
-        github_release_id: Optional[int],
-        window_hours: int = 1
+        self, image_url: str, github_release_id: Optional[int], window_hours: int = 1
     ) -> Optional[Dict[str, Any]]:
         """
         Check if this URL + release_id combination was tested recently.
@@ -425,7 +423,7 @@ class TestMetrics:
                 ORDER BY started_at DESC
                 LIMIT 1
                 """,
-                (image_url, github_release_id, cutoff)
+                (image_url, github_release_id, cutoff),
             )
 
             row = cursor.fetchone()
@@ -434,16 +432,13 @@ class TestMetrics:
             if row:
                 started_at = datetime.fromisoformat(row["started_at"])
                 minutes_ago = int((datetime.utcnow() - started_at).total_seconds() / 60)
-                return {
-                    "test_id": row["id"],
-                    "started_at": row["started_at"],
-                    "minutes_ago": minutes_ago
-                }
+                return {"test_id": row["id"], "started_at": row["started_at"], "minutes_ago": minutes_ago}
 
             return None
 
         except Exception as e:
             # Fail-safe: Allow test to proceed but log warning
             import logging
+
             logging.warning(f"Duplicate check failed for URL={image_url}, release_id={github_release_id}: {e}")
             return None

@@ -18,9 +18,15 @@ from unittest.mock import patch
 # Import the service module (has hyphens in filename)
 service_path = Path(__file__).parent / "adsb-boot-test-service.py"
 spec = importlib.util.spec_from_file_location("adsb_test_service", service_path)
+if spec is None:
+    raise ImportError(f"Could not load module from {service_path}")
 adsb_test_service = importlib.util.module_from_spec(spec)
 sys.modules["adsb_test_service"] = adsb_test_service
-spec.loader.exec_module(adsb_test_service)
+assert spec.loader is not None
+if spec.loader:
+    spec.loader.exec_module(adsb_test_service)
+else:
+    raise ImportError(f"Could not load module from {service_path}")
 
 # Import the class we need
 APIKeyAuth = adsb_test_service.APIKeyAuth

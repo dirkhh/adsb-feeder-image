@@ -11,20 +11,20 @@ These tests focus on security-critical paths including:
 NOTE: Some tests document security improvements that SHOULD be made.
 """
 
-import hmac
 import hashlib
-import json
+import hmac
 import sys
-import pytest
 from pathlib import Path
+
+import pytest
 
 # Import the webhook_service module
 sys.path.insert(0, str(Path(__file__).parent))
-from webhook_service import (
-    verify_webhook_signature,
-    validate_github_url,
-    matches_binary_filter,
+from webhook_service import (  # noqa: E402
     extract_qualifying_binaries,
+    matches_binary_filter,
+    validate_github_url,
+    verify_webhook_signature,
 )
 
 
@@ -75,7 +75,7 @@ class TestWebhookSignatureVerification:
         secret = "test-secret-key"
         payload = b'{"test": "data"}'
 
-        assert verify_webhook_signature(payload, None, secret) is False
+        assert verify_webhook_signature(payload, None, secret) is False  # type: ignore[arg-type]
         assert verify_webhook_signature(payload, "", secret) is False
 
     def test_missing_secret_rejected(self):
@@ -83,7 +83,7 @@ class TestWebhookSignatureVerification:
         payload = b'{"test": "data"}'
         signature = "sha256=abc123"
 
-        assert verify_webhook_signature(payload, signature, None) is False
+        assert verify_webhook_signature(payload, signature, None) is False  # type: ignore[arg-type]
         assert verify_webhook_signature(payload, signature, "") is False
 
     def test_malformed_signature_format_rejected(self):

@@ -14,47 +14,29 @@ Usage:
 """
 
 import argparse
-import asyncio
 import os
 import re
-import shutil
 import subprocess
 import sys
 import time
 import urllib.parse
 from pathlib import Path
+from typing import Optional
 
 import requests
-from bs4 import BeautifulSoup
-from selenium import webdriver
+from metrics import TestMetrics  # type: ignore # noqa: E402
 from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.common.by import By
-from selenium.webdriver.firefox.service import Service as FirefoxService
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-from webdriver_manager.firefox import GeckoDriverManager
-
-try:
-    from metrics import TestMetrics
-    METRICS_AVAILABLE = True
-except ImportError:
-    METRICS_AVAILABLE = False
-
-try:
-    from serial_console_reader import SerialConsoleReader
-    SERIAL_AVAILABLE = True
-except ImportError:
-    SERIAL_AVAILABLE = False
+from serial_console_reader import SerialConsoleReader  # type: ignore # noqa: E402
 
 # Configure line-buffered output for real-time logging when running as a systemd service
 # This ensures all output appears immediately in journalctl without manual flush() calls
-sys.stdout.reconfigure(line_buffering=True)
-sys.stderr.reconfigure(line_buffering=True)
+sys.stdout.reconfigure(line_buffering=True)  # type: ignore[union-attr,attr-defined]
+sys.stderr.reconfigure(line_buffering=True)  # type: ignore[union-attr,attr-defined]
 
 
 def update_metrics_stage(metrics_id: int, metrics_db: str, stage: str, status: str):
     """Update metrics stage if metrics tracking is enabled."""
-    if not METRICS_AVAILABLE or metrics_id is None:
+    if metrics_id is None:
         return
 
     try:
@@ -64,7 +46,7 @@ def update_metrics_stage(metrics_id: int, metrics_db: str, stage: str, status: s
         print(f"⚠️  Failed to update metrics: {e}")
 
 
-def save_serial_log(serial_reader, metrics_id: int = None, script_dir: Path = None):
+def save_serial_log(serial_reader, metrics_id: Optional[int] = None, script_dir: Optional[Path] = None):
     """Save serial console log to file on test failure."""
     if not serial_reader or not serial_reader.is_running():
         return
@@ -79,6 +61,7 @@ def save_serial_log(serial_reader, metrics_id: int = None, script_dir: Path = No
             log_file = log_dir / f"serial-console-test-{metrics_id}.log"
         else:
             import time
+
             timestamp = int(time.time())
             log_file = log_dir / f"serial-console-{timestamp}.log"
 
@@ -129,6 +112,7 @@ def power_toggle(script_path: str, turn_on: bool) -> bool:
     action = "on" if turn_on else "off"
     base_dir = Path(__file__).parent
     python_venv = base_dir / "venv/bin/python3"
+    process: Optional[subprocess.Popen] = None
     try:
         # Use Popen for real-time output forwarding to systemd journal
         process = subprocess.Popen(
@@ -140,8 +124,9 @@ def power_toggle(script_path: str, turn_on: bool) -> bool:
         )
 
         # Forward output in real-time to journal
-        for line in process.stdout:
-            print(line, end="", flush=True)
+        if process.stdout:
+            for line in process.stdout:
+                print(line, end="", flush=True)
 
         # Wait for process to complete with timeout
         returncode = process.wait(timeout=30)
@@ -153,8 +138,9 @@ def power_toggle(script_path: str, turn_on: bool) -> bool:
             return False
 
     except subprocess.TimeoutExpired:
-        process.kill()
-        process.wait()
+        if process:
+            process.kill()
+            process.wait()
         print(f"Power toggle script timed out after 30 seconds")
         return False
     except Exception as e:
@@ -230,7 +216,14 @@ def setup_iscsi_image(cached_decompressed: Path, ssh_public_key: str) -> None:
 
     # Build command with optional public key parameter
     # Use stdbuf to force line-buffered output from bash (otherwise bash fully buffers when stdout is a pipe)
-    cmd = ["stdbuf", "-oL", "bash", str(Path(__file__).parent / "setup-tftp-iscsi.sh"), str(cached_decompressed), str(target_path)]
+    cmd = [
+        "stdbuf",
+        "-oL",
+        "bash",
+        str(Path(__file__).parent / "setup-tftp-iscsi.sh"),
+        str(cached_decompressed),
+        str(target_path),
+    ]
     if ssh_public_key != "":
         cmd.append(ssh_public_key)
 
@@ -244,8 +237,9 @@ def setup_iscsi_image(cached_decompressed: Path, ssh_public_key: str) -> None:
     )
 
     # Forward each line of output immediately to journal
-    for line in process.stdout:
-        print(line, end="", flush=True)
+    if process and process.stdout:
+        for line in process.stdout:
+            print(line, end="", flush=True)
 
     returncode = process.wait()
     if returncode != 0:
@@ -291,13 +285,16 @@ def show_serial_context(serial_reader, num_lines: int = 3):
         print(f"  (Could not read serial console: {e})")
 
 
-def wait_for_feeder_online(rpi_ip: str, expected_image_name: str, timeout_minutes: int = 5, serial_reader=None) -> tuple[bool, str]:
+def wait_for_feeder_online(
+    rpi_ip: str, expected_image_name: str, timeout_minutes: int = 5, serial_reader=None
+) -> tuple[bool, str]:
     """Wait for the feeder to come online and verify the correct image is running."""
     print(f"Waiting for feeder at {rpi_ip} to come online (timeout: {timeout_minutes} minutes)...")
 
     start_time = time.time()
     timeout_seconds = timeout_minutes * 60
     watching_first_boot = -1
+    status_string: str = ""
     while time.time() - start_time < timeout_seconds:
         status_string = ""
         try:
@@ -431,6 +428,7 @@ def execute_js_and_wait(driver, js_code: str, description: str, wait_seconds: in
         print(f"   JS execution failed: {e}")
         return None
 
+
 def test_basic_setup(rpi_ip: str, timeout_seconds: int = 90) -> bool:
     """
     Test the basic setup process using Selenium.
@@ -443,16 +441,17 @@ def test_basic_setup(rpi_ip: str, timeout_seconds: int = 90) -> bool:
     # Ensure testuser exists
     try:
         import pwd
-        pwd.getpwnam('testuser')
+
+        pwd.getpwnam("testuser")
         print("✓ testuser exists")
     except KeyError:
         print("⚠ testuser does not exist - creating it")
         try:
-            subprocess.run([
-                "useradd", "-r", "-m", "-s", "/bin/bash",
-                "-c", "User for running browser tests",
-                "testuser"
-            ], check=True, capture_output=True)
+            subprocess.run(
+                ["useradd", "-r", "-m", "-s", "/bin/bash", "-c", "User for running browser tests", "testuser"],
+                check=True,
+                capture_output=True,
+            )
             print("✓ testuser created")
         except subprocess.CalledProcessError as e:
             print(f"✗ Failed to create testuser: {e.stderr.decode()}")
@@ -474,11 +473,16 @@ def test_basic_setup(rpi_ip: str, timeout_seconds: int = 90) -> bool:
         # Use Popen with real-time output forwarding (same as shell script)
         process = subprocess.Popen(
             [
-                "sudo", "-u", "testuser",
-                "env", f"HOME=/home/testuser",
-                f"{base_dir}/venv/bin/python3", str(test_script),
+                "sudo",
+                "-u",
+                "testuser",
+                "env",
+                f"HOME=/home/testuser",
+                f"{base_dir}/venv/bin/python3",
+                str(test_script),
                 rpi_ip,
-                "--timeout", str(timeout_seconds)
+                "--timeout",
+                str(timeout_seconds),
             ],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
@@ -535,16 +539,20 @@ Examples:
     parser.add_argument("--test-setup", action="store_true", help="Run basic setup test after feeder comes online")
     parser.add_argument("--metrics-id", type=int, help="Metrics test ID for tracking progress")
     parser.add_argument("--metrics-db", default="/var/lib/adsb-boot-test/metrics.db", help="Path to metrics database")
-    parser.add_argument("--serial-console", default="", help="Path to serial console device (e.g., /dev/ttyUSB0), empty to disable")
+    parser.add_argument(
+        "--serial-console", default="", help="Path to serial console device (e.g., /dev/ttyUSB0), empty to disable"
+    )
     parser.add_argument("--serial-baud", type=int, default=115200, help="Serial console baud rate (default: 115200)")
-    parser.add_argument("--log-all-serial", action="store_true", help="Save serial console logs for all tests (not just failures)")
+    parser.add_argument(
+        "--log-all-serial", action="store_true", help="Save serial console logs for all tests (not just failures)"
+    )
 
     args = parser.parse_args()
 
     # Start serial console reader if configured
     serial_reader = None
     script_dir = Path(__file__).parent
-    if args.serial_console and SERIAL_AVAILABLE:
+    if args.serial_console:
         # Determine log file path if real-time logging is enabled
         realtime_log_file = None
         if args.log_all_serial:
@@ -560,7 +568,7 @@ Examples:
             device_path=args.serial_console,
             baud_rate=args.serial_baud,
             log_prefix=f"serial-{args.metrics_id}" if args.metrics_id else "serial",
-            realtime_log_file=realtime_log_file
+            realtime_log_file=realtime_log_file,
         )
         if serial_reader.start():
             print(f"✓ Serial console monitoring enabled: {args.serial_console}")
@@ -569,15 +577,12 @@ Examples:
         else:
             print(f"⚠️  Serial console monitoring failed to start")
             serial_reader = None
-    elif args.serial_console and not SERIAL_AVAILABLE:
-        print("⚠️  Serial console requested but serial_console_reader not available")
     cache_dir = script_dir / "test-images"
     expected_image_name = download_and_decompress_image(args.image_url, args.force_download, cache_dir)
     cached_image_path = cache_dir / expected_image_name
 
     # Update metrics: download stage completed
     update_metrics_stage(args.metrics_id, args.metrics_db, "download", "passed")
-
 
     try:
         if not args.force_off:
@@ -631,7 +636,9 @@ Examples:
                     power_toggle(args.power_toggle_script, True)
                     time.sleep(20)  # give it time to boot and iSCSI to be initialized
                 else:
-                    print(f"with DietPi this can take 20+ minutes because of iSCSI root filesystem and shutdown failure -- keep waiting")
+                    print(
+                        f"with DietPi this can take 20+ minutes because of iSCSI root filesystem and shutdown failure -- keep waiting"
+                    )
 
             else:
                 print(f"no success in {args.timeout} minutes")

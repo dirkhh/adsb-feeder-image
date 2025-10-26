@@ -7,6 +7,7 @@ Tests the validation logic in TestExecutor to ensure proper input sanitization.
 
 import sys
 from pathlib import Path
+from typing import Any
 
 
 def test_ip_validation():
@@ -70,7 +71,7 @@ def test_timeout_validation():
             return False
 
     # Invalid timeouts
-    invalid_timeouts = [
+    invalid_timeouts: list[Any] = [
         0,  # Too small
         -1,  # Negative
         61,  # Too large

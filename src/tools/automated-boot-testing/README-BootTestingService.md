@@ -429,8 +429,6 @@ src/tools/automated-boot-testing/
 ├── metrics.py                   # Metrics tracking module (NEW)
 ├── boot-test-metrics-cli.py     # Metrics CLI query tool (NEW)
 ├── METRICS_INTEGRATION.md       # Metrics integration guide (NEW)
-├── analyze-js-behavior.py       # JavaScript analysis tool
-└── debug-js-transitions.py      # Transition debugging tool
 ```
 
 ### Production Installation (after install)

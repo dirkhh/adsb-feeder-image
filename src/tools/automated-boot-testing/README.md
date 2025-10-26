@@ -37,11 +37,6 @@ sudo ./src/tools/automated-boot-testing/setup-tftp-iscsi.sh /path/to/image.img
 - **`test-api.py`** - API testing utility
 - **`README-BootTestingService.md`** - Detailed documentation
 
-## Debugging Tools
-
-- **`analyze-js-behavior.py`** - JavaScript behavior analysis
-- **`debug-js-transitions.py`** - Page transition debugging
-
 ## Documentation
 
 See `README-BootTestingService.md` for comprehensive documentation including:

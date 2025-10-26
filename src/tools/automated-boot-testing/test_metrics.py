@@ -4,8 +4,9 @@ Simple test to verify metrics module works correctly
 """
 
 import tempfile
-from pathlib import Path
 from datetime import datetime, timedelta
+from pathlib import Path
+
 from metrics import TestMetrics
 
 
@@ -23,7 +24,7 @@ def test_metrics():
             image_url="https://example.com/image-v1.0.0-beta.1.img.xz",
             triggered_by="manual",
             trigger_source="test-script",
-            rpi_ip="192.168.1.100"
+            rpi_ip="192.168.1.100",
         )
         print(f"✓ Started test ID: {test_id}")
 
@@ -63,16 +64,11 @@ def test_metrics():
             image_url="https://example.com/image-v1.0.0-beta.2.img.xz",
             triggered_by="webhook",
             trigger_source="github",
-            rpi_ip="192.168.1.100"
+            rpi_ip="192.168.1.100",
         )
         metrics.update_stage(test_id2, "download", "passed")
         metrics.update_stage(test_id2, "boot", "failed")
-        metrics.complete_test(
-            test_id2,
-            "failed",
-            error_message="Boot timeout",
-            error_stage="boot"
-        )
+        metrics.complete_test(test_id2, "failed", error_message="Boot timeout", error_stage="boot")
         print(f"✓ Created failed test ID: {test_id2}")
 
         # Test 7: Query failures
@@ -98,16 +94,10 @@ def test_check_duplicate_skips_when_release_id_none():
     metrics = TestMetrics(db_path=":memory:")
 
     # Create a test to potentially match
-    metrics.start_test(
-        image_url="https://example.com/test.img",
-        github_release_id=123
-    )
+    metrics.start_test(image_url="https://example.com/test.img", github_release_id=123)
 
     # Check with release_id=None should skip check entirely
-    result = metrics.check_duplicate(
-        image_url="https://example.com/test.img",
-        github_release_id=None
-    )
+    result = metrics.check_duplicate(image_url="https://example.com/test.img", github_release_id=None)
 
     assert result is None
 
@@ -118,10 +108,7 @@ def test_check_duplicate_returns_none_when_no_match():
 
     # Don't create any test records
 
-    result = metrics.check_duplicate(
-        image_url="https://example.com/test.img",
-        github_release_id=123
-    )
+    result = metrics.check_duplicate(image_url="https://example.com/test.img", github_release_id=123)
 
     assert result is None
 
@@ -134,10 +121,7 @@ def test_check_duplicate_detects_recent_duplicate():
     release_id = 456
 
     # Create first test
-    test_id = metrics.start_test(
-        image_url=url,
-        github_release_id=release_id
-    )
+    test_id = metrics.start_test(image_url=url, github_release_id=release_id)
 
     # Check for duplicate (should find it)
     result = metrics.check_duplicate(url, release_id)
@@ -150,7 +134,6 @@ def test_check_duplicate_detects_recent_duplicate():
 
 def test_check_duplicate_ignores_old_duplicates():
     """Should not detect duplicates outside time window"""
-    import time
     from unittest.mock import patch
 
     metrics = TestMetrics(db_path=":memory:")
@@ -161,13 +144,10 @@ def test_check_duplicate_ignores_old_duplicates():
     # Create test with old timestamp (2 hours ago)
     old_time = datetime.utcnow() - timedelta(hours=2)
 
-    with patch('metrics.datetime') as mock_datetime:
+    with patch("metrics.datetime") as mock_datetime:
         mock_datetime.utcnow.return_value = old_time
         mock_datetime.fromisoformat = datetime.fromisoformat
-        test_id = metrics.start_test(
-            image_url=url,
-            github_release_id=release_id
-        )
+        metrics.start_test(image_url=url, github_release_id=release_id)
 
     # Check for duplicate (should NOT find it - too old)
     result = metrics.check_duplicate(url, release_id, window_hours=1)
@@ -196,5 +176,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\n❌ Test failed: {e}")
         import traceback
+
         traceback.print_exc()
         exit(1)

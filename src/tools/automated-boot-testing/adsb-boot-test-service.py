@@ -23,17 +23,21 @@ import subprocess
 import sys
 import threading
 import time
-from datetime import datetime, timedelta
 from functools import wraps
 from pathlib import Path
-from queue import Empty, Queue
-from subprocess import check_output, DEVNULL
-from typing import Any, Dict, Optional
+from subprocess import DEVNULL, check_output
+from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
 
-from flask import Flask, jsonify, request
+from flask import Flask, g, jsonify, request
+from metrics import TestMetrics  # type: ignore # noqa: E402
 
-from metrics import TestMetrics
+
+def keys_match(priv, pub):
+    """Check if private and public SSH keys match by comparing fingerprints."""
+    priv_fingerprint = check_output(["ssh-keygen", "-lf", str(priv)], stderr=DEVNULL, text=True).split()[1]
+    pub_fingerprint = check_output(["ssh-keygen", "-lf", pub], stderr=DEVNULL, text=True).split()[1]
+    return priv_fingerprint == pub_fingerprint
 
 
 class APIKeyAuth:
@@ -89,92 +93,11 @@ class APIKeyAuth:
             logging.info(f"Authenticated request from user: {user_id}")
 
             # Add user_id to request context for use in endpoint
-            request.user_id = user_id
+            g.user_id = user_id
 
             return f(*args, **kwargs)
 
         return decorated_function
-
-
-class TestQueue:
-    """Manages the test queue with duplicate prevention."""
-
-    def __init__(self):
-        self.queue = Queue()
-        self.processed_urls = {}  # url -> timestamp
-        self.duplicate_window = timedelta(hours=1)
-        self._lock = threading.Lock()
-
-    def add_test(
-        self, url: str, requester_ip: str = "unknown", triggered_by: str = "api", trigger_source: str = None
-    ) -> Dict[str, str]:
-        """Add a test to the queue if not a duplicate."""
-        with self._lock:
-            now = datetime.now()
-            url_key = url.lower().strip()
-
-            # Check for recent duplicates
-            if url_key in self.processed_urls:
-                last_processed = self.processed_urls[url_key]
-                if now - last_processed < self.duplicate_window:
-                    remaining_time = self.duplicate_window - (now - last_processed)
-                    return {
-                        "status": "duplicate",
-                        "message": f"URL was processed {remaining_time} ago. Ignoring duplicate.",
-                        "queue_size": self.queue.qsize(),
-                    }
-
-            # Add to queue
-            test_item = {
-                "url": url,
-                "requester_ip": requester_ip,
-                "triggered_by": triggered_by,
-                "trigger_source": trigger_source,
-                "added_at": now.isoformat(),
-                "id": f"test_{int(time.time())}_{len(url_key)}",
-            }
-
-            self.queue.put(test_item)
-            self.processed_urls[url_key] = now
-
-            return {
-                "status": "queued",
-                "message": f"Test queued successfully",
-                "queue_size": self.queue.qsize(),
-                "test_id": test_item["id"],
-            }
-
-    def get_next_test(self) -> Optional[Dict]:
-        """Get the next test from the queue."""
-        try:
-            return self.queue.get_nowait()
-        except Empty:
-            return None
-
-    def mark_completed(self, test_id: str, success: bool, message: str = ""):
-        """Mark a test as completed."""
-        logging.info(f"Test {test_id} completed: {'SUCCESS' if success else 'FAILED'} - {message}")
-
-    def get_queued_items(self) -> list:
-        """Get list of items currently in queue (without removing them)."""
-        with self._lock:
-            # Convert queue to list without modifying it
-            return list(self.queue.queue)
-
-    def flush(self) -> int:
-        """Flush all items from queue and return count of flushed items."""
-        with self._lock:
-            count = 0
-            while not self.queue.empty():
-                try:
-                    self.queue.get_nowait()
-                    count += 1
-                except Empty:
-                    break
-            # Also clear the processed URLs cache
-            self.processed_urls.clear()
-            logging.info(f"Flushed {count} items from queue")
-            return count
 
 
 class GitHubValidator:
@@ -184,7 +107,7 @@ class GitHubValidator:
         self.allowed_repo = allowed_repo
         self.allowed_domains = ["github.com", "githubusercontent.com"]
 
-    def validate_url(self, url: str) -> Dict[str, str]:
+    def validate_url(self, url: str) -> Dict[str, Any]:
         """Validate that the URL is a GitHub release artifact from the allowed repo."""
         try:
             parsed = urlparse(url)
@@ -226,7 +149,15 @@ class GitHubValidator:
 class TestExecutor:
     """Executes the actual test using the test-feeder-image.py script."""
 
-    def __init__(self, rpi_ip: str, power_toggle_script: str, ssh_key: str, timeout_minutes: int = 10, config: Dict = None):
+    def __init__(
+        self,
+        rpi_ip: str,
+        power_toggle_script: str,
+        ssh_key: str,
+        timeout_minutes: int = 10,
+        config: Optional[Dict[str, Any]] = None,
+        venv_python: Optional[Path] = None,
+    ):
         # Validate all inputs at initialization - fail fast if invalid
         self.rpi_ip = self._validate_ip(rpi_ip, "rpi_ip")
         self.power_toggle_script = self._validate_power_toggle_script(power_toggle_script)
@@ -261,13 +192,9 @@ class TestExecutor:
         if not ssh_pub_key_path.is_file():
             raise ValueError(f"SSH public key is not a file: {ssh_pub_key_path}")
         # test if private and public keys match
-        keys_match = lambda priv, pub: (
-            check_output(["ssh-keygen", "-lf", str(priv)], stderr=DEVNULL, text=True).split()[1]
-            == check_output(["ssh-keygen", "-lf", pub], stderr=DEVNULL, text=True).split()[1]
-        )
         if not keys_match(ssh_key_path, ssh_pub_key_path):
             raise ValueError(f"SSH key and public key do not match: {ssh_key_path} {ssh_pub_key_path}")
-        return ssh_key_path
+        return str(ssh_key_path)
 
     def _validate_power_toggle_script(self, script_path: str) -> str:
         """Validate power toggle script path."""
@@ -311,7 +238,7 @@ class TestExecutor:
 
         return Path(__file__).parent / "venv" / "bin" / "python"
 
-    def execute_test(self, test_item: Dict, metrics_id: int = None) -> Dict[str, str]:
+    def execute_test(self, test_item: Dict, metrics_id: Optional[int] = None) -> Dict[str, Any]:
         """Execute a test with timeout."""
         test_id = test_item["id"]
         url = test_item["url"]
@@ -369,10 +296,11 @@ class TestExecutor:
             # Forward output in real-time to journalctl
             output_lines = []
             try:
-                for line in process.stdout:
-                    # Log to journalctl in real-time
-                    logging.info(line.rstrip())
-                    output_lines.append(line)
+                if process.stdout:
+                    for line in process.stdout:
+                        # Log to journalctl in real-time
+                        logging.info(line.rstrip())
+                        output_lines.append(line)
 
                 # Wait for process to complete with timeout
                 returncode = process.wait(timeout=self.timeout_minutes * 60)
@@ -409,7 +337,6 @@ class ADSBTestService:
 
     def __init__(self, config: Dict):
         self.config = config
-        self.test_queue = TestQueue()
         self.url_validator = GitHubValidator()
         self.test_executor = TestExecutor(
             rpi_ip=config["rpi_ip"],
@@ -433,7 +360,7 @@ class ADSBTestService:
 
         # Queue processing
         self.processing = False
-        self.processor_thread = None
+        self.processor_thread: Optional[threading.Thread] = None
 
     def setup_routes(self):
         """Setup Flask routes."""
@@ -461,9 +388,11 @@ class ADSBTestService:
                 release_id = github_context.get("release_id")
 
                 requester_ip = request.environ.get("REMOTE_ADDR", "unknown")
-                user_id = getattr(request, "user_id", "unknown")
+                user_id = getattr(g, "user_id", "unknown")
 
-                logging.info(f"Triggering boot test for URL: {url} from {requester_ip} by {user_id} with GitHub context: {github_context}")
+                logging.info(
+                    f"Triggering boot test for URL: {url} from {requester_ip} by {user_id} with GitHub context: {github_context}"
+                )
 
                 # Validate URL
                 validation = self.url_validator.validate_url(url)
@@ -477,11 +406,16 @@ class ADSBTestService:
                         f"Duplicate test ignored: URL={url}, release_id={release_id}, "
                         f"previous test_id={duplicate['test_id']}, {duplicate['minutes_ago']} minutes ago"
                     )
-                    return jsonify({
-                        "status": "ignored",
-                        "message": f"Duplicate test from {duplicate['minutes_ago']} minutes ago",
-                        "previous_test_id": duplicate['test_id']
-                    }), 200
+                    return (
+                        jsonify(
+                            {
+                                "status": "ignored",
+                                "message": f"Duplicate test from {duplicate['minutes_ago']} minutes ago",
+                                "previous_test_id": duplicate["test_id"],
+                            }
+                        ),
+                        200,
+                    )
 
                 if not github_context:
                     logging.warning(f"No GitHub context provided, URL: {url}")
@@ -513,45 +447,6 @@ class ADSBTestService:
 
             except Exception as e:
                 logging.error(f"Error processing test request: {e}")
-                return jsonify({"error": str(e)}), 500
-
-        @self.app.route("/api/status", methods=["GET"])
-        @self.auth.require_auth
-        def get_status():
-            """Get service status and queue information (requires authentication)."""
-            # Get queued items and extract filenames
-            queued_items = self.test_queue.get_queued_items()
-            queued_images = [os.path.basename(item["url"]) for item in queued_items]
-
-            return jsonify(
-                {
-                    "status": "running",
-                    "queue_size": self.test_queue.queue.qsize(),
-                    "queued_images": queued_images,
-                    "processing": self.processing,
-                    "config": {
-                        "rpi_ip": self.config["rpi_ip"],
-                        "power_toggle_script": self.config["power_toggle_script"],
-                        "timeout_minutes": self.config.get("timeout_minutes", 10),
-                    },
-                }
-            )
-
-        @self.app.route("/api/queue/flush", methods=["POST"])
-        @self.auth.require_auth
-        def flush_queue():
-            """Flush all items from the queue (requires authentication)."""
-            try:
-                user_id = getattr(request, "user_id", "unknown")
-                flushed_count = self.test_queue.flush()
-
-                logging.info(f"Queue flushed by {user_id}: {flushed_count} items removed")
-                return jsonify(
-                    {"success": True, "flushed_count": flushed_count, "message": f"Flushed {flushed_count} items from queue"}
-                )
-
-            except Exception as e:
-                logging.error(f"Error flushing queue: {e}")
                 return jsonify({"error": str(e)}), 500
 
         @self.app.route("/health", methods=["GET"])
@@ -641,6 +536,13 @@ class ADSBTestService:
                 logging.error(f"Error in queue processor: {e}")
                 time.sleep(10)
 
+    def stop_queue_processor(self):
+        """Stop the queue processor."""
+        self.processing = False
+        if self.processor_thread:
+            self.processor_thread.join(timeout=30)
+        logging.info("Queue processor stopped")
+
     def _execute_test(self, test: Dict[str, Any]) -> Dict[str, Any]:
         """
         Execute a single boot test.
@@ -649,6 +551,9 @@ class ADSBTestService:
         """
         test_id = test["id"]
         image_url = test["image_url"]
+        duration: float = 0.0
+        process: Optional[subprocess.Popen] = None
+        returncode: Optional[int] = None
 
         # Validate URL doesn't contain shell metacharacters
         dangerous_chars = [";", "&", "|", "`", "$", "\n", "\r"]
@@ -702,10 +607,11 @@ class ADSBTestService:
             # Forward output in real-time to journalctl
             output_lines = []
             try:
-                for line in process.stdout:
-                    # Log to journalctl in real-time
-                    logging.info(line.rstrip())
-                    output_lines.append(line)
+                if process.stdout:
+                    for line in process.stdout:
+                        # Log to journalctl in real-time
+                        logging.info(line.rstrip())
+                        output_lines.append(line)
 
                 # Wait for process to complete with timeout
                 returncode = process.wait(timeout=self.test_executor.timeout_minutes * 60)
@@ -731,14 +637,12 @@ class ADSBTestService:
             }
 
         except Exception as e:
-            return {"success": False, "error": str(e), "error_stage": "executor", "duration": duration,}
-
-    def stop_queue_processor(self):
-        """Stop the queue processor."""
-        self.processing = False
-        if self.processor_thread:
-            self.processor_thread.join(timeout=30)
-        logging.info("Queue processor stopped")
+            return {
+                "success": False,
+                "error": str(e),
+                "error_stage": "executor",
+                "duration": duration,
+            }
 
     def run(self, host: str = "0.0.0.0", port: int = 8080):
         """Run the Flask service."""
@@ -758,8 +662,8 @@ class ADSBTestService:
 def setup_logging(log_level: str = "INFO"):
     """Setup logging configuration for systemd service."""
     # Configure line-buffered output for real-time journalctl logging
-    sys.stdout.reconfigure(line_buffering=True)
-    sys.stderr.reconfigure(line_buffering=True)
+    sys.stdout.reconfigure(line_buffering=True)  # type: ignore[attr-defined,union-attr]
+    sys.stderr.reconfigure(line_buffering=True)  # type: ignore[attr-defined,union-attr]
 
     logging.basicConfig(
         level=getattr(logging, log_level.upper()),
