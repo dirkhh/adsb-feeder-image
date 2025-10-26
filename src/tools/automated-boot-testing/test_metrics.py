@@ -5,6 +5,7 @@ Simple test to verify metrics module works correctly
 
 import tempfile
 from pathlib import Path
+from datetime import datetime, timedelta
 from metrics import TestMetrics
 
 
@@ -146,6 +147,33 @@ def test_check_duplicate_detects_recent_duplicate():
     assert result["test_id"] == test_id
     assert result["minutes_ago"] == 0  # Just created
     assert "started_at" in result
+
+
+def test_check_duplicate_ignores_old_duplicates():
+    """Should not detect duplicates outside time window"""
+    import time
+    from unittest.mock import patch
+
+    metrics = TestMetrics(db_path=":memory:")
+
+    url = "https://example.com/test.img"
+    release_id = 789
+
+    # Create test with old timestamp (2 hours ago)
+    old_time = datetime.utcnow() - timedelta(hours=2)
+
+    with patch('metrics.datetime') as mock_datetime:
+        mock_datetime.utcnow.return_value = old_time
+        mock_datetime.fromisoformat = datetime.fromisoformat
+        test_id = metrics.start_test(
+            image_url=url,
+            github_release_id=release_id
+        )
+
+    # Check for duplicate (should NOT find it - too old)
+    result = metrics.check_duplicate(url, release_id, window_hours=1)
+
+    assert result is None
 
 
 if __name__ == "__main__":
