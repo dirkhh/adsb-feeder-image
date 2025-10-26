@@ -462,6 +462,8 @@ class ADSBTestService:
                 requester_ip = request.environ.get("REMOTE_ADDR", "unknown")
                 user_id = getattr(request, "user_id", "unknown")
 
+                logging.info(f"Triggering boot test for URL: {url} from {requester_ip} by {user_id} with GitHub context: {github_context}")
+
                 # Validate URL
                 validation = self.url_validator.validate_url(url)
                 if not validation["valid"]:
