@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Optional, Dict, Any, List
 
 
-class TestMetrics:
+class Metrics:
     """Simple metrics tracking for boot tests"""
 
     def __init__(self, db_path: str = "/var/lib/adsb-boot-test/metrics.db"):
