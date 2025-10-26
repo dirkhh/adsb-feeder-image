@@ -1,5 +1,6 @@
 Changes since v3.0.5
 =======
+- beta-notes: fix small UI bug and potential issue enabling temperature sensors that could lead to crash
 - beta-notes: fix compose up failure related to docker network creation
 - beta-notes: fix SDRPlay SDR Setup for 1090 bug
 - beta-notes: update Skystats to v0.1.11
