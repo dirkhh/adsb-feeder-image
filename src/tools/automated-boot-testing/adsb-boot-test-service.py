@@ -484,7 +484,7 @@ class ADSBTestService:
                     }), 200
 
                 if not github_context:
-                    logging.warning(f"No GitHub context provided for test {test_id}, URL: {url}")
+                    logging.warning(f"No GitHub context provided, URL: {url}")
                     # return jsonify({"status": "ignored"}), 200
 
                 # Create test record in 'queued' state
