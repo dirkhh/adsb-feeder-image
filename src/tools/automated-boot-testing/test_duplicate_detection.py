@@ -95,3 +95,42 @@ def test_duplicate_detection_blocks_second_request(app):
     assert data2['status'] == 'ignored'
     assert 'previous_test_id' in data2
     assert data2['previous_test_id'] == test_id_1
+
+
+def test_different_release_ids_both_allowed(app):
+    """Same URL with different release_ids should both be queued"""
+    client = app.test_client()
+
+    base_payload = {
+        "url": "https://github.com/dirkhh/adsb-feeder-image/releases/download/v1.0.0/test.img.xz",
+        "github_context": {
+            "event_type": "release",
+            "commit_sha": "abc123"
+        }
+    }
+
+    # First request with release_id=100
+    payload1 = {**base_payload, "github_context": {**base_payload["github_context"], "release_id": 100}}
+    response1 = client.post(
+        '/api/trigger-boot-test',
+        data=json.dumps(payload1),
+        content_type='application/json',
+        headers={'X-API-Key': 'test_key_123'}
+    )
+
+    assert response1.status_code == 200
+    data1 = json.loads(response1.data)
+    assert data1['status'] == 'queued'
+
+    # Second request with different release_id=200
+    payload2 = {**base_payload, "github_context": {**base_payload["github_context"], "release_id": 200}}
+    response2 = client.post(
+        '/api/trigger-boot-test',
+        data=json.dumps(payload2),
+        content_type='application/json',
+        headers={'X-API-Key': 'test_key_123'}
+    )
+
+    assert response2.status_code == 200
+    data2 = json.loads(response2.data)
+    assert data2['status'] == 'queued'  # Should be queued, not ignored
