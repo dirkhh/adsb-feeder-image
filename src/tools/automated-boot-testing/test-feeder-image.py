@@ -64,7 +64,7 @@ def update_metrics_stage(metrics_id: int, metrics_db: str, stage: str, status: s
         print(f"⚠️  Failed to update metrics: {e}")
 
 
-def save_serial_log_on_failure(serial_reader, metrics_id: int = None, script_dir: Path = None):
+def save_serial_log(serial_reader, metrics_id: int = None, script_dir: Path = None):
     """Save serial console log to file on test failure."""
     if not serial_reader or not serial_reader.is_running():
         return
@@ -1130,21 +1130,21 @@ Examples:
                     update_metrics_stage(args.metrics_id, args.metrics_db, "browser_test", "passed")
                     print("\n🎉 All tests completed successfully!")
                     if args.log_all_serial:
-                        save_serial_log_on_failure(serial_reader, args.metrics_id, script_dir)
+                        save_serial_log(serial_reader, args.metrics_id, script_dir)
                     if serial_reader:
                         serial_reader.stop()
                     sys.exit(0)
                 else:
                     update_metrics_stage(args.metrics_id, args.metrics_db, "browser_test", "failed")
                     print("\n❌ Basic setup test failed!")
-                    save_serial_log_on_failure(serial_reader, args.metrics_id, script_dir)
+                    save_serial_log(serial_reader, args.metrics_id, script_dir)
                     if serial_reader:
                         serial_reader.stop()
                     sys.exit(1)
             else:
                 print("\n🎉 Test completed successfully!")
                 if args.log_all_serial:
-                    save_serial_log_on_failure(serial_reader, args.metrics_id, script_dir)
+                    save_serial_log(serial_reader, args.metrics_id, script_dir)
                 if serial_reader:
                     serial_reader.stop()
                 sys.exit(0)
@@ -1152,14 +1152,14 @@ Examples:
             # Update metrics: boot or network failed
             update_metrics_stage(args.metrics_id, args.metrics_db, "boot", "failed")
             print("\n❌ Test failed!")
-            save_serial_log_on_failure(serial_reader, args.metrics_id, script_dir)
+            save_serial_log(serial_reader, args.metrics_id, script_dir)
             if serial_reader:
                 serial_reader.stop()
             sys.exit(1)
 
     except Exception as e:
         print(f"\n❌ Error: {e}")
-        save_serial_log_on_failure(serial_reader, args.metrics_id, script_dir)
+        save_serial_log(serial_reader, args.metrics_id, script_dir)
         if serial_reader:
             serial_reader.stop()
         sys.exit(1)
