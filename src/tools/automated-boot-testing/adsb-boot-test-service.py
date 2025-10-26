@@ -458,6 +458,7 @@ class ADSBTestService:
 
                 # Extract GitHub context if provided
                 github_context = data.get("github_context", {})
+                release_id = github_context.get("release_id")
 
                 requester_ip = request.environ.get("REMOTE_ADDR", "unknown")
                 user_id = getattr(request, "user_id", "unknown")
@@ -468,6 +469,20 @@ class ADSBTestService:
                 validation = self.url_validator.validate_url(url)
                 if not validation["valid"]:
                     return jsonify({"error": f"Invalid URL: {validation['error']}"}), 400
+
+                # Check for duplicates
+                duplicate = self.metrics.check_duplicate(url, release_id)
+                if duplicate:
+                    logging.info(
+                        f"Duplicate test ignored: URL={url}, release_id={release_id}, "
+                        f"previous test_id={duplicate['test_id']}, {duplicate['minutes_ago']} minutes ago"
+                    )
+                    return jsonify({
+                        "status": "ignored",
+                        "message": f"Duplicate test from {duplicate['minutes_ago']} minutes ago",
+                        "previous_test_id": duplicate['test_id']
+                    }), 200
+
                 if not github_context:
                     logging.warning(f"No GitHub context provided for test {test_id}, URL: {url}")
                     # return jsonify({"status": "ignored"}), 200
