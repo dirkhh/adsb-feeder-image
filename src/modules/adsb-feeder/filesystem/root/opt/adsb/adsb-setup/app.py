@@ -77,6 +77,7 @@ from utils.util import (
     create_fake_info,
     generic_get_json,
     is_true,
+    is_uuid,
     make_int,
     mf_get_ip_and_triplet,
     print_err,
@@ -2517,10 +2518,11 @@ class AdsbIm:
             # make sure use_route_api is populated with the default:
             self._d.env_by_tags("route_api").list_get(sitenum)
 
-            # make sure the uuids are populated:
-            if not self._d.env_by_tags("adsblol_uuid").list_get(sitenum):
+            # make sure the uuids are populated and valid UUIDs
+            if not is_uuid(self._d.env_by_tags("adsblol_uuid").list_get(sitenum)):
                 self._d.env_by_tags("adsblol_uuid").list_set(sitenum, str(uuid4()))
-            if not self._d.env_by_tags("ultrafeeder_uuid").list_get(sitenum):
+
+            if not is_uuid(self._d.env_by_tags("ultrafeeder_uuid").list_get(sitenum)):
                 self._d.env_by_tags("ultrafeeder_uuid").list_set(sitenum, str(uuid4()))
 
             for agg in [submit_key.replace("--submit", "") for submit_key in self._other_aggregators.keys()]:

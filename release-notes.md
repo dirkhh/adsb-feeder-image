@@ -1,5 +1,6 @@
 Changes since v3.0.5
 =======
+- data sharing page: add capability to change UUID for account-less aggregators
 - beta-notes: fix compose up failure related to docker network creation
 - beta-notes: fix SDRPlay SDR Setup for 1090 bug
 - beta-notes: update Skystats to v0.1.11

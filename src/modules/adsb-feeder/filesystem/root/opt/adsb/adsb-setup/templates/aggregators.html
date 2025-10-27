@@ -130,11 +130,17 @@
       <a href="https://www.adsbexchange.com/privacy-policy/">ADSBExchange</a>
     </label>
   </div>
-  <div class="col-12 small fw-light text-muted text-end">
-    <div class="small fw-light text-muted text-end collapse" id="showuuids">
-      {% if uf_enabled("adsblol", m) %}adsb.lol UUID: {{ list_value_by_tag('adsblol_uuid', m) }} {% endif %}<br>
-      {% if uf_enabled("flyitaly", m) or uf_enabled("avdelphi", m) or uf_enabled("planespotters", m) or uf_enabled("tat", m) or uf_enabled("adsbfi", m) or uf_enabled("hpradar", m) or uf_enabled("alive", m) or uf_enabled("adsbx", m) %}
-      Ultrafeeder UUID: {{ list_value_by_tag('ultrafeeder_uuid', m) }} {% endif %}
+  <div class="col-12 form-check text-end">
+    <div class="form-group collapse" id="showuuids">
+      {% if uf_enabled("adsblol", m) %}
+      adsb.lol UUID:
+      <input type="text" id="adsblol_uuid" name="adsblol_uuid" class="form-control text-end"
+             value="{{ list_value_by_tag("adsblol_uuid", m) }}" />
+      {% endif %}<br>
+      Ultrafeeder UUID:
+      <input type="text" id="ultrafeeder_uuid" name="ultrafeeder_uuid" class="form-control text-end"
+             value="{{ list_value_by_tag("ultrafeeder_uuid", m) }}" />
+      <br>
     </div>
     <button class="btn btn-secondary small" type="button" data-mdb-toggle="collapse" data-mdb-target="#showuuids"
             aria-expanded="false" aria-controls="showuuids">show UUIDS</button>

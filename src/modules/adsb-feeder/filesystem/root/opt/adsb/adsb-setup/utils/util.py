@@ -11,6 +11,7 @@ import sys
 import tempfile
 import time
 import traceback
+from uuid import UUID
 
 import requests
 from flask import flash
@@ -246,3 +247,17 @@ def get_plain_url(plain_url, method="GET", data=None):
     else:
         return response.text, response.status_code
     return None, status
+
+
+def is_uuid(uuid):
+    if not uuid:
+        # no need to log anything in this case
+        return False
+    try:
+        UUID(uuid)
+        return True
+    except Exception as exc:
+        # log this case for easier debugging
+        print_err(traceback.format_exception_only(exc))
+        print_err(f"not a valid UUID: {uuid}")
+        return False
