@@ -284,7 +284,12 @@ class TestMetrics:
         return results
 
     def get_queued_tests(self) -> List[Dict[str, Any]]:
-        """Get all tests in queued state (for persistent queue processing)"""
+        """
+        Get all tests in queued state (for persistent queue processing).
+
+        Prioritizes non-DietPi images when selecting next test to run,
+        while maintaining chronological order as secondary sort.
+        """
         conn = self._get_connection()
         conn.row_factory = sqlite3.Row
         cursor = conn.execute(
@@ -296,6 +301,12 @@ class TestMetrics:
         )
         results = [dict(row) for row in cursor.fetchall()]
         self._close_connection(conn)
+
+        # Prioritize non-DietPi images (they test faster)
+        # Sort by: 1) has 'dietpi' in name (False first = non-dietpi first)
+        #          2) started_at timestamp (oldest first)
+        results.sort(key=lambda test: ("dietpi" in test.get("image_url", "").lower(), test.get("started_at", "")))
+
         return results
 
     def get_unreported_tests(self) -> List[Dict[str, Any]]:

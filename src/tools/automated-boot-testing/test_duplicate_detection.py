@@ -52,6 +52,7 @@ def app(test_config, tmp_path):
     test_config["ssh_key"] = str(tmp_path / "fake-key")
 
     # Mock SSH key validation and Python venv validation to bypass actual checks
+    # fmt: off
     with patch.object(service.TestExecutor, "_validate_ssh_key", return_value=str(tmp_path / "fake-key")), patch.object(
         service.TestExecutor, "_validate_python_path", return_value=Path("/usr/bin/python3")
     ):
@@ -62,6 +63,7 @@ def app(test_config, tmp_path):
 
         test_service.app.config["TESTING"] = True
         yield test_service.app
+    # fmt: on
 
 
 def test_duplicate_detection_blocks_second_request(app):
