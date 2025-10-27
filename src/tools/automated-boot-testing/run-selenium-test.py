@@ -142,29 +142,29 @@ def run_basic_setup_test(rpi_ip: str, timeout_seconds: int = 90) -> int:
         # Click submit
         try:
             submit_button.click()
-            print("✓ Submit button clicked")
+            print(f"✓ Submit button clicked {time.strftime('%H:%M:%S')}")
         except Exception:
             driver.execute_script("arguments[0].click();", submit_button)
             print("✓ Submit button clicked via JavaScript")
 
         # Wait for form submission flow
-        print("Waiting for form submission to complete...")
+        print(f"Waiting for form submission to complete... {time.strftime('%H:%M:%S')}")
         try:
             # Wait for redirect to /waiting
-            print("  Step 1: Waiting for redirect...")
+            print(f"  Step 1: Waiting for redirect... {time.strftime('%H:%M:%S')}")
             WebDriverWait(driver, 60).until(lambda d: "/waiting" in d.current_url)
-            print("✓ Form submitted - redirected to waiting page")
+            print(f"✓ Form submitted - redirected to waiting page {time.strftime('%H:%M:%S')}")
 
             # Wait for processing to complete
-            print("  Step 2: Waiting for processing...")
+            print(f"  Step 2: Waiting for processing... {time.strftime('%H:%M:%S')}")
             WebDriverWait(driver, 600).until(lambda d: "SDR Setup" in d.title)
-            print("✓ Successfully reached SDR Setup page")
+            print(f"✓ Successfully reached SDR Setup page {time.strftime('%H:%M:%S')}")
             return 0
 
         except TimeoutException:
             current_url = driver.current_url
             current_title = driver.title
-            print(f"⚠ Did not complete flow within timeout")
+            print(f"⚠ Did not complete flow within timeout {time.strftime('%H:%M:%S')}")
             print(f"Current URL: {current_url}")
             print(f"Current title: {current_title}")
 
