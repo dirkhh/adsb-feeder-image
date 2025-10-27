@@ -26,7 +26,7 @@ import time
 from functools import wraps
 from pathlib import Path
 from subprocess import DEVNULL, check_output
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 from urllib.parse import urlparse
 
 from flask import Flask, g, jsonify, request

@@ -52,7 +52,7 @@ ignore_missing_imports = true
 [project]
 name = "adsb-feeder-image"
 dynamic = ["version"]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [
     "djlint",
     "Flask",
@@ -67,6 +67,7 @@ dev = [
     "black>=24.8.0",
     "coverage>=7.6.1",
     "flake8>=5.0.4",
+    "Flask>=3.1.0",
     "mccabe>=0.7.0",
     "mypy>=1.14.1",
     "mypy-extensions>=1.1.0",
