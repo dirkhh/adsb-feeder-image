@@ -251,6 +251,11 @@ class GitHubReporter:
             # Get current body
             current_body = release.body or ""
 
+            # Check if the results_markdown is unchanged from what is part of the current body
+            if results_markdown in current_body:
+                logger.debug(f"Release {release.title} already has these same test results")
+                return True
+
             # Check if we already have a test results section
             marker = "## Hardware Test Results"
             if marker in current_body:
