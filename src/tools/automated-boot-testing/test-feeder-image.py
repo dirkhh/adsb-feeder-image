@@ -344,6 +344,12 @@ def wait_for_feeder_online(
                 continue
             status_string = "ping up"
 
+            # check if we failed to attach the root filesystem
+            if serial_reader and serial_reader.search_recent("Enter 'help' for a list of built-in commands.", 15):
+                status_string += " - iSCSI driver not found"
+                print(status_string)
+                return False, status_string
+
             # Try to fetch the main page
             response = requests.get(f"http://{rpi_ip}/", timeout=10)
             status_string += f" HTTP response {response.status_code}"
