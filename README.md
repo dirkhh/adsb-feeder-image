@@ -40,7 +40,7 @@ These ADS-B aggregators are also supported:
 - [airplanes.live](https://airplanes.live)
 - [AVDelphi](https://www.avdelphi.com)
 - [FlightAware](https://flightaware.com)
-- [FlightRadar24](https://www.flightradar24.com)
+- [Flightradar24](https://www.flightradar24.com)
 - [hpradar](https://skylink.hpradar.com/)
 - [OpenSky Network](https://opensky-network.org)
 - [Plane.watch](https://plane.watch)
