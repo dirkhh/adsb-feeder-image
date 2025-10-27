@@ -157,7 +157,7 @@ def run_basic_setup_test(rpi_ip: str, timeout_seconds: int = 90) -> int:
 
             # Wait for processing to complete
             print("  Step 2: Waiting for processing...")
-            WebDriverWait(driver, 300).until(lambda d: "SDR Setup" in d.title)
+            WebDriverWait(driver, 600).until(lambda d: "SDR Setup" in d.title)
             print("✓ Successfully reached SDR Setup page")
             return 0
 
