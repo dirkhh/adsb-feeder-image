@@ -311,6 +311,8 @@ def wait_for_feeder_online(
                         "Syncing filesystems and block devices - timed out, issuing SIGKILL",
                         "rejecting I/O to offline device",
                         "Failed to execute shutdown binary",
+                        "Transport endpoint is not connected",
+                        "Failed to execute shutdown binary",
                     ]
                     # Combine into single regex pattern (escape special chars for literal matching)
                     pattern = "|".join(re.escape(p) for p in shutdown_hang_patterns)
@@ -634,7 +636,7 @@ Examples:
                     power_toggle(args.power_toggle_script, False)
                     time.sleep(10)
                     power_toggle(args.power_toggle_script, True)
-                    time.sleep(20)  # give it time to boot and iSCSI to be initialized
+                    time.sleep(60)  # give it time to boot and iSCSI to be initialized
                 else:
                     print(
                         f"with DietPi this can take 20+ minutes because of iSCSI root filesystem and shutdown failure -- keep waiting"
