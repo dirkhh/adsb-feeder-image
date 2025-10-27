@@ -390,10 +390,6 @@ class ADSBTestService:
                 requester_ip = request.environ.get("REMOTE_ADDR", "unknown")
                 user_id = getattr(g, "user_id", "unknown")
 
-                logging.info(
-                    f"Triggering boot test for URL: {url} from {requester_ip} by {user_id} with GitHub context: {github_context}"
-                )
-
                 # Validate URL
                 validation = self.url_validator.validate_url(url)
                 if not validation["valid"]:
@@ -402,7 +398,7 @@ class ADSBTestService:
                 # Check for duplicates
                 duplicate = self.metrics.check_duplicate(url, release_id)
                 if duplicate:
-                    logging.info(
+                    logging.debug(
                         f"Duplicate test ignored: URL={url}, release_id={release_id}, "
                         f"previous test_id={duplicate['test_id']}, {duplicate['minutes_ago']} minutes ago"
                     )
@@ -416,6 +412,10 @@ class ADSBTestService:
                         ),
                         200,
                     )
+
+                logging.info(
+                    f"Triggering boot test for URL: {url} from {requester_ip} by {user_id} with GitHub context: {github_context}"
+                )
 
                 if not github_context:
                     logging.warning(f"No GitHub context provided, URL: {url}")
