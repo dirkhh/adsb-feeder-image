@@ -148,16 +148,17 @@ def extract_qualifying_binaries(release_data: Dict[str, Any]) -> List[Dict[str, 
 
         if matches_binary_filter(asset_name, name):
             created_at = asset.get("created_at", "")
-            # compare that timestamp with the current time and if it is more than 1 hour old, ignore the release
+            # compare that timestamp with the current time and if it is more than half an hour old,
+            # ignore the asset as it definitely hasn't been submitted already
             if created_at:
                 # Parse ISO timestamp (may include 'Z' for UTC or timezone info)
                 asset_time = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
                 current_time = datetime.now(asset_time.tzinfo) if asset_time.tzinfo else datetime.now()
 
-                # Check if timestamp is more than 1 hour old
+                # Check if timestamp is more than half an hour old
                 time_diff = current_time - asset_time
-                if time_diff > timedelta(hours=1):
-                    logger.info(f"Ignoring {asset_name} because it was created more than 1 hour ago")
+                if time_diff > timedelta(minutes=30):
+                    logger.info(f"Ignoring {asset_name} because it was created more than half an hour ago")
                     continue
             qualifying_binaries.append({"name": asset_name, "url": download_url})
             logger.info(f"Found qualifying binary: {asset_name}")
