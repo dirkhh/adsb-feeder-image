@@ -60,6 +60,29 @@ class SerialConsoleReader:
         self._repeat_count = 0
         self._recent_read = 0
 
+        # ANSI escape sequence regex pattern
+        # Matches: ESC [ ... m (color codes), ESC M (reverse index), ESC [ K (erase), etc.
+        # Pattern: ESC followed by either:
+        #   - Single character codes ([@-Z\\-_])
+        #   - CSI sequences ([0-?]*[ -/]*[@-~])
+        self._ansi_escape_pattern = re.compile(r"\x1b(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
+
+    def _strip_ansi_sequences(self, text: str) -> str:
+        """
+        Remove ANSI escape sequences and carriage returns from text.
+
+        Args:
+            text: String potentially containing ANSI escape sequences
+
+        Returns:
+            String with ANSI sequences and carriage returns removed
+        """
+        # Remove ANSI escape sequences
+        text = self._ansi_escape_pattern.sub("", text)
+        # Remove carriage returns (often used with ANSI sequences)
+        text = text.replace("\r", "")
+        return text
+
     def start(self) -> bool:
         """
         Start background reading thread.
@@ -178,6 +201,9 @@ class SerialConsoleReader:
                         except Exception:
                             line_str = str(line).rstrip()
 
+                        # Strip ANSI escape sequences before buffering
+                        line_str = self._strip_ansi_sequences(line_str)
+
                         # Only add non-empty lines
                         if line_str:
                             with self._buffer_lock:
@@ -243,6 +269,7 @@ class SerialConsoleReader:
 
         Args:
             n: Number of recent lines to retrieve
+            start_from_last: If True, only consider lines since last call with this flag
 
         Returns:
             List of recent lines (oldest first)
@@ -261,19 +288,21 @@ class SerialConsoleReader:
             else:
                 return buffer_list[-n:]
 
-    def search_recent(self, pattern: str, max_lines: int = 100, regex: bool = False) -> bool:
+    def search_recent(self, pattern: str, max_lines: int = 100, regex: bool = False, start_from_last: bool = False) -> bool:
         """
-        Search for string/pattern in last N lines.
+        Search for string/pattern in recent lines.
 
         Args:
             pattern: String or regex pattern to search for
             max_lines: Maximum number of recent lines to search
             regex: If True, treat pattern as regex; if False, simple substring match
+            start_from_last: If True, only search lines added since last call with this flag.
+                           If False (default), search the last N lines regardless of when they were added.
 
         Returns:
             True if pattern was found, False otherwise
         """
-        recent_lines = self.get_recent(max_lines, start_from_last=True)
+        recent_lines = self.get_recent(max_lines, start_from_last=start_from_last)
         if not recent_lines:
             return False
 
