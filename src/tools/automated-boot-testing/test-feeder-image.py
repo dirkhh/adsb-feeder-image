@@ -472,7 +472,9 @@ def test_basic_setup(rpi_ip: str, timeout_seconds: int = 90) -> bool:
     print("=" * 70)
     process = None
     try:
-        # Use Popen with real-time output forwarding (same as shell script)
+        # Use Popen with real-time output forwarding
+        # Important: Use python3 -u for unbuffered output, otherwise Python buffers
+        # stdout when it detects it's not a terminal (even with bufsize=1 on the pipe)
         process = subprocess.Popen(
             [
                 "sudo",
@@ -481,6 +483,7 @@ def test_basic_setup(rpi_ip: str, timeout_seconds: int = 90) -> bool:
                 "env",
                 f"HOME=/home/testuser",
                 f"{base_dir}/venv/bin/python3",
+                "-u",  # Unbuffered output
                 str(test_script),
                 rpi_ip,
                 "--timeout",
