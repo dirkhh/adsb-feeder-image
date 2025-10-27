@@ -2,15 +2,17 @@
 #
 # Remote Deployment Script for Test Services
 #
-# Deploys github-webhook and adsb-boot-test to remote servers.
+# Deploys github-webhook, adsb-boot-test, and github-reporter to remote servers.
 # Reads target hosts from .env file in the same directory.
 #
 # Usage:
-#   ./remote-deploy-test-services.sh [webhook|boot-test|all]
+#   ./remote-deploy-test-services.sh [webhook|boot-test|reporter|all]
 #
 # .env format:
 #   WEBHOOK_HOST=[user@]hostname
 #   BOOT_TEST_HOST=[user@]hostname
+#
+# Note: github-reporter always deploys to BOOT_TEST_HOST (same server as boot-test)
 #
 # Examples:
 #   WEBHOOK_HOST=root@webhook.example.com
@@ -33,6 +35,7 @@ ENV_FILE="${SCRIPT_DIR}/.env"
 # Service directories
 WEBHOOK_DIR="${SCRIPT_DIR}/github-webhook"
 BOOT_TEST_DIR="${SCRIPT_DIR}/automated-boot-testing"
+REPORTER_DIR="${SCRIPT_DIR}/github-reporter"
 
 # Remote staging directory
 REMOTE_STAGE_DIR="/tmp/adsb-deploy-$(date +%s)"
@@ -229,6 +232,56 @@ deploy_boot_test() {
     log_success "adsb-boot-test deployment completed successfully"
 }
 
+# Function to deploy github-reporter
+deploy_reporter() {
+    # Reporter always runs on same host as boot-test service
+    local host=$(parse_host "$BOOT_TEST_HOST")
+
+    log_info "Deploying github-reporter to $host (same as boot-test)"
+
+    # Test SSH connection
+    if ! test_ssh "$host"; then
+        log_error "Cannot connect to $host via SSH"
+        log_warning "Ensure SSH key authentication is configured"
+        return 1
+    fi
+
+    log_success "SSH connection to $host verified"
+
+    # Create staging directory on remote
+    log_info "Creating staging directory on remote..."
+    ssh "$host" "mkdir -p $REMOTE_STAGE_DIR/github-reporter"
+
+    # Copy files to remote staging directory
+    log_info "Copying files to remote..."
+    scp -r "$REPORTER_DIR"/* "$host:$REMOTE_STAGE_DIR/github-reporter/" > /dev/null
+
+    log_success "Files copied to remote staging directory"
+
+    # Run deployment script on remote
+    log_info "Running deployment script on remote..."
+    ssh "$host" "cd $REMOTE_STAGE_DIR/github-reporter && bash deploy-reporter.sh"
+
+    # Restart service
+    log_info "Restarting github-reporter..."
+    ssh "$host" "systemctl restart github-reporter"
+
+    # Check service status
+    if ssh "$host" "systemctl is-active --quiet github-reporter"; then
+        log_success "github-reporter is running"
+    else
+        log_error "github-reporter failed to start"
+        ssh "$host" "journalctl -u github-reporter -n 20 --no-pager"
+        return 1
+    fi
+
+    # Cleanup staging directory
+    log_info "Cleaning up remote staging directory..."
+    ssh "$host" "rm -rf $REMOTE_STAGE_DIR"
+
+    log_success "github-reporter deployment completed successfully"
+}
+
 # Main function
 main() {
     local target="${1:-all}"
@@ -260,6 +313,13 @@ main() {
             fi
             deploy_boot_test
             ;;
+        reporter)
+            if [[ -z "$BOOT_TEST_HOST" ]]; then
+                log_error "BOOT_TEST_HOST not set in .env file (reporter uses same host as boot-test)"
+                exit 1
+            fi
+            deploy_reporter
+            ;;
         all)
             local failed=0
 
@@ -277,8 +337,14 @@ main() {
                 if ! deploy_boot_test; then
                     failed=1
                 fi
+                echo
+
+                # Deploy reporter to same host as boot-test
+                if ! deploy_reporter; then
+                    failed=1
+                fi
             else
-                log_warning "BOOT_TEST_HOST not set in .env - skipping adsb-boot-test deployment"
+                log_warning "BOOT_TEST_HOST not set in .env - skipping adsb-boot-test and github-reporter deployment"
             fi
 
             if [[ $failed -eq 1 ]]; then
@@ -290,11 +356,12 @@ main() {
         *)
             log_error "Invalid target: $target"
             echo
-            echo "Usage: $0 [webhook|boot-test|all]"
+            echo "Usage: $0 [webhook|boot-test|reporter|all]"
             echo
             echo "  webhook    - Deploy github-webhook service only"
             echo "  boot-test  - Deploy adsb-boot-test only"
-            echo "  all        - Deploy both services (default)"
+            echo "  reporter   - Deploy github-reporter only (runs on same host as boot-test)"
+            echo "  all        - Deploy all services (default)"
             exit 1
             ;;
     esac
