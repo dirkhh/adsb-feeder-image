@@ -231,7 +231,8 @@ class GitHubReporter:
         """
         Update or create release body with test results.
 
-        Appends test results section to release description.
+        Shows all test results for this release (not just the unreported ones),
+        preserving prior results while adding new ones.
         """
         try:
             # Find release by ID
@@ -245,8 +246,12 @@ class GitHubReporter:
                 logger.error(f"Release {release_id} not found")
                 return False
 
-            # Format test results
-            results_markdown = self._format_results(tests)
+            # Get ALL tests for this release (not just unreported ones)
+            # This ensures we show complete test results history
+            all_tests = self.metrics.get_tests_by_github_context("release", release_id=release_id)
+
+            # Format all test results (preserves prior results)
+            results_markdown = self._format_results(all_tests)
 
             # Get current body
             current_body = release.body or ""
@@ -270,11 +275,12 @@ class GitHubReporter:
             # Update release
             release.update_release(name=release.title, message=new_body)
 
-            logger.info(f"✓ Updated release {release.title} with test results ({len(tests)} tests)")
+            logger.info(f"✓ Updated release {release.title} with test results ({len(all_tests)} total tests)")
             logger.info(f"Test results: {results_markdown}")
 
             # Mark tests as reported ONLY if in final state
             # Tests still queued or running will be updated again on next poll
+            # NOTE: We only mark the 'tests' parameter (unreported tests), not all_tests
             final_states = {"passed", "failed", "error"}
             for test in tests:
                 if test["status"] in final_states:
@@ -296,15 +302,20 @@ class GitHubReporter:
         """
         Post or update PR comment with test results.
 
-        Uses HTML comment marker to find and update existing comment.
+        Shows all test results for this PR (not just the unreported ones),
+        preserving prior results while adding new ones.
         """
         try:
             # Get pull request
             pr = self.repo.get_pull(pr_number)
             logger.info(f"Updating PR #{pr_number}: {pr.title}")
 
-            # Format results
-            results_section = self._format_results(tests)
+            # Get ALL tests for this PR (not just unreported ones)
+            # This ensures we show complete test results history
+            all_tests = self.metrics.get_tests_by_github_context("pull_request", pr_number=pr_number)
+
+            # Format all test results (preserves prior results)
+            results_section = self._format_results(all_tests)
 
             # Comment marker for finding our comment
             comment_marker = "<!-- boot-test-results -->"
@@ -320,14 +331,15 @@ class GitHubReporter:
             if existing_comment:
                 # Update existing comment
                 existing_comment.edit(comment_body)
-                logger.info(f"✓ Updated PR #{pr_number} comment with {len(tests)} test results")
+                logger.info(f"✓ Updated PR #{pr_number} comment with {len(all_tests)} total test results")
             else:
                 # Create new comment
                 pr.create_issue_comment(comment_body)
-                logger.info(f"✓ Created PR #{pr_number} comment with {len(tests)} test results")
+                logger.info(f"✓ Created PR #{pr_number} comment with {len(all_tests)} total test results")
 
             # Mark tests as reported ONLY if in final state
             # Tests still queued or running will be updated again on next poll
+            # NOTE: We only mark the 'tests' parameter (unreported tests), not all_tests
             final_states = {"passed", "failed", "error"}
             for test in tests:
                 if test["status"] in final_states:
