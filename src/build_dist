@@ -127,6 +127,7 @@ if [[ "$VARIANT" == "dietpi"* ]] ; then
     sed --follow-symlinks -i '/[[:blank:]]\/var\/log[[:blank:]]/d' "$MNT_DIR"/etc/fstab
     echo 'INDEX_LOGGING=0' >> "$MNT_DIR"/boot/dietpi/.installed
     echo 'aSOFTWARE_INSTALL_STATE[103]=0' >> "$MNT_DIR"/boot/dietpi/.installed
+    cat "$MNT_DIR"/boot/dietpi/.installed
 
     cat >> /etc/wpa_supplicant/wpa_supplicant.conf <<EOF
 # disable p2p as it can cause errors
