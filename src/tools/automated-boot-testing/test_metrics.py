@@ -170,9 +170,70 @@ def test_check_duplicate_different_release_ids():
     assert result is None  # Not a duplicate
 
 
+def test_duration_reflects_execution_time_not_queue_time():
+    """Duration should reflect actual execution time, not queue wait time"""
+    import time
+    from unittest.mock import patch
+
+    metrics = TestMetrics(db_path=":memory:")
+
+    # Simulate: Test queued at time T
+    queue_time = datetime.utcnow()
+    with patch("metrics.datetime") as mock_datetime:
+        mock_datetime.utcnow.return_value = queue_time
+        mock_datetime.fromisoformat = datetime.fromisoformat
+        test_id = metrics.start_test(
+            image_url="https://example.com/test.img",
+            triggered_by="api",
+        )
+
+    print(f"✓ Test {test_id} queued at {queue_time.isoformat()}")
+
+    # Simulate: Test sits in queue for 5 seconds
+    time.sleep(0.1)  # Small sleep to ensure time difference
+    execution_start_time = queue_time + timedelta(seconds=5)
+
+    # Simulate: Test starts executing at time T+5s
+    with patch("metrics.datetime") as mock_datetime:
+        mock_datetime.utcnow.return_value = execution_start_time
+        mock_datetime.fromisoformat = datetime.fromisoformat
+        metrics.update_test_status(test_id, "running")
+
+    print(f"✓ Test {test_id} started running at {execution_start_time.isoformat()}")
+
+    # Simulate: Test runs for 3 seconds
+    completion_time = execution_start_time + timedelta(seconds=3)
+
+    # Simulate: Test completes at time T+8s
+    with patch("metrics.datetime") as mock_datetime:
+        mock_datetime.utcnow.return_value = completion_time
+        mock_datetime.fromisoformat = datetime.fromisoformat
+        metrics.complete_test(test_id, "passed")
+
+    print(f"✓ Test {test_id} completed at {completion_time.isoformat()}")
+
+    # Verify: Duration should be 3 seconds (execution time), not 8 seconds (queue + execution)
+    results = metrics.get_recent_results(limit=1)
+    assert len(results) == 1
+
+    duration = results[0]["duration_seconds"]
+    started_at = datetime.fromisoformat(results[0]["started_at"])
+
+    print(f"✓ Reported duration: {duration} seconds")
+    print(f"✓ Started at: {started_at.isoformat()}")
+
+    assert duration == 3, f"Expected duration 3s (execution time), got {duration}s"
+    assert started_at == execution_start_time, f"Expected started_at to be execution start time"
+
+    print("✓ Duration correctly reflects execution time, not queue wait time")
+
+
 if __name__ == "__main__":
     try:
         test_metrics()
+        print("\n" + "=" * 60)
+        test_duration_reflects_execution_time_not_queue_time()
+        print("\n🎉 All tests passed!")
     except Exception as e:
         print(f"\n❌ Test failed: {e}")
         import traceback
