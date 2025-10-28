@@ -132,8 +132,8 @@ AUTO_SETUP_GLOBAL_PASSWORD=ADSB_RANDOM_PASSWORD
 # for the adsbim builds, git, python, pip, docker, and docker compose are already pre-installed
 # zerotier and tailscale are preinstalled as well, but their additional settings need to run
 # again after first boot in order for things to work correctly
-AUTO_SETUP_INSTALL_SOFTWARE_ID=201  # zerotier
-AUTO_SETUP_INSTALL_SOFTWARE_ID=58   # tailscale
+#AUTO_SETUP_INSTALL_SOFTWARE_ID=201  # zerotier
+#AUTO_SETUP_INSTALL_SOFTWARE_ID=58   # tailscale
 
 #------------------------------------------------------------------------------------------------------
 ##### Misc DietPi program settings #####

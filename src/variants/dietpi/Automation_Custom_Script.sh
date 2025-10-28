@@ -5,10 +5,6 @@
 # it will simply fail to grab the port and exit
 python3 /opt/adsb/adsb-setup/waiting-app.py 80 /var/tmp/dietpi/logs/dietpi-firstrun-setup.log "Second boot of" &>>/run/adsb-feeder-image.log &
 
-# make sure the VPN services are stopped and disabled
-systemctl disable --now zerotier-one.service tailscaled.service
-systemctl mask zerotier-one tailscaled
-
 # avoid unnecessary diskwrites by zerotier
 ln -sf /dev/null /var/lib/zerotier-one/metrics.prom
 
@@ -42,7 +38,7 @@ systemctl restart systemd-journald && echo "journal should now be persistent"
 # when chrony is installed it's imperative that CONFIG_NTP_MODE=0
 # (custom/disabled) is set in dietpi.txt to avoid breakage of dietpi-update
 /boot/dietpi/func/dietpi-set_software ntpd-mode 0
-apt install -y --no-install-recommends chrony jq zstd acpid netcat-openbsd ifplugd ifmetric
+apt install -y --no-install-recommends chrony ifplugd ifmetric
 
 # ifmetric ensures proper precedence for local network connections
 # dhclient applies the metric setting from interfaces only to the default
@@ -68,68 +64,6 @@ fi
 # always step the clock if it's off by more than 0.5 seconds
 sed -i -e 's/^makestep.*/makestep 0.5 -1/' /etc/chrony/chrony.conf
 systemctl restart chrony
-
-# also install acpid with the other stuff above and configure the power button to perform a clean shutdown
-cat > /etc/acpi/events/power_button <<EOF
-event=button/power PBTN 00000080 00000000
-action=/usr/sbin/poweroff
-EOF
-
-systemctl restart acpid
-
-
-# copy the blocklisting code from Ramon Kolb's install-docker.sh script
-# DOCKER-INSTALL.SH -- Installation script for the Docker infrastructure on a Raspbian or Ubuntu system
-# Usage: source <(curl -s https://raw.githubusercontent.com/sdr-enthusiasts/docker-install/main/docker-install.sh)
-#
-# Copyright 2021-2023 Ramon F. Kolb (kx1t)- licensed under the terms and conditions
-# of the MIT license. The terms and conditions of this license are included with the Github
-# distribution of this package.
-
-
-    BLOCKED_MODULES=("rtl2832_sdr")
-    BLOCKED_MODULES+=("dvb_usb_rtl2832u")
-    BLOCKED_MODULES+=("dvb_usb_rtl28xxu")
-    BLOCKED_MODULES+=("dvb_usb_v2")
-    BLOCKED_MODULES+=("r820t")
-    BLOCKED_MODULES+=("rtl2830")
-    BLOCKED_MODULES+=("rtl2832")
-    BLOCKED_MODULES+=("rtl2838")
-    BLOCKED_MODULES+=("dvb_core")
-    echo -n "Getting the latest UDEV rules... "
-    mkdir -p /etc/udev/rules.d /etc/udev/hwdb.d
-    # First install the UDEV rules for RTL-SDR dongles
-    curl -sL -o /etc/udev/rules.d/rtl-sdr.rules https://raw.githubusercontent.com/wiedehopf/adsb-scripts/master/osmocom-rtl-sdr.rules
-    curl -sL -o /etc/udev/rules.d/dump978-fa.rules https://raw.githubusercontent.com/flightaware/dump978/master/debian/dump978-fa.udev
-    # Now install the UDEV rules for SDRPlay devices
-    curl -sL -o /etc/udev/rules.d/66-mirics.rules https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/66-mirics.rules
-    curl -sL -o /etc/udev/hwdb.d/20-sdrplay.hwdb https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/20-sdrplay.hwdb
-    # Next, exclude the drivers so the dongles stay accessible
-    echo -n "Excluding and unloading any competing RTL-SDR drivers... "
-    UNLOAD_SUCCESS=true
-    for module in "${BLOCKED_MODULES[@]}"
-    do
-        if ! grep -q "$module" /etc/modprobe.d/exclusions-rtl2832.conf
-        then
-          echo blacklist "$module" >>/etc/modprobe.d/exclusions-rtl2832.conf
-          echo install "$module" /bin/false >>/etc/modprobe.d/exclusions-rtl2832.conf
-          modprobe -r "$module" 2>/dev/null || UNLOAD_SUCCESS=false
-        fi
-    done
-
-    if [[ "${UNLOAD_SUCCESS}" == false ]]; then
-      echo "INFO: Although we've successfully excluded any competing RTL-SDR drivers, we weren't able to unload them. This will remedy itself when you reboot your system after the script finishes."
-    fi
-
-    echo "Deactivating biastees possibly turned on by kernel driver, device not found errors are expected:"
-    for i in 0 1 2 3; do
-        rtl_biast -d "$i" -b 0 &
-    done
-
-
-#
-# End of Ramon Kolb's docker-install.sh
-#
 
 # most of the feeder image is already installed, we just do a few final steps that need
 # to happen after first boot
@@ -160,9 +94,3 @@ systemctl enable --now \
 # adsb-docker is restart by dietpi after this script and it's not that important to get started anyhow
 # rely on dietpi to start adsb-docker but make sure it's enabled
 systemctl enable adsb-docker
-
-# Disable telemetry for tailscale
-# but only if it's not already there
-if ! grep -q -- "^FLAGS=\"--no-logs-no-support" /etc/default/tailscaled ; then
-   sed -i 's/FLAGS=\"/FLAGS=\"--no-logs-no-support /' /etc/default/tailscaled
-fi
