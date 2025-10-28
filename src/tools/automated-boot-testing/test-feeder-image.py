@@ -324,6 +324,7 @@ def wait_for_feeder_online(
                         "Failed to execute shutdown binary",
                         "Transport endpoint is not connected",
                         "Failed to execute shutdown binary",
+                        "Job networking.service/stop running",
                     ]
                     # Combine into single regex pattern (escape special chars for literal matching)
                     pattern = "|".join(re.escape(p) for p in shutdown_hang_patterns)
