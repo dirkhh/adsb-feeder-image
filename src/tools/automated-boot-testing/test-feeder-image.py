@@ -20,8 +20,9 @@ import subprocess
 import sys
 import time
 import urllib.parse
+from functools import partial
 from pathlib import Path
-from typing import Optional
+from typing import Callable, Optional
 
 import requests
 from metrics import TestMetrics  # type: ignore # noqa: E402
@@ -146,6 +147,16 @@ def power_toggle(script_path: str, turn_on: bool) -> bool:
     except Exception as e:
         print(f"Error running power toggle script: {e}")
         return False
+
+
+def power_cycle_and_cleanup(power_toggle_script: str, cleanup_script: Optional[Callable[[], None]] = None) -> None:
+    """Power cycle the system and cleanup the image."""
+    power_toggle(power_toggle_script, False)
+    time.sleep(10)  # we don't know if our power_toggle script is instant or not, so we wait 10 seconds
+    if cleanup_script:
+        cleanup_script()
+    power_toggle(power_toggle_script, True)
+    time.sleep(60)  # give it time to boot and iSCSI to be initialized
 
 
 def validate_image_filename(filename: str) -> str:
@@ -519,6 +530,12 @@ def test_basic_setup(rpi_ip: str, timeout_seconds: int = 90) -> bool:
         print(f"✗ Error running test: {e}")
         return False
 
+def rebuild_image(url: str, cache_dir: Path, ssh_public_key: str) -> None:
+    """Rebuild the image from the compressed original."""
+    expected_image_name = download_and_decompress_image(url, True, cache_dir)
+    cached_image_path = cache_dir / expected_image_name
+    setup_iscsi_image(cached_image_path, ssh_public_key)
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -594,8 +611,6 @@ Examples:
             try_ssh_shutdown(args.rpi_ip, args.user, args.ssh_key, args.shutdown_timeout)
             wait_for_system_down(args.rpi_ip, args.shutdown_timeout)
 
-        power_toggle(args.power_toggle_script, False)
-
         # Derive public key path from private key path (assumes public key is at private_key + '.pub')
         ssh_public_key = ""
         if args.ssh_key:
@@ -606,12 +621,11 @@ Examples:
             else:
                 print(f"⚠ SSH private key provided but public key not found at: {ssh_public_key_path}")
 
-        setup_iscsi_image(cached_image_path, ssh_public_key)
+        power_cycle_and_cleanup(args.power_toggle_script, partial(setup_iscsi_image, cached_image_path, ssh_public_key))
 
         # Update metrics: boot stage starting
         update_metrics_stage(args.metrics_id, args.metrics_db, "boot", "running")
 
-        power_toggle(args.power_toggle_script, True)
         count = 0
         success = False
         status_string = ""
@@ -623,23 +637,14 @@ Examples:
             if "iSCSI driver not found" in status_string:
                 print("iSCSI driver not found, rebuilding image")
                 # power cycle, recreate the image from the compressed original, and try again
-                power_toggle(args.power_toggle_script, False)
-                cached_image_path.unlink()
-                expected_image_name = download_and_decompress_image(args.image_url, False, cache_dir)
-                cached_image_path = cache_dir / expected_image_name
-                setup_iscsi_image(cached_image_path, ssh_public_key)
-                power_toggle(args.power_toggle_script, True)
-                time.sleep(10)
+                power_cycle_and_cleanup(args.power_toggle_script, partial(rebuild_image, args.image_url, cache_dir, ssh_public_key))
                 continue
 
             if "dietpi" in expected_image_name:
                 if "ping down" in status_string:
                     print("with DietPi we could be hung because of iSCSI root filesystem and shutdown failure")
                     # power cycle and try again
-                    power_toggle(args.power_toggle_script, False)
-                    time.sleep(10)
-                    power_toggle(args.power_toggle_script, True)
-                    time.sleep(60)  # give it time to boot and iSCSI to be initialized
+                    power_cycle_and_cleanup(args.power_toggle_script, None)
                 else:
                     print(
                         f"with DietPi this can take 20+ minutes because of iSCSI root filesystem and shutdown failure -- keep waiting"
