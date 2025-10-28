@@ -537,6 +537,10 @@ def rebuild_image(url: str, cache_dir: Path, ssh_public_key: str) -> None:
     cached_image_path = cache_dir / expected_image_name
     setup_iscsi_image(cached_image_path, ssh_public_key)
 
+def sync_boot_kernel(cached_image_path: Path, ssh_public_key: str) -> None:
+    """Sync the boot kernel from the root filesystem."""
+    # copy the boot kernel from the root filesystem to the cached image path
+    setup_iscsi_image(cached_image_path, ssh_public_key)
 
 def main():
     parser = argparse.ArgumentParser(
@@ -645,7 +649,7 @@ Examples:
                 if "ping down" in status_string:
                     print("with DietPi we could be hung because of iSCSI root filesystem and shutdown failure")
                     # power cycle and try again
-                    power_cycle_and_cleanup(args.power_toggle_script, None)
+                    power_cycle_and_cleanup(args.power_toggle_script, partial(sync_boot_kernel, cached_image_path, ssh_public_key))
                 else:
                     print(
                         f"with DietPi this can take 20+ minutes because of iSCSI root filesystem and shutdown failure -- keep waiting"
