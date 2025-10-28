@@ -90,7 +90,7 @@ class APIKeyAuth:
                 return jsonify({"error": "Invalid API key"}), 401
 
             # Log successful authentication
-            logging.info(f"Authenticated request from user: {user_id}")
+            logging.debug(f"Authenticated request from user: {user_id}")
 
             # Add user_id to request context for use in endpoint
             g.user_id = user_id
@@ -670,6 +670,10 @@ def setup_logging(log_level: str = "INFO"):
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         handlers=[logging.StreamHandler(sys.stdout)],
     )
+
+    # Set werkzeug (Flask's HTTP server) to WARNING to suppress HTTP request logs
+    # This prevents routine HTTP request logs from appearing at INFO level
+    logging.getLogger("werkzeug").setLevel(logging.WARNING)
 
 
 def load_config(config_file: str = "/etc/adsb-boot-test/config.json") -> Dict:
