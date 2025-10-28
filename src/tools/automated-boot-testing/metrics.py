@@ -142,13 +142,28 @@ class TestMetrics:
         self._close_connection(conn)
 
     def update_test_status(self, test_id: int, status: str):
-        """Update overall test status (queued -> running -> passed/failed)"""
+        """
+        Update overall test status (queued -> running -> passed/failed).
+
+        When transitioning to 'running', also updates started_at to current time,
+        ensuring duration_seconds reflects actual execution time, not queue wait time.
+        """
         valid_statuses = ["queued", "running", "passed", "failed", "error"]
         if status not in valid_statuses:
             raise ValueError(f"Invalid status: {status}. Must be one of {valid_statuses}")
 
         conn = self._get_connection()
-        conn.execute("UPDATE test_runs SET status = ? WHERE id = ?", (status, test_id))
+
+        # When test starts running, update started_at to current time
+        # This makes duration_seconds reflect actual execution time
+        if status == "running":
+            conn.execute(
+                "UPDATE test_runs SET status = ?, started_at = ? WHERE id = ?",
+                (status, datetime.utcnow().isoformat(), test_id)
+            )
+        else:
+            conn.execute("UPDATE test_runs SET status = ? WHERE id = ?", (status, test_id))
+
         conn.commit()
         self._close_connection(conn)
 
