@@ -23,6 +23,9 @@ RuntimeWatchdogSec=15
 RebootWatchdogSec=10min
 EOF
 
+# set random password for dietpi user
+echo "dietpi:$(head -c 20 /dev/urandom | base64)" | chpasswd
+
 # dietpi deletes and creates a new /etc/machine-id after systemd-journald starts up
 # thus systemd-journald is writing to /var/log/journal/<old-machine-id>
 # journalctl on the other hand tries to read from /var/log/journal/<new-machine-id>
