@@ -10,12 +10,10 @@
   "log_all_serial": false,
   "power_toggle_script": "/opt/adsb-boot-test/power-toggle-kasa.py",
   "kasa_ip": "192.168.22.147",
-  "unifi_controller": "",
-  "unifi_username": "",
-  "unifi_password": "",
-  "unifi_site": "default",
-  "unifi_switch_mac": "",
-  "unifi_port_idx": 0,
+  "unifi_ssh_address": "",
+  "unifi_ssh_username": "",
+  "unifi_ssh_keypath": "",
+  "unifi_port_number": 0,
   "api_keys": {
     "REPLACE_WITH_SECURE_KEY_1": "github-ci",
     "REPLACE_WITH_SECURE_KEY_2": "developer1"
@@ -32,11 +30,9 @@
   "_power_toggle_notes": {
     "power_toggle_script": "Path to power toggle script. Options: power-toggle-kasa.py (Kasa smart plug) or power-toggle-unifi.py (UniFi PoE port)",
     "kasa_ip": "For Kasa: IP address of Kasa smart plug",
-    "unifi_controller": "For UniFi: IP/hostname of UniFi controller (leave empty if using Kasa)",
-    "unifi_username": "For UniFi: Controller username",
-    "unifi_password": "For UniFi: Controller password",
-    "unifi_site": "For UniFi: Site name (usually 'default')",
-    "unifi_switch_mac": "For UniFi: MAC address of switch (e.g., 'aa:bb:cc:dd:ee:ff')",
-    "unifi_port_idx": "For UniFi: Port number to control (1-based, e.g., 5 for port 5)"
+    "unifi_ssh_address": "For UniFi: IP/hostname of switch (direct SSH access)",
+    "unifi_ssh_username": "For UniFi: SSH username (e.g., 'admin' or 'ubnt')",
+    "unifi_ssh_keypath": "For UniFi: Path to SSH private key without passphrase",
+    "unifi_port_number": "For UniFi: Port number to control (1-based, e.g., 16)"
   }
 }
