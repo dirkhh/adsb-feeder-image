@@ -23,7 +23,7 @@ sudo ./src/tools/automated-boot-testing/install-service.sh
 
 This will:
 1. Create `/opt/adsb-boot-test/` with dedicated virtual environment
-2. Install Python dependencies from `requirements.txt`
+2. Install Python dependencies from `pyproject.toml` (using uv)
 3. Copy service files to `/opt/adsb-boot-test/`
 4. Create `/etc/adsb-boot-test/config.json`
 5. Install and enable systemd service
@@ -422,7 +422,6 @@ src/tools/automated-boot-testing/
 ├── install-service.sh           # Production installation script
 ├── setup-dev.sh                 # Development setup script
 ├── setup-tftp-iscsi.sh          # TFTP/iSCSI boot setup
-├── requirements.txt             # Python dependencies
 ├── test-api.py                  # API testing script
 ├── test-feeder-image.py         # Core test script (source)
 ├── run-selenium-test.py         # Selenium test runner (non-root)
@@ -474,7 +473,7 @@ The installation script is idempotent - it can be run multiple times safely.
 - Network utilities (ping, etc.)
 
 ### Python Dependencies
-All Python dependencies are listed in `requirements.txt` and automatically installed:
+All Python dependencies are listed in `pyproject.toml` and automatically installed using `uv`:
 - Flask (web framework)
 - requests (HTTP client)
 - selenium (browser automation)
@@ -483,7 +482,7 @@ All Python dependencies are listed in `requirements.txt` and automatically insta
 - python-kasa (smart switch control)
 
 ### Installation
-Dependencies are automatically installed in the dedicated virtual environment at `/opt/adsb-boot-test/venv/`
+Dependencies are automatically installed using `uv` in the dedicated virtual environment at `/opt/adsb-boot-test/venv/`
 
 ### Development Setup
 For development, use the setup script:
@@ -493,9 +492,9 @@ For development, use the setup script:
 ./src/tools/automated-boot-testing/setup-dev.sh
 ```
 
-Or install manually:
+Or install manually using uv:
 
 ```bash
 # In your development environment
-pip install -r src/tools/automated-boot-testing/requirements.txt
+uv pip install -e .
 ```

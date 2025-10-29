@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """
-UniFi PoE Port Power Toggle
+UniFi PoE Port Power Toggle via SSH
 
-Controls PoE power on a specific port of a UniFi switch via the UniFi Controller API.
+Controls PoE power on a specific port of a UniFi switch via direct SSH commands.
+Much faster than Controller API (5-10s vs 30+s).
+
 Reads configuration from /etc/adsb-boot-test/config.json
 
 Configuration required in config.json:
-  "unifi_controller": "192.168.1.1"     # Controller IP/hostname
-  "unifi_username": "admin"             # Controller username
-  "unifi_password": "password"          # Controller password
-  "unifi_site": "default"               # Site name (usually "default")
-  "unifi_switch_mac": "aa:bb:cc:dd:ee:ff"  # MAC of the switch
-  "unifi_port_idx": 5                   # Port number (1-based, e.g., 5 = port 5)
+  "unifi_ssh_address": "192.168.1.10"           # Switch IP/hostname
+  "unifi_ssh_username": "admin"                 # SSH username
+  "unifi_ssh_keypath": "/path/to/key"           # Path to private key (no passphrase)
+  "unifi_port_number": 16                       # Port number (1-based)
 
 Exit codes:
   0 - Success
@@ -19,169 +19,243 @@ Exit codes:
 """
 
 import json
+import os
+import subprocess
 import sys
 import time
-
-import urllib3
-from pyunifi.controller import Controller  # type: ignore[import-untyped]
-
-# Disable SSL warnings for self-signed certs (UniFi uses self-signed by default)
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+from typing import Optional
 
 
-def control_unifi_port(
-    controller_ip: str,
-    username: str,
-    password: str,
-    site: str,
-    switch_mac: str,
-    port_idx: int,
-    turn_on: bool,
-) -> bool:
-    """
-    Control PoE power on a UniFi switch port.
+class UniFiSSHController:
+    """Controls UniFi switch PoE ports via SSH commands"""
 
-    Args:
-        controller_ip: IP or hostname of UniFi controller
-        username: Controller username
-        password: Controller password
-        site: Site name (usually "default")
-        switch_mac: MAC address of the switch
-        port_idx: Port number (1-based)
-        turn_on: True to enable PoE, False to disable
+    def __init__(self, address: str, username: str, keypath: str, port_number: int):
+        """
+        Initialize SSH controller.
 
-    Returns:
-        True on success, False on failure
-    """
-    try:
-        print(f"Connecting to UniFi controller at {controller_ip}...")
+        Args:
+            address: IP or hostname of the switch
+            username: SSH username
+            keypath: Path to SSH private key file (no passphrase)
+            port_number: Port number to control (1-based)
+        """
+        self.address = address
+        self.username = username
+        self.keypath = keypath
+        self.port_number = port_number
 
-        # Connect to controller
-        # Default UniFi port is 8443 (HTTPS)
-        controller = Controller(
-            host=controller_ip,
-            username=username,
-            password=password,
-            port=8443,
-            site_id=site,
-            ssl_verify=False,  # UniFi uses self-signed certs
-        )
+    def toggle_port(self, turn_on: bool) -> bool:
+        """
+        Toggle port power and verify state change.
 
-        # Normalize MAC address format (UniFi expects lowercase with colons)
-        switch_mac = switch_mac.lower().replace("-", ":")
+        Args:
+            turn_on: True to enable PoE, False to disable
 
-        # Ensure port_idx is an integer (1-based port number)
-        port_idx = int(port_idx)
+        Returns:
+            True if port reached desired state, False otherwise
+        """
+        expected_state = "On" if turn_on else "Off"
 
+        # Pre-check: Query current state first
+        print(f"Checking current state of port {self.port_number}...")
+        success, output = self._run_ssh_command(f"swctrl poe show id {self.port_number}")
+
+        if success:
+            current_state = self._parse_poe_status(output)
+            if current_state == expected_state:
+                print(f"✓ Port {self.port_number} is already {expected_state}")
+                return True
+            print(f"Current state: {current_state}, target state: {expected_state}")
+        else:
+            print(f"Warning: Could not check current state, proceeding with toggle...")
+
+        # Send toggle command
         action = "Enabling" if turn_on else "Disabling"
-        print(f"{action} PoE on switch {switch_mac} port {port_idx}...")
+        poe_mode = "auto" if turn_on else "off"
+        print(f"{action} PoE on port {self.port_number}...")
 
-        # Workaround for pyunifi bug: use raw API calls instead of broken methods
-        # Get the device by MAC address
-        devices = controller.get_aps()  # get_aps() returns all devices including switches
-        device = None
-        for d in devices:
-            if d.get("mac", "").lower() == switch_mac:
-                device = d
-                break
-
-        if not device:
-            print(f"ERROR: Switch with MAC {switch_mac} not found")
+        success, output = self._run_ssh_command(f"swctrl poe set {poe_mode} id {self.port_number}")
+        if not success:
+            print(f"ERROR: Failed to send toggle command: {output}", file=sys.stderr)
             return False
 
-        device_id = device["_id"]
-        print(f"Found device ID: {device_id}")
+        # Wait and verify state change
+        return self._verify_state_change(expected_state)
 
-        # Get current port overrides
-        current_overrides = device.get("port_overrides", [])
+    def _run_ssh_command(self, command: str, retry: bool = True) -> tuple[bool, str]:
+        """
+        Execute SSH command on the UniFi switch.
 
-        # Find if this port already has an override
-        # NOTE: UniFi API uses 1-based port indexing, NOT 0-based!
-        override_found = False
-        new_overrides = []
+        Args:
+            command: The swctrl command to run
+            retry: If True and command fails, wait 2s and retry once
 
-        for override in current_overrides:
-            if override.get("port_idx") == port_idx:
-                # Update existing override - keep all existing fields
-                override["poe_mode"] = "auto" if turn_on else "off"
-                override_found = True
-            new_overrides.append(override)
+        Returns:
+            (success: bool, output: str)
+            - success: True if command executed (exit code 0), False otherwise
+            - output: stdout from the command (or stderr on failure)
+        """
+        ssh_cmd = [
+            "ssh",
+            "-i",
+            self.keypath,
+            "-o",
+            "StrictHostKeyChecking=no",
+            "-o",
+            "UserKnownHostsFile=/dev/null",
+            "-o",
+            "ConnectTimeout=5",
+            f"{self.username}@{self.address}",
+            command,
+        ]
 
-        # If no override exists for this port, create one
-        if not override_found:
-            # Need to include required fields - copy structure from existing override if available
-            new_override = {"port_idx": port_idx, "poe_mode": "auto" if turn_on else "off"}  # 1-based, not 0-based!
-            # If there are existing overrides, copy the structure/fields from one as template
-            if current_overrides:
-                template = current_overrides[0]
-                for key in template.keys():
-                    if key not in new_override and key not in ["port_idx", "poe_mode"]:
-                        # Copy other fields that might be required
-                        new_override[key] = template[key]
-            new_overrides.append(new_override)
+        for attempt in range(2 if retry else 1):
+            try:
+                result = subprocess.run(
+                    ssh_cmd,
+                    capture_output=True,
+                    text=True,
+                    timeout=7,
+                    check=False,
+                )
 
-        # Update the device with new port overrides
-        # Construct the API URL and make a PUT request directly
-        # pyunifi's _run_command doesn't support PUT, so we use requests directly
-        api_url = f"https://{controller_ip}:8443/api/s/{site}/rest/device/{device_id}"
-        payload = {"port_overrides": new_overrides}
+                if result.returncode == 0:
+                    return (True, result.stdout)
 
-        # Use the controller's session which already has auth cookies
-        response = controller.session.put(api_url, json=payload, verify=False)  # Skip SSL verification for self-signed certs
+                # First attempt failed, retry if enabled
+                if retry and attempt == 0:
+                    print(f"SSH command failed (attempt {attempt + 1}), retrying in 2s...")
+                    time.sleep(2)
+                    continue
 
-        if response.status_code != 200:
-            print(f"ERROR: API request failed with status {response.status_code}")
-            print(f"Response: {response.text}")
-            return False
+                return (False, result.stderr or result.stdout)
 
-        # Wait for the actual PoE state to change (can take 5-10 seconds)
-        print(f"Waiting for PoE state to actually change on port {port_idx}...")
-        expected_mode = "auto" if turn_on else "off"
-        max_wait_seconds = 30
-        poll_interval = 1
-        elapsed = 0
+            except subprocess.TimeoutExpired:
+                if retry and attempt == 0:
+                    print(f"SSH command timed out (attempt {attempt + 1}), retrying in 2s...")
+                    time.sleep(2)
+                    continue
+                return (False, "SSH command timed out")
 
-        while elapsed < max_wait_seconds:
-            # Re-fetch the device to get current port_table status
-            devices = controller.get_aps()
-            device = None
-            for d in devices:
-                if d.get("mac", "").lower() == switch_mac:
-                    device = d
-                    break
+            except FileNotFoundError:
+                return (False, "SSH binary not found. Is OpenSSH installed?")
 
-            if not device:
-                print(f"ERROR: Could not re-fetch device status")
-                return False
+            except Exception as e:
+                return (False, f"Unexpected error: {e}")
 
-            # Check port_table for actual PoE status
-            # port_table uses 1-based indexing in the array (port 1 = index 0)
-            port_table = device.get("port_table", [])
-            if port_idx - 1 < len(port_table):
-                port_status = port_table[port_idx - 1]
-                actual_poe_mode = port_status.get("poe_mode", "unknown")
+        return (False, "All retry attempts failed")
 
-                # Check if the actual mode matches what we requested
-                if actual_poe_mode == expected_mode:
-                    status = "enabled" if turn_on else "disabled"
-                    print(f"✓ PoE {status} on port {port_idx} (verified after {elapsed}s)")
-                    return True
+    def _verify_state_change(self, expected_state: str, max_wait_seconds: int = 15) -> bool:
+        """
+        Poll port status until PoE power matches expected state.
 
-                # For debugging: show what we're waiting for
-                if elapsed == 0:
-                    print(f"Current PoE mode: {actual_poe_mode}, waiting for: {expected_mode}")
+        Args:
+            expected_state: Either "On" or "Off"
+            max_wait_seconds: Maximum time to wait (default 15)
+
+        Returns:
+            True if state matches expected_state within timeout, False otherwise
+        """
+        # Initial wait for hardware to process command
+        print(f"Waiting for PoE state to change...")
+        time.sleep(2)
+
+        poll_interval = 2
+        elapsed = 2
+        first_check = True
+
+        while elapsed <= max_wait_seconds:
+            success, output = self._run_ssh_command(f"swctrl poe show id {self.port_number}", retry=False)
+
+            if not success:
+                print(f"Warning: Could not query port status: {output}")
+                time.sleep(poll_interval)
+                elapsed += poll_interval
+                continue
+
+            current_state = self._parse_poe_status(output)
+
+            if first_check:
+                print(f"Current PoE state: {current_state}, waiting for: {expected_state}")
+                first_check = False
+
+            if current_state == expected_state:
+                status = "enabled" if expected_state == "On" else "disabled"
+                print(f"✓ PoE {status} on port {self.port_number} (verified after {elapsed}s)")
+                return True
 
             time.sleep(poll_interval)
             elapsed += poll_interval
 
-        # Timeout - state didn't change in time
-        print(f"WARNING: PoE state change timed out after {max_wait_seconds}s")
-        print(f"Configuration was updated, but actual port state may not have changed yet")
-        return True  # Return success since the API call worked, even if state didn't change yet
-
-    except Exception as e:
-        print(f"ERROR: Failed to control UniFi switch: {e}", file=sys.stderr)
+        print(
+            f"ERROR: PoE state did not change to '{expected_state}' after {max_wait_seconds}s",
+            file=sys.stderr,
+        )
         return False
+
+    def _parse_poe_status(self, output: str) -> Optional[str]:
+        """
+        Parse 'swctrl poe show id <port>' output to extract PoE power state.
+
+        Expected output format:
+        Port  OpMode      HpMode    PwrLimit   Class   PoEPwr  PwrGood  Power(W)  ...
+        ----  ------  ------------  --------  -------  ------  -------  --------  ...
+          16    Auto       Unknown        -1  Class 4      On     Good      5.35  ...
+
+        Args:
+            output: Raw output from swctrl poe show command
+
+        Returns:
+            "On" or "Off" if parsed successfully, None if parsing failed
+        """
+        try:
+            lines = output.strip().split("\n")
+            if len(lines) < 3:
+                return None
+
+            # Find header line and PoEPwr column index
+            header_line = None
+            for i, line in enumerate(lines):
+                if "PoEPwr" in line:
+                    header_line = line
+                    break
+
+            if not header_line:
+                return None
+
+            # Split header to find column index
+            headers = header_line.split()
+            try:
+                poe_pwr_index = headers.index("PoEPwr")
+            except ValueError:
+                return None
+
+            # Find data line (starts with whitespace + digits)
+            data_line = None
+            for line in lines:
+                stripped = line.strip()
+                if stripped and stripped[0].isdigit():
+                    data_line = line
+                    break
+
+            if not data_line:
+                return None
+
+            # Extract value at PoEPwr column
+            data_line = data_line.replace("Class ", "Class")
+            values = data_line.split()
+            if len(values) <= poe_pwr_index:
+                return None
+
+            poe_value = values[poe_pwr_index]
+            if poe_value in ("On", "Off"):
+                return poe_value
+
+            return None
+
+        except Exception as e:
+            print(f"Warning: Failed to parse PoE status: {e}", file=sys.stderr)
+            return None
 
 
 def load_config(config_path: str = "/etc/adsb-boot-test/config.json") -> dict:
@@ -209,39 +283,52 @@ def main():
     # Load config
     config = load_config()
 
-    # Get UniFi settings from config
+    # Get UniFi SSH settings from config
     required_fields = [
-        "unifi_controller",
-        "unifi_username",
-        "unifi_password",
-        "unifi_site",
-        "unifi_switch_mac",
-        "unifi_port_idx",
+        "unifi_ssh_address",
+        "unifi_ssh_username",
+        "unifi_ssh_keypath",
+        "unifi_port_number",
     ]
 
     missing = [field for field in required_fields if field not in config]
     if missing:
         print(f"ERROR: Missing required config fields: {', '.join(missing)}", file=sys.stderr)
-        print("\nRequired UniFi configuration:", file=sys.stderr)
-        print('  "unifi_controller": "192.168.1.1"', file=sys.stderr)
-        print('  "unifi_username": "admin"', file=sys.stderr)
-        print('  "unifi_password": "password"', file=sys.stderr)
-        print('  "unifi_site": "default"', file=sys.stderr)
-        print('  "unifi_switch_mac": "aa:bb:cc:dd:ee:ff"', file=sys.stderr)
-        print('  "unifi_port_idx": 5', file=sys.stderr)
+        print("\nRequired UniFi SSH configuration:", file=sys.stderr)
+        print('  "unifi_ssh_address": "192.168.1.10"', file=sys.stderr)
+        print('  "unifi_ssh_username": "admin"', file=sys.stderr)
+        print('  "unifi_ssh_keypath": "/etc/adsb-boot-test/unifi_key"', file=sys.stderr)
+        print('  "unifi_port_number": 16', file=sys.stderr)
         sys.exit(1)
 
-    # Control the port
-    success = control_unifi_port(
-        controller_ip=config["unifi_controller"],
-        username=config["unifi_username"],
-        password=config["unifi_password"],
-        site=config["unifi_site"],
-        switch_mac=config["unifi_switch_mac"],
-        port_idx=config["unifi_port_idx"],
-        turn_on=turn_on,
+    # Validate keypath exists
+    keypath = config["unifi_ssh_keypath"]
+    if not os.path.isfile(keypath):
+        print(f"ERROR: SSH key not found: {keypath}", file=sys.stderr)
+        sys.exit(1)
+
+    # Validate port number is integer >= 1
+    try:
+        port_number = int(config["unifi_port_number"])
+        if port_number < 1:
+            print(f"ERROR: Port number must be >= 1, got: {port_number}", file=sys.stderr)
+            sys.exit(1)
+    except (ValueError, TypeError):
+        print(
+            f"ERROR: Port number must be an integer, got: {config['unifi_port_number']}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    # Create controller and toggle port
+    controller = UniFiSSHController(
+        address=config["unifi_ssh_address"],
+        username=config["unifi_ssh_username"],
+        keypath=keypath,
+        port_number=port_number,
     )
 
+    success = controller.toggle_port(turn_on)
     sys.exit(0 if success else 1)
 
 
