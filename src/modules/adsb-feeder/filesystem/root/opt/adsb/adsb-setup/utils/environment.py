@@ -82,6 +82,11 @@ class Env:
 
                 return
 
+            # When pull=True, we're only reading from file, not writing
+            # If value wasn't in file, just keep current value
+            if pull:
+                return
+
             if value == value_in_file:
                 return  # do not write to file if value is the same
             if value == None or value == "None":

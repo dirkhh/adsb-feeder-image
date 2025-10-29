@@ -35,7 +35,9 @@ class Data:
         Reset singleton state for testing. DO NOT USE IN PRODUCTION.
 
         This method clears the singleton instance and any cached state,
-        allowing tests to start with a fresh Data instance.
+        and forces all Env objects to re-read from config.json.
+        This allows tests to start with a fresh Data instance using
+        updated config files.
 
         Raises:
             RuntimeError: If called outside of test environment
@@ -49,6 +51,13 @@ class Data:
             if hasattr(cls.instance, "_env_by_tags_dict"):
                 cls.instance._env_by_tags_dict.clear()
             delattr(cls, "instance")
+
+        # Force all Env objects to re-read from config file
+        # This allows tests to provide new config.json files
+        if hasattr(cls, "_env"):
+            for env_obj in cls._env:
+                if hasattr(env_obj, "_reconcile"):
+                    env_obj._reconcile(value=None, pull=True)
 
     data_path = ADSB_BASE_DIR
     config_path = ADSB_CONFIG_DIR
