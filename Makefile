@@ -56,8 +56,8 @@ run-tests:
 		echo "Or create venv: make create-venv"; \
 		exit 1; \
 	fi; \
-	echo "=== Running pytest on tests/ ==="; \
-	$$PYTEST tests/ -v || FAILURES="$$FAILURES pytest,"; \
+	echo "=== Running pytest on tests/unit/ ==="; \
+	$$PYTEST tests/unit/ -v || FAILURES="$$FAILURES pytest,"; \
 	echo "=== Running test_serial_console_reader.py ==="; \
 	(cd src/tools/automated-boot-testing && $$PYTHON test_serial_console_reader.py) || FAILURES="$$FAILURES test_serial_console_reader,"; \
 	echo "=== Running test_metrics.py ==="; \
