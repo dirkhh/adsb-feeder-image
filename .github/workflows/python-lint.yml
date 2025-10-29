@@ -23,26 +23,25 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
       with:
-        python-version: '3.11'
-        cache: 'pip'
+        enable-cache: true
+        cache-dependency-glob: "pyproject.toml"
+
+    - name: Set up Python
+      run: uv python install 3.11
 
     - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install mypy flake8 black pylint ruff setuptools-scm
-        # Install project dependencies for type checking from pyproject.toml
-        if [ -f pyproject.toml ]; then pip install -e .; fi
+      run: uv sync --all-groups
 
     - name: Run flake8
       id: flake8
       continue-on-error: true
       run: |
         echo "Running flake8..."
-        flake8 src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup --extend-ignore=E501,E203,F541,E721,E711 --show-source --statistics --count
-        flake8 src/tools --extend-ignore=E501,E203,F541,E721,E711 --show-source --statistics --count --exclude=venv,__pycache__,.git
+        uv run flake8 src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup --extend-ignore=E501,E203,F541,E721,E711 --show-source --statistics --count
+        uv run flake8 src/tools --extend-ignore=E501,E203,F541,E721,E711 --show-source --statistics --count --exclude=venv,__pycache__,.git
         echo "flake8 completed"
 
     - name: Run mypy
@@ -51,8 +50,8 @@ jobs:
       continue-on-error: true
       run: |
         echo "Running mypy..."
-        mypy src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup --config-file=pyproject.toml --pretty
-        mypy src/tools --config-file=pyproject.toml --pretty --exclude venv --exclude __pycache__
+        uv run mypy src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup --config-file=pyproject.toml --pretty
+        uv run mypy src/tools --config-file=pyproject.toml --pretty --exclude venv --exclude __pycache__
         echo "mypy completed"
 
     - name: Check code formatting with black
@@ -61,8 +60,8 @@ jobs:
       continue-on-error: true
       run: |
         echo "Running black..."
-        black --check --line-length=130 src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup
-        black --check --line-length=130 src/tools --exclude venv --exclude __pycache__
+        uv run black --check --line-length=130 src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup
+        uv run black --check --line-length=130 src/tools --exclude venv --exclude __pycache__
         echo "black completed"
 
     - name: Run ruff
@@ -71,14 +70,18 @@ jobs:
       continue-on-error: true
       run: |
         echo "Running ruff..."
-        ruff check src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup --config=pyproject.toml
-        ruff check src/tools --config=pyproject.toml --exclude venv --exclude __pycache__
+        uv run ruff check src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup --config=pyproject.toml
+        uv run ruff check src/tools --config=pyproject.toml --exclude venv --exclude __pycache__
         echo "ruff completed"
 
     - name: Report status
       if: always()
       run: |
         echo "Linting complete. Checking results..."
+        echo "flake8 outcome: ${{ steps.flake8.outcome }}"
+        echo "mypy outcome: ${{ steps.mypy.outcome }}"
+        echo "black outcome: ${{ steps.black.outcome }}"
+        echo "ruff outcome: ${{ steps.ruff.outcome }}"
         if [ "${{ steps.flake8.outcome }}" != "success" ] || [ "${{ steps.mypy.outcome }}" != "success" ] || [ "${{ steps.black.outcome }}" != "success" ] || [ "${{ steps.ruff.outcome }}" != "success" ]; then
           echo "❌ One or more linters found errors. Check the logs above."
           exit 1
