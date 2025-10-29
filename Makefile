@@ -40,6 +40,37 @@ run-checks:
 		exit 1; \
 	fi
 
+run-tests:
+# run the Python unit tests locally
+	@echo "Running Python tests..."
+	@if command -v uv >/dev/null 2>&1; then \
+		echo "Using uv run"; \
+		PYTEST="uv run pytest"; PYTHON="uv run python"; \
+	elif [ -d .venv/bin ]; then \
+		echo "Using .venv virtual environment"; \
+		export PATH=.venv/bin:$$PATH; \
+		PYTEST=pytest; PYTHON=python3; \
+	else \
+		echo "ERROR: Neither 'uv' command nor .venv/bin found!"; \
+		echo "Install uv: curl -LsSf https://astral.sh/uv/install.sh | sh"; \
+		echo "Or create venv: make create-venv"; \
+		exit 1; \
+	fi; \
+	echo "=== Running pytest on tests/ ==="; \
+	$$PYTEST tests/ -v || FAILURES="$$FAILURES pytest,"; \
+	echo "=== Running test_serial_console_reader.py ==="; \
+	(cd src/tools/automated-boot-testing && $$PYTHON test_serial_console_reader.py) || FAILURES="$$FAILURES test_serial_console_reader,"; \
+	echo "=== Running test_metrics.py ==="; \
+	(cd src/tools/automated-boot-testing && $$PYTHON test_metrics.py) || FAILURES="$$FAILURES test_metrics,"; \
+	echo "=========================================="; \
+	if [ -z "$$FAILURES" ]; then \
+		echo "All tests passed"; \
+	else \
+		SUMMARY=$${FAILURES%,}; \
+		echo "Tests failed: $$SUMMARY"; \
+		exit 1; \
+	fi
+
 create-venv:
 # create virtual environment necessary to run linter checks
 	python3 -m venv .venv
