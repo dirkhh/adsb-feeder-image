@@ -9,7 +9,7 @@ from utils.other_aggregators import (
     Aggregator,
     ADSBHub,
     FlightAware,
-    FlightRadar24,
+    Flightradar24,
     OpenSky,
     PlaneFinder,
     PlaneWatch,
@@ -232,8 +232,8 @@ class TestFlightAware:
         mock_deactivate.assert_called_once()
 
 
-class TestFlightRadar24:
-    """Test FlightRadar24 aggregator"""
+class TestFlightradar24:
+    """Test Flightradar24 aggregator"""
 
     def setup_method(self):
         """Set up test fixtures"""
@@ -247,15 +247,15 @@ class TestFlightRadar24:
         self.mock_data.env_by_tags.return_value.valuestr = "test_string"
 
     def test_flightradar24_initialization(self):
-        """Test FlightRadar24 initialization"""
-        fr24 = FlightRadar24(self.mock_system)
+        """Test Flightradar24 initialization"""
+        fr24 = Flightradar24(self.mock_system)
 
-        assert fr24.name == "FlightRadar24"
+        assert fr24.name == "Flightradar24"
         assert fr24.tags == ["flightradar"]
 
     def test_flightradar24_activate(self):
-        """Test FlightRadar24 activation"""
-        fr24 = FlightRadar24(self.mock_system)
+        """Test Flightradar24 activation"""
+        fr24 = Flightradar24(self.mock_system)
 
         with patch.object(fr24, '_activate') as mock_activate:
             fr24._activate("test_user_input", 0)
@@ -263,8 +263,8 @@ class TestFlightRadar24:
 
     @patch('utils.other_aggregators.Aggregator._deactivate')
     def test_flightradar24_deactivate(self, mock_deactivate):
-        """Test FlightRadar24 deactivation"""
-        fr24 = FlightRadar24(self.mock_system)
+        """Test Flightradar24 deactivation"""
+        fr24 = Flightradar24(self.mock_system)
 
         fr24._deactivate()
 
@@ -563,7 +563,7 @@ class TestAggregatorIntegration:
         aggregators = [
             ADSBHub(self.mock_system),
             FlightAware(self.mock_system),
-            FlightRadar24(self.mock_system),
+            Flightradar24(self.mock_system),
             OpenSky(self.mock_system),
             PlaneFinder(self.mock_system),
             PlaneWatch(self.mock_system),
@@ -585,7 +585,7 @@ class TestAggregatorIntegration:
         aggregators = [
             ADSBHub(self.mock_system),
             FlightAware(self.mock_system),
-            FlightRadar24(self.mock_system),
+            Flightradar24(self.mock_system),
             OpenSky(self.mock_system),
             PlaneFinder(self.mock_system),
             PlaneWatch(self.mock_system),
@@ -661,7 +661,7 @@ class TestAggregatorIntegration:
         aggregators = [
             ADSBHub(self.mock_system),
             FlightAware(self.mock_system),
-            FlightRadar24(self.mock_system),
+            Flightradar24(self.mock_system),
             OpenSky(self.mock_system),
             PlaneFinder(self.mock_system),
             PlaneWatch(self.mock_system),
