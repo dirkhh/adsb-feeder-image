@@ -1,7 +1,7 @@
 # ADS-B Setup Test Suite
 
-**Last Updated:** 2025-10-23
-**Test Suite Status:** 377 passing tests, 39% coverage
+**Last Updated:** 2025-10-28
+**Test Suite Status:** 371 passing tests, 33% coverage
 
 This directory contains a comprehensive test suite for the adsb-setup application. The test suite is designed to ensure the reliability and functionality of the ADS-B feeder setup system.
 
@@ -16,7 +16,6 @@ This directory contains a comprehensive test suite for the adsb-setup applicatio
 7. [Test Fixtures](#test-fixtures)
 8. [Coverage Analysis](#coverage-analysis)
 9. [Test Markers](#test-markers)
-10. [Continuous Integration](#continuous-integration)
 11. [Known Issues](#known-issues)
 12. [Contributing](#contributing)
 13. [Troubleshooting](#troubleshooting)
@@ -29,7 +28,10 @@ This directory contains a comprehensive test suite for the adsb-setup applicatio
 # Install dependencies
 uv pip install pytest pytest-cov pytest-mock
 
-# Run all tests
+# Run all tests (using Makefile - recommended)
+make run-tests
+
+# Or run tests directly with pytest
 uv run pytest tests/
 
 # Run only unit tests
@@ -55,8 +57,7 @@ tests/
 ├── conftest.py                        # Shared fixtures and configuration
 ├── requirements.txt                   # Test dependencies
 ├── run_tests.py                       # Test runner script
-├── integration/                       # Integration tests
-│   └── test_system_integration.py     # End-to-end integration tests
+├── test_fixture_setup.py              # Tests for the adsb_test_env fixture
 └── unit/                              # Unit tests
     ├── test_aggregators.py            # Aggregator module tests
     ├── test_app.py                    # Flask application tests
@@ -67,9 +68,12 @@ tests/
     ├── test_netconfig.py              # Network configuration tests
     ├── test_paths.py                  # Path configuration tests
     ├── test_sdr.py                    # SDR module tests
-    ├── test_system.py                 # System operations tests (NEW!)
+    ├── test_system.py                 # System operations tests
     ├── test_util.py                   # Utility functions tests
     └── test_wifi.py                   # WiFi module tests
+
+Note: The integration/ directory exists but currently has no tests. Integration tests
+were removed in favor of comprehensive unit tests with proper mocking.
 ```
 
 ### Test Organization by Module
@@ -118,34 +122,33 @@ uv run pytest tests/ -x
 
 ```bash
 # Run all tests
-python tests/run_tests.py
+python3 tests/run_tests.py
 
 # Run unit tests only
-python tests/run_tests.py --unit
-
-# Run integration tests only
-python tests/run_tests.py --integration
+python3 tests/run_tests.py --unit
 
 # Run with coverage
-python tests/run_tests.py --coverage
+python3 tests/run_tests.py --coverage
 
 # Run with verbose output
-python tests/run_tests.py --verbose
+python3 tests/run_tests.py --verbose
 
 # Run tests in parallel
-python tests/run_tests.py --parallel 4
+python3 tests/run_tests.py --parallel 4
 
 # Run specific test markers
-python tests/run_tests.py --markers "not slow"
+python3 tests/run_tests.py --markers "not slow"
 
 # Run linting checks
-python tests/run_tests.py --lint
+python3 tests/run_tests.py --lint
 
 # Run security checks
-python tests/run_tests.py --security
+python3 tests/run_tests.py --security
 
 # Run all checks
-python tests/run_tests.py --all
+python3 tests/run_tests.py --all
+
+# Note: --integration option exists but currently runs no tests
 ```
 
 ### Coverage Commands
@@ -169,7 +172,7 @@ uv run pytest --cov=src --cov-report=term-missing tests/unit/test_system.py
 uv run pytest tests/ -k "test_lock"
 
 # Run tests with specific markers (if configured)
-uv run pytest tests/ -m "integration"
+uv run pytest tests/ -m "unit"
 
 # Run tests in parallel (if pytest-xdist installed)
 uv run pytest tests/ -n auto
@@ -208,21 +211,19 @@ class TestFunctionOrClass:
 
 ### Test Organization
 
-- **Unit Tests** (`tests/unit/`): Single module/function tests
-  - test_app.py: Flask application routes, handlers, and API endpoints
-  - test_util.py: Utility functions like string cleanup, boolean conversion
-  - test_config.py: Configuration file management and environment variables
-  - test_data.py: Data singleton class and its methods
-  - test_environment.py: Env class and environment variable management
-  - test_flask.py: Flask utilities including route management and decorators
-  - test_aggregators.py: Aggregator classes (FlightAware, FlightRadar24, etc.)
-  - test_wifi.py: WiFi management and network operations
-  - test_netconfig.py: Network configuration classes
-  - test_sdr.py: SDR device detection and configuration
-  - test_system.py: System operations (shutdown, Docker, network, locks)
+All tests are currently unit tests located in `tests/unit/`:
 
-- **Integration Tests** (`tests/integration/`): Multi-module interaction tests
-  - test_system_integration.py: Complete system integration including configuration persistence, Flask app lifecycle, and component interaction
+- **test_app.py**: Flask application routes, handlers, and API endpoints
+- **test_util.py**: Utility functions like string cleanup, boolean conversion
+- **test_config.py**: Configuration file management and environment variables
+- **test_data.py**: Data singleton class and its methods
+- **test_environment.py**: Env class and environment variable management
+- **test_flask.py**: Flask utilities including route management and decorators
+- **test_aggregators.py**: Aggregator classes (FlightAware, Flightradar24, etc.)
+- **test_wifi.py**: WiFi management and network operations
+- **test_netconfig.py**: Network configuration classes
+- **test_sdr.py**: SDR device detection and configuration
+- **test_system.py**: System operations (shutdown, Docker, network, locks)
 
 ---
 
@@ -667,7 +668,6 @@ def test_my_function(self, adsb_test_env):
 The test suite uses pytest markers to categorize tests:
 
 - `unit`: Unit tests
-- `integration`: Integration tests
 - `slow`: Slow running tests
 - `network`: Tests requiring network access
 - `system`: Tests requiring system access
@@ -684,67 +684,9 @@ The test suite is integrated with GitHub Actions and runs automatically on:
 - Pull requests to main or beta branches
 
 The CI pipeline includes:
-- Unit and integration tests across Python 3.9-3.12
+- Unit tests across Python 3.9-3.12
 - Code coverage reporting
-- Linting with flake8, black, and isort
-- Security scanning with bandit and safety
-- Performance testing
-
----
-
-## Known Issues
-
-### 1. Integration Test Failures (10 tests)
-
-**Status:** Known architectural issues, not test bugs
-
-**Affected tests:**
-- `test_system_integration.py` - All 10 tests
-
-**Root causes:**
-1. **Data singleton** prevents test isolation
-2. **Path caching** at module import prevents test modifications
-3. **Session-scoped fixtures** cause cross-test interference
-
-**Workaround:**
-- These tests are deprioritized (Priority 5 tasks)
-- Require larger architectural refactoring
-- Focus on unit tests first
-
-**To fix (future work):**
-```python
-# Add reset method to Data class
-def reset_for_testing(self):
-    """Reset singleton state for testing"""
-    self._envs = {}
-    self._config = {}
-    # ... reset other state
-```
-
-### 2. Test Ordering Sensitivity
-
-**Issue:** Some tests fail when run in full suite but pass individually
-
-**Affected:**
-- `test_util.py::TestCreateFakeInfo` (2 tests)
-- `test_config.py::TestReadValuesFromEnvFile::test_read_env_file_missing` (1 test)
-
-**Cause:** Cross-file test interference from module state
-
-**Workaround:**
-- Tests pass when run individually: `uv run pytest tests/unit/test_util.py -v`
-- Tests pass when running only unit tests
-- Failures only occur in full test suite run
-
-**Status:** Low priority - tests are correct, just sensitive to ordering
-
-### 3. Permission Errors in /opt/adsb
-
-**Issue:** Tests fail with "Permission denied: '/opt/adsb'" when module isn't using test environment
-
-**Cause:** Module imported before `ADSB_BASE_DIR` was set, or not reloaded after change
-
-**Fix:** Ensure all tests use `adsb_test_env` fixture and reload modules properly
+- Linting with flake8, black, isort, and ruff
 
 ---
 
@@ -752,9 +694,8 @@ def reset_for_testing(self):
 
 ### Adding New Tests
 
-1. **Choose the right location:**
-   - `tests/unit/` - Single module/function tests
-   - `tests/integration/` - Multi-module interaction tests
+1. **All new tests go in `tests/unit/`**
+   - Single module/function tests with comprehensive mocking
 
 2. **Use the template:**
    ```bash

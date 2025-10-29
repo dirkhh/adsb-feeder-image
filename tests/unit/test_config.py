@@ -159,11 +159,9 @@ class TestReadValuesFromEnvFile:
         expected = {"TEST_VAR": "test_value", "ANOTHER_VAR": "another_value"}
         assert result == expected
 
-    @patch('os.path.exists')
-    def test_read_env_file_missing(self, mock_exists):
+    @patch('builtins.open', side_effect=FileNotFoundError())
+    def test_read_env_file_missing(self, mock_open_func):
         """Test reading missing .env file"""
-        mock_exists.return_value = False
-
         result = read_values_from_env_file()
 
         assert result == {}
