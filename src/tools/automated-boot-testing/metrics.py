@@ -158,8 +158,7 @@ class TestMetrics:
         # This makes duration_seconds reflect actual execution time
         if status == "running":
             conn.execute(
-                "UPDATE test_runs SET status = ?, started_at = ? WHERE id = ?",
-                (status, datetime.utcnow().isoformat(), test_id)
+                "UPDATE test_runs SET status = ?, started_at = ? WHERE id = ?", (status, datetime.utcnow().isoformat(), test_id)
             )
         else:
             conn.execute("UPDATE test_runs SET status = ? WHERE id = ?", (status, test_id))

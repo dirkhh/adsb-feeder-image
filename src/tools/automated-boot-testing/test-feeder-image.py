@@ -537,16 +537,19 @@ def test_basic_setup(rpi_ip: str, timeout_seconds: int = 90) -> bool:
         print(f"✗ Error running test: {e}")
         return False
 
+
 def rebuild_image(url: str, cache_dir: Path, ssh_public_key: str) -> None:
     """Rebuild the image from the compressed original."""
     expected_image_name = download_and_decompress_image(url, True, cache_dir)
     cached_image_path = cache_dir / expected_image_name
     setup_iscsi_image(cached_image_path, ssh_public_key)
 
+
 def sync_boot_kernel(cached_image_path: Path, ssh_public_key: str) -> None:
     """Sync the boot kernel from the root filesystem."""
     # copy the boot kernel from the root filesystem to the cached image path
     setup_iscsi_image(cached_image_path, ssh_public_key)
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -648,14 +651,18 @@ Examples:
             if "iSCSI driver not found" in status_string:
                 print("iSCSI driver not found, rebuilding image")
                 # power cycle, recreate the image from the compressed original, and try again
-                power_cycle_and_cleanup(args.power_toggle_script, partial(rebuild_image, args.image_url, cache_dir, ssh_public_key))
+                power_cycle_and_cleanup(
+                    args.power_toggle_script, partial(rebuild_image, args.image_url, cache_dir, ssh_public_key)
+                )
                 continue
 
             if "dietpi" in expected_image_name:
                 if "ping down" in status_string:
                     print("with DietPi we could be hung because of iSCSI root filesystem and shutdown failure")
                     # power cycle and try again
-                    power_cycle_and_cleanup(args.power_toggle_script, partial(sync_boot_kernel, cached_image_path, ssh_public_key))
+                    power_cycle_and_cleanup(
+                        args.power_toggle_script, partial(sync_boot_kernel, cached_image_path, ssh_public_key)
+                    )
                 else:
                     print(
                         f"with DietPi this can take 20+ minutes because of iSCSI root filesystem and shutdown failure -- keep waiting"
