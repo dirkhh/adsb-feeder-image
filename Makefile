@@ -58,6 +58,8 @@ run-tests:
 	fi; \
 	echo "=== Running pytest on tests/unit/ ==="; \
 	$$PYTEST tests/unit/ -v || FAILURES="$$FAILURES pytest,"; \
+	echo "=== Running selenium framework tests ==="; \
+	$$PYTEST src/tools/automated-boot-testing/tests/ -v || FAILURES="$$FAILURES selenium-tests,"; \
 	echo "=== Running test_serial_console_reader.py ==="; \
 	(cd src/tools/automated-boot-testing && $$PYTHON test_serial_console_reader.py) || FAILURES="$$FAILURES test_serial_console_reader,"; \
 	echo "=== Running test_metrics.py ==="; \
@@ -70,6 +72,9 @@ run-tests:
 		echo "Tests failed: $$SUMMARY"; \
 		exit 1; \
 	fi
+
+run-lab-tests:
+	python3 src/tools/automated-boot-testing/run_tests_with_artifacts.py
 
 create-venv:
 # create virtual environment necessary to run linter checks

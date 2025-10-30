@@ -63,7 +63,8 @@ class TestMetrics:
                 github_commit_sha TEXT,
                 github_workflow_run_id INTEGER,
                 github_reported_at TEXT,
-                github_report_status TEXT
+                github_report_status TEXT,
+                github_report_attempts INTEGER DEFAULT 0
             )
         """
         )
@@ -331,6 +332,7 @@ class TestMetrics:
         - Have GitHub context (event_type set)
         - Haven't been reported yet (reported_at is NULL)
         - Or failed to report (report_status = 'failed')
+        - And haven't exceeded max retry attempts (< 2)
         """
         conn = self._get_connection()
         conn.row_factory = sqlite3.Row
@@ -340,6 +342,7 @@ class TestMetrics:
             WHERE github_event_type IS NOT NULL
             AND (github_reported_at IS NULL
                  OR github_report_status = 'failed')
+            AND COALESCE(github_report_attempts, 0) < 2
             ORDER BY started_at ASC
         """
         )
@@ -405,6 +408,25 @@ class TestMetrics:
             WHERE id = ?
         """,
             (datetime.utcnow().isoformat(), status, test_id),
+        )
+        conn.commit()
+        self._close_connection(conn)
+
+    def increment_report_attempt(self, test_id: int):
+        """
+        Increment the GitHub report attempt counter for a test.
+
+        Args:
+            test_id: Test run ID
+        """
+        conn = self._get_connection()
+        conn.execute(
+            """
+            UPDATE test_runs
+            SET github_report_attempts = COALESCE(github_report_attempts, 0) + 1
+            WHERE id = ?
+        """,
+            (test_id,),
         )
         conn.commit()
         self._close_connection(conn)
