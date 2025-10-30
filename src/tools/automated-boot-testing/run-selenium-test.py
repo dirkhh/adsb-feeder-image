@@ -5,10 +5,11 @@ This script is invoked by test-feeder-image.py via sudo -u testuser.
 """
 
 import argparse
+import getpass
+import logging
 import re
 import sys
 import time
-from pathlib import Path
 
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
@@ -17,6 +18,9 @@ from selenium.webdriver.firefox.service import Service as FirefoxService
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.firefox import GeckoDriverManager
+
+# Configure basic logging. Can be overridden in main by --log-level
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
 
 
 def wait_for_target_page(driver, target_title: str, timeout_seconds: int = 600, initial_wait_seconds: int = 60) -> bool:
@@ -28,39 +32,35 @@ def wait_for_target_page(driver, target_title: str, timeout_seconds: int = 600, 
     """
     try:
         # First, wait for either /waiting URL or the target page title
-        print(f"  Waiting for redirect to waiting page or {target_title}...")
-        WebDriverWait(driver, initial_wait_seconds).until(
-            lambda d: "/waiting" in d.current_url or target_title in d.title
-        )
+        logging.info(f"Waiting for redirect to waiting page or {target_title}...")
+        WebDriverWait(driver, initial_wait_seconds).until(lambda d: "/waiting" in d.current_url or target_title in d.title)
         current_url = driver.current_url
         current_title = driver.title
 
         if target_title in current_title:
-            print(f"✓ Arrived at target page: {current_title}")
+            logging.info(f"Arrived at target page: {current_title}")
             return True
         elif "/waiting" in current_url:
             # yes, this seems superflous, but it's intended to show us where we are spending time waiting for the target page
-            print(f"✓ Redirected to waiting page")
-            WebDriverWait(driver, timeout_seconds).until(
-                lambda d: target_title in d.title
-            )
-            print(f"✓ Processing completed, reached target page: {driver.title}")
+            logging.info("Redirected to waiting page")
+            WebDriverWait(driver, timeout_seconds).until(lambda d: target_title in d.title)
+            logging.info(f"Processing completed, reached target page: {driver.title}")
             return True
         else:
-            print(f"⚠ Unexpected state: URL={current_url}, Title={current_title}")
+            logging.warning(f"Unexpected state: URL={current_url}, Title={current_title}")
             return False
 
     except TimeoutException:
         current_url = driver.current_url
         current_title = driver.title
-        print(f"⚠ Timeout waiting for target page '{target_title}'")
-        print(f"Current URL: {current_url}")
-        print(f"Current title: {current_title}")
+        logging.warning(f"Timeout waiting for target page '{target_title}'")
+        logging.debug(f"Current URL: {current_url}")
+        logging.debug(f"Current title: {current_title}")
 
         return False
 
 
-def verify_homepage_elements(driver, wait, site_name: str) -> int:
+def verify_homepage_elements(driver, wait, site_name: str) -> bool:
     """
     Verify the required elements on the feeder homepage.
 
@@ -73,18 +73,18 @@ def verify_homepage_elements(driver, wait, site_name: str) -> int:
         0 on success, 1 on failure
     """
     try:
-        print("Verifying homepage elements...")
+        logging.info("Verifying homepage elements...")
 
         # Check page title
         expected_title = f"ADS-B Feeder Homepage for {site_name}"
         current_title = driver.title
         if expected_title not in current_title:
-            print(f"✗ Wrong homepage title. Expected '{expected_title}', got '{current_title}'")
-            return 1
-        print(f"✓ Homepage title is correct: {current_title}")
+            logging.error(f"Wrong homepage title. Expected '{expected_title}', got '{current_title}'")
+            return False
+        logging.info(f"Homepage title is correct: {current_title}")
 
         # 1. Check for "Position / Message rate:" with expected format
-        print("Checking Position / Message rate element...")
+        logging.info("Checking Position / Message rate element...")
         try:
             # The position/message rate is in spans with IDs mf_status_0 and mf_stats_0
             # Find the div that contains "Position / Message rate:"
@@ -104,31 +104,29 @@ def verify_homepage_elements(driver, wait, site_name: str) -> int:
             stats_text = stats_span.text.strip()
             full_text = f"{status_text} — {stats_text}"
 
-            print(f"  Found: '{full_text}'")
+            logging.info(f"Found: '{full_text}'")
 
             # Verify format: "nn pos / mm msg per sec — pp planes / qq today"
             # Allow for the text to be in either span, combined with —
             # Pattern should match numbers for pos/msg per sec and planes/today
-            pattern = r'\d+\s+pos\s+/\s+\d+\s+msg\s+per\s+sec\s+—\s+\d+\s+planes\s+/\s+\d+\s+today'
+            pattern = r"\d+\s+pos\s+/\s+\d+\s+msg\s+per\s+sec\s+—\s+\d+\s+planes\s+/\s+\d+\s+today"
             if re.match(pattern, full_text):
-                print(f"✓ Position / Message rate format is correct")
+                logging.info("Position / Message rate format is correct")
             elif full_text:
                 # Allow all zeros or partial patterns - if it has numbers, it's probably valid
                 if any(c.isdigit() for c in full_text):
-                    print(f"✓ Position / Message rate found with data: '{full_text}'")
+                    logging.info(f"Position / Message rate found with data: '{full_text}'")
                 else:
-                    print(f"⚠ Position / Message rate appears empty or not populated yet: '{full_text}'")
+                    logging.warning(f"Position / Message rate appears empty or not populated yet: '{full_text}'")
             else:
-                print(f"⚠ Position / Message rate is empty (may still be loading)")
+                logging.warning("Position / Message rate is empty (may still be loading)")
 
         except Exception as e:
-            print(f"✗ Could not find Position / Message rate element: {e}")
-            import traceback
-            traceback.print_exc()
-            return 1
+            logging.exception(f"Could not find Position / Message rate element: {e}")
+            return False
 
         # 2. Check for "No aggregators configured. Add aggregators: Data Sharing" with link
-        print("Checking aggregators configuration message...")
+        logging.info("Checking aggregators configuration message...")
         try:
             # The text "No aggregators configured" is in a div, and the link is a sibling
             aggregators_div = wait.until(
@@ -136,58 +134,54 @@ def verify_homepage_elements(driver, wait, site_name: str) -> int:
             )
             aggregators_text = aggregators_div.text
             if "No aggregators configured" not in aggregators_text:
-                print(f"✗ Aggregators message not found correctly")
-                return 1
+                logging.error("Aggregators message not found correctly")
+                return False
 
             # Find the Data Sharing link (should be in the same div or a child)
-            data_sharing_link = aggregators_div.find_element(By.XPATH, ".//a[contains(text(), 'Data Sharing') or contains(@href, '/aggregators')]")
+            data_sharing_link = aggregators_div.find_element(
+                By.XPATH, ".//a[contains(text(), 'Data Sharing') or contains(@href, '/aggregators')]"
+            )
             link_href = data_sharing_link.get_attribute("href")
             link_text = data_sharing_link.text.strip()
 
             if "/aggregators" in link_href:
-                print(f"✓ Found 'No aggregators configured' message with Data Sharing link ({link_text}) to {link_href}")
+                logging.info(f"Found 'No aggregators configured' message with Data Sharing link ({link_text}) to {link_href}")
             else:
-                print(f"⚠ Data Sharing link may not point to /aggregators: {link_href}")
-                return 1
+                logging.warning(f"Data Sharing link may not point to /aggregators: {link_href}")
+                return False
 
         except Exception as e:
-            print(f"✗ Could not find aggregators configuration message: {e}")
-            return 1
+            logging.exception(f"Could not find aggregators configuration message: {e}")
+            return False
 
         # 3. Check for "Your version:" with version badge
-        print("Checking version information...")
+        logging.info("Checking version information...")
         try:
             # Find the span containing "Your version:" and get the following sibling with version-badge class
-            version_label = wait.until(
-                EC.presence_of_element_located((By.XPATH, "//span[contains(text(), 'Your version:')]"))
-            )
+            version_label = wait.until(EC.presence_of_element_located((By.XPATH, "//span[contains(text(), 'Your version:')]")))
             # The version badge is a following sibling span
             version_badge = version_label.find_element(By.XPATH, "./following-sibling::span[contains(@class, 'version-badge')]")
             version_text = version_badge.text.strip()
 
             if version_text:
-                print(f"✓ Found version information: '{version_text}'")
+                logging.info(f"Found version information: '{version_text}'")
             else:
-                print(f"✗ Version badge is empty")
-                return 1
+                logging.error("Version badge is empty")
+                return False
 
         except Exception as e:
-            print(f"✗ Could not find version information: {e}")
-            import traceback
-            traceback.print_exc()
-            return 1
+            logging.exception(f"Could not find version information: {e}")
+            return False
 
-        print("✓ All homepage elements verified successfully")
-        return 0
+        logging.info("All homepage elements verified successfully")
+        return True
 
     except Exception as e:
-        print(f"✗ Error verifying homepage elements: {e}")
-        import traceback
-        traceback.print_exc()
-        return 1
+        logging.exception(f"Error verifying homepage elements: {e}")
+        return False
 
 
-def verify_and_configure_sdrs(driver, wait, site_name: str = "automated test site") -> int:
+def verify_and_configure_sdrs(driver, wait, site_name: str = "automated test site") -> bool:
     """
     Verify SDR setup page and configure SDRs as needed.
     After configuration, applies settings and verifies homepage.
@@ -201,36 +195,34 @@ def verify_and_configure_sdrs(driver, wait, site_name: str = "automated test sit
         0 on success, 1 on failure
     """
     try:
-        print("Verifying SDR configuration...")
+        logging.info("Verifying SDR configuration...")
 
         # Wait for the SDR table to be present and populated
-        print("Waiting for SDR table to load...")
-        sdr_table = wait.until(EC.presence_of_element_located((By.ID, "sdr_table")))
+        logging.info("Waiting for SDR table to load...")
+        wait.until(EC.presence_of_element_located((By.ID, "sdr_table")))
 
         # Wait for at least one SDR row to become visible (data loaded from API)
-        print("Waiting for SDR data to load...")
+        logging.info("Waiting for SDR data to load...")
         try:
             WebDriverWait(driver, 30).until(
                 lambda d: len(d.find_elements(By.CSS_SELECTOR, "#sdr_table tbody tr:not(.d-none)")) > 0
             )
-            print("✓ SDR data loaded")
+            logging.info("SDR data loaded")
         except TimeoutException:
-            print("⚠ Timeout waiting for SDR data to load, continuing anyway...")
+            logging.warning("Timeout waiting for SDR data to load, continuing anyway...")
 
         # Count visible SDR rows (rows that don't have 'd-none' class)
-        print("Counting SDRs in table...")
-        visible_sdr_rows = driver.find_elements(
-            By.CSS_SELECTOR, "#sdr_table tbody tr:not(.d-none)"
-        )
+        logging.info("Counting SDRs in table...")
+        visible_sdr_rows = driver.find_elements(By.CSS_SELECTOR, "#sdr_table tbody tr:not(.d-none)")
         num_sdrs = len(visible_sdr_rows)
-        print(f"✓ Found {num_sdrs} SDR(s) in table")
+        logging.info(f"Found {num_sdrs} SDR(s) in table")
 
         if num_sdrs == 0:
-            print("✗ No SDRs found in table")
-            return 1
+            logging.error("No SDRs found in table")
+            return False
 
         # Find the SDR with serial '978' and verify its assignment
-        print("Looking for SDR with serial '978'...")
+        logging.info("Looking for SDR with serial '978'...")
         sdr_978_found = False
         sdr_978_purpose = None
 
@@ -249,26 +241,26 @@ def verify_and_configure_sdrs(driver, wait, site_name: str = "automated test sit
                     sdr_978_found = True
                     purpose_element = driver.find_element(By.ID, f"sdr{i}-purpose")
                     sdr_978_purpose = purpose_element.text.strip()
-                    print(f"✓ Found SDR with serial containing '978': {serial_text}")
-                    print(f"  Current purpose/use: '{sdr_978_purpose}'")
+                    logging.info(f"Found SDR with serial containing '978': {serial_text}")
+                    logging.info(f"Current purpose/use: '{sdr_978_purpose}'")
 
                     # Check if it's assigned to '978'
                     if "978" in sdr_978_purpose:
-                        print("✓ SDR with serial '978' is correctly assigned to use '978'")
+                        logging.info("SDR with serial '978' is correctly assigned to use '978'")
                     else:
-                        print(f"✗ SDR with serial '978' is not assigned to '978', got: '{sdr_978_purpose}'")
-                        return 1
+                        logging.error(f"SDR with serial '978' is not assigned to '978', got: '{sdr_978_purpose}'")
+                        return False
                     break
             except Exception:
                 # Continue checking other rows
                 continue
 
         if not sdr_978_found:
-            print("⚠ Warning: SDR with serial '978' not found (this may be expected if no such SDR exists)")
+            logging.warning("Warning: SDR with serial '978' not found (this may be expected if no such SDR exists)")
 
         # If there's a second SDR, click on it and assign it to 1090
         if num_sdrs >= 2:
-            print(f"Found {num_sdrs} SDRs, checking if we need to assign the second SDR to 1090...")
+            logging.info(f"Found {num_sdrs} SDRs, checking if we need to assign the second SDR to 1090...")
 
             # Collect all visible SDRs with their indices and serials
             visible_sdrs = []
@@ -300,16 +292,16 @@ def verify_and_configure_sdrs(driver, wait, site_name: str = "automated test sit
                     second_sdr_idx, second_sdr_serial = visible_sdrs[1]
 
             if second_sdr_idx is not None:
-                print(f"Found second SDR at index {second_sdr_idx} with serial: {second_sdr_serial}")
+                logging.info(f"Found second SDR at index {second_sdr_idx} with serial: {second_sdr_serial}")
 
                 # Check current purpose
                 purpose_element = driver.find_element(By.ID, f"sdr{second_sdr_idx}-purpose")
                 current_purpose = purpose_element.text.strip()
-                print(f"  Current purpose/use: '{current_purpose}'")
+                logging.info(f"Current purpose/use: '{current_purpose}'")
 
                 # If not already assigned to 1090, click and assign it
                 if "1090" not in current_purpose:
-                    print(f"Clicking on SDR row {second_sdr_idx} to open dialog...")
+                    logging.info(f"Clicking on SDR row {second_sdr_idx} to open dialog...")
                     sdr_row = driver.find_element(By.ID, f"sdr{second_sdr_idx}")
                     driver.execute_script("arguments[0].scrollIntoView(true);", sdr_row)
                     time.sleep(1)
@@ -320,15 +312,15 @@ def verify_and_configure_sdrs(driver, wait, site_name: str = "automated test sit
                     except Exception:
                         driver.execute_script("arguments[0].click();", sdr_row)
 
-                    print("Waiting for dialog to appear...")
+                    logging.info("Waiting for dialog to appear...")
                     # Wait for modal to be visible
-                    modal = wait.until(EC.visibility_of_element_located((By.ID, "sdrsetup_dialog")))
+                    wait.until(EC.visibility_of_element_located((By.ID, "sdrsetup_dialog")))
 
                     # Wait a moment for radio buttons to be ready
                     time.sleep(1)
 
                     # Find and click the 1090 radio button
-                    print("Selecting 1090 in dialog...")
+                    logging.info("Selecting 1090 in dialog...")
                     try:
                         usage_1090 = wait.until(EC.element_to_be_clickable((By.ID, "usage1090")))
                         if not usage_1090.is_selected():
@@ -336,10 +328,10 @@ def verify_and_configure_sdrs(driver, wait, site_name: str = "automated test sit
                                 usage_1090.click()
                             except Exception:
                                 driver.execute_script("arguments[0].click();", usage_1090)
-                        print("✓ Selected 1090 in dialog")
+                        logging.info("Selected 1090 in dialog")
                     except Exception as e:
-                        print(f"✗ Could not find/select usage1090 radio button: {e}")
-                        return 1
+                        logging.exception(f"Could not find/select usage1090 radio button: {e}")
+                        return False
 
                     # Set gain value if the field is visible and empty
                     try:
@@ -347,28 +339,24 @@ def verify_and_configure_sdrs(driver, wait, site_name: str = "automated test sit
                         if gain_input.is_displayed():
                             current_gain = gain_input.get_attribute("value")
                             if not current_gain or current_gain.strip() == "":
-                                print("Setting gain to 'auto'...")
+                                logging.info("Setting gain to 'auto'...")
                                 gain_input.clear()
                                 gain_input.send_keys("auto")
-                                print("✓ Gain set to 'auto'")
+                                logging.info("Gain set to 'auto'")
                     except Exception as e:
-                        print(f"⚠ Could not set gain value (may not be needed): {e}")
+                        logging.warning(f"Could not set gain value (may not be needed): {e}")
 
                     # Click the OK button to save
-                    print("Clicking OK button to save...")
-                    ok_button = driver.find_element(
-                        By.XPATH, "//button[@onclick='save_sdr_setup()']"
-                    )
+                    logging.info("Clicking OK button to save...")
+                    ok_button = driver.find_element(By.XPATH, "//button[@onclick='save_sdr_setup()']")
                     try:
                         ok_button.click()
                     except Exception:
                         driver.execute_script("arguments[0].click();", ok_button)
 
                     # Wait for dialog to close
-                    print("Waiting for dialog to close...")
-                    WebDriverWait(driver, 5).until(
-                        EC.invisibility_of_element_located((By.ID, "sdrsetup_dialog"))
-                    )
+                    logging.info("Waiting for dialog to close...")
+                    WebDriverWait(driver, 5).until(EC.invisibility_of_element_located((By.ID, "sdrsetup_dialog")))
 
                     # Wait a moment for UI to update
                     time.sleep(2)
@@ -376,23 +364,23 @@ def verify_and_configure_sdrs(driver, wait, site_name: str = "automated test sit
                     # Verify the assignment was saved
                     purpose_element = driver.find_element(By.ID, f"sdr{second_sdr_idx}-purpose")
                     updated_purpose = purpose_element.text.strip()
-                    print(f"  Updated purpose/use: '{updated_purpose}'")
+                    logging.info(f"Updated purpose/use: '{updated_purpose}'")
 
                     if "1090" in updated_purpose:
-                        print("✓ Successfully assigned second SDR to 1090")
+                        logging.info("Successfully assigned second SDR to 1090")
                     else:
-                        print(f"⚠ Warning: SDR purpose shows '{updated_purpose}', expected '1090'")
+                        logging.warning(f"SDR purpose shows '{updated_purpose}', expected '1090'")
                 else:
-                    print(f"✓ Second SDR is already assigned to 1090")
+                    logging.info("Second SDR is already assigned to 1090")
             else:
-                print("⚠ Could not identify second SDR to configure")
+                logging.warning("Could not identify second SDR to configure")
         else:
-            print("Only one SDR found, skipping second SDR configuration")
+            logging.info("Only one SDR found, skipping second SDR configuration")
 
-        print("✓ SDR verification and configuration completed")
+        logging.info("SDR verification and configuration completed")
 
         # Click Apply Settings button to save changes
-        print("Clicking Apply Settings button...")
+        logging.info("Clicking Apply Settings button...")
         apply_button = None
         apply_selectors = [
             "//button[@type='submit'][@name='sdr_setup'][@value='go']",
@@ -402,43 +390,41 @@ def verify_and_configure_sdrs(driver, wait, site_name: str = "automated test sit
         for selector in apply_selectors:
             try:
                 apply_button = driver.find_element(By.XPATH, selector)
-                print(f"✓ Found Apply Settings button")
+                logging.info("Found Apply Settings button")
                 break
             except Exception:
                 continue
 
         if not apply_button:
-            print("✗ Could not find Apply Settings button")
-            return 1
+            logging.error("Could not find Apply Settings button")
+            return False
 
         driver.execute_script("arguments[0].scrollIntoView(true);", apply_button)
         time.sleep(1)
 
         try:
             apply_button.click()
-            print(f"✓ Apply Settings button clicked {time.strftime('%H:%M:%S')}")
+            logging.info(f"Apply Settings button clicked {time.strftime('%H:%M:%S')}")
         except Exception:
             driver.execute_script("arguments[0].click();", apply_button)
-            print("✓ Apply Settings button clicked via JavaScript")
+            logging.info("Apply Settings button clicked via JavaScript")
 
         # Wait for processing to complete and reach homepage
-        print(f"Waiting for settings to be applied... {time.strftime('%H:%M:%S')}")
+        logging.info(f"Waiting for settings to be applied... {time.strftime('%H:%M:%S')}")
         wait_result = wait_for_target_page(driver, "Feeder Homepage", timeout_seconds=600)
-        if wait_result != 0:
-            return wait_result
+        if not wait_result:
+            return False
 
         # Verify homepage elements
         homepage_result = verify_homepage_elements(driver, wait, site_name)
-        if homepage_result != 0:
-            return homepage_result
+        if not homepage_result:
+            return False
 
-        return 0
+        return True
 
     except Exception as e:
-        print(f"✗ Error during SDR verification: {e}")
-        import traceback
-        traceback.print_exc()
-        return 1
+        logging.exception(f"Error during SDR verification: {e}")
+        return False
 
 
 def run_basic_setup_test(rpi_ip: str, timeout_seconds: int = 90) -> int:
@@ -448,12 +434,12 @@ def run_basic_setup_test(rpi_ip: str, timeout_seconds: int = 90) -> int:
     Returns:
         0 on success, 1 on failure
     """
-    print(f"Testing basic setup on http://{rpi_ip}/setup...")
-    print(f"Running as user: {Path.home()}")
+    logging.info(f"Testing basic setup on http://{rpi_ip}/setup...")
+    logging.info(f"Running as user: {getpass.getuser()}")
 
     driver = None
     try:
-        print("Starting Firefox browser...")
+        logging.info("Starting Firefox browser...")
 
         # Setup Firefox with enhanced options
         firefox_service = FirefoxService(GeckoDriverManager().install())
@@ -471,7 +457,7 @@ def run_basic_setup_test(rpi_ip: str, timeout_seconds: int = 90) -> int:
         driver = webdriver.Firefox(service=firefox_service, options=firefox_options)
         driver.set_page_load_timeout(30)
 
-        print("✓ Firefox browser started successfully")
+        logging.info("Firefox browser started successfully")
 
         wait = WebDriverWait(driver, 10)
 
@@ -479,30 +465,33 @@ def run_basic_setup_test(rpi_ip: str, timeout_seconds: int = 90) -> int:
         driver.get(f"http://{rpi_ip}/setup")
 
         # Check page title
-        print("Checking page title...")
+        logging.info("Checking page title...")
         current_title = driver.title
-
         if "Basic Setup" not in current_title:
-            print(f"✗ Wrong page title: {current_title}")
+            logging.error(f"Wrong page title: {current_title}")
             return 1
-        print(f"✓ Page title is correct ({current_title})")
+        logging.info(f"Page title is correct ({current_title})")
 
         # Check CPU temperature
-        print("Checking CPU temperature...")
+        logging.info("Checking CPU temperature...")
         cpu_temp_block = wait.until(EC.presence_of_element_located((By.ID, "cpu_temp_block")))
         cpu_temp_element = cpu_temp_block.find_element(By.ID, "cpu_temp")
         temp_text = cpu_temp_element.text.strip()
 
         # Extract temperature value
-        temp_value = float("".join(filter(lambda x: x.isdigit() or x == ".", temp_text)))
+        try:
+            temp_value = float("".join(filter(lambda x: x.isdigit() or x == ".", temp_text)))
+        except ValueError:
+            logging.error(f"Could not parse CPU temperature from text: {temp_text}")
+            return 1
 
         if not (30 <= temp_value <= 85):
-            print(f"✗ CPU temperature out of range: {temp_value}°C")
+            logging.error(f"CPU temperature out of range: {temp_value}°C")
             return 1
-        print(f"✓ CPU temperature is reasonable: {temp_value}°C")
+        logging.info(f"CPU temperature is reasonable: {temp_value}°C")
 
         # Fill in site information
-        print("Filling in site information...")
+        logging.info("Filling in site information...")
 
         site_name_input = wait.until(EC.element_to_be_clickable((By.ID, "site_name")))
         site_name_input.clear()
@@ -520,10 +509,10 @@ def run_basic_setup_test(rpi_ip: str, timeout_seconds: int = 90) -> int:
         alt_input.clear()
         alt_input.send_keys("30")
 
-        print("✓ Site information filled")
+        logging.info("Site information filled")
 
         # Click ADSB checkbox
-        print("Clicking ADSB checkbox...")
+        logging.info("Clicking ADSB checkbox...")
         adsb_checkbox = wait.until(EC.presence_of_element_located((By.ID, "is_adsb_feeder")))
         driver.execute_script("arguments[0].scrollIntoView(true);", adsb_checkbox)
         time.sleep(1)
@@ -531,15 +520,15 @@ def run_basic_setup_test(rpi_ip: str, timeout_seconds: int = 90) -> int:
         if not adsb_checkbox.is_selected():
             try:
                 adsb_checkbox.click()
-                print("✓ ADSB checkbox clicked")
+                logging.info("ADSB checkbox clicked")
             except Exception:
                 driver.execute_script("arguments[0].click();", adsb_checkbox)
-                print("✓ ADSB checkbox clicked via JavaScript")
+                logging.info("ADSB checkbox clicked via JavaScript")
         else:
-            print("✓ ADSB checkbox was already checked")
+            logging.info("ADSB checkbox was already checked")
 
         # Click submit button
-        print("Looking for submit button...")
+        logging.info("Looking for submit button...")
         submit_button = None
 
         submit_selectors = [
@@ -550,13 +539,13 @@ def run_basic_setup_test(rpi_ip: str, timeout_seconds: int = 90) -> int:
         for selector in submit_selectors:
             try:
                 submit_button = driver.find_element(By.XPATH, selector)
-                print(f"✓ Found submit button")
+                logging.info("Found submit button")
                 break
             except Exception:
                 continue
 
         if not submit_button:
-            print("✗ Could not find submit button")
+            logging.error("Could not find submit button")
             return 1
 
         driver.execute_script("arguments[0].scrollIntoView(true);", submit_button)
@@ -565,57 +554,57 @@ def run_basic_setup_test(rpi_ip: str, timeout_seconds: int = 90) -> int:
         # Click submit
         try:
             submit_button.click()
-            print(f"✓ Submit button clicked {time.strftime('%H:%M:%S')}")
+            logging.info(f"Submit button clicked {time.strftime('%H:%M:%S')}")
         except Exception:
             driver.execute_script("arguments[0].click();", submit_button)
-            print("✓ Submit button clicked via JavaScript")
+            logging.info("Submit button clicked via JavaScript")
 
         # Wait for form submission flow
-        print(f"Waiting for form submission to complete... {time.strftime('%H:%M:%S')}")
+        logging.info(f"Waiting for form submission to complete... {time.strftime('%H:%M:%S')}")
         try:
             wait_result = wait_for_target_page(driver, "SDR Setup", timeout_seconds=600)
-            if wait_result != 0:
-                return wait_result
+            if not wait_result:
+                return 1
 
             # Continue with SDR setup verification
             site_name = "automated test site"  # From form we filled earlier
             sdr_test_result = verify_and_configure_sdrs(driver, wait, site_name)
-            if sdr_test_result != 0:
-                return sdr_test_result
+            if not sdr_test_result:
+                return 1
 
             return 0
 
         except TimeoutException:
             current_url = driver.current_url
             current_title = driver.title
-            print(f"⚠ Did not complete flow within timeout {time.strftime('%H:%M:%S')}")
-            print(f"Current URL: {current_url}")
-            print(f"Current title: {current_title}")
+            logging.warning(f"Did not complete flow within timeout {time.strftime('%H:%M:%S')}")
+            logging.debug(f"Current URL: {current_url}")
+            logging.debug(f"Current title: {current_title}")
 
             # If we're already on the homepage, verify it directly
             if "Homepage" in current_title or "Feeder Homepage" in current_title:
-                print("✓ Already on Homepage, verifying elements")
+                logging.info("Already on Homepage, verifying elements")
                 site_name = "automated test site"  # From form we filled earlier
                 homepage_result = verify_homepage_elements(driver, wait, site_name)
-                return homepage_result
+                return 0 if homepage_result else 1
 
             # If we're already on SDR Setup page, continue with verification
             if "SDR Setup" in current_title:
-                print("✓ Already on SDR Setup page, continuing with verification")
+                logging.info("Already on SDR Setup page, continuing with verification")
                 site_name = "automated test site"  # From form we filled earlier
                 sdr_test_result = verify_and_configure_sdrs(driver, wait, site_name)
-                return sdr_test_result
+                return 0 if sdr_test_result else 1
 
             # Accept partial completion if processing
             if "/waiting" in current_url or "performing requested actions" in current_title.lower():
-                print("✓ Form submission successful, system is processing")
+                logging.info("Form submission successful, system is processing")
                 return 1
             else:
-                print("✗ Form submission may have failed")
+                logging.error("Form submission may have failed")
                 return 1
 
     except Exception as e:
-        print(f"✗ Error during test: {e}")
+        logging.exception(f"Error during test: {e}")
         return 1
     finally:
         if driver:
@@ -626,8 +615,15 @@ def main():
     parser = argparse.ArgumentParser(description="Run Selenium tests as non-root user")
     parser.add_argument("rpi_ip", help="IP address of the Raspberry Pi")
     parser.add_argument("--timeout", type=int, default=90, help="Timeout in seconds")
+    parser.add_argument("--log-level", default="INFO", help="Logging level (DEBUG, INFO, WARNING, ERROR)")
 
     args = parser.parse_args()
+
+    # Apply requested log level
+    try:
+        logging.getLogger().setLevel(getattr(logging, args.log_level.upper(), logging.INFO))
+    except Exception:
+        logging.getLogger().setLevel(logging.INFO)
 
     exit_code = run_basic_setup_test(args.rpi_ip, args.timeout)
     sys.exit(exit_code)
