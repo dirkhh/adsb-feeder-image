@@ -251,10 +251,13 @@ deploy_reporter() {
     # Create staging directory on remote
     log_info "Creating staging directory on remote..."
     ssh "$host" "mkdir -p $REMOTE_STAGE_DIR/github-reporter"
+    ssh "$host" "mkdir -p $REMOTE_STAGE_DIR/automated-boot-testing"
 
     # Copy files to remote staging directory
+    # Note: Reporter needs metrics.py from automated-boot-testing
     log_info "Copying files to remote..."
     scp -r "$REPORTER_DIR"/* "$host:$REMOTE_STAGE_DIR/github-reporter/" > /dev/null
+    scp "$BOOT_TEST_DIR/metrics.py" "$host:$REMOTE_STAGE_DIR/automated-boot-testing/" > /dev/null
 
     log_success "Files copied to remote staging directory"
 

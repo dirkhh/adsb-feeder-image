@@ -424,7 +424,7 @@ src/tools/automated-boot-testing/
 ├── setup-tftp-iscsi.sh          # TFTP/iSCSI boot setup
 ├── test-api.py                  # API testing script
 ├── test-feeder-image.py         # Core test script (source)
-├── run-selenium-test.py         # Selenium test runner (non-root)
+├── run_selenium_test.py         # Selenium test runner (non-root)
 ├── metrics.py                   # Metrics tracking module (NEW)
 ├── boot-test-metrics-cli.py     # Metrics CLI query tool (NEW)
 ├── METRICS_INTEGRATION.md       # Metrics integration guide (NEW)
@@ -468,18 +468,49 @@ The installation script is idempotent - it can be run multiple times safely.
 
 ### System Requirements
 - Python 3.11+
-- Firefox browser (for Selenium WebDriver)
+- Web browser for Selenium testing (see Browser Setup below)
 - SSH client tools (for remote system management)
 - Network utilities (ping, etc.)
 
+### Browser Setup for Selenium Tests
+
+The automated browser tests require a web browser and matching WebDriver.
+
+**For x86_64 systems:**
+- Chrome/Chromium or Firefox
+- WebDriver is automatically managed by Selenium Manager
+
+**For ARM64 systems (Raspberry Pi, etc.):**
+Selenium Manager doesn't support ARM64, so you must install browsers and drivers from system packages:
+
+1. **Chromium** (recommended):
+```bash
+sudo apt-get update
+sudo apt-get install chromium chromium-driver
+```
+
+2. **Firefox** (optional):
+```bash
+# Firefox is usually pre-installed, but if not:
+sudo apt-get install firefox-esr
+
+# geckodriver must be installed manually for ARM64:
+cd /tmp
+wget https://github.com/mozilla/geckodriver/releases/download/v0.36.0/geckodriver-v0.36.0-linux-aarch64.tar.gz
+tar -xzf geckodriver-v0.36.0-linux-aarch64.tar.gz
+sudo mv geckodriver /usr/local/bin/geckodriver
+sudo chmod +x /usr/local/bin/geckodriver
+```
+
+**Note:** Check [Mozilla's geckodriver releases](https://github.com/mozilla/geckodriver/releases) for the latest ARM64 version.
+
 ### Python Dependencies
 All Python dependencies are listed in `pyproject.toml` and automatically installed using `uv`:
-- Flask (web framework)
-- requests (HTTP client)
-- selenium (browser automation)
-- webdriver-manager (WebDriver management)
-- beautifulsoup4 (HTML parsing)
-- python-kasa (smart switch control)
+- flask (web framework for test service API)
+- requests (HTTP client for downloading images)
+- selenium (browser automation for UI testing)
+- python-kasa (Kasa smart plug control for power cycling)
+- pyserial (serial console monitoring during boot)
 
 ### Installation
 Dependencies are automatically installed using `uv` in the dedicated virtual environment at `/opt/adsb-boot-test/venv/`
@@ -498,3 +529,37 @@ Or install manually using uv:
 # In your development environment
 uv pip install -e .
 ```
+
+## Selenium Test Framework
+
+The selenium tests have been refactored to use a maintainable Page Object Model architecture.
+
+### Running Selenium Tests
+
+```bash
+# Run with Chrome (default)
+python3 run_selenium_test.py <RPI_IP>
+
+# Run with Firefox
+python3 run_selenium_test.py <RPI_IP> --browser firefox
+
+# Run with visible browser
+python3 run_selenium_test.py <RPI_IP> --no-headless
+```
+
+### Framework Documentation
+
+See [selenium_framework/README.md](selenium_framework/README.md) for:
+- Architecture overview
+- Usage examples
+- Adding new tests
+- Configuration options
+- Troubleshooting
+
+### Key Improvements
+
+- **Browser Agnostic**: Switch between Chrome and Firefox with `--browser` flag
+- **Maintainable**: Page Object Model separates UI from test logic
+- **Testable**: Unit tests for framework components
+- **Clear Errors**: Custom exception hierarchy with descriptive messages
+- **Configurable**: Centralized configuration and timeout management

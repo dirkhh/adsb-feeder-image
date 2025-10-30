@@ -89,7 +89,6 @@ tools = [
     "slowapi",
     "uvicorn",
     "types-pyserial",
-    "webdriver-manager",
 ]
 
 [tool.setuptools_scm]

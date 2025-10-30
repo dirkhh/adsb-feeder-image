@@ -480,7 +480,7 @@ def test_basic_setup(rpi_ip: str, timeout_seconds: int = 90) -> bool:
 
     # Prepare test environment for testuser
     base_dir = Path(__file__).parent
-    test_script = base_dir / "run-selenium-test.py"
+    test_script = base_dir / "run_selenium_test.py"
     if not test_script.exists():
         print(f"✗ Test script not found: {test_script}")
         return False
