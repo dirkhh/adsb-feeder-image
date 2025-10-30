@@ -22,25 +22,35 @@ def migrate_database(db_path: str):
     cursor.execute("PRAGMA table_info(test_runs)")
     columns = [row[1] for row in cursor.fetchall()]
 
-    if "github_event_type" in columns:
-        print("Migration already applied - skipping")
+    migrations_needed = []
+
+    # Check for initial GitHub columns
+    if "github_event_type" not in columns:
+        print("Adding initial GitHub context columns...")
+        migrations_needed.extend(
+            [
+                "ALTER TABLE test_runs ADD COLUMN github_event_type TEXT",
+                "ALTER TABLE test_runs ADD COLUMN github_release_id INTEGER",
+                "ALTER TABLE test_runs ADD COLUMN github_pr_number INTEGER",
+                "ALTER TABLE test_runs ADD COLUMN github_commit_sha TEXT",
+                "ALTER TABLE test_runs ADD COLUMN github_workflow_run_id INTEGER",
+                "ALTER TABLE test_runs ADD COLUMN github_reported_at TEXT",
+                "ALTER TABLE test_runs ADD COLUMN github_report_status TEXT",
+            ]
+        )
+
+    # Check for retry tracking column (new migration)
+    if "github_report_attempts" not in columns:
+        print("Adding retry tracking column...")
+        migrations_needed.append("ALTER TABLE test_runs ADD COLUMN github_report_attempts INTEGER DEFAULT 0")
+
+    if not migrations_needed:
+        print("All migrations already applied - skipping")
         conn.close()
         return
 
-    print("Adding GitHub context columns...")
-
-    # Add new columns
-    migrations = [
-        "ALTER TABLE test_runs ADD COLUMN github_event_type TEXT",
-        "ALTER TABLE test_runs ADD COLUMN github_release_id INTEGER",
-        "ALTER TABLE test_runs ADD COLUMN github_pr_number INTEGER",
-        "ALTER TABLE test_runs ADD COLUMN github_commit_sha TEXT",
-        "ALTER TABLE test_runs ADD COLUMN github_workflow_run_id INTEGER",
-        "ALTER TABLE test_runs ADD COLUMN github_reported_at TEXT",
-        "ALTER TABLE test_runs ADD COLUMN github_report_status TEXT",
-    ]
-
-    for migration in migrations:
+    # Apply migrations
+    for migration in migrations_needed:
         cursor.execute(migration)
         print(f"  ✓ {migration}")
 

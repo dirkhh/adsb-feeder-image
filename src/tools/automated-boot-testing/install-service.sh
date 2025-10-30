@@ -39,7 +39,7 @@ if [[ -f "$SOURCE_DIR/requirements.txt" ]]; then
     ./venv/bin/pip install -r "$SOURCE_DIR/requirements.txt"
 else
     echo "   Installing individual packages..."
-    ./venv/bin/pip install flask requests selenium webdriver-manager beautifulsoup4 python-kasa
+    ./venv/bin/pip install flask requests selenium python-kasa pyserial
 fi
 
 # Create configuration directory
@@ -60,13 +60,18 @@ fi
 echo "📋 Copying service files..."
 cp "$SOURCE_DIR/adsb-boot-test-service.py" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/test-feeder-image.py" "$INSTALL_DIR/"
-cp "$SOURCE_DIR/run-selenium-test.py" "$INSTALL_DIR/"
+cp "$SOURCE_DIR/run_selenium_test.py" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/setup-tftp-iscsi.sh" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/metrics.py" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/boot-test-metrics-cli.py" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/serial_console_reader.py" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/power-toggle-kasa.py" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/power-toggle-unifi.py" "$INSTALL_DIR/"
+
+# Copy selenium_framework directory
+echo "📋 Copying selenium framework..."
+cp -r "$SOURCE_DIR/selenium_framework" "$INSTALL_DIR/"
+
 chmod +x "$INSTALL_DIR"/*.py
 chmod +x "$INSTALL_DIR"/*.sh
 

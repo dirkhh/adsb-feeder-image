@@ -244,6 +244,19 @@ class GitHubReporter:
 
             if not release:
                 logger.error(f"Release {release_id} not found")
+                # Increment attempt counter and mark as failed if this is the second attempt
+                for test in tests:
+                    self.metrics.increment_report_attempt(test["id"])
+                    attempts = test.get("github_report_attempts", 0) + 1
+                    if attempts >= 2:
+                        # Give up after 2 attempts - release was likely deleted
+                        logger.warning(
+                            f"Test {test['id']} reached max attempts ({attempts}) for deleted release {release_id}, marking as permanently failed"
+                        )
+                        self.metrics.mark_reported(test["id"], "failed")
+                    else:
+                        logger.info(f"Test {test['id']} attempt {attempts}/2 for release {release_id}, will retry")
+                        self.metrics.mark_reported(test["id"], "failed")
                 return False
 
             # Get ALL tests for this release (not just unreported ones)
@@ -350,14 +363,31 @@ class GitHubReporter:
 
         except GithubException as e:
             logger.error(f"✗ Failed to update PR #{pr_number}: {e}")
-            # Mark tests as failed for retry
+            # Increment attempt counter and handle deleted PRs
             for test in tests:
-                self.metrics.mark_reported(test["id"], "failed")
+                self.metrics.increment_report_attempt(test["id"])
+                attempts = test.get("github_report_attempts", 0) + 1
+                if attempts >= 2:
+                    # Give up after 2 attempts - PR was likely deleted or closed
+                    logger.warning(
+                        f"Test {test['id']} reached max attempts ({attempts}) for PR #{pr_number}, marking as permanently failed"
+                    )
+                    self.metrics.mark_reported(test["id"], "failed")
+                else:
+                    logger.info(f"Test {test['id']} attempt {attempts}/2 for PR #{pr_number}, will retry")
+                    self.metrics.mark_reported(test["id"], "failed")
             raise
 
         except Exception as e:
             logger.error(f"✗ Error updating PR #{pr_number}: {e}")
+            # Increment attempt counter for generic errors too
             for test in tests:
+                self.metrics.increment_report_attempt(test["id"])
+                attempts = test.get("github_report_attempts", 0) + 1
+                if attempts >= 2:
+                    logger.warning(
+                        f"Test {test['id']} reached max attempts ({attempts}) for PR #{pr_number}, marking as permanently failed"
+                    )
                 self.metrics.mark_reported(test["id"], "failed")
             raise
 
