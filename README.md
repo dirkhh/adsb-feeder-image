@@ -6,9 +6,9 @@
 
 ## The easiest way to track nearby aircraft, ships, and weather balloons with your own hardware and share with others
 
-Track aircraft around you broadcasting ADS-B messages on 1090 MHz (and, in the US, UAT messages on 978 MHz). Show the planes on a map, including recent tracks, altitude, speed, and in case of many commercial flights even the route that they are on. For some reason some of the commercial vendors call this 'aircraft radar', even though radar is definitely not involved - it's all UHF radio waves. Similarly, track the data messages sent out by these planes via ACARS, VDL2, and HFDL - and track ships sending AIS and weather balloons using the RadioSonde data.
+Track aircraft around you broadcasting ADS-B messages on 1090 MHz (and, in the US, UAT messages on 978 MHz). Show the planes on a map, including recent tracks, altitude, speed, and in case of many commercial flights even the route that they are on. For some reason some of the commercial vendors call this 'aircraft radar', even though radar is definitely not involved - it's all UHF radio waves. Similarly, track the data messages sent out by these planes via ACARS, VDL2, and HFDL - and track ships sending AIS and weather balloons using the RadioSonde data. Note that each of these protocols requires its own SDR and the number of SDRs a single system can support is limited.
 
-This project provides an easy to use turn-key SD card image for a number of single board computers (or to run in an x86 VM).
+This project provides an easy to use turn-key SD card image for a number of single board computers (or to run on an x86_64 PC or in an x86_64 VM).
 Currently we are building the following images:
 
 - Raspberry Pi Raspian based, supports Zero 2, 3a/b, 4, and 5 (frequently tested on Zero 2W, 3a, 3b, and 4 - note that Pi Zero W will NOT work)
