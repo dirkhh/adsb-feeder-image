@@ -179,7 +179,7 @@ EOF
             exit 0
         fi
         cd image-dietpi || exit 0
-        G_GITOWNER=dirkhh G_GITBRANCH=adsbim ../../../DietPi/.build/images/dietpi-build -v all   -m 20 -o dirkhh -b adsbim --createvms
+        G_GITOWNER=dirkhh G_GITBRANCH=adsbim ../../../DietPi/.build/images/dietpi-build -d 7 -v all   -m 20 -o dirkhh -b adsbim --createvms
         pwd
         ls -l
     fi
