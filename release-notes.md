@@ -1,24 +1,13 @@
 Changes since v3.0.5
 =======
+- switch to latest DietPi images and prepare for next release
 - data sharing page: add capability to change UUID for account-less aggregators
-- beta-notes: fix small UI bug and potential issue enabling temperature sensors that could lead to crash
-- beta-notes: fix compose up failure related to docker network creation
-- beta-notes: fix SDRPlay SDR Setup for 1090 bug
-- beta-notes: update Skystats to v0.1.11
 - add ability to backup Skystats database. NOTE: no restore from the UI (yet)
-- beta-notes: small updates to the README
-- beta-notes: update Skystats to v0.1.10
-- beta-notes: update ultrafeeder and telegraf containers to fix Mode-S Beast message counting issue
 - acarshub: make sure /run size is increased before restoring data from disk
 - acarshub: use index optimization setting to prevent the DB growing unnecessarily
-- beta-notes: redoing the internal changes, this time hopefully without breaking things - tested on Python 3.9
-- beta-notes: revert some internal changes that need more careful planning as they introduced bugs in a number of scenarios, including for systems with older Python versions
 - add recovery service to the image (not the app): go to http://<IP>:1089 and be offered to go back to the previous version - or go to a specific version or branch with http://<IP>:1089/recover-to/<tag-or-branch>
-- beta-notes: fix two stupid bugs introduced in the last beta
 - UI: consistent wording of button text to apply changes
-- beta-notes: update Skystats to v0.1.8
 - ais-catcher: update container to make sure biastee is set to off on startup if not enabled
-- beta-notes: fix showing CPU temperature and allow manual configuration of the correct sensor
 - core: add Skystats for extended statistics - tuned for low disk IO
 - UI: always show the CPU temperature in the title bar, even without a temperature sensor
 - UI: split Expert settings into an Advanced page and the existing Expert page, making the user experience a bit easier to explore
