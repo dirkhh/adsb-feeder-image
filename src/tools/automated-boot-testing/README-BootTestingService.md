@@ -14,6 +14,43 @@ A systemd service that provides a web API for triggering automated feeder image 
 - **Comprehensive Logging**: Detailed logs for debugging and monitoring
 - **Metrics Tracking**: SQLite-based metrics tracking with CLI query tool
 
+### VM Image Testing (x86_64 Proxmox)
+
+The service also supports testing qcow2 VM images for x86_64 systems:
+
+**Automatic Detection:**
+- VM images detected by URL pattern: `*Proxmox-x86_64.qcow2*`
+- Uses same API endpoint and queue as RPi tests
+- Unified metrics and reporting
+
+**VM Testing Workflow:**
+1. Download qcow2.xz image
+2. Transfer to VM server via SCP
+3. Decompress on server
+4. Create VM with virt-install
+5. Wait for DHCP IP assignment
+6. Run Selenium tests
+7. Cleanup (destroy VM, remove disk)
+
+**VM Server Requirements:**
+- KVM/libvirt/virt-install installed
+- SSH access with key authentication
+- Bridge network configured (e.g., bridge77)
+- dnsmasq for DHCP (or virsh domifaddr support)
+
+**Configuration:**
+```json
+{
+  "vm_server_ip": "192.168.66.13",
+  "vm_ssh_key": "/etc/adsb-boot-test/vm_ssh_key",
+  "vm_bridge": "bridge77",
+  "vm_memory_mb": 1024,
+  "vm_cpus": 2
+}
+```
+
+VM configuration is optional. If not configured, VM test requests will fail with a clear error message.
+
 ## Installation
 
 ```bash

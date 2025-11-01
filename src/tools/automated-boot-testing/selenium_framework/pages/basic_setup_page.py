@@ -1,8 +1,8 @@
 """Page Object for Basic Setup page."""
 
-from html import unescape
 import logging
 import re
+from html import unescape
 
 from selenium.webdriver.common.by import By
 
