@@ -1,5 +1,6 @@
 Changes since v3.0.6
 =======
+- support WiFi networks with protected management frames on DietPi
 - fix Mode S Beast support
 - fix app install / DietPi install issue
 
