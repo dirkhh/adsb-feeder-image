@@ -14,6 +14,11 @@
   "unifi_ssh_username": "",
   "unifi_ssh_keypath": "",
   "unifi_port_number": 0,
+  "vm_server_ip": "",
+  "vm_ssh_key": "",
+  "vm_bridge": "bridge77",
+  "vm_memory_mb": 1024,
+  "vm_cpus": 2,
   "api_keys": {
     "REPLACE_WITH_SECURE_KEY_1": "github-ci",
     "REPLACE_WITH_SECURE_KEY_2": "developer1"
@@ -34,5 +39,12 @@
     "unifi_ssh_username": "For UniFi: SSH username (e.g., 'admin' or 'ubnt')",
     "unifi_ssh_keypath": "For UniFi: Path to SSH private key without passphrase",
     "unifi_port_number": "For UniFi: Port number to control (1-based, e.g., 16)"
+  },
+  "_vm_testing_notes": {
+    "vm_server_ip": "IP address of VM server with KVM/libvirt. Leave empty \"\" to disable VM testing. VM images detected by URL pattern (*Proxmox-x86_64.qcow2*)",
+    "vm_ssh_key": "Path to SSH private key for VM server (e.g., /etc/adsb-boot-test/vm_ssh_key). Required if vm_server_ip is set.",
+    "vm_bridge": "Bridge network interface on VM server (default: bridge77). Must have DHCP configured.",
+    "vm_memory_mb": "VM memory in megabytes (default: 1024). Optional - increase for resource-intensive tests.",
+    "vm_cpus": "Number of VM CPUs (default: 2). Optional - adjust based on VM server capacity."
   }
 }
