@@ -132,7 +132,15 @@ class GitHubValidator:
     def _is_release_url(self, url: str) -> bool:
         """Check if URL looks like a GitHub release download."""
         # Common patterns for GitHub release downloads
-        patterns = ["/releases/download/", "/archive/refs/tags/", ".img.xz", ".img.gz", ".zip", ".tar.gz"]
+        patterns = [
+            "/releases/download/",
+            "/archive/refs/tags/",
+            ".img.xz",
+            ".img.gz",
+            ".qcow2.xz",  # Add support for VM images
+            ".zip",
+            ".tar.gz",
+        ]
         return any(pattern in url for pattern in patterns)
 
     def _verify_repository(self, url: str) -> bool:
@@ -362,6 +370,18 @@ class ADSBTestService:
         self.processing = False
         self.processor_thread: Optional[threading.Thread] = None
 
+    def _detect_test_type(self, image_url: str) -> str:
+        """
+        Detect test type from image URL pattern.
+
+        Args:
+            image_url: URL of the image to test
+
+        Returns:
+            "vm" if Proxmox qcow2 image, "rpi" otherwise
+        """
+        return "vm" if "Proxmox-x86_64.qcow2" in image_url else "rpi"
+
     def setup_routes(self):
         """Setup Flask routes."""
 
@@ -545,7 +565,143 @@ class ADSBTestService:
 
     def _execute_test(self, test: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Execute a single boot test.
+        Execute test - routes to appropriate handler based on image type.
+
+        Args:
+            test: Test record from database
+
+        Returns:
+            Dict with success, error, error_stage, duration
+        """
+        image_url = test["image_url"]
+        test_type = self._detect_test_type(image_url)
+
+        logging.info(f"Detected test type: {test_type} for URL: {image_url}")
+
+        if test_type == "vm":
+            return self._execute_vm_test(test)
+        else:
+            return self._execute_rpi_test(test)
+
+    def _execute_vm_test(self, test: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Execute VM test using test-vm-image.py script.
+
+        Args:
+            test: Test record from database
+
+        Returns:
+            Dict with success, error, error_stage, duration
+        """
+        test_id = test["id"]
+        image_url = test["image_url"]
+        duration: float = 0.0
+        process: Optional[subprocess.Popen] = None
+        returncode: Optional[int] = None
+
+        # Validate VM config exists
+        required_config = ["vm_server_ip", "vm_ssh_key", "vm_bridge"]
+        missing = [key for key in required_config if not self.config.get(key)]
+        if missing:
+            return {
+                "success": False,
+                "error": f"VM testing not configured (missing: {', '.join(missing)})",
+                "error_stage": "configuration",
+            }
+
+        # Validate URL doesn't contain shell metacharacters
+        dangerous_chars = [";", "&", "|", "`", "$", "\n", "\r"]
+        if any(c in image_url for c in dangerous_chars):
+            return {
+                "success": False,
+                "error": "URL contains invalid characters and was rejected for security",
+                "error_stage": "validation",
+            }
+
+        try:
+            # Build VM test command
+            vm_script = Path(__file__).parent / "test-vm-image.py"
+            cmd = [
+                str(self.test_executor.venv_python),
+                str(vm_script),
+                image_url,
+                "--vm-server",
+                self.config["vm_server_ip"],
+                "--vm-ssh-key",
+                self.config["vm_ssh_key"],
+                "--vm-bridge",
+                self.config["vm_bridge"],
+                "--metrics-id",
+                str(test_id),
+                "--metrics-db",
+                str(self.metrics.db_path),
+                "--timeout",
+                str(self.test_executor.timeout_minutes),
+            ]
+
+            # Add optional VM config
+            if self.config.get("vm_memory_mb"):
+                cmd.extend(["--vm-memory", str(self.config["vm_memory_mb"])])
+            if self.config.get("vm_cpus"):
+                cmd.extend(["--vm-cpus", str(self.config["vm_cpus"])])
+
+            logging.info(f"Executing VM test command: {' '.join(cmd)}")
+
+            # Execute with timeout and real-time output forwarding
+            start_time = time.time()
+
+            # Use Popen to capture output in real-time for journalctl
+            process = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1,  # Line buffered
+            )
+
+            # Forward output in real-time to journalctl
+            output_lines = []
+            try:
+                if process.stdout:
+                    for line in process.stdout:
+                        # Log to journalctl in real-time
+                        logging.info(line.rstrip())
+                        output_lines.append(line)
+
+                # Wait for process to complete with timeout
+                returncode = process.wait(timeout=self.test_executor.timeout_minutes * 60)
+
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait()
+                return {
+                    "success": False,
+                    "error": f"VM test timed out after {self.test_executor.timeout_minutes} minutes",
+                    "error_stage": "timeout",
+                }
+
+            duration = time.time() - start_time
+
+            # Check exit code
+            success = returncode == 0
+            return {
+                "success": success,
+                "error": None if success else "VM test script failed",
+                "error_stage": None if success else "test_execution",
+                "duration": duration,
+            }
+
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e),
+                "error_stage": "executor",
+                "duration": duration,
+            }
+
+    def _execute_rpi_test(self, test: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Execute RPi boot test using test-feeder-image.py.
 
         Returns dict with success, error, error_stage.
         """

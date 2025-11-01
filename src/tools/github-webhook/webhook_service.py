@@ -107,7 +107,12 @@ def matches_binary_filter(binary_name: str, release_name: str) -> bool:
             # logger.info(f"Test build {testfilter} not found in {binary_name}")
             return False
 
-    # Must contain raspberrypi64 and release name must contain the word "beta"
+    # Check for VM images (Proxmox x86_64 qcow2)
+    if "Proxmox-x86_64.qcow2" in binary_name:
+        logger.info(f"VM image found: {binary_name}")
+        return True
+
+    # Check for Raspberry Pi images
     if "raspberrypi64" not in binary_name:
         # logger.info(f"Raspberry Pi 64 not found in {binary_name}")
         return False
