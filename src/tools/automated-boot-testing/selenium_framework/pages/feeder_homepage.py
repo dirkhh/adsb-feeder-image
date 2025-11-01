@@ -167,7 +167,7 @@ class FeederHomepage(BasePage):
             raise ValidationError("Version badge is empty")
         return True
 
-    def verify_all_homepage_elements(self, site_name: str) -> bool:
+    def verify_all_homepage_elements(self, site_name: str, virtualized: bool) -> bool:
         """
         Verify all required homepage elements.
 
@@ -180,8 +180,9 @@ class FeederHomepage(BasePage):
         logger.info("Verifying all homepage elements...")
 
         self.verify_page_loaded(site_name)
-        self.verify_position_message_rate()
-        self.verify_aggregators_message()
+        if not virtualized:
+            self.verify_position_message_rate()
+            self.verify_aggregators_message()
         self.verify_version_info()
 
         logger.info("All homepage elements verified successfully")
