@@ -202,6 +202,8 @@ ctrl_interface=DIR=/run/wpa_supplicant GROUP=netdev
 update_config=1
 # disable p2p as it can cause errors
 p2p_disabled=1
+# enable protected managment frame support
+pmf=1
 """
                 )
                 for k in netblocks.keys():
