@@ -1,6 +1,8 @@
 """Page Object for Basic Setup page."""
 
+from html import unescape
 import logging
+import re
 
 from selenium.webdriver.common.by import By
 
@@ -45,6 +47,31 @@ class BasicSetupPage(BasePage):
             raise ValidationError(f"Wrong page title. Expected '{self.PAGE_TITLE_TEXT}' in title, got '{title}'")
         logger.info(f"Basic Setup page loaded: {title}")
         return True
+
+    def get_declared_hardware(self) -> str:
+        """Return hardware information as shown in the footer."""
+        source = self.driver.page_source
+        # Look for a <div> that contains "Running on ... • adsb-im-"
+        # Capture text between "on" and the bullet/adsb-im- marker.
+        pattern = re.compile(
+            r"<div[^>]*>(?:.*?)Running\s+on\s*(?P<hw>.*?)\s*(?:•|&bull;|&#\d+;|&[^;]+;)\s*adsb-im-.*?</div>",
+            re.IGNORECASE | re.DOTALL,
+        )
+        match = pattern.search(source)
+        if not match:
+            logger.debug("Declared hardware string not found in page source.")
+            return ""
+
+        hw_raw = match.group("hw")
+        # Strip any HTML tags that might be inside the captured region
+        hw_text = re.sub(r"<[^>]+>", "", hw_raw)
+        # Unescape HTML entities and trim whitespace
+        hw_text = unescape(hw_text).strip()
+        return hw_text
+
+    def check_virtualized(self) -> bool:
+        """On virtualized platforms several of the tests need to be skipped"""
+        return "Virtualized" in self.get_declared_hardware()
 
     def get_cpu_temperature(self) -> float:
         """

@@ -91,29 +91,41 @@ class SeleniumTestRunner:
             homepage = FeederHomepage(self.driver, base_url)
             waiting_page = WaitingPage(self.driver, base_url)
 
-            # Step 1: Navigate to setup page
+            # Navigate to setup page
             logger.info(f"Testing basic setup on {base_url}/setup...")
             basic_setup.navigate()
             basic_setup.verify_page_loaded()
 
-            # Step 2: Verify CPU temperature
-            basic_setup.verify_cpu_temperature()
+            success = True
+            virtualized = basic_setup.check_virtualized()
 
-            # Step 3: Fill form
+            # Verify CPU temperature
+            if not virtualized:
+                basic_setup.verify_cpu_temperature()
+
+            # Fill form
             basic_setup.fill_site_information(
                 self.config.site_name, self.config.latitude, self.config.longitude, self.config.altitude
             )
             basic_setup.select_adsb_feeder()
 
-            # Step 4: Submit form
+            # Submit form
             basic_setup.submit_form()
 
-            # Step 5: Wait for SDR Setup page
-            logger.info("Waiting for form submission to complete...")
-            waiting_page.wait_for_target_page("SDR Setup", timeout_seconds=600)
+            if not virtualized:
+                # Wait for SDR Setup page
+                logger.info("Waiting for form submission to complete...")
+                waiting_page.wait_for_target_page("SDR Setup", timeout_seconds=600)
 
-            # Step 6: Configure SDRs
-            success = self._configure_sdrs(sdr_setup, homepage, waiting_page)
+                # Configure SDRs
+                success = self._configure_sdrs(sdr_setup, homepage, waiting_page)
+
+            # Wait for homepage
+            logger.info("Waiting for settings to be applied...")
+            waiting_page.wait_for_target_page("Feeder Homepage", timeout_seconds=600)
+
+            # Verify homepage
+            homepage.verify_all_homepage_elements(self.config.site_name, virtualized)
 
             return success
 
@@ -167,13 +179,6 @@ class SeleniumTestRunner:
 
             # Apply settings
             sdr_setup.apply_settings()
-
-            # Wait for homepage
-            logger.info("Waiting for settings to be applied...")
-            waiting_page.wait_for_target_page("Feeder Homepage", timeout_seconds=600)
-
-            # Verify homepage
-            homepage.verify_all_homepage_elements(self.config.site_name)
 
             return True
 
