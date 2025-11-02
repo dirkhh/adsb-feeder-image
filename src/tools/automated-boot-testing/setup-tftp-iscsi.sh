@@ -197,7 +197,6 @@ cp /etc/resolv.conf "$MOUNT_ROOT/etc/resolv.conf"
 
 # Check if image has already been configured for iSCSI boot
 NEEDS_ISCSI_SETUP=true
-NEEDS_INITRAMFS_REBUILD=false
 
 if [ -f "$MOUNT_ROOT/etc/initramfs-tools/scripts/local-top/iscsi" ]; then
     echo -e "${YELLOW}Checking if iSCSI boot is already configured...${NC}"
@@ -210,9 +209,6 @@ if [ -f "$MOUNT_ROOT/etc/initramfs-tools/scripts/local-top/iscsi" ]; then
         if [ -f "$MOUNT_BOOT/initramfs.img" ]; then
             echo -e "${GREEN}Initramfs already exists - skipping iSCSI setup${NC}"
             NEEDS_ISCSI_SETUP=false
-        else
-            echo -e "${YELLOW}Initramfs missing - will rebuild${NC}"
-            NEEDS_INITRAMFS_REBUILD=true
         fi
     else
         echo -e "${YELLOW}iSCSI script exists but looks incomplete - will reconfigure${NC}"
@@ -224,10 +220,8 @@ fi
 if [ "$NEEDS_ISCSI_SETUP" = "true" ]; then
     # Create initramfs configuration files
     echo -e "${YELLOW}Creating initramfs configuration files...${NC}"
-elif [ "$NEEDS_INITRAMFS_REBUILD" = "true" ]; then
-    echo -e "${YELLOW}Will rebuild initramfs only...${NC}"
 else
-    echo -e "${GREEN}Skipping iSCSI setup - already configured${NC}"
+    echo -e "${YELLOW}Will rebuild initramfs only...${NC}"
 fi
 
 # Only create configuration files if needed
@@ -348,12 +342,7 @@ echo -e "${GREEN}Configuration files created${NC}"
 fi  # End of NEEDS_ISCSI_SETUP
 
 # Install packages and build initramfs if needed
-if [ "$NEEDS_ISCSI_SETUP" = "true" ] || [ "$NEEDS_INITRAMFS_REBUILD" = "true" ]; then
-    # Chroot and build initramfs
-    echo -e "${YELLOW}Building initramfs in chroot...${NC}"
-else
-    echo -e "${GREEN}Skipping initramfs build - already configured${NC}"
-fi
+echo -e "${YELLOW}Building initramfs in chroot...${NC}"
 
 # Find the kernel version (needed for initramfs and summary)
 KERNEL_VERSION=$(ls "$MOUNT_ROOT/lib/modules" | grep -E '^[0-9]+\.[0-9]+' | sort -V | tail -n1)
@@ -364,9 +353,6 @@ if [ -z "$KERNEL_VERSION" ]; then
 fi
 
 echo -e "${GREEN}Using kernel version: $KERNEL_VERSION${NC}"
-
-if [ "$NEEDS_ISCSI_SETUP" = "true" ] || [ "$NEEDS_INITRAMFS_REBUILD" = "true" ]; then
-
 
 # Install required packages if not present
 chroot "$MOUNT_ROOT" /bin/bash << 'CHROOT_EOF'
@@ -405,7 +391,7 @@ CHROOT_EOF2
 
 echo -e "${GREEN}Initramfs built successfully${NC}"
 
-fi  # End of initramfs building
+# End of initramfs building
 
 # Install SSH public key if provided
 if [ -n "$SSH_PUBLIC_KEY" ]; then
@@ -518,12 +504,18 @@ echo -e "${GREEN}Boot files copied successfully${NC}"
 # Configure iSCSI target (tgt)
 echo -e "${YELLOW}Configuring iSCSI target...${NC}"
 
-# Get absolute path for IMAGE_FILE
+# Get absolute paths for both files
 IMAGE_FILE_ABS=$(realpath "$IMAGE_FILE")
+WORKING_IMAGE_FILE_ABS=$(realpath "$WORKING_IMAGE_FILE")
 
-# Copy clean but prepared image file to working image file (i.e., the iSCSI directory)
-cp "$IMAGE_FILE_ABS" "$WORKING_IMAGE_FILE"
-echo -e "${GREEN}Working image file copied successfully to $WORKING_IMAGE_FILE${NC}"
+# Copy image file only if source and target are different
+if [ "$IMAGE_FILE_ABS" != "$WORKING_IMAGE_FILE_ABS" ]; then
+    echo -e "${YELLOW}Copying image from $IMAGE_FILE_ABS to $WORKING_IMAGE_FILE_ABS${NC}"
+    cp "$IMAGE_FILE_ABS" "$WORKING_IMAGE_FILE"
+    echo -e "${GREEN}Working image file copied successfully to $WORKING_IMAGE_FILE${NC}"
+else
+    echo -e "${YELLOW}Source and target are the same, using existing image in place${NC}"
+fi
 
 
 # Create tgt configuration
@@ -534,12 +526,12 @@ cat > "$TGT_CONF" << EOF
 # ADS-B Feeder Image iSCSI Target Configuration
 # This configuration provides the boot image via iSCSI for network boot testing
 #
-# Image: $IMAGE_FILE_ABS
+# Image: $WORKING_IMAGE_FILE
 # Generated: $(date)
 
 <target iqn.2025-10.im.adsb:adsbim-test.root>
     # Backing storage - the actual image file
-    backing-store $IMAGE_FILE_ABS
+    backing-store $WORKING_IMAGE_FILE
 
     # Allow access from the test Pi
     initiator-address 192.168.77.0/24
@@ -551,7 +543,7 @@ EOF
 
 echo -e "${GREEN}iSCSI target configuration created: $TGT_CONF${NC}"
 echo -e "Target: ${YELLOW}iqn.2025-10.im.adsb:adsbim-test.root${NC}"
-echo -e "Backing store: ${YELLOW}$IMAGE_FILE_ABS${NC}"
+echo -e "Backing store: ${YELLOW}$WORKING_IMAGE_FILE${NC}"
 
 # Restart tgt service to pick up new configuration
 echo -e "${YELLOW}Restarting tgt service...${NC}"
@@ -569,7 +561,7 @@ else
 fi
 # Summary
 echo -e "${GREEN}=== Summary ===${NC}"
-echo -e "Image: ${YELLOW}$IMAGE_FILE_ABS${NC}"
+echo -e "Image: ${YELLOW}$WORKING_IMAGE_FILE${NC}"
 if [ -n "$KERNEL_VERSION" ]; then
     echo -e "Kernel: ${YELLOW}$KERNEL_VERSION${NC}"
 fi

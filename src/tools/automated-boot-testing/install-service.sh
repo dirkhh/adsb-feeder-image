@@ -62,6 +62,7 @@ cp "$SOURCE_DIR/adsb-boot-test-service.py" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/test-feeder-image.py" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/test-vm-image.py" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/run_selenium_test.py" "$INSTALL_DIR/"
+cp "$SOURCE_DIR/run-selenium-as-testuser.py" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/setup-tftp-iscsi.sh" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/metrics.py" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/boot-test-metrics-cli.py" "$INSTALL_DIR/"
@@ -73,6 +74,14 @@ cp "$SOURCE_DIR/generate-api-key.py" "$INSTALL_DIR/"
 # Copy selenium_framework directory
 echo "📋 Copying selenium framework..."
 cp -r "$SOURCE_DIR/selenium_framework" "$INSTALL_DIR/"
+
+# Copy boot_test_lib directory
+echo "📋 Copying boot test library..."
+cp -r "$SOURCE_DIR/boot_test_lib" "$INSTALL_DIR/"
+
+# Copy hardware_backends directory
+echo "📋 Copying hardware backends..."
+cp -r "$SOURCE_DIR/hardware_backends" "$INSTALL_DIR/"
 
 chmod +x "$INSTALL_DIR"/*.py
 chmod +x "$INSTALL_DIR"/*.sh

@@ -263,7 +263,6 @@ class TestExecutor:
             cmd = [
                 str(self.venv_python),
                 str(self.script_path),
-                "--test-setup",  # Include the web UI test
                 "--timeout",
                 str(self.timeout_minutes),
                 "--ssh-key",
@@ -280,9 +279,11 @@ class TestExecutor:
                 cmd.extend(["--serial-console", serial_console])
                 serial_baud = self.config.get("serial_baud", 115200)
                 cmd.extend(["--serial-baud", str(serial_baud)])
-                # Add log-all-serial flag if configured
-                if self.config.get("log_all_serial", False):
-                    cmd.append("--log-all-serial")
+
+            # Add keep-on-failure flag if configured (for debugging)
+            keep_on_failure = self.config.get("keep_on_failure", False)
+            if keep_on_failure:
+                cmd.append("--keep-on-failure")
 
             # Add positional arguments
             cmd.extend([url, self.rpi_ip, self.power_toggle_script])
@@ -645,6 +646,11 @@ class ADSBTestService:
             if self.config.get("vm_cpus"):
                 cmd.extend(["--vm-cpus", str(self.config["vm_cpus"])])
 
+            # Add keep-on-failure flag if configured (for debugging)
+            keep_on_failure = self.config.get("keep_on_failure", False)
+            if keep_on_failure:
+                cmd.append("--keep-on-failure")
+
             logging.info(f"Executing VM test command: {' '.join(cmd)}")
 
             # Execute with timeout and real-time output forwarding
@@ -732,7 +738,6 @@ class ADSBTestService:
                 str(test_id),
                 "--metrics-db",
                 str(self.metrics.db_path),
-                "--test-setup",
                 "--timeout",
                 str(self.test_executor.timeout_minutes),
                 "--ssh-key",
@@ -743,8 +748,6 @@ class ADSBTestService:
             if self.config.get("serial_console"):
                 cmd.extend(["--serial-console", self.config["serial_console"]])
                 cmd.extend(["--serial-baud", str(self.config.get("serial_baud", 115200))])
-                if self.config.get("log_all_serial", False):
-                    cmd.append("--log-all-serial")
 
             logging.info(f"Executing command: {' '.join(cmd)}")
 
