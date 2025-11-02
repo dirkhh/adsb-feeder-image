@@ -7,7 +7,6 @@
   "ssh_key": "/etc/adsb-boot-test/ssh_key",
   "serial_console": "",
   "serial_baud": 115200,
-  "log_all_serial": false,
   "power_toggle_script": "/opt/adsb-boot-test/power-toggle-kasa.py",
   "kasa_ip": "192.168.22.147",
   "unifi_ssh_address": "",
@@ -30,7 +29,6 @@
   "_serial_console_notes": {
     "serial_console": "Path to serial device (e.g., /dev/ttyUSB0). Leave empty \"\" to disable serial monitoring.",
     "serial_baud": "Serial baud rate (default: 115200). Typical values: 9600, 19200, 38400, 57600, 115200.",
-    "log_all_serial": "If true, save serial console logs for ALL tests. If false, only save on failures (default: false)."
   },
   "_power_toggle_notes": {
     "power_toggle_script": "Path to power toggle script. Options: power-toggle-kasa.py (Kasa smart plug) or power-toggle-unifi.py (UniFi PoE port)",
