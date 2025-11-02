@@ -36,4 +36,4 @@ fi
 # next make new secrets / passwords
 ./src/tools/update-secrets.sh
 
-echo "now you need to git push && git push --tags"
+echo "now you need to git push --follow-tags"
