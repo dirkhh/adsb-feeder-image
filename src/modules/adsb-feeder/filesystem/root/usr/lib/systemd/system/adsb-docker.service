@@ -6,6 +6,7 @@ PartOf=docker.service
 [Service]
 SyslogIdentifier=adsb-docker
 WorkingDirectory=/opt/adsb
+ExecStartPre=-/bin/bash -c "mount -o remount,exec,size=$(( $(cat /proc/meminfo | grep -i 'memtotal' | grep -o '[[:digit:]]*') / 2 ))k /run"
 ExecStartPre=-/bin/bash -c "[[ -f /opt/adsb/os.adsb.feeder.image ]] && echo 128 > /sys/module/usbcore/parameters/usbfs_memory_mb"
 ExecStartPre=-/opt/adsb/scripts/fix-docker-network
 ExecStart=/opt/adsb/docker-compose-start
