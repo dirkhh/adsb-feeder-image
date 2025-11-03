@@ -86,15 +86,9 @@ echo "_ADSBIM_BASE_VERSION=$(cat /opt/adsb/adsb.im.version)" >> "$ENV_FILE"
 echo "_ADSBIM_CONTAINER_VERSION=$(cat /opt/adsb/adsb.im.version)" >> "$ENV_FILE"
 
 # make sure all the ADS-B Feeder services are enabled and started
-systemctl enable --now \
-    adsb-bootstrap.service \
-    adsb-setup.service \
-    adsb-recovery.service \
-    adsb-update.timer \
-    adsb-zram.service \
-    adsb-netdog.service \
-    adsb-early-boot.service
+systemctl enable --now adsb-bootstrap.service
 
-# adsb-docker is restart by dietpi after this script and it's not that important to get started anyhow
-# rely on dietpi to start adsb-docker but make sure it's enabled
-systemctl enable adsb-docker
+readarray -t services_enable < /opt/adsb/misc/services
+readarray -t services_image < /opt/adsb/misc/services_image
+services_enable+=( "${services_image[@]}" )
+systemctl enable --now "${services_enable[@]}"

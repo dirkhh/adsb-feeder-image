@@ -324,14 +324,20 @@ if grep -qs -i -e "AF_IS_STAGE2=True" /opt/adsb/config/.env && ! diff -q /opt/ad
     restart_webproxy=true
 fi
 
-services_enable=()
+readarray -t services_enable < ./opt/adsb/misc/services
+readarray -t services_image < ./opt/adsb/misc/services_image
+
+# on the image we use these extra services
+if [ -f /opt/adsb/os.adsb.feeder.image ] ; then
+    services_enable+=( "${services_image[@]}" )
+fi
 
 # if this an app and not the full image, prune some of the files that aren't wanted for the app
 # wanted for the app and copy the trees we need over
 if [ ! -f /opt/adsb/os.adsb.feeder.image ] ; then
-    rm -f ./usr/lib/systemd/system/adsb-hotspot.service
-    rm -f ./usr/lib/systemd/system/adsb-bootstrap.service
-    rm -f ./usr/lib/systemd/system/adsb-recovery.service
+    for service in "${services_image[@]}"; do
+        rm -f "./usr/lib/systemd/system/${service}"
+    done
 fi
 
 for path in ./usr/lib/systemd/system/*; do
@@ -355,11 +361,6 @@ else
     set -x
     cp -f -a ./* /
     set +x
-
-    services_enable+=("adsb-hotspot.service")
-    services_enable+=("adsb-zram.service")
-    services_enable+=("adsb-netdog.service")
-    services_enable+=("adsb-recovery.service")
 fi
 
 # remove flag file so the caching helper script will run via pre-start.sh
@@ -367,15 +368,9 @@ rm -f /opt/adsb/.cachebust_done
 
 echo "$(date -u +"%FT%T.%3NZ") updating systemd services ..."
 
-services_enable+=("adsb-early-boot.service")
-services_enable+=("adsb-docker.service")
-
 # the timer is gonna start the adsb-update service
 # old versions had adsb-update start on boot, fix that up in case we update from an old version
 rm -f /etc/systemd/system/multi-user.target.wants/adsb-update.service
-
-services_enable+=("adsb-update.timer")
-services_enable+=("adsb-setup.service")
 
 for service in "${services_enable[@]}"; do
     if ! systemctl is-enabled "${service}" >/dev/null; then

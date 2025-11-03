@@ -130,15 +130,11 @@ if [ "$BASE_DISTRO" = "armbian" ] ; then
 fi
 
 # Enable services at boot
-systemctl enable adsb-setup.service
-systemctl enable adsb-recovery.service
-systemctl enable adsb-early-boot.service
-systemctl enable adsb-docker.service
 systemctl enable adsb-bootstrap.service
-systemctl enable adsb-hotspot.service
-systemctl enable adsb-zram.service
-systemctl enable adsb-update.timer
-systemctl enable adsb-netdog.service
+readarray -t services_enable < /opt/adsb/misc/services
+readarray -t services_image < /opt/adsb/misc/services_image
+services_enable+=( "${services_image[@]}" )
+systemctl enable "${services_enable[@]}"
 
 # Disable some things we don't need and that only eat memory (assuming they exist)
 systemctl disable bluetooth.service || true
