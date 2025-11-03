@@ -70,6 +70,7 @@ from utils.other_aggregators import (
     Sdrmap,
     Uk1090,
 )
+from utils.paths import get_adsb_base_dir
 from utils.sdr import SDRDevices
 from utils.system import System
 from utils.util import (
@@ -441,7 +442,7 @@ class AdsbIm:
 
     def get_previous_version(self):
         previous_version = ""
-        pv_file = "/opt/adsb/adsb.im.previous-version"
+        pv_file = f"{get_adsb_base_dir()}/adsb.im.previous-version"
 
         if pathlib.Path(pv_file).exists():
             with open(pv_file, "r") as f:
@@ -745,7 +746,9 @@ class AdsbIm:
             return
 
         def push_mo():
-            subprocess.run(["bash", "/opt/adsb/push_multioutline.sh", f"{self._d.env_by_tags('num_micro_sites').value}"])
+            subprocess.run(
+                ["bash", f"{get_adsb_base_dir()}/push_multioutline.sh", f"{self._d.env_by_tags('num_micro_sites').value}"]
+            )
 
         oldThread = self._push_multi_thread
         if oldThread and oldThread.is_alive():
@@ -1011,7 +1014,7 @@ class AdsbIm:
                 return redirect(request.url)
             if file.filename and (file.filename.endswith(".zip") or file.filename.endswith(".backup")):
                 filename = secure_filename(file.filename)
-                restore_path = pathlib.Path("/opt/adsb/config/restore")
+                restore_path = pathlib.Path(f"{get_adsb_base_dir()}/config/restore")
                 # clean up the restore path when saving a fresh zipfile
                 shutil.rmtree(restore_path, ignore_errors=True)
                 restore_path.mkdir(mode=0o644, exist_ok=True)
@@ -1040,7 +1043,7 @@ class AdsbIm:
         # be very careful with the content of this zip file...
         print_err("zip file uploaded, looking at the content")
         filename = request.args["zipfile"]
-        adsb_path = pathlib.Path("/opt/adsb/config")
+        adsb_path = pathlib.Path(f"{get_adsb_base_dir()}/config")
         restore_path = adsb_path / "restore"
         restore_path.mkdir(mode=0o755, exist_ok=True)
         restored_files: List[str] = []
@@ -1082,12 +1085,12 @@ class AdsbIm:
     def restore_post(self, form):
         # they have selected the files to restore
         print_err("restoring the files the user selected")
-        adsb_path = pathlib.Path("/opt/adsb/config")
+        adsb_path = pathlib.Path(f"{get_adsb_base_dir()}/config")
         (adsb_path / "ultrafeeder").mkdir(mode=0o755, exist_ok=True)
         restore_path = adsb_path / "restore"
         restore_path.mkdir(mode=0o755, exist_ok=True)
         try:
-            subprocess.call("/opt/adsb/docker-compose-adsb down -t 30", timeout=40.0, shell=True)
+            subprocess.call(f"{get_adsb_base_dir()}/docker-compose-adsb down -t 30", timeout=40.0, shell=True)
         except subprocess.TimeoutExpired:
             print_err("timeout expired stopping docker... trying to continue...")
         for name, value in form.items():
@@ -1123,7 +1126,7 @@ class AdsbIm:
                         write_values_to_config_json(values, reason="execute_restore from .env")
 
         # clean up the restore path
-        restore_path = pathlib.Path("/opt/adsb/config/restore")
+        restore_path = pathlib.Path(f"{get_adsb_base_dir()}/config/restore")
         shutil.rmtree(restore_path, ignore_errors=True)
 
         # now that everything has been moved into place we need to read all the values from config.json
@@ -1169,7 +1172,7 @@ class AdsbIm:
         create_fake_info([0] + self.micro_indices())
 
         try:
-            subprocess.call("/opt/adsb/docker-compose-start", timeout=180.0, shell=True)
+            subprocess.call(f"{get_adsb_base_dir()}/docker-compose-start", timeout=180.0, shell=True)
         except subprocess.TimeoutExpired:
             print_err("timeout expired re-starting docker... trying to continue...")
 
@@ -2149,7 +2152,7 @@ class AdsbIm:
                 print_err(f"found suspicious characters in IP address {ip} - let's not use this in a command")
                 return (False, f"found suspicious characters in IP address {ip} - rejected")
             else:
-                data_dir = pathlib.Path("/opt/adsb/config/ultrafeeder")
+                data_dir = pathlib.Path(f"{get_adsb_base_dir()}/config/ultrafeeder")
                 if (data_dir / f"{old_ip}").exists() and (data_dir / f"{old_ip}").is_dir():
                     # ok, as one would hope, there's an Ultrafeeder directory for the old IP
                     if (data_dir / f"{ip}").exists():
@@ -2160,7 +2163,7 @@ class AdsbIm:
                         )
                     try:
                         subprocess.run(
-                            f"/opt/adsb/docker-compose-adsb down uf_{num} -t 30",
+                            f"{get_adsb_base_dir()}/docker-compose-adsb down uf_{num} -t 30",
                             shell=True,
                         )
                     except Exception:
@@ -2201,10 +2204,10 @@ class AdsbIm:
 
     def setRtlGain(self):
         if self._d.is_enabled("stage2_nano") or self._d.env_by_tags("aggregator_choice").value == "nano":
-            gaindir = pathlib.Path("/opt/adsb/config/nanofeeder/globe_history/autogain")
+            gaindir = pathlib.Path(f"{get_adsb_base_dir()}/config/nanofeeder/globe_history/autogain")
             setGainPath = pathlib.Path("/run/adsb-feeder-nanofeeder/readsb/setGain")
         else:
-            gaindir = pathlib.Path("/opt/adsb/config/ultrafeeder/globe_history/autogain")
+            gaindir = pathlib.Path(f"{get_adsb_base_dir()}/config/ultrafeeder/globe_history/autogain")
             setGainPath = pathlib.Path("/run/adsb-feeder-ultrafeeder/readsb/setGain")
         try:
             gaindir.mkdir(exist_ok=True, parents=True)
@@ -2248,7 +2251,7 @@ class AdsbIm:
 
     def update_hfdlobserver_config(self):
         if self._d.is_enabled("hfdlobserver"):
-            config_template = pathlib.Path("/opt/adsb/hfdlobserver/compose/settings.yaml.sample")
+            config_template = pathlib.Path(f"{get_adsb_base_dir()}/hfdlobserver/compose/settings.yaml.sample")
             config_lines = config_template.read_text().splitlines()
             local_config = "%LOCAL_EDITS_DONT_MANAGE%=1" in config_lines
             # we have config settings or the user has edited the file themselves - etiher way we want to run the container
@@ -2269,8 +2272,8 @@ class AdsbIm:
             ]
             for p in placeholders:
                 config_lines = [line.replace("%" + p + "%", str(self._d.env_by_tags(p).value)) for line in config_lines]
-            config = pathlib.Path("/opt/adsb/hfdlobserver/compose/settings.yaml")
-            config_backup = pathlib.Path("/opt/adsb/hfdlobserver/compose/settings.yaml.bak")
+            config = pathlib.Path(f"{get_adsb_base_dir()}/hfdlobserver/compose/settings.yaml")
+            config_backup = pathlib.Path(f"{get_adsb_base_dir()}/hfdlobserver/compose/settings.yaml.bak")
             if config.exists():
                 config.rename(config_backup)
             with open(config, "w") as f:
@@ -2287,7 +2290,7 @@ class AdsbIm:
             and self._d.env_by_tags("sondeserial").value
             and self._d.env_by_tags("sonde_sdr_type").value
         ):
-            config_template = pathlib.Path("/opt/adsb/radiosonde/station.cfg.template")
+            config_template = pathlib.Path(f"{get_adsb_base_dir()}/radiosonde/station.cfg.template")
             config_lines = config_template.read_text().splitlines()
             if "%LOCAL_EDITS_DONT_MANAGE%=1" in config_lines:
                 # the user told us not to mess with their changes
@@ -2320,8 +2323,8 @@ class AdsbIm:
 
             new_config = "\n".join(config_lines)
 
-            config = pathlib.Path("/opt/adsb/radiosonde/station.cfg")
-            config_backup = pathlib.Path("/opt/adsb/radiosonde/station.cfg.bak")
+            config = pathlib.Path(f"{get_adsb_base_dir()}/radiosonde/station.cfg")
+            config_backup = pathlib.Path(f"{get_adsb_base_dir()}/radiosonde/station.cfg.bak")
 
             if config.exists():
                 try:
@@ -2449,7 +2452,7 @@ class AdsbIm:
         # we have a temperature sensor and dependency install (if needed) succeeded
         # let's turn on the service
         # first, write out the default config file
-        open("/opt/adsb/extras/adsb-temperature.default", "w").write(default_file_content)
+        open(f"{get_adsb_base_dir()}/extras/adsb-temperature.default", "w").write(default_file_content)
         success, output = run_shell_captured(
             "systemctl is-active adsb-temperature.service || systemctl enable --now adsb-temperature.service",
             timeout=20,
@@ -2963,7 +2966,7 @@ class AdsbIm:
 
             if self._d.is_feeder_image and not self._d.env_by_tags("journal_configured").value:
                 try:
-                    cmd = "/opt/adsb/scripts/journal-set-volatile.sh"
+                    cmd = f"{get_adsb_base_dir()}/scripts/journal-set-volatile.sh"
                     print_err(cmd)
                     subprocess.run(cmd, shell=True, timeout=5.0)
                     self.update_journal_state()
@@ -3257,9 +3260,9 @@ class AdsbIm:
                     return render_template("/restarting.html")
                 if key == "log_persistence_toggle":
                     if self._persistent_journal:
-                        cmd = ["/opt/adsb/scripts/journal-set-volatile.sh"]
+                        cmd = [f"{get_adsb_base_dir()}/scripts/journal-set-volatile.sh"]
                     else:
-                        cmd = ["/opt/adsb/scripts/journal-set-persist.sh"]
+                        cmd = [f"{get_adsb_base_dir()}/scripts/journal-set-persist.sh"]
                     try:
                         print_err(cmd)
                         subprocess.run(cmd, shell=True, timeout=5.0)
@@ -3270,18 +3273,18 @@ class AdsbIm:
                 if key == "acarshub_to_disk" and value == "go":
                     run_shell_captured("docker stop acarshub", timeout=30)
                     run_shell_captured(
-                        "mkdir -p /opt/adsb/config/acarshub_data"
-                        + "&& cp -f /run/acars_data/* /opt/adsb/config/acarshub_data"
+                        f"mkdir -p {get_adsb_base_dir()}/config/acarshub_data"
+                        + f"&& cp -f /run/acars_data/* {get_adsb_base_dir()}/config/acarshub_data"
                         + "&& rm -rf /run/acars_data",
                         timeout=30,
                     )
-                    self._d.env_by_tags("acarshub_data_path").value = "/opt/adsb/config/acarshub_data"
+                    self._d.env_by_tags("acarshub_data_path").value = f"{get_adsb_base_dir()}/config/acarshub_data"
                 if key == "acarshub_to_run" and value == "go":
                     run_shell_captured("docker stop acarshub", timeout=30)
                     run_shell_captured(
                         "mkdir -p /run/acars_data"
-                        + "&& cp -f /opt/adsb/config/acarshub_data/* /run/acars_data"
-                        + "&& rm -rf /opt/adsb/config/acarshub_data",
+                        + f"&& cp -f {get_adsb_base_dir()}/config/acarshub_data/* /run/acars_data"
+                        + f"&& rm -rf {get_adsb_base_dir()}/config/acarshub_data",
                         timeout=30,
                     )
                     self._d.env_by_tags("acarshub_data_path").value = "/run/acars_data"
@@ -3616,7 +3619,7 @@ class AdsbIm:
                 if value == "nano" and self._d.is_feeder_image:
                     # make sure we don't log to disk at all
                     try:
-                        subprocess.call("bash /opt/adsb/scripts/journal-set-volatile.sh", shell=True, timeout=5)
+                        subprocess.call(f"bash {get_adsb_base_dir()}/scripts/journal-set-volatile.sh", shell=True, timeout=5)
                         print_err("switched to volatile journal")
                     except Exception:
                         print_err("exception trying to switch to volatile journal - ignoring")
@@ -3685,7 +3688,7 @@ class AdsbIm:
             if self._d.is_enabled("sdrplay") and not self._d.is_enabled("sdrplay_license_accepted"):
                 return redirect(url_for("sdrplay_license"))
 
-            self._system._restart.bg_run(cmdline="/opt/adsb/docker-compose-start", silent=False)
+            self._system._restart.bg_run(cmdline=f"{get_adsb_base_dir()}/docker-compose-start", silent=False)
             return render_template("/restarting.html", extra_args=extra_args)
         print_err("base config not completed", level=2)
         return redirect(url_for("director"))
@@ -3955,7 +3958,7 @@ class AdsbIm:
         self.plane_stats_day = start_of_day.timestamp()
         self.plane_stats: list = [[] for i in [0] + self.micro_indices()]
         try:
-            with gzip.open("/opt/adsb/adsb_planes_seen_per_day.json.gz", "r") as f:
+            with gzip.open(f"{get_adsb_base_dir()}/adsb_planes_seen_per_day.json.gz", "r") as f:
                 planes = json.load(f)
                 ts = planes.get("timestamp", 0)
 
@@ -4013,7 +4016,7 @@ class AdsbIm:
             planes = {"timestamp": int(time.time()), "planes": planelists, "stats": self.plane_stats}
             planes_json = json.dumps(planes, indent=2)
 
-            path = "/opt/adsb/adsb_planes_seen_per_day.json.gz"
+            path = f"{get_adsb_base_dir()}/adsb_planes_seen_per_day.json.gz"
             tmp = path + ".tmp"
             with gzip.open(tmp, "w") as f:
                 f.write(planes_json.encode("utf-8"))
@@ -4168,7 +4171,7 @@ class AdsbIm:
         # if we get to show the feeder homepage, the user should have everything figured out
         # and we can remove the pre-installed ssh-keys and password
         with self.miscLock:
-            if os.path.exists("/opt/adsb/adsb.im.passwd.and.keys"):
+            if os.path.exists(f"{get_adsb_base_dir()}/adsb.im.passwd.and.keys"):
                 print_err("removing pre-installed ssh-keys, overwriting root password")
                 authkeys = "/root/.ssh/authorized_keys"
                 shutil.copyfile(authkeys, authkeys + ".bak")
@@ -4182,7 +4185,7 @@ class AdsbIm:
                 # now overwrite the root password with something random
                 self.rpw = self.generate_random_password()
                 self.set_rpw()
-                os.remove("/opt/adsb/adsb.im.passwd.and.keys")
+                os.remove(f"{get_adsb_base_dir()}/adsb.im.passwd.and.keys")
 
         board = self._d.env_by_tags("board_name").valuestr
         # there are many other boards I should list here - but Pi 3 and Pi Zero are probably the most common
@@ -4195,7 +4198,7 @@ class AdsbIm:
             local_address = request.host.split(":")[0]
 
         # this indicates that the last docker-compose-adsb up call failed
-        compose_up_failed = os.path.exists("/opt/adsb/state/compose_up_failed")
+        compose_up_failed = os.path.exists(f"{get_adsb_base_dir()}/state/compose_up_failed")
 
         ipv6_broken = False
         if compose_up_failed:
@@ -4351,7 +4354,7 @@ class AdsbIm:
 
         if target == "0x0.st":
             success, output = run_shell_captured(
-                command="bash /opt/adsb/log-sanitizer.sh 2>&1 | curl -F'expires=168' -F'file=@-'  https://0x0.st",
+                command=f"bash {get_adsb_base_dir()}/log-sanitizer.sh 2>&1 | curl -F'expires=168' -F'file=@-'  https://0x0.st",
                 timeout=60,
             )
             url = output.strip()
@@ -4364,7 +4367,7 @@ class AdsbIm:
 
         if target == "termbin.com":
             success, output = run_shell_captured(
-                command="bash /opt/adsb/log-sanitizer.sh 2>&1 | nc termbin.com 9999",
+                command=f"bash {get_adsb_base_dir()}/log-sanitizer.sh 2>&1 | nc termbin.com 9999",
                 timeout=60,
             )
             # strip extra chars for termbin
@@ -4396,7 +4399,7 @@ class AdsbIm:
 
         def get_log(fobj):
             subprocess.run(
-                "bash /opt/adsb/log-sanitizer.sh",
+                f"bash {get_adsb_base_dir()}/log-sanitizer.sh",
                 shell=True,
                 stdout=fobj,
                 stderr=subprocess.STDOUT,
@@ -4446,7 +4449,7 @@ class AdsbIm:
         else:
             ipv6 = "IPv6 is working or disabled"
 
-        netdog = simple_cmd_result("tail -n 10 /opt/adsb/logs/netdog.log 2>/dev/null")
+        netdog = simple_cmd_result(f"tail -n 10 {get_adsb_base_dir()}/logs/netdog.log 2>/dev/null")
 
         containers = [
             self._d.env_by_tags(["container", container]).value
@@ -4515,8 +4518,8 @@ class AdsbIm:
     def dozzle_yml_from_template(self):
         # env vars are not supported in certain places in compose ymls,
         # in even more places in docker v20 which is still somewhat prevalent
-        template_file = "/opt/adsb/config/dozzle_template.yml"
-        yml_file = "/opt/adsb/config/dozzle.yml"
+        template_file = f"{get_adsb_base_dir()}/config/dozzle_template.yml"
+        yml_file = f"{get_adsb_base_dir()}/config/dozzle.yml"
         with open(template_file, "r") as template:
             with open(yml_file, "w") as yml:
                 yml.write(template.read().replace("DOCKER_IPV6", "true" if self._d.is_enabled("docker_ipv6") else "false"))
@@ -4562,20 +4565,21 @@ def create_stage2_yml_files(n, ip):
         [f"rv_{n}.yml", "rv_stage2_template.yml"],
         [f"sdrmap_{n}.yml", "sdrmap_stage2_template.yml"],
     ]:
-        create_stage2_yml_from_template(f"/opt/adsb/config/{yml_file}", n, ip, f"/opt/adsb/config/{template}")
+        create_stage2_yml_from_template(
+            f"{get_adsb_base_dir()}/config/{yml_file}", n, ip, f"{get_adsb_base_dir()}/config/{template}"
+        )
 
 
 if __name__ == "__main__":
     # setup the config folder if that hasn't happened yet
     # this is designed for two scenarios:
-    # (a) /opt/adsb/config is a subdirectory of /opt/adsb (that gets created if necessary)
+    # (a) {get_adsb_base_dir()}/config is a subdirectory of {get_adsb_base_dir()} (that gets created if necessary)
     #     and the config files are moved to reside there
-    # (b) prior to starting this app, /opt/adsb/config is created as a symlink to the
+    # (b) prior to starting this app, {get_adsb_base_dir()}/config is created as a symlink to the
     #     OS designated config dir (e.g., /mnt/dietpi_userdata/adsb-feeder) and the config
     #     files are moved to that place instead
-
-    adsb_dir = pathlib.Path("/opt/adsb")
-    config_dir = pathlib.Path("/opt/adsb/config")
+    adsb_dir = pathlib.Path(f"{get_adsb_base_dir()}")
+    config_dir = pathlib.Path(f"{get_adsb_base_dir()}/config")
 
     if not config_dir.exists():
         config_dir.mkdir()
