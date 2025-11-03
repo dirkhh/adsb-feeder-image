@@ -563,8 +563,12 @@ class AdsbIm:
             return
 
         def start_mdns():
-            subprocess.run(["/bin/bash", "/opt/adsb/scripts/mdns-alias-setup.sh", f"{host_name}"])
-            subprocess.run(["/usr/bin/hostnamectl", "hostname", f"{host_name}"])
+            # if we run this for testing purposes on a system without hostnamectl, let's not
+            # try and mess with things...
+            hostnamectl = pathlib.Path("/usr/bin/hostnamectl")
+            if hostnamectl.exists():
+                subprocess.run(["/bin/bash", f"{get_adsb_base_dir()}/scripts/mdns-alias-setup.sh", f"{host_name}"])
+                subprocess.run(["/usr/bin/hostnamectl", "hostname", f"{host_name}"])
 
         if self._current_site_name == site_name:
             return
@@ -630,8 +634,8 @@ class AdsbIm:
 
         # reset undervoltage indicator
         self._d.env_by_tags("under_voltage").value = False
-
-        threading.Thread(target=self.monitor_dmesg).start()
+        if "Raspberry" in board:
+            threading.Thread(target=self.monitor_dmesg).start()
 
         # Suppress Flask development server warning
         import logging

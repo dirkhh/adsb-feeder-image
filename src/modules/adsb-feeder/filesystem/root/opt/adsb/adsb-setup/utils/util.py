@@ -224,13 +224,17 @@ def create_fake_info(indices: Sequence[Optional[int]]) -> bool:
             except Exception:
                 pass
         if not cpuinfo.exists():
-            with open("/proc/cpuinfo", "r") as ci_in, open(cpuinfo, "w") as ci_out:
-                for line in ci_in:
-                    if not line.startswith("Serial"):
-                        ci_out.write(line)
-                random_hex_string = secrets.token_hex(8)
-                ci_out.write(f"Serial\t\t: {random_hex_string}\n")
-
+            try:
+                with open("/proc/cpuinfo", "r") as ci_in, open(cpuinfo, "w") as ci_out:
+                    for line in ci_in:
+                        if not line.startswith("Serial"):
+                            ci_out.write(line)
+                    random_hex_string = secrets.token_hex(8)
+                    ci_out.write(f"Serial\t\t: {random_hex_string}\n")
+            except Exception:
+                with open(cpuinfo, "w") as ci_out:
+                    random_hex_string = secrets.token_hex(8)
+                    ci_out.write(f"Serial\t\t: {random_hex_string}\n")
     if not FAKE_THERMAL_TEMP_FILE.exists():
         with open(FAKE_THERMAL_TEMP_FILE, "w") as fake_temp:
             fake_temp.write("12345\n")
