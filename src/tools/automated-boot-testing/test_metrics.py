@@ -17,8 +17,6 @@ def test_metrics():
         db_path = Path(tmpdir) / "test-metrics.db"
         metrics = TestMetrics(db_path=str(db_path))
 
-        print("✓ Metrics initialized")
-
         # Test 1: Start a test
         test_id = metrics.start_test(
             image_url="https://example.com/image-v1.0.0-beta.1.img.xz",
@@ -26,38 +24,27 @@ def test_metrics():
             trigger_source="test-script",
             rpi_ip="192.168.1.100",
         )
-        print(f"✓ Started test ID: {test_id}")
 
         # Test 2: Update stages
         metrics.update_stage(test_id, "download", "passed")
-        print("✓ Updated download stage")
-
         metrics.update_stage(test_id, "boot", "passed")
-        print("✓ Updated boot stage")
-
         metrics.update_stage(test_id, "network", "passed")
-        print("✓ Updated network stage")
-
         metrics.update_stage(test_id, "browser_test", "passed")
-        print("✓ Updated browser test stage")
 
         # Test 3: Complete test
         metrics.complete_test(test_id, "passed")
-        print("✓ Completed test")
 
         # Test 4: Query results
         results = metrics.get_recent_results(limit=10)
         assert len(results) == 1
         assert results[0]["status"] == "passed"
         assert results[0]["image_version"] == "v1.0.0-beta.1"
-        print(f"✓ Query returned {len(results)} result(s)")
 
         # Test 5: Get stats
         stats = metrics.get_stats(days=7)
         assert stats["total"] == 1
         assert stats["passed"] == 1
         assert stats["pass_rate"] == 100.0
-        print(f"✓ Stats: {stats['total']} total, {stats['pass_rate']}% pass rate")
 
         # Test 6: Create a failed test
         test_id2 = metrics.start_test(
@@ -69,14 +56,12 @@ def test_metrics():
         metrics.update_stage(test_id2, "download", "passed")
         metrics.update_stage(test_id2, "boot", "failed")
         metrics.complete_test(test_id2, "failed", error_message="Boot timeout", error_stage="boot")
-        print(f"✓ Created failed test ID: {test_id2}")
 
         # Test 7: Query failures
         failures = metrics.get_failures(limit=10)
         assert len(failures) == 1
         assert failures[0]["status"] == "failed"
         assert failures[0]["error_message"] == "Boot timeout"
-        print(f"✓ Query returned {len(failures)} failure(s)")
 
         # Test 8: Updated stats
         stats = metrics.get_stats(days=7)
@@ -84,9 +69,6 @@ def test_metrics():
         assert stats["passed"] == 1
         assert stats["failed"] == 1
         assert stats["pass_rate"] == 50.0
-        print(f"✓ Updated stats: {stats['total']} total, {stats['pass_rate']}% pass rate")
-
-        print("\n🎉 All tests passed!")
 
 
 def test_check_duplicate_skips_when_release_id_none():
@@ -178,7 +160,7 @@ def test_duration_reflects_execution_time_not_queue_time():
     metrics = TestMetrics(db_path=":memory:")
 
     # Simulate: Test queued at time T
-    queue_time = datetime.utcnow()
+    queue_time = datetime.now(tz=None)
     with patch("metrics.datetime") as mock_datetime:
         mock_datetime.utcnow.return_value = queue_time
         mock_datetime.fromisoformat = datetime.fromisoformat
@@ -186,8 +168,6 @@ def test_duration_reflects_execution_time_not_queue_time():
             image_url="https://example.com/test.img",
             triggered_by="api",
         )
-
-    print(f"✓ Test {test_id} queued at {queue_time.isoformat()}")
 
     # Simulate: Test sits in queue for 5 seconds
     time.sleep(0.1)  # Small sleep to ensure time difference
@@ -199,8 +179,6 @@ def test_duration_reflects_execution_time_not_queue_time():
         mock_datetime.fromisoformat = datetime.fromisoformat
         metrics.update_test_status(test_id, "running")
 
-    print(f"✓ Test {test_id} started running at {execution_start_time.isoformat()}")
-
     # Simulate: Test runs for 3 seconds
     completion_time = execution_start_time + timedelta(seconds=3)
 
@@ -210,8 +188,6 @@ def test_duration_reflects_execution_time_not_queue_time():
         mock_datetime.fromisoformat = datetime.fromisoformat
         metrics.complete_test(test_id, "passed")
 
-    print(f"✓ Test {test_id} completed at {completion_time.isoformat()}")
-
     # Verify: Duration should be 3 seconds (execution time), not 8 seconds (queue + execution)
     results = metrics.get_recent_results(limit=1)
     assert len(results) == 1
@@ -219,24 +195,5 @@ def test_duration_reflects_execution_time_not_queue_time():
     duration = results[0]["duration_seconds"]
     started_at = datetime.fromisoformat(results[0]["started_at"])
 
-    print(f"✓ Reported duration: {duration} seconds")
-    print(f"✓ Started at: {started_at.isoformat()}")
-
     assert duration == 3, f"Expected duration 3s (execution time), got {duration}s"
     assert started_at == execution_start_time, f"Expected started_at to be execution start time"
-
-    print("✓ Duration correctly reflects execution time, not queue wait time")
-
-
-if __name__ == "__main__":
-    try:
-        test_metrics()
-        print("\n" + "=" * 60)
-        test_duration_reflects_execution_time_not_queue_time()
-        print("\n🎉 All tests passed!")
-    except Exception as e:
-        print(f"\n❌ Test failed: {e}")
-        import traceback
-
-        traceback.print_exc()
-        exit(1)

@@ -45,11 +45,11 @@ run-tests:
 	@echo "Running Python tests..."
 	@if command -v uv >/dev/null 2>&1; then \
 		echo "Using uv run"; \
-		PYTEST="uv run pytest"; PYTHON="uv run python"; \
+		PYTEST="uv run pytest"; \
 	elif [ -d .venv/bin ]; then \
 		echo "Using .venv virtual environment"; \
 		export PATH=.venv/bin:$$PATH; \
-		PYTEST=pytest; PYTHON=python3; \
+		PYTEST=pytest; \
 	else \
 		echo "ERROR: Neither 'uv' command nor .venv/bin found!"; \
 		echo "Install uv: curl -LsSf https://astral.sh/uv/install.sh | sh"; \
@@ -60,10 +60,8 @@ run-tests:
 	$$PYTEST tests/unit/ -v || FAILURES="$$FAILURES pytest,"; \
 	echo "=== Running selenium framework tests ==="; \
 	$$PYTEST src/tools/automated-boot-testing/tests/ -v || FAILURES="$$FAILURES selenium-tests,"; \
-	echo "=== Running test_serial_console_reader.py ==="; \
-	(cd src/tools/automated-boot-testing && $$PYTHON test_serial_console_reader.py) || FAILURES="$$FAILURES test_serial_console_reader,"; \
-	echo "=== Running test_metrics.py ==="; \
-	(cd src/tools/automated-boot-testing && $$PYTHON test_metrics.py) || FAILURES="$$FAILURES test_metrics,"; \
+	echo "=== Running automated-boot-testing tests ==="; \
+	(cd src/tools/automated-boot-testing && $$PYTEST test_serial_console_reader.py test_metrics.py -v) || FAILURES="$$FAILURES automated-boot-testing,"; \
 	echo "=========================================="; \
 	if [ -z "$$FAILURES" ]; then \
 		echo "All tests passed"; \
