@@ -7,6 +7,8 @@ from pathlib import Path
 
 import requests
 
+from boot_test_lib.disk_space_utils import handle_space_error, is_likely_space_error
+
 logger = logging.getLogger(__name__)
 
 
@@ -95,18 +97,25 @@ class ImageDownloader:
         downloaded = 0
         last_report = 0
 
-        with open(cached_path, "wb") as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                if chunk:
-                    f.write(chunk)
-                    downloaded += len(chunk)
+        try:
+            with open(cached_path, "wb") as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    if chunk:
+                        f.write(chunk)
+                        downloaded += len(chunk)
 
-                    # Log progress every 5%
-                    if total_size > 0 and downloaded > last_report:
-                        pct = (downloaded / total_size) * 100
-                        logger.info(f"Downloaded: {pct:.1f}% ({downloaded}/{total_size} bytes)")
-                        last_report += int(0.05 * total_size)
+                        # Log progress every 5%
+                        if total_size > 0 and downloaded > last_report:
+                            pct = (downloaded / total_size) * 100
+                            logger.info(f"Downloaded: {pct:.1f}% ({downloaded}/{total_size} bytes)")
+                            last_report += int(0.05 * total_size)
 
-        logger.info(f"✓ Download complete: {cached_path}")
-        logger.info(f"Downloaded {cached_path.stat().st_size / 1024 / 1024:.1f} MB")
-        return cached_path
+            logger.info(f"✓ Download complete: {cached_path}")
+            logger.info(f"Downloaded {cached_path.stat().st_size / 1024 / 1024:.1f} MB")
+            return cached_path
+
+        except Exception as e:
+            # Check if this is a disk space error
+            if is_likely_space_error(e):
+                handle_space_error(self.cache_dir, "download")
+            raise
