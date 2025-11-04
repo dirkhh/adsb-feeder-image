@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Optional
 
 import requests
+from boot_test_lib.disk_space_utils import handle_space_error, is_likely_space_error
 from boot_test_lib.download import ImageDownloader, ImageInfo
 from serial_console_reader import SerialConsoleReader  # type: ignore
 
@@ -65,23 +66,28 @@ class RPiISCSIBackend(HardwareBackend):
         logger.info("=" * 70)
 
         downloader = ImageDownloader(cache_dir=Path("/tmp"))
-        local_compressed = downloader.download(image_info)
+        self.local_compressed = downloader.download(image_info)
 
         # Decompress locally
-        local_decompressed = local_compressed.with_suffix("")  # Remove .xz
-        if not local_decompressed.exists():
-            logger.info(f"Decompressing to {local_decompressed}")
-            subprocess.run(["xz", "-d", "-k", str(local_compressed)], check=True)
-            logger.info(f"Decompressed to {local_decompressed.stat().st_size / 1024 / 1024:.1f} MB")
+        self.local_decompressed = self.local_compressed.with_suffix("")  # Remove .xz
+        if not self.local_decompressed.exists():
+            logger.info(f"Decompressing to {self.local_decompressed}")
+            try:
+                subprocess.run(["xz", "-d", "-k", str(self.local_compressed)], check=True)
+                logger.info(f"Decompressed to {self.local_decompressed.stat().st_size / 1024 / 1024:.1f} MB")
+            except Exception as e:
+                if is_likely_space_error(e):
+                    handle_space_error(Path("/tmp"), "decompression")
+                raise
         else:
-            logger.info(f"Using cached decompressed image: {local_decompressed}")
+            logger.info(f"Using cached decompressed image: {self.local_decompressed}")
 
         # Setup iSCSI image
         logger.info("=" * 70)
         logger.info("Stage 2: Setup iSCSI image")
         logger.info("=" * 70)
 
-        self._setup_iscsi_image(local_decompressed)
+        self._setup_iscsi_image(self.local_decompressed)
 
     def boot_system(self) -> None:
         """Power cycle Raspberry Pi."""
@@ -146,6 +152,21 @@ class RPiISCSIBackend(HardwareBackend):
             logger.info("✓ Raspberry Pi powered off")
         except Exception as e:
             logger.warning(f"Failed to power off: {e}")
+
+        # Clean up temp files
+        if hasattr(self, "local_decompressed") and self.local_decompressed and self.local_decompressed.exists():
+            try:
+                self.local_decompressed.unlink()
+                logger.info(f"✓ Removed temp file: {self.local_decompressed}")
+            except Exception as e:
+                logger.warning(f"Failed to remove temp file: {e}")
+
+        if hasattr(self, "local_compressed") and self.local_compressed and self.local_compressed.exists():
+            try:
+                self.local_compressed.unlink()
+                logger.info(f"✓ Removed temp file: {self.local_compressed}")
+            except Exception as e:
+                logger.warning(f"Failed to remove temp file: {e}")
 
     def _setup_iscsi_image(self, decompressed_image: Path) -> None:
         """

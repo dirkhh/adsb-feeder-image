@@ -5,6 +5,7 @@ Note: Integration tests are marked with @pytest.mark.integration and can be run 
     pytest tests/test_download.py -m "not integration"     # Run only unit tests
 """
 
+import errno
 import tempfile
 from pathlib import Path
 from unittest.mock import Mock, patch
@@ -267,3 +268,100 @@ class TestImageDownloaderIntegration:
             result3 = downloader.download(image_info, force=True)
             assert result3 == result
             assert result3.exists()
+
+
+class TestDownloadSpaceErrorHandling:
+    """Tests for download space error handling."""
+
+    @patch("boot_test_lib.download.requests.get")
+    def test_download_handles_space_error(self, mock_get):
+        """Test that download detects and reports space errors."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            cache_dir = Path(tmpdir)
+            downloader = ImageDownloader(cache_dir=cache_dir)
+
+            image_info = ImageInfo(
+                url="http://example.com/test.img.xz",
+                filename="test.img.xz",
+                expected_name="test.img",
+                image_type="rpi",
+            )
+
+            # Setup mock response
+            mock_response = Mock()
+            mock_response.headers = {"content-length": "1024"}
+            mock_response.iter_content = Mock(return_value=[b"x" * 1024])
+            mock_response.raise_for_status = Mock()
+            mock_get.return_value = mock_response
+
+            # Mock space error during file write
+            with patch("builtins.open", side_effect=OSError(errno.ENOSPC, "No space")):
+                with patch("boot_test_lib.download.handle_space_error") as mock_handle:
+                    with pytest.raises(OSError):
+                        downloader.download(image_info)
+
+                    # Verify handle_space_error was called
+                    mock_handle.assert_called_once()
+                    args = mock_handle.call_args[0]
+                    assert args[0] == cache_dir
+                    assert args[1] == "download"
+
+    @patch("boot_test_lib.download.requests.get")
+    def test_download_reraises_original_error(self, mock_get):
+        """Test that original error is re-raised after handling."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            cache_dir = Path(tmpdir)
+            downloader = ImageDownloader(cache_dir=cache_dir)
+
+            image_info = ImageInfo(
+                url="http://example.com/test.img.xz",
+                filename="test.img.xz",
+                expected_name="test.img",
+                image_type="rpi",
+            )
+
+            original_error = OSError(errno.ENOSPC, "No space")
+
+            # Setup mock response
+            mock_response = Mock()
+            mock_response.headers = {"content-length": "1024"}
+            mock_response.iter_content = Mock(return_value=[b"x" * 1024])
+            mock_response.raise_for_status = Mock()
+            mock_get.return_value = mock_response
+
+            with patch("builtins.open", side_effect=original_error):
+                with patch("boot_test_lib.download.handle_space_error"):
+                    with pytest.raises(OSError) as exc_info:
+                        downloader.download(image_info)
+
+                    # Verify same error instance is raised
+                    assert exc_info.value is original_error
+
+    @patch("boot_test_lib.download.requests.get")
+    def test_download_ignores_non_space_errors(self, mock_get):
+        """Test that non-space errors are not handled specially."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            cache_dir = Path(tmpdir)
+            downloader = ImageDownloader(cache_dir=cache_dir)
+
+            image_info = ImageInfo(
+                url="http://example.com/test.img.xz",
+                filename="test.img.xz",
+                expected_name="test.img",
+                image_type="rpi",
+            )
+
+            # Setup mock response
+            mock_response = Mock()
+            mock_response.headers = {"content-length": "1024"}
+            mock_response.iter_content = Mock(return_value=[b"x" * 1024])
+            mock_response.raise_for_status = Mock()
+            mock_get.return_value = mock_response
+
+            with patch("builtins.open", side_effect=ValueError("Other error")):
+                with patch("boot_test_lib.download.handle_space_error") as mock_handle:
+                    with pytest.raises(ValueError):
+                        downloader.download(image_info)
+
+                    # Verify handle_space_error was NOT called
+                    mock_handle.assert_not_called()

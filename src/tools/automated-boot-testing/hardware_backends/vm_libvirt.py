@@ -52,6 +52,7 @@ class VMLibvirtBackend(HardwareBackend):
         # VM details (set during preparation)
         self.vm_name = "adsb-vm-test"
         self.remote_work_dir = "/tmp"
+        self.local_compressed: Optional[Path] = None
         self.remote_compressed: Optional[str] = None
         self.remote_qcow2: Optional[str] = None
         self.vm_ip: Optional[str] = None
@@ -74,7 +75,7 @@ class VMLibvirtBackend(HardwareBackend):
         logger.info("=" * 70)
 
         downloader = ImageDownloader(cache_dir=Path("/tmp"))
-        local_path = downloader.download(image_info)
+        self.local_compressed = downloader.download(image_info)
 
         # Transfer to VM server
         logger.info("=" * 70)
@@ -88,7 +89,7 @@ class VMLibvirtBackend(HardwareBackend):
         self.remote.execute(f"rm -f {self.remote_compressed} {self.remote_qcow2}")
 
         # Upload using SCP
-        if not self.remote.scp_upload(local_path, self.remote_compressed):
+        if not self.remote.scp_upload(self.local_compressed, self.remote_compressed):
             raise RuntimeError("Failed to transfer image to VM server")
 
         # Decompress on server
@@ -162,7 +163,7 @@ class VMLibvirtBackend(HardwareBackend):
         if result.returncode == 0:
             logger.info("✓ VM undefined")
 
-        # Remove disk files
+        # Remove remote disk files
         if self.remote_qcow2:
             self.remote.execute(f"rm -f {self.remote_qcow2}")
             logger.info(f"✓ Removed: {self.remote_qcow2}")
@@ -170,6 +171,14 @@ class VMLibvirtBackend(HardwareBackend):
         if self.remote_compressed:
             self.remote.execute(f"rm -f {self.remote_compressed}")
             logger.info(f"✓ Removed: {self.remote_compressed}")
+
+        # Clean up local temp file
+        if hasattr(self, "local_compressed") and self.local_compressed and self.local_compressed.exists():
+            try:
+                self.local_compressed.unlink()
+                logger.info(f"✓ Removed local temp file: {self.local_compressed}")
+            except Exception as e:
+                logger.warning(f"Failed to remove local temp file: {e}")
 
     def _cleanup_existing_vm(self) -> None:
         """Clean up any existing VM with same name."""
