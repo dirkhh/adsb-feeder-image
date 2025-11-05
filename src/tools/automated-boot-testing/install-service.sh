@@ -33,13 +33,13 @@ fi
 
 # Install Python dependencies
 echo "📦 Installing Python dependencies..."
-./venv/bin/pip install --upgrade pip
-if [[ -f "$SOURCE_DIR/requirements.txt" ]]; then
-    echo "   Using requirements.txt file..."
-    ./venv/bin/pip install -r "$SOURCE_DIR/requirements.txt"
+if command -v uv &> /dev/null; then
+    echo "   Using uv (fast installer)..."
+    uv pip install -r "$SOURCE_DIR/requirements.txt" --python ./venv/bin/python
 else
-    echo "   Installing individual packages..."
-    ./venv/bin/pip install flask requests selenium python-kasa pyserial
+    echo "   Using pip (uv not available - consider installing it for faster deploys)..."
+    ./venv/bin/pip install --upgrade pip
+    ./venv/bin/pip install -r "$SOURCE_DIR/requirements.txt"
 fi
 
 # Create configuration directory

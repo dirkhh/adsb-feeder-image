@@ -32,8 +32,14 @@ fi
 
 # Install Python dependencies
 echo "📦 Installing Python dependencies..."
-./venv/bin/pip install --upgrade pip
-./venv/bin/pip install -r "$SOURCE_DIR/requirements-reporter.txt"
+if command -v uv &> /dev/null; then
+    echo "   Using uv (fast installer)..."
+    uv pip install -r "$SOURCE_DIR/requirements-reporter.txt" --python ./venv/bin/python
+else
+    echo "   Using pip (uv not available - consider installing it for faster deploys)..."
+    ./venv/bin/pip install --upgrade pip
+    ./venv/bin/pip install -r "$SOURCE_DIR/requirements-reporter.txt"
+fi
 
 # Create configuration directory
 echo "📁 Creating configuration directory..."
