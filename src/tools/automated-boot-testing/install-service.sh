@@ -8,7 +8,6 @@ INSTALL_DIR="/opt/adsb-boot-test"
 CONFIG_DIR="/etc/adsb-boot-test"
 SERVICE_FILE="/etc/systemd/system/adsb-boot-test.service"
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$(dirname "$(dirname "$SOURCE_DIR")")")"
 
 echo "🚀 Installing ADS-B Boot Test Service to $INSTALL_DIR..."
 

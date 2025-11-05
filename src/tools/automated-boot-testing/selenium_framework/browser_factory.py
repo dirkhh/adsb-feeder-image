@@ -94,7 +94,7 @@ class BrowserFactory:
                 driver = webdriver.Chrome(options=options)
         else:
             # x86_64: Use Selenium Manager for automatic driver management
-            logger.info(f"Detected x86_64 architecture, using Selenium Manager")
+            logger.info("Detected x86_64 architecture, using Selenium Manager")
             driver = webdriver.Chrome(options=options)
 
         driver.set_page_load_timeout(Timeouts.PAGE_LOAD)
@@ -149,7 +149,7 @@ class BrowserFactory:
                 driver = webdriver.Firefox(options=options)
         else:
             # x86_64: Use Selenium Manager for automatic driver management
-            logger.info(f"Detected x86_64 architecture, using Selenium Manager")
+            logger.info("Detected x86_64 architecture, using Selenium Manager")
             driver = webdriver.Firefox(options=options)
 
         driver.set_page_load_timeout(Timeouts.PAGE_LOAD)

@@ -118,7 +118,7 @@ class SeleniumTestRunner:
                 waiting_page.wait_for_target_page("SDR Setup", timeout_seconds=600)
 
                 # Configure SDRs
-                success = self._configure_sdrs(sdr_setup, homepage, waiting_page)
+                success = self._configure_sdrs(sdr_setup)
 
             # Wait for homepage
             logger.info("Waiting for settings to be applied...")
@@ -136,7 +136,7 @@ class SeleniumTestRunner:
             logger.exception(f"Unexpected error during test: {e}")
             return False
 
-    def _configure_sdrs(self, sdr_setup: SDRSetupPage, homepage: FeederHomepage, waiting_page: WaitingPage) -> bool:
+    def _configure_sdrs(self, sdr_setup: SDRSetupPage) -> bool:
         """
         Configure SDRs and verify homepage.
 

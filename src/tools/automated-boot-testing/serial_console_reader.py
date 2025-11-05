@@ -134,7 +134,7 @@ class SerialConsoleReader:
         self._running = True
         self._thread = threading.Thread(target=self._read_loop, daemon=True)
         self._thread.start()
-        print(f"✓ Started serial console reader thread")
+        print("✓ Started serial console reader thread")
 
         return True
 
@@ -168,7 +168,7 @@ class SerialConsoleReader:
         if self._log_file_handle:
             try:
                 self._log_file_handle.close()
-                print(f"✓ Closed real-time serial log")
+                print("✓ Closed real-time serial log")
             except Exception as e:
                 print(f"⚠️  Error closing log file: {e}")
             self._log_file_handle = None

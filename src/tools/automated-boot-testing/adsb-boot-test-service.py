@@ -164,7 +164,6 @@ class TestExecutor:
         ssh_key: str,
         timeout_minutes: int = 10,
         config: Optional[Dict[str, Any]] = None,
-        venv_python: Optional[Path] = None,
     ):
         # Validate all inputs at initialization - fail fast if invalid
         self.rpi_ip = self._validate_ip(rpi_ip, "rpi_ip")
@@ -254,7 +253,7 @@ class TestExecutor:
         # Validate URL doesn't contain shell metacharacters
         dangerous_chars = [";", "&", "|", "`", "$", "\n", "\r"]
         if any(c in url for c in dangerous_chars):
-            return {"success": False, "message": f"URL contains invalid characters and was rejected for security"}
+            return {"success": False, "message": "URL contains invalid characters and was rejected for security"}
 
         logging.info(f"Starting test {test_id} for URL: {url}")
 
@@ -440,7 +439,6 @@ class ADSBTestService:
 
                 if not github_context:
                     logging.warning(f"No GitHub context provided, URL: {url}")
-                    # return jsonify({"status": "ignored"}), 200
 
                 # Create test record in 'queued' state
                 test_id = self.metrics.start_test(
@@ -898,7 +896,7 @@ def main():
     service = ADSBTestService(config)
 
     # Handle shutdown signals
-    def signal_handler(signum, frame):
+    def signal_handler(signum, _frame):
         logging.info(f"Received signal {signum}, shutting down...")
         service.stop_queue_processor()
         sys.exit(0)
