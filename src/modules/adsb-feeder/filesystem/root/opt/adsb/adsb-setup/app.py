@@ -336,6 +336,7 @@ class AdsbIm:
         self.app.add_url_rule(f"/feeder-update-<channel>", "feeder-update", self.feeder_update)
         self.app.add_url_rule(f"/get-logs", "get-logs", self.get_logs)
         self.app.add_url_rule(f"/view-logs", "view-logs", self.view_logs)
+        self.app.add_url_rule(f"/widget", "widget", self.widget)
         # fmt: on
         self.update_boardname()
         self.update_version()
@@ -4163,8 +4164,11 @@ class AdsbIm:
 
         self.healthcheck.check()
 
+    def widget(self):
+        return self.index(widget_mode=True)
+
     @check_restart_lock
-    def index(self):
+    def index(self, widget_mode=False):
         # if we get to show the feeder homepage, the user should have everything figured out
         # and we can remove the pre-installed ssh-keys and password
         with self.miscLock:
@@ -4225,6 +4229,7 @@ class AdsbIm:
             channel=channel,
             adsb=adsb,
             pi5_usb_current_limited=self.pi5_usb_current_limited(),
+            widget_mode=widget_mode,
         )
 
     @check_restart_lock

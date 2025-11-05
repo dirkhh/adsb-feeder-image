@@ -14,6 +14,7 @@
 {% set ns.site_indices = [0] %}
 {% endif %}
 {% set num_micro_sites = (ns.site_indices | length) %}
+{% if not widget_mode %}
 <h1 class="mt-3 text-center text-danger">
   {% block title %}{% if env_value_by_tag('aggregator_choice') != 'nonadsb' %}ADS-B{% else %}SDR{% endif %} Feeder Homepage for {{ list_value_by_tag("site_name", 0) }}{% endblock %}
 </h1>
@@ -60,6 +61,9 @@
   You are running low on disk space on the your feeder. This can lead to odd problems and even crashes. Consider
   upgrading to a larger storage device.
 </div>
+<!-- widget_mode -->
+{% endif %}
+
 <div class="row">
   <div
        class="col-12 mb-3 {% if env_value_by_tag('aggregator_choice') not in ['micro', 'nano'] or is_enabled('stage2') %} d-none {% endif %}">
@@ -198,6 +202,7 @@
         <span class="text-warning"><span class="icon-placeholder" data-icon="feed-warning"></span></span> feed is degraded,
         <span class="text-muted"><span class="icon-placeholder" data-icon="overall-good"></span></span> feed state is not supported
         <br />
+        {% if not widget_mode %}
         <span onclick="$('#extra_legend').toggleClass('d-none'); $(this).find('.toggle-icon').text($('#extra_legend').hasClass('d-none') ? '▶' : '▼'); return false;"
               style="cursor: pointer;">
           <span class="toggle-icon small">▶</span> <strong class="small">Toggle detailed legend</strong>
@@ -220,9 +225,12 @@
           <br />
           '<span class="icon-placeholder" data-icon="status-unknown"></span>': status information is not available at this time or not supported
         </span>
+        <!-- widget_mode -->
+        {% endif %}
       </div>
     </div>
   </div>
+  {% if not widget_mode %}
   <div class="col-12 mb-4 {% if env_value_by_tag('aggregator_choice') in ['micro', 'nano'] %} d-none {% endif %}">
     <div class "small">
       {% if is_enabled('stage2') %}
@@ -542,6 +550,8 @@
     connecting to those aggregators. A two stage setup which off-loads the connections to the aggregators to a different
     system might be a good idea.
   </div>
+  <!-- widget_mode -->
+  {% endif %}
 </div>
 <script src="/static/js/chart.js" integrity="sha256-QvTb/nDEMP/CLHEo82yujVmcrJC4zTfI9CpZ5WXl3rc="
           crossorigin="anonymous"></script>
