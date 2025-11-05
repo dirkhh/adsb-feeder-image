@@ -112,7 +112,7 @@ class SSHRemote:
         returncode = process.wait()
 
         if returncode == 0:
-            logger.info(f"✓ Upload complete")
+            logger.info("✓ Upload complete")
             return True
         else:
             logger.error(f"Upload failed with exit code {returncode}")

@@ -250,7 +250,7 @@ def test_shutdown_hang_pattern_matching():
     reader._recent_read = 0
     found = reader.search_recent(pattern, max_lines=15, regex=True)
 
-    assert found, f"Pattern should match '[!!!!!!] Failed to execute shutdown binary.' " f"but search_recent returned False"
+    assert found, "Pattern should match '[!!!!!!] Failed to execute shutdown binary.' " "but search_recent returned False"
 
 
 def test_repeated_search_without_new_lines():

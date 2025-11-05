@@ -47,7 +47,7 @@ def test_key_generation():
     # All keys should be unique
     assert len(keys) == 100, "Generated keys should be unique"
 
-    print(f"  ✓ Generated 100 unique keys with sufficient entropy")
+    print("  ✓ Generated 100 unique keys with sufficient entropy")
     print(f"  ✓ Average key length: {sum(len(k) for k in keys) / len(keys):.1f} characters")
 
 

@@ -67,7 +67,7 @@ class UniFiSSHController:
                 return True
             print(f"Current state: {current_state}, target state: {expected_state}")
         else:
-            print(f"Warning: Could not check current state, proceeding with toggle...")
+            print("Warning: Could not check current state, proceeding with toggle...")
 
         # Send toggle command
         action = "Enabling" if turn_on else "Disabling"
@@ -157,7 +157,7 @@ class UniFiSSHController:
             True if state matches expected_state within timeout, False otherwise
         """
         # Initial wait for hardware to process command
-        print(f"Waiting for PoE state to change...")
+        print("Waiting for PoE state to change...")
         time.sleep(2)
 
         poll_interval = 2

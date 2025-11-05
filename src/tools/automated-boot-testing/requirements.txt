@@ -1,0 +1,24 @@
+# ADS-B Boot Test Service Dependencies
+# Core dependencies for automated boot testing service
+
+# Web framework for API service
+flask>=3.1.0
+
+# Browser automation for Selenium tests
+selenium>=4.0.0
+
+# HTTP client for API calls
+requests>=2.31.0
+
+# TP-Link Kasa smart plug control
+python-kasa>=0.5.0
+
+# Serial port communication for console monitoring
+pyserial>=3.5
+
+# Human-readable formatting for disk space, etc.
+humanize>=4.0.0
+
+# Testing framework (for development and CI)
+pytest>=8.3.5
+pytest-mock>=3.14.1

@@ -235,7 +235,7 @@ class RPiISCSIBackend(HardwareBackend):
                 break
 
             if attempt < max_attempts:
-                logger.warning(f"Verification failed, waiting 2 seconds before retry...")
+                logger.warning("Verification failed, waiting 2 seconds before retry...")
                 time.sleep(2)
         else:
             raise RuntimeError("iSCSI target verification failed after all retries - disk LUN not exposed")
@@ -310,7 +310,7 @@ class RPiISCSIBackend(HardwareBackend):
         while time.time() - start_time < timeout_seconds:
             result = subprocess.run(["ping", "-c", "1", "-W", "2", self.rpi_ip], capture_output=True)
             if result.returncode != 0:
-                logger.info(f"✓ System is down")
+                logger.info("✓ System is down")
                 return True
             time.sleep(2)
 
@@ -478,12 +478,12 @@ class RPiISCSIBackend(HardwareBackend):
 
                     # Detect first or second boot
                     if "First boot of ADS-B Feeder System" in title:
-                        logger.info(f"ping up | HTTP 200 | First boot in progress")
+                        logger.info("ping up | HTTP 200 | First boot in progress")
                         seen_first_boot = True
                         time.sleep(10)
                         continue
                     elif "Second boot of ADS-B Feeder System" in title:
-                        logger.info(f"ping up | HTTP 200 | Second boot in progress")
+                        logger.info("ping up | HTTP 200 | Second boot in progress")
                         time.sleep(10)
                         continue
 
