@@ -196,4 +196,4 @@ def test_duration_reflects_execution_time_not_queue_time():
     started_at = datetime.fromisoformat(results[0]["started_at"])
 
     assert duration == 3, f"Expected duration 3s (execution time), got {duration}s"
-    assert started_at == execution_start_time, f"Expected started_at to be execution start time"
+    assert started_at == execution_start_time, "Expected started_at to be execution start time"

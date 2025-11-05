@@ -58,10 +58,10 @@ def show_recent(metrics: TestMetrics, limit: int, failures_only: bool = False, v
         print(f"\n📋 Test Results for {version}")
     elif failures_only:
         results = metrics.get_failures(limit=limit)
-        print(f"\n❌ Recent Failures")
+        print("\n❌ Recent Failures")
     else:
         results = metrics.get_recent_results(limit=limit)
-        print(f"\n📋 Recent Test Results")
+        print("\n📋 Recent Test Results")
 
     print("━" * 50)
 
@@ -137,18 +137,18 @@ def show_details(metrics: TestMetrics, test_id: int):
         print(f"Source:         {result['trigger_source']}")
     print(f"RPI IP:         {result['rpi_ip']}")
 
-    print(f"\nStage Results:")
+    print("\nStage Results:")
     print(f"  Download:     {result['download_status'] or 'not started'}")
     print(f"  Boot:         {result['boot_status'] or 'not started'}")
     print(f"  Network:      {result['network_status'] or 'not started'}")
     print(f"  Browser Test: {result['browser_test_status'] or 'not started'}")
 
     if result["error_message"]:
-        print(f"\nError Details:")
+        print("\nError Details:")
         print(f"  Stage:   {result['error_stage'] or 'unknown'}")
         print(f"  Message: {result['error_message']}")
 
-    print(f"\nImage URL:")
+    print("\nImage URL:")
     print(f"  {result['image_url']}")
     print()
 

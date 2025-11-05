@@ -99,10 +99,10 @@ Examples:
     print("Test the API with curl:")
     print()
     example_key, example_user = keys[0]
-    print(f"curl -X POST http://localhost:9456/api/trigger-boot-test \\")
+    print("curl -X POST http://localhost:9456/api/trigger-boot-test \\")
     print(f'  -H "X-API-Key: {example_key}" \\')
-    print(f'  -H "Content-Type: application/json" \\')
-    print(f'  -d \'{{"url": "https://github.com/dirkhh/adsb-feeder-image/releases/download/v1.0/test.img.xz"}}\'')
+    print('  -H "Content-Type: application/json" \\')
+    print('  -d \'{"url": "https://github.com/dirkhh/adsb-feeder-image/releases/download/v1.0/test.img.xz"}\'')
     print()
 
     # Security reminder
