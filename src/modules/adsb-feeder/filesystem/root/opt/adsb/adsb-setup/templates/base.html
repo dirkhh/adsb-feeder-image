@@ -35,6 +35,8 @@
   <link rel="shortcut icon" href="/static/favicon{% if env_value_by_tag('aggregator_choice') == 'nonadsb' %}-sdr{% endif %}.ico" />
   <!-- Spinner -->
   <link rel="stylesheet" href="/static/css/style.css" />
+  <!-- widget_mode is {{ widget_mode }} -->
+  {% if not widget_mode %}
   <title>
     {{ list_value_by_tag("site_name", 0) }}{% if list_value_by_tag("site_name", 0) != "" %}:
     {% endif %}{% block title %}{% endblock %}
@@ -179,12 +181,75 @@
       </ul>
     </div>
   </nav>
+  <!-- widget_mode-->
+  {% endif %}
+</head>
+
+<body>
+  <div id="overlay" style="display: none">
+    <div id="loader" style="display: none">
+      <div class="plane-animation">
+        <div class="clouds">
+          <div class="cloud cloud1">
+            <svg viewBox="0 0 21 19" xmlns="http://www.w3.org/2000/svg">
+              <path d="m3 13.649c0 2.9551 2.4177 5.3507 5.4 5.3507h8.1c2.4853 0 4.5-2.0161 4.5-4.5031 0-1.8466-1.1107-3.552-2.7-4.2469-0.1683-2.9275-2.616-5.25-5.6107-5.25-2.3379 0-4.3424 1.4864-5.1893 3.5-2.7 0.4375-4.5 2.7001-4.5 5.1493z" stroke="none"/>
+            </svg>
+          </div>
+          <div class="cloud cloud2">
+            <svg viewBox="0 0 21 19" xmlns="http://www.w3.org/2000/svg">
+              <path d="m3 13.649c0 2.9551 2.4177 5.3507 5.4 5.3507h8.1c2.4853 0 4.5-2.0161 4.5-4.5031 0-1.8466-1.1107-3.552-2.7-4.2469-0.1683-2.9275-2.616-5.25-5.6107-5.25-2.3379 0-4.3424 1.4864-5.1893 3.5-2.7 0.4375-4.5 2.7001-4.5 5.1493z" stroke="none"/>
+            </svg>
+          </div>
+          <div class="cloud cloud3">
+            <svg viewBox="0 0 21 19" xmlns="http://www.w3.org/2000/svg">
+              <path d="m3 13.649c0 2.9551 2.4177 5.3507 5.4 5.3507h8.1c2.4853 0 4.5-2.0161 4.5-4.5031 0-1.8466-1.1107-3.552-2.7-4.2469-0.1683-2.9275-2.616-5.25-5.6107-5.25-2.3379 0-4.3424 1.4864-5.1893 3.5-2.7 0.4375-4.5 2.7001-4.5 5.1493z" stroke="none"/>
+            </svg>
+          </div>
+          <div class="cloud cloud4">
+            <svg viewBox="0 0 21 19" xmlns="http://www.w3.org/2000/svg">
+              <path d="m3 13.649c0 2.9551 2.4177 5.3507 5.4 5.3507h8.1c2.4853 0 4.5-2.0161 4.5-4.5031 0-1.8466-1.1107-3.552-2.7-4.2469-0.1683-2.9275-2.616-5.25-5.6107-5.25-2.3379 0-4.3424 1.4864-5.1893 3.5-2.7 0.4375-4.5 2.7001-4.5 5.1493z" stroke="none"/>
+            </svg>
+          </div>
+          <div class="cloud cloud5">
+            <svg viewBox="0 0 21 19" xmlns="http://www.w3.org/2000/svg">
+              <path d="m3 13.649c0 2.9551 2.4177 5.3507 5.4 5.3507h8.1c2.4853 0 4.5-2.0161 4.5-4.5031 0-1.8466-1.1107-3.552-2.7-4.2469-0.1683-2.9275-2.616-5.25-5.6107-5.25-2.3379 0-4.3424 1.4864-5.1893 3.5-2.7 0.4375-4.5 2.7001-4.5 5.1493z" stroke="none"/>
+            </svg>
+          </div>
+          <div class="cloud cloud6">
+            <svg viewBox="0 0 21 19" xmlns="http://www.w3.org/2000/svg">
+              <path d="m3 13.649c0 2.9551 2.4177 5.3507 5.4 5.3507h8.1c2.4853 0 4.5-2.0161 4.5-4.5031 0-1.8466-1.1107-3.552-2.7-4.2469-0.1683-2.9275-2.616-5.25-5.6107-5.25-2.3379 0-4.3424 1.4864-5.1893 3.5-2.7 0.4375-4.5 2.7001-4.5 5.1493z" stroke="none"/>
+            </svg>
+          </div>
+          <div class="cloud cloud7">
+            <svg viewBox="0 0 21 19" xmlns="http://www.w3.org/2000/svg">
+              <path d="m3 13.649c0 2.9551 2.4177 5.3507 5.4 5.3507h8.1c2.4853 0 4.5-2.0161 4.5-4.5031 0-1.8466-1.1107-3.552-2.7-4.2469-0.1683-2.9275-2.616-5.25-5.6107-5.25-2.3379 0-4.3424 1.4864-5.1893 3.5-2.7 0.4375-4.5 2.7001-4.5 5.1493z" stroke="none"/>
+            </svg>
+          </div>
+          <div class="cloud cloud8">
+            <svg viewBox="0 0 21 19" xmlns="http://www.w3.org/2000/svg">
+              <path d="m3 13.649c0 2.9551 2.4177 5.3507 5.4 5.3507h8.1c2.4853 0 4.5-2.0161 4.5-4.5031 0-1.8466-1.1107-3.552-2.7-4.2469-0.1683-2.9275-2.616-5.25-5.6107-5.25-2.3379 0-4.3424 1.4864-5.1893 3.5-2.7 0.4375-4.5 2.7001-4.5 5.1493z" stroke="none"/>
+            </svg>
+          </div>
+        </div>
+        <div class="plane">
+          <svg viewBox="0 0 32 29" xmlns="http://www.w3.org/2000/svg">
+            <path d="M30.8,14.2C30.1,13.4,29,13,28,13H8.5L4.8,8.4C4.6,8.1,4.3,8,4,8H1C0.7,8,0.4,8.1,0.2,8.4C0,8.6,0,9,0,9.3l3,11  C3.2,20.7,3.6,21,4,21h6.4l-3.3,6.6c-0.2,0.3-0.1,0.7,0,1C7.3,28.8,7.7,29,8,29h4c0.3,0,0.6-0.1,0.7-0.3l6.9-7.7H28  c1.1,0,2.1-0.4,2.8-1.2c0.8-0.8,1.2-1.8,1.2-2.8S31.6,14.9,30.8,14.2z"/>
+            <path d="M10.4,11h8.5l-5.1-5.7C13.6,5.1,13.3,5,13,5H9C8.7,5,8.3,5.2,8.1,5.5C8,5.8,8,6.1,8.1,6.4L10.4,11z"/>
+          </svg>
+        </div>
+        <div class="runway"></div>
+      </div>
+      <div class="loading-text">Processing...</div>
+    </div>
+  </div>
+  <div class="container pt-5 my-3">
   <script src="/static/js/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8="
           crossorigin="anonymous"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/mdb.min.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/iconCache.js') }}"></script>
   <script>
     let verbose = true;
+    //{{ not widget_mode }}
     // maps[0..4] are the bit values for the maps that are visible if we can potentially not
     // show show all of the maps, where bit 0 is ADS-B, bit 1 is ACARS, bit 2 is SHIPFEEDER, and bit 3 is SONDE
     let maps = [0];
@@ -212,7 +277,7 @@
     {% endif %}
 
     for (let i = 4; i >= 1; i--) {
-      for (mask of [15,7,3,1]) {
+      for (mask of [15, 7, 3, 1]) {
         m = mapsNeeded & mask;
         if (bitsSet[m] <= i) {
           break
@@ -221,11 +286,11 @@
       maps[i] = m;
     }
     let breakpointslist = [//notxt, navcolaps, sm btn,  noKofi,  3 btn ,  2 btn , 1 btn  ,  0 btn
-                           ["768px", "680px", "180px", "180px", "180px", "180px", "180px", "180px"],
-                           ["768px", "680px", "250px", "200px", "200px", "200px", "200px", "180px"],
-                           ["825px", "680px", "350px", "270px", "270px", "270px", "220px", "180px"],
-                           ["960px", "768px", "420px", "300px", "300px", "260px", "215px", "180px"],
-                           ["1100px","800px", "490px", "350px", "305px", "260px", "215px", "170px"]];
+      ["768px", "680px", "180px", "180px", "180px", "180px", "180px", "180px"],
+      ["768px", "680px", "250px", "200px", "200px", "200px", "200px", "180px"],
+      ["825px", "680px", "350px", "270px", "270px", "270px", "220px", "180px"],
+      ["960px", "768px", "420px", "300px", "300px", "260px", "215px", "180px"],
+      ["1100px", "800px", "490px", "350px", "305px", "260px", "215px", "170px"]];
     let breakpoints = breakpointslist[bitsSet[mapsNeeded]];
     {% if env_value_by_tag("temp_sensor") != "" %}
     for (let i = 0; i < breakpoints.length; i++) {
@@ -267,7 +332,7 @@
       $('.btn').each(function () {
         $(this).toggleClass("btn-sm", matches);
         $(this).css('font-size', matches ? '85%' : '');
-        $(this).css('--mdb-btn-padding-x', matches ? '0.75rem' : '1.5rem' );
+        $(this).css('--mdb-btn-padding-x', matches ? '0.75rem' : '1.5rem');
       })
       if (matches) {
         $('#livemap-navbar-button-text').html('MAP');
@@ -283,13 +348,13 @@
       $('#brand_text').toggleClass("d-none", matches);
     }
     function navButtonCollapse(matches) {
-      $("#navbar").toggleClass("navbar-expand", ! matches)
+      $("#navbar").toggleClass("navbar-expand", !matches)
     }
     function adjustButtonFont(matches) {
       // loop over all submit buttons and add css font-size of 70% and smaller horizontal padding
       // console.log("adjustButtonFont: " + matches);
       $('.btn').each(function () {
-        if (! $(this).hasClass('nb-btn')) {
+        if (!$(this).hasClass('nb-btn')) {
           if (matches) {
             $(this).css('font-size', '70%');
             $(this).css('--mdb-btn-padding-x', '0.25rem')
@@ -365,6 +430,7 @@
       preloadIcons().then(() => {
         populateIconPlaceholders();
       });
+      {% if not widget_mode %}
       for (let i = 0; i < 4; i++) {
         if (nMapButtons[i].matches) {
           nMapButton(true, i);
@@ -380,7 +446,12 @@
 
       // Check for changelog popup
       checkChangelogPopup();
+      {% else %}
+      // widget mode
+      {% endif %}
     });
+    // widget_mode
+    //{{ endif }}
 
     let tasks = [];
     let timersActive = false;
@@ -414,16 +485,6 @@
       }
     }
 
-    // Warn if the browser doesn't support addEventListener or the Page Visibility API
-    if (typeof document.addEventListener === "undefined" || document.hidden === undefined) {
-      console.error("hidden tab handler requires a browser that supports the Page Visibility API.");
-      timersActive = true; // timers will always stay active
-    } else {
-      document.addEventListener("visibilitychange", handleVisibilityChange, false);
-    }
-
-    handleVisibilityChange();
-
     function registerTask(task) {
       tasks.push(task);
       if (timersActive) {
@@ -438,42 +499,55 @@
       }
     }
 
-    let feederTarget = 0;
-    let parameters = location.search.substring(1).split('&');
-    for (let i = 0; i < parameters.length; i++) {
-      if (parameters[i].startsWith("m=")) {
-        feederTarget = parameters[i].split("=")[1];
+    $(function () {
+      // Warn if the browser doesn't support addEventListener or the Page Visibility API
+      if (typeof document.addEventListener === "undefined" || document.hidden === undefined) {
+        console.error("hidden tab handler requires a browser that supports the Page Visibility API.");
+        timersActive = true; // timers will always stay active
+      } else {
+        document.addEventListener("visibilitychange", handleVisibilityChange, false);
       }
-    }
-    {% if is_enabled('stage2') %}
-    console.log(`feederTarget: ${feederTarget}`);
-    {% endif %}
-    let siteNames = [];
-    {% for site in env_value_by_tag('site_name') %}
-    siteNames.push('{{site}}');
-    {% endfor %}
-    siteName = feederTarget == 0 ? siteName = "Combined": siteNames[feederTarget];
-    $("#navbarDropdownFeederSelection").text(`Target: ${siteName}`);
-    if (feederTarget > 0) {
-      let tag = "";
-      for (tag of ["live_traffic", "heatmap", "tracks", "replay"]) {
-        let oldhref = $("#" + tag).attr("href");
-        let newhref = oldhref.replace("/map/", "/map_" + feederTarget + "/");
-        $("#" + tag).attr("href", newhref);
+
+      handleVisibilityChange();
+
+
+      let feederTarget = 0;
+      let parameters = location.search.substring(1).split('&');
+      for (let i = 0; i < parameters.length; i++) {
+        if (parameters[i].startsWith("m=")) {
+          feederTarget = parameters[i].split("=")[1];
+        }
       }
-      $("#options").attr("href", "/visualization?m=" + feederTarget);
-      $("#data_sharing_current_link").attr("href", "/aggregators?m=" + feederTarget);
-      $("#data_sharing_current").removeClass("d-none");
-      $("#stats_current").removeClass("d-none");
-      $("#stats_current").attr("href", "/stats_" + feederTarget + "/");
-      $("#stats_current").text(`${siteName} Stats`);
-    } else {
-      $("#data_sharing_current").addClass("d-none");
-      $("#stats_current").addClass("d-none");
-    }
+      {% if is_enabled('stage2') %}
+      console.log(`feederTarget: ${feederTarget}`);
+      {% endif %}
+      let siteNames = [];
+      {% for site in env_value_by_tag('site_name') %}
+      siteNames.push('{{site}}');
+      {% endfor %}
+      siteName = feederTarget == 0 ? siteName = "Combined" : siteNames[feederTarget];
+      $("#navbarDropdownFeederSelection").text(`Target: ${siteName}`);
+      if (feederTarget > 0) {
+        let tag = "";
+        for (tag of ["live_traffic", "heatmap", "tracks", "replay"]) {
+          let oldhref = $("#" + tag).attr("href");
+          let newhref = oldhref.replace("/map/", "/map_" + feederTarget + "/");
+          $("#" + tag).attr("href", newhref);
+        }
+        $("#options").attr("href", "/visualization?m=" + feederTarget);
+        $("#data_sharing_current_link").attr("href", "/aggregators?m=" + feederTarget);
+        $("#data_sharing_current").removeClass("d-none");
+        $("#stats_current").removeClass("d-none");
+        $("#stats_current").attr("href", "/stats_" + feederTarget + "/");
+        $("#stats_current").text(`${siteName} Stats`);
+      } else {
+        $("#data_sharing_current").addClass("d-none");
+        $("#stats_current").addClass("d-none");
+      }
+    }); // end of the $(function(){});
 
     let check_mf_task = {};
-    check_mf_task.func = function() {
+    check_mf_task.func = function () {
 
       // you can comment this out this to permanently show the spinner for mobile testing for example
       // show_spinner();
@@ -514,7 +588,7 @@
 
     {% if is_enabled('temperature_block') %}
     let temperatureTask = {};
-    temperatureTask.func = function() {
+    temperatureTask.func = function () {
       let url = "/api/get_temperatures.json";
       fetch(url, {
         method: "GET", cors: "no-cors", signal: AbortSignal.timeout(15000)
@@ -603,7 +677,7 @@
       console.log('hide_spinner');
     }
     function stage2_feeder_target_submit(newTarget) {
-      if (newTarget == '*' || newTarget == '0' || newTarget =='' || newTarget == undefined) {
+      if (newTarget == '*' || newTarget == '0' || newTarget == '' || newTarget == undefined) {
         queryString = "";
       } else {
         queryString = "?m=" + newTarget;
@@ -611,22 +685,22 @@
       location.replace(location.href.split('?')[0] + queryString);
       return false;
     }
-
+    {% if not widget_mode %}
     function checkChangelogPopup() {
       fetch('/api/check_changelog_status', {
         method: 'GET',
         cors: 'no-cors',
         signal: AbortSignal.timeout(5000)
       })
-      .then(response => response.json())
-      .then(data => {
-        if (data.show_changelog) {
-          showChangelogPopup(data.previous_version, data.new_version, data.changelog);
-        }
-      })
-      .catch(error => {
-        console.log('Error checking changelog status:', error);
-      });
+        .then(response => response.json())
+        .then(data => {
+          if (data.show_changelog) {
+            showChangelogPopup(data.previous_version, data.new_version, data.changelog);
+          }
+        })
+        .catch(error => {
+          console.log('Error checking changelog status:', error);
+        });
     }
 
     function showChangelogPopup(oldVersion, newVersion, changelogContent) {
@@ -634,27 +708,27 @@
 
       // Create modal HTML
       const modalHtml = `
-        <div class="modal fade" id="changelogModal" tabindex="-1" aria-labelledby="changelogModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-lg modal-dialog-scrollable">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="changelogModalLabel">Your Feeder Has Been Updated!</h5>
-                <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                <div class="mb-3">
-                  <strong>Updated from:</strong><span class="version-badge ms-2 ">${oldVersion}</span> <strong>to:</strong><span class="version-badge ms-2">${newVersion}</span>
+          <div class="modal fade" id="changelogModal" tabindex="-1" aria-labelledby="changelogModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="changelogModalLabel">Your Feeder Has Been Updated!</h5>
+                  <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="changelog-content">
-                  <pre style="white-space: pre-wrap; font-family: inherit;">${changelog}</pre>
+                <div class="modal-body">
+                  <div class="mb-3">
+                    <strong>Updated from:</strong><span class="version-badge ms-2 ">${oldVersion}</span> <strong>to:</strong><span class="version-badge ms-2">${newVersion}</span>
+                  </div>
+                  <div class="changelog-content">
+                    <pre style="white-space: pre-wrap; font-family: inherit;">${changelog}</pre>
+                  </div>
                 </div>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-mdb-dismiss="modal">Cool！😎</button>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-primary" data-mdb-dismiss="modal">Cool！😎</button>
+                </div>
               </div>
             </div>
-          </div>
-        </div>`;
+          </div>`;
 
       // Add modal to body
       $('body').append(modalHtml);
@@ -664,7 +738,7 @@
       changelogModal.show();
 
       // Mark as seen when modal is hidden
-      $('#changelogModal').on('hidden.bs.modal', function() {
+      $('#changelogModal').on('hidden.bs.modal', function () {
         markChangelogSeen();
         $(this).remove();
       });
@@ -679,28 +753,28 @@
         },
         signal: AbortSignal.timeout(5000)
       })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            const changelogModal = mdb.Modal.getInstance(document.getElementById('changelogModal'));
+            if (changelogModal) {
+              changelogModal.hide();
+            }
+          } else {
+            console.log('Server error marking changelog as seen:', data.error || 'Unknown error');
+            const changelogModal = mdb.Modal.getInstance(document.getElementById('changelogModal'));
+            if (changelogModal) {
+              changelogModal.hide();
+            }
+          }
+        })
+        .catch(error => {
+          console.log('Error marking changelog as seen:', error);
           const changelogModal = mdb.Modal.getInstance(document.getElementById('changelogModal'));
           if (changelogModal) {
             changelogModal.hide();
           }
-        } else {
-          console.log('Server error marking changelog as seen:', data.error || 'Unknown error');
-          const changelogModal = mdb.Modal.getInstance(document.getElementById('changelogModal'));
-          if (changelogModal) {
-            changelogModal.hide();
-          }
-        }
-      })
-      .catch(error => {
-        console.log('Error marking changelog as seen:', error);
-        const changelogModal = mdb.Modal.getInstance(document.getElementById('changelogModal'));
-        if (changelogModal) {
-          changelogModal.hide();
-        }
-      });
+        });
     }
 
     $(document).find('form').each((key, value) => {
@@ -737,68 +811,12 @@
         })
       }
     });
+    // widget_mode
+    {% endif %}
   </script>
-</head>
 
-<body>
-  <div id="overlay" style="display: none">
-    <div id="loader" style="display: none">
-      <div class="plane-animation">
-        <div class="clouds">
-          <div class="cloud cloud1">
-            <svg viewBox="0 0 21 19" xmlns="http://www.w3.org/2000/svg">
-              <path d="m3 13.649c0 2.9551 2.4177 5.3507 5.4 5.3507h8.1c2.4853 0 4.5-2.0161 4.5-4.5031 0-1.8466-1.1107-3.552-2.7-4.2469-0.1683-2.9275-2.616-5.25-5.6107-5.25-2.3379 0-4.3424 1.4864-5.1893 3.5-2.7 0.4375-4.5 2.7001-4.5 5.1493z" stroke="none"/>
-            </svg>
-          </div>
-          <div class="cloud cloud2">
-            <svg viewBox="0 0 21 19" xmlns="http://www.w3.org/2000/svg">
-              <path d="m3 13.649c0 2.9551 2.4177 5.3507 5.4 5.3507h8.1c2.4853 0 4.5-2.0161 4.5-4.5031 0-1.8466-1.1107-3.552-2.7-4.2469-0.1683-2.9275-2.616-5.25-5.6107-5.25-2.3379 0-4.3424 1.4864-5.1893 3.5-2.7 0.4375-4.5 2.7001-4.5 5.1493z" stroke="none"/>
-            </svg>
-          </div>
-          <div class="cloud cloud3">
-            <svg viewBox="0 0 21 19" xmlns="http://www.w3.org/2000/svg">
-              <path d="m3 13.649c0 2.9551 2.4177 5.3507 5.4 5.3507h8.1c2.4853 0 4.5-2.0161 4.5-4.5031 0-1.8466-1.1107-3.552-2.7-4.2469-0.1683-2.9275-2.616-5.25-5.6107-5.25-2.3379 0-4.3424 1.4864-5.1893 3.5-2.7 0.4375-4.5 2.7001-4.5 5.1493z" stroke="none"/>
-            </svg>
-          </div>
-          <div class="cloud cloud4">
-            <svg viewBox="0 0 21 19" xmlns="http://www.w3.org/2000/svg">
-              <path d="m3 13.649c0 2.9551 2.4177 5.3507 5.4 5.3507h8.1c2.4853 0 4.5-2.0161 4.5-4.5031 0-1.8466-1.1107-3.552-2.7-4.2469-0.1683-2.9275-2.616-5.25-5.6107-5.25-2.3379 0-4.3424 1.4864-5.1893 3.5-2.7 0.4375-4.5 2.7001-4.5 5.1493z" stroke="none"/>
-            </svg>
-          </div>
-          <div class="cloud cloud5">
-            <svg viewBox="0 0 21 19" xmlns="http://www.w3.org/2000/svg">
-              <path d="m3 13.649c0 2.9551 2.4177 5.3507 5.4 5.3507h8.1c2.4853 0 4.5-2.0161 4.5-4.5031 0-1.8466-1.1107-3.552-2.7-4.2469-0.1683-2.9275-2.616-5.25-5.6107-5.25-2.3379 0-4.3424 1.4864-5.1893 3.5-2.7 0.4375-4.5 2.7001-4.5 5.1493z" stroke="none"/>
-            </svg>
-          </div>
-          <div class="cloud cloud6">
-            <svg viewBox="0 0 21 19" xmlns="http://www.w3.org/2000/svg">
-              <path d="m3 13.649c0 2.9551 2.4177 5.3507 5.4 5.3507h8.1c2.4853 0 4.5-2.0161 4.5-4.5031 0-1.8466-1.1107-3.552-2.7-4.2469-0.1683-2.9275-2.616-5.25-5.6107-5.25-2.3379 0-4.3424 1.4864-5.1893 3.5-2.7 0.4375-4.5 2.7001-4.5 5.1493z" stroke="none"/>
-            </svg>
-          </div>
-          <div class="cloud cloud7">
-            <svg viewBox="0 0 21 19" xmlns="http://www.w3.org/2000/svg">
-              <path d="m3 13.649c0 2.9551 2.4177 5.3507 5.4 5.3507h8.1c2.4853 0 4.5-2.0161 4.5-4.5031 0-1.8466-1.1107-3.552-2.7-4.2469-0.1683-2.9275-2.616-5.25-5.6107-5.25-2.3379 0-4.3424 1.4864-5.1893 3.5-2.7 0.4375-4.5 2.7001-4.5 5.1493z" stroke="none"/>
-            </svg>
-          </div>
-          <div class="cloud cloud8">
-            <svg viewBox="0 0 21 19" xmlns="http://www.w3.org/2000/svg">
-              <path d="m3 13.649c0 2.9551 2.4177 5.3507 5.4 5.3507h8.1c2.4853 0 4.5-2.0161 4.5-4.5031 0-1.8466-1.1107-3.552-2.7-4.2469-0.1683-2.9275-2.616-5.25-5.6107-5.25-2.3379 0-4.3424 1.4864-5.1893 3.5-2.7 0.4375-4.5 2.7001-4.5 5.1493z" stroke="none"/>
-            </svg>
-          </div>
-        </div>
-        <div class="plane">
-          <svg viewBox="0 0 32 29" xmlns="http://www.w3.org/2000/svg">
-            <path d="M30.8,14.2C30.1,13.4,29,13,28,13H8.5L4.8,8.4C4.6,8.1,4.3,8,4,8H1C0.7,8,0.4,8.1,0.2,8.4C0,8.6,0,9,0,9.3l3,11  C3.2,20.7,3.6,21,4,21h6.4l-3.3,6.6c-0.2,0.3-0.1,0.7,0,1C7.3,28.8,7.7,29,8,29h4c0.3,0,0.6-0.1,0.7-0.3l6.9-7.7H28  c1.1,0,2.1-0.4,2.8-1.2c0.8-0.8,1.2-1.8,1.2-2.8S31.6,14.9,30.8,14.2z"/>
-            <path d="M10.4,11h8.5l-5.1-5.7C13.6,5.1,13.3,5,13,5H9C8.7,5,8.3,5.2,8.1,5.5C8,5.8,8,6.1,8.1,6.4L10.4,11z"/>
-          </svg>
-        </div>
-        <div class="runway"></div>
-      </div>
-      <div class="loading-text">Processing...</div>
-    </div>
-  </div>
-  <div class="container pt-5 my-3">
     {% block content %}{% endblock %}
+    {% if not widget_mode %}
     <footer class="mt-5 py-4 border-top">
       <div class="container px-0">
         <div class="mb-3">
@@ -835,6 +853,8 @@
         </div>
       </div>
     </footer>
+    <!-- widget_mode -->
+    {% endif %}
   </div>
 </body>
 </html>
