@@ -23,13 +23,16 @@ fi
 echo "Activating virtual environment..."
 source venv/bin/activate
 
-# Upgrade pip
-echo "Upgrading pip..."
-pip install --upgrade pip
-
 # Install dependencies
 echo "Installing dependencies..."
-pip install -r requirements.txt
+if command -v uv &> /dev/null; then
+    echo "Using uv (fast installer)..."
+    uv pip install -r requirements.txt
+else
+    echo "Using pip (uv not available - consider installing it for faster deploys)..."
+    pip install --upgrade pip
+    pip install -r requirements.txt
+fi
 
 echo "✅ Development environment setup complete!"
 echo ""
