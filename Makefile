@@ -11,7 +11,7 @@ run-checks:
 	@echo "=== Running mypy ==="
 	mypy src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup --config-file=pyproject.toml
 	@echo "=== Running black ==="
-	black --check --line-length 130 src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup
+	black --diff --check --line-length 130 src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup
 	@echo "=== Running ruff ==="
 	ruff check src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup --config=pyproject.toml
 	@echo "All linter checks completed successfully!"
