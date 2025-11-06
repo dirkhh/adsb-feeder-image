@@ -91,7 +91,7 @@ class MultiOutline:
                 oldHash = hwt.get("multioutline_hash")
 
         if oldHash == newHash:
-            print_err("no need to regenerate combined heywhatsthat outlines, already current")
+            # print_err("no need to regenerate combined heywhatsthat outlines, already current")
             return None
 
         result = {
