@@ -197,6 +197,7 @@ class AdsbIm:
         self._last_base_info = dict()
 
         self._multi_outline_bg = None
+        self._push_multi_thread = None
 
         self.lastSetGainWrite = 0.0
 
@@ -752,10 +753,16 @@ class AdsbIm:
         def push_mo():
             subprocess.run(["bash", "/opt/adsb/push_multioutline.sh", f"{self._d.env_by_tags('num_micro_sites').value}"])
 
+        oldThread = self._push_multi_thread
+        if oldThread and oldThread.is_alive():
+            print_err("push_multi_outline: still running, skipping this run")
+
         thread = threading.Thread(
             target=push_mo,
         )
         thread.start()
+
+        self._push_multi_thread = thread
 
     def stage2_checks(self):
         for i in self.micro_indices():
