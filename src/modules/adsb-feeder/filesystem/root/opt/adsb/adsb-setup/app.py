@@ -578,12 +578,6 @@ class AdsbIm:
     def run(self, no_server=False):
         debug = os.environ.get("ADSBIM_DEBUG") is not None
 
-        # hopefully very temporary hack to deal with a broken container that
-        # doesn't run on Raspberry Pi 5 boards
-        board = self._d.env_by_tags("board_name").valuestr
-        if board.startswith("Raspberry Pi 5"):
-            self._d.env_by_tags(["container", "planefinder"]).value = "ghcr.io/sdr-enthusiasts/docker-planefinder:5.0.161_arm64"
-
         # as we migrate from pre v3.0.1 to v3.0.1 we need to sync the new feeder type
         # variables based on existing settings - the rest of the code must ensure that
         # these stay in sync, so this should only ever create change the first time
