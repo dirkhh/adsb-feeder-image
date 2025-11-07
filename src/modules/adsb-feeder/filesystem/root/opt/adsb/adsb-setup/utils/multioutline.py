@@ -1,6 +1,7 @@
 import hashlib
 import json
 import re
+import time
 import traceback
 
 from shapely.geometry import LinearRing, Polygon
@@ -9,16 +10,16 @@ from shapely.ops import unary_union
 from utils.paths import ENV_FILE
 from utils.util import get_plain_url, print_err
 
-use_is_valid_reason = True
 try:
-    from shapely import is_valid_reason
+    from shapely import is_valid, is_valid_reason
 except Exception:
-    use_is_valid_reason = False
-    from shapely.validation import explain_validity
+    print_err("shapely version is too old - can't do multi outline")
+    raise
 
 
 class MultiOutline:
     def _get_outlines(self, num):
+        now = time.time()
         data = []
         for i in range(1, num + 1):
             try:
@@ -27,6 +28,7 @@ class MultiOutline:
                 pass
             else:
                 data.append(outline)
+        print_err(f"_get_outlines() {time.time() - now}", level=8)
         return data
 
     def _tar1090port(self):
@@ -39,6 +41,7 @@ class MultiOutline:
         return tar1090port
 
     def _get_heywhatsthat(self, num):
+        now = time.time()
         data = []
         hwt_feeders = []
         with open("/opt/adsb/config/.env", "r") as env:
@@ -62,6 +65,7 @@ class MultiOutline:
                 print_err(f"_get_heywhatsthat: json.loads failed on response: {response}")
             else:
                 data.append(hwt)
+        print_err(f"_get_heywhatsthat() {time.time() - now}", level=8)
         return data
 
     def create_outline(self, num):
@@ -105,13 +109,14 @@ class MultiOutline:
         }
         for idx in range(len(data[0]["rings"])):
             alt = data[0]["rings"][idx]["alt"]
-            multi_range = self.create(data, hwt_alt=alt).get("multiRange")
+            multi_range = self.create(data, hwt_alt=alt).get("multiRange", [])
             for i in range(len(multi_range)):
                 result["rings"].append({"points": multi_range[i], "alt": alt})
         return result
 
     def create(self, data, hwt_alt=0):
         # print_err(f"multioutline: called create with for data with len {len(data)}")
+        now = time.time()
         result: dict = {"multiRange": []}
         polygons = []
         for i in range(len(data)):
@@ -128,27 +133,17 @@ class MultiOutline:
                 try:
                     p = Polygon(shell=LinearRing(points))
                     if p:
-                        if use_is_valid_reason:
-                            r = is_valid_reason(p)  # type: ignore[possibly-unbound]
-                            if r == "Valid Geometry":
-                                polygons.append(p)
-                            else:
-                                print_err(f"multioutline: can't create polygon from outline #{i} - {r}")
+                        if is_valid(p):
+                            polygons.append(p)
                         else:
-                            try:
-                                r = explain_validity(p)  # type: ignore[possibly-unbound]
-                                if r == "Valid Geometry":
-                                    polygons.append(p)
-                                else:
-                                    print_err(f"multioutline: can't create polygon from outline #{i} - {r}")
-                            except Exception:
-                                print_err(traceback.format_exc())
-                                print_err(f"multioutline: can't create polygon from outline #{i}")
+                            r = is_valid_reason(p)
+                            print_err(f"multioutline: can't create polygon from outline #{i} - {r}")
                     else:
                         print_err(f"multioutline: can't create polygon from outline #{i}")
                 except Exception:
                     print_err(traceback.format_exc())
                     print_err(f"multioutline: can't create linear ring from outline #{i} - maybe there is no data, yet?")
+        print_err(f"create first half {time.time() - now}", level=8)
 
         if len(polygons) == 0:
             return result
@@ -160,20 +155,14 @@ class MultiOutline:
             to_consider = [0]
             for i in look_at:
                 combined = False
-                if not polygons[i] or not polygons[i].is_valid:
-                    if use_is_valid_reason:
-                        r = is_valid_reason(polygons[i])  # type: ignore[possibly-unbound]
-                    else:
-                        r = explain_validity(polygons[i])  # type: ignore[possibly-unbound]
+                if not polygons[i] or not is_valid(polygons[i]):
+                    r = is_valid_reason(polygons[i])  # type: ignore[possibly-unbound]
                     print_err(f"multioutline: polygons[{i}]: {r}")
 
-                    polygons[i] = polygons[i].buffer(0.0001)
+                polygons[i] = polygons[i].buffer(0.0001)
                 for j in to_consider:
-                    if not polygons[j].is_valid:
-                        if use_is_valid_reason:
-                            r = is_valid_reason(polygons[j])  # type: ignore[possibly-unbound]
-                        else:
-                            r = explain_validity(polygons[j])  # type: ignore[possibly-unbound]
+                    if not is_valid(polygons[j]):
+                        r = is_valid_reason(polygons[j])  # type: ignore[possibly-unbound]
                         print_err(f"multioutline: polygons[{j}]: {r}")
                     polygons[j] = polygons[j].buffer(0.0001)
                     try:
@@ -189,6 +178,7 @@ class MultiOutline:
                 if not combined:
                     to_consider.append(i)
             look_at = to_consider[1:]
+        print_err(f"create second half {time.time() - now}", level=8)
 
         for i in to_consider:
             try:
@@ -202,4 +192,7 @@ class MultiOutline:
                 print_err(traceback.format_exc())
                 print_err(f"multioutline: can't get points from polygon #{i} exterior coords: {e}")
                 pass
+
+        print_err(f"create done {time.time() - now}", level=8)
+
         return result
