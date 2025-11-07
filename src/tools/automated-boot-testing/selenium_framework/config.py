@@ -9,7 +9,7 @@ class SeleniumConfig:
     """Selenium test configuration settings."""
 
     rpi_ip: str
-    browser: Literal["chrome", "firefox"] = "chrome"
+    browser: Literal["chrome", "firefox"] = "firefox"
     headless: bool = True
     timeout: int = 90
     site_name: str = "automated test site"

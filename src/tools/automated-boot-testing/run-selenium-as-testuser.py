@@ -35,7 +35,7 @@ def main() -> int:
 
     try:
         # Create test configuration
-        config = SeleniumConfig(rpi_ip=args.target_ip, browser="chrome", headless=True, timeout=args.timeout)
+        config = SeleniumConfig(rpi_ip=args.target_ip, browser="firefox", headless=True, timeout=args.timeout)
 
         # Run tests using context manager
         with SeleniumTestRunner(config) as runner:
