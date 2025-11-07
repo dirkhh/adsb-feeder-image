@@ -750,6 +750,7 @@ class AdsbIm:
         oldThread = self._push_multi_thread
         if oldThread and oldThread.is_alive():
             print_err("push_multi_outline: still running, skipping this run")
+            return
 
         thread = threading.Thread(
             target=push_mo,
