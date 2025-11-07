@@ -1,7 +1,12 @@
 Changes since v3.0.6
 =======
+- systemd services: define active services in one place so this doesn't get out of sync (again)
+- initial support for planefinder radar stick, no MLAT yet, PF data sharing needs to be enabled
+- stage2: multioutline: don't launch another script instance if previous one is still running
+- stage2: multioutline: log CPU time used when it takes more than 30 seconds
+- stage2: multioutline: don't regenerate combined heywhatsthat if source data stays the same
 - support WiFi networks with protected management frames on DietPi
-- fix Mode S Beast support
+- fix Mode S Beast healthcheck
 - fix app install / DietPi install issue
 
 
