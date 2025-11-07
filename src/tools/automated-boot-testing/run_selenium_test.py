@@ -36,8 +36,8 @@ def main() -> int:
     parser.add_argument(
         "--browser",
         choices=["chrome", "firefox"],
-        default="chrome",
-        help="Browser to use for testing (default: chrome)",
+        default="firefox",
+        help="Browser to use for testing (default: firefox)",
     )
     parser.add_argument("--headless", action="store_true", default=True, help="Run browser in headless mode (default: True)")
     parser.add_argument("--no-headless", action="store_false", dest="headless", help="Run browser with GUI")
