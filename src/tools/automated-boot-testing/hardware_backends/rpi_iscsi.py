@@ -26,6 +26,7 @@ class RPiISCSIBackend(HardwareBackend):
         power_toggle_script: Path,
         serial_console: Optional[str] = None,
         serial_baud: int = 115200,
+        iscsi_server_ip: str = "192.168.77.252",
     ):
         """
         Initialize RPi iSCSI backend.
@@ -36,12 +37,14 @@ class RPiISCSIBackend(HardwareBackend):
             power_toggle_script: Path to power toggle script
             serial_console: Optional serial console device path
             serial_baud: Serial baud rate
+            iscsi_server_ip: iSCSI server IP address (default: 192.168.77.252)
         """
         super().__init__(config)
         self.rpi_ip = rpi_ip
         self.power_toggle_script = power_toggle_script
         self.serial_console = serial_console
         self.serial_baud = serial_baud
+        self.iscsi_server_ip = iscsi_server_ip
 
         self.expected_image_name: Optional[str] = None
         self.serial_reader: Optional[SerialConsoleReader] = None
@@ -206,6 +209,11 @@ class RPiISCSIBackend(HardwareBackend):
         ]
         if ssh_public_key:
             cmd.append(ssh_public_key)
+        else:
+            cmd.append("")  # Empty string for ssh_public_key if not provided
+
+        # Add iscsi_server_ip as the 4th argument
+        cmd.append(self.iscsi_server_ip)
 
         logger.info(f"Running: {' '.join(cmd)}")
 

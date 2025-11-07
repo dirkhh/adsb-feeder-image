@@ -26,6 +26,7 @@ def main() -> int:
     parser.add_argument("rpi_ip", help="Raspberry Pi IP address")
     parser.add_argument("power_toggle_script", help="Path to power toggle script")
     parser.add_argument("--ssh-key", help="SSH public key to install in image")
+    parser.add_argument("--iscsi-server-ip", default="192.168.77.252", help="iSCSI server IP address (default: 192.168.77.252)")
     parser.add_argument("--serial-console", help="Serial console device (e.g., /dev/ttyUSB0)")
     parser.add_argument("--serial-baud", type=int, default=115200, help="Serial baud rate (default: 115200)")
     parser.add_argument("--metrics-id", type=int, help="Metrics database test ID")
@@ -61,6 +62,7 @@ def main() -> int:
         power_toggle_script=Path(args.power_toggle_script),
         serial_console=args.serial_console,
         serial_baud=args.serial_baud,
+        iscsi_server_ip=args.iscsi_server_ip,
     )
 
     success = False

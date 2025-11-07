@@ -1,5 +1,6 @@
 {
   "rpi_ip": "192.168.77.190",
+  "iscsi_server_ip": "192.168.77.252",
   "timeout_minutes": 10,
   "host": "100.x.x.x",
   "port": 9456,
