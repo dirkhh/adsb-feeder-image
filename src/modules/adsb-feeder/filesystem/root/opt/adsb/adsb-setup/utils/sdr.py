@@ -220,6 +220,7 @@ class SDRDevices:
         check_pidvid(pv_list=["1d50:60a1"], sdr_type="airspy")
         check_pidvid(pv_list=["03eb:800c"], sdr_type="airspyhf")
         check_pidvid(pv_list=["0403:6001"], sdr_type="modesbeast")
+        check_pidvid(pv_list=["0403:6015"], sdr_type="pf_radar_stick")
 
         sdrplay_pv_list = [
             "1df7:2500",
@@ -292,14 +293,12 @@ class SDRDevices:
             return ret
 
         for sdr in self.sdrs:
-            if sdr._type == "airspy":
-                ret["1090"] = sdr._serial
-            if sdr._type == "modesbeast":
+            # these SDRs can't do 978 or dump978 does not support them, always suggest to used them
+            # for 1090
+            if sdr._type in ["airspy", "modesbeast", "sdrplay", "pf_radar_stick"]:
                 ret["1090"] = sdr._serial
             elif sdr._type == "stratuxv3":
                 ret["978"] = sdr._serial
-            elif sdr._type == "sdrplay":
-                ret["1090"] = sdr._serial
             elif sdr._type == "rtlsdr":
                 if "1090" in sdr._serial:
                     ret["1090"] = sdr._serial

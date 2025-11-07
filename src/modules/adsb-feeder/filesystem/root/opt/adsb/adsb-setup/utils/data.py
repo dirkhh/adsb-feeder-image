@@ -311,6 +311,10 @@ class Data:
             tags=["planefinder", "key"],
         ),
         Env(
+            "PF_RADAR_STICK_ENABLED",
+            tags=["pf_radar_stick", "is_enabled"],
+        ),
+        Env(
             "FEEDER_ADSBHUB_STATION_KEY",
             default=[""],
             tags=["adsbhub", "key"],

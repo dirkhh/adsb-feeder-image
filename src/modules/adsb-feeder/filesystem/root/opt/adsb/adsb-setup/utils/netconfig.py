@@ -135,6 +135,8 @@ class UltrafeederConfig:
                 ret.add("adsb,airspy_adsb,30005,beast_in")
             elif self._d.is_enabled("sdrplay"):
                 ret.add("adsb,sdrplay-beast1090,30005,beast_in")
+            elif self._d.is_enabled("pf_radar_stick"):
+                ret.add("adsb,pfclient,30055,beast_in")
             elif remote_sdr:
                 if remote_sdr.find(",") == -1:
                     remote_sdr += ",30005"

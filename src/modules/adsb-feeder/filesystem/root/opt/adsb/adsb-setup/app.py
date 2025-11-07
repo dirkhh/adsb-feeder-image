@@ -2634,6 +2634,11 @@ class AdsbIm:
             self._d.env_by_tags(["sdrplay", "is_enabled"]).value = sdrplay
             # Mode-S Beast
             modesbeast = any([sdr._serial == env1090.value and sdr._type == "modesbeast" for sdr in self._sdrdevices.sdrs])
+            # Plane Finder Radar Stick
+            pf_radar_stick = any(
+                [sdr._serial == env1090.value and sdr._type == "pf_radar_stick" for sdr in self._sdrdevices.sdrs]
+            )
+            self._d.env_by_tags(["pf_radar_stick", "is_enabled"]).value = pf_radar_stick
 
             # rtl-sdr
             rtlsdr = any(sdr._type == "rtlsdr" and sdr._serial == env1090.value for sdr in self._sdrdevices.sdrs)
