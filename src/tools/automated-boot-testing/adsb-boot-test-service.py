@@ -743,6 +743,9 @@ class ADSBTestService:
             ]
 
             # Add optional arguments
+            if self.config.get("iscsi_server_ip"):
+                cmd.extend(["--iscsi-server-ip", self.config["iscsi_server_ip"]])
+
             if self.config.get("serial_console"):
                 cmd.extend(["--serial-console", self.config["serial_console"]])
                 cmd.extend(["--serial-baud", str(self.config.get("serial_baud", 115200))])

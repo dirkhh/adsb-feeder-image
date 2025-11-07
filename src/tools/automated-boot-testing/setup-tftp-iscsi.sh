@@ -2,13 +2,15 @@
 #
 # Setup TFTP/iSCSI boot for Raspberry Pi test image
 #
-# Usage: setup-tftp-iscsi.sh <image_file> [ssh_public_key]
+# Usage: setup-tftp-iscsi.sh <image_file> <working_image_file> [ssh_public_key] [iscsi_server_ip]
 #
 # Arguments:
-#   image_file      - Path to the Raspberry Pi image file (.img)
-#   ssh_public_key  - Optional: Path to SSH public key to install in /root/.ssh/authorized_keys
-#                     for passwordless access. If using test-feeder-image.py with --ssh-key,
-#                     the public key is assumed to be at <private_key_path>.pub
+#   image_file         - Path to the Raspberry Pi image file (.img)
+#   working_image_file - Path where the working image will be stored
+#   ssh_public_key     - Optional: Path to SSH public key to install in /root/.ssh/authorized_keys
+#                        for passwordless access. If using test-feeder-image.py with --ssh-key,
+#                        the public key is assumed to be at <private_key_path>.pub
+#   iscsi_server_ip    - Optional: iSCSI server IP address (default: 192.168.77.252)
 #
 set -e  # Exit on any error
 
@@ -16,10 +18,11 @@ set -e  # Exit on any error
 IMAGE_FILE="$1"
 WORKING_IMAGE_FILE="$2"
 SSH_PUBLIC_KEY="$3"  # Optional: SSH public key to install for passwordless access
+ISCSI_SERVER_IP="${4:-192.168.77.252}"  # Optional: iSCSI server IP, defaults to 192.168.77.252
 MOUNT_BOOT="/mnt/rpi-prep-root/boot/firmware"
 MOUNT_ROOT="/mnt/rpi-prep-root"
 TFTP_DEST="/srv/tftp"
-CMDLINE="console=serial0,115200 ip=dhcp ISCSI_INITIATOR=iqn.2025-10.im.adsb.testrpi:rpi4 ISCSI_TARGET_NAME=iqn.2025-10.im.adsb:adsbim-test.root ISCSI_TARGET_IP=192.168.66.109 ISCSI_TARGET_PORT=3260 root=/dev/sda2 rw rootwait elevator=deadline cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1 systemd.getty_auto=0"
+CMDLINE="console=serial0,115200 ip=dhcp ISCSI_INITIATOR=iqn.2025-10.im.adsb.testrpi:rpi4 ISCSI_TARGET_NAME=iqn.2025-10.im.adsb:adsbim-test.root ISCSI_TARGET_IP=${ISCSI_SERVER_IP} ISCSI_TARGET_PORT=3260 root=/dev/sda2 rw rootwait elevator=deadline cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1 systemd.getty_auto=0"
 
 # Colors for output
 RED='\033[0;31m'
