@@ -4,7 +4,9 @@ import logging
 import re
 from html import unescape
 
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
 
 from ..base_page import BasePage
 from ..config import Timeouts
@@ -82,17 +84,27 @@ class BasicSetupPage(BasePage):
 
         Raises:
             ValidationError: If temperature cannot be parsed
+            TimeoutException: If temperature doesn't appear within timeout
         """
         logger.info("Reading CPU temperature...")
-        cpu_temp_block = self.find_element(self.CPU_TEMP_BLOCK)
-        cpu_temp_element = cpu_temp_block.find_element(*self.CPU_TEMP)
-        temp_text = cpu_temp_element.text.strip()
+        temp_text = ""
 
         try:
+            # Wait up to 5 seconds for the temperature element to be present
+            cpu_temp_element = WebDriverWait(self.driver, 5).until(lambda driver: driver.find_element(*self.CPU_TEMP))
+
+            # Wait for the element to have non-empty text
+            WebDriverWait(self.driver, 5).until(lambda _: cpu_temp_element.text.strip() != "")
+
+            temp_text = cpu_temp_element.text.strip()
+
             # Extract numeric value (handle formats like "65.5°C" or "65.5")
             temp_value = float("".join(filter(lambda x: x.isdigit() or x == ".", temp_text)))
-            logger.info(f"CPU temperature: {temp_value}°C")
+            logger.info(f"CPU temperature: {temp_text}, extracted {temp_value}")
             return temp_value
+
+        except TimeoutException:
+            raise ValidationError("CPU temperature did not appear within 5 seconds")
         except ValueError as e:
             raise ValidationError(f"Could not parse CPU temperature from text: {temp_text}") from e
 
