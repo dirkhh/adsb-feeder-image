@@ -482,6 +482,10 @@ if [ -f "$MOUNT_BOOT/dietpi.txt" ]; then
     sed -i "s/console=serial0,115200/console=ttyS0,115200/" "$TFTP_DEST/cmdline.txt"
 fi
 
+# Finished modifying or accessing the loop mounts - clean up
+cleanup
+trap - EXIT
+
 # Create or update cmdline.txt
 if [ -f "$TFTP_DEST/cmdline.txt" ]; then
     EXISTING_CMDLINE=$(cat "$TFTP_DEST/cmdline.txt")
