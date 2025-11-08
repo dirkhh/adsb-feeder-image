@@ -78,11 +78,11 @@ def write_values_to_env_file(values):
                     suffix = "" if i == 0 else f"_{i}"
                     env_line = f"{key}{suffix}={value[i]}\n"
                     f.write(env_line)
-                    print_err(f"wrote {env_line} to .env", level=8)
+                    print_err(f"wrote {env_line[:-1]} to .env", level=8)
             else:
                 env_line = f"{key}={value}\n"
                 f.write(env_line)
-                print_err(f"wrote {env_line} to .env", level=8)
+                print_err(f"wrote {env_line[:-1]} to .env", level=8)
 
     os.rename(tmp, ENV_FILE)
 
