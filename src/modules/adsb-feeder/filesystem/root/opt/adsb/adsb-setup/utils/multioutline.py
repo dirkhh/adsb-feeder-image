@@ -1,9 +1,6 @@
 import hashlib
 import json
-import os
 import re
-import subprocess
-import time
 import traceback
 from shapely.geometry import LinearRing, Polygon
 from shapely.ops import unary_union
@@ -11,10 +8,11 @@ from utils.util import make_int, print_err, get_plain_url
 
 old_shapely = False
 try:
-    from shapely.validation import is_valid, is_valid_reason
-except:
+    from shapely import is_valid, is_valid_reason
+except ImportError:
     oldShapely = True
     from shapely.validation import explain_validity
+
 
 def check_valid(p):
     if not p:
@@ -35,24 +33,21 @@ def check_valid(p):
         print_err(traceback.format_exc())
         return False, "see backtrace above"
 
+
 class MultiOutline:
     def _get_outlines(self, num):
         data = []
         for i in range(1, num + 1):
             try:
                 outline = json.load(open(f"/run/adsb-feeder-uf_{i}/readsb/outline.json"))
-            except:
+            except Exception:
                 pass
             else:
                 data.append(outline)
         return data
 
     def _tar1090port(self):
-        data = []
-        hwt_feeders = []
-        now = time.time()
         tar1090port = 8080
-
         with open("/opt/adsb/config/.env", "r") as env:
             for line in env:
                 match = re.search(r"AF_TAR1090_PORT=(\d+)", line)
@@ -68,7 +63,7 @@ class MultiOutline:
             for line in env:
                 match = re.search(r"_ADSBIM_HEYWHATSTHAT_ENABLED_(\d+)=True", line)
                 if match:
-                    hwt_feeders.append(int(match.group(1)))
+                    hwt_feeders.append(make_int(match.group(1)))
         for i in hwt_feeders:
 
             hwt_url = f"http://127.0.0.1:{self._tar1090port()}/{i}/upintheair.json"
@@ -78,7 +73,7 @@ class MultiOutline:
                 continue
             try:
                 hwt = json.loads(response)
-            except:
+            except Exception:
                 print_err(f"_get_heywhatsthat: json.loads failed on response: {response}")
             else:
                 data.append(hwt)
@@ -151,7 +146,7 @@ class MultiOutline:
                         polygons.append(p)
                     else:
                         print_err(f"multioutline: can't create polygon from outline #{i} - {reason}")
-                except:
+                except Exception:
                     print_err(traceback.format_exc())
                     print_err(
                         f"multioutline: can't create linear ring from outline #{i} - maybe there is no data, yet?"
