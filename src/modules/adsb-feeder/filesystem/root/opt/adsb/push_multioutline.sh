@@ -15,4 +15,4 @@ fi
 # it's a huge dependency and only needed for the relatively rare stage 2 case)
 python3 -c "import shapely" &>/dev/null || apt install -y python3-shapely
 
-python3 /opt/adsb/adsb-setup/push_multioutline.py "$@"
+exec python3 /opt/adsb/adsb-setup/push_multioutline.py "$@"
