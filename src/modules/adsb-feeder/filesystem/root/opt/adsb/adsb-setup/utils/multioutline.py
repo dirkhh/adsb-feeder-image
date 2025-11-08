@@ -2,15 +2,20 @@ import hashlib
 import json
 import re
 import traceback
+from typing import Dict, List
+
 from shapely.geometry import LinearRing, Polygon
 from shapely.ops import unary_union
-from utils.util import make_int, print_err, get_plain_url
+
+from utils.paths import ENV_FILE
+from utils.util import get_plain_url, make_int, print_err
 
 old_shapely = False
 try:
     from shapely import is_valid, is_valid_reason
 except ImportError:
     oldShapely = True
+    print_err("using old shapely", level=8)
     from shapely.validation import explain_validity
 
 
@@ -47,8 +52,8 @@ class MultiOutline:
         return data
 
     def _tar1090port(self):
-        tar1090port = 8080
-        with open("/opt/adsb/config/.env", "r") as env:
+        tar1090port = "8080"
+        with open(ENV_FILE, "r") as env:
             for line in env:
                 match = re.search(r"AF_TAR1090_PORT=(\d+)", line)
                 if match:
@@ -70,6 +75,8 @@ class MultiOutline:
             response, status = get_plain_url(hwt_url)
             if status != 200:
                 print_err(f"_get_heywhatsthat: http status {status} for {hwt_url}")
+                continue
+            if not response:
                 continue
             try:
                 hwt = json.loads(response)
@@ -126,8 +133,8 @@ class MultiOutline:
 
     def create(self, data, hwt_alt=0):
         # print_err(f"multioutline: called create with for data with len {len(data)}")
-        result = {"multiRange": []}
-        polygons = []
+        result: Dict = {"multiRange": []}
+        polygons: List[Polygon] = []
         for i in range(len(data)):
             d = data[i]
             if hwt_alt == 0:
@@ -148,14 +155,13 @@ class MultiOutline:
                         print_err(f"multioutline: can't create polygon from outline #{i} - {reason}")
                 except Exception:
                     print_err(traceback.format_exc())
-                    print_err(
-                        f"multioutline: can't create linear ring from outline #{i} - maybe there is no data, yet?"
-                    )
+                    print_err(f"multioutline: can't create linear ring from outline #{i} - maybe there is no data, yet?")
 
         if len(polygons) == 0:
             return result
         made_change = True
-        look_at = range(1, len(polygons))
+        look_at: List[int] = list(range(1, len(polygons)))
+        to_consider = [0]
         while made_change:
             made_change = False
             to_consider = [0]
@@ -172,15 +178,18 @@ class MultiOutline:
                         print_err(f"multioutline: polygons[{j}]: {reason}")
                     try:
                         if not polygons[j].disjoint(polygons[i]):
-                            p = unary_union([polygons[j], polygons[i]])
-                            polygons[j] = p
+                            poly_union = unary_union([polygons[j], polygons[i]])
+                            if isinstance(poly_union, Polygon):
+                                polygons[j] = poly_union
+                            else:
+                                print_err(
+                                    f"unary_union of {[polygons[j], polygons[i]]} which we know to not be disjoint isn't a Polygon {poly_union}"
+                                )
                             made_change = True
                             combined = True
                     except Exception as e:
                         print_err(traceback.format_exc())
-                        print_err(
-                            f"multioutline: exception {e} while combining polygons #{j} and #{i} for hwt_alt={hwt_alt}"
-                        )
+                        print_err(f"multioutline: exception {e} while combining polygons #{j} and #{i} for hwt_alt={hwt_alt}")
                         pass
                 if not combined:
                     to_consider.append(i)
