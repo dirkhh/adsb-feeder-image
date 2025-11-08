@@ -24,6 +24,8 @@ t2 = time.process_time()
 elapsed = round(t2 - t1, 3)
 if elapsed > 30:
     print_err(f"multioutline generation CPU seconds used: {elapsed}")
+else:
+    print_err(f"multioutline generation CPU seconds used: {elapsed}", level=8)
 
 # heywhatsthat
 
@@ -48,3 +50,5 @@ t3 = time.process_time()
 elapsed = round(t3 - t2, 3)
 if elapsed > 30:
     print_err(f"heywhatsthat generation CPU seconds used: {elapsed}")
+else:
+    print_err(f"heywhatsthat generation CPU seconds used: {elapsed}", level=8)
