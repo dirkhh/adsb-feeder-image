@@ -198,9 +198,9 @@ class MultiOutline:
             try:
                 coords = polygons[i].exterior.coords
                 if len(coords[0]) == 3:
-                    points = [[x, y] for x, y, a in coords]
+                    points = [[round(x, 4), round(y, 4)] for x, y, a in coords]
                 else:
-                    points = [[x, y] for x, y in coords]
+                    points = [[round(x, 4), round(y, 4)] for x, y in coords]
                 result["multiRange"].append(points)
             except Exception as e:
                 print_err(traceback.format_exc())
