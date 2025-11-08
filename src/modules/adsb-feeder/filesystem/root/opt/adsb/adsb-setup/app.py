@@ -25,7 +25,6 @@ import zipfile
 from base64 import b64encode
 from copy import deepcopy
 from datetime import datetime, timezone
-from os import urandom
 from time import sleep
 from typing import Dict, List, Tuple
 from uuid import uuid4
@@ -45,6 +44,7 @@ from flask import (
 )
 from flask.logging import logging as flask_logging  # pyright: ignore[reportPrivateImportUsage]
 from utils.agg_status import AggStatus, Healthcheck, ImStatus
+from utils.auth import WebAuth
 from utils.background import Background
 from utils.config import (
     config_lock,
@@ -109,14 +109,54 @@ flask_logging.getLogger("werkzeug").addFilter(NoStatic())
 class AdsbIm:
     def __init__(self):
         print_err("starting AdsbIm.__init__", level=4)
+        self._d = Data()
+        self._system = System(data=self._d)
         self.app = Flask(__name__)
-        self.app.secret_key = urandom(16).hex()
+        # Initialize authentication system (with persistent secret key)
+        if self._d.env_by_tags("app_secret").valuestr == "":
+            self._d.env_by_tags("app_secret").value = secrets.token_hex(24)
+        self.app.secret_key = self._d.env_by_tags("app_secret").valuestr
+        self._auth = WebAuth(
+            self.app,
+            self._d.env_by_tags("app_secret").valuestr,
+            lambda: self._d.env_by_tags("web_auth_username").valuestr,
+            lambda: self._d.env_by_tags("web_auth_password").valuestr,
+            lambda: self._d.env_by_tags("web_auth_enabled").valuestr.lower() in ("true", "1", "yes"),
+        )
 
         # set Cache-Control max-age for static files served
         # cachebust.sh ensures that the browser doesn't get outdated files
         self.app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 1209600
 
         self.exiting = False
+        self._provisional_password = ""
+
+        # Add authentication check before each request
+        @self.app.before_request
+        def check_authentication():
+            # List of routes that don't require authentication
+            public_routes = [
+                "login",
+                "logout",
+                "static",
+                "info",  # Support Info page
+                "support",  # Share Diagnostics
+                "geojson",  # for Shipfeeder
+                "iconspng",  # AIS icons
+            ]
+            # API endpoints for status checks should also be public
+            if request.endpoint and (
+                request.endpoint in public_routes
+                or request.endpoint.startswith("api/status/")
+                or request.path.startswith("/api/status/")
+            ):
+                return None
+
+            # If authentication is enabled and user is not authenticated, redirect to login
+            if not self._auth.is_authenticated():
+                return redirect(url_for("login", next=request.url))
+
+            return None
 
         @self.app.context_processor
         def env_functions():
@@ -139,8 +179,7 @@ class AdsbIm:
             }
 
         self._routemanager = RouteManager(self.app)
-        self._d = Data()
-        self._system = System(data=self._d)
+
         # let's only instantiate the Wifi class if we are on WiFi
         self.wifi = None
         self.wifi_ssid = ""
@@ -338,6 +377,8 @@ class AdsbIm:
         self.app.add_url_rule(f"/get-logs", "get-logs", self.get_logs)
         self.app.add_url_rule(f"/view-logs", "view-logs", self.view_logs)
         self.app.add_url_rule(f"/widget", "widget", self.widget)
+        self.app.add_url_rule("/login", "login", self.login, methods=["GET", "POST"])
+        self.app.add_url_rule("/logout", "logout", self.logout)
         # fmt: on
         self.update_boardname()
         self.update_version()
@@ -369,6 +410,18 @@ class AdsbIm:
         # to lists)
         with config_lock:
             write_values_to_config_json(self._d.env_values, reason="Startup")
+
+    def require_auth(self, f):
+        """Decorator to require authentication for a route."""
+        from functools import wraps
+
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not self._auth.is_authenticated():
+                return redirect(url_for("login", next=request.url))
+            return f(*args, **kwargs)
+
+        return decorated_function
 
     def update_boardname(self):
         board = ""
@@ -3487,10 +3540,32 @@ class AdsbIm:
                     print_err("updating the root password")
                     self.set_rpw()
                     continue
+                if key == "web_auth_setup":
+                    # Enable web authentication with the provided username and password
+                    username = form.get("web_auth--username", "")
+                    password = self._provisional_password
+                    if username and password:
+                        self._d.env_by_tags("web_auth_username").value = username
+                        self._d.env_by_tags("web_auth_password").value = self._auth.hash_password(password)
+                        self._d.env_by_tags("web_auth_enabled").value = True
+                        flash("Web authentication has been enabled. You will need to log in every time you access the UI.")
+                        print_err(f"Web authentication enabled for user: {username}")
+                    else:
+                        flash("Username and password are required to enable authentication.")
+                        print_err("user auth without user")
+                    continue
+                if key == "web_auth_disable":
+                    self._d.env_by_tags("web_auth_enabled").value = False
+                    self._d.env_by_tags("web_auth_username").value = ""
+                    self._d.env_by_tags("web_auth_password").value = ""
+
+                    flash("Web authentication has been disabled. You will no longer need to log in every time you access the UI.")
+                    print_err("Web authentication has been disabled")
+                    continue
                 if key == "wifi":
                     print_err("updating the wifi settings")
                     ssid = form.get("wifi_ssid")
-                    password = form.get("wifi_password")
+                    password = form.get("wifi_password", "")
 
                     def connect_wifi():
                         if self.wifi is None:
@@ -3582,6 +3657,7 @@ class AdsbIm:
                 if success:
                     report_issue(f"added ssh key: {value}")
                 continue
+
             try:
                 e = self._d.env_by_tags(key.split("--"))
             except Exception:
@@ -3795,6 +3871,9 @@ class AdsbIm:
                     self._d.env_by_tags("tailscale_name").value = ""
         # create a potential new root password in case the user wants to change it
         self.rpw = self.generate_random_password()
+        # similarly, create a password for WebAuth if none exists
+        if self._d.env_by_tags("web_auth_password").valuestr == "":
+            self._provisional_password = self.generate_random_password()
         # if we are on a branch that's neither stable nor beta, pass the value to the template
         # so that a third update button will be shown - separately, pass along unconditional
         # information on the current branch the user is on so we can show that in the explanatory text.
@@ -3805,6 +3884,7 @@ class AdsbIm:
             zerotier_running=zerotier_running,
             hotspot_enabled=not self._d.hotspot_disabled_path.exists(),
             rpw=self.rpw,
+            auth_pwd=self._provisional_password,
             channel=channel,
             current_branch=current_branch,
             containers=self._system.list_containers(),
@@ -4482,6 +4562,36 @@ class AdsbIm:
             envvars=envvars,
             netdog=netdog,
         )
+
+    def login(self):
+        """Handle login for web authentication."""
+        if request.method == "GET":
+            # Check if already authenticated
+            if self._auth.is_authenticated():
+                return redirect(url_for("director"))
+
+            # Check if next parameter was provided
+            next_page = request.args.get("next", "")
+            return render_template("login.html", error=None, next=next_page)
+
+        # POST method - process login
+        username = request.form.get("username", "")
+        password = request.form.get("password", "")
+        next_page = request.form.get("next", "") or request.args.get("next", "")
+
+        if self._auth.login(username, password):
+            # Successful login
+            if next_page and next_page.startswith("/"):
+                return redirect(next_page)
+            return redirect(url_for("director"))
+        else:
+            # Failed login
+            return render_template("login.html", error="Invalid username or password", next=next_page)
+
+    def logout(self):
+        """Handle logout for web authentication."""
+        self._auth.logout()
+        return redirect(url_for("login"))
 
     def waiting(self):
         return render_template("waiting.html", title="ADS-B Feeder is performing requested actions")

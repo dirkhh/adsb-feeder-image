@@ -1,5 +1,6 @@
 Changes since v3.0.6
 =======
+- web UI: simple http authentication
 - hotfix: revert to older multi-outline code - this will fix CPU usage / random tar1090 hangs for large stage2 systems
 - infrastructure: add automated boot test / basic functionality test support
 - security: fix potential command injection vulnerability in FlightRadar24 signup

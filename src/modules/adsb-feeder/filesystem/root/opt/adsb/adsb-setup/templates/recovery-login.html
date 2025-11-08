@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" data-mdb-theme="{{ theme }}">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <!-- Google Fonts Roboto. Copyright 2011 Google Inc. All Rights Reserved. See {{ url_for('static', filename='fonts/LICENSE.txt') }} -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts.css') }}" />
+  <!-- MDB -->
+  <link rel="stylesheet" id="css-theme" href="{{ url_for('static', filename='css/mdb.min.css') }}" />
+  {% if not (theme == 'light') or (theme == 'dark') %}
+  <script>
+    ; (function () {
+      const htmlElement = document.querySelector("html")
+      if (htmlElement.getAttribute("data-mdb-theme") === 'auto') {
+        function updateTheme() {
+          document.querySelector("html").setAttribute("data-mdb-theme",
+            window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateTheme)
+        updateTheme()
+      }
+    })()
+  </script>
+  {% endif %}
+  <link rel="shortcut icon" href="/static/favicon.ico" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <title>Login</title>
+</head>
+
+<body>
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+      <div class="card">
+        <div class="card-body">
+          <h3 class="card-title text-center mb-4">Login Required</h3>
+
+          {% if error %}
+          <div class="alert alert-danger" role="alert">
+            {{ error }}
+          </div>
+          {% endif %}
+
+          <form method="POST" action="{{ url_for('login') }}">
+            {% if next %}
+            <input type="hidden" name="next" value="{{ next }}" />
+            {% endif %}
+
+            <div class="form-outline mb-4">
+              <input type="text" id="username" name="username" class="form-control" required autofocus />
+              <label class="form-label" for="username">Username</label>
+            </div>
+
+            <div class="form-outline mb-4">
+              <input type="password" id="password" name="password" class="form-control" required />
+              <label class="form-label" for="password">Password</label>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block w-100">Login</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

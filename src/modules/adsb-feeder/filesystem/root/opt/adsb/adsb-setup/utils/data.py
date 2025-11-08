@@ -445,6 +445,10 @@ class Data:
             default=False,
             tags=["secure_image", "is_enabled", "norestore"],
         ),
+        Env("_ADSBIM_WEB_AUTH_ENABLED", default=False, tags=["web_auth_enabled"]),
+        Env("_ADSBIM_WEB_AUTH_USERNAME", default="", tags=["web_auth_username"]),
+        Env("_ADSBIM_WEB_AUTH_PASSWORD_HASH", default="", tags=["web_auth_password"]),
+        Env("_ADSBIM_APP_SECRET", default="", tags=["app_secret"]),
         Env(
             "AF_APP_INIT_DONE",
             default=False,
