@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+      <div class="card">
+        <div class="card-body">
+          <h3 class="card-title text-center mb-4">Login Required</h3>
+
+          {% if error %}
+          <div class="alert alert-danger" role="alert">
+            {{ error }}
+          </div>
+          {% endif %}
+
+          <form method="POST" action="{{ url_for('login') }}">
+            {% if next %}
+            <input type="hidden" name="next" value="{{ next }}" />
+            {% endif %}
+
+            <div class="form-outline mb-4">
+              <input type="text" id="username" name="username" class="form-control" required autofocus />
+              <label class="form-label" for="username">Username</label>
+            </div>
+
+            <div class="form-outline mb-4">
+              <input type="password" id="password" name="password" class="form-control" required />
+              <label class="form-label" for="password">Password</label>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block w-100">Login</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

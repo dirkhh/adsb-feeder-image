@@ -7,9 +7,83 @@ import sys
 import time
 from sys import argv
 
-from flask import Flask, Response, redirect, render_template
+from flask import Flask, Response, redirect, render_template, request, url_for
+from utils.auth import WebAuth
+
+# Import authentication utilities (using relative import from parent directory)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+
+def print_err(*args, **kwargs):
+    timestamp = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()) + ".{0:03.0f}Z".format(math.modf(time.time())[0] * 1000)
+    print(*((timestamp,) + args), file=sys.stderr, **kwargs)
+
 
 app = Flask(__name__)
+
+
+# to stay as independent from the larger code base as possible, manually load the required config keys
+class ConfigClass:
+    def __init__(self) -> None:
+        self._enabled = False
+        self._app_secret = ""
+        self._user_name = ""
+        self._password_hash = ""
+
+    def get_config_json(self):
+        try:
+            config = json.load(open("/opt/adsb/config/config.json"))
+            self._enabled = config.get("_ADSBIM_WEB_AUTH_ENABLED", False)
+            self._user_name = config.get("_ADSBIM_WEB_AUTH_USERNAME", "")
+            self._password_hash = config.get("_ADSBIM_WEB_AUTH_PASSWORD_HASH", "")
+            self._app_secret = config.get("_ADSBIM_APP_SECRET", "")
+        except Exception as ex:
+            # oops, that sucks
+            print_err(f"reading config from recovery app failed with {ex}")
+
+    def enabled(self):
+        self.get_config_json()
+        return self._enabled
+
+    def user_name(self):
+        self.get_config_json()
+        return self._user_name
+
+    def password_hash(self):
+        self.get_config_json()
+        return self._password_hash
+
+    def app_secret(self):
+        self.get_config_json()
+        return self._app_secret
+
+
+# Initialize authentication
+c = ConfigClass()
+auth = WebAuth(
+    app,
+    c.app_secret(),
+    c.user_name,
+    c.password_hash,
+    c.enabled,
+)
+
+
+# Add authentication check before each request
+@app.before_request
+def check_authentication():
+    # List of routes that don't require authentication
+    public_routes = ["login", "logout", "static", "stream_log"]
+    if request.endpoint and request.endpoint in public_routes:
+        return None
+
+    # If authentication is enabled and user is not authenticated, redirect to login
+    if not auth.is_authenticated():
+        return redirect(url_for("login", next=request.url))
+
+    return None
+
+
 logfile = "/run/adsb-feeder-image.log"
 theme = "auto"
 git_repo_path = "/opt/adsb-feeder-update/adsb-feeder-image"
@@ -17,11 +91,6 @@ git_repo_url = "https://github.com/dirkhh/adsb-feeder-image"
 rollback_in_progress = False
 rollback_target_version = None
 recovery_process = None
-
-
-def print_err(*args, **kwargs):
-    timestamp = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()) + ".{0:03.0f}Z".format(math.modf(time.time())[0] * 1000)
-    print(*((timestamp,) + args), file=sys.stderr, **kwargs)
 
 
 def ensure_git_repo():
@@ -151,6 +220,40 @@ def get_previous_version():
             pass
 
     return None
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    """Handle login for web authentication."""
+    if request.method == "GET":
+        # Check if already authenticated
+        if auth.is_authenticated():
+            return redirect(url_for("recovery"))
+
+        # Check if next parameter was provided
+        next_page = request.args.get("next", "")
+        return render_template("recovery-login.html", error=None, next=next_page, theme=theme)
+
+    # POST method - process login
+    username = request.form.get("username", "")
+    password = request.form.get("password", "")
+    next_page = request.form.get("next", "") or request.args.get("next", "")
+
+    if auth.login(username, password):
+        # Successful login
+        if next_page and next_page.startswith("/"):
+            return redirect(next_page)
+        return redirect(url_for("recovery"))
+    else:
+        # Failed login
+        return render_template("login.html", error="Invalid username or password", next=next_page, theme=theme)
+
+
+@app.route("/logout")
+def logout():
+    """Handle logout for web authentication."""
+    auth.logout()
+    return redirect(url_for("login"))
 
 
 @app.route("/stream-log")

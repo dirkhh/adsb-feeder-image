@@ -96,6 +96,62 @@
       </div>
     </form>
   </div>
+  <div class="col-12 col-lg-6">
+    <h5 class="mt-3">Web Authentication</h5>
+    <form method="POST" onsubmit="show_spinner(); return true;">
+      <div class="row align-items-center">
+        <div class="col-12 mb-2">
+          <label>
+            Protect the web interface with a username and password.
+            When enabled, both the main setup app and recovery app will require authentication.
+            {% if env_value_by_tag('web_auth_enabled') %}
+            <br><strong>Authentication is currently ENABLED.</strong>
+            {% else %}
+            <br>Authentication is currently disabled.
+            {% endif %}
+          </label>
+        </div>
+        {% if not env_value_by_tag('web_auth_enabled') %}
+        <div class="col-12 mb-2">
+          <input class="form-control" id="web_auth_username" name="web_auth--username" type="text"
+                  placeholder="Username" required>
+          <label class="form-label" for="web_auth_username">Username</label>
+        </div>
+        <div class="col-12 mb-2">
+          <label for="auth_password">
+            The system provides you with a password to use with that user name. Click on 'Show Password', copy the random
+            password shown, and then click 'Enable Authentication'.<br />
+            Note, this is the only time you will be shown this password. So make sure that you copy it to a safe place
+            (e.g. a password manager) or you will lock yourself out of this UI.
+          </label>
+        </div>
+        <div class="col-8">
+          <div class="collapse" id="show_auth_pwd">
+            <div class="d-flex align-items-center">
+              <pre class="mb-0 me-3"><code class="fs-5 px-2 py-1 rounded">{{ auth_pwd }}</code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="col-4">
+          <button class="btn btn-secondary mx-auto w-100" type="button" data-mdb-toggle="collapse" data-mdb-target="#show_auth_pwd"
+                  aria-expanded="false" aria-controls="show_auth_pwd"
+                  onclick="document.getElementById('web_auth_enable').disabled = false;">Show Password</button>
+        </div>
+        <div class="col-12 mt-2">
+          <button type="submit" class="btn btn-primary mx-auto w-100" id="web_auth_enable" name="web_auth_setup" value="stay" disabled>
+            Enable Authentication
+          </button>
+        </div>
+        {% else %}
+        <div class="col-12">
+          <button type="submit" class="btn btn-warning mx-auto w-100" name="web_auth_disable" value="stay">
+            Disable Authentication
+          </button>
+        </div>
+        {% endif %}
+      </div>
+    </form>
+  </div>
   <div class="col-12 col-lg-6 {% if is_enabled('secure_image') %} d-none {% endif %}">
     <h5 class="mt-3">Wifi Hotspot</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
