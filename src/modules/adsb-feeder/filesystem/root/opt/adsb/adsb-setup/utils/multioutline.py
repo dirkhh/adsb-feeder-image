@@ -8,13 +8,31 @@ from shapely.geometry import LinearRing, Polygon
 from shapely.ops import unary_union
 from utils.util import make_int, print_err, get_plain_url
 
-use_is_valid_reason = True
+old_shapely = False
 try:
-    from shapely.validation import is_valid_reason
+    from shapely.validation import is_valid, is_valid_reason
 except:
-    use_is_valid_reason = False
+    oldShapely = True
     from shapely.validation import explain_validity
 
+def check_valid(p):
+    if not p:
+        return False, "no polygon passed to check_valid"
+    if old_shapely:
+        if is_valid(p):
+            return True, ""
+        else:
+            r = is_valid_reason(p)
+            return False, r
+    try:
+        r = explain_validity(p)  # type: ignore[possibly-unbound]
+        if r == "Valid Geometry":
+            return True, ""
+        else:
+            return False, r
+    except Exception:
+        print_err(traceback.format_exc())
+        return False, "see backtrace above"
 
 class MultiOutline:
     def _get_outlines(self, num):
@@ -95,25 +113,11 @@ class MultiOutline:
             if len(points) > 2:
                 try:
                     p = Polygon(shell=LinearRing(points))
-                    if p:
-                        if use_is_valid_reason:
-                            r = is_valid_reason(p)
-                            if r == "Valid Geometry":
-                                polygons.append(p)
-                            else:
-                                print_err(f"multioutline: can't create polygon from outline #{i} - {r}")
-                        else:
-                            try:
-                                r = explain_validity(p)
-                                if r == "Valid Geometry":
-                                    polygons.append(p)
-                                else:
-                                    print_err(f"multioutline: can't create polygon from outline #{i} - {r}")
-                            except:
-                                print_err(traceback.format_exc())
-                                print_err(f"multioutline: can't create polygon from outline #{i}")
+                    valid, reason = check_valid(p)
+                    if valid:
+                        polygons.append(p)
                     else:
-                        print_err(f"multioutline: can't create polygon from outline #{i}")
+                        print_err(f"multioutline: can't create polygon from outline #{i} - {reason}")
                 except:
                     print_err(traceback.format_exc())
                     print_err(
@@ -129,13 +133,15 @@ class MultiOutline:
             to_consider = [0]
             for i in look_at:
                 combined = False
-                if not polygons[i] or not polygons[i].is_valid:
-                    print_err(f"multioutline: polygons[{i}]: {explain_validity(polygons[i])}")
+                if not polygons[i].is_valid:
                     polygons[i] = polygons[i].buffer(0.0001)
+                    valid, reason = check_valid(polygons[i])
+                    print_err(f"multioutline: polygons[{i}]: {reason}")
                 for j in to_consider:
                     if not polygons[j].is_valid:
-                        print_err(f"multioutline: polygons[{j}]: {explain_validity(polygons[j])}")
                         polygons[j] = polygons[j].buffer(0.0001)
+                        valid, reason = check_valid(polygons[j])
+                        print_err(f"multioutline: polygons[{j}]: {reason}")
                     try:
                         if not polygons[j].disjoint(polygons[i]):
                             p = unary_union([polygons[j], polygons[i]])
