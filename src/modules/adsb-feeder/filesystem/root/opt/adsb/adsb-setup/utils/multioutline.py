@@ -14,7 +14,7 @@ old_shapely = False
 try:
     from shapely import is_valid, is_valid_reason
 except ImportError:
-    oldShapely = True
+    old_shapely = True
     print_err("using old shapely", level=8)
     from shapely.validation import explain_validity
 
@@ -22,7 +22,7 @@ except ImportError:
 def check_valid(p):
     if not p:
         return False, "no polygon passed to check_valid"
-    if old_shapely:
+    if not old_shapely:
         if is_valid(p):
             return True, ""
         else:
