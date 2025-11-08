@@ -1,5 +1,6 @@
 HOST ?= adsb-feeder.local
 SSH_CONTROL=/tmp/adsb-setup-ssh-control-${HOST}
+SET_VERBOSE=7
 
 export PATH := .venv/bin:$(PATH)
 
@@ -158,6 +159,8 @@ sync-py-control:
 		rm -f /opt/adsb/.cachebust_done; \
 		bash /opt/adsb/scripts/cachebust.sh Makefile;\
 	'
+
+	ssh -S "${SSH_CONTROL}" root@$(HOST) "echo ${SET_VERBOSE} > /opt/adsb/verbose"
 
 run-loop:
 # python3 app.py in a loop
