@@ -1,3 +1,4 @@
+import hashlib
 import json
 import os
 import re
@@ -91,12 +92,35 @@ class MultiOutline:
         data = self._get_heywhatsthat(num)
         if len(data) == 0:
             return None
+        # check if we need to even generate the combined upintheair or if it is already current
+        # based on all the individual upintheair data
+        newHash = hashlib.md5(json.dumps(data).encode()).hexdigest()
+        oldHash = ""
+        hwt_url = f"http://127.0.0.1:{self._tar1090port()}/upintheair.json"
+        response, status = get_plain_url(hwt_url)
+        if status != 200:
+            print_err(f"_get_heywhatsthat: http status {status} for {hwt_url}")
+        elif response is None:
+            print_err(f"_get_heywhatsthat: response is None for {hwt_url}")
+        else:
+            try:
+                hwt = json.loads(response)
+            except Exception:
+                print_err(f"_get_heywhatsthat: json.loads failed on response: {response}")
+            else:
+                oldHash = hwt.get("multioutline_hash")
+
+        if oldHash == newHash:
+            print_err("no need to regenerate combined heywhatsthat outlines, already current", level=8)
+            return None
+
         result = {
             "id": "combined",
             "lat": data[0]["lat"],
             "lon": data[0]["lon"],
             "rings": [],
             "refraction": "0.25",
+            "multioutline_hash": newHash,
         }
         for idx in range(len(data[0]["rings"])):
             alt = data[0]["rings"][idx]["alt"]
