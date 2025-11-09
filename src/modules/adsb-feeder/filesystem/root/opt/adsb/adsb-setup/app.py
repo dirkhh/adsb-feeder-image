@@ -119,7 +119,7 @@ class AdsbIm:
             self._d.env_by_tags("app_secret").valuestr,
             lambda: self._d.env_by_tags("web_auth_username").valuestr,
             lambda: self._d.env_by_tags("web_auth_password").valuestr,
-            lambda: self._d.env_by_tags("web_auth_enabled").value,
+            lambda: is_true(self._d.env_by_tags("web_auth_enabled").value),
         )
 
         # set Cache-Control max-age for static files served
