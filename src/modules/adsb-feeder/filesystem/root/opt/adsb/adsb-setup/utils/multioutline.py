@@ -62,41 +62,38 @@ class MultiOutline:
         return tar1090port
 
     def _get_heywhatsthat(self, num):
-        data = []
+        responses = []
         hwt_feeders = []
         with open("/opt/adsb/config/.env", "r") as env:
             for line in env:
                 match = re.search(r"_ADSBIM_HEYWHATSTHAT_ENABLED_(\d+)=True", line)
                 if match:
                     hwt_feeders.append(make_int(match.group(1)))
-        for i in hwt_feeders:
 
+        for i in hwt_feeders:
             hwt_url = f"http://127.0.0.1:{self._tar1090port()}/{i}/upintheair.json"
             response, status = get_plain_url(hwt_url)
             if status != 200:
                 print_err(f"_get_heywhatsthat: http status {status} for {hwt_url}")
                 continue
             if not response:
+                print_err(f"_get_heywhatsthat: no response for {hwt_url}")
                 continue
-            try:
-                hwt = json.loads(response)
-            except Exception:
-                print_err(f"_get_heywhatsthat: json.loads failed on response: {response}")
-            else:
-                data.append(hwt)
-        return data
+            responses.append(response)
+
+        return responses
 
     def create_outline(self, num):
         data = self._get_outlines(num)
         return self.create(data)
 
     def create_heywhatsthat(self, num):
-        data = self._get_heywhatsthat(num)
-        if len(data) == 0:
+        responses = self._get_heywhatsthat(num)
+        if len(responses) == 0:
             return None
         # check if we need to even generate the combined upintheair or if it is already current
         # based on all the individual upintheair data
-        newHash = hashlib.md5(json.dumps(data).encode()).hexdigest()
+        newHash = hashlib.md5("".join(responses).encode()).hexdigest()
         oldHash = ""
         hwt_url = f"http://127.0.0.1:{self._tar1090port()}/upintheair.json"
         response, status = get_plain_url(hwt_url)
@@ -115,6 +112,15 @@ class MultiOutline:
         if oldHash == newHash:
             print_err("no need to regenerate combined heywhatsthat outlines, already current", level=8)
             return None
+
+        data = []
+        for response in responses:
+            try:
+                hwt = json.loads(response)
+            except Exception:
+                print_err(f"create_heywhatsthat: json.loads failed on response: {response}")
+            else:
+                data.append(hwt)
 
         result = {
             "id": "combined",
