@@ -13,8 +13,6 @@ import pytest
 from utils.paths import ADSB_CONFIG_DIR, ENV_FILE, USER_ENV_FILE, CONFIG_JSON_FILE
 from utils.config import (
     config_lock,
-    log_consistency_warnings,
-    log_consistency_warning,
     read_values_from_config_json,
     read_values_from_env_file,
     write_values_to_config_json,
@@ -41,27 +39,6 @@ class TestConfigConstants:
         """Test that config_lock is a threading lock"""
         # threading.Lock() returns a LockType object, not a Lock class
         assert hasattr(config_lock, 'acquire') and hasattr(config_lock, 'release')
-
-
-class TestLogConsistencyWarning:
-    """Test log_consistency_warning function"""
-
-    def test_log_consistency_warning_default(self):
-        """Test default value of log_consistency_warnings"""
-        import utils.config
-        assert utils.config.log_consistency_warnings is True
-
-    def test_log_consistency_warning_set_false(self):
-        """Test setting log_consistency_warnings to False"""
-        import utils.config
-        log_consistency_warning(False)
-        assert utils.config.log_consistency_warnings is False
-
-    def test_log_consistency_warning_set_true(self):
-        """Test setting log_consistency_warnings to True"""
-        import utils.config
-        log_consistency_warning(True)
-        assert utils.config.log_consistency_warnings is True
 
 
 class TestReadValuesFromConfigJson:
