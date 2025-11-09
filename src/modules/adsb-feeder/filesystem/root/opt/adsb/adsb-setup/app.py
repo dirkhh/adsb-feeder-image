@@ -570,6 +570,7 @@ class AdsbIm:
         threading.Thread(target=update_dns).start()
 
     def write_envfile(self):
+        print_err("writing env file")
         write_values_to_env_file(self._d.envs_for_envfile)
 
     def setup_ultrafeeder_args(self):
@@ -690,6 +691,7 @@ class AdsbIm:
         log = logging.getLogger("werkzeug")
         log.setLevel(logging.ERROR)
 
+        print_err("starting up werkzeug")
         self.app.run(
             host="0.0.0.0",
             port=self._d.env_by_tags("webport").valueint,
@@ -2518,6 +2520,7 @@ class AdsbIm:
         self._d.env_by_tags("graphs1090_other_temp1").value = "/run/ambient-temperature"
 
     def handle_implied_settings(self):
+        print_err("running handle_implied_settings")
         self.handle_non_adsb()
         if self._d.env_by_tags("aggregator_choice").value in ["micro", "nano", "nonadsb"]:
             ac_db = False
