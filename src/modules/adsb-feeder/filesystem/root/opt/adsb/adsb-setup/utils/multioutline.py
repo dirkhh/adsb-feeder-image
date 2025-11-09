@@ -89,8 +89,7 @@ class MultiOutline:
 
     def create_heywhatsthat(self, num):
         responses = self._get_heywhatsthat(num)
-        if len(responses) == 0:
-            return None
+
         # check if we need to even generate the combined upintheair or if it is already current
         # based on all the individual upintheair data
         newHash = hashlib.md5("".join(responses).encode()).hexdigest()
@@ -122,19 +121,27 @@ class MultiOutline:
             else:
                 data.append(hwt)
 
+        if len(data) > 0:
+            lat = data[0]["lat"]
+            lon = data[0]["lon"]
+        else:
+            lat = 0
+            lon = 0
+
         result = {
             "id": "combined",
-            "lat": data[0]["lat"],
-            "lon": data[0]["lon"],
+            "lat": lat,
+            "lon": lon,
             "rings": [],
             "refraction": "0.25",
             "multioutline_hash": newHash,
         }
-        for idx in range(len(data[0]["rings"])):
-            alt = data[0]["rings"][idx]["alt"]
-            multi_range = self.create(data, hwt_alt=alt).get("multiRange")
-            for i in range(len(multi_range)):
-                result["rings"].append({"points": multi_range[i], "alt": alt})
+        if len(data) > 0:
+            for idx in range(len(data[0]["rings"])):
+                alt = data[0]["rings"][idx]["alt"]
+                multi_range = self.create(data, hwt_alt=alt).get("multiRange")
+                for i in range(len(multi_range)):
+                    result["rings"].append({"points": multi_range[i], "alt": alt})
         return result
 
     def create(self, data, hwt_alt=0):
