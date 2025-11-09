@@ -48,8 +48,6 @@ from utils.auth import WebAuth
 from utils.background import Background
 from utils.config import (
     config_lock,
-    log_consistency_warning,
-    read_values_from_config_json,
     read_values_from_env_file,
     write_values_to_config_json,
     write_values_to_env_file,
@@ -2176,7 +2174,6 @@ class AdsbIm:
         self.planes_seen_per_day.pop()
 
         # deal with env vars
-        log_consistency_warning(False)
         for e in self._d.stage2_envs:
             print_err(f"shifting {e.name} down and deleting last element {e._value}")
             if not type(e._value) == list:
@@ -2191,9 +2188,6 @@ class AdsbIm:
             while len(e._value) > self._d.env_by_tags("num_micro_sites").valueint:
                 e.list_remove()
         self._d.env_by_tags("num_micro_sites").value = self._d.env_by_tags("num_micro_sites").valueint - 1
-        log_consistency_warning(True)
-        # now read them in to get a consistency warning if needed
-        read_values_from_config_json(check_integrity=True)
 
     def edit_micro_site(self, num: int, site_name, ip, uat, brofm, new_idx: int):
         print_err(
@@ -2754,7 +2748,6 @@ class AdsbIm:
 
             # this code is here and not further up so get_base_info knows
             # about the various URLs for 978 / airspy / 1090
-            log_consistency_warning(False)
             self.setup_new_micro_site(
                 "local",
                 uat=do978,
@@ -2767,13 +2760,10 @@ class AdsbIm:
             for i in self.micro_indices():
                 if self._d.env_by_tags("mf_ip").list_get(i) == "local":
                     self._d.env_by_tags(["uat978", "is_enabled"]).list_set(i, do978)
-            log_consistency_warning(True)
-            read_values_from_config_json(check_integrity=True)
 
         if self._d.env_by_tags("stage2_nano_2").value:
             # this code is here and not further up so get_base_info knows
             # about the various URLs for 978 / airspy / 1090
-            log_consistency_warning(False)
             self.setup_new_micro_site(
                 "local2",
                 uat=False,
@@ -2782,8 +2772,6 @@ class AdsbIm:
                 do_import=True,
                 do_restore=False,
             )
-            log_consistency_warning(True)
-            read_values_from_config_json(check_integrity=True)
 
         # set all of the ultrafeeder config data up
         self.setup_ultrafeeder_args()
@@ -3200,7 +3188,6 @@ class AdsbIm:
                             micro_data[mk] = form.get(mk)
                     do_import = key.startswith("import_micro")
                     do_restore = key == "import_micro_full"
-                    log_consistency_warning(False)
                     status, message = self.setup_new_micro_site(
                         ip,
                         uat=is_true(uat),
@@ -3210,8 +3197,6 @@ class AdsbIm:
                         do_restore=do_restore,
                         micro_data=micro_data,
                     )
-                    log_consistency_warning(True)
-                    read_values_from_config_json(check_integrity=True)
                     if status:
                         print_err("successfully added new micro site")
                         self._next_url_from_director = url_for("stage2")

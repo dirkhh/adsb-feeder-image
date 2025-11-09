@@ -9,15 +9,8 @@ from .util import print_err
 
 config_lock = threading.Lock()
 
-log_consistency_warnings = True
 
-
-def log_consistency_warning(value: bool):
-    global log_consistency_warnings
-    log_consistency_warnings = value
-
-
-def read_values_from_config_json(check_integrity=False):
+def read_values_from_config_json():
     # print_err("reading .json file")
     if not os.path.exists(CONFIG_JSON_FILE):
         # this must be either a first run after an install,
