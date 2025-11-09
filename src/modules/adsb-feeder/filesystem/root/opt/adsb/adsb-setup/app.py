@@ -136,17 +136,19 @@ class AdsbIm:
             public_routes = [
                 "login",
                 "logout",
+                "temperatures",
+                "check_changelog_status",
+                "/fa-status.json/",
                 "static",
                 "info",  # Support Info page
                 "support",  # Share Diagnostics
                 "geojson",  # for Shipfeeder
                 "iconspng",  # AIS icons
+                "widget",
             ]
-            # API endpoints for status checks should also be public
+            # API endpoints should also be public
             if request.endpoint and (
-                request.endpoint in public_routes
-                or request.endpoint.startswith("api/status/")
-                or request.path.startswith("/api/status/")
+                request.endpoint in public_routes or request.endpoint.startswith("api") or request.path.startswith("/api/")
             ):
                 return None
 
