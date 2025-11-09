@@ -93,11 +93,8 @@ sync-and-update-nocontainer:
 	# sync over changes from local repo
 	make sync-py-control
 
-	# restart webinterface
-	ssh -S "${SSH_CONTROL}" root@$(HOST) systemctl restart adsb-setup
-
-	# restart the reovery service
-	ssh -S "${SSH_CONTROL}" root@$(HOST) systemctl restart adsb-recovery
+	# restart webinterface and recovery service
+	ssh -S "${SSH_CONTROL}" root@$(HOST) systemctl restart adsb-setup adsb-recovery
 
 sync-and-update:
 # sync relevant files and update
@@ -114,11 +111,8 @@ sync-and-update:
 	# docker pull / docker compose on the yml files
 	ssh -S "${SSH_CONTROL}" root@$(HOST) /opt/adsb/docker-update-adsb-im
 
-	# start webinterface back up
-	ssh -S "${SSH_CONTROL}" root@$(HOST) systemctl restart adsb-setup
-
-	# restart the reovery service
-	ssh -S "${SSH_CONTROL}" root@$(HOST) systemctl restart adsb-recovery
+	# restart webinterface and recovery service
+	ssh -S "${SSH_CONTROL}" root@$(HOST) systemctl restart adsb-setup adsb-recovery
 
 sync-py-control:
 # check if the SSH control port is open, if not, open it.
