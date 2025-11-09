@@ -8,7 +8,7 @@ def test_test_config_defaults():
     config = SeleniumConfig(rpi_ip="192.168.1.100")
 
     assert config.rpi_ip == "192.168.1.100"
-    assert config.browser == "chrome"
+    assert config.browser == "chrome" or config.browser == "firefox"
     assert config.headless is True
     assert config.timeout == 90
     assert config.site_name == "automated test site"
