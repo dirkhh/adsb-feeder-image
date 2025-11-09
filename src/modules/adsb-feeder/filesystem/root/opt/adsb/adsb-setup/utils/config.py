@@ -3,15 +3,24 @@ import os
 import os.path
 import tempfile
 import threading
+import time
 
 from .paths import ADSB_CONFIG_DIR, CONFIG_JSON_FILE, ENV_FILE, USER_ENV_FILE
 from .util import print_err
 
 config_lock = threading.Lock()
+config_cache = None
+config_cache_updated = 0.0
 
 
 def read_values_from_config_json():
-    # print_err("reading .json file")
+    global config_cache
+    global config_cache_updated
+    # the config cache means we don't need to do as much json parsing
+    # mostly this speeds up the startup of the app
+    if config_cache and time.time() - config_cache_updated < 1:
+        return config_cache
+    print_err("reading config.json file", level=8)
     if not os.path.exists(CONFIG_JSON_FILE):
         # this must be either a first run after an install,
         # or the first run after an upgrade from a version that didn't use the config.json
@@ -24,10 +33,17 @@ def read_values_from_config_json():
         ret = json.load(open(CONFIG_JSON_FILE, "r"))
     except Exception:
         print_err("Failed to read .json file")
+    else:
+        config_cache = ret
+        config_cache_updated = time.time()
     return ret
 
 
 def write_values_to_config_json(data: dict, reason="no reason provided"):
+    global config_cache
+    global config_cache_updated
+    config_cache = data
+    config_cache_updated = time.time()
     try:
         print_err(f"config.json write: {reason}")
         fd, tmp = tempfile.mkstemp(dir=str(ADSB_CONFIG_DIR))
