@@ -14,22 +14,23 @@ if ! [[ -d "$ORIG" ]] || [[ "$1" == "Makefile" ]]; then
     ORIG=/opt/adsb/adsb-setup
 fi
 # move unmodified files to staging directories
-cp -T -f -a "$ORIG/static" /opt/adsb/adsb-setup/static-staging
-cp -T -f -a "$ORIG/templates" /opt/adsb/adsb-setup/templates-staging
+cp -T -f -a "$ORIG/static" /opt/adsb/adsb-setup/static-staging &
+cp -T -f -a "$ORIG/templates" /opt/adsb/adsb-setup/templates-staging &
+wait
 
 # generate icon cache
 nl="
 "
-icons="const iconCache = {"
-for file in /opt/adsb/adsb-setup/static-staging/icons/*.svg; do
-    name=$(basename -s .svg $file)
-    icons+="$nl'$name':$nl\`"
-    icons+=$(cat $file)
-    icons+="\`,"
-done
-icons+="$nl};"
-
-echo "$icons" > /opt/adsb/adsb-setup/static-staging/js/iconCache.js
+{
+    echo "const iconCache = {"
+    for file in /opt/adsb/adsb-setup/static-staging/icons/*.svg; do
+        name=$(basename -s .svg $file)
+        echo "$nl'$name':$nl\`"
+        cat $file
+        echo "\`,"
+    done
+    echo "$nl};"
+} > /opt/adsb/adsb-setup/static-staging/js/iconCache.js
 
 # ignore woff2 files they should not change anyhow, this makes this code simpler as the woff2 files
 # are referred to from a css file
@@ -44,24 +45,26 @@ while read -r FILE; do
     prefix="${base%.*}"
     postfix="${base##*.}"
     newname="${prefix}.${md5sum}.${postfix}"
-    mv "$FILE" "$dir/$newname"
+    mv "$FILE" "$dir/$newname" &
     sedreplaceargs+=("-e" "s#${base}#${newname}#")
 done <<< "$STATIC"
 
 #echo "${sedreplaceargs[@]}"
 for FILE in /opt/adsb/adsb-setup/templates-staging/*.html; do
-    sed -i "${sedreplaceargs[@]}" "$FILE"
+    sed -i "${sedreplaceargs[@]}" "$FILE" &
 done
+wait
 
 rm -rf /opt/adsb/adsb-setup/static-old /opt/adsb/adsb-setup/templates-old
 
-mv /opt/adsb/adsb-setup/static /opt/adsb/adsb-setup/static-old
-mv /opt/adsb/adsb-setup/static-staging /opt/adsb/adsb-setup/static
+mv /opt/adsb/adsb-setup/static /opt/adsb/adsb-setup/static-old &
+mv /opt/adsb/adsb-setup/templates /opt/adsb/adsb-setup/templates-old &
+wait
 
-mv /opt/adsb/adsb-setup/templates /opt/adsb/adsb-setup/templates-old
-mv /opt/adsb/adsb-setup/templates-staging /opt/adsb/adsb-setup/templates
-
-rm -rf /opt/adsb/adsb-setup/static-old /opt/adsb/adsb-setup/templates-old
+mv /opt/adsb/adsb-setup/static-staging /opt/adsb/adsb-setup/static &
+mv /opt/adsb/adsb-setup/templates-staging /opt/adsb/adsb-setup/templates &
+rm -rf /opt/adsb/adsb-setup/static-old /opt/adsb/adsb-setup/templates-old &
+wait
 
 echo "$(date -u +"%FT%T.%3NZ") cachebust done"
 touch /opt/adsb/.cachebust_done
