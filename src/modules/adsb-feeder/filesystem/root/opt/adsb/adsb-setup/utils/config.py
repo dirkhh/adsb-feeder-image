@@ -13,12 +13,12 @@ config_cache = None
 config_cache_updated = 0.0
 
 
-def read_values_from_config_json():
+def read_values_from_config_json(no_cache=False):
     global config_cache
     global config_cache_updated
     # the config cache means we don't need to do as much json parsing
     # mostly this speeds up the startup of the app
-    if config_cache and time.time() - config_cache_updated < 1:
+    if not no_cache and config_cache and time.time() - config_cache_updated < 1:
         return config_cache
     print_err("reading config.json file", level=8)
     if not os.path.exists(CONFIG_JSON_FILE):

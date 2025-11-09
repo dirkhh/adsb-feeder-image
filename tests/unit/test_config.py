@@ -56,7 +56,7 @@ class TestReadValuesFromConfigJson:
         mock_read_env.return_value = {"test": "value"}
         mock_json_load.return_value = {"test": "value"}
 
-        result = read_values_from_config_json()
+        result = read_values_from_config_json(no_cache=True)
 
         # Should read from .env, write to config.json, then read config.json
         mock_read_env.assert_called_once()
@@ -72,7 +72,7 @@ class TestReadValuesFromConfigJson:
 
         with patch('json.load') as mock_json_load:
             mock_json_load.return_value = {"test": "value"}
-            result = read_values_from_config_json()
+            result = read_values_from_config_json(no_cache=True)
 
         assert result == {"test": "value"}
 
@@ -83,7 +83,7 @@ class TestReadValuesFromConfigJson:
         mock_exists.return_value = True
         mock_file.side_effect = Exception("File read error")
 
-        result = read_values_from_config_json()
+        result = read_values_from_config_json(no_cache=True)
 
         assert result == {}
 
@@ -229,7 +229,7 @@ class TestConfigIntegration:
             utils.config.write_values_to_config_json(test_data, "test")
 
             # Read config back using module reference
-            result = utils.config.read_values_from_config_json()
+            result = utils.config.read_values_from_config_json(no_cache=True)
 
             # Verify mocks were called
             mock_write.assert_called_once_with(test_data, "test")
