@@ -78,7 +78,7 @@ run-lab-tests:
 create-venv:
 # create virtual environment necessary to run linter checks
 	python3 -m venv .venv
-	pip3 install flask flake8 mypy black ruff requests types-requests shapely types-shapely
+	pip3 install flask flake8 mypy black ruff requests types-requests shapely types-shapely types-pyserial selenium humanize fastapi slowapi uvicorn kasa pytest
 
 
 ssh-control:
