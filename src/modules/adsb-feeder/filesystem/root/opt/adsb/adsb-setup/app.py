@@ -152,6 +152,7 @@ class AdsbIm:
 
             # If authentication is enabled and user is not authenticated, redirect to login
             if not self._auth.is_authenticated():
+                print_err(f"redirecting to login page for {request.endpoint}")
                 return redirect(url_for("login", next=request.url))
 
             return None
