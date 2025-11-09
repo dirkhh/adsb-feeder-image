@@ -4,7 +4,7 @@
 {% block content %}
 <div class="container mt-5">
   <div class="row justify-content-center">
-    <div class="col-md-6 col-lg-4">
+    <div class="col-8 col-sm-7 col-md-6 col-lg-5 col-xl-4">
       <div class="card">
         <div class="card-body">
           <h3 class="card-title text-center mb-4">Login Required</h3>
@@ -19,18 +19,18 @@
             {% if next %}
             <input type="hidden" name="next" value="{{ next }}" />
             {% endif %}
+            <div class="row align-items-center">
+              <div class="form-group col-10 align-items-center mb-1">
+                <input type="text" id="username" name="username" class="form-control" required autofocus />
+                <label class="form-label" for="username">Username</label>
+              </div>
 
-            <div class="form-outline mb-4">
-              <input type="text" id="username" name="username" class="form-control" required autofocus />
-              <label class="form-label" for="username">Username</label>
+              <div class="form-group col-10 align-items-center mb-1">
+                <input type="password" id="password" name="password" class="form-control" required />
+                <label class="form-label" for="password">Password</label>
+              </div>
+              <button type="submit" class="btn btn-primary btn-block w-100 col-8">Login</button>
             </div>
-
-            <div class="form-outline mb-4">
-              <input type="password" id="password" name="password" class="form-control" required />
-              <label class="form-label" for="password">Password</label>
-            </div>
-
-            <button type="submit" class="btn btn-primary btn-block w-100">Login</button>
           </form>
         </div>
       </div>
