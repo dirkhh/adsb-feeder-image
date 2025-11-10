@@ -128,14 +128,14 @@
         <div class="col-8">
           <div class="collapse" id="show_auth_pwd">
             <div class="d-flex align-items-center">
-              <pre class="mb-0 me-3"><code class="fs-5 px-2 py-1 rounded">{{ auth_pwd }}</code></pre>
+              <pre class="mb-0 me-3"><code class="fs-5 px-2 py-1 rounded" data-test="auth_passwd">{{ auth_pwd }}</code></pre>
             </div>
           </div>
         </div>
         <div class="col-4">
           <button class="btn btn-secondary mx-auto w-100" type="button" data-mdb-toggle="collapse" data-mdb-target="#show_auth_pwd"
                   aria-expanded="false" aria-controls="show_auth_pwd"
-                  onclick="document.getElementById('web_auth_enable').disabled = false;">Show Password</button>
+                  onclick="document.getElementById('web_auth_enable').disabled = false;" data-test="show_auth_passwd">Show Password</button>
         </div>
         <div class="col-12 mt-2">
           <button type="submit" class="btn btn-primary mx-auto w-100" id="web_auth_enable" name="web_auth_setup" value="stay" disabled>
