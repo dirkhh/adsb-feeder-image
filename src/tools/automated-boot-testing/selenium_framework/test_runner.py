@@ -9,7 +9,7 @@ from selenium.webdriver.remote.webdriver import WebDriver
 from .browser_factory import BrowserFactory
 from .config import SeleniumConfig
 from .exceptions import SeleniumTestError
-from .pages import BasicSetupPage, FeederHomepage, SDRSetupPage, WaitingPage
+from .pages import BasicSetupPage, FeederHomepage, SDRSetupPage, SystemMgmgtPage, WaitingPage
 
 logger = logging.getLogger(__name__)
 
@@ -236,4 +236,28 @@ class SeleniumTestRunner:
             return True
         else:
             logger.warning(f"SDR purpose shows '{updated_purpose}', expected '1090'")
+            return False
+
+    def run_authentication_test(self) -> bool:
+        try:
+            # Ensure driver is initialized
+            assert self.driver is not None, "Driver not initialized. Use context manager."
+            logger.info(f"Testing authentication setup on {self.config.base_url}")
+            homepage = FeederHomepage(self.driver, self.config.base_url)
+            systemmgmt_page = SystemMgmgtPage(self.driver, self.config.base_url)
+            systemmgmt_page.navigate()
+            systemmgmt_page.verify_systemmgmt_loaded()
+            password = systemmgmt_page.setup_login("test")
+            systemmgmt_page.verify_login_loaded()
+            systemmgmt_page.try_login("wrong", "none")
+            systemmgmt_page.verify_login_loaded()
+            systemmgmt_page.try_login("test", password)
+            homepage.verify_homepage_loaded(self.config.site_name)
+            return True
+
+        except SeleniumTestError as e:
+            logger.error(f"Test failed: {e}")
+            return False
+        except Exception as e:
+            logger.exception(f"Unexpected error during test: {e}")
             return False
