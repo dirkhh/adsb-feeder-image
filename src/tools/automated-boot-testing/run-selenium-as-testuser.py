@@ -46,6 +46,9 @@ def main() -> int:
         with SeleniumTestRunner(config) as runner:
             success = runner.run_basic_setup_test()
 
+            if success:
+                success = runner.run_authentication_test()
+
         if success:
             logger.info("✓ Tests passed")
             return 0
