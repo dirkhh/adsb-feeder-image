@@ -12,7 +12,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 from .config import Timeouts
-from .exceptions import ElementNotFoundError
+from .exceptions import ElementNotFoundError, ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +46,13 @@ class BasePage:
     def get_current_title(self) -> str:
         """Return current page title."""
         return self.driver.title
+
+    def verify_page_loaded(self, expected_title) -> bool:
+        title = self.get_current_title()
+        if expected_title not in title:
+            raise ValidationError(f"Wrong page title. Expected '{expected_title}' in title, got '{title}'")
+        logger.info(f"Page loaded: {title}")
+        return True
 
     def find_element(self, locator: Tuple[str, str], timeout: int = Timeouts.SHORT_WAIT) -> WebElement:
         """

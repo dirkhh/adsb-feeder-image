@@ -33,27 +33,9 @@ class FeederHomepage(BasePage):
         """Navigate to homepage."""
         self.navigate_to("/")
 
-    def verify_page_loaded(self, expected_site_name: str) -> bool:
-        """
-        Verify we're on the feeder homepage with correct site name.
-
-        Args:
-            expected_site_name: Expected site name in title
-
-        Returns:
-            True if on correct page
-
-        Raises:
-            ValidationError: If page title is incorrect
-        """
-        title = self.get_current_title()
+    def verify_homepage_loaded(self, expected_site_name: str) -> bool:
         expected_title = self.PAGE_TITLE_TEMPLATE.format(expected_site_name)
-
-        if expected_title not in title:
-            raise ValidationError(f"Wrong homepage title. Expected '{expected_title}', got '{title}'")
-
-        logger.info(f"Homepage title correct: {title}")
-        return True
+        return self.verify_page_loaded(expected_title)
 
     def get_position_message_rate(self) -> str:
         """

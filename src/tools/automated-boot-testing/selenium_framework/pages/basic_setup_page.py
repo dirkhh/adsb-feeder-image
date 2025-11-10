@@ -34,21 +34,8 @@ class BasicSetupPage(BasePage):
         """Navigate to the basic setup page."""
         self.navigate_to("/setup")
 
-    def verify_page_loaded(self) -> bool:
-        """
-        Verify we're on the basic setup page.
-
-        Returns:
-            True if on correct page
-
-        Raises:
-            ValidationError: If page title is incorrect
-        """
-        title = self.get_current_title()
-        if self.PAGE_TITLE_TEXT not in title:
-            raise ValidationError(f"Wrong page title. Expected '{self.PAGE_TITLE_TEXT}' in title, got '{title}'")
-        logger.info(f"Basic Setup page loaded: {title}")
-        return True
+    def verify_base_page_loaded(self) -> bool:
+        return self.verify_page_loaded(self.PAGE_TITLE_TEXT)
 
     def get_declared_hardware(self) -> str:
         """Return hardware information as shown in the footer."""

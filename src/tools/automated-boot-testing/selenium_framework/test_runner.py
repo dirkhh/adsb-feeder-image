@@ -94,7 +94,7 @@ class SeleniumTestRunner:
             # Navigate to setup page
             logger.info(f"Testing basic setup on {base_url}/setup...")
             basic_setup.navigate()
-            basic_setup.verify_page_loaded()
+            basic_setup.verify_base_page_loaded()
 
             success = True
             virtualized = basic_setup.check_virtualized()

@@ -48,13 +48,8 @@ class SDRSetupPage(BasePage):
         """Navigate to SDR setup page."""
         self.navigate_to("/sdr_setup")
 
-    def verify_page_loaded(self) -> bool:
-        """Verify we're on the SDR setup page."""
-        title = self.get_current_title()
-        if self.PAGE_TITLE_TEXT not in title:
-            raise ValidationError(f"Wrong page title. Expected '{self.PAGE_TITLE_TEXT}' in title, got '{title}'")
-        logger.info(f"SDR Setup page loaded: {title}")
-        return True
+    def verify_setup_page_loaded(self) -> bool:
+        return self.verify_page_loaded(self.PAGE_TITLE_TEXT)
 
     def wait_for_sdr_table_loaded(self) -> None:
         """Wait for SDR table to be present and populated."""
