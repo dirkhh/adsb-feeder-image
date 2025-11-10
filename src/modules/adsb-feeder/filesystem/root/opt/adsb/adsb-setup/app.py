@@ -249,9 +249,6 @@ class AdsbIm:
         else:
             self._d.env_by_tags("rbthermalhack").value = ""
 
-        # make sure we show the temperature block if we have a temperature sensor
-        self._d.env_by_tags("temperature_block").value = os.path.exists(self._d.env_by_tags("cpu_temperature_path").valuestr)
-
         # Ensure secure_image is set the new way if before the update it was set only as env variable
         if self._d.is_enabled("secure_image"):
             self.set_secure_image()
@@ -2501,7 +2498,6 @@ class AdsbIm:
                 timeout=20,
             )
             self._d.env_by_tags("graphs1090_other_temp1").value = ""
-            self._d.env_by_tags("temperature_block").value = os.path.exists(self._d.env_by_tags("cpu_temperature_path").valuestr)
             self._d.env_by_tags("has_dht22").value = False
             temp_sensor.value = ""
             return
@@ -2519,11 +2515,16 @@ class AdsbIm:
             print_err(f"failed to enable adsb-temperature.service: {output}")
             temp_sensor.value = ""
             return
-        self._d.env_by_tags("temperature_block").value = True
         self._d.env_by_tags("graphs1090_other_temp1").value = "/run/ambient-temperature"
 
     def handle_implied_settings(self):
         print_err("running handle_implied_settings")
+
+        # make sure we show the temperature block if we have a temperature sensor
+        self._d.env_by_tags("temperature_block").value = (
+            os.path.exists(self._d.env_by_tags("cpu_temperature_path").valuestr) or self._d.env_by_tags("temp_sensor").value
+        )
+
         self.handle_non_adsb()
         if self._d.env_by_tags("aggregator_choice").value in ["micro", "nano", "nonadsb"]:
             ac_db = False
