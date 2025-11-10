@@ -1,5 +1,8 @@
 Changes since v3.0.6
 =======
+- beta-notes: update planefinder container
+- beta-notes: suggest having ssh working before turning on authentication
+- beta-notes: don't allow setting up auth on a secured image
 - web UI: simple http authentication
 - hotfix: revert to older multi-outline code - this will fix CPU usage / random tar1090 hangs for large stage2 systems
 - infrastructure: add automated boot test / basic functionality test support
