@@ -26,6 +26,7 @@ selenium_framework/
     ├── basic_setup_page.py    # Basic setup form
     ├── sdr_setup_page.py      # SDR configuration
     ├── feeder_homepage.py     # Homepage verification
+    ├── systemmgmt_page.py     # System Management verification
     └── waiting_page.py        # Page transition handling
 ```
 
@@ -34,17 +35,11 @@ selenium_framework/
 ### Running Tests
 
 ```bash
-# Run with Chrome (default)
-python3 run_selenium_test.py 192.168.1.100
+# Run with Firefox (default)
+python3 run-selenium-as-testuser.py 192.168.1.100
 
-# Run with Firefox
-python3 run_selenium_test.py 192.168.1.100 --browser firefox
-
-# Run with visible browser (no headless)
-python3 run_selenium_test.py 192.168.1.100 --no-headless
-
-# With debug logging
-python3 run_selenium_test.py 192.168.1.100 --log-level DEBUG
+# Run with Chrome
+python3 run-selenium-as-testuser.py 192.168.1.100 --browser chrome
 ```
 
 ### Programmatic Usage

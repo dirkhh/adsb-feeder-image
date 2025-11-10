@@ -461,7 +461,7 @@ src/tools/automated-boot-testing/
 ├── setup-tftp-iscsi.sh          # TFTP/iSCSI boot setup
 ├── test-api.py                  # API testing script
 ├── test-feeder-image.py         # Core test script (source)
-├── run_selenium_test.py         # Selenium test runner (non-root)
+├── run-selenium-as-testuser.py  # Selenium test runner (non-root)
 ├── metrics.py                   # Metrics tracking module (NEW)
 ├── boot-test-metrics-cli.py     # Metrics CLI query tool (NEW)
 ├── METRICS_INTEGRATION.md       # Metrics integration guide (NEW)
@@ -574,14 +574,11 @@ The selenium tests have been refactored to use a maintainable Page Object Model 
 ### Running Selenium Tests
 
 ```bash
-# Run with Chrome (default)
-python3 run_selenium_test.py <RPI_IP>
+# Run with Firefox (default)
+python3 run-selenium-as-testuser.py <RPI_IP>
 
-# Run with Firefox
-python3 run_selenium_test.py <RPI_IP> --browser firefox
-
-# Run with visible browser
-python3 run_selenium_test.py <RPI_IP> --no-headless
+# Run with Chrome
+python3 run-selenium-as-testuser.py <RPI_IP> --browser chrome
 ```
 
 ### Framework Documentation

@@ -27,7 +27,12 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Run selenium tests as non-root user")
     parser.add_argument("target_ip", help="IP address of system to test")
     parser.add_argument("--timeout", type=int, default=600, help="Timeout in seconds (default: 600)")
-
+    parser.add_argument(
+        "--browser",
+        choices=["chrome", "firefox"],
+        default="firefox",
+        help="Browser to use for testing (default: firefox)",
+    )
     args = parser.parse_args()
 
     logger.info(f"Running browser tests against {args.target_ip}")
@@ -35,7 +40,7 @@ def main() -> int:
 
     try:
         # Create test configuration
-        config = SeleniumConfig(rpi_ip=args.target_ip, browser="firefox", headless=True, timeout=args.timeout)
+        config = SeleniumConfig(rpi_ip=args.target_ip, browser=args.browser, headless=True, timeout=args.timeout)
 
         # Run tests using context manager
         with SeleniumTestRunner(config) as runner:
