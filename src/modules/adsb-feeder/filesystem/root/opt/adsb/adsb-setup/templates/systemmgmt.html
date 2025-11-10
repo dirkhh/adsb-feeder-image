@@ -107,7 +107,9 @@
             {% if env_value_by_tag('web_auth_enabled') %}
             <br><strong>Authentication is currently ENABLED.</strong>
             {% else %}
-            <br>Authentication is currently disabled.
+            <br>Authentication is currently disabled. Make sure you have an SSH key or
+            password set up and tested before enabling this, or you risk permanently locking
+            yourself out of this image if you misplace the password.
             {% endif %}
           </label>
         </div>
@@ -139,7 +141,7 @@
         </div>
         <div class="col-12 mt-2">
           <button type="submit" class="btn btn-primary mx-auto w-100" id="web_auth_enable" name="web_auth_setup" value="stay" disabled>
-            Enable Authentication
+            ssh is working<br/>Enable Authentication
           </button>
         </div>
         {% else %}
