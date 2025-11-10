@@ -3532,7 +3532,7 @@ class AdsbIm:
                     print_err("updating the root password")
                     self.set_rpw()
                     continue
-                if key == "web_auth_setup":
+                if allow_insecure and key == "web_auth_setup":
                     # Enable web authentication with the provided username and password
                     username = form.get("web_auth--username", "")
                     password = self._provisional_password
@@ -3546,7 +3546,7 @@ class AdsbIm:
                         flash("Username and password are required to enable authentication.")
                         print_err("user auth without user")
                     continue
-                if key == "web_auth_disable":
+                if allow_insecure and key == "web_auth_disable":
                     self._d.env_by_tags("web_auth_enabled").value = False
                     self._d.env_by_tags("web_auth_username").value = ""
                     self._d.env_by_tags("web_auth_password").value = ""

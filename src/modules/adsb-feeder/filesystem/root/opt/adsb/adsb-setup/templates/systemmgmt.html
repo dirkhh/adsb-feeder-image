@@ -96,7 +96,7 @@
       </div>
     </form>
   </div>
-  <div class="col-12 col-lg-6">
+  <div class="col-12 col-lg-6 {% if is_enabled('secure_image') %} d-none {% endif %}">
     <h5 class="mt-3">Web Authentication</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
       <div class="row align-items-center">
