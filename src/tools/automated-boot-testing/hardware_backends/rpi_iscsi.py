@@ -135,7 +135,13 @@ class RPiISCSIBackend(HardwareBackend):
         return self.rpi_ip
 
     def cleanup(self) -> None:
-        """Power off Raspberry Pi and cleanup serial reader."""
+        """Save the setup log (if able) and power off Raspberry Pi and cleanup serial reader."""
+        logger.info("=" * 70)
+        logger.info("Save setup log")
+        logger.info("=" * 70)
+        # Copy setup log from RPi
+        self._copy_setup_log()
+
         logger.info("=" * 70)
         logger.info("Cleanup: Powering off Raspberry Pi")
         logger.info("=" * 70)
@@ -672,3 +678,48 @@ class RPiISCSIBackend(HardwareBackend):
 
         except Exception as e:
             logger.warning(f"Error reporting serial log info: {e}")
+
+    def _copy_setup_log(self) -> None:
+        """Copy the adsb-feeder-image.log from RPi to local server."""
+        try:
+            # Create logs directory if needed
+            setup_log_dir = Path("/opt/adsb-boot-test/setup-logs")
+            setup_log_dir.mkdir(parents=True, exist_ok=True)
+
+            # Generate log filename
+            if self.config.metrics_id:
+                local_log_file = setup_log_dir / f"adsb-feeder-image-{self.config.metrics_id}.log"
+            else:
+                timestamp = int(time.time())
+                local_log_file = setup_log_dir / f"adsb-feeder-image-{timestamp}.log"
+
+            # Build ssh command to cat the file and redirect to local file
+            # This avoids scp/sftp-server requirement and known_hosts issues
+            ssh_key = str(self.config.ssh_key) if self.config.ssh_key else ""
+            ssh_cmd = [
+                "ssh",
+                "-o",
+                "ConnectTimeout=10",
+                "-o",
+                "StrictHostKeyChecking=no",
+                "-o",
+                "UserKnownHostsFile=/dev/null",
+            ]
+            if ssh_key:
+                ssh_cmd.extend(["-i", ssh_key])
+            ssh_cmd.extend([f"root@{self.rpi_ip}", "cat /run/adsb-feeder-image.log"])
+
+            logger.info(f"Copying setup log from RPi to {local_log_file}...")
+            result = subprocess.run(ssh_cmd, capture_output=True, text=True, timeout=30)
+
+            if result.returncode == 0:
+                # Write the output to the local file
+                local_log_file.write_text(result.stdout)
+                logger.info(f"✓ Setup log copied to: {local_log_file}")
+            else:
+                logger.warning(f"Failed to copy setup log: {result.stderr}")
+
+        except subprocess.TimeoutExpired:
+            logger.warning("Setup log copy timed out")
+        except Exception as e:
+            logger.warning(f"Failed to copy setup log: {e}")
