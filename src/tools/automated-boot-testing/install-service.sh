@@ -69,88 +69,26 @@ cp "$SOURCE_DIR/power-toggle-kasa.py" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/power-toggle-unifi.py" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/generate-api-key.py" "$INSTALL_DIR/"
 
-# Copy selenium_framework directory
-echo "📋 Copying selenium framework..."
 cp -r "$SOURCE_DIR/selenium_framework" "$INSTALL_DIR/"
-
-# Copy boot_test_lib directory
-echo "📋 Copying boot test library..."
 cp -r "$SOURCE_DIR/boot_test_lib" "$INSTALL_DIR/"
-
-# Copy hardware_backends directory
-echo "📋 Copying hardware backends..."
 cp -r "$SOURCE_DIR/hardware_backends" "$INSTALL_DIR/"
 
 chmod +x "$INSTALL_DIR"/*.py
 chmod +x "$INSTALL_DIR"/*.sh
 
-# Create test images directory
-echo "📁 Creating test images directory..."
+# Create required directories
+echo "📁 Creating required directories..."
 mkdir -p "$INSTALL_DIR/test-images"
-
-# Create serial logs directory
-echo "📁 Creating serial logs directory..."
 mkdir -p "$INSTALL_DIR/serial-logs"
-
-# Create metrics database directory
-echo "📁 Creating metrics database directory..."
+mkdir -p "$INSTALL_DIR/setup-logs"
 mkdir -p /var/lib/adsb-boot-test
 chmod 755 /var/lib/adsb-boot-test
 
 # Install systemd service
 echo "🔧 Installing systemd service..."
 cp "$SOURCE_DIR/adsb-boot-test.service" "$SERVICE_FILE"
-
-# Setup logging (systemd will handle log collection)
-echo "📝 Setting up logging..."
-echo "   Logs will be available via: journalctl -u $SERVICE_NAME"
-
-# Reload systemd
-echo "🔄 Reloading systemd..."
 systemctl daemon-reload
-
-# Enable service
-echo "✅ Enabling service..."
 systemctl enable "$SERVICE_NAME"
 
 echo ""
 echo "🎉 Installation complete!"
-echo ""
-echo "📁 Installation structure:"
-echo "   Service files: $INSTALL_DIR/"
-echo "   Virtual env:   $INSTALL_DIR/venv/"
-echo "   Test images:   $INSTALL_DIR/test-images/"
-echo "   Config:        $CONFIG_DIR/config.json"
-echo "   Metrics DB:    /var/lib/adsb-boot-test/metrics.db"
-echo ""
-echo "Next steps:"
-echo "1. Edit the configuration file:"
-echo "   sudo nano $CONFIG_DIR/config.json"
-echo ""
-echo "2. Set your IP addresses (rpi_ip) and power toggle script (power_toggle_script)"
-echo ""
-echo "3. Start the service:"
-echo "   sudo systemctl start $SERVICE_NAME"
-echo ""
-echo "4. Check service status:"
-echo "   sudo systemctl status $SERVICE_NAME"
-echo ""
-echo "5. View logs:"
-echo "   sudo journalctl -u $SERVICE_NAME -f"
-echo "   sudo journalctl -u $SERVICE_NAME --since '1 hour ago'"
-echo ""
-echo "6. Test the API:"
-echo "   curl -X POST http://localhost:9456/api/trigger-boot-test \\"
-echo "        -H 'Content-Type: application/json' \\"
-echo "        -d '{\"url\": \"https://github.com/dirkhh/adsb-feeder-image/releases/download/v3.0.6-beta.6/adsb-im-raspberrypi64-pi-2-3-4-5-v3.0.6-beta.6.img.xz\"}'"
-echo ""
-echo "7. View metrics:"
-echo "   sudo $INSTALL_DIR/boot-test-metrics-cli.py"
-echo "   sudo $INSTALL_DIR/boot-test-metrics-cli.py --stats 7"
-echo "   sudo $INSTALL_DIR/boot-test-metrics-cli.py --failures"
-echo ""
-echo "8. Manual service management:"
-echo "   sudo systemctl stop $SERVICE_NAME"
-echo "   sudo systemctl restart $SERVICE_NAME"
-echo "   sudo systemctl disable $SERVICE_NAME"
-echo ""
