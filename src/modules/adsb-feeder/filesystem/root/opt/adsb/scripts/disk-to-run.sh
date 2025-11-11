@@ -5,7 +5,7 @@ mkdir -p /run/acars_data
 if cd /run/acars_data; then
     ! [[ -f acarshub.rrd ]] && [[ -f /opt/adsb/config/acarshub/acarshub.rrd.zst ]] \
         && zstd -f --decompress /opt/adsb/config/acarshub/acarshub.rrd.zst -o acarshub.rrd.tmp \
-        && mv -f acarshub.rrd.tmp acarshub.rrd
+        && mv -v -f acarshub.rrd.tmp acarshub.rrd
     if ! [[ -f messages.db ]]; then
         if [[ -f /opt/adsb/config/acarshub/messages.db ]]; then
             # restore current to-disk method of using vacuum into without compression
