@@ -145,6 +145,9 @@ cleanup() {
     umount "$MOUNT_BOOT" 2>/dev/null || true
     umount "$MOUNT_ROOT" 2>/dev/null || true
 
+    # Force fsck for the root filesystem
+    fsck.ext4 -fy "${LOOP_DEV}p2" || true
+
     # Remove loop device
     if [ -n "$LOOP_DEV" ]; then
         losetup -d "$LOOP_DEV" 2>/dev/null || true
