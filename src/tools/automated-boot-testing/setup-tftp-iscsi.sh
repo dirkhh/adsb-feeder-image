@@ -195,8 +195,8 @@ mount -t sysfs /sys "$MOUNT_ROOT/sys"
 mount -o bind /dev "$MOUNT_ROOT/dev"
 mount -o bind /dev/pts "$MOUNT_ROOT/dev/pts"
 
-# Copy DNS resolution
-cp /etc/resolv.conf "$MOUNT_ROOT/etc/resolv.conf"
+# Set up DNS resolution
+echo "nameserver ${ISCSI_SERVER_IP}" > "$MOUNT_ROOT/etc/resolv.conf"
 
 # Check if image has already been configured for iSCSI boot
 NEEDS_ISCSI_SETUP=true
