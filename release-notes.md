@@ -1,5 +1,6 @@
 Changes since v3.0.6
 =======
+- beta-notes: auth - add help text to explain to people how to recover / when to re-image
 - acarshub: improve method of saving data to disk to avoid DB corruption
 - beta-notes: update planefinder container - radar stick now works with MLAT
 - beta-notes: suggest having ssh working before turning on authentication

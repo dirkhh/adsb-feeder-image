@@ -35,6 +35,23 @@
         </div>
       </div>
     </div>
+    <div class="col-12"></div>
+    <span onclick="$('#help-notes').toggleClass('d-none'); $(this).find('.toggle-icon').text($('#help-notes').hasClass('d-none') ? '▶' : '▼'); return false;" style="cursor: pointer;">
+      <span class="toggle-icon small">▶</span> <strong class="small text-danger">Login help</strong>
+    </span>
+    <div id="help-notes" class="d-none col-10 col-sm-9 col-md-8">
+      <div class="card">
+        <div class="card-body small">
+          <div>
+            If you misplaced your credentials and have `ssh` enabled, you can use that to log into the command line and run
+            <pre class="text-center"><code>bash /opt/adsb/scripts/auth-disable.sh</code></pre> which will disable the Web UI login and reset the credentials.
+          </div>
+          <div class="mt-3">
+            If you don't have `ssh` access you should download a new copy of the Feeder Image software and re-image your device.
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}
