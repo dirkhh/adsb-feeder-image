@@ -1,5 +1,6 @@
 Changes since v3.0.6
 =======
+- acarshub: improve method of saving data to disk to avoid DB corruption
 - beta-notes: update planefinder container
 - beta-notes: suggest having ssh working before turning on authentication
 - beta-notes: don't allow setting up auth on a secured image
