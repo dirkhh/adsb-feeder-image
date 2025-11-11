@@ -9,10 +9,11 @@ if [[ -d /run/acars_data ]] && mkdir -p /opt/adsb/config/acarshub/ && cd /opt/ad
         apt install --no-install-recommends --no-install-suggests -y sqlite3
     fi
     rm -f messages.db.tmp
-    # backup using vacuum into and delete old backup file
+    # backup using vacuum into
     sqlite3 /run/acars_data/messages.db "vacuum into 'messages.db.tmp';" \
         && mv -v -f messages.db.tmp messages.db \
-        && rm -f messages.db.zst
+    # delete backup file used by previous iteration of this code
+    rm -f messages.db.zst
 fi
 
 exit 0
