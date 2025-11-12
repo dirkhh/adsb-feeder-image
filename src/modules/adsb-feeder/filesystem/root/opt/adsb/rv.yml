@@ -30,4 +30,3 @@ services:
       - /run:exec,size=64M
     volumes:
       - "/etc/localtime:/etc/localtime:ro"
-      - "/etc/timezone:/etc/timezone:ro"

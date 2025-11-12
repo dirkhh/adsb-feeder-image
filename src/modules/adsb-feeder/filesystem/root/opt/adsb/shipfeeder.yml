@@ -61,7 +61,6 @@ services:
       - /tmp
     volumes:
       - "/etc/localtime:/etc/localtime:ro"
-      - "/etc/timezone:/etc/timezone:ro"
       - "/opt/adsb/ais/shipxplorer/data:/data"
       - /dev:/dev:rw
 

@@ -21,5 +21,4 @@ services:
     volumes:
       - /opt/adsb/webproxy:/run/nginx
       - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
 
