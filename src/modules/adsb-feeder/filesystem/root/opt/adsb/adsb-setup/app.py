@@ -1234,6 +1234,22 @@ class AdsbIm:
         except subprocess.TimeoutExpired:
             print_err("timeout expired re-starting docker... trying to continue...")
 
+        graphs_non_xml = self._d.config_path / "ultrafeeder/graphs1090/rrd/localhost.tar.gz"
+        graphs_xml = self._d.config_path / "ultrafeeder/graphs1090/xml.tar.gz"
+        if graphs_xml.exists() and not graphs_non_xml.exists():
+            print_err("attempting to restore graphs1090 XML backup")
+            container = "ultrafeeder"
+            if self._d.env_by_tags("aggregator_choice").value == "nano":
+                container = "nanofeeder"
+            cmdline = f"docker exec {container} bash /usr/share/graphs1090/rrd-restore.sh /var/lib/collectd/xml.tar.gz /var/lib/collectd/rrd/localhost && docker restart {container}"
+            success, output = run_shell_captured(cmdline)
+            print_err(output)
+            if success:
+                print_err("success: restore graphs1090 XML backup")
+            else:
+                print_err("FAILURE: restore graphs1090 XML backup")
+            graphs_xml.unlink(missing_ok=True)
+
     def base_is_configured(self):
         base_config: set[Env] = {env for env in self._d._env if env.is_mandatory}
         for env in base_config:
