@@ -108,6 +108,12 @@ class AdsbIm:
     def __init__(self):
         print_err("starting AdsbIm.__init__", level=4)
         self._d = Data()
+        os_flag_file = self._d.data_path / "os.adsb.feeder.image"
+        if os_flag_file.exists():
+            # this is an image, are we supposed to use the staging server for testing?
+            if pathlib.Path("/boot/usestaging").exists() or pathlib.Path("/boot/firmware/usestaging").exists():
+                print_err("Using the staging infrastructure as backend")
+                self._d.adsbim_api_url = "https://staging.adsb.im/api"
         self._system = System(data=self._d)
         self.app = Flask(__name__)
         # Initialize authentication system (with persistent secret key)
@@ -192,7 +198,6 @@ class AdsbIm:
         # newer images will include a flag file that indicates that this is indeed
         # a full image - but in case of upgrades from older version, this heuristic
         # should be sufficient to guess if this is an image or an app
-        os_flag_file = self._d.data_path / "os.adsb.feeder.image"
         if not os_flag_file.exists():
             # so this could be a pre-0.15 image, or it could indeed be the app
             app_flag_file = adsb_dir / "app.adsb.feeder.image"
@@ -1315,7 +1320,7 @@ class AdsbIm:
         return {serial for serial in {self._d.env_by_tags(e).valuestr for e in self.serial_env_names()} if serial != ""}
 
     def closest_airport_dict(self, lat, lon) -> dict:
-        airport, status = generic_get_json(f"https://adsb.im/api/closest_airport/{lat}/{lon}", timeout=10.0)
+        airport, status = generic_get_json(f"{self._d.adsbim_api_url}/closest_airport/{lat}/{lon}", timeout=10.0)
         if status != 200 or airport == None:
             print_err(f"closest_airport({lat}, {lon}) failed with status {status}")
             return {"error": "Failed to fetch closest airport"}
@@ -3790,7 +3795,7 @@ class AdsbIm:
         os_flag_file = self._d.data_path / "os.adsb.feeder.image"
         is_image = os_flag_file.exists()
         # retrieve the busiest known frequencies JSON from the adsb.im website
-        url = f"https://adsb.im/api/best_frequencies/{self._d.env_by_tags('lat').list_get(0)}/{self._d.env_by_tags('lon').list_get(0)}?threshold=98"
+        url = f"{self._d.adsbim_api_url}/best_frequencies/{self._d.env_by_tags('lat').list_get(0)}/{self._d.env_by_tags('lon').list_get(0)}?threshold=98"
         acars_frequencies = ""
         vdl2_frequencies = ""
         frequencies_json, status_code = generic_get_json(url)
@@ -4403,7 +4408,7 @@ class AdsbIm:
                 ):
 
                     changelog_response, status_code = generic_get_json(
-                        f"https://adsb.im/api/changelog/{previous_version}/{current_version}"
+                        f"{self._d.adsbim_api_url}/changelog/{previous_version}/{current_version}"
                     )
 
                     changelog_content = changelog_response if status_code == 200 else "Failed to fetch changelog"

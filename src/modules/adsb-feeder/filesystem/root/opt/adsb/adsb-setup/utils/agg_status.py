@@ -457,7 +457,7 @@ class ImStatus:
     def check(self, check=False):
         with self._lock:
             if not self._cached or time.time() > self._next_check or check:
-                json_url = f"https://adsb.im/api/status"
+                json_url = f"{self._d.adsbim_api_url}/status"
                 self._cached, status = generic_get_json(json_url, self._d.env_by_tags("pack").value)
                 if status == 200:
                     # good result, no need to update this sooner than in a minute

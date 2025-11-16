@@ -70,6 +70,7 @@ class Data:
 
     ultrafeeder: list = field(default_factory=list)
     previous_version = ""
+    adsbim_api_url = "https://adsb.im/api"
 
     _proxy_routes = [
         # endpoint, port, url_path
