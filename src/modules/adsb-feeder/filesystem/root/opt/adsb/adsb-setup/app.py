@@ -139,6 +139,7 @@ class AdsbIm:
                 "temperatures",
                 "check_changelog_status",
                 "/fa-status.json/",
+                "/fr24-monitor.json/",
                 "static",
                 "info",  # Support Info page
                 "support",  # Share Diagnostics
