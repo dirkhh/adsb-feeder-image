@@ -270,6 +270,8 @@ class AggStatus:
                 self._beast = T.Good if fr_dict.get("feed_status") == "connected" else T.Disconnected
                 self._last_check = datetime.now()
             else:
+                self._beast = T.Unknown
+                self._last_check = datetime.now()
                 print_err(f"flightradar at {json_url} returned {status}")
         elif self._agg == "radarbox":
 
