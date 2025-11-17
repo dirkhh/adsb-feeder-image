@@ -2,7 +2,7 @@
 #
 # Setup TFTP/iSCSI boot for Raspberry Pi test image
 #
-# Usage: setup-tftp-iscsi.sh <image_file> <working_image_file> [ssh_public_key] [iscsi_server_ip]
+# Usage: setup-tftp-iscsi.sh <image_file> <working_image_file> [ssh_public_key] [iscsi_server_ip] [flag_filename]
 #
 # Arguments:
 #   image_file         - Path to the Raspberry Pi image file (.img)
@@ -11,6 +11,7 @@
 #                        for passwordless access. If using test-feeder-image.py with --ssh-key,
 #                        the public key is assumed to be at <private_key_path>.pub
 #   iscsi_server_ip    - Optional: iSCSI server IP address (default: 192.168.77.252)
+#   flag_filename      - Optional: Name of flag file to create in /boot/firmware/ (e.g., "staging")
 #
 set -e  # Exit on any error
 
@@ -19,6 +20,7 @@ IMAGE_FILE="$1"
 WORKING_IMAGE_FILE="$2"
 SSH_PUBLIC_KEY="$3"  # Optional: SSH public key to install for passwordless access
 ISCSI_SERVER_IP="${4:-192.168.77.252}"  # Optional: iSCSI server IP, defaults to 192.168.77.252
+FLAG_FILENAME="$5"  # Optional: Flag file to create in /boot/firmware/
 MOUNT_BOOT="/mnt/rpi-prep-root/boot/firmware"
 MOUNT_ROOT="/mnt/rpi-prep-root"
 TFTP_DEST="/srv/tftp"
@@ -420,6 +422,20 @@ if [ -n "$SSH_PUBLIC_KEY" ]; then
     fi
 else
     echo -e "${YELLOW}No SSH public key provided - skipping SSH key installation${NC}"
+fi
+
+# Create flag file if provided
+if [ -n "$FLAG_FILENAME" ]; then
+    echo -e "${YELLOW}Creating flag file in /boot/firmware/...${NC}"
+    FLAG_FILE_PATH="$MOUNT_BOOT/$FLAG_FILENAME"
+
+    # Create empty flag file
+    touch "$FLAG_FILE_PATH"
+    chmod 644 "$FLAG_FILE_PATH"
+
+    echo -e "${GREEN}Flag file created: /boot/firmware/$FLAG_FILENAME${NC}"
+else
+    echo -e "${YELLOW}No flag filename provided - skipping flag file creation${NC}"
 fi
 
 # Prepare TFTP destination

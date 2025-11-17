@@ -107,7 +107,7 @@ class TestMetrics:
              github_event_type, github_release_id, github_pr_number, github_commit_sha,
              github_workflow_run_id, github_report_status)
             VALUES (?, ?, ?, 'queued', ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """,
+            """,
             (
                 image_url,
                 version,
@@ -193,7 +193,7 @@ class TestMetrics:
             SET completed_at = ?, duration_seconds = ?, status = ?,
                 error_message = ?, error_stage = ?
             WHERE id = ?
-        """,
+            """,
             (completed_at, duration, status, error_message, error_stage, test_id),
         )
         conn.commit()
@@ -223,7 +223,7 @@ class TestMetrics:
             SELECT * FROM test_runs
             ORDER BY started_at DESC
             LIMIT ?
-        """,
+            """,
             (limit,),
         )
         results = [dict(row) for row in cursor.fetchall()]
@@ -246,7 +246,7 @@ class TestMetrics:
                 AVG(duration_seconds) as avg_duration
             FROM test_runs
             WHERE started_at >= ?
-        """,
+            """,
             (since,),
         )
         row = cursor.fetchone()
@@ -274,7 +274,7 @@ class TestMetrics:
             WHERE image_version LIKE ?
             ORDER BY started_at DESC
             LIMIT ?
-        """,
+            """,
             (f"%{version}%", limit),
         )
         results = [dict(row) for row in cursor.fetchall()]
@@ -291,7 +291,7 @@ class TestMetrics:
             WHERE status IN ('failed', 'error')
             ORDER BY started_at DESC
             LIMIT ?
-        """,
+            """,
             (limit,),
         )
         results = [dict(row) for row in cursor.fetchall()]
@@ -312,7 +312,7 @@ class TestMetrics:
             SELECT * FROM test_runs
             WHERE status = 'queued'
             ORDER BY started_at ASC
-        """
+            """
         )
         results = [dict(row) for row in cursor.fetchall()]
         self._close_connection(conn)
@@ -344,7 +344,7 @@ class TestMetrics:
                  OR github_report_status = 'failed')
             AND COALESCE(github_report_attempts, 0) < 2
             ORDER BY started_at ASC
-        """
+            """
         )
         results = [dict(row) for row in cursor.fetchall()]
         self._close_connection(conn)
@@ -368,7 +368,7 @@ class TestMetrics:
                 WHERE github_event_type = 'release'
                 AND github_release_id = ?
                 ORDER BY started_at ASC
-            """,
+                """,
                 (release_id,),
             )
         elif event_type == "pull_request" and pr_number:
@@ -378,7 +378,7 @@ class TestMetrics:
                 WHERE github_event_type = 'pull_request'
                 AND github_pr_number = ?
                 ORDER BY started_at ASC
-            """,
+                """,
                 (pr_number,),
             )
         else:
@@ -406,7 +406,7 @@ class TestMetrics:
             UPDATE test_runs
             SET github_reported_at = ?, github_report_status = ?
             WHERE id = ?
-        """,
+            """,
             (datetime.utcnow().isoformat(), status, test_id),
         )
         conn.commit()
@@ -425,7 +425,7 @@ class TestMetrics:
             UPDATE test_runs
             SET github_report_attempts = COALESCE(github_report_attempts, 0) + 1
             WHERE id = ?
-        """,
+            """,
             (test_id,),
         )
         conn.commit()
@@ -489,3 +489,27 @@ class TestMetrics:
 
             logging.warning(f"Duplicate check failed for URL={image_url}, release_id={github_release_id}: {e}")
             return None
+
+    def get_tests_by_status(self, status: str) -> List[Dict[str, Any]]:
+        """
+        Get all tests with a specific status.
+
+        Args:
+            status: Test status to filter by (queued, running, passed, failed, error)
+
+        Returns:
+            List of test dictionaries matching the status
+        """
+        conn = self._get_connection()
+        conn.row_factory = sqlite3.Row
+        cursor = conn.execute(
+            """
+            SELECT * FROM test_runs
+            WHERE status = ?
+            ORDER BY started_at DESC
+            """,
+            (status,),
+        )
+        results = [dict(row) for row in cursor.fetchall()]
+        self._close_connection(conn)
+        return results

@@ -49,6 +49,7 @@ class RPiISCSIBackend(HardwareBackend):
         self.expected_image_name: Optional[str] = None
         self.serial_reader: Optional[SerialConsoleReader] = None
         self.serial_log_dir = Path("/opt/adsb-boot-test/serial-logs")
+        self.flag_filename: Optional[str] = None  # Optional flag file to create in /boot/firmware/
 
     def prepare_environment(self) -> None:
         """Download image and setup iSCSI."""
@@ -220,6 +221,13 @@ class RPiISCSIBackend(HardwareBackend):
 
         # Add iscsi_server_ip as the 4th argument
         cmd.append(self.iscsi_server_ip)
+
+        # Add flag_filename as the 5th argument (optional)
+        if hasattr(self, "flag_filename") and self.flag_filename:
+            cmd.append(self.flag_filename)
+            logger.info(f"Flag file will be created: /boot/firmware/{self.flag_filename}")
+        else:
+            cmd.append("")  # Empty string if no flag file
 
         logger.info(f"Running: {' '.join(cmd)}")
 
