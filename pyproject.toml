@@ -61,6 +61,7 @@ dependencies = [
     "shapely",
     "types-requests",
     "types-shapely",
+    "cryptography"
 ]
 
 [dependency-groups]

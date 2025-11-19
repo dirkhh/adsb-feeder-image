@@ -102,11 +102,12 @@ echo "You appear to be on a ${distro}-style distribution"
 missing=""
 if which python3 &> /dev/null ; then
 	python3 -c "import sys; sys.exit(1) if sys.version_info.major != 3 or sys.version_info.minor < 6" &> /dev/null && missing="python3 "
-	python3 -c "import requests" &>/dev/null || missing="python3-requests "
-	python3 -c "import flask" &>/dev/null || missing="python3-flask "
-	python3 -c "import sys; import flask; sys.exit(1) if flask.__version__ < '2.0' else sys.exit(0)" &> /dev/null || missing="python3-flask "
+	python3 -c "import requests" &>/dev/null || missing+="python3-requests "
+	python3 -c "import flask" &>/dev/null || missing+="python3-flask "
+    python3 -c "import cryptography" &>/dev/null || missing+="python3-cryptography "
+	python3 -c "import sys; import flask; sys.exit(1) if flask.__version__ < '2.0' else sys.exit(0)" &> /dev/null || missing+="python3-flask "
 else
-	missing="python3 python3-flask python3-requests "
+	missing="python3 python3-flask python3-requests python3-cryptography "
 fi
 which git &> /dev/null || missing+="git "
 if which docker &> /dev/null ; then

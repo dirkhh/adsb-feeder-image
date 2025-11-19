@@ -1,3 +1,4 @@
+import base64
 import copy
 import filecmp
 import gzip
@@ -29,6 +30,9 @@ from time import sleep
 from typing import Dict, List, Tuple
 from uuid import uuid4
 from zlib import compress
+
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import padding
 
 import requests
 from flask import (
@@ -134,6 +138,8 @@ class AdsbIm:
 
         self.exiting = False
         self._provisional_password = ""
+        self.local_address = ""
+        self.local_dev = ""
 
         # Add authentication check before each request
         @self.app.before_request
@@ -2435,6 +2441,88 @@ class AdsbIm:
             return "0"
         return gain
 
+    def update_global_name(self):
+        if self._d.env_by_tags("site_name").list_get(0) == "":
+            # we don't have a site name, yet - there's no point to this
+            return
+        if self.local_address == "":
+            self.update_net_dev(from_update=True)
+        if self.local_address == "":
+            print_err(f"failed to get local address for update_global_name()... bailing")
+            return
+        fqdn = self._d.env_by_tags("fqdn").value
+        fqdn_ip = self._d.env_by_tags("fqdn_ip").value
+        if fqdn == "" or fqdn_ip != self.local_address:
+            url = f"{self._d.adsbim_api_url}/0/globalname"
+            challenge_response = None
+            if fqdn != "":
+                challenge_json, status_code = generic_get_json(f"{url}?fqdn={fqdn}")
+                if status_code == 200:
+                    challenge = challenge_json.get("challenge", "")
+                    # now encrypt the challenge with the private key in /opt/adsb/certs/feeder.key
+                    try:
+                        # Decode the base64-encoded challenge
+                        challenge_bytes = base64.b64decode(challenge)
+
+                        # Load the private key
+                        with open("/opt/adsb/certs/feeder.key", "rb") as key_file:
+                            private_key = serialization.load_pem_private_key(key_file.read(), password=None)
+
+                        # Sign the challenge with the private key
+                        signature = private_key.sign(challenge_bytes, padding.PKCS1v15(), hashes.SHA256())
+
+                        # Base64-encode the signature
+                        challenge_response = base64.b64encode(signature).decode("utf-8")
+                    except Exception as e:
+                        print_err(f"Error signing challenge: {e}")
+
+            data = {
+                "site_name": self._d.env_by_tags("site_name").list_get(0),
+                "ip_address": self.local_address,
+                "fqdn": fqdn,
+            }
+            if challenge_response:
+                data["challenge_response"] = challenge_response
+            # note that the backend server needs to do a DNS update / LetsEncrypt run. So this can
+            # take quite a while... maybe this needs to go into a thread...
+            global_name, status_code = generic_get_json(url, data=json.dumps(data), timeout=120.0)
+            if status_code != 200:
+                print_err(f"error retrieving global name: {status_code}")
+            else:
+                print_err(f"Received global_name data {global_name}")
+                fqdn = global_name.get("fqdn", "")
+                if fqdn != "":
+                    self._d.env_by_tags("fqdn").value = fqdn
+                    self._d.env_by_tags("fqdn_ip").value = self.local_address
+
+                    # Save certificate, private key, and chain to files
+                    cert_dir = "/opt/adsb/certs"
+                    os.makedirs(cert_dir, mode=0o755, exist_ok=True)
+
+                    # Write certificate
+                    cert_pem = global_name.get("certificate", "")
+                    if cert_pem:
+                        cert_path = os.path.join(cert_dir, "feeder.cert")
+                        with open(cert_path, "w") as f:
+                            f.write(cert_pem)
+                        os.chmod(cert_path, 0o644)
+
+                    # Write private key with restrictive permissions
+                    key_pem = global_name.get("private_key", "")
+                    if key_pem:
+                        key_path = os.path.join(cert_dir, "feeder.key")
+                        with open(key_path, "w") as f:
+                            f.write(key_pem)
+                        os.chmod(key_path, 0o600)
+
+                    # Write certificate chain
+                    chain_pem = global_name.get("chain", "")
+                    if chain_pem:
+                        chain_path = os.path.join(cert_dir, "feeder.chain")
+                        with open(chain_path, "w") as f:
+                            f.write(chain_pem)
+                        os.chmod(chain_path, 0o644)
+
     def handle_non_adsb(self):
         # if the user explicitly says they don't want ADS-B, then don't
         # assign any SDRs to ADS-B functions
@@ -3036,6 +3124,9 @@ class AdsbIm:
         # start the containers
         if self.base_is_configured() or self._d.is_enabled("stage2"):
             self._d.env_by_tags(["base_config", "is_enabled"]).value = True
+            # check if we need to get the gobal hostname / fqdn
+            self.update_global_name()
+
             if self.at_least_one_aggregator():
                 self._d.env_by_tags("aggregators_chosen").value = True
 
@@ -4167,7 +4258,7 @@ class AdsbIm:
             if r and r.get("latest_tag", "unknown") != "unknown":
                 self.ci = False
 
-    def update_net_dev(self):
+    def update_net_dev(self, from_update: bool = False):
         dev = ""
         addr = ""
         try:
@@ -4181,7 +4272,8 @@ class AdsbIm:
                 .stdout.decode()
                 .strip()
             )
-        except Exception:
+        except Exception as e:
+            print(f"exception on ip route call: {e}")
             result = ""
         else:
             if " " in result:
@@ -4190,8 +4282,14 @@ class AdsbIm:
                 dev = result
                 addr = ""
         if result and addr:
+            # update global name DNS if IP address has changed
+            needs_update = False
+            if addr != self.local_address:
+                needs_update = True
             self.local_address = addr
             self.local_dev = dev
+            if needs_update and not from_update:
+                self.update_global_name()
         else:
             self.local_address = ""
             self.local_dev = ""

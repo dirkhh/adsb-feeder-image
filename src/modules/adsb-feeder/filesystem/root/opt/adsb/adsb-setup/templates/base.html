@@ -835,6 +835,12 @@
           <div class="text-muted small d-block d-md-none">
             {{ env_value_by_tag("board_name") }}<br>{{ env_value_by_tag("image_name") }}
           </div>
+          {% if env_value_by_tag('fqdn') != '' %}
+          <div class="text-muted small d-block d-md-none">
+            You can access this site on your local network as
+            <a href="http://{env_value_by_tag('fqdn')}">http://{env_value_by_tag('fqdn')}</a>
+          </div>
+          {% endif %}
 
           <div class="mt-3">
             <a href="https://ko-fi.com/H2H2H3JS5" target="_blank" rel="noopener">
@@ -842,7 +848,6 @@
             </a>
           </div>
         </div>
-
         <div class="small text-muted">
           Need help? Check the <a {% if env_value_by_tag('aggregator_choice') == 'nonadsb' %}
           href="https://sdre.im/using" {% else %} href="https://adsb.im/using" {% endif %}

@@ -53,7 +53,7 @@ curl -fsSL "https://pkgs.tailscale.com/stable/debian/${DEBIAN_DISTRO}.tailscale-
 # setup Python/Flask
 apt-get update --allow-releaseinfo-change
 
-apt-get install -y --no-install-recommends python3 python3-flask python3-requests
+apt-get install -y --no-install-recommends python3 python3-flask python3-requests python3-cryptography
 
 # install chrony for better time synchronization compared to systemd-timesyncd
 apt-get install -y --no-install-recommends chrony

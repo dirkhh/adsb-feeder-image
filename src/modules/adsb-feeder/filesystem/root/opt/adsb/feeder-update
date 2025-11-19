@@ -211,6 +211,9 @@ function check_missing() {
     if ! python3 -c "import requests" &>/dev/null ; then
         missing+=("python3-requests")
     fi
+    if ! python3 -c "import cryptography" &>/dev/null; then
+        missing+=("python3-cryptography")
+    fi
     if [ -f /opt/adsb/os.adsb.feeder.image ] ; then
         # get hostapd / isc-dhcpd-server if necessary
         if ! command -v hostapd &>/dev/null || ! dhcpd --version 2>&1 | grep -qs -e isc-dhcpd; then

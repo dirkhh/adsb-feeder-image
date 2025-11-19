@@ -204,6 +204,9 @@ class Data:
         Env("_ADSB_IM_INITIALS", default=["CHANGEME"], tags=["initials"]),
         Env("MLAT_SITE_NAME", default=[""], is_mandatory=True, tags=["site_name"]),
         Env("MLAT_SITE_NAME_SANITIZED", default=[""], is_mandatory=True, tags=["site_name_sanitized"]),
+        # global name
+        Env("_ADSBIM_FQDN", default="", tags=["fqdn"]),
+        Env("_ADSBIM_FQDN_IP", default="", tags=["fqdn_ip"]),
         # what type of feeder are we looking at?
         Env("_ADSBIM_IS_ADSB_FEEDER", default=False, tags=["is_adsb_feeder", "is_enabled"]),
         Env("_ADSBIM_IS_ACARS_FEEDER", default=False, tags=["is_acars_feeder", "is_enabled"]),
