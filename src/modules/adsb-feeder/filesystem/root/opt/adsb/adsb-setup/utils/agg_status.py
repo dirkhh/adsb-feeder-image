@@ -596,6 +596,11 @@ class Healthcheck:
                     if samples == self.lastReadsbSamples:
                         fail.append(f"1090 SDR hung (sample count: {samples})")
                     self.lastReadsbSamples = samples
+        except FileNotFoundError:
+            if adsb:
+                print_err("readsb/stats.json missing - reporting 1090 error for healthcheck")
+                fail.append("readsb stats.json not found")
+
         except Exception:
             if adsb:
                 print_err(traceback.format_exc())
@@ -616,6 +621,10 @@ class Healthcheck:
                     now = obj.get("now")
                     if not now or now < time.time() - 60:
                         fail.append("readsb aircraft.json out of date")
+            except FileNotFoundError:
+                print_err("readsb/aircarft.json missing - reporting 1090 error for healthcheck")
+                fail.append("readsb not running / 1090 SDR probably dead / unplugged")
+
             except Exception:
                 print_err(traceback.format_exc())
                 fail.append("readsb not running / 1090 SDR probably dead / unplugged")
@@ -638,6 +647,10 @@ class Healthcheck:
                     now = obj.get("now")
                     if not now or now < time.time() - 60:
                         fail.append("dump978 aircraft.json out of date")
+            except FileNotFoundError:
+                print_err("skyaware978/aircarft.json missing - reporting 978 error for healthcheck")
+                fail.append("dump978 not running / 978 SDR probably dead / unplugged")
+
             except Exception:
                 print_err(traceback.format_exc())
                 fail.append("dump978 not running / 978 SDR probably dead / unplugged")
@@ -653,6 +666,10 @@ class Healthcheck:
                     now = obj.get("now")
                     if not now or now < time.time() - 90:
                         fail.append("airspy stats.json outdated")
+            except FileNotFoundError:
+                print_err("airspy_adsb/stats.json missing - reporting 1090/airspy error for healthcheck")
+                fail.append("airspy_adsb not running, 1090 SDR (airspy) probably dead / unplugged")
+
             except Exception:
                 print_err(traceback.format_exc())
                 fail.append("airspy_adsb not running, 1090 SDR (airspy) probably dead / unplugged")
