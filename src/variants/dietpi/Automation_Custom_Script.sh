@@ -41,8 +41,11 @@ systemctl restart systemd-journald && echo "journal should now be persistent"
 # install chrony for better time synchronization compared to systemd-timesyncd
 # when chrony is installed it's imperative that CONFIG_NTP_MODE=0
 # (custom/disabled) is set in dietpi.txt to avoid breakage of dietpi-update
+# to speed up the process, the other necessary image creation type installs
+# are included here as well; the Python cryptography module is a bit of the odd one
+# out, but having it here should work.
 /boot/dietpi/func/dietpi-set_software ntpd-mode 0
-apt install -y --no-install-recommends chrony ifplugd ifmetric
+apt install -y --no-install-recommends chrony ifplugd ifmetric python3-cryptography
 
 # ifmetric ensures proper precedence for local network connections
 # dhclient applies the metric setting from interfaces only to the default
