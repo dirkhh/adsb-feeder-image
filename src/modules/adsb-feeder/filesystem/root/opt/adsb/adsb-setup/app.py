@@ -140,6 +140,7 @@ class AdsbIm:
         self._provisional_password = ""
         self.local_address = ""
         self.local_dev = ""
+        self._global_name_update_lock = threading.Lock()
 
         # Add authentication check before each request
         @self.app.before_request
@@ -2443,6 +2444,67 @@ class AdsbIm:
             return "0"
         return gain
 
+    def _update_global_name_worker(self, url, data, fqdn, challenge_response):
+        """Background worker thread for global name update and certificate retrieval."""
+        # Check if another update is already in progress
+        if not self._global_name_update_lock.acquire(blocking=False):
+            print_err("Global name update already in progress, skipping this request")
+            return
+
+        try:
+            if challenge_response:
+                data["challenge_response"] = challenge_response
+
+            # This API call can take a long time (DNS update + LetsEncrypt)
+            global_name, status_code = generic_get_json(url, data=json.dumps(data), timeout=300.0)
+            if status_code != 200:
+                print_err(f"error retrieving global name: {status_code}")
+                return
+
+            print_err(f"Received global_name data {global_name}")
+            fqdn = global_name.get("fqdn", "")
+            if fqdn == "":
+                return
+
+            # Update environment values
+            self._d.env_by_tags("fqdn").value = fqdn
+            self._d.env_by_tags("fqdn_ip").value = self.local_address
+
+            # Save certificate, private key, and chain to files
+            cert_dir = "/opt/adsb/certs"
+            os.makedirs(cert_dir, mode=0o755, exist_ok=True)
+
+            # Write certificate
+            cert_pem = global_name.get("certificate", "")
+            if cert_pem:
+                cert_path = os.path.join(cert_dir, "feeder.cert")
+                with open(cert_path, "w") as f:
+                    f.write(cert_pem)
+                os.chmod(cert_path, 0o644)
+
+            # Write private key with restrictive permissions
+            key_pem = global_name.get("private_key", "")
+            if key_pem:
+                key_path = os.path.join(cert_dir, "feeder.key")
+                with open(key_path, "w") as f:
+                    f.write(key_pem)
+                os.chmod(key_path, 0o600)
+
+            # Write certificate chain
+            chain_pem = global_name.get("chain", "")
+            if chain_pem:
+                chain_path = os.path.join(cert_dir, "feeder.chain")
+                with open(chain_path, "w") as f:
+                    f.write(chain_pem)
+                os.chmod(chain_path, 0o644)
+
+            print_err(f"Successfully updated global name and certificates for {fqdn}")
+        except Exception as e:
+            print_err(f"Error in global name update worker: {e}")
+        finally:
+            # Always release the lock, even if there was an error or timeout
+            self._global_name_update_lock.release()
+
     def update_global_name(self):
         if self._d.env_by_tags("site_name").list_get(0) == "":
             # we don't have a site name, yet - there's no point to this
@@ -2483,47 +2545,17 @@ class AdsbIm:
                 "ip_address": self.local_address,
                 "fqdn": fqdn,
             }
-            if challenge_response:
-                data["challenge_response"] = challenge_response
-            # note that the backend server needs to do a DNS update / LetsEncrypt run. So this can
-            # take quite a while... maybe this needs to go into a thread...
-            global_name, status_code = generic_get_json(url, data=json.dumps(data), timeout=120.0)
-            if status_code != 200:
-                print_err(f"error retrieving global name: {status_code}")
-            else:
-                print_err(f"Received global_name data {global_name}")
-                fqdn = global_name.get("fqdn", "")
-                if fqdn != "":
-                    self._d.env_by_tags("fqdn").value = fqdn
-                    self._d.env_by_tags("fqdn_ip").value = self.local_address
 
-                    # Save certificate, private key, and chain to files
-                    cert_dir = "/opt/adsb/certs"
-                    os.makedirs(cert_dir, mode=0o755, exist_ok=True)
-
-                    # Write certificate
-                    cert_pem = global_name.get("certificate", "")
-                    if cert_pem:
-                        cert_path = os.path.join(cert_dir, "feeder.cert")
-                        with open(cert_path, "w") as f:
-                            f.write(cert_pem)
-                        os.chmod(cert_path, 0o644)
-
-                    # Write private key with restrictive permissions
-                    key_pem = global_name.get("private_key", "")
-                    if key_pem:
-                        key_path = os.path.join(cert_dir, "feeder.key")
-                        with open(key_path, "w") as f:
-                            f.write(key_pem)
-                        os.chmod(key_path, 0o600)
-
-                    # Write certificate chain
-                    chain_pem = global_name.get("chain", "")
-                    if chain_pem:
-                        chain_path = os.path.join(cert_dir, "feeder.chain")
-                        with open(chain_path, "w") as f:
-                            f.write(chain_pem)
-                        os.chmod(chain_path, 0o644)
+            # Run the API call and certificate update in a background thread
+            # to avoid blocking the main application
+            worker_thread = threading.Thread(
+                target=self._update_global_name_worker,
+                args=(url, data, fqdn, challenge_response),
+                daemon=True,
+                name="global-name-update",
+            )
+            worker_thread.start()
+            print_err("Global name update started in background thread")
 
     def handle_non_adsb(self):
         # if the user explicitly says they don't want ADS-B, then don't
