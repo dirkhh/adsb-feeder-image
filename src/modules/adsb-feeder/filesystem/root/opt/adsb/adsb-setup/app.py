@@ -31,10 +31,9 @@ from typing import Dict, List, Tuple
 from uuid import uuid4
 from zlib import compress
 
-from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric import padding
-
 import requests
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from flask import (
     Flask,
     Response,
@@ -2461,6 +2460,10 @@ class AdsbIm:
                 print_err(f"error retrieving global name: {status_code}")
                 return
 
+            if not global_name or not isinstance(global_name, Dict):
+                print_err(f"unexpected return value for global name: {global_name}")
+                return
+
             print_err(f"Received global_name data {global_name}")
             fqdn = global_name.get("fqdn", "")
             if fqdn == "":
@@ -2521,7 +2524,7 @@ class AdsbIm:
             challenge_response = None
             if fqdn != "":
                 challenge_json, status_code = generic_get_json(f"{url}?fqdn={fqdn}")
-                if status_code == 200:
+                if status_code == 200 and isinstance(challenge_json, Dict):
                     challenge = challenge_json.get("challenge", "")
                     # now encrypt the challenge with the private key in /opt/adsb/certs/feeder.key
                     try:
@@ -2530,10 +2533,14 @@ class AdsbIm:
 
                         # Load the private key
                         with open("/opt/adsb/certs/feeder.key", "rb") as key_file:
-                            private_key = serialization.load_pem_private_key(key_file.read(), password=None)
+                            loaded_key = serialization.load_pem_private_key(key_file.read(), password=None)
+
+                        # Ensure it's an RSA private key
+                        if not isinstance(loaded_key, rsa.RSAPrivateKey):
+                            raise ValueError("Private key is not an RSA key")
 
                         # Sign the challenge with the private key
-                        signature = private_key.sign(challenge_bytes, padding.PKCS1v15(), hashes.SHA256())
+                        signature = loaded_key.sign(challenge_bytes, padding.PKCS1v15(), hashes.SHA256())
 
                         # Base64-encode the signature
                         challenge_response = base64.b64encode(signature).decode("utf-8")
