@@ -3886,7 +3886,10 @@ class AdsbIm:
                     e.value = value
             if key == "site_name":
                 unique_name = self.unique_site_name(value, idx=sitenum)
+                need_update = sitenum == 0 and self._d.env_by_tags("site_name").list_get(0) != unique_name
                 self._d.env_by_tags("site_name").list_set(sitenum, unique_name)
+                if need_update:
+                    self.update_global_name()
         # done handling the input data
         # what implied settings do we have (and could we simplify them?)
 
@@ -3899,6 +3902,10 @@ class AdsbIm:
         if not seen_go:
             print_err("no go button, so stay on the same page", level=2)
             return redirect(request.url)
+
+        # do we have a site name but no fqdn? Let's try to obtain one (possibly 'again')
+        if self._d.env_by_tags("site_name").list_get(0) != "" and self._d.env_by_tags("fqdn").value == "":
+            self.update_global_name()
 
         # where do we go from here?
         if next_url:  # we figured it out above
@@ -4343,6 +4350,9 @@ class AdsbIm:
         # make sure DNS works, every 5 minutes is sufficient
         if time.time() - self.last_dns_check > 300:
             self.update_dns_state()
+            # also ensure that we ended up getting an fqdn (a previous spurious error could have prevented that)
+            if self._d.env_by_tags("fqdn").value == "" and self._d.env_by_tags("site_name").list_get(0) != "":
+                self.update_global_name()
 
         self._sdrdevices.ensure_populated()
 
