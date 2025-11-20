@@ -1326,10 +1326,12 @@ class AdsbIm:
         return {serial for serial in {self._d.env_by_tags(e).valuestr for e in self.serial_env_names()} if serial != ""}
 
     def closest_airport_dict(self, lat, lon) -> dict:
-        airport, status = generic_get_json(f"{self._d.adsbim_api_url}/closest_airport/{lat}/{lon}", timeout=10.0)
-        if status != 200 or airport == None:
-            print_err(f"closest_airport({lat}, {lon}) failed with status {status}")
-            return {"error": "Failed to fetch closest airport"}
+        airport = None
+        if lat and lon:
+            airport, status = generic_get_json(f"{self._d.adsbim_api_url}/closest_airport/{lat}/{lon}", timeout=10.0)
+            if status != 200 or airport == None:
+                print_err(f"closest_airport({lat}, {lon}) failed with status {status}")
+                return {"error": "Failed to fetch closest airport"}
         return airport if airport else {"error": "No closest airport found"}
 
     def closest_airport(self, lat, lon) -> Response:
