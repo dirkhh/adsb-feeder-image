@@ -513,3 +513,26 @@ class TestMetrics:
         results = [dict(row) for row in cursor.fetchall()]
         self._close_connection(conn)
         return results
+
+    def get_test(self, test_id: int) -> Optional[Dict[str, Any]]:
+        """
+        Get a specific test by ID.
+
+        Args:
+            test_id: Test run ID
+
+        Returns:
+            Dictionary with test data or None if not found
+        """
+        conn = self._get_connection()
+        conn.row_factory = sqlite3.Row
+        cursor = conn.execute(
+            """
+            SELECT * FROM test_runs
+            WHERE id = ?
+            """,
+            (test_id,),
+        )
+        row = cursor.fetchone()
+        self._close_connection(conn)
+        return dict(row) if row else None
