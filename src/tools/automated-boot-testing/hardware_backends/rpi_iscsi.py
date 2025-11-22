@@ -1,6 +1,7 @@
 """Raspberry Pi testing backend using iSCSI boot."""
 
 import logging
+import os
 import subprocess
 import time
 from pathlib import Path
@@ -162,6 +163,72 @@ class RPiISCSIBackend(HardwareBackend):
             logger.info("✓ Raspberry Pi powered off")
         except Exception as e:
             logger.warning(f"Failed to power off: {e}")
+
+        # create a space optimized copy of the files so we can restart this particular image later
+        # - if there is no previous directory under /srv/history/ then create a backup using
+        #   cp -al /srv/tftp /srv/history/<self.config.metrics_id>/tftp
+        # - if there is one or more previous directory under /srv/history/ create a new backup
+        #   rsync -a --link-dest=/srv/history/<newest exist. backup>/tftp /tftp/<self.config.metrics_id>/history/2/tftp/
+        # finally, create a hardlink to the image file in use under /srv/iscsi/ in that backup directory as well
+        # that way we'll be able to get back to this state quite easily in the future
+        try:
+            history_dir = Path("/srv/history")
+            backup_dir = history_dir / str(self.config.metrics_id)
+            tftp_source = Path("/srv/tftp")
+
+            # Create history directory if it doesn't exist
+            history_dir.mkdir(parents=True, exist_ok=True)
+            backup_dir.mkdir(parents=True, exist_ok=True)
+
+            # Find all existing backups in /srv/history/ (excluding the current one)
+            existing_backups = sorted(
+                [d for d in history_dir.iterdir() if d.is_dir() and d != backup_dir],
+                key=lambda p: p.stat().st_mtime,
+            )
+
+            tftp_backup_dest = backup_dir / "tftp"
+
+            if not existing_backups:
+                # No previous backups exist, use cp -al for hardlink copy
+                logger.info(f"Creating first backup using hardlinks: {tftp_backup_dest}")
+                subprocess.run(
+                    ["cp", "-al", str(tftp_source), str(tftp_backup_dest)],
+                    check=True,
+                )
+                logger.info("✓ First backup created with hardlinks")
+            else:
+                # Previous backups exist, use rsync with --link-dest
+                newest_backup = existing_backups[-1]
+                link_dest = newest_backup / "tftp"
+                logger.info(f"Creating incremental backup with hardlinks from: {newest_backup}")
+                subprocess.run(
+                    [
+                        "rsync",
+                        "-a",
+                        f"--link-dest={link_dest}",
+                        f"{tftp_source}/",
+                        f"{tftp_backup_dest}/",
+                    ],
+                    check=True,
+                )
+                logger.info(f"✓ Incremental backup created (linked to {newest_backup})")
+
+            # Create hardlink to the iSCSI image file in the backup directory
+            if hasattr(self, "local_decompressed") and self.local_decompressed:
+                iscsi_image_path = Path("/srv/iscsi") / self.local_decompressed.name
+                if iscsi_image_path.exists():
+                    image_backup_dest = backup_dir / iscsi_image_path.name
+                    logger.info(f"Creating hardlink to iSCSI image: {image_backup_dest}")
+                    if image_backup_dest.exists():
+                        image_backup_dest.unlink()
+                    os.link(iscsi_image_path, image_backup_dest)
+                    logger.info("✓ iSCSI image hardlink created")
+                else:
+                    logger.warning(f"iSCSI image not found at: {iscsi_image_path}")
+
+            logger.info(f"✓ Backup completed: {backup_dir}")
+        except Exception as e:
+            logger.warning(f"Failed to create backup: {e}")
 
         # Clean up temp files
         if hasattr(self, "local_decompressed") and self.local_decompressed and self.local_decompressed.exists():

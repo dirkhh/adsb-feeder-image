@@ -21,7 +21,7 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=read-only
-ReadWritePaths=/etc/adsb-boot-test /tmp /srv/iscsi /srv/tftp /etc/tgt /mnt /opt/adsb-boot-test/test-images /opt/adsb-boot-test/serial-logs /opt/adsb-boot-test/setup-logs /home/testuser /var/lib/adsb-boot-test
+ReadWritePaths=/etc/adsb-boot-test /tmp /srv/iscsi /srv/tftp /srv/history /etc/tgt /mnt /opt/adsb-boot-test/test-images /opt/adsb-boot-test/serial-logs /opt/adsb-boot-test/setup-logs /home/testuser /var/lib/adsb-boot-test
 
 # Environment
 Environment=PYTHONPATH=/opt/adsb-boot-test
