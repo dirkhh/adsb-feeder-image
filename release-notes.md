@@ -1,5 +1,6 @@
 Changes since v3.0.6
 =======
+- beta-notes: correctly handle global name link for app installs
 - fix issue displaying negative external temperatures on some Raspberry Pis with DHT11/22 sensor
 - move Celsius / Fahrenheit settings to the main 'Advanced Setup' page
 - update containers

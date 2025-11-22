@@ -843,7 +843,11 @@
           {% if env_value_by_tag('fqdn') %}
           <div class="text-muted small d-block">
             You can access this site on your local network as
+            {% if env_value_by_tag('webport') != 80 %}
+            <a href="http://{{env_value_by_tag('fqdn')}}:{{env_value_by_tag('webport')}}">http://{{env_value_by_tag('fqdn')}}:{{env_value_by_tag('webport')}}</a>
+            {% else %}
             <a href="http://{{env_value_by_tag('fqdn')}}">http://{{env_value_by_tag('fqdn')}}</a>
+            {% endif %}
           </div>
           {% endif %}
 
