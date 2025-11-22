@@ -1,5 +1,6 @@
 Changes since v3.0.6
 =======
+- fix issue displaying negative external temperatures on some Raspberry Pis with DHT11/22 sensor
 - move Celsius / Fahrenheit settings to the main 'Advanced Setup' page
 - update containers
 - add global names for feeders - based on the site name a name is assigned to each feeder that resolves in the global DNS and points to the feeder in the local network

@@ -27,7 +27,7 @@ import tempfile
 # so for PC9 (aka pin 7 on the 26 pin header) pass in 9
 
 # set the version of the dht native app that this expects:
-VERSION = "v0.1.4"
+VERSION = "v0.2.0"
 
 
 def run_subprocess(command, timeout=180):
@@ -296,7 +296,7 @@ if __name__ == "__main__":
             time.sleep(60)
             continue
         temperature = sensor.get_temperature()
-        if temperature is not None:
+        if temperature is not None and temperature <= 100.0 and temperature >= -100.0:
             output = {}
             output["ext"] = f"{temperature:.0f}"
             output["now"] = f"{int(time.time())}"
