@@ -589,6 +589,11 @@
 
     {% if is_enabled('temperature_block') %}
     let temperatureTask = {};
+    let use_freedom_units = {% if is_enabled('freedom_units') %} 1 {% else %} 0 {% endif %}
+    function update_temperature_unit(freedom) {
+      use_freedom_units = freedom;
+      temperatureTask.func()
+    }
     temperatureTask.func = function () {
       let url = "/api/get_temperatures.json";
       fetch(url, {
@@ -625,11 +630,11 @@
       if (cpu != null) {
         $("#cpu_temp_block").css('opacity', opacity);
         $("#cpu_temp_block").removeClass('d-none');
-        {% if is_enabled('freedom_units') %}
-        cpu_text = Math.round(cpu * 1.8 + 32) + "°F";
-        {% else %}
-        cpu_text = cpu + "°C";
-        {% endif %}
+        if (use_freedom_units) {
+          cpu_text = Math.round(cpu * 1.8 + 32) + "°F";
+        } else {
+          cpu_text = cpu + "°C";
+        }
         $("#cpu_temp").text(cpu_text);
         if (cpu < 55) {
           $("#cpu_temp").css('color', color_palette["good"]);

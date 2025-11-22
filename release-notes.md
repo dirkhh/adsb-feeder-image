@@ -1,5 +1,6 @@
 Changes since v3.0.6
 =======
+- move Celsius / Fahrenheit settings to the main 'Advanced Setup' page
 - update containers
 - add global names for feeders - based on the site name a name is assigned to each feeder that resolves in the global DNS and points to the feeder in the local network
 - make graphs1090 standalone install export work with adsb.im import from 32 bit systems

@@ -46,7 +46,7 @@
   {% if is_image %}
   {% if env_value_by_tag('temp_sensor') == "" %}
   <div class="col-12 col-lg-6">
-    <h5 class="mt-4">Temperature sensor</h5>
+    <h5 class="mt-4">Temperature information</h5>
     <form id="temp_sensor_form" method="POST">
       <div class="row align-items-center">
         <div class="col-8">
@@ -70,6 +70,23 @@
               <li>TEMPer USB temperature sensor</li>
             </ul>
           </div>
+        </div>
+        <div class="col-8">
+          <span class="text-nowrap">
+            <input type="radio" name="freedom_units" id="freedom_units" value="1" {% if
+                      env_value_by_tag("freedom_units") %} checked {% endif %}
+                      onclick="update_temperature_unit(1);">
+            <label class="form-check-label mr-3" for="freedom_units">Fahrenheit</label>
+          </span>
+          <span class="text-nowrap">
+            <input type="radio" name="freedom_units" id="metric_units" value="0" {% if not
+                      env_value_by_tag("freedom_units") %} checked {% endif %}
+                      onclick="update_temperature_unit(0)">
+            <label class="form-check-label mr-3" for="css_dark">Celsius</label>
+          </span>
+        </div>
+        <div class="col-4">
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="freedom_units--submit" value="stay">Apply</button>
         </div>
       </div>
     </form>
@@ -116,10 +133,6 @@
               <label for="dht22_pin" id="pin_label" class="col-12 col-sm-9">GPIO Pin, typically 4</label>
               <input class="col-10 col-sm-2 ms-3" id="dht22_pin" name="dht22_pin" type="text" style="height: 2rem;"
                      value="" />
-            </div>
-            <div class="col-12 mx-0 mt-3">
-              <input class="form-switch" id="freedom_units" name="freedom_units" type="checkbox" />
-              <label class="ms-2" for="freedom_units">Use Fahrenheit</label>
             </div>
           </div>
         </div>
@@ -1045,7 +1058,6 @@
         });
       }
     });
-
   });
   let modal = new mdb.Modal($("#tempsensor_dialog"))
   $('input[name="tempsensor"][type="radio"]').on('change', function () {
@@ -1054,7 +1066,6 @@
    });
 
   function show_temp_sensor_dialog() {
-    $("#freedom_units").prop("checked", "True" === "{{ is_enabled('freedom_units') }}");
     $("#pin_container").toggleClass("d-none", !$("#has_dht22").is(':checked'));
     modal.show();
   }
@@ -1066,7 +1077,6 @@
     form_data.append("temp_sensor_enable", "go");
     form_data.append("temp_sensor", sensor);
     form_data.append("dht22_pin", $("#dht22_pin").val());
-    form_data.append("freedom_units", $("#freedom_units").is(':checked'));
     console.log(form_data);
     show_spinner();
     let response = fetch("/advanced", {
@@ -1082,6 +1092,7 @@
         console.log(error);
     });
   }
+
 </script>
 {% endblock %}
 
