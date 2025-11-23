@@ -623,7 +623,7 @@
           plugins: {
             title: {
               display: true,
-              text: `Statistics ending ${todayString} (UTC)`,
+              text: `Statistics ending ${todayString}`,
               font: {
                 size: 18,
               }
@@ -705,14 +705,15 @@
             for (let i = 0; i < len; i++) {
               days = Math.max(planesHistory[i].length, days);
             }
+            let userTimezone = "{{ list_value_by_tag('tz', 0) }}" || "UTC";
             let today = new Date();
-            let month = today.toLocaleString("en-us", { month: "long", timeZone: "UTC" });
-            let day = today.getUTCDate();
+            let month = today.toLocaleString("en-us", { month: "long", timeZone: userTimezone });
+            let day = parseInt(today.toLocaleString("en-us", { day: "numeric", timeZone: userTimezone }));
             todayString = `${month} ${day}`;
             for (let i = days-1; i >= 0; i--) {
               let date = new Date();
               date.setDate(date.getDate() - i);
-              let day = date.getUTCDate();
+              let day = parseInt(date.toLocaleString("en-us", { day: "numeric", timeZone: userTimezone }));
               labels.push(day);
             }
             // now collect the feeder names - need to do this in jinja, not JS
