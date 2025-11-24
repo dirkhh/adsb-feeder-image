@@ -848,6 +848,8 @@
             {% else %}
             <a href="http://{{env_value_by_tag('fqdn')}}">http://{{env_value_by_tag('fqdn')}}</a>
             {% endif %}
+            <br/><small>Note that DNS rebind protection in your router may prevent this from working. In that case try connecting to
+              <a href="https://my.adsb.im">https://my.adsb.im</a></small>
           </div>
           {% endif %}
 
