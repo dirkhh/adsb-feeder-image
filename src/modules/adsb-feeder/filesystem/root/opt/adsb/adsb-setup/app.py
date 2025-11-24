@@ -3153,7 +3153,7 @@ class AdsbIm:
         # we're trying to be clever and edit this from a template
         self.update_sonde_config()
 
-        if verbose & 1:
+        if verbose:
             print_err(f"ACARS container {self._d.is_enabled(['run_acarsdec'])}")
             print_err(f"ACARS2 container {self._d.is_enabled(['run_acarsdec2'])}")
             print_err(f"VDL2 container {self._d.is_enabled(['run_dumpvdl2'])}")
