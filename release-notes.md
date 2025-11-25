@@ -1,5 +1,6 @@
 Changes since v3.0.6
 =======
+- web UI: make temperature sensor settings available on app installs
 - beta-notes: add hint about DNS rebind protection
 - beta-notes: correctly handle global name link for app installs
 - fix issue displaying negative external temperatures on some Raspberry Pis with DHT11/22 sensor

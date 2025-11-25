@@ -43,7 +43,6 @@
       </div>
     </form>
   </div>
-  {% if is_image %}
   {% if env_value_by_tag('temp_sensor') == "" %}
   <div class="col-12 col-lg-6">
     <h5 class="mt-4">Temperature information</h5>
@@ -143,7 +142,6 @@
       </div>
     </div>
   </div>
-  {% endif %}
   <div class="col-12 col-lg-6">
     <h5 class="mt-4">Skystats</h5>
     <form method="POST">
