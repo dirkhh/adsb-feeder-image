@@ -1,5 +1,6 @@
 Changes since v3.0.6
 =======
+- web UI: improve aggregator links and suggest feeding the community aggregators
 - web UI: make temperature sensor settings available on app installs
 - beta-notes: add hint about DNS rebind protection
 - beta-notes: correctly handle global name link for app installs
