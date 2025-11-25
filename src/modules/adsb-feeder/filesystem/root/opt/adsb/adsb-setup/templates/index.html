@@ -203,6 +203,9 @@
         <span class="text-muted"><span class="icon-placeholder" data-icon="overall-good"></span></span> feed state is not supported
         <br />
         {% if not widget_mode %}
+        <span class="text-muted" style="font-size: 70%;">NOTE: degraded MLAT for many of the aggregators tends to be a server-side issue.
+          Only report issues if you are feeding adsb.lol / adsb.fi / airplanes.live and all aggregators show degraded MLAT.</span>
+        <br />
         <span onclick="$('#extra_legend').toggleClass('d-none'); $(this).find('.toggle-icon').text($('#extra_legend').hasClass('d-none') ? '▶' : '▼'); return false;"
               style="cursor: pointer;">
           <span class="toggle-icon small">▶</span> <strong class="small">Toggle detailed legend</strong>
