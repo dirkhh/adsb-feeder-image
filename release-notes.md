@@ -1,21 +1,15 @@
 Changes since v3.0.6
 =======
+- web UI: simple http authentication
 - web UI: add note about degraded MLAT notifications
 - web UI: improve aggregator links and suggest feeding the community aggregators
 - web UI: make temperature sensor settings available on app installs
-- beta-notes: add hint about DNS rebind protection
-- beta-notes: correctly handle global name link for app installs
 - fix issue displaying negative external temperatures on some Raspberry Pis with DHT11/22 sensor
 - move Celsius / Fahrenheit settings to the main 'Advanced Setup' page
 - update containers
 - add global names for feeders - based on the site name a name is assigned to each feeder that resolves in the global DNS and points to the feeder in the local network
 - make graphs1090 standalone install export work with adsb.im import from 32 bit systems
-- beta-notes: auth - add help text to explain to people how to recover / when to re-image
 - acarshub: improve method of saving data to disk to avoid DB corruption
-- beta-notes: update planefinder container - radar stick now works with MLAT
-- beta-notes: suggest having ssh working before turning on authentication
-- beta-notes: don't allow setting up auth on a secured image
-- web UI: simple http authentication
 - hotfix: revert to older multi-outline code - this will fix CPU usage / random tar1090 hangs for large stage2 systems
 - infrastructure: add automated boot test / basic functionality test support
 - security: fix potential command injection vulnerability in FlightRadar24 signup
