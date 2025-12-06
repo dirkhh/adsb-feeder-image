@@ -31,6 +31,14 @@ kill_wait_app() {
 # browser caching helper script (will only do anything if /opt/adsb/.cachebust_done doesn't exist)
 bash /opt/adsb/scripts/cachebust.sh
 
+# hack around dietpi-software app install issue
+if [ -d /boot/dietpi ]; then
+    if ! python3 -c "import cryptography" &>/dev/null ; then
+        # we are running on DietPi and don't have the cryptography module. Let's install it.
+        pip3 install -U cryptography &>/dev/null || true
+    fi
+fi
+
 # if the waiting app is running, stop it
 kill_wait_app
 
