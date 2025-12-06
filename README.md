@@ -51,7 +51,6 @@ These ADS-B aggregators are also supported:
 
 For ACARS / VDL2 / HFDL the image currently supports
 - [airframes.io](https://airframes.io)
-- [ACARS Drama](https://acarsdrama.com/)
 - [adsb.lol](https://www.adsb.lol/docs/open-data/aircraft-data-links/)
 - [AVDelphi](https://avdelphi.com/)
 

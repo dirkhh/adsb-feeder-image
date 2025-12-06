@@ -3114,9 +3114,6 @@ class AdsbIm:
             feed_vdl2_tcp += "feed.airframes.io:5553;"
             feed_acars_udp += "feed.airframes.io:5550;"
             feed_hfdl_tcp += "feed.airframes.io:5556;"
-        if self._d.list_is_enabled("feed_acars_acarsdrama", 0):
-            feed_acars_udp += "feedthe.acarsdrama.com:5550;"
-            feed_vdl2_udp += "feedthe.acarsdrama.com:5555;"
         if self._d.list_is_enabled("feed_acars_avdelphi", 0):
             feed_acars_udp += "data.avdelphi.com:5556;"
             feed_vdl2_udp += "data.avdelphi.com:5600;"
