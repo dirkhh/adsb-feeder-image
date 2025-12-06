@@ -218,7 +218,7 @@ cd ${APP_DIR}/config || exit_message "can't find ${APP_DIR}/config"
 
 # run the final steps of the setup and then enable the services
 systemctl daemon-reload
-readarray -t services_enable < ./opt/adsb/misc/services
+readarray -t services_enable < /opt/adsb/misc/services
 systemctl enable --now "${services_enable[@]}"
 
 # while the user is getting ready, let's try to pull the key docker
