@@ -262,8 +262,12 @@ class AdsbIm:
             self._d.env_by_tags("rbthermalhack").value = ""
 
         # Ensure secure_image is set the new way if before the update it was set only as env variable
-        if self._d.is_enabled("secure_image"):
+        if self._d.is_enabled("secure_image") and not self.check_secure_image():
             self.set_secure_image()
+        # set secure_image env variable in case it is not set
+        if not self._d.is_enabled("secure_image") and self.check_secure_image():
+            self.set_secure_image()
+
         self._d.env_by_tags("pack")._value_call = self.pack_im
         self._other_aggregators = {
             "adsbhub--submit": ADSBHub(self._system),
@@ -3492,8 +3496,6 @@ class AdsbIm:
                         timeout=30,
                     )
                     self._d.env_by_tags("acarshub_data_path").value = "/run/acars_data"
-                if key == "secure_image":
-                    self.set_secure_image()
                 if allow_insecure and key == "toggle_hotspot":
                     self.toggle_hotspot()
                 if key == "no_config_link":
