@@ -64,10 +64,12 @@
   <div class="col-12 col-lg-6 {% if not is_enabled('secure_image') %} d-none {% endif %}">
     <h5 class="mt-3">The feeder system is secured</h5>
       <div class="row align-items-center">
-        <div class="col-8">
+        <div class="col-12">
           If you're looking for missing options, this is likely the reason.
-          To unlock the system and re-enable all those options, log in locally or via SSH
-          and issue the following command:
+          <br>
+          To unlock the system and re-enable all those options, log in locally or via SSH and issue
+          the following command:
+          <br>
           /opt/adsb/scripts/secure-image-disable.sh
         </div>
       </div>
@@ -75,12 +77,14 @@
   <div class="col-12 col-lg-6 {% if is_enabled('secure_image') %} d-none {% endif %}">
     <h5 class="mt-3">Secure Feeder System</h5>
       <div class="row align-items-center">
-        <div class="col-8">
+        <div class="col-12">
           Attempt to make it somewhat harder for someone on the local network to gain access to the
           image. Of course, anyone with physical access to the feeder hardware can circumvent the
           protection attempted here. Also disables the wifi hotspot which allows for wifi
           configuration when there is no network connectivity.
+          <br>
           To enable this option, log in locally or via SSH and run this command:
+          <br>
           /opt/adsb/scripts/secure-image-enable.sh
         </div>
       </div>
