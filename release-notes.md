@@ -1,30 +1,6 @@
-Changes since v3.0.6
+Changes since v3.0.7
 =======
-- web UI: simple http authentication
-- web UI: add note about degraded MLAT notifications
-- web UI: improve aggregator links and suggest feeding the community aggregators
-- web UI: make temperature sensor settings available on app installs
-- fix issue displaying negative external temperatures on some Raspberry Pis with DHT11/22 sensor
-- move Celsius / Fahrenheit settings to the main 'Advanced Setup' page
-- update containers
-- add global names for feeders - based on the site name a name is assigned to each feeder that resolves in the global DNS and points to the feeder in the local network
-- make graphs1090 standalone install export work with adsb.im import from 32 bit systems
-- acarshub: improve method of saving data to disk to avoid DB corruption
-- hotfix: revert to older multi-outline code - this will fix CPU usage / random tar1090 hangs for large stage2 systems
-- infrastructure: add automated boot test / basic functionality test support
-- security: fix potential command injection vulnerability in FlightRadar24 signup
-- security: add input validation to prevent path traversal attacks
-- core: improve error logging for missing container version file
-- core: comprehensive code quality improvements (type hints, test coverage, modernized architecture)
-- systemd services: define active services in one place so this doesn't get out of sync (again)
-- initial support for planefinder radar stick, no MLAT yet, PF data sharing needs to be enabled
-- stage2: multioutline: don't launch another script instance if previous one is still running
-- stage2: multioutline: log CPU time used when it takes more than 30 seconds
-- stage2: multioutline: don't regenerate combined heywhatsthat if source data stays the same
-- support WiFi networks with protected management frames on DietPi
-- fix Mode S Beast healthcheck
-- fix app install / DietPi install issue
-
+- move secure image enable into shell script
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)
