@@ -1,5 +1,6 @@
 Changes since v3.0.7
 =======
+- update almost all docker containers to current versions
 - move secure image enable into shell script
 
 > [!NOTE]
