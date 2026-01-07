@@ -329,12 +329,12 @@ archive_age = 120
 # Enable control over the scanner, and starting/stopping decoders from the web interface.
 # A password must also be set (below).
 # USERS ENABLE THIS AT THEIR OWN RISK!!
-web_control = False
+web_control = %sonde_web_control%
 
 # Password for controls on the web interface. The main interface will still be publicly available.
 # Note that as the web interface is HTTP-only, this password will be sent over the internet in the clear,
 # so don't re-use passwords!
-web_password = none
+web_password = %sonde_web_password%
 
 # KML refresh rate
 kml_refresh_rate = 10
