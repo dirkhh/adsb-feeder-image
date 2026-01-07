@@ -2426,6 +2426,8 @@ class AdsbIm:
                 "sonde_max_freq",
                 "sonde_callsign",
                 "sonde_share_position",
+                "sonde_web_control",
+                "sonde_web_password",
             ]
             for p in placeholders:
                 value = self._d.env_by_tags(p).value

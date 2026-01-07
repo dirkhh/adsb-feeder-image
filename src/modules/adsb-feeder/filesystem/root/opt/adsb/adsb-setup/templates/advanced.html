@@ -938,6 +938,26 @@
                       submit_button="sonde--update"
                       value="{{ env_value_by_tag('sonde_share_position') }}">
               </div>
+              <div class="col-4 mb-1">
+                <label for="sonde_web_control">
+                  Sonde enable web control
+                </label>
+              </div>
+              <div class="col-8 mb-1">
+                <input type="text" class="mx-auto w-100" name="sonde_web_control" id="sonde_web_control"
+                      submit_button="sonde--update"
+                      value="{{ env_value_by_tag('sonde_web_control') }}">
+              </div>
+              <div class="col-4 mb-1">
+                <label for="sonde_web_password">
+                  Sonde enable web password
+                </label>
+              </div>
+              <div class="col-8 mb-1">
+                <input type="text" class="mx-auto w-100" name="sonde_web_password" id="sonde_web_password"
+                      submit_button="sonde--update"
+                      value="{{ env_value_by_tag('sonde_web_password') }}">
+              </div>
               {% if env_value_by_tag('sondeserial') == '' %}
               <div class="col-12 mb-1 text-warning">
                 <p>No SDR is assigned for Sonde - you can change that on the <a href="/sdr_setup">SDR Setup</a> page.</p>

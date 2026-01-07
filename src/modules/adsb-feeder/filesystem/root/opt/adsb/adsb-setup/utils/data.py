@@ -823,6 +823,8 @@ class Data:
         Env("SONDE_MAX_FREQ", default="406.00", tags=["sonde_max_freq"]),
         Env("SONDE_CALLSIGN", default="ADSBIMDEFAULT", tags=["sonde_callsign"]),
         Env("SONDE_SHARE_POSITION", default="False", tags=["sonde_share_position"]),
+        Env("SONDE_WEB_CONTROL", default="False", tags=["sonde_web_control"]),
+        Env("SONDE_WEB_PASSWORD", default="none", tags=["sonde_web_password"]),
         # Skystats related stuff
         Env("AF_IS_SKYSTATS_ENABLED", default=False, tags=["skystats", "is_enabled"]),
         Env("AF_IS_SKYSTATS_DB_ENABLED", default=False, tags=["skystats_db", "is_enabled"]),
