@@ -573,6 +573,21 @@ class Data:
             tags=["tailscale_extras"],
         ),
         Env(
+            "_ADSBIM_STATE_NETBIRD_MANAGEMENT_URL",
+            tags=["netbird_management_url"],
+            default="",
+        ),
+        Env(
+            "_ADSBIM_STATE_NETBIRD_SETUP_KEY",
+            tags=["netbird_setup_key", "key"],
+            default="",
+        ),
+        Env(
+            "_ADSBIM_STATE_NETBIRD_REGISTERED",
+            tags=["netbird_registered"],
+            default=False,
+        ),
+        Env(
             "_ADSBIM_STATE_EXTRA_ENV",
             tags=["ultrafeeder_extra_env"],
         ),

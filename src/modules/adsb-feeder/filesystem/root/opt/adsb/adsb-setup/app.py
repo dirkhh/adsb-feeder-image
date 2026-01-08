@@ -3585,6 +3585,116 @@ class AdsbIm:
                         "systemctl disable --now zerotier-one && systemctl mask zerotier-one", timeout=30
                     )
                     continue
+                if allow_insecure and key == "netbird_deregister":
+                    self._d.env_by_tags("netbird_management_url").value = ""
+                    self._d.env_by_tags("netbird_setup_key").value = ""
+                    self._d.env_by_tags("netbird_registered").value = False
+                    success, output = run_shell_captured(
+                        "rm -f /etc/systemd/system/netbird.service; "
+                        "systemctl daemon-reload >/dev/null 2>&1 || true; "
+                        "systemctl cat netbird >/dev/null 2>&1 || netbird service install >/dev/null 2>&1 || true; "
+                        "systemctl unmask netbird >/dev/null 2>&1 || true; "
+                        "systemctl enable --now netbird >/dev/null 2>&1 || true; "
+                        "netbird deregister >/dev/null 2>&1 || "
+                        "netbird down --delete >/dev/null 2>&1 || "
+                        "netbird down --logout >/dev/null 2>&1 || "
+                        "netbird down >/dev/null 2>&1 || true; "
+                        "systemctl disable --now netbird || true",
+                        timeout=30,
+                    )
+                    return redirect(url_for("systemmgmt"))
+                if allow_insecure and key == "netbird_down":
+                    success, output = run_shell_captured(
+                        "netbird down >/dev/null 2>&1 || true; systemctl disable --now netbird",
+                        timeout=30,
+                    )
+                    return redirect(url_for("systemmgmt"))
+                if allow_insecure and key == "netbird_up":
+                    nb_mgmt_url = self._d.env_by_tags("netbird_management_url").valuestr.strip()
+                    nb_setup_key = self._d.env_by_tags("netbird_setup_key").valuestr.strip()
+                    if not nb_mgmt_url:
+                        nb_mgmt_url = "https://api.netbird.io"
+                        self._d.env_by_tags("netbird_management_url").value = nb_mgmt_url
+                    print_err("starting netbird")
+                    try:
+                        subprocess.run(
+                            "rm -f /etc/systemd/system/netbird.service; "
+                            "/usr/bin/systemctl daemon-reload >/dev/null 2>&1 || true; "
+                            "/usr/bin/systemctl cat netbird >/dev/null 2>&1 || /usr/bin/netbird service install >/dev/null 2>&1",
+                            shell=True,
+                            timeout=20.0,
+                        )
+                        subprocess.run(
+                            ["/usr/bin/systemctl", "unmask", "netbird"],
+                            timeout=20.0,
+                        )
+                        subprocess.run(
+                            ["/usr/bin/systemctl", "enable", "--now", "netbird"],
+                            timeout=20.0,
+                        )
+                        name = self.onlyAlphaNumDash(self._d.env_by_tags("site_name").list_get(0))
+                        cmd = ["/usr/bin/netbird", "up", f"--hostname={name}"]
+                        cmd += ["--management-url", nb_mgmt_url]
+                        if nb_setup_key:
+                            cmd += ["--setup-key", nb_setup_key]
+                        subprocess.run(cmd, timeout=30.0)
+                    except Exception:
+                        report_issue("exception trying to start netbird - giving up")
+                        continue
+                    return redirect(url_for("systemmgmt"))
+                if allow_insecure and key == "netbird":
+                    nb_mgmt_url = form.get("netbird_management_url", "").strip()
+                    nb_setup_key = form.get("netbird_setup_key", "").strip()
+                    if not nb_setup_key:
+                        report_issue("Netbird requires a setup key")
+                        continue
+                    if nb_mgmt_url:
+                        match = re.match(
+                            r"^https?://[-a-zA-Z0-9._\+~=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?::[0-9]{1,5})?(?:[-a-zA-Z0-9()_\+.~/=]*)$",
+                            nb_mgmt_url,
+                        )
+                        if not match:
+                            report_issue(f"the management URL didn't make sense {nb_mgmt_url}")
+                            continue
+                    if not nb_mgmt_url:
+                        nb_mgmt_url = "https://api.netbird.io"
+                    self._d.env_by_tags("netbird_management_url").value = nb_mgmt_url
+                    self._d.env_by_tags("netbird_setup_key").value = nb_setup_key
+                    print_err("starting netbird")
+                    try:
+                        subprocess.run(
+                            "rm -f /etc/systemd/system/netbird.service; "
+                            "/usr/bin/systemctl daemon-reload >/dev/null 2>&1 || true; "
+                            "/usr/bin/systemctl cat netbird >/dev/null 2>&1 || /usr/bin/netbird service install >/dev/null 2>&1",
+                            shell=True,
+                            timeout=20.0,
+                        )
+                        subprocess.run(
+                            ["/usr/bin/systemctl", "unmask", "netbird"],
+                            timeout=20.0,
+                        )
+                        subprocess.run(
+                            ["/usr/bin/systemctl", "enable", "--now", "netbird"],
+                            timeout=20.0,
+                        )
+                        name = self.onlyAlphaNumDash(self._d.env_by_tags("site_name").list_get(0))
+                        cmd = [
+                            "/usr/bin/netbird",
+                            "up",
+                            "--setup-key",
+                            nb_setup_key,
+                            f"--hostname={name}",
+                            "--management-url",
+                            nb_mgmt_url,
+                        ]
+                        result = subprocess.run(cmd, timeout=30.0)
+                    except Exception:
+                        report_issue("exception trying to set up netbird - giving up")
+                        continue
+                    if result.returncode == 0:
+                        self._d.env_by_tags("netbird_registered").value = True
+                        self._d.env_by_tags("netbird_setup_key").value = ""
+                    return redirect(url_for("systemmgmt"))
                 if allow_insecure and key == "tailscale":
                     # grab extra arguments if given
                     ts_args = form.get("tailscale_extras", "")
@@ -3994,10 +4104,68 @@ class AdsbIm:
             return self.update()
         tailscale_running = False
         zerotier_running = False
+        netbird_running = False
+        netbird_connected = False
+        netbird_registered = self._d.env_by_tags("netbird_registered").value
+        netbird_fqdn = ""
+        netbird_ip = ""
         if self._d.is_feeder_image:
             success, output = run_shell_captured("ps -e", timeout=2)
             zerotier_running = "zerotier-one" in output
             tailscale_running = "tailscaled" in output
+            netbird_running = "netbird" in output
+            if netbird_running:
+                try:
+                    result = subprocess.run(
+                        "netbird status 2>/dev/null",
+                        shell=True,
+                        check=True,
+                        capture_output=True,
+                    )
+                    nb_status_output = result.stdout.decode().strip()
+                    if (
+                        "NeedsLogin" in nb_status_output
+                        or "NotConnected" in nb_status_output
+                        or "Disconnected" in nb_status_output
+                        or "failed to connect" in nb_status_output
+                    ):
+                        netbird_running = False
+                except Exception:
+                    netbird_running = False
+                if netbird_running:
+                    try:
+                        result = subprocess.run(
+                            "netbird status --json 2>/dev/null",
+                            shell=True,
+                            check=True,
+                            capture_output=True,
+                        )
+                        nb_status_json = json.loads(result.stdout.decode() or "{}")
+                        netbird_fqdn = (
+                            nb_status_json.get("fqdn", "")
+                            or nb_status_json.get("FQDN", "")
+                            or nb_status_json.get("DNSName", "")
+                            or nb_status_json.get("Domain", "")
+                        )
+                        netbird_ip = (
+                            nb_status_json.get("netbirdIp", "")
+                            or nb_status_json.get("NetbirdIP", "")
+                            or nb_status_json.get("IP", "")
+                        )
+                        netbird_connected = bool(nb_status_json.get("management", {}).get("connected")) and bool(netbird_ip)
+                    except Exception:
+                        nb_status_json = None
+                    if not netbird_fqdn or not netbird_ip:
+                        for line in nb_status_output.splitlines():
+                            if not netbird_fqdn and line.lower().startswith("dns"):
+                                _, value = line.split(":", 1)
+                                netbird_fqdn = value.strip()
+                            if not netbird_ip and line.lower().startswith("ip"):
+                                _, value = line.split(":", 1)
+                                netbird_ip = value.strip()
+                    if netbird_fqdn or netbird_ip:
+                        netbird_registered = True
+                        self._d.env_by_tags("netbird_registered").value = True
             # is tailscale set up?
             try:
                 if not tailscale_running:
@@ -4037,6 +4205,11 @@ class AdsbIm:
             "systemmgmt.html",
             tailscale_running=tailscale_running,
             zerotier_running=zerotier_running,
+            netbird_running=netbird_running,
+            netbird_connected=netbird_connected,
+            netbird_registered=netbird_registered,
+            netbird_fqdn=netbird_fqdn,
+            netbird_ip=netbird_ip,
             hotspot_enabled=not self._d.hotspot_disabled_path.exists(),
             rpw=self.rpw,
             auth_pwd=self._provisional_password,
