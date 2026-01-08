@@ -389,6 +389,60 @@
       </div>
     </form>
   </div>
+  <div class="col-12 col-lg-6 {% if is_enabled('secure_image') %} d-none {% endif %}">
+    <h5 class="mt-3">Add Netbird</h5>
+    <form method="POST" onsubmit="show_spinner(); return true;">
+      <div class="row align-items-center">
+        <div class="col-12 mb-2">
+          <label for="netbird_management_url">
+            Netbird support allows to connect your ADS-B Feeder to your Netbird network.
+            {% if not netbird_registered %} Please add your Netbird setup key below. The management URL is optional
+            for self-hosted setups and can be left blank for Netbird Cloud.
+            {% else %}<br />This device should now be on your Netbird network.{% endif %}
+          </label>
+        </div>
+        {% if not netbird_registered %}
+        <div class="col-4">
+          <input class="form-control mx-auto w-100" id="netbird_management_url" name="netbird_management_url" type="text"
+                 value="{{ env_value_by_tag('netbird_management_url') }}" placeholder="Management URL">
+        </div>
+        <div class="col-4">
+          <input class="form-control mx-auto w-100" id="netbird_setup_key" name="netbird_setup_key" type="text"
+                 value="" placeholder="Setup Key" required>
+        </div>
+        <div class="col-4">
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="netbird" value="go">Apply</button>
+        </div>
+        {% else %}
+        {% if netbird_fqdn != "" or netbird_ip != "" %}
+        <div class="col-12 mb-2">
+          {% if netbird_fqdn != "" %}
+          Netbird FQDN: <code>{{ netbird_fqdn }}</code><br />
+          {% endif %}
+          {% if netbird_ip != "" %}
+          Netbird IP: <code>{{ netbird_ip }}</code>
+          {% endif %}
+        </div>
+        {% endif %}
+        <div class="col-4">
+          {% if netbird_running %}
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="netbird_down" value="go">Bring Down</button>
+          {% else %}
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="netbird_up" value="go">Bring Up</button>
+          {% endif %}
+        </div>
+        <div class="col-4">
+          <button type="submit" class="btn btn-danger mx-auto w-100" name="netbird_deregister"
+                  value="go">Deregister</button>
+        </div>
+        <div class="col-12 text-danger">
+          Bringing Netbird down or deregistering it may prevent you from accessing this feeder if you use a
+          Netbird network to connect to it.
+        </div>
+        {% endif %}
+      </div>
+    </form>
+  </div>
   <div class="col-12 col-lg-6 {% if is_enabled('secure_image') or env_value_by_tag('board_name').startswith("Virtualized") %} d-none {% endif %}">
     <h5 class="mt-3">{% if wifi != "" %}Reconfigure{% else %}Connect to{% endif %} WiFi</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">

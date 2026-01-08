@@ -324,6 +324,29 @@ EOF
             systemctl mask "$service"
         fi
     done
+
+    # ensure netbird is available on existing images (kept disabled/masked by default)
+    if grep -i debian /etc/os-release &> /dev/null; then
+        if ! dpkg -s netbird &>/dev/null; then
+            if [[ ! -s /etc/apt/sources.list.d/netbird.list ]]; then
+                echo "Adding Netbird repo"
+                if [[ ! -s /usr/share/keyrings/netbird-archive-keyring.gpg ]]; then
+                    curl -fsSL "https://pkgs.netbird.io/debian/public.key" \
+                        | gpg --dearmor -o /usr/share/keyrings/netbird-archive-keyring.gpg
+                fi
+                cat >/etc/apt/sources.list.d/netbird.list <<EOF
+deb [signed-by=/usr/share/keyrings/netbird-archive-keyring.gpg] https://pkgs.netbird.io/debian stable main
+EOF
+            fi
+            if systemctl is-enabled netbird 2>/dev/null | grep -q masked; then
+                systemctl unmask netbird || true
+            fi
+            apt-get update
+            apt-get install -y netbird
+            systemctl disable netbird || true
+            systemctl stop netbird || true
+        fi
+    fi
 fi
 
 echo "$(date -u +"%FT%T.%3NZ") copy the updated files in place"
