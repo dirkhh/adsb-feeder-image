@@ -3623,13 +3623,27 @@ class AdsbIm:
                         return redirect(url_for("systemmgmt"))
                     print_err("starting netbird")
                     try:
+                        if os.path.exists("/etc/systemd/system/netbird.service"):
+                            os.remove("/etc/systemd/system/netbird.service")
                         subprocess.run(
-                            "rm -f /etc/systemd/system/netbird.service; "
-                            "/usr/bin/systemctl daemon-reload >/dev/null 2>&1 || true; "
-                            "/usr/bin/systemctl cat netbird >/dev/null 2>&1 || /usr/bin/netbird service install >/dev/null 2>&1",
-                            shell=True,
+                            ["/usr/bin/systemctl", "daemon-reload"],
                             timeout=20.0,
+                            stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL,
                         )
+                        result = subprocess.run(
+                            ["/usr/bin/systemctl", "cat", "netbird"],
+                            timeout=20.0,
+                            stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL,
+                        )
+                        if result.returncode != 0:
+                            subprocess.run(
+                                ["/usr/bin/netbird", "service", "install"],
+                                timeout=20.0,
+                                stdout=subprocess.DEVNULL,
+                                stderr=subprocess.DEVNULL,
+                            )
                         subprocess.run(
                             ["/usr/bin/systemctl", "unmask", "netbird"],
                             timeout=20.0,
@@ -3683,13 +3697,27 @@ class AdsbIm:
                     self._d.env_by_tags("netbird_setup_key").value = nb_setup_key
                     print_err("starting netbird")
                     try:
+                        if os.path.exists("/etc/systemd/system/netbird.service"):
+                            os.remove("/etc/systemd/system/netbird.service")
                         subprocess.run(
-                            "rm -f /etc/systemd/system/netbird.service; "
-                            "/usr/bin/systemctl daemon-reload >/dev/null 2>&1 || true; "
-                            "/usr/bin/systemctl cat netbird >/dev/null 2>&1 || /usr/bin/netbird service install >/dev/null 2>&1",
-                            shell=True,
+                            ["/usr/bin/systemctl", "daemon-reload"],
                             timeout=20.0,
+                            stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL,
                         )
+                        result = subprocess.run(
+                            ["/usr/bin/systemctl", "cat", "netbird"],
+                            timeout=20.0,
+                            stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL,
+                        )
+                        if result.returncode != 0:
+                            subprocess.run(
+                                ["/usr/bin/netbird", "service", "install"],
+                                timeout=20.0,
+                                stdout=subprocess.DEVNULL,
+                                stderr=subprocess.DEVNULL,
+                            )
                         subprocess.run(
                             ["/usr/bin/systemctl", "unmask", "netbird"],
                             timeout=20.0,
@@ -4138,12 +4166,12 @@ class AdsbIm:
             if netbird_running:
                 try:
                     result = subprocess.run(
-                        "netbird status --json 2>/dev/null",
-                        shell=True,
+                        ["/usr/bin/netbird", "status", "--json"],
                         check=True,
                         capture_output=True,
+                        text=True,
                     )
-                    nb_status_json = json.loads(result.stdout.decode() or "{}")
+                    nb_status_json = json.loads(result.stdout or "{}")
                     netbird_fqdn = (
                         nb_status_json.get("fqdn", "")
                         or nb_status_json.get("FQDN", "")
