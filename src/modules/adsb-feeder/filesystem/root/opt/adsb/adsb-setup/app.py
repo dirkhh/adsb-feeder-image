@@ -3610,11 +3610,17 @@ class AdsbIm:
                     )
                     return redirect(url_for("systemmgmt"))
                 if allow_insecure and key == "netbird_up":
-                    nb_mgmt_url = self._d.env_by_tags("netbird_management_url").valuestr.strip()
-                    nb_setup_key = self._d.env_by_tags("netbird_setup_key").valuestr.strip()
+                    nb_mgmt_url = (self._d.env_by_tags("netbird_management_url").valuestr or "").strip()
+                    nb_setup_key = (self._d.env_by_tags("netbird_setup_key").valuestr or "").strip()
                     if not nb_mgmt_url:
                         nb_mgmt_url = "https://api.netbird.io"
                         self._d.env_by_tags("netbird_management_url").value = nb_mgmt_url
+                    if nb_setup_key and not re.fullmatch(
+                        r"[A-Fa-f0-9]{8}-(?:[A-Fa-f0-9]{4}-){3}[A-Fa-f0-9]{12}",
+                        nb_setup_key,
+                    ):
+                        report_issue("NetBird setup key must be a UUID (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)")
+                        return redirect(url_for("systemmgmt"))
                     print_err("starting netbird")
                     try:
                         subprocess.run(
@@ -3639,23 +3645,38 @@ class AdsbIm:
                             cmd += ["--setup-key", nb_setup_key]
                         subprocess.run(cmd, timeout=30.0)
                     except Exception:
-                        report_issue("exception trying to start netbird - giving up")
-                        continue
+                        report_issue("NetBird startup failed. Please check the logs and try again.")
+                        return redirect(url_for("systemmgmt"))
                     return redirect(url_for("systemmgmt"))
                 if allow_insecure and key == "netbird":
-                    nb_mgmt_url = form.get("netbird_management_url", "").strip()
-                    nb_setup_key = form.get("netbird_setup_key", "").strip()
+                    nb_mgmt_url = (form.get("netbird_management_url") or "").strip()
+                    nb_setup_key = (form.get("netbird_setup_key") or "").strip()
                     if not nb_setup_key:
                         report_issue("Netbird requires a setup key")
-                        continue
+                        return redirect(url_for("systemmgmt"))
+                    if not re.fullmatch(
+                        r"[A-Fa-f0-9]{8}-(?:[A-Fa-f0-9]{4}-){3}[A-Fa-f0-9]{12}",
+                        nb_setup_key,
+                    ):
+                        report_issue("NetBird setup key must be a UUID (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)")
+                        return redirect(url_for("systemmgmt"))
                     if nb_mgmt_url:
-                        match = re.match(
-                            r"^https?://[-a-zA-Z0-9._\+~=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?::[0-9]{1,5})?(?:[-a-zA-Z0-9()_\+.~/=]*)$",
+                        match = re.fullmatch(
+                            r"https?://"
+                            r"(?:"
+                            r"[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+"
+                            r"|"
+                            r"(?:\d{1,3}\.){3}\d{1,3}"
+                            r")"
+                            r"(?::\d{1,5})?"
+                            r"(?:/[A-Za-z0-9.~:/?#\[\]@!$&'()*+,;=%-]*)?$",
                             nb_mgmt_url,
                         )
                         if not match:
-                            report_issue(f"the management URL didn't make sense {nb_mgmt_url}")
-                            continue
+                            report_issue(
+                                "NetBird management URL must start with http:// or https:// and include a valid hostname or IP"
+                            )
+                            return redirect(url_for("systemmgmt"))
                     if not nb_mgmt_url:
                         nb_mgmt_url = "https://api.netbird.io"
                     self._d.env_by_tags("netbird_management_url").value = nb_mgmt_url
@@ -3689,8 +3710,8 @@ class AdsbIm:
                         ]
                         result = subprocess.run(cmd, timeout=30.0)
                     except Exception:
-                        report_issue("exception trying to set up netbird - giving up")
-                        continue
+                        report_issue("NetBird setup failed. Please check the logs and try again.")
+                        return redirect(url_for("systemmgmt"))
                     if result.returncode == 0:
                         self._d.env_by_tags("netbird_registered").value = True
                         self._d.env_by_tags("netbird_setup_key").value = ""
@@ -4117,55 +4138,31 @@ class AdsbIm:
             if netbird_running:
                 try:
                     result = subprocess.run(
-                        "netbird status 2>/dev/null",
+                        "netbird status --json 2>/dev/null",
                         shell=True,
                         check=True,
                         capture_output=True,
                     )
-                    nb_status_output = result.stdout.decode().strip()
-                    if (
-                        "NeedsLogin" in nb_status_output
-                        or "NotConnected" in nb_status_output
-                        or "Disconnected" in nb_status_output
-                        or "failed to connect" in nb_status_output
-                    ):
+                    nb_status_json = json.loads(result.stdout.decode() or "{}")
+                    netbird_fqdn = (
+                        nb_status_json.get("fqdn", "")
+                        or nb_status_json.get("FQDN", "")
+                        or nb_status_json.get("DNSName", "")
+                        or nb_status_json.get("Domain", "")
+                    )
+                    netbird_ip = (
+                        nb_status_json.get("netbirdIp", "")
+                        or nb_status_json.get("NetbirdIP", "")
+                        or nb_status_json.get("IP", "")
+                    )
+                    netbird_connected = bool(nb_status_json.get("management", {}).get("connected")) and bool(netbird_ip)
+                    if not netbird_connected:
                         netbird_running = False
                 except Exception:
                     netbird_running = False
-                if netbird_running:
-                    try:
-                        result = subprocess.run(
-                            "netbird status --json 2>/dev/null",
-                            shell=True,
-                            check=True,
-                            capture_output=True,
-                        )
-                        nb_status_json = json.loads(result.stdout.decode() or "{}")
-                        netbird_fqdn = (
-                            nb_status_json.get("fqdn", "")
-                            or nb_status_json.get("FQDN", "")
-                            or nb_status_json.get("DNSName", "")
-                            or nb_status_json.get("Domain", "")
-                        )
-                        netbird_ip = (
-                            nb_status_json.get("netbirdIp", "")
-                            or nb_status_json.get("NetbirdIP", "")
-                            or nb_status_json.get("IP", "")
-                        )
-                        netbird_connected = bool(nb_status_json.get("management", {}).get("connected")) and bool(netbird_ip)
-                    except Exception:
-                        nb_status_json = None
-                    if not netbird_fqdn or not netbird_ip:
-                        for line in nb_status_output.splitlines():
-                            if not netbird_fqdn and line.lower().startswith("dns"):
-                                _, value = line.split(":", 1)
-                                netbird_fqdn = value.strip()
-                            if not netbird_ip and line.lower().startswith("ip"):
-                                _, value = line.split(":", 1)
-                                netbird_ip = value.strip()
-                    if netbird_fqdn or netbird_ip:
-                        netbird_registered = True
-                        self._d.env_by_tags("netbird_registered").value = True
+                if netbird_fqdn or netbird_ip:
+                    netbird_registered = True
+                    self._d.env_by_tags("netbird_registered").value = True
             # is tailscale set up?
             try:
                 if not tailscale_running:
