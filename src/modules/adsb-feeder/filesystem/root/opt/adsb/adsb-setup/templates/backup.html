@@ -14,9 +14,20 @@
     {% endif %}
     {% endwith %}
   </div>
+<form method="post" enctype="multipart/form-data">
 <p>
   Config Backup: creates a zip file with your configuration settings<br>
   Config + Graphs Backup: adds the data used to generate the statistical graphs (roughly +15MB)<br>
+</p>
+  <a class="mb-3 btn btn-primary" href="/backupexecuteconfig">Config Backup</a>
+  <a class="mb-3 btn btn-primary" href="/backupexecutegraphs">Config + Graphs Backup</a>
+<p>
+  In almost cases one of the two options above is what you really want. The
+  {% if is_enabled('skystats_db') %}two options below create{%else%}option below creates{%endif%} potentially significantly
+  larger backup files (read - it takes much longer to create the backup and much longer to restore) and unless you know that
+  you definitely do need that additionally data, you should likely stick with one of the two options above.
+</p>
+<p>
   Full Backup: adds on top of all that the replay / heatmap data<br>
   {% if is_enabled('skystats_db') %}
   Skystats DB Backup: creates a SQL dump of the Skystats PostgreSQL database
@@ -28,9 +39,6 @@
   MAX_GLOBE_HISTORY=365 in the environment variables on the expert page to only retain a year of data, this setting will
   not impact graph data.
 </p>
-<form method="post" enctype="multipart/form-data">
-  <a class="mb-3 btn btn-primary" href="/backupexecuteconfig">Config Backup</a>
-  <a class="mb-3 btn btn-primary" href="/backupexecutegraphs">Config + Graphs Backup</a>
   <a class="mb-3 btn btn-primary" href="/backupexecutefull">Full Backup</a>
   {% if is_enabled('skystats_db') %}
   <a class="mb-3 btn btn-primary" href="/backupexecuteskystatsdb">Skystats DB Backup</a>

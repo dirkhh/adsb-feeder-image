@@ -1,5 +1,6 @@
 Changes since v3.0.7
 =======
+- update wording for backup options to encourage people to pick the appropriate backup type
 - change restore implementation to work on systems with small /tmp filesystem
 - ensure OS update doesn't hang waiting for keyboard input
 - update almost all docker containers to current versions
