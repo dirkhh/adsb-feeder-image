@@ -1,6 +1,6 @@
 Changes since v3.0.8
 =======
-- update almost all docker containers to current versions (WARNING: potentially long update time)
+- update docker containers to current versions (WARNING: potentially long update time)
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)

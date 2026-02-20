@@ -25,4 +25,4 @@ SHIPFEEDER_CONTAINER=ghcr.io/sdr-enthusiasts/docker-shipfeeder:latest-build-6028
 RADIOSONDE_CONTAINER=ghcr.io/projecthorus/radiosonde_auto_rx:v1.8.2
 SKYSTATS_CONTAINER=ghcr.io/tomcarman/skystats:0.1.11
 DOZZLE_CONTAINER=ghcr.io/amir20/dozzle:v10.0.2
-ALPINE_CONTAINER=alpine:3.23.2
+ALPINE_CONTAINER=alpine:3.23.3
