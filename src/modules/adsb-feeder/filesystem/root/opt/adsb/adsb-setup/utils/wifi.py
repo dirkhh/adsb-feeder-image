@@ -192,8 +192,7 @@ class Wifi:
             netblocks[ssid] = output.replace("}", "\tpriority=1000\n}")
 
             with open(path, "w") as conf:
-                conf.write(
-                    f"""
+                conf.write(f"""
 # WiFi country code, set here in case the access point does not send one
 country={country_code}
 # Grant all members of group "netdev" permissions to configure WiFi, e.g. via wpa_cli or wpa_gui
@@ -204,8 +203,7 @@ update_config=1
 p2p_disabled=1
 # enable protected managment frame support
 pmf=1
-"""
-                )
+""")
                 for k in netblocks.keys():
                     conf.write(netblocks[k])
         except Exception:

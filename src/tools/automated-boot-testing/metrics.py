@@ -38,8 +38,7 @@ class TestMetrics:
     def _init_db(self):
         """Initialize database schema"""
         conn = self._get_connection()
-        conn.execute(
-            """
+        conn.execute("""
             CREATE TABLE IF NOT EXISTS test_runs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 image_url TEXT NOT NULL,
@@ -66,8 +65,7 @@ class TestMetrics:
                 github_report_status TEXT,
                 github_report_attempts INTEGER DEFAULT 0
             )
-        """
-        )
+        """)
         conn.execute("CREATE INDEX IF NOT EXISTS idx_started_at ON test_runs(started_at)")
         conn.execute("CREATE INDEX IF NOT EXISTS idx_status ON test_runs(status)")
         conn.execute("CREATE INDEX IF NOT EXISTS idx_image_version ON test_runs(image_version)")
@@ -307,13 +305,11 @@ class TestMetrics:
         """
         conn = self._get_connection()
         conn.row_factory = sqlite3.Row
-        cursor = conn.execute(
-            """
+        cursor = conn.execute("""
             SELECT * FROM test_runs
             WHERE status = 'queued'
             ORDER BY started_at ASC
-            """
-        )
+            """)
         results = [dict(row) for row in cursor.fetchall()]
         self._close_connection(conn)
 
@@ -336,16 +332,14 @@ class TestMetrics:
         """
         conn = self._get_connection()
         conn.row_factory = sqlite3.Row
-        cursor = conn.execute(
-            """
+        cursor = conn.execute("""
             SELECT * FROM test_runs
             WHERE github_event_type IS NOT NULL
             AND (github_reported_at IS NULL
                  OR github_report_status = 'failed')
             AND COALESCE(github_report_attempts, 0) < 2
             ORDER BY started_at ASC
-            """
-        )
+            """)
         results = [dict(row) for row in cursor.fetchall()]
         self._close_connection(conn)
         return results
