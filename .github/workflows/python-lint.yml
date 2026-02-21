@@ -60,8 +60,8 @@ jobs:
       continue-on-error: true
       run: |
         echo "Running black..."
-        uv run black --check --line-length=130 src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup
-        uv run black --check --line-length=130 src/tools --exclude venv --exclude __pycache__
+        uv run black --diff --check --line-length=130 src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup
+        uv run black --diff --check --line-length=130 src/tools --exclude venv --exclude __pycache__
         echo "black completed"
 
     - name: Run ruff

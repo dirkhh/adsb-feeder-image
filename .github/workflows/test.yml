@@ -112,7 +112,7 @@ jobs:
 
     - name: Run black
       run: |
-        uv run black --check src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup/
+        uv run black --diff --check --line-length=130 src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup/
 
     - name: Run mypy
       run: |
