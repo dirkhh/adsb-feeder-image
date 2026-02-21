@@ -1,5 +1,7 @@
 Changes since v3.0.8
 =======
+- sonde: optionally enable web control
+- sdrmap: add status link
 - update docker containers to current versions (WARNING: potentially long update time)
 
 > [!NOTE]
