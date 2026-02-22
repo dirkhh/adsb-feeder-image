@@ -144,6 +144,15 @@ if [[ $missing != "" ]] ; then
 	exit 1
 fi
 
+if (( $(docker --version | cut -d ' ' -f3 | cut -d '.' -f1) < 21 )); then
+    echo "The docker provided by your OS is too old, please install docker using this script via the docker.com repository"
+    echo
+    echo "curl https://get.docker.com/ | sudo bash"
+    echo
+    echo "Once it is finished, rerun this install script"
+    exit 1
+fi
+
 # ok, now we should have all we need, let's get started
 
 if ! git clone 'https://github.com/dirkhh/adsb-feeder-image.git' "$GIT_PARENT_DIR"/adsb-feeder ; then

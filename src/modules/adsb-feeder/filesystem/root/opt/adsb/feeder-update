@@ -172,6 +172,19 @@ else
     fi
 fi
 
+if [[ "$BRANCH" == "stable" || "$BRANCH" == "beta" || "$BRANCH" == "oldstable" ]] && (( $(docker --version | cut -d ' ' -f3 | cut -d '.' -f1) < 21 )); then
+    echo "The docker provided by your OS is too old, please install docker using this script via the docker.com repository"
+    echo
+    echo "curl https://get.docker.com/ | sudo bash"
+    echo
+    echo "Once it is finished, rerun the update"
+    # place people trying to update with old docker on 3.0.8 (known good version)
+    BRANCH="stable"
+    TARGET="v3.0.8"
+    cd /opt/adsb-feeder-update/adsb-feeder-image || exit_with_message "can't cd /opt/adsb-feeder-update/adsb-feeder-image"
+    git reset --hard "$TARGET" || exit_with_message "git reset --hard $TARGET failed, giving up"
+fi
+
 # now we know that we are running the right script in the right place
 DIR=$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")
 echo "$(date -u +"%FT%T.%3NZ") running ${DIR}/feeder-update from $TARGET"
