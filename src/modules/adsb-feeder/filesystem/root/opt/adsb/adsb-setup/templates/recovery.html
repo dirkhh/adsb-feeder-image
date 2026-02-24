@@ -84,7 +84,8 @@
       streamErrorHandled = false;
       streamlog.onerror = function (e) {
         streamlog.close();
-        console.log("streamlog error");
+        console.log("streamlog error, reloading page");
+        window.location.reload();
       }
       streamlog.onmessage = function (e) {
         $('#log').append(e.data + "\n");
