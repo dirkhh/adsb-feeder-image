@@ -4,6 +4,7 @@ import os
 import re
 import subprocess
 import sys
+import threading
 import time
 from sys import argv
 
@@ -304,6 +305,29 @@ def start_recovery(target_version):
         rollback_target_version = None
         recovery_process = None
         return False, str(e)
+
+
+@app.route("/reboot")
+def reboot():
+
+    if os.path.exists("/opt/adsb/adsb.im.secure_image"):
+        return (False, "Secure Image is set, reboot is disabled.")
+
+    print_err("Reboot requested via recovery app!")
+
+    # reboot in a thread so we can redirect to / before we do it
+
+    def do_reboot():
+        time.sleep(2)
+        subprocess.Popen(
+            ["/usr/sbin/reboot"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+
+    threading.Thread(target=do_reboot).start()
+
+    return redirect("/")
 
 
 @app.route("/rollback")
