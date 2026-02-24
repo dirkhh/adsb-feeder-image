@@ -473,3 +473,7 @@ systemctl restart adsb-setup.service
 
 echo "$(date -u +"%FT%T.%3NZ") update to ${VERSION} complete"
 echo "$(date -u +"%FT%T.%3NZ") update to ${VERSION} complete" >&3
+
+# this needs to happen as the very last step as the recovery app runs this script and restarting it
+# will interrupt it when started by the recovery app
+systemctl restart adsb-recovery.service
