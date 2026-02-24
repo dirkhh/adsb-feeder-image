@@ -284,6 +284,9 @@ def start_recovery(target_version):
     if os.path.exists("/opt/adsb/adsb.im.secure_image"):
         return (False, "Secure Image is set, rollback is disabled.")
 
+    if rollback_in_progress:
+        return (False, "Recovery already in progress")
+
     print_err(f"Starting recovery to version {target_version}")
     try:
         # Mark rollback as in progress
