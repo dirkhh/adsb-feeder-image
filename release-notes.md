@@ -1,5 +1,6 @@
 Changes since v3.0.8
 =======
+- beta-notes: update acarshub to 4.1.1
 - NOTE: if this update does not work, your docker --version is 20 or lower (update via get.docker.com)
 - sonde: optionally enable web control
 - sdrmap: add status link
