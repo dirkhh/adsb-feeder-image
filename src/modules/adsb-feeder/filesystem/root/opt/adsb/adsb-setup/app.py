@@ -237,7 +237,8 @@ class AdsbIm:
         for i in [0] + self.micro_indices():
             self._d.ultrafeeder.append(UltrafeederConfig(data=self._d, micro=i))
 
-        self.last_dns_check = 0.0
+        # delay first dns check by at least 30 seconds to avoid unnecessary error after boot
+        self.next_dns_check = time.time() + 30
         self.undervoltage_epoch = 0.0
 
         self._current_site_name = None
@@ -582,7 +583,6 @@ class AdsbIm:
             if not dns_state:
                 print_err("ERROR: we appear to have lost DNS")
 
-        self.last_dns_check = time.time()
         threading.Thread(target=update_dns).start()
 
     def write_envfile(self):
@@ -4391,8 +4391,9 @@ class AdsbIm:
         self.track_planes_seen_per_day()
 
         # make sure DNS works, every 5 minutes is sufficient
-        if time.time() - self.last_dns_check > 300:
+        if time.time() > self.next_dns_check:
             self.update_dns_state()
+            self.next_dns_check = time.time() + 300
             # also ensure that we ended up getting an fqdn (a previous spurious error could have prevented that)
             if self._d.env_by_tags("fqdn").value == "" and self._d.env_by_tags("site_name").list_get(0) != "":
                 self.update_global_name()
