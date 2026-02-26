@@ -4391,9 +4391,13 @@ class AdsbIm:
         self.track_planes_seen_per_day()
 
         # make sure DNS works, every 5 minutes is sufficient
-        if time.time() > self.next_dns_check:
+        # check every minute as long as the check fails
+        if time.time() + 5 > self.next_dns_check:
             self.update_dns_state()
-            self.next_dns_check = time.time() + 300
+            if self._d.env_by_tags("dns_state").value:
+                self.next_dns_check = time.time() + 300
+            else:
+                self.next_dns_check = time.time() + 60
             # also ensure that we ended up getting an fqdn (a previous spurious error could have prevented that)
             if self._d.env_by_tags("fqdn").value == "" and self._d.env_by_tags("site_name").list_get(0) != "":
                 self.update_global_name()
