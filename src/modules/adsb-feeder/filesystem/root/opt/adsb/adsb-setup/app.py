@@ -1111,7 +1111,7 @@ class AdsbIm:
             restore_path = pathlib.Path(f"{get_adsb_base_dir()}/config/restore")
             # clean up the restore path when saving a fresh zipfile
             shutil.rmtree(restore_path, ignore_errors=True)
-            restore_path.mkdir(mode=0o644, exist_ok=True)
+            restore_path.mkdir(mode=0o755, exist_ok=True)  # was 0o644; directories need execute bit
 
             received_bytes = 0
             next_progress = time.time() + 5
@@ -2165,8 +2165,11 @@ class AdsbIm:
         brofm,
         do_import=False,
         do_restore=False,
-        micro_data={},
+        micro_data=None,  # mutable default {} is shared across calls
     ):
+        if micro_data is None:
+            micro_data = {}
+
         # the key here can be a readsb net connector triplet in the form ip,port,protocol
         # usually it's just the ip
         if key in {self._d.env_by_tags("mf_ip").list_get(i) for i in self.micro_indices()}:

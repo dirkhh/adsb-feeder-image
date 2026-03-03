@@ -1,4 +1,4 @@
-from typing import Callable, List, Union
+from typing import Callable, List, Optional, Union
 
 from utils.config import config_lock, read_values_from_config_json, write_values_to_config_json
 from utils.util import is_true, make_int, print_err, report_issue, stack_info
@@ -19,7 +19,7 @@ class Env:
         default: Union[str, list, bool, int, float, None] = None,
         default_call: Union[Callable, None] = None,
         value_call: Union[Callable, None] = None,
-        tags: List[str] = [""],
+        tags: Optional[List[str]] = None,  # mutable default [""] is shared across instances
     ):
         self._name = name
 
@@ -38,7 +38,7 @@ class Env:
             self._value = value
         self._is_mandatory = is_mandatory
         self._value_call = value_call
-        self._tags = tags
+        self._tags = tags if tags is not None else [""]  # apply default here, not in signature
 
         # Always reconcile from file
         self._reconcile(value=None, pull=True)
@@ -154,8 +154,7 @@ class Env:
                 return [self._default[0]]
             else:
                 return self._default
-            return self._default
-        return ""
+        return ""  # removed unreachable duplicate 'return self._default' that was here
 
     @value.setter
     def value(self, value):
@@ -179,7 +178,7 @@ class Env:
             self.list_set(0, value)
             self._reconcile(value)
             return
-        if type(self._value) == list or value != self._value:
+        if value != self._value:  # was 'type(self._value) == list or ...'; list case already returned above
             self._value = value
             self._reconcile(value)
 
@@ -238,7 +237,7 @@ class Env:
         if type(self._default) == list and len(self._default) == 1:
             while len(self._value) <= idx:
                 self._value.append(self._default[0])
-                self._reconcile(self._value)
+            self._reconcile(self._value)  # moved outside while loop; was doing file I/O per pad element
             return self._value[idx]
 
         if type(self._default) != list:
