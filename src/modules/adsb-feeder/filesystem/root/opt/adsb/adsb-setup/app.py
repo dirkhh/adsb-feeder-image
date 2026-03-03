@@ -4691,13 +4691,16 @@ class AdsbIm:
         pipeIn = os.fdopen(fdIn, "wb")
 
         def get_log(fobj):
-            subprocess.run(
-                f"bash {get_adsb_base_dir()}/log-sanitizer.sh",
-                shell=True,
-                stdout=fobj,
-                stderr=subprocess.STDOUT,
-                timeout=30,
-            )
+            try:
+                subprocess.run(
+                    f"bash {get_adsb_base_dir()}/log-sanitizer.sh",
+                    shell=True,
+                    stdout=fobj,
+                    stderr=subprocess.STDOUT,
+                    timeout=30,
+                )
+            finally:
+                fobj.close()  # close pipe write-end so reader sees EOF
 
         thread = threading.Thread(
             target=get_log,

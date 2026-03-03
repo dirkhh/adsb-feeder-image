@@ -30,7 +30,8 @@ def read_values_from_config_json(no_cache=False):
 
     ret = {}
     try:
-        ret = json.load(open(CONFIG_JSON_FILE, "r"))
+        with open(CONFIG_JSON_FILE, "r") as f:
+            ret = json.load(f)
     except Exception:
         print_err("Failed to read .json file")
     else:
@@ -42,8 +43,6 @@ def read_values_from_config_json(no_cache=False):
 def write_values_to_config_json(data: dict, reason="no reason provided"):
     global config_cache
     global config_cache_updated
-    config_cache = data
-    config_cache_updated = time.time()
     try:
         print_err(f"config.json write: {reason}")
         fd, tmp = tempfile.mkstemp(dir=str(ADSB_CONFIG_DIR))
@@ -52,6 +51,9 @@ def write_values_to_config_json(data: dict, reason="no reason provided"):
         os.rename(tmp, CONFIG_JSON_FILE)
     except Exception:
         print_err(f"Error writing config.json to {CONFIG_JSON_FILE}")
+        return  # don't update cache if write failed
+    config_cache = data
+    config_cache_updated = time.time()
 
 
 def read_values_from_env_file():
