@@ -216,7 +216,7 @@ class System:
             requests.Timeout,
             requests.RequestException,
         ) as err:
-            status = err.errno if err.errno else -1
+            status = getattr(err, "errno", None) or -1  # not all request exceptions have errno
         except Exception:
             status = -1
         else:
@@ -273,7 +273,7 @@ class System:
             )
             output = result.stdout.decode("utf-8")
             for line in output.split("\n"):
-                if line and line[1] == '"' and line[-2] == '"':
+                if len(line) >= 3 and line[1] == '"' and line[-2] == '"':  # guard short lines
                     # the names show up as '"ultrafeeder"'
                     containers.append(line[2:-2])
         except subprocess.SubprocessError as e:

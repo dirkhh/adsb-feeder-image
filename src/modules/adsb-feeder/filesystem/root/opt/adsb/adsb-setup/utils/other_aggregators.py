@@ -495,6 +495,9 @@ class OpenSky(Aggregator):
 
     def _activate(self, user_input: str, idx: int = 0) -> bool:
         self._idx = make_int(idx)
+        if "::" not in user_input:  # split("::") without separator raises ValueError
+            print_err(f"OpenSky: expected '::' separator in input")
+            return False
         serial, user = user_input.split("::")
         print_err(f"passed in {user_input} seeing user |{user}| and serial |{serial}|")
         if not user:
@@ -567,6 +570,9 @@ class Sdrmap(Aggregator):
 
     def _activate(self, user_input: str, idx: int = 0) -> bool:
         self._idx = make_int(idx)
+        if "::" not in user_input:  # split("::") without separator raises ValueError
+            print_err(f"Sdrmap: expected '::' separator in input")
+            return False
         password, user = user_input.split("::")
         print_err(f"passed in {user_input} seeing user |{user}| and password |{password}|")
         if not user:

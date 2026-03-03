@@ -69,7 +69,7 @@ class UltrafeederConfig:
 
     def generate(self):
         is_stage2 = self._d.is_enabled("stage2")
-        num_micro = self._d.env_by_tags("num_micro_sites").value
+        num_micro = int(self._d.env_by_tags("num_micro_sites").value or 0)  # .value is str; > comparison needs int
         # when not in stage2 mode, no point in setting up the others
         if self._micro > 0 and not is_stage2:
             return ""
