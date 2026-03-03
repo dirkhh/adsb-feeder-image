@@ -17,10 +17,10 @@ class Aggregator:
         self,
         name: str,
         system: System,
-        tags: list[str] = [],
+        tags: Optional[list[str]] = None,  # mutable default [] is shared across instances
     ) -> None:
         self._name = name
-        self._tags = tags
+        self._tags = tags if tags is not None else []
         self._system = system
         self._d = system._d
         self._idx = 0

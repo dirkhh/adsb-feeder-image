@@ -157,7 +157,12 @@ class MultiOutline:
                     print_err(f"multioutline: can't get points from outline #{i}: {d}")
                     points = []
             else:
-                points = [r["points"] for r in d["rings"] if r["alt"] == hwt_alt][0]
+                matching_rings = [r["points"] for r in d["rings"] if r["alt"] == hwt_alt]  # was [..][0]; IndexError if no match
+                if not matching_rings:
+                    print_err(f"multioutline: no ring matching alt {hwt_alt} in outline #{i}")
+                    points = []
+                else:
+                    points = matching_rings[0]
             if len(points) > 2:
                 try:
                     p = Polygon(shell=LinearRing(points))

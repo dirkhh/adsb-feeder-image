@@ -920,7 +920,7 @@ class Data:
                 enabled = [enabled]
             new_value = []
             for i in range(len(value)):
-                new_value.append(value[i] if enabled[i] else "")
+                new_value.append(value[i] if i < len(enabled) and enabled[i] else "")  # guard: enabled may be shorter than value
             return new_value
 
         def value_for_env(e: Env, value: Any) -> Union[str, bool, int]:
