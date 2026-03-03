@@ -378,9 +378,9 @@ class SDRDevices:
             return f"[ERROR] rtl_eeprom found serial number {match.group(1)} but expected {oldserial}"
         # ok, this looks all good. fingers crossed
         try:
-            result = subprocess.run(
-                f"echo 'y' | rtl_eeprom -d 0 -s {newserial}",
-                shell=True,
+            result = subprocess.run(  # avoid shell=True to prevent injection via newserial
+                ["rtl_eeprom", "-d", "0", "-s", newserial],
+                input="y\n",
                 text=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,

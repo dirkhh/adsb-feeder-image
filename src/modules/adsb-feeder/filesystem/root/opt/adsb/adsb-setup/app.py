@@ -1148,7 +1148,7 @@ class AdsbIm:
         # the user has uploaded a zip file and we need to take a look.
         # be very careful with the content of this zip file...
         print_err("zip file uploaded, looking at the content")
-        filename = request.args["zipfile"]
+        filename = secure_filename(request.args["zipfile"])  # sanitize user-supplied filename
         adsb_path = pathlib.Path(f"{get_adsb_base_dir()}/config")
         restore_path = adsb_path / "restore"
         restore_path.mkdir(mode=0o755, exist_ok=True)
@@ -2140,7 +2140,13 @@ class AdsbIm:
             )
 
             with zipfile.ZipFile(tmpfile) as zf:
-                zf.extractall(path=self._d.config_path / "ultrafeeder" / ip)
+                # validate member paths before extraction to prevent zip slip
+                extract_path = self._d.config_path / "ultrafeeder" / ip
+                for member in zf.namelist():
+                    if not str(os.path.normpath(os.path.join(extract_path, member))).startswith(str(extract_path)):
+                        print_err(f"import skipped for path breakout name: {member}")
+                        continue
+                    zf.extract(member, extract_path)
             # deal with the duplicate "ultrafeeder in the path"
             shutil.move(
                 self._d.config_path / "ultrafeeder" / ip / "ultrafeeder" / "globe_history",
