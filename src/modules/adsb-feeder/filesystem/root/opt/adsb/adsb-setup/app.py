@@ -541,7 +541,7 @@ class AdsbIm:
             config = result.stdout.decode("utf-8")
         except Exception:
             config = "Storage=auto"
-        for line in config:
+        for line in config.splitlines():  # was iterating chars, not lines
             if line.startswith("Storage=volatile"):
                 self._persistent_journal = False
                 break
@@ -3271,7 +3271,7 @@ class AdsbIm:
             daemon_json = {}
         new_daemon_json = daemon_json.copy()
         if value:
-            del new_daemon_json["max-concurrent-downloads"]
+            new_daemon_json.pop("max-concurrent-downloads", None)  # del raises KeyError if missing
         else:
             new_daemon_json["max-concurrent-downloads"] = 1
         if new_daemon_json != daemon_json:
@@ -4428,8 +4428,7 @@ class AdsbIm:
             try:
                 result = (
                     subprocess.run(
-                        ["zerotier-cli", "get", f"{zt_network}", "ip4"],
-                        shell=True,
+                        ["zerotier-cli", "get", f"{zt_network}", "ip4"],  # shell=True with list args breaks arg passing
                         capture_output=True,
                         timeout=2.0,
                     )

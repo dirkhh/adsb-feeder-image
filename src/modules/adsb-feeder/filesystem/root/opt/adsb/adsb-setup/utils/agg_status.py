@@ -102,7 +102,7 @@ class AggStatus:
             mlat_json = json.load(open(path, "r"))
             percent_good = mlat_json.get("good_sync_percentage_last_hour", 0)
             percent_bad = mlat_json.get("bad_sync_percentage_last_hour", 0)
-            now = mlat_json.get("now")
+            now = mlat_json.get("now", 0)  # default to 0; None causes TypeError below
         except Exception:
             self._mlat = T.Disconnected
             return
@@ -210,8 +210,8 @@ class AggStatus:
         elif container_status == "up":
             pass
         elif "up for" in container_status:
-            _, _, uptime = container_status.split(" ")
-            uptime = int(uptime)
+            parts = container_status.split(" ")  # safe unpack; 3-part tuple unpack crashed on bad format
+            uptime = int(parts[2]) if len(parts) >= 3 else 0
             if self._agg not in ultrafeeder_aggs:
                 if uptime < 60:
                     self._beast = T.Starting
@@ -590,7 +590,7 @@ class Healthcheck:
                 now = obj.get("now")
                 if not now or now < time.time() - 60:
                     fail.append("readsb stats.json out of date")
-                local = obj.get("total").get("local")
+                local = obj.get("total", {}).get("local")  # chained get; "total" may be absent
                 if local and self._d.env_by_tags("readsb_device_type").value != "modesbeast":
                     samples = local.get("samples_processed")
                     if samples == self.lastReadsbSamples:
@@ -629,7 +629,7 @@ class Healthcheck:
                 print_err(traceback.format_exc())
                 fail.append("readsb not running / 1090 SDR probably dead / unplugged")
 
-            hours = self._d.env_by_tags("healthcheck_noplane_hours_1090").value
+            hours = float(self._d.env_by_tags("healthcheck_noplane_hours_1090").value or 0)  # .value is str
             if self.last1090.tooLong(hours):
                 fail.append(f"no planes 1090 for {hours}h")
 
@@ -655,7 +655,7 @@ class Healthcheck:
                 print_err(traceback.format_exc())
                 fail.append("dump978 not running / 978 SDR probably dead / unplugged")
 
-            hours = self._d.env_by_tags("healthcheck_noplane_hours_978").value
+            hours = float(self._d.env_by_tags("healthcheck_noplane_hours_978").value or 0)  # .value is str
             if self.last978.tooLong(hours):
                 fail.append(f"no planes 978 for {hours}h")
 

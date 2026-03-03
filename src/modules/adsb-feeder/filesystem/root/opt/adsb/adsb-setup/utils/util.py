@@ -178,10 +178,10 @@ def generic_get_json(url: str, data: Optional[Any] = None, timeout: float = 5.0)
         requests.RequestException,
     ) as err:
         print_err(f"checking {url} failed: {err}")
-        status = err.errno if err.errno else -1
+        status = getattr(err, "errno", None) or -1  # not all request exceptions have errno
     except Exception:
         # for some reason this didn't work
-        print_err("checking {url} failed: reason unknown")
+        print_err(f"checking {url} failed: reason unknown")
     else:
         return json_response, response.status_code
     return None, status
@@ -371,9 +371,9 @@ def get_plain_url(plain_url: str, method: str = "GET", data: Optional[str] = Non
         requests.RequestException,
     ) as err:
         print_err(f"checking {plain_url} failed: {err}")
-        status = err.errno if err.errno else -1
+        status = getattr(err, "errno", None) or -1  # not all request exceptions have errno
     except Exception:
-        print_err("checking {plain_url} failed: {traceback.format_exc()}")
+        print_err(f"checking {plain_url} failed: {traceback.format_exc()}")
     else:
         return response.text, response.status_code
     return None, status
