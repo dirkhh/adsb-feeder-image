@@ -1,5 +1,6 @@
 Changes since v3.0.8
 =======
+- OS Update: fix unattended apt upgrade on Raspbian
 - beta-notes: update acarshub to v4.1.5-beta.1
 - beta-notes: another round of container version updates
 - beta-notes: update acarshub to v4.1.4-beta.2 and update ultrafeeder
