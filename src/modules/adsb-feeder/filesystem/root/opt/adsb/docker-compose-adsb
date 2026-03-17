@@ -38,8 +38,11 @@ exec 9>>"$lockFile"
 
 if ! flock --exclusive --nonblock 9; then
     echo "$(date -u +"%FT%T.%3NZ") $$: docker-compose-adsb will wait for lock"
-    flock --exclusive 9
-    echo "$(date -u +"%FT%T.%3NZ") $$: docker-compose-adsb finished waiting for lock"
+    if ! timeout 600 flock --exclusive 9; then
+        echo "$(date -u +"%FT%T.%3NZ") $$: docker-compose-adsb failed to get lock after 10 minutes, exiting"
+        exit 1
+    fi
+    echo "$(date -u +"%FT%T.%3NZ") $$: docker-compose-adsb acquired lock"
 fi
 
 docker_compose="docker compose"

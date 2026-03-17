@@ -9,4 +9,4 @@ if [[ ! -f /opt/adsb/init-complete ]] && grep -e 'AF_IS_BASE_CONFIG_FINISHED=Tru
     touch /opt/adsb/init-complete
 fi
 
-/opt/adsb/docker-compose-adsb up -d -t 30 --remove-orphans
+exec /opt/adsb/docker-compose-adsb up -d -t 30 --remove-orphans

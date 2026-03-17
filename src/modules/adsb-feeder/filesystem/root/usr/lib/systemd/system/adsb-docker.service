@@ -10,10 +10,10 @@ ExecStartPre=-/bin/bash -c "mount -o remount,exec,size=$(( $(cat /proc/meminfo |
 ExecStartPre=-/bin/bash -c "[[ -f /opt/adsb/os.adsb.feeder.image ]] && echo 128 > /sys/module/usbcore/parameters/usbfs_memory_mb"
 ExecStartPre=-/opt/adsb/scripts/fix-docker-network
 ExecStart=/opt/adsb/docker-compose-start
-RemainAfterExit=yes
 ExecStop=/opt/adsb/docker-compose-adsb stop -t 30
 ExecStopPost=-/opt/adsb/scripts/run-to-disk.sh
-RestartSec=300
+RemainAfterExit=yes
+RestartSec=30min
 TimeoutStartSec=10min
 TimeoutStopSec=2min
 Restart=always
