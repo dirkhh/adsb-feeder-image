@@ -541,7 +541,7 @@ class AdsbIm:
             config = result.stdout.decode("utf-8")
         except Exception:
             config = "Storage=auto"
-        for line in config:
+        for line in config.splitlines():
             if line.startswith("Storage=volatile"):
                 self._persistent_journal = False
                 break
