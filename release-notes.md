@@ -1,5 +1,6 @@
 Changes since v3.0.8
 =======
+- share diagnostics page: small tweaks
 - beta-notes: update acarshub to v4.1.5-beta.2
 - OS Update: fix unattended apt upgrade on Raspbian
 - beta-notes: update acarshub to v4.1.5-beta.1
