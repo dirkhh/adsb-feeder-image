@@ -4656,7 +4656,7 @@ class AdsbIm:
 
         if target == "0x0.st":
             success, output = run_shell_captured(
-                command=f"bash {get_adsb_base_dir()}/log-sanitizer.sh 2>&1 | curl -F'expires=168' -F'file=@-'  https://0x0.st",
+                command=f"bash {get_adsb_base_dir()}/log-sanitizer.sh 2>&1 | curl --user-agent 'adsb.im/1.0' -F 'secret=' -F'expires=24' -F'file=@-'  https://0x0.st",
                 timeout=60,
             )
             url = output.strip()
