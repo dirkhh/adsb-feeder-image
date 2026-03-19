@@ -6,12 +6,15 @@
 <p>This will create an anonymized log that removes IP addresses, locations, and any aggregator keys and other secrets
   from your logs and upload them to a website for easier sharing with the developers.</p>
 <p class="{% if url != '' %}d-none{% endif %}">After you click the button, this will display a link that you can share
-  on one of the support forums (and that you can review first to make sure no personal data is included).</p>
+  on one of the support forums.</p>
 <p class="{% if url == '' %}d-none{% endif %}">The link to the uploaded log is: <a href="{{ url }}">{{ url }}</a>.</p>
 <p class="{% if url == '' %}d-none{% endif %}">Please share this link with the developers who are trying to help you
   (and who most likely asked you to provide this info in the first place).</p>
 <p>Please note, we offer multiple ways to upload these because the services tend to not reliably work from every
   location and at all times. So if you get an error, please try one of the other options.
+</p>
+<p>Instead of using 0x0 or termbin, another option is to download the log and upload it on the
+  <a href="https://discord.gg/gducED2VC3">adsb.im Discord server</a>
 </p>
 <form method="post" enctype="multipart/form-data">
   <button type="submit" class="btn btn-primary btn-rounded p-4 mb-3" name="upload" value="0x0.st"
@@ -27,8 +30,7 @@
   <div class="mb-3">
     For help and questions, please go to the
     <a href="https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image">adsb-feeder-image Zulip
-      channel</a> or (if you prefer Discord) the <code>#adsb-dot-im</code> channel on this <a
-       href="https://discord.gg/gducED2VC3">Discord server</a>.
+      channel</a> or on the <a href="https://discord.gg/gducED2VC3">adsb.im Discord server</a>.
   </div>
 </div>
 {% endblock %}
