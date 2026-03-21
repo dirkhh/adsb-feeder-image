@@ -397,6 +397,9 @@ class AggStatus:
                 except Exception:
                     print_err(traceback.format_exc())
 
+        if self._agg == "adsbx":
+            self.adsbx_feeder_id()
+
     def check_alive_maplink(self):
         # currently airplanes live uses the first 16 characters of the uuid as the feed id
         # this works better than getting it for the API because the API only returns 1 feed id
