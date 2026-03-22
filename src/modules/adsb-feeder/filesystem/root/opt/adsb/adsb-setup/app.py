@@ -3,6 +3,7 @@ import copy
 import filecmp
 import gzip
 import io
+import ipaddress
 import json
 import math
 import os
@@ -15,6 +16,7 @@ import secrets
 import shlex
 import shutil
 import signal
+import socket
 import string
 import subprocess
 import sys
@@ -2504,7 +2506,7 @@ class AdsbIm:
             # This API call can take a long time (DNS update + LetsEncrypt)
             global_name, status_code = generic_get_json(url, data=json.dumps(data), timeout=300.0)
             if status_code != 200:
-                print_err(f"error retrieving global name: {status_code}")
+                print_err(f"error retrieving global name: {status_code} {global_name}")
                 return
 
             if not global_name or not isinstance(global_name, Dict):
@@ -2555,18 +2557,53 @@ class AdsbIm:
             # Always release the lock, even if there was an error or timeout
             self._global_name_update_lock.release()
 
-    def update_global_name(self):
+    def update_global_name(self, force_update: bool = False):
+        def is_rfc1918_private_ip(ip_str: str) -> bool:
+            try:
+                ip = ipaddress.IPv4Address(ip_str)
+                return ip.is_private
+            except (ipaddress.AddressValueError, ValueError):
+                return False
+
         if self._d.env_by_tags("site_name").list_get(0) == "":
             # we don't have a site name, yet - there's no point to this
             return
         if self.local_address == "":
             self.update_net_dev(from_update=True)
         if self.local_address == "":
-            print_err(f"failed to get local address for update_global_name()... bailing")
+            print_err("failed to get local address for update_global_name()... bailing")
             return
+        if not is_rfc1918_private_ip(self.local_address):
+            print_err(f"don't attempt to get a global name for a non-local address {self.local_address}")
+            return
+
         fqdn = self._d.env_by_tags("fqdn").value
+        # check if the record exists and matches
+        lookup_match = False
+        try:
+            # getaddrinfo returns list of (family, type, proto, canonname, sockaddr) tuples
+            result = socket.getaddrinfo(fqdn, None, socket.AF_INET, socket.SOCK_STREAM)
+            if result:
+                # Extract the IP address from the first result
+                ip_address = result[0][4][0]
+                lookup_match = ip_address == self.local_address
+        except socket.gaierror:
+            # DNS lookup failed - host doesn't exist or other DNS error - let's try the update
+            pass
+
+        ext_ip, status = self._system.check_ip()
+        if status != 200:
+            ext_ip = None
         fqdn_ip = self._d.env_by_tags("fqdn_ip").value
-        if fqdn == "" or fqdn_ip != self.local_address:
+        if (
+            fqdn == ""
+            or not lookup_match
+            or fqdn_ip != self.local_address
+            or (ext_ip is not None and ext_ip != self._d.env_by_tags("fqdn_ext_ip").value)
+            or force_update
+        ):
+            if ext_ip is not None:
+                self._d.env_by_tags("fqdn_ext_ip").value = ext_ip
             url = f"{self._d.adsbim_api_url}/0/globalname"
             challenge_response = None
             if fqdn != "":
@@ -4395,21 +4432,23 @@ class AdsbIm:
             self.wifi_ssid = ""
 
     def every_minute(self):
+        now = time.time()
         # track the number of planes seen per day - that's a fun statistic to have and
         # readsb makes it a bit annoying to get that
         self.track_planes_seen_per_day()
 
         # make sure DNS works, every 5 minutes is sufficient
         # check every minute as long as the check fails
-        if time.time() + 5 > self.next_dns_check:
+        if now + 5 > self.next_dns_check:
             self.update_dns_state()
             if self._d.env_by_tags("dns_state").value:
-                self.next_dns_check = time.time() + 300
+                self.next_dns_check = now + 300
             else:
-                self.next_dns_check = time.time() + 60
+                self.next_dns_check = now + 60
             # also ensure that we ended up getting an fqdn (a previous spurious error could have prevented that)
-            if self._d.env_by_tags("fqdn").value == "" and self._d.env_by_tags("site_name").list_get(0) != "":
-                self.update_global_name()
+            # and that it matches our local address - make sure we connect to the backend at least twice a day
+            # in order to keep the my.adsb.im data fresh
+            self.update_global_name(now % (12 * 3600) < 60)
 
         self._sdrdevices.ensure_populated()
 
@@ -4452,7 +4491,7 @@ class AdsbIm:
             self.zerotier_address = ""
 
         # reset undervoltage warning after 2h
-        if self._d.env_by_tags("under_voltage").value and time.time() - self.undervoltage_epoch > 2 * 3600:
+        if self._d.env_by_tags("under_voltage").value and now - self.undervoltage_epoch > 2 * 3600:
             self._d.env_by_tags("under_voltage").value = False
 
         # now let's check for disk space

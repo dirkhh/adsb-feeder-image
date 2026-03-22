@@ -1,5 +1,6 @@
 Changes since v3.0.8
 =======
+- ensure that my.adsb.im has accurate information to forward the user to the local feeder
 - share diagnostics page: small tweaks
 - beta-notes: update acarshub to v4.1.5-beta.2
 - OS Update: fix unattended apt upgrade on Raspbian
