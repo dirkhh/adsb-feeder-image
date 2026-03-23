@@ -1,5 +1,6 @@
 Changes since v3.0.8
 =======
+- beta-notes: update global name if the user changed site name
 - beta-notes: update acarshub to v4.1.5-beta.3
 - update airplanes live map link
 - stage2: add feeder links to home page table

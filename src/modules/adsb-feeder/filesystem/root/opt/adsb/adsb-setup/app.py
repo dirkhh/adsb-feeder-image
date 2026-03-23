@@ -2565,7 +2565,8 @@ class AdsbIm:
             except (ipaddress.AddressValueError, ValueError):
                 return False
 
-        if self._d.env_by_tags("site_name").list_get(0) == "":
+        site_name = str(self._d.env_by_tags("site_name").list_get(0))
+        if site_name == "":
             # we don't have a site name, yet - there's no point to this
             return
         if self.local_address == "":
@@ -2578,18 +2579,24 @@ class AdsbIm:
             return
 
         fqdn = self._d.env_by_tags("fqdn").value
+        # did the user change the site name? if yes, they need a new fqdn
+        if not fqdn.startswith(site_name.lower()):
+            fqdn = ""
+            self._d.env_by_tags("fqdn").value = ""
+
         # check if the record exists and matches
         lookup_match = False
-        try:
-            # getaddrinfo returns list of (family, type, proto, canonname, sockaddr) tuples
-            result = socket.getaddrinfo(fqdn, None, socket.AF_INET, socket.SOCK_STREAM)
-            if result:
-                # Extract the IP address from the first result
-                ip_address = result[0][4][0]
-                lookup_match = ip_address == self.local_address
-        except socket.gaierror:
-            # DNS lookup failed - host doesn't exist or other DNS error - let's try the update
-            pass
+        if fqdn != "":
+            try:
+                # getaddrinfo returns list of (family, type, proto, canonname, sockaddr) tuples
+                result = socket.getaddrinfo(fqdn, None, socket.AF_INET, socket.SOCK_STREAM)
+                if result:
+                    # Extract the IP address from the first result
+                    ip_address = result[0][4][0]
+                    lookup_match = ip_address == self.local_address
+            except socket.gaierror:
+                # DNS lookup failed - host doesn't exist or other DNS error - let's try the update
+                pass
 
         ext_ip, status = self._system.check_ip()
         if status != 200:
