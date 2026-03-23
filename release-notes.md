@@ -1,5 +1,6 @@
 Changes since v3.0.8
 =======
+- update airplanes live map link
 - stage2: add feeder links to home page table
 - update theairtraffic status link
 - ensure that my.adsb.im has accurate information to forward the user to the local feeder

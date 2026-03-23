@@ -405,7 +405,7 @@ class AggStatus:
         # this works better than getting it for the API because the API only returns 1 feed id
         uuid = str(self._d.env_by_tags("ultrafeeder_uuid").list_get(self._idx))
         feed_id = uuid.replace("-", "")[:16]
-        map_link = f"https://globe.airplanes.live/?feed={feed_id}"
+        map_link = f"https://globe.airplanes.live/?uuid={feed_id}"
         self._d.env_by_tags("alivemaplink").list_set(self._idx, map_link)
 
         return
