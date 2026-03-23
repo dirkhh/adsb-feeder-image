@@ -2519,7 +2519,9 @@ class AdsbIm:
 
         fqdn = self._d.env_by_tags("fqdn").value
         # did the user change the site name? if yes, they need a new fqdn
-        if not fqdn.startswith(site_name.lower()):
+        used_site_name = self._d.env_by_tags("fqdn_used_site_name").value
+        if site_name != used_site_name:
+            print_err(f"FQDN ({fqdn}) reset due site name change: {used_site_name} -> {site_name}")
             fqdn = ""
             self._d.env_by_tags("fqdn").value = ""
 
@@ -2613,6 +2615,7 @@ class AdsbIm:
             # Update environment values
             self._d.env_by_tags("fqdn").value = fqdn
             self._d.env_by_tags("fqdn_ip").value = self.local_address
+            self._d.env_by_tags("fqdn_used_site_name").value = data["site_name"]
 
             # Save certificate, private key, and chain to files
             cert_dir = "/opt/adsb/certs"
