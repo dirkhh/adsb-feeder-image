@@ -3279,8 +3279,6 @@ class AdsbIm:
         # start the containers
         if self.base_is_configured() or self._d.is_enabled("stage2"):
             self._d.env_by_tags(["base_config", "is_enabled"]).value = True
-            # check if we need to get the gobal hostname / fqdn
-            self.update_global_name()
 
             if self.at_least_one_aggregator():
                 self._d.env_by_tags("aggregators_chosen").value = True
@@ -4021,10 +4019,6 @@ class AdsbIm:
         if not seen_go:
             print_err("no go button, so stay on the same page", level=2)
             return redirect(request.url)
-
-        # do we have a site name but no fqdn? Let's try to obtain one (possibly 'again')
-        if self._d.env_by_tags("site_name").list_get(0) != "" and self._d.env_by_tags("fqdn").value == "":
-            self.update_global_name()
 
         # where do we go from here?
         if next_url:  # we figured it out above
