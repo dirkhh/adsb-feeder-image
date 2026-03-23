@@ -2596,6 +2596,10 @@ class AdsbIm:
         try:
             if challenge_response:
                 data["challenge_response"] = challenge_response
+            else:
+                # if we weren't able to complete the challenge, we won't be able to successfully
+                # update the existing fqdn - so let's just get a new one
+                data["fqdn"] = ""
 
             # This API call can take a long time (DNS update + LetsEncrypt)
             global_name, status_code = generic_get_json(url, data=json.dumps(data), timeout=300.0)
