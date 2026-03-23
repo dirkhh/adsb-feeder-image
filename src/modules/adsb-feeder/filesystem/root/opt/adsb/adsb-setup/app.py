@@ -2494,13 +2494,103 @@ class AdsbIm:
             return "0"
         return gain
 
-    def _update_global_name_worker(self, url, data, fqdn, challenge_response):
-        """Background worker thread for global name update and certificate retrieval."""
+    def _update_global_name_worker(self, force_update):
+        """Background worker thread for global name update."""
+
+        def is_rfc1918_private_ip(ip_str: str) -> bool:
+            try:
+                ip = ipaddress.IPv4Address(ip_str)
+                return ip.is_private
+            except (ipaddress.AddressValueError, ValueError):
+                return False
+
+        site_name = str(self._d.env_by_tags("site_name").list_get(0))
+        if site_name == "":
+            # we don't have a site name, yet - there's no point to this
+            return
+        if self.local_address == "":
+            self.update_net_dev(from_update=True)
+        if self.local_address == "":
+            print_err("failed to get local address for update_global_name()... bailing")
+            return
+        if not is_rfc1918_private_ip(self.local_address):
+            print_err(f"don't attempt to get a global name for a non-local address {self.local_address}")
+            return
+
+        fqdn = self._d.env_by_tags("fqdn").value
+        # did the user change the site name? if yes, they need a new fqdn
+        if not fqdn.startswith(site_name.lower()):
+            fqdn = ""
+            self._d.env_by_tags("fqdn").value = ""
+
+        # check if the record exists and matches
+        lookup_match = False
+        if fqdn != "":
+            try:
+                # getaddrinfo returns list of (family, type, proto, canonname, sockaddr) tuples
+                result = socket.getaddrinfo(fqdn, None, socket.AF_INET, socket.SOCK_STREAM)
+                if result:
+                    # Extract the IP address from the first result
+                    ip_address = result[0][4][0]
+                    lookup_match = ip_address == self.local_address
+            except socket.gaierror:
+                # DNS lookup failed - host doesn't exist or other DNS error - let's try the update
+                pass
+
+        ext_ip, status = self._system.check_ip()
+        if status != 200:
+            ext_ip = None
+        fqdn_ip = self._d.env_by_tags("fqdn_ip").value
+        if not (
+            fqdn == ""
+            or not lookup_match
+            or fqdn_ip != self.local_address
+            or (ext_ip is not None and ext_ip != self._d.env_by_tags("fqdn_ext_ip").value)
+            or force_update
+        ):
+            return
+
+        if ext_ip is not None:
+            self._d.env_by_tags("fqdn_ext_ip").value = ext_ip
+        url = f"{self._d.adsbim_api_url}/0/globalname"
+        challenge_response = None
+        if fqdn != "":
+            challenge_json, status_code = generic_get_json(f"{url}?fqdn={fqdn}")
+            if status_code == 200 and isinstance(challenge_json, Dict):
+                challenge = challenge_json.get("challenge", "")
+                # now encrypt the challenge with the private key in /opt/adsb/certs/feeder.key
+                try:
+                    # Decode the base64-encoded challenge
+                    challenge_bytes = base64.b64decode(challenge)
+
+                    # Load the private key
+                    with open("/opt/adsb/certs/feeder.key", "rb") as key_file:
+                        loaded_key = serialization.load_pem_private_key(key_file.read(), password=None)
+
+                    # Ensure it's an RSA private key
+                    if not isinstance(loaded_key, rsa.RSAPrivateKey):
+                        raise ValueError("Private key is not an RSA key")
+
+                    # Sign the challenge with the private key
+                    signature = loaded_key.sign(challenge_bytes, padding.PKCS1v15(), hashes.SHA256())
+
+                    # Base64-encode the signature
+                    challenge_response = base64.b64encode(signature).decode("utf-8")
+                except Exception as e:
+                    print_err(f"Error signing challenge: {e}")
+
+        data = {
+            "site_name": self._d.env_by_tags("site_name").list_get(0),
+            "ip_address": self.local_address,
+            "fqdn": fqdn,
+        }
+
         # Check if another update is already in progress
         if not self._global_name_update_lock.acquire(blocking=False):
             print_err("Global name update already in progress, skipping this request")
             return
 
+        print_err("Global name update started in background thread")
         try:
             if challenge_response:
                 data["challenge_response"] = challenge_response
@@ -2560,102 +2650,15 @@ class AdsbIm:
             self._global_name_update_lock.release()
 
     def update_global_name(self, force_update: bool = False):
-        def is_rfc1918_private_ip(ip_str: str) -> bool:
-            try:
-                ip = ipaddress.IPv4Address(ip_str)
-                return ip.is_private
-            except (ipaddress.AddressValueError, ValueError):
-                return False
+        # Run in a background thread to avoid blocking the main application
 
-        site_name = str(self._d.env_by_tags("site_name").list_get(0))
-        if site_name == "":
-            # we don't have a site name, yet - there's no point to this
-            return
-        if self.local_address == "":
-            self.update_net_dev(from_update=True)
-        if self.local_address == "":
-            print_err("failed to get local address for update_global_name()... bailing")
-            return
-        if not is_rfc1918_private_ip(self.local_address):
-            print_err(f"don't attempt to get a global name for a non-local address {self.local_address}")
-            return
-
-        fqdn = self._d.env_by_tags("fqdn").value
-        # did the user change the site name? if yes, they need a new fqdn
-        if not fqdn.startswith(site_name.lower()):
-            fqdn = ""
-            self._d.env_by_tags("fqdn").value = ""
-
-        # check if the record exists and matches
-        lookup_match = False
-        if fqdn != "":
-            try:
-                # getaddrinfo returns list of (family, type, proto, canonname, sockaddr) tuples
-                result = socket.getaddrinfo(fqdn, None, socket.AF_INET, socket.SOCK_STREAM)
-                if result:
-                    # Extract the IP address from the first result
-                    ip_address = result[0][4][0]
-                    lookup_match = ip_address == self.local_address
-            except socket.gaierror:
-                # DNS lookup failed - host doesn't exist or other DNS error - let's try the update
-                pass
-
-        ext_ip, status = self._system.check_ip()
-        if status != 200:
-            ext_ip = None
-        fqdn_ip = self._d.env_by_tags("fqdn_ip").value
-        if (
-            fqdn == ""
-            or not lookup_match
-            or fqdn_ip != self.local_address
-            or (ext_ip is not None and ext_ip != self._d.env_by_tags("fqdn_ext_ip").value)
-            or force_update
-        ):
-            if ext_ip is not None:
-                self._d.env_by_tags("fqdn_ext_ip").value = ext_ip
-            url = f"{self._d.adsbim_api_url}/0/globalname"
-            challenge_response = None
-            if fqdn != "":
-                challenge_json, status_code = generic_get_json(f"{url}?fqdn={fqdn}")
-                if status_code == 200 and isinstance(challenge_json, Dict):
-                    challenge = challenge_json.get("challenge", "")
-                    # now encrypt the challenge with the private key in /opt/adsb/certs/feeder.key
-                    try:
-                        # Decode the base64-encoded challenge
-                        challenge_bytes = base64.b64decode(challenge)
-
-                        # Load the private key
-                        with open("/opt/adsb/certs/feeder.key", "rb") as key_file:
-                            loaded_key = serialization.load_pem_private_key(key_file.read(), password=None)
-
-                        # Ensure it's an RSA private key
-                        if not isinstance(loaded_key, rsa.RSAPrivateKey):
-                            raise ValueError("Private key is not an RSA key")
-
-                        # Sign the challenge with the private key
-                        signature = loaded_key.sign(challenge_bytes, padding.PKCS1v15(), hashes.SHA256())
-
-                        # Base64-encode the signature
-                        challenge_response = base64.b64encode(signature).decode("utf-8")
-                    except Exception as e:
-                        print_err(f"Error signing challenge: {e}")
-
-            data = {
-                "site_name": self._d.env_by_tags("site_name").list_get(0),
-                "ip_address": self.local_address,
-                "fqdn": fqdn,
-            }
-
-            # Run the API call and certificate update in a background thread
-            # to avoid blocking the main application
-            worker_thread = threading.Thread(
-                target=self._update_global_name_worker,
-                args=(url, data, fqdn, challenge_response),
-                daemon=True,
-                name="global-name-update",
-            )
-            worker_thread.start()
-            print_err("Global name update started in background thread")
+        worker_thread = threading.Thread(
+            target=self._update_global_name_worker,
+            args=(force_update,),
+            daemon=True,
+            name="global-name-update",
+        )
+        worker_thread.start()
 
     def handle_non_adsb(self):
         # if the user explicitly says they don't want ADS-B, then don't
