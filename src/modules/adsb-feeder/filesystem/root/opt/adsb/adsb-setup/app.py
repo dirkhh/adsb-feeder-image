@@ -2551,7 +2551,7 @@ class AdsbIm:
                 doh_data = doh_response.json()
                 if doh_data.get("Status") == 0 and doh_data.get("Answer"):
                     ip_address = doh_data["Answer"][0]["data"]
-                    print_err(f"DoH lookup {ip_address} / local_address {self.local_address}")
+                    print_err(f"DoH lookup {ip_address} / local_address {self.local_address}", level=8)
                     lookup_match = ip_address == self.local_address
             except Exception:
                 # DNS lookup failed - host doesn't exist or other DNS error - let's try the update
@@ -4478,6 +4478,7 @@ class AdsbIm:
             # also ensure that we ended up getting an fqdn (a previous spurious error could have prevented that)
             # and that it matches our local address - make sure we connect to the backend at least twice a day
             # in order to keep the my.adsb.im data fresh
+            # argument: force_update every 12h
             self.update_global_name(now % (12 * 3600) < 60)
 
         self._sdrdevices.ensure_populated()
