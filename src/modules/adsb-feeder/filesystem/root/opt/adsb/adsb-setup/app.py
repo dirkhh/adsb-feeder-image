@@ -675,6 +675,7 @@ class AdsbIm:
             self._d.env_by_tags("is_sonde_feeder").value = self._d.is_enabled("sonde")
         # fmt: on
 
+        print_err("startup: run handle_implied_settings()")
         self.handle_implied_settings()
         self.write_envfile()
 
@@ -690,6 +691,7 @@ class AdsbIm:
 
         self._every_minute = Background(60, self.every_minute)
         # every_minute stuff is required to initialize some values, run it synchronously
+        print_err("startup: run every_minute()")
         self.every_minute()
 
         if self._d.is_enabled("stage2"):
