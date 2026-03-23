@@ -16,7 +16,6 @@ import secrets
 import shlex
 import shutil
 import signal
-import socket
 import string
 import subprocess
 import sys
@@ -2529,13 +2528,19 @@ class AdsbIm:
         lookup_match = False
         if fqdn != "":
             try:
-                # getaddrinfo returns list of (family, type, proto, canonname, sockaddr) tuples
-                result = socket.getaddrinfo(fqdn, None, socket.AF_INET, socket.SOCK_STREAM)
-                if result:
-                    # Extract the IP address from the first result
-                    ip_address = result[0][4][0]
+                # Use DNS-over-HTTPS to bypass local DNS rebind protection which may
+                # filter RFC1918 addresses returned by external DNS queries
+                doh_response = requests.get(
+                    f"https://dns.google/resolve?name={fqdn}&type=A",
+                    timeout=5,
+                    headers={"accept": "application/dns-json"},
+                )
+                doh_data = doh_response.json()
+                if doh_data.get("Status") == 0 and doh_data.get("Answer"):
+                    ip_address = doh_data["Answer"][0]["data"]
+                    print_err(f"DoH lookup {ip_address} / local_address {self.local_address}")
                     lookup_match = ip_address == self.local_address
-            except socket.gaierror:
+            except Exception:
                 # DNS lookup failed - host doesn't exist or other DNS error - let's try the update
                 pass
 
@@ -2592,7 +2597,10 @@ class AdsbIm:
             print_err("Global name update already in progress, skipping this request")
             return
 
-        print_err("Global name update started in background thread")
+        print_err(
+            f"Global name update started in background thread fqdn={fqdn}, lookup_match={lookup_match}, "
+            f"fqdn_ip={fqdn_ip}, local={self.local_address}, ext_ip={ext_ip}, force_update={force_update}"
+        )
         try:
             if challenge_response:
                 data["challenge_response"] = challenge_response
@@ -4422,7 +4430,7 @@ class AdsbIm:
                 .strip()
             )
         except Exception as e:
-            print(f"exception on ip route call: {e}")
+            print_err(f"exception on ip route call: {e}")
             result = ""
         else:
             if " " in result:
