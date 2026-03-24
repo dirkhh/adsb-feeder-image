@@ -27,7 +27,7 @@ services:
       - ENABLE_ACARS=${FEEDER_ACARSHUB_EXTERNAL_ACARS}
       - ENABLE_HFDL=${FEEDER_ACARSHUB_EXTERNAL_HFDL}
       - QUIETMESSAGES=false
-      - MIN_LOG_LEVEL=3
+      - MIN_LOG_LEVEL=4
       - IATA_OVERRIDE=UP|UPS|United Parcel Service;GS|FTH|Mountain Aviation (Foothills);GS|EJA|ExecJet
       - ENABLE_ADSB=${FEEDER_ACARS_ENABLE_ADSB}
       - ADSB_URL=http://ultrafeeder/data/aircraft.json
