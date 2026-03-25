@@ -3992,21 +3992,22 @@ class AdsbIm:
             # when dealing with micro feeder aggregators, we need to keep the site number
             # in mind
             tags = key.split("--")
+            old_value = ""
             if sitenum > 0 and "is_enabled" in tags:
                 print_err(f"setting up stage2 micro site number {sitenum}: {key}")
                 self._d.env_by_tags("aggregators_chosen").value = True
                 self._d.env_by_tags(tags).list_set(sitenum, is_true(value))
             else:
                 if type(e._value) == list:
+                    old_value = e.list_get(sitenum)
                     e.list_set(sitenum, value)
                 else:
+                    old_value = e.value
                     e.value = value
             if key == "site_name":
                 unique_name = self.unique_site_name(value, idx=sitenum)
-                need_update = sitenum == 0 and self._d.env_by_tags("site_name").list_get(0) != unique_name
-                self._d.env_by_tags("site_name").list_set(sitenum, unique_name)
-                if need_update:
-                    self.update_global_name()
+                if sitenum == 0 and old_value != unique_name:
+                    self.update_global_name(True)
         # done handling the input data
         # what implied settings do we have (and could we simplify them?)
 
