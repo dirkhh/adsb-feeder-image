@@ -1,5 +1,6 @@
 Changes since v3.0.8
 =======
+- beta-notes: global name udpate: Better retry to get correct certificates
 - beta-notes: update acarshub to v4.1.5
 - beta-notes: update acarshub to v4.1.5-beta.4
 - beta-notes: update global name if the user changed site name
