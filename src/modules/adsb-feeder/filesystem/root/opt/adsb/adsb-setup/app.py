@@ -2567,6 +2567,7 @@ class AdsbIm:
             or fqdn_ip != self.local_address
             or (ext_ip is not None and ext_ip != self._d.env_by_tags("fqdn_ext_ip").value)
             or force_update
+            or self._d.env_by_tags("fqdn_cert_state").value == "initiated"
         ):
             return
 
@@ -2664,8 +2665,18 @@ class AdsbIm:
             with open(chain_path, "w") as f:
                 f.write(chain_pem)
             os.chmod(chain_path, 0o644)
+        action = global_name.get("action", "")
+        if action == "initiated":
+            print_err(f"Received temporary certificate for {fqdn}")
+            self._d.env_by_tags("fqdn_cert_state").value = "initiated"
 
-        print_err(f"Successfully updated global name and certificates for {fqdn}")
+        elif action == "created" or action == "updated":
+            print_err(f"Successfully updated certificates for {fqdn}")
+            self._d.env_by_tags("fqdn_cert_state").value = "created"
+        elif action == "updated_dns":
+            print_err(f"Successfully updated global DNS for {fqdn}")
+        else:
+            print_err("global name update finished, no change needed")
 
     def update_global_name(self, force_update: bool = False):
         # Run in a background thread to avoid blocking the main application
