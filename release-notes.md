@@ -1,27 +1,16 @@
 Changes since v3.0.8
 =======
-- beta-notes: global name udpate: Better retry to get correct certificates
-- beta-notes: update acarshub to v4.1.5
-- beta-notes: update acarshub to v4.1.5-beta.4
-- beta-notes: update global name if the user changed site name
-- beta-notes: update acarshub to v4.1.5-beta.3
-- update airplanes live map link
-- stage2: add feeder links to home page table
-- update theairtraffic status link
-- ensure that my.adsb.im has accurate information to forward the user to the local feeder
-- share diagnostics page: small tweaks
-- beta-notes: update acarshub to v4.1.5-beta.2
 - OS Update: fix unattended apt upgrade on Raspbian
-- beta-notes: update acarshub to v4.1.5-beta.1
-- beta-notes: another round of container version updates
-- beta-notes: update acarshub to v4.1.4-beta.2 and update ultrafeeder
-- NOTE: if acarshub does not work immediately, wait 10 minutes for possible migrations to finish
-- beta-notes: update acarshub to 4.1.3
-- beta-notes: update acarshub to 4.1.1
-- NOTE: if this update does not work, your docker --version is 20 or lower (update via get.docker.com)
-- sonde: optionally enable web control
 - sdrmap: add status link
+- theairtraffic: update status link
+- airplanes.live: update map link
+- stage2: add feeder links to home page table
+- global name: ensure that my.adsb.im has accurate information to forward the user to the local feeder
+- share diagnostics page: small tweaks
+- sonde: optionally enable web control
 - update docker containers to current versions (WARNING: potentially long update time)
+- ACARS: update acarshub to v4.1.5
+- NOTE: if acarshub does not work immediately, wait 10 minutes for possible migrations to finish
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)
