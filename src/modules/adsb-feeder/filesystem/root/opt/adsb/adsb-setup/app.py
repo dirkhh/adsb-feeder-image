@@ -4487,6 +4487,10 @@ class AdsbIm:
             else:
                 self.next_dns_check = now + 60
 
+            # this needs to check every now and then if the external IP has changed
+            # running this every 5 min with the DNS stuff should be fine
+            self.update_global_name(False)
+
         if now >= self.next_global_name_update:
             # this runs first randomly 2 min to 12h after startup, then every 12h
             self.next_global_name_update = now + 12 * 3600
