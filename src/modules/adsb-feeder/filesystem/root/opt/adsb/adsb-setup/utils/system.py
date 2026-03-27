@@ -217,15 +217,8 @@ class System:
 
         requests.packages.urllib3.util.connection.HAS_IPV6 = False  # type: ignore[attr-defined]
         try:
-            response = requests.request(
-                url="http://v4.ipv6-test.com/api/myip.php",
-                method="GET",
-                timeout=10.0,
-                headers={
-                    "User-Agent": "Python3/requests/adsb.im",
-                    "Accept": "text/plain",
-                },
-            )
+            response = requests.get(url="http://api.ipify.org", timeout=10.0)
+
         except (
             requests.HTTPError,
             requests.ConnectionError,
