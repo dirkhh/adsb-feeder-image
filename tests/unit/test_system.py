@@ -498,10 +498,9 @@ class TestSystemNetwork:
         mock_response.status_code = 200
         mock_requests.return_value = mock_response
 
-        ip, status = system.check_ip()
+        ip = system.check_ip()
 
         assert ip == "203.0.113.42"
-        assert status == 200
 
     @patch('requests.get')
     @patch('utils.data.Data')
@@ -514,10 +513,9 @@ class TestSystemNetwork:
         error.errno = 111
         mock_requests.side_effect = error
 
-        ip, status = system.check_ip()
+        ip = system.check_ip()
 
         assert ip is None
-        assert status == 111
 
     @patch('requests.get')
     @patch('utils.data.Data')
@@ -530,10 +528,9 @@ class TestSystemNetwork:
         error.errno = None
         mock_requests.side_effect = error
 
-        ip, status = system.check_ip()
+        ip = system.check_ip()
 
         assert ip is None
-        assert status == -1
 
     @patch('requests.get')
     @patch('utils.data.Data')
@@ -543,10 +540,9 @@ class TestSystemNetwork:
 
         mock_requests.side_effect = Exception("Unknown error")
 
-        ip, status = system.check_ip()
+        ip = system.check_ip()
 
         assert ip is None
-        assert status == -1
 
     @patch('socket.socket')
     @patch('utils.system.run_shell_captured')

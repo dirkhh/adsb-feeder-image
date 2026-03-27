@@ -1329,8 +1329,8 @@ class AdsbIm:
         return False
 
     def ip_info(self):
-        ip, status = self._system.check_ip()
-        if status == 200:
+        ip = self._system.check_ip()
+        if ip is not None:
             self._d.env_by_tags(["feeder_ip"]).value = ip
             self._d.env_by_tags(["mf_ip"]).list_set(0, ip)
         jsonString = json.dumps(
@@ -2566,9 +2566,7 @@ class AdsbIm:
                 pass
 
         print_err(f"update_global: check_ip()", level=8)
-        ext_ip, status = self._system.check_ip()
-        if status != 200:
-            ext_ip = None
+        ext_ip = self._system.check_ip()
         fqdn_ip = self._d.env_by_tags("fqdn_ip").value
         if not (
             fqdn == ""

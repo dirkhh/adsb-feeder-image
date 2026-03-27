@@ -431,10 +431,9 @@ def test_check_ip_success(self, mock_requests):
     mock_requests.return_value = mock_response
 
     system = System(MagicMock())
-    ip, status = system.check_ip()
+    ip = system.check_ip()
 
     assert ip == "203.0.113.42"
-    assert status == 200
 
 @patch('socket.socket')
 def test_check_gpsd_success(self, mock_socket_class):

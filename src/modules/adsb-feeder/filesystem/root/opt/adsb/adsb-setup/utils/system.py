@@ -123,6 +123,10 @@ class System:
         self.lastContainerCheck: float = 0.0
         self.dockerPsCache: dict[str, str] = dict()
 
+        self.external_ip: Optional[str] = None
+        self.external_ip_timestamp: float = 0.0
+        self.external_ip_check_lock = threading.RLock()
+
     @property
     def restart(self) -> Restart:
         """Get the restart manager instance."""
@@ -194,15 +198,24 @@ class System:
         # we have an ipv6 address but curl -6 isn't working
         return True
 
-    def check_ip(self) -> tuple[Optional[str], int]:
+    def check_ip(self) -> Optional[str]:
         """
         Check external IP address.
 
         Returns:
             Tuple of (IP address or None, HTTP status code or error number)
         """
+
+        with self.external_ip_check_lock:
+            return self._check_ip_locked()
+
+    def _check_ip_locked(self) -> Optional[str]:
+
+        # cache external IP for one minute
+        if self.external_ip and time.time() < self.external_ip_timestamp + 1 * 60:
+            return self.external_ip
+
         requests.packages.urllib3.util.connection.HAS_IPV6 = False  # type: ignore[attr-defined]
-        status = -1
         try:
             response = requests.request(
                 url="http://v4.ipv6-test.com/api/myip.php",
@@ -220,14 +233,17 @@ class System:
             requests.RequestException,
         ) as err:
             print_err(f"check_ip() failed: {err}")
-            status = err.errno if err.errno else -1
         except Exception:
-            status = -1
             print_err("check_ip() failed:")
             print_err(traceback.format_exc())
         else:
-            return response.text, response.status_code
-        return None, status
+            if response.status_code != 200:
+                return None
+            ip = response.text
+            self.external_ip = ip
+            self.external_ip_timestamp = time.time()
+            return ip
+        return None
 
     def check_gpsd(self) -> bool:
         # gateway IP shouldn't change on a system, buffer it for the duration the program runs
