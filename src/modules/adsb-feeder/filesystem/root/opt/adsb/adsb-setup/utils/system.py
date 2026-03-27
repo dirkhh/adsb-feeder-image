@@ -2,6 +2,7 @@ import socket
 import subprocess
 import threading
 import time
+import traceback
 from time import sleep
 from typing import Callable, Optional
 
@@ -203,8 +204,10 @@ class System:
         requests.packages.urllib3.util.connection.HAS_IPV6 = False  # type: ignore[attr-defined]
         status = -1
         try:
-            response = requests.get(
-                "http://v4.ipv6-test.com/api/myip.php",
+            response = requests.request(
+                url="http://v4.ipv6-test.com/api/myip.php",
+                method="GET",
+                timeout=10.0,
                 headers={
                     "User-Agent": "Python3/requests/adsb.im",
                     "Accept": "text/plain",
@@ -216,9 +219,12 @@ class System:
             requests.Timeout,
             requests.RequestException,
         ) as err:
+            print_err(f"check_ip() failed: {err}")
             status = err.errno if err.errno else -1
         except Exception:
             status = -1
+            print_err("check_ip() failed:")
+            print_err(traceback.format_exc())
         else:
             return response.text, response.status_code
         return None, status

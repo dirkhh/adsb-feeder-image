@@ -181,7 +181,8 @@ def generic_get_json(url: str, data: Optional[Any] = None, timeout: float = 5.0)
         status = err.errno if err.errno else -1
     except Exception:
         # for some reason this didn't work
-        print_err("checking {url} failed: reason unknown")
+        print_err("checking {url} failed:")
+        print_err(traceback.format_exc())
     else:
         return json_response, response.status_code
     return None, status
