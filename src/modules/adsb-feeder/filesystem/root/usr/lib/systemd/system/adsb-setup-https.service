@@ -1,0 +1,29 @@
+[Unit]
+Description=ADS-B Feeder Setup Service over https
+After=network-online.target adsb-hotspot.service
+
+[Service]
+SyslogIdentifier=adsb-setup
+WorkingDirectory=/opt/adsb/adsb-setup
+ExecStartPre=/bin/bash /opt/adsb/pre-start.sh
+#ExecStart=/usr/bin/python3 /opt/adsb/adsb-setup/app.py
+ExecStart=/usr/bin/gunicorn \
+    --bind 0.0.0.0:443 \
+    --certfile /opt/adsb/certs/feeder.cert \
+    --keyfile /opt/adsb/certs/feeder.key \
+    --ca-certs /opt/adsb/certs/feeder.chain \
+    --workers 1 \
+    --worker-class gthread \
+    --threads 8 \
+    app:create_app()
+ExecStopPost=/opt/adsb/scripts/log2disk.sh
+Restart=always
+Type=simple
+RestartSec=5
+StartLimitInterval=1
+StartLimitBurst=100
+StandardOutput=append:/run/adsb-feeder-image.log
+StandardError=append:/run/adsb-feeder-image.log
+
+[Install]
+WantedBy=multi-user.target

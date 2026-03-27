@@ -207,7 +207,7 @@ class AdsbIm:
         # should be sufficient to guess if this is an image or an app
         if not os_flag_file.exists():
             # so this could be a pre-0.15 image, or it could indeed be the app
-            app_flag_file = adsb_dir / "app.adsb.feeder.image"
+            app_flag_file = self._d.data_path / "app.adsb.feeder.image"
             if not app_flag_file.exists():
                 # there should be no app without the app flag file, so assume that
                 # this is an older image that was upgraded and hence didn't get the
@@ -650,9 +650,7 @@ class AdsbIm:
         thread = threading.Thread(target=start_mdns)
         thread.start()
 
-    def run(self, no_server=False):
-        debug = os.environ.get("ADSBIM_DEBUG") is not None
-
+    def startup(self, no_server=False):
         # as we migrate from pre v3.0.1 to v3.0.1 we need to sync the new feeder type
         # variables based on existing settings - the rest of the code must ensure that
         # these stay in sync, so this should only ever create change the first time
@@ -703,6 +701,12 @@ class AdsbIm:
         self._d.env_by_tags("under_voltage").value = False
         if "Raspberry" in self._d.env_by_tags("board_name").valuestr:
             threading.Thread(target=self.monitor_dmesg).start()
+
+    def run(self, no_server=False):
+        debug = os.environ.get("ADSBIM_DEBUG") is not None
+        self.startup(no_server=no_server)
+        if no_server:
+            return
 
         # Suppress Flask development server warning
         import logging
@@ -4981,7 +4985,7 @@ def create_stage2_yml_files(n, ip):
         )
 
 
-if __name__ == "__main__":
+def _prepare():
     # setup the config folder if that hasn't happened yet
     # this is designed for two scenarios:
     # (a) {get_adsb_base_dir()}/config is a subdirectory of {get_adsb_base_dir()} (that gets created if necessary)
@@ -5011,8 +5015,6 @@ if __name__ == "__main__":
         # I don't understand how that could happen
         shutil.copyfile(adsb_dir / "docker.image.versions", config_dir / ".env")
 
-    no_server = len(sys.argv) > 1 and sys.argv[1] == "--update-config"
-
     a = AdsbIm()
 
     def signal_handler(sig, frame):
@@ -5026,4 +5028,17 @@ if __name__ == "__main__":
     signal.signal(signal.SIGTERM, signal_handler)
     signal.signal(signal.SIGHUP, signal_handler)
 
+    return a
+
+
+def create_app():
+    """WSGI factory for gunicorn: gunicorn 'app:create_app()'"""
+    a = _prepare()
+    a.startup()
+    return a.app
+
+
+if __name__ == "__main__":
+    no_server = len(sys.argv) > 1 and sys.argv[1] == "--update-config"
+    a = _prepare()
     a.run(no_server=no_server)
