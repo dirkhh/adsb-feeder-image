@@ -2514,6 +2514,8 @@ class AdsbIm:
             self._global_name_update_lock.release()
 
     def _update_global_name_locked(self, force_update):
+        print_err(f"update_global: _update_global_name_locked()", level=8)
+
         def is_rfc1918_private_ip(ip_str: str) -> bool:
             try:
                 ip = ipaddress.IPv4Address(ip_str)
@@ -2543,6 +2545,7 @@ class AdsbIm:
             self._d.env_by_tags("fqdn").value = ""
 
         # check if the record exists and matches
+        print_err(f"update_global: check if the record exists and matches", level=8)
         lookup_match = False
         if fqdn != "":
             try:
@@ -2562,6 +2565,7 @@ class AdsbIm:
                 # DNS lookup failed - host doesn't exist or other DNS error - let's try the update
                 pass
 
+        print_err(f"update_global: check_ip()", level=8)
         ext_ip, status = self._system.check_ip()
         if status != 200:
             ext_ip = None
@@ -2574,6 +2578,7 @@ class AdsbIm:
             or force_update
             or self._d.env_by_tags("fqdn_cert_state").value == "initiated"
         ):
+            print_err(f"update_global: no update needed", level=8)
             return
 
         if ext_ip is not None:
@@ -2581,10 +2586,12 @@ class AdsbIm:
         url = f"{self._d.adsbim_api_url}/0/globalname"
         challenge_response = None
         if fqdn != "":
+            print_err(f"update_global: get challenge_json", level=8)
             challenge_json, status_code = generic_get_json(f"{url}?fqdn={fqdn}")
             if status_code == 200 and isinstance(challenge_json, Dict):
                 challenge = challenge_json.get("challenge", "")
                 # now encrypt the challenge with the private key in /opt/adsb/certs/feeder.key
+                print_err(f"update_global: encrypting challenge", level=8)
                 try:
                     # Decode the base64-encoded challenge
                     challenge_bytes = base64.b64decode(challenge)
