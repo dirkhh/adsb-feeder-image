@@ -20,18 +20,3 @@ fi
 
 systemd-run -u adsb-docker-pull bash /opt/adsb/docker-pull.sh
 
-# the code below enables the redirection from the my.adsb.im service to the
-# local feeder. this only needs to run if things aren't configured, yet
-grep "AF_IS_BASE_CONFIG_FINISHED=True" /opt/adsb/config/.env &> /dev/null && exit 0
-
-# get the local IP address
-IP=$(ip route get 8.8.8.8 | sed -n '/src/{s/.*src *\([^ ]*\).*/\1/p;q}')
-
-# slightly different approach in the rare cases where the first one fails
-[[ -z "$IP" ]] && IP=$(ip route get 8.8.8.8 | sed -nr 's/^.* src ([0-9.]*).*/\1/p;q')
-
-# this gets stopped and disabled by the setup app
-while true; do
-    curl "https://my.adsb.im/adsb-feeder.html?lip=${IP}" > /dev/null 2>&1
-    sleep 60
-done &

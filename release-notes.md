@@ -1,16 +1,7 @@
-Changes since v3.0.8
+Changes since v3.0.9
 =======
-- OS Update: fix unattended apt upgrade on Raspbian
-- sdrmap: add status link
-- theairtraffic: update status link
-- airplanes.live: update map link
-- stage2: add feeder links to home page table
-- global name: ensure that my.adsb.im has accurate information to forward the user to the local feeder
-- share diagnostics page: small tweaks
-- sonde: optionally enable web control
-- update docker containers to current versions (WARNING: potentially long update time)
-- ACARS: update acarshub to v4.1.5
-- NOTE: if acarshub does not work immediately, wait 10 minutes for possible migrations to finish
+- global name: fix incorrect refresh algorithm
+- webUI: only show global name if it works from this browser; minor fixes
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)

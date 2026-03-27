@@ -11,6 +11,7 @@ import os.path
 import pathlib
 import pickle
 import platform
+import random
 import re
 import secrets
 import shlex
@@ -240,6 +241,10 @@ class AdsbIm:
 
         # delay first dns check by at least 30 seconds to avoid unnecessary error after boot
         self.next_dns_check = time.time() + 30
+
+        # force global name update at a random point 2 min to 12h after startup
+        self.next_global_name_update = time.time() + random.randint(2 * 60, 12 * 3600)
+
         self.undervoltage_epoch = 0.0
 
         self._current_site_name = None
@@ -2518,8 +2523,8 @@ class AdsbIm:
 
         site_name = str(self._d.env_by_tags("site_name").list_get(0))
         if site_name == "":
-            # we don't have a site name, yet - there's no point to this
-            return
+            # we don't have a site name, yet - call it "firstboot"
+            site_name = "firstboot"
         if self.local_address == "":
             self.update_net_dev(from_update=True)
         if self.local_address == "":
@@ -4481,11 +4486,16 @@ class AdsbIm:
                 self.next_dns_check = now + 300
             else:
                 self.next_dns_check = now + 60
-            # also ensure that we ended up getting an fqdn (a previous spurious error could have prevented that)
-            # and that it matches our local address - make sure we connect to the backend at least twice a day
-            # in order to keep the my.adsb.im data fresh
-            # argument: force_update every 12h
-            self.update_global_name(now % (12 * 3600) < 60)
+
+        if now >= self.next_global_name_update:
+            # this runs first randomly 2 min to 12h after startup, then every 12h
+            self.next_global_name_update = now + 12 * 3600
+            # forced update to keep the my.adsb.im data fresh
+            self.update_global_name(True)
+        elif self._d.env_by_tags("fqdn").value == "":
+            # if there is no fqdn, this could be a fresh install or some other condition that
+            # requires we run this asap (force_update = False)
+            self.update_global_name(False)
 
         self._sdrdevices.ensure_populated()
 
