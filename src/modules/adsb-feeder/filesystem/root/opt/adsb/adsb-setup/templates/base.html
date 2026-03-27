@@ -428,9 +428,9 @@
 
     $(document).ready(function () {
       // Preload icons and populate placeholders when page loads
-      preloadIcons().then(() => {
-        populateIconPlaceholders();
-      });
+      preloadIcons()
+        .then(() => populateIconPlaceholders())
+        .catch(err => console.log("Error loading icons:", err));
       {% if not widget_mode %}
       for (let i = 0; i < 4; i++) {
         if (nMapButtons[i].matches) {
@@ -583,6 +583,9 @@
               $("#mf_stats_" + i).text(d["planes"] + " planes / " + d["tplanes"] + " today");
             }
           })
+        })
+        .catch((err) => {
+          console.log("requested stage2_stats and got error: " + err);
         });
       scheduleTask(check_mf_task, 15000);
     };
