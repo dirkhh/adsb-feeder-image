@@ -2606,7 +2606,7 @@ class AdsbIm:
                     print_err(f"Error signing challenge: {e}")
 
         data = {
-            "site_name": self._d.env_by_tags("site_name").list_get(0),
+            "site_name": site_name,
             "ip_address": self.local_address,
             "fqdn": fqdn,
         }
