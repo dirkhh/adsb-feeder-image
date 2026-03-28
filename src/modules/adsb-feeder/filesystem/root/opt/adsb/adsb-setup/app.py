@@ -4303,6 +4303,7 @@ class AdsbIm:
         elif not self._d.is_enabled("stage2"):
             # we don't do ADS-B, we don't do any of the other protocols, and this isn't a stage 2
             # let's send the user to the non-ADS-B setup
+            print_err(f"director redirecting to basic setup, nonadsb station name not correctly configured")
             return self.setup()
 
         # if the user chose to individually pick aggregators but hasn't done so,
