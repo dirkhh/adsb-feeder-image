@@ -101,7 +101,7 @@ class NoStatic(flask_logging.Filter):
         msg = record.getMessage()
         if "GET /static/" in msg:
             return False
-        if not (verbose & 8) and "GET /api/" in msg:
+        if not (int(verbose) & 8) and "GET /api/" in msg:
             return False
 
         return True
@@ -1973,7 +1973,7 @@ class AdsbIm:
                     if key not in self.microfeeder_setting_tags:
                         continue
                     tags = key.split("--")
-                    e = self._d.env_by_tags(tags)
+                    e = self._d.env_by_tags(tags)  # type: ignore
                     if e:
                         e.list_set(n, value)
         base_info, status = generic_get_json(f"http://{ip}:{port}/api/base_info", timeout=timeout)
@@ -3019,7 +3019,7 @@ class AdsbIm:
             if gain == "" or gain == "auto":
                 self._d.env_by_tags(["978gain"]).value = "autogain"
 
-            if verbose & 1:
+            if int(verbose) & 1:
                 print_err(f"in the end we have")
                 print_err(f"1090serial {env1090.value}")
                 print_err(f"1090_2serial {self._d.env_by_tags('1090_2serial').value}")
