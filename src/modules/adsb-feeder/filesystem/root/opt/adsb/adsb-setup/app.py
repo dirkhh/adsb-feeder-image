@@ -3416,9 +3416,14 @@ class AdsbIm:
             }
         )
 
-        initials_set = (self._d.env_by_tags('initials').list_get(0) != "")
+        have_initials = not any(
+            {
+                self._d.env_by_tags("initials").list_get(0) == "",
+                self._d.env_by_tags("initials").list_get(0) == "CHANGEME",
+            }
+        )
 
-        return non_adsb_enabled and initials_set
+        return non_adsb_enabled and have_initials
 
     @check_restart_lock
     def update(self):
