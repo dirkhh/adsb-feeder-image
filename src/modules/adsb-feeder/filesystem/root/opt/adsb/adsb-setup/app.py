@@ -82,6 +82,7 @@ from utils.util import (
     generic_get_json,
     is_true,
     is_uuid,
+    make_float,
     make_int,
     mf_get_ip_and_triplet,
     print_err,
@@ -1571,7 +1572,7 @@ class AdsbIm:
                         if "auto" in gain:
                             pass
                         else:
-                            numgain = make_int(gain)
+                            numgain = make_float(gain)
                             if numgain < 0:
                                 gain = "0"
                             elif numgain >= 50:
@@ -1580,7 +1581,7 @@ class AdsbIm:
                         # I don't understand why gain values for hfdl are different?
                         if sdr.purpose == "hfdl":
                             if gain != "":
-                                numgain = make_int(gain)
+                                numgain = make_float(gain)
                                 if numgain <= 0:
                                     gain = "0"
                                 elif numgain > 45:
@@ -1588,7 +1589,7 @@ class AdsbIm:
                         elif "auto" in gain:
                             pass
                         else:
-                            numgain = make_int(gain)
+                            numgain = make_float(gain)
                             if numgain < 20:
                                 gain = "20"
                             elif numgain > 59:
@@ -2492,9 +2493,9 @@ class AdsbIm:
     def adjust_airspy_gain(self, gain):
         if gain.startswith("auto"):
             return "auto"
-        elif make_int(gain) > 21:
+        elif make_float(gain) > 21:
             return "21"
-        elif make_int(gain) < 0:
+        elif make_float(gain) < 0:
             return "0"
         return gain
 

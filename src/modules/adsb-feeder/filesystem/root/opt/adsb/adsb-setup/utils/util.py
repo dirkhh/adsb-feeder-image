@@ -140,6 +140,15 @@ def make_int(value: Any) -> int:
         return 0
 
 
+def make_float(value: Any) -> float:
+    """Convert value to float, returning 0 on failure."""
+    try:
+        return float(value)
+    except Exception:
+        stack_info(f"ERROR: make_float({value}) - returning 0")
+        return 0.0
+
+
 def generic_get_json(url: str, data: Optional[Any] = None, timeout: float = 5.0) -> tuple[Optional[Any], int]:
     """
     Make JSON GET/POST request with custom user agent.
