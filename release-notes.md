@@ -1,5 +1,7 @@
 Changes since v3.0.9
 =======
+- beta-notes: several small cleanups
+- webUI: fix issue with looping back to basic setup page for non-ADSB setups
 - global name: fix incorrect refresh algorithm
 - webUI: only show global name if it works from this browser; minor fixes
 
