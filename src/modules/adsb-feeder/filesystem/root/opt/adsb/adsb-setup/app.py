@@ -2629,14 +2629,18 @@ class AdsbIm:
             # update the existing fqdn - so let's just get a new one
             data["fqdn"] = ""
 
-        # This API call can take a long time (DNS update + LetsEncrypt)
+        # This API call used to take a long time - these days it usually doesn't, but
+        # just in case...
         global_name, status_code = generic_get_json(url, data=json.dumps(data), timeout=300.0)
         if status_code != 200:
             print_err(f"error retrieving global name: {status_code} {global_name}")
             return
 
         if not global_name or not isinstance(global_name, Dict):
-            print_err(f"unexpected return value for global name: {global_name}")
+            if site_name == "firstboot":
+                print_err("sent firstboot ping")
+            else:
+                print_err(f"unexpected return value for global name: {global_name}")
             return
 
         print_err(f"Received global_name data {global_name}")
