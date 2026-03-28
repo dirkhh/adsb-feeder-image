@@ -3411,17 +3411,10 @@ class AdsbIm:
                 self._d.is_enabled(["shipfeeder"]),
             }
         )
-        inconsistent_non_adsb_config = any(
-            {
-                self._d.is_enabled(["acarsdec"]) and self._d.env_by_tags("acars_feed_id").value == "",
-                self._d.is_enabled(["acarsdec2"]) and self._d.env_by_tags("acars_2_feed_id").value == "",
-                self._d.is_enabled(["dumpvdl2"]) and self._d.env_by_tags("vdl2_feed_id").value == "",
-                self._d.is_enabled(["dumphfdl"]) and self._d.env_by_tags("hfdl_feed_id").value == "",
-                self._d.is_enabled(["sonde"]) and self._d.env_by_tags("sonde_callsign").value == "",
-                self._d.is_enabled(["shipfeeder"]) and self._d.env_by_tags("ais_station_name").value == "",
-            }
-        )
-        return non_adsb_enabled and not inconsistent_non_adsb_config
+
+        initials_set = (self._d.env_by_tags('initials').list_get(0) != "")
+
+        return non_adsb_enabled and initials_set
 
     @check_restart_lock
     def update(self):
