@@ -6,6 +6,7 @@ echo "FACTORY RESET" >> /run/adsb-feeder-image.log
 /opt/adsb/docker-compose-adsb down
 rm -f /opt/adsb/config/{.env,config.json};
 rm -f /opt/adsb/init-complete
+rm -f /opt/adsb/certs/feeder.*
 [ "$1" = "-prune" ] && docker system prune -a -f
 
 echo "FACTORY RESET DONE" >> /run/adsb-feeder-image.log
