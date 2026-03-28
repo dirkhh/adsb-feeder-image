@@ -436,6 +436,7 @@
           the UDP port you receive here.
         </label>
         <input type="text" id="aisfriends_udp_port" name="aisfriends_udp_port" class="form-control w-75"
+               pattern="^\d{3,5}$"
                placeholder="AIS Friends UDP Port" value="{{ list_value_by_tags('aisfriends_udp_port',m) }}" />
       </div>
     </label>
@@ -452,6 +453,7 @@
           and enter the UDP port you receive here.
         </label>
         <input type="text" id="aishub_udp_port" name="aishub_udp_port" class="form-control w-75"
+               pattern="^\d{3,5}$"
                placeholder="AISHub UDP Port" value="{{ list_value_by_tags('aishub_udp_port',m) }}" />
       </div>
     </label>
@@ -496,6 +498,7 @@
           the UDP port you receive here.
         </label>
         <input type="text" id="ais_marinetraffic_udp_port" name="ais_marinetraffic_udp_port" class="form-control w-75"
+                pattern="^\d{3,5}$"
                 placeholder="MarineTraffic UDP Port" value="{{ list_value_by_tags('ais_marinetraffic_udp_port',m) }}" />
       </div>
     </label>
@@ -513,6 +516,7 @@
           the UDP port you receive here.
         </label>
         <input type="text" id="ais_myshiptracking_udp_port" name="ais_myshiptracking_udp_port" class="form-control w-75"
+                pattern="^\d{3,5}$"
                 placeholder="MyShipTracking UDP Port" value="{{ list_value_by_tags('ais_myshiptracking_udp_port',m) }}" />
       </div>
     </label>
@@ -529,6 +533,7 @@
           and enter the UDP port you receive here.
         </label>
         <input type="text" id="ais_boatbeacon_udp_port" name="ais_boatbeacon_udp_port" class="form-control w-75"
+                pattern="^\d{3,5}$"
                 placeholder="BoatBeacon UDP Port" value="{{ list_value_by_tags('ais_boatbeacon_udp_port',m) }}" />
       </div>
     </label>
@@ -553,6 +558,7 @@
           the UDP port you receive here.
         </label>
         <input type="text" id="ais_shippingexplorer_udp_port" name="ais_shippingexplorer_udp_port" class="form-control w-75"
+               pattern="^\d{3,5}$"
                placeholder="ShippingExplorer UDP Port" value="{{ list_value_by_tags('ais_shippingexplorer_udp_port',m) }}" />
       </div>
     </label>
@@ -569,6 +575,7 @@
           the UDP port you receive here.
         </label>
         <input type="text" id="ais_shipxplorer_udp_port" name="ais_shipxplorer_udp_port"
+               pattern="^\d{3,5}$"
                class="form-control w-75" placeholder="ShipXplorer UDP Port"
                value="{{ list_value_by_tags('ais_shipxplorer_udp_port',m) }}" />
       </div>
@@ -586,6 +593,7 @@
           the UDP port you receive here.
         </label>
         <input type="text" id="ais_vesselfinder_udp_port" name="ais_vesselfinder_udp_port"
+               pattern="^\d{3,5}$"
                class="form-control w-75" placeholder="VesselFinder UDP Port"
                value="{{ list_value_by_tags('ais_vesselfinder_udp_port',m) }}" />
       </div>
