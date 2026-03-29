@@ -1,5 +1,6 @@
 Changes since v3.0.10
 =======
+- webUI: fix Telegraf enable button
 - webUI: instruct user to set initials when setting up non-ADSB services
 - fix bug when PiHole (or another DNS sinkhole) blocklists ipify
 - fix another problem where a non-ADSB setup could end up looping on the basic setup page
