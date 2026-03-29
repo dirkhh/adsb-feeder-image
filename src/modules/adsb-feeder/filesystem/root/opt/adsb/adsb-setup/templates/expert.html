@@ -285,8 +285,8 @@
           </label>
         </div>
         <div class="col-4">
-          <button type="submit" class="btn btn-primary mx-auto w-100" name="telegraf_adsb" value="go">
-            Enable telegraf
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="telegraf_adsb--{% if is_enabled('telegraf_adsb') %}disable{% else %}enable{% endif %}" value="go">
+            {% if is_enabled('telegraf_adsb') %}Disable{% else %}Enable{% endif %} telegraf
           </button>
         </div>
       </div>
