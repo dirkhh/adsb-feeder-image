@@ -1,3 +1,4 @@
+import re
 import socket
 import subprocess
 import threading
@@ -233,6 +234,9 @@ class System:
             if response.status_code != 200:
                 return None
             ip = response.text
+            if not re.match(r"(\d+).(\d+).(\d+).(\d+)", ip):
+                print_err(f"check_ip(): this doesn't seem to be an IP: {ip}")
+                return None
             self.external_ip = ip
             self.external_ip_timestamp = time.time()
             return ip
