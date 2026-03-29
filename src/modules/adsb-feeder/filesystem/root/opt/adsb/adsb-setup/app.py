@@ -3434,6 +3434,9 @@ class AdsbIm:
             }
         )
 
+        if non_adsb_enabled and not (have_initials or names_good):
+            flash("Please set initials")
+
         return non_adsb_enabled and (have_initials or names_good)
 
     @check_restart_lock
