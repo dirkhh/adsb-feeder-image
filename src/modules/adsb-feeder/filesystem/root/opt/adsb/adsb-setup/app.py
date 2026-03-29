@@ -3416,6 +3416,17 @@ class AdsbIm:
             }
         )
 
+        names_good = not any(
+            {
+                self._d.is_enabled(["acarsdec"]) and self._d.env_by_tags("acars_feed_id").value == "",
+                self._d.is_enabled(["acarsdec2"]) and self._d.env_by_tags("acars_2_feed_id").value == "",
+                self._d.is_enabled(["dumpvdl2"]) and self._d.env_by_tags("vdl2_feed_id").value == "",
+                self._d.is_enabled(["dumphfdl"]) and self._d.env_by_tags("hfdl_feed_id").value == "",
+                self._d.is_enabled(["sonde"]) and self._d.env_by_tags("sonde_callsign").value == "",
+                self._d.is_enabled(["shipfeeder"]) and self._d.env_by_tags("ais_station_name").value == "",
+            }
+        )
+
         have_initials = not any(
             {
                 self._d.env_by_tags("initials").list_get(0) == "",
@@ -3423,7 +3434,7 @@ class AdsbIm:
             }
         )
 
-        return non_adsb_enabled and have_initials
+        return non_adsb_enabled and (have_initials or names_good)
 
     @check_restart_lock
     def update(self):
