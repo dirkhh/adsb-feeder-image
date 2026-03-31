@@ -356,9 +356,7 @@ def recover_to_tag(tagorbranch):
 
     # Validate tag format
     version_pattern = re.compile(r"^v\d+\.\d+\.\d+(?:-beta\.\d+)?$")
-    if version_pattern.match(tagorbranch):
-        tagorbranch = tagorbranch[1:]
-    else:
+    if not version_pattern.match(tagorbranch):
         tagorbranch = f"origin/{tagorbranch}"
 
     success, error = start_recovery(tagorbranch)
