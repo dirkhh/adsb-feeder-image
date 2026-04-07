@@ -49,6 +49,8 @@ sed -i -e 's/IPQoS 0x00/#\0/' /etc/ssh/sshd_config
 echo "deb http://download.zerotier.com/debian/${DEBIAN_DISTRO} ${DEBIAN_DISTRO} main" > /etc/apt/sources.list.d/zerotier.list
 curl -fsSL "https://pkgs.tailscale.com/stable/debian/${DEBIAN_DISTRO}.noarmor.gpg" | sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
 curl -fsSL "https://pkgs.tailscale.com/stable/debian/${DEBIAN_DISTRO}.tailscale-keyring.list" | sudo tee /etc/apt/sources.list.d/tailscale.list
+curl -fsSL "https://pkgs.netbird.io/debian/public.key" | sudo gpg --dearmor -o /usr/share/keyrings/netbird-archive-keyring.gpg
+echo "deb [signed-by=/usr/share/keyrings/netbird-archive-keyring.gpg] https://pkgs.netbird.io/debian stable main" > /etc/apt/sources.list.d/netbird.list
 
 # setup Python/Flask
 apt-get update --allow-releaseinfo-change
@@ -89,12 +91,13 @@ df -h
 systemctl mask hostapd.service
 systemctl mask isc-dhcp-server.service
 
-# install zerotier and tailscale, first get their repo
+# install zerotier, tailscale and netbird, first get their repo
 # don't enable
 
-apt-get install -y zerotier-one tailscale
+apt-get install -y zerotier-one tailscale netbird
 systemctl disable tailscaled
 systemctl disable zerotier-one
+systemctl disable netbird
 systemctl mask tailscaled
 systemctl mask zerotier-one
 
@@ -144,4 +147,3 @@ systemctl disable ModemManager.service || true
 # finally, create a flag file as indicator that this is a complete ADS-B Feeder
 # Image, and not just the app running on a different OS.
 touch /opt/adsb/os.adsb.feeder.image
-
