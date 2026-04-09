@@ -2828,6 +2828,10 @@ class AdsbIm:
             ac_db = False
             # save 100 MB of memory for low memory setups
 
+        if self._d.is_enabled("skystats"):
+            # skystats needs this DB, force it on
+            ac_db = True
+
         self._d.env_by_tags(["tar1090_ac_db"]).value = ac_db
 
         # make sure the avahi alias service runs on an adsb.im image
