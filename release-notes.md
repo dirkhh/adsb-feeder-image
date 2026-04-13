@@ -1,9 +1,8 @@
-Changes since v3.0.10
+Changes since v3.0.11
 =======
-- webUI: fix Telegraf enable button
-- webUI: instruct user to set initials when setting up non-ADSB services
-- fix bug when PiHole (or another DNS sinkhole) blocklists ipify
-- fix another problem where a non-ADSB setup could end up looping on the basic setup page
+- skystats: force DB on even on low-mem systems
+- recovery app: fix recover-to-tag
+- web UI: update OpenSky URL
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)
