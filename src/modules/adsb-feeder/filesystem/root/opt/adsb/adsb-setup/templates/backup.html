@@ -3,45 +3,46 @@
 
 {% block content %}
 <h1 class="mt-3 text-center text-danger">{% block title %} Create a backup of your configuration {% endblock %}</h1>
-  <div>
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    {% for message in messages %}
-    <div class="alert alert-warning">
-      {{ message }}
-    </div>
-    {% endfor %}
-    {% endif %}
-    {% endwith %}
+<div>
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+  {% for message in messages %}
+  <div class="alert alert-warning">
+    {{ message }}
   </div>
+  {% endfor %}
+  {% endif %}
+  {% endwith %}
+</div>
 <form method="post" enctype="multipart/form-data">
-<p>
+  <p>
   Config Backup: creates a zip file with your configuration settings<br>
   Config + Graphs Backup: adds the data used to generate the statistical graphs (roughly +15MB)<br>
-</p>
+  </p>
   <a class="mb-3 btn btn-primary" href="/backupexecuteconfig">Config Backup</a>
   <a class="mb-3 btn btn-primary" href="/backupexecutegraphs">Config + Graphs Backup</a>
-<p>
-  In almost cases one of the two options above is what you really want. The
-  {% if is_enabled('skystats_db') %}two options below create{%else%}option below creates{%endif%} potentially significantly
+  <p>
+  In almost all cases one of the two options above is what you really want. The Full Backup creates significantly
   larger backup files (read - it takes much longer to create the backup and much longer to restore) and unless you know that
-  you definitely do need that additionally data, you should likely stick with one of the two options above.
-</p>
-<p>
+  you definitely do need that additional data, you should likely stick with one of the two options above.
+  </p>
+  <p>
   Full Backup: adds on top of all that the replay / heatmap data<br>
-  {% if is_enabled('skystats_db') %}
-  Skystats DB Backup: creates a SQL dump of the Skystats PostgreSQL database
-  {% endif %}
-</p>
-<p>
+  </p>
+  <a class="mb-3 btn btn-primary" href="/backupexecutefull">Full Backup</a>
+  <p>
   Depending on the amount of historic replay / heatmap data you have, a Full Backup can take a signficant amount of time
   and result in a very large archive to be downloaded. If you want to limit the data retained on disk, you can use
   MAX_GLOBE_HISTORY=365 in the environment variables on the expert page to only retain a year of data, this setting will
   not impact graph data.
-</p>
-  <a class="mb-3 btn btn-primary" href="/backupexecutefull">Full Backup</a>
+  </p>
   {% if is_enabled('skystats_db') %}
+  <p>
+  Skystats DB Backup: creates a SQL dump of the Skystats PostgreSQL database (restore currently not supported)
+  </p>
+  <p>
   <a class="mb-3 btn btn-primary" href="/backupexecuteskystatsdb">Skystats DB Backup</a>
+  </p>
   {% endif %}
 </form>
 {% endblock %}
