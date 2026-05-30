@@ -1,7 +1,7 @@
 # dataclass
 import os
 from dataclasses import dataclass, field
-from typing import Any, Optional, Union
+from typing import Any, ClassVar, Optional, Union
 
 from utils.config import read_values_from_env_file
 
@@ -23,6 +23,8 @@ from .util import is_true, print_err
 @dataclass
 class Data:
     """Singleton dataclass for application configuration and state."""
+
+    instance: ClassVar["Data"]
 
     def __new__(cls) -> "Data":
         if not hasattr(cls, "instance"):
