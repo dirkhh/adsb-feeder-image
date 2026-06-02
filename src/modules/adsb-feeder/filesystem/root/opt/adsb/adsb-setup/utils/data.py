@@ -986,12 +986,14 @@ class Data:
         # fmt: off
         ret["AF_FALSE_ON_STAGE2"] = "false" if self.is_enabled(["stage2"]) else "true"
         if self.is_enabled(["stage2"]):
+            # use ports > 33000 for stage2 stuff
+            stage2_running_port = 33000
             for i in range(1, self.env_by_tags("num_micro_sites").valueint + 1):
-                ret[f"AF_TAR1090_PORT_{i}"] = int(ret[f"AF_TAR1090_PORT"]) + i * 1000
-                ret[f"AF_PIAWAREMAP_PORT_{i}"] = int(ret[f"AF_PIAWAREMAP_PORT"]) + i * 1000
-                ret[f"AF_PIAWARESTAT_PORT_{i}"] = int(ret[f"AF_PIAWARESTAT_PORT"]) + i * 1000
-                ret[f"AF_FLIGHTRADAR_PORT_{i}"] = int(ret[f"AF_FLIGHTRADAR_PORT"]) + i * 1000
-                ret[f"AF_PLANEFINDER_PORT_{i}"] = int(ret[f"AF_PLANEFINDER_PORT"]) + i * 1000
+                ret[f"AF_TAR1090_PORT_{i}"] = (stage2_running_port := stage2_running_port + 1)
+                ret[f"AF_PIAWAREMAP_PORT_{i}"] = (stage2_running_port := stage2_running_port + 1)
+                ret[f"AF_PIAWARESTAT_PORT_{i}"] = (stage2_running_port := stage2_running_port + 1)
+                ret[f"AF_FLIGHTRADAR_PORT_{i}"] = (stage2_running_port := stage2_running_port + 1)
+                ret[f"AF_PLANEFINDER_PORT_{i}"] = (stage2_running_port := stage2_running_port + 1)
                 site_name = self.env_by_tags("site_name").list_get(i)
                 ret[f"GRAPHS1090_WWW_TITLE_{i}"] = f"{site_name} graphs1090 stats"
                 ret[f"GRAPHS1090_WWW_HEADER_{i}"] = f"Performance Graphs: {site_name}"
