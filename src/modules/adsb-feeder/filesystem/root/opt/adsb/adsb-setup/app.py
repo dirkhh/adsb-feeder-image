@@ -195,7 +195,7 @@ class AdsbIm:
                 "env_values": self._d.env_values,
             }
 
-        self._routemanager = RouteManager(self.app)
+        self._routemanager = RouteManager(self.app, self._d)
 
         # let's only instantiate the Wifi class if we are on WiFi
         self.wifi = None

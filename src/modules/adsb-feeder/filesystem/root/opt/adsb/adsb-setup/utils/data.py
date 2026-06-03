@@ -69,6 +69,7 @@ class Data:
     hotspot_disabled_path = HOTSPOT_DISABLED_FILE
     is_feeder_image = True
     _env_by_tags_dict: dict[tuple[str, ...], Env] = field(default_factory=dict[tuple[str, ...], Env])
+    _env_file_vals = []
 
     ultrafeeder: list = field(default_factory=list)
     previous_version = ""
@@ -997,6 +998,7 @@ class Data:
                 site_name = self.env_by_tags("site_name").list_get(i)
                 ret[f"GRAPHS1090_WWW_TITLE_{i}"] = f"{site_name} graphs1090 stats"
                 ret[f"GRAPHS1090_WWW_HEADER_{i}"] = f"Performance Graphs: {site_name}"
+        self._env_file_vals = ret
         return ret
         # fmt: on
 
