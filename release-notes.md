@@ -1,13 +1,6 @@
-Changes since v3.0.11
+Changes since v3.0.12
 =======
-- stage2: include Heywhatsthat IDs in merged outlines
-- expert setup: easier env var and ultrafeeder args entry
-- update all containers
-- web UI: improve text on backup page
-- skystats: update to 0.1.13
-- skystats: force DB on even on low-mem systems
-- recovery app: fix recover-to-tag
-- web UI: update OpenSky URL
+- stage2: support well more than 40 sites (resources permitting)
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)
