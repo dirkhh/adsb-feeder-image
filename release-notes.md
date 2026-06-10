@@ -1,5 +1,6 @@
 Changes since v3.0.12
 =======
+- update RadarVirtuel container and setup
 - beta-notes: stage2 minor piaware link fix on data sharing page
 - stage2: support well more than 40 sites (resources permitting)
 

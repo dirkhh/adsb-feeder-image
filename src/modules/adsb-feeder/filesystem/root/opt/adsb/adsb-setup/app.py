@@ -285,7 +285,6 @@ class AdsbIm:
             "planefinder--submit": PlaneFinder(self._system),
             "planewatch--submit": PlaneWatch(self._system),
             "radarbox--submit": RadarBox(self._system),
-            "radarvirtuel--submit": RadarVirtuel(self._system),
             "1090uk--submit": Uk1090(self._system),
             "sdrmap--submit": Sdrmap(self._system),
         }
@@ -308,7 +307,7 @@ class AdsbIm:
             ["planefinder", "PlaneFinder", "https://planefinder.net/", ["/planefinder-statSTG2IDX/"], 1],
             ["adsbhub", "ADSBHub", "https://www.adsbhub.org/coverage.php", [""], 1],
             ["opensky", "OpenSky", "https://map.opensky-network.org/", ["https://opensky-network.org/my-opensky/sensors/view-sensors"], 1],
-            ["radarvirtuel", "RadarVirtuel", "https://www.radarvirtuel.com/", [""], 1],
+            ["radarvirtuel", "RadarVirtuel", "https://www.radarvirtuel.com/", [""], 0],
             ["1090uk", "1090MHz UK", "https://1090mhz.uk", ["https://www.1090mhz.uk/mystatus.php?key=<FEEDER_1090UK_API_KEY>"], 1],
             ["sdrmap", "sdrmap", "https://sdrmap.org/", ["https://sdrmap.org/?station=<FEEDER_SM_USERNAME>"], 1],
         ]
@@ -330,7 +329,7 @@ class AdsbIm:
             "planefinder--key", "planefinder--is_enabled",
             "adsbhub--key", "adsbhub--is_enabled",
             "opensky--user", "opensky--key", "opensky--is_enabled",
-            "radarvirtuel--key", "radarvirtuel--is_enabled",
+            "radarvirtuel--is_enabled",
             "planewatch--key", "planewatch--is_enabled",
             "1090uk--key", "1090uk--is_enabled",
             "adsblol--is_enabled",

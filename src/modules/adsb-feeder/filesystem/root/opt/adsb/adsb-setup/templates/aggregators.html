@@ -134,6 +134,20 @@
       <a href="https://www.adsbexchange.com/">ADSBExchange</a> <a href="https://www.adsbexchange.com/privacy-policy/" title="Privacy Policy" style="font-size: 0.8em;">🛡️</a>
     </label>
   </div>
+  <!-- RadarVirtuel is not simply an Ultrafeeder config, yet it's now also accountless. So... umm. -->
+
+
+  <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
+    <input type="checkbox" class="form-check-input me-1" name="radarvirtuel--is_enabled" id="radarvirtuel--is_enabled"
+           {{ others_enabled("radarvirtuel", m) }} onclick="$('#individual').click();" />
+    <label for="radarvirtuel--is_enabled">
+      <a href="https://www.radarvirtuel.com/">RadarVirtuel</a> <span
+            title="This site is missing a clear data/privacy policy" style="font-size: 0.8em;">⚠️</span>
+    </label>
+  </div>
+
+
+
   <div class="col-12 form-check text-end">
     <div class="form-group collapse" id="showuuids">
       {% if uf_enabled("adsblol", m) %}
@@ -295,24 +309,6 @@
         <input type="text" id="opensky--key" name="opensky--key" class="form-control w-75"
                placeholder="OpenSky serial number" value="{{ list_value_by_tags(["opensky", "key"], m) }}" />
         <button type="submit" class="btn btn-primary mt-1" name="opensky--submit" value="{{stay}}">Request key</button>
-      </div>
-    </label>
-  </div>
-  <div class="ol-12 form-check">
-    <input type="checkbox" class="form-check-input me-1" name="radarvirtuel--is_enabled" id="radarvirtuel--is_enabled"
-           {{ others_enabled("radarvirtuel", m) }} />
-    <label class="mx-1 w-auto" for="radarvirtuel--is_enabled">
-      <a href="https://www.radarvirtuel.com/">RadarVirtuel</a> <span title="This site is missing a clear data/privacy policy" style="font-size: 0.8em;">⚠️</span>
-      <div class="form-group" id="RV_FIELDS">
-        <label for="radarvirtuel--key">
-          To sign up for a feeder key send email to
-          <a href="mailto://support@adsbnetwork.com">support@adsbnetwork.com</a>. Include your name, Lat/Lon of
-          nearest airport, and mention that you are using a Docker setup. They will respond with a feeder key that you
-          can enter here
-        </label>
-        <input type="text" id="radarvirtuel--key" name="radarvirtuel--key" class="form-control w-75"
-               {{ others_enabled("radarvirtuel", m) | replace("checked", "required" ) }}
-               placeholder=" RadarVirtuel feeder key" value="{{ list_value_by_tags(["radarvirtuel", "key"], m) }}">
       </div>
     </label>
   </div>
@@ -621,7 +617,6 @@
     ["planefinder--is_enabled", "PF_FIELDS", ["planefinder--key"]],
     ["adsbhub--is_enabled", "AH_FIELDS", ["adsbhub--key"]],
     ["opensky--is_enabled", "OS_FIELDS", ["opensky--user"]],
-    ["radarvirtuel--is_enabled", "RV_FIELDS", ["radarvirtuel--key"]],
     ["1090uk--is_enabled", "TNUK_FIELDS", ["1090uk--key"]],
     ["sdrmap--is_enabled", "SM_FIELDS", ["sdrmap--user", "sdrmap--key"]],
     ["ais_feed_aiscatcher--is_enabled", "AISCATCHER_FIELDS", ["aiscatcher_feeder_key"]],
