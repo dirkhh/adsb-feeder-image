@@ -35,9 +35,14 @@ class RouteManager:
         if inc_port > 0:
             # this is ugly. we need too look up the port
             endpoint = re.sub("_.*$", "/", orig)
+            name = None
             for ep, ep_name, ep_path in self._d._proxy_routes:
                 if endpoint == ep:
                     name = ep_name
+                    break
+            if name is None:
+                print_err(f"endpoint: {endpoint} not found in proxy_routes", level=1)
+                raise ValueError(f"Endpoint {endpoint} not found in proxy routes")
             print_err(f"endpoint: {endpoint} name: {name}", level=8)
             env_name = "AF_" + name + "_PORT_" + str(inc_port)
             # this port value is only in the env file not the envs
