@@ -37,13 +37,12 @@ class RouteManager:
             endpoint = re.sub("_.*$", "/", orig)
             for ep, ep_name, ep_path in self._d._proxy_routes:
                 if endpoint == ep:
-                    name= ep_name
+                    name = ep_name
             print_err(f"endpoint: {endpoint} name: {name}", level=8)
             env_name = "AF_" + name + "_PORT_" + str(inc_port)
             # this port value is only in the env file not the envs
             # but conveniently we can look a the vals we put into the env file
             new_port = self._d._env_file_vals[env_name]
-        #new_port += inc_port * 1000
         host_url = request.host_url.rstrip("/ ")
         host_url = re.sub(":\\d+$", "", host_url)
         new_path += sub_path

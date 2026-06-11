@@ -69,7 +69,7 @@ class Data:
     hotspot_disabled_path = HOTSPOT_DISABLED_FILE
     is_feeder_image = True
     _env_by_tags_dict: dict[tuple[str, ...], Env] = field(default_factory=dict[tuple[str, ...], Env])
-    _env_file_vals = []
+    _env_file_vals: dict[str, Union[str, int]] = field(default_factory=dict)
 
     ultrafeeder: list = field(default_factory=list)
     previous_version = ""

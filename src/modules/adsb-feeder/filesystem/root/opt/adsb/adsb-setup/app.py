@@ -69,7 +69,6 @@ from utils.other_aggregators import (
     PlaneFinder,
     PlaneWatch,
     RadarBox,
-    RadarVirtuel,
     Sdrmap,
     Uk1090,
 )
