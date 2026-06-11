@@ -438,7 +438,7 @@ class TestAdsbImIntegration:
         # Verify all components were initialized
         mock_data.assert_called_once()
         mock_system.assert_called_once()
-        mock_route_manager.assert_called_once_with(adsb_im.app)
+        mock_route_manager.assert_called_once_with(adsb_im.app, mock_data_instance)
 
         # Verify properties
         assert adsb_im._d is mock_data_instance

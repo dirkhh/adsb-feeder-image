@@ -16,20 +16,37 @@ def flask_app():
     return app
 
 
+@pytest.fixture
+def mock_data():
+    """Create a mock Data object for testing"""
+    mock = MagicMock()
+    mock._env_file_vals = {}
+    mock._proxy_routes = [
+        ["/map/", "TAR1090", "/"],
+        ["/tar1090/", "TAR1090", "/"],
+        ["/graphs1090/", "TAR1090", "/graphs1090/"],
+        ["/fa/", "PIAWAREMAP", "/"],
+        ["/fa-status/", "PIAWARESTAT", "/"],
+        ["/fa-status.json/", "PIAWARESTAT", "/status.json"],
+    ]
+    return mock
+
+
 class TestRouteManager:
     """Test the RouteManager class"""
 
-    def test_route_manager_initialization(self):
+    def test_route_manager_initialization(self, mock_data):
         """Test RouteManager initialization"""
         mock_app = MagicMock()
-        route_manager = RouteManager(mock_app)
+        route_manager = RouteManager(mock_app, mock_data)
 
         assert route_manager.app is mock_app
+        assert route_manager._d is mock_data
 
-    def test_add_proxy_routes(self):
+    def test_add_proxy_routes(self, mock_data):
         """Test adding proxy routes"""
         mock_app = MagicMock()
-        route_manager = RouteManager(mock_app)
+        route_manager = RouteManager(mock_app, mock_data)
 
         proxy_routes = [
             ["/map/", "TAR1090", "/"],
@@ -53,9 +70,12 @@ class TestRouteManager:
         assert callable(calls[1][0][2])
         assert callable(calls[2][0][2])
 
-    def test_function_factory(self, flask_app):
+    def test_function_factory(self, flask_app, mock_data):
         """Test function factory creates proper redirect functions"""
-        route_manager = RouteManager(flask_app)
+        # Setup mock data for inc_port lookup
+        mock_data._proxy_routes = [["/test/", "TEST", "/"]]
+        mock_data._env_file_vals = {"AF_TEST_PORT_2": 10080}
+        route_manager = RouteManager(flask_app, mock_data)
 
         func = route_manager.function_factory("/test/", 8080, "/path")
 
@@ -68,76 +88,82 @@ class TestRouteManager:
                 func(idx=1, inc_port=2, sub_path="/extra")
                 mock_redirect.assert_called_once()
 
-    def test_my_redirect_basic(self, flask_app):
+    def test_my_redirect_basic(self, flask_app, mock_data):
         """Test basic redirect functionality"""
-        route_manager = RouteManager(flask_app)
+        route_manager = RouteManager(flask_app, mock_data)
 
         with flask_app.test_request_context('/'):
             with patch('utils.flask.redirect') as mock_redirect:
                 result = route_manager.my_redirect("/test/", 8080, "/path")
                 mock_redirect.assert_called_once_with("http://localhost:8080/path")
 
-    def test_my_redirect_with_query_string(self, flask_app):
+    def test_my_redirect_with_query_string(self, flask_app, mock_data):
         """Test redirect with query string"""
-        route_manager = RouteManager(flask_app)
+        route_manager = RouteManager(flask_app, mock_data)
 
         with flask_app.test_request_context('/?param=value'):
             with patch('utils.flask.redirect') as mock_redirect:
                 result = route_manager.my_redirect("/test/", 8080, "/path")
                 mock_redirect.assert_called_once_with("http://localhost:8080/path?param=value")
 
-    def test_my_redirect_with_idx(self, flask_app):
+    def test_my_redirect_with_idx(self, flask_app, mock_data):
         """Test redirect with index parameter"""
-        route_manager = RouteManager(flask_app)
+        route_manager = RouteManager(flask_app, mock_data)
 
         with flask_app.test_request_context('/'):
             with patch('utils.flask.redirect') as mock_redirect:
                 result = route_manager.my_redirect("/test/", 8080, "/path", idx=5)
                 mock_redirect.assert_called_once_with("http://localhost:8080/5/path")
 
-    def test_my_redirect_with_inc_port(self, flask_app):
+    def test_my_redirect_with_inc_port(self, flask_app, mock_data):
         """Test redirect with increment port"""
-        route_manager = RouteManager(flask_app)
+        # Setup mock data with _proxy_routes so inc_port lookup works
+        mock_data._proxy_routes = [["/test/", "TEST", "/"]]
+        mock_data._env_file_vals = {"AF_TEST_PORT_3": 11080}
+        route_manager = RouteManager(flask_app, mock_data)
 
         with flask_app.test_request_context('/'):
             with patch('utils.flask.redirect') as mock_redirect:
                 result = route_manager.my_redirect("/test/", 8080, "/path", inc_port=3)
-                # Should increment port by inc_port * 1000: 8080 + 3*1000 = 11080
+                # Should use port from _env_file_vals: 11080
                 mock_redirect.assert_called_once_with("http://localhost:11080/path")
 
-    def test_my_redirect_with_sub_path(self, flask_app):
+    def test_my_redirect_with_sub_path(self, flask_app, mock_data):
         """Test redirect with sub path"""
-        route_manager = RouteManager(flask_app)
+        route_manager = RouteManager(flask_app, mock_data)
 
         with flask_app.test_request_context('/'):
             with patch('utils.flask.redirect') as mock_redirect:
                 result = route_manager.my_redirect("/test/", 8080, "/path", sub_path="/extra")
                 mock_redirect.assert_called_once_with("http://localhost:8080/path/extra")
 
-    def test_my_redirect_complex_scenario(self, flask_app):
+    def test_my_redirect_complex_scenario(self, flask_app, mock_data):
         """Test redirect with multiple parameters"""
-        route_manager = RouteManager(flask_app)
+        # Setup mock data with _proxy_routes so inc_port lookup works
+        mock_data._proxy_routes = [["/test/", "TEST", "/"]]
+        mock_data._env_file_vals = {"AF_TEST_PORT_1": 9080}
+        route_manager = RouteManager(flask_app, mock_data)
 
         with flask_app.test_request_context('/?param1=value1&param2=value2'):
             with patch('utils.flask.redirect') as mock_redirect:
                 result = route_manager.my_redirect("/test/", 8080, "/path", idx=2, inc_port=1, sub_path="/extra")
-                # Port: 8080 + 1*1000 = 9080
+                # Port: from _env_file_vals = 9080
                 # Path: /path + /extra = /path/extra
                 # With idx: /2/path/extra
                 mock_redirect.assert_called_once_with("http://localhost:9080/2/path/extra?param1=value1&param2=value2")
 
-    def test_my_redirect_host_url_cleanup(self, flask_app):
+    def test_my_redirect_host_url_cleanup(self, flask_app, mock_data):
         """Test redirect with host URL cleanup"""
-        route_manager = RouteManager(flask_app)
+        route_manager = RouteManager(flask_app, mock_data)
 
         with flask_app.test_request_context('/'):
             with patch('utils.flask.redirect') as mock_redirect:
                 result = route_manager.my_redirect("/test/", 8080, "/path")
                 mock_redirect.assert_called_once_with("http://localhost:8080/path")
 
-    def test_my_redirect_host_url_with_port_cleanup(self, flask_app):
+    def test_my_redirect_host_url_with_port_cleanup(self, flask_app, mock_data):
         """Test redirect with host URL that has port cleanup"""
-        route_manager = RouteManager(flask_app)
+        route_manager = RouteManager(flask_app, mock_data)
 
         with flask_app.test_request_context('/'):
             with patch('utils.flask.redirect') as mock_redirect:
@@ -222,10 +248,10 @@ class TestCheckRestartLock:
 class TestRouteManagerIntegration:
     """Integration tests for RouteManager"""
 
-    def test_route_manager_full_workflow(self):
+    def test_route_manager_full_workflow(self, mock_data):
         """Test complete workflow of RouteManager"""
         mock_app = MagicMock()
-        route_manager = RouteManager(mock_app)
+        route_manager = RouteManager(mock_app, mock_data)
 
         # Define proxy routes
         proxy_routes = [
@@ -252,10 +278,10 @@ class TestRouteManagerIntegration:
                 # Port should be numeric for my_redirect to work
                 mock_redirect.assert_called_once_with("http://localhost:8080/")
 
-    def test_route_manager_edge_cases(self):
+    def test_route_manager_edge_cases(self, mock_data):
         """Test RouteManager edge cases"""
         mock_app = MagicMock()
-        route_manager = RouteManager(mock_app)
+        route_manager = RouteManager(mock_app, mock_data)
 
         # Test with empty proxy routes
         route_manager.add_proxy_routes([])
@@ -274,9 +300,9 @@ class TestRouteManagerIntegration:
             # This is expected behavior for malformed routes
             assert isinstance(e, (IndexError, TypeError, ValueError))
 
-    def test_route_manager_special_characters(self, flask_app):
+    def test_route_manager_special_characters(self, flask_app, mock_data):
         """Test RouteManager with special characters in URLs"""
-        route_manager = RouteManager(flask_app)
+        route_manager = RouteManager(flask_app, mock_data)
 
         with flask_app.test_request_context('/'):
             with patch('utils.flask.redirect') as mock_redirect:
@@ -284,9 +310,9 @@ class TestRouteManagerIntegration:
                 result = route_manager.my_redirect("/test/", 8080, "/path with spaces", sub_path="/extra%20path")
                 mock_redirect.assert_called_once_with("http://localhost:8080/path with spaces/extra%20path")
 
-    def test_route_manager_unicode(self, flask_app):
+    def test_route_manager_unicode(self, flask_app, mock_data):
         """Test RouteManager with unicode characters"""
-        route_manager = RouteManager(flask_app)
+        route_manager = RouteManager(flask_app, mock_data)
 
         with flask_app.test_request_context('/'):
             with patch('utils.flask.redirect') as mock_redirect:
