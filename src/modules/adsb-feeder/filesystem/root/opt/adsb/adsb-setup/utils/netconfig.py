@@ -83,11 +83,7 @@ class UltrafeederConfig:
         # let's grab the values, depending on the mode
         if not is_stage2 or self._micro > 0:
             for name, netconfig in self.enabled_aggregators.items():
-                uuid_tag = "adsblol_uuid" if name == "adsblol" else "ultrafeeder_uuid"
-                uuid = self._d.env_by_tags(uuid_tag).list_get(self._micro)
-                if not uuid:
-                    uuid = str(uuid4())
-                    self._d.env_by_tags(uuid_tag).list_set(self._micro, uuid)
+                uuid = self._d.env_by_tags(["ultrafeeder", name, "uuid"]).list_get(self._micro)
                 ret.add(netconfig.generate(mlat_privacy=mlat_privacy, uuid=uuid, mlat_enable=mlat_enable))
         ret.discard("")
 

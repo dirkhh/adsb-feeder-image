@@ -2877,9 +2877,25 @@ class AdsbIm:
             self._d.env_by_tags("route_api").list_get(sitenum)
 
             # make sure the uuids are populated and valid UUIDs
-            if not is_uuid(self._d.env_by_tags("adsblol_uuid").list_get(sitenum)):
-                self._d.env_by_tags("adsblol_uuid").list_set(sitenum, str(uuid4()))
+            # generate / migrate uuid for each aggregator
+            for name, conf in self._d.netconfigs.items():
+                if name == 'adsblol':
+                    oldvar_uuid = self._d.env_by_tags("adsblol_uuid").list_get(sitenum)
+                else:
+                    oldvar_uuid = self._d.env_by_tags("ultrafeeder_uuid").list_get(sitenum)
 
+                current_uuid = self._d.env_by_tags(["ultrafeeder", name, "uuid"]).list_get(sitenum)
+
+                if oldvar_uuid != "" and current_uuid == "":
+                    print_err(f"migrating uuid from old env var: sitenum {sitenum} agg {name} existing uuid: {oldvar_uuid}")
+                    self._d.env_by_tags(["ultrafeeder", name, "uuid"]).list_set(sitenum, oldvar_uuid)
+                elif current_uuid == "":
+                    new_uuid = str(uuid4())
+                    print_err(f"generating uuid for: sitenum {sitenum} agg {name} uuid: {new_uuid}")
+                    self._d.env_by_tags(["ultrafeeder", name, "uuid"]).list_set(sitenum, new_uuid)
+
+            # ultrafeeder uuid is still necessary for expert ultrafeeder config lines
+            # but do this after the above code which checks if an ultrafeeder uuid already exists for migration purpose
             if not is_uuid(self._d.env_by_tags("ultrafeeder_uuid").list_get(sitenum)):
                 self._d.env_by_tags("ultrafeeder_uuid").list_set(sitenum, str(uuid4()))
 
