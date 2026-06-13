@@ -35,17 +35,6 @@ status_short = {
     T.Starting: "starting",
     T.ContainerDown: "container_down",
 }
-ultrafeeder_aggs = [
-    "adsblol",
-    "flyitaly",
-    "avdelphi",
-    "planespotters",
-    "tat",
-    "adsbfi",
-    "adsbx",
-    "hpradar",
-    "alive",
-]
 
 
 class AggStatus:
@@ -59,6 +48,7 @@ class AggStatus:
         self._d = data
         self._url = url
         self._system = system
+        self.ultrafeeder_aggs = list(data.netconfigs.keys())
 
     @property
     def beast(self) -> str:
@@ -169,7 +159,7 @@ class AggStatus:
 
     def check_impl(self):
         # print_err(f"agg_status check_impl for {self._agg}-{self._idx}")
-        if self._agg in ultrafeeder_aggs:
+        if self._agg in self.ultrafeeder_aggs:
             container_name = "ultrafeeder" if self._idx == 0 else f"uf_{self._idx}"
         else:
             container_for_agg = {
@@ -194,7 +184,7 @@ class AggStatus:
 
         # for the Ultrafeeder based aggregators, let's not bother with talking to their API
         # readsb / mlat-client provide information about the feed status for those
-        if self._agg in ultrafeeder_aggs:
+        if self._agg in self.ultrafeeder_aggs:
             self.get_mlat_status()
             self.get_beast_status()
             self._last_check = datetime.now()
@@ -212,14 +202,14 @@ class AggStatus:
         elif "up for" in container_status:
             _, _, uptime = container_status.split(" ")
             uptime = int(uptime)
-            if self._agg not in ultrafeeder_aggs:
+            if self._agg not in self.ultrafeeder_aggs:
                 if uptime < 60:
                     self._beast = T.Starting
                     self._mlat = T.Disabled
                     self._last_check = datetime.now()
                     return
 
-            if self._agg in ultrafeeder_aggs:
+            if self._agg in self.ultrafeeder_aggs:
                 if uptime < 30:
                     # overwrite the status we got above
                     self._beast = T.Starting
