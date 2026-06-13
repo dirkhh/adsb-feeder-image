@@ -148,9 +148,14 @@ class Data:
             "mlat,feed.adsb.lol,31090,39001",
             has_policy=True,
         ),
-        "flyitaly": NetConfig(
-            "adsb,dati.flyitalyadsb.com,4905,beast_reduce_plus_out",
-            "mlat,dati.flyitalyadsb.com,30100,39002",
+        "alive": NetConfig(
+            "adsb,feed.airplanes.live,30004,beast_reduce_plus_out",
+            "mlat,feed.airplanes.live,31090,39012",
+            has_policy=True,
+        ),
+        "adsbfi": NetConfig(
+            "adsb,feed.adsb.fi,30004,beast_reduce_plus_out",
+            "mlat,feed.adsb.fi,31090,39007",
             has_policy=True,
         ),
         "adsbx": NetConfig(
@@ -168,14 +173,9 @@ class Data:
             "mlat,mlat.planespotters.net,31090,39005",
             has_policy=True,
         ),
-        "adsbfi": NetConfig(
-            "adsb,feed.adsb.fi,30004,beast_reduce_plus_out",
-            "mlat,feed.adsb.fi,31090,39007",
-            has_policy=True,
-        ),
-        "avdelphi": NetConfig(
-            "adsb,data.avdelphi.com,24999,beast_reduce_plus_out",
-            "",
+        "flyitaly": NetConfig(
+            "adsb,dati.flyitalyadsb.com,4905,beast_reduce_plus_out",
+            "mlat,dati.flyitalyadsb.com,30100,39002",
             has_policy=True,
         ),
         "hpradar": NetConfig(
@@ -183,9 +183,9 @@ class Data:
             "mlat,skyfeed.hpradar.com,31090,39011",
             has_policy=False,
         ),
-        "alive": NetConfig(
-            "adsb,feed.airplanes.live,30004,beast_reduce_plus_out",
-            "mlat,feed.airplanes.live,31090,39012",
+        "avdelphi": NetConfig(
+            "adsb,data.avdelphi.com,24999,beast_reduce_plus_out",
+            "",
             has_policy=True,
         ),
     }
