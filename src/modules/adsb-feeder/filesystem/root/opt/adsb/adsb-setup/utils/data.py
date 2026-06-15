@@ -188,6 +188,11 @@ class Data:
             "",
             has_policy=True,
         ),
+        "dataero": NetConfig(
+            "adsb,adsb.dataero.eu,30005,beast_reduce_plus_out",
+            "mlat,adsb.dataero.eu,31090",
+            has_policy=False,
+        ),
     }
     # we have four different types of "feeders":
     # 1. integrated feeders (single SBC where one Ultrafeeder collects from SDR and send to aggregator)
