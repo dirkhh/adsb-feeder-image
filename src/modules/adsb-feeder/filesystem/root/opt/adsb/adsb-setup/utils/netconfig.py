@@ -4,10 +4,15 @@ from utils.util import is_true, mf_get_ip_and_triplet, print_err
 
 
 class NetConfig:
-    def __init__(self, adsb_config: str, mlat_config: str, has_policy: bool):
+    def __init__(self, identifier: str, name: str, website: str, links: str, table: int, adsb_config: str, mlat_config: str, policy: str):
+        self.identifier = identifier
+        self.name = name
+        self.website = website
+        self.links = links
+        self.table = table # which table for status display
         self.adsb_config = adsb_config
         self.mlat_config = mlat_config
-        self._has_policy = has_policy
+        self.policy = policy
 
     def generate(self, mlat_privacy: bool = True, uuid: str = "", mlat_enable: bool = True):
         adsb_line = self.adsb_config
@@ -26,7 +31,7 @@ class NetConfig:
 
     @property
     def has_policy(self):
-        return self._has_policy
+        return bool(self.policy)
 
 
 class UltrafeederConfig:

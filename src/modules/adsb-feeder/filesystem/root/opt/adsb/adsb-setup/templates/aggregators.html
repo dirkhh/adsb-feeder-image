@@ -349,6 +349,23 @@
         </div>
     </label>
   </div>
+  {% for identifier, conf in netconfigs.items() %}
+  <div class="col-12 form-check">
+    <input type="checkbox" class="form-check-input me-1" name="{{ conf.identifier }}--ultrafeeder--is_enabled" id="{{ conf.identifier }}--ultrafeeder--is_enabled"
+           {{ uf_enabled(conf.identifier, m) }} />
+    <label class="col-4" for="{{ conf.identifier }}--ultrafeeder--is_enabled">
+      <a href={{ conf.website }}>{{ conf.name }}</a> <a href="{{ conf.policy }}" title="Privacy Policy" style="font-size: 0.8em;">{{ "🛡️" if conf.policy else "⚠️" }}</a>
+      <div class="form-group" id="{{ conf.identifier.upper() }}_ULTRAFEEDER_FIELDS">
+        <label for="{{ conf.identifier }}--ultrafeeder--uuid">
+          UUID
+        </label>
+        <input type="text" id="{{ conf.identifier }}--ultrafeeder--uuid" name="{{ conf.identifier }}--ultrafeeder--uuid" class="form-control text-end"
+            {{ uf_enabled(conf.identifier, m) | replace("checked", "required" ) }} placeholder=" {{ conf.name }} UUID"
+            value="{{ list_value_by_tags(["ultrafeeder", conf.identifier, "uuid"], m) }}">
+      </div>
+    </label>
+  </div>
+  {% endfor %}
   <hr>
   {% endif %}
   <!-- end of the ADS-B section -->
@@ -629,6 +646,9 @@
     ["ais_feed_marinetraffic--is_enabled", "MARINETRAFFIC_FIELDS", ["ais_marinetraffic_udp_port"]],
     ["ais_feed_myshiptracking--is_enabled", "MYSHIPTRACKING_FIELDS", ["ais_myshiptracking_udp_port"]],
     ["ais_feed_shipxplorer--is_enabled", "SHIPXPLORER_FIELDS", ["ais_shipxplorer_udp_port"]],
+    {% for identifier, conf in netconfigs.items() %}
+    ["{{ conf.identifier }}--ultrafeeder--is_enabled", "{{ conf.identifier.upper() }}_ULTRAFEEDER_FIELDS", ["{{ conf.identifier }}--ultrafeeder--uuid"]],
+    {% endfor %}
   ];
   for (const ids of box_fields) {
     let box = $(`#${ids[0]}`);

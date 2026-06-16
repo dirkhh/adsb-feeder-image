@@ -141,59 +141,113 @@ class Data:
                     ret.append([endpoint + f"_<int:idx>", port, path])
         return ret
 
-    # these are the default values for the env file
-    netconfigs = {
-        "adsblol": NetConfig(
-            "adsb,feed.adsb.lol,30004,beast_reduce_plus_out",
-            "mlat,feed.adsb.lol,31090,39001",
-            has_policy=True,
+    # this is the ONE place where all details about ultrafeeder aggregators should go
+    netconfigs_list = [
+        NetConfig(
+            identifier="adsblol",
+            name="adsb.lol",
+            website="https://adsb.lol/",
+            links=["https://api.adsb.lol/0/me"],
+            table=0,
+            adsb_config="adsb,feed.adsb.lol,30004,beast_reduce_plus_out",
+            mlat_config="mlat,feed.adsb.lol,31090,39001",
+            policy="https://adsb.lol/privacy-license/",
         ),
-        "alive": NetConfig(
-            "adsb,feed.airplanes.live,30004,beast_reduce_plus_out",
-            "mlat,feed.airplanes.live,31090,39012",
-            has_policy=True,
+        NetConfig(
+            identifier="alive",
+            name="airplanes.live",
+            website="https://globe.airplanes.live/",
+            links=["https://airplanes.live/myfeed/"],
+            table=0,
+            adsb_config="adsb,feed.airplanes.live,30004,beast_reduce_plus_out",
+            mlat_config="mlat,feed.airplanes.live,31090,39012",
+            policy="https://airplanes.live/privacy-policy/",
         ),
-        "adsbfi": NetConfig(
-            "adsb,feed.adsb.fi,30004,beast_reduce_plus_out",
-            "mlat,feed.adsb.fi,31090,39007",
-            has_policy=True,
+        NetConfig(
+            identifier="adsbfi",
+            name="adsb.fi",
+            website="https://globe.adsb.fi/",
+            links=["https://api.adsb.fi/v1/myip"],
+            table=0,
+            adsb_config="adsb,feed.adsb.fi,30004,beast_reduce_plus_out",
+            mlat_config="mlat,feed.adsb.fi,31090,39007",
+            policy="https://adsb.fi/privacy",
         ),
-        "adsbx": NetConfig(
-            "adsb,feed1.adsbexchange.com,30004,beast_reduce_plus_out",
-            "mlat,feed.adsbexchange.com,31090,39003",
-            has_policy=True,
+        NetConfig(
+            identifier="adsbx",
+            name="ADSBExchange",
+            website="https://globe.adsbexchange.com/",
+            links=["https://www.adsbexchange.com/myip/"],
+            table=0,
+            adsb_config="adsb,feed1.adsbexchange.com,30004,beast_reduce_plus_out",
+            mlat_config="mlat,feed.adsbexchange.com,31090,39003",
+            policy="https://www.adsbexchange.com/privacy-policy/",
         ),
-        "tat": NetConfig(
-            "adsb,feed.theairtraffic.com,30004,beast_reduce_plus_out",
-            "mlat,feed.theairtraffic.com,31090,39004",
-            has_policy=False,
+        NetConfig(
+            identifier="tat",
+            name="TheAirTraffic",
+            website="https://globe.theairtraffic.com/",
+            links=["https://theairtraffic.com/myip/"],
+            table=0,
+            adsb_config="adsb,feed.theairtraffic.com,30004,beast_reduce_plus_out",
+            mlat_config="mlat,feed.theairtraffic.com,31090,39004",
+            policy="https://theairtraffic.com/privacy/",
         ),
-        "planespotters": NetConfig(
-            "adsb,feed.planespotters.net,30004,beast_reduce_plus_out",
-            "mlat,mlat.planespotters.net,31090,39005",
-            has_policy=True,
+        NetConfig(
+            identifier="planespotters",
+            name="Planespotters",
+            website="https://radar.planespotters.net/",
+            links=["https://www.planespotters.net/feed/status"],
+            table=0,
+            adsb_config="adsb,feed.planespotters.net,30004,beast_reduce_plus_out",
+            mlat_config="mlat,mlat.planespotters.net,31090,39005",
+            policy="https://www.planespotters.net/legal/privacypolicy/"
         ),
-        "flyitaly": NetConfig(
-            "adsb,dati.flyitalyadsb.com,4905,beast_reduce_plus_out",
-            "mlat,dati.flyitalyadsb.com,30100,39002",
-            has_policy=True,
+        NetConfig(
+            identifier="flyitaly",
+            name="Fly Italy ADSB",
+            website="https://mappa.flyitalyadsb.com/",
+            links=["https://my.flyitalyadsb.com/am_i_feeding"],
+            table=0,
+            adsb_config="adsb,dati.flyitalyadsb.com,4905,beast_reduce_plus_out",
+            mlat_config="mlat,dati.flyitalyadsb.com,30100,39002",
+            policy="https://flyitalyadsb.com/informazioni-legali-e-privacy/"
         ),
-        "hpradar": NetConfig(
-            "adsb,skyfeed.hpradar.com,30004,beast_reduce_plus_out",
-            "mlat,skyfeed.hpradar.com,31090,39011",
-            has_policy=False,
+        NetConfig(
+            identifier="hpradar",
+            name="HPRadar",
+            website="https://skylink.hpradar.com/",
+            links=[""],
+            table=0,
+            adsb_config="adsb,skyfeed.hpradar.com,30004,beast_reduce_plus_out",
+            mlat_config="mlat,skyfeed.hpradar.com,31090,39011",
+            policy=""
         ),
-        "avdelphi": NetConfig(
-            "adsb,data.avdelphi.com,24999,beast_reduce_plus_out",
-            "",
-            has_policy=True,
+        NetConfig(
+            identifier="avdelphi",
+            name="AVDelphi",
+            website="https://www.avdelphi.com/coverage.html",
+            links=[""],
+            table=0,
+            adsb_config="adsb,data.avdelphi.com,24999,beast_reduce_plus_out",
+            mlat_config="",
+            policy="https://www.avdelphi.com/privacy.html",
         ),
-        "dataero": NetConfig(
-            "adsb,adsb.dataero.eu,30005,beast_reduce_plus_out",
-            "mlat,adsb.dataero.eu,31090",
-            has_policy=False,
+        NetConfig(
+            identifier="dataero",
+            name="Dataero",
+            website="https://dataero.eu/",
+            links=[],
+            table=0,
+            adsb_config="adsb,adsb.dataero.eu,30005,beast_reduce_plus_out",
+            mlat_config="mlat,adsb.dataero.eu,31090",
+            policy="https://dataero.eu/privacy-policy"
         ),
-    }
+    ]
+
+    # create dictionary from list
+    netconfigs = { entry.identifier: entry for entry in netconfigs_list }
+
     # we have four different types of "feeders":
     # 1. integrated feeders (single SBC where one Ultrafeeder collects from SDR and send to aggregator)
     # 2. micro feeders (SBC with SDR(s) attached, talking to a stage2 micro proxy)

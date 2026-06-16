@@ -310,6 +310,7 @@ class AdsbIm:
             ["1090uk", "1090MHz UK", "https://1090mhz.uk", ["https://www.1090mhz.uk/mystatus.php?key=<FEEDER_1090UK_API_KEY>"], 1],
             ["sdrmap", "sdrmap", "https://sdrmap.org/", ["https://sdrmap.org/?station=<FEEDER_SM_USERNAME>"], 1],
         ]
+
         self.agg_matrix = None
         self.agg_structure = []
         self.last_cache_agg_status = 0.0
@@ -317,7 +318,7 @@ class AdsbIm:
         self.cache_agg_status_lock = threading.Lock()
         self.miscLock = threading.Lock()
         self.last_aggregator_debug_print = None
-        self.microfeeder_setting_tags = (
+        self.microfeeder_setting_tags = [
             "site_name", "lat", "lon", "alt", "tz", "mf_version", "max_range",
             "adsblol_uuid", "adsblol_link", "ultrafeeder_uuid", "mlat_privacy", "route_api",
             "uat978", "heywhatsthat", "heywhatsthat_id",
@@ -342,7 +343,27 @@ class AdsbIm:
             "alive--is_enabled",
             "uat978--is_enabled",
             "sdrmap--is_enabled", "sdrmap--user", "sdrmap--key",
-        )
+        ]
+
+        netconfigs = self._d.netconfigs
+        def add_to_list_if_missing(item, tlist):
+            if item not in tlist:
+                tlist.append(item)
+
+        for key, value in netconfigs.items():
+            if not any([ key == entry[0] for entry in self.all_aggregators ]):
+                self.all_aggregators.append([key, key, "", [""], 1 if value.has_policy else 0 ])
+            add_to_list_if_missing(f"{key}--ultrafeeder--is_enabled", self.microfeeder_setting_tags)
+            add_to_list_if_missing(f"{key}--ultrafeeder--uuid", self.microfeeder_setting_tags)
+
+        self.uf_aggregators: list = []
+        for entry in self.all_aggregators:
+            if entry[0] in netconfigs.keys():
+                self.uf_aggregators.append(entry)
+
+        self.microfeeder_setting_tags = tuple(self.microfeeder_setting_tags)
+        print_err(self.all_aggregators)
+        print_err(self.microfeeder_setting_tags)
 
         self._routemanager.add_proxy_routes(self._d.proxy_routes)
         self.app.add_url_rule("/geojson", "geojson", self.geojson)
@@ -4274,6 +4295,9 @@ class AdsbIm:
             site=site,
             m=str(m),
             piastatport=str(m * 1000 + make_int(self._d.env_by_tags("piastatport").value)),
+            netconfigs=self._d.netconfigs,
+            all_aggregators=self.all_aggregators,
+            uf_aggregators=self.uf_aggregators,
         )
 
     @check_restart_lock
