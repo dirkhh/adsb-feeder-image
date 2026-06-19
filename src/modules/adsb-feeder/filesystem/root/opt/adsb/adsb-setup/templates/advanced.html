@@ -391,6 +391,59 @@
       </div>
     </form>
   </div>
+  <div class="col-12 col-lg-6">
+    <h5 class="mt-4">Reboot on missing SDR</h5>
+    <form method="POST">
+      <div class="row align-items-center">
+        <div class="col-4">
+          <label>Auto-reboot</label>
+        </div>
+        <div class="col-4">
+          {% if is_enabled('reboot_on_missing_sdr') %}
+          <button type="submit" class="btn btn-primary" name="roms--submit" value="go">Update settings</button>
+          {% endif %}
+        </div>
+        <div class="col-4">
+          {% if not is_enabled('reboot_on_missing_sdr') %}
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="reboot_on_missing_sdr--enable" value="go">Enable</button>
+          {% else %}
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="reboot_on_missing_sdr--disable" value="go">Disable</button>
+          {% endif %}
+        </div>
+        <div class="col-12 mb-2 mt-2">
+          <span onclick="$('#autoreboot_explain').toggleClass('d-none'); $(this).find('.toggle-icon').text($('#autoreboot_explain').hasClass('d-none') ? '▶' : '▼'); return false;"
+                style="cursor: pointer;">
+            <span class="toggle-icon small">▶</span> <strong class="small">More information</strong>
+          </span>
+          <div class="small d-none mt-2" id="autoreboot_explain">
+            Sometimes an SDR will drop from USB, but will reappear after a reboot. Usually this is an indication of a
+            real hardware issue (dying SDR, bad power, USB connector issues, etc), but especially with hard to get to
+            feeder setups it can be useful to limp along by forcing a reboot when a configured SDR disappears.
+            <br>
+            The wait time allows for temporary glitches; only if the SDR is missing for longer than the given time will
+            the reboot be considered.
+            <br>
+            The max retries prevents infinite reboot loops. If after that many reboots the SDR is still missing, the
+            system keeps running as it did before.
+          </div>
+        </div>
+        {% if is_enabled('reboot_on_missing_sdr') %}
+        <div class="col-8 mb-1">
+          <label for="roms_wait">Wait time (seconds)</label>
+        </div>
+        <div class="col-4 mb-1">
+          <input class="mx-auto w-100" id="roms_wait" name="roms_wait" type="number" min="1" value="{{ env_value_by_tag('roms_wait') }}">
+        </div>
+        <div class="col-8 mb-1">
+          <label for="roms_max">Max reboots before giving up</label>
+        </div>
+        <div class="col-4 mb-1">
+          <input class="mx-auto w-100" id="roms_max" name="roms_max" type="number" min="1" value="{{ env_value_by_tag('roms_max') }}">
+        </div>
+        {% endif %}
+      </div>
+    </form>
+  </div>
   <!-- the rest of this will create its own spread across two columns on wider screens -->
   <div class="col-12">
     <div class="row">

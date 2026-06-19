@@ -1,5 +1,7 @@
 Changes since v3.0.12
 =======
+- healthcheck: add experimental feature to force automatic reboots when a configured SDR disappears
+- temperature: improve handling of BM280 sensors
 - update RadarVirtuel container and setup
 - beta-notes: stage2 minor piaware link fix on data sharing page
 - stage2: support well more than 40 sites (resources permitting)

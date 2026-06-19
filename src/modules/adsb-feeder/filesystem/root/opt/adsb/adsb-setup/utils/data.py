@@ -461,7 +461,7 @@ class Data:
         Env("_ADSBIM_APP_SECRET", default="", tags=["app_secret"]),
         #
         # if a configured SDR disappears, reboot the feeder. Wait the specified time, don't do it more than max times
-        Env("_ADSBIM_REBOOT_ON_MISSING_SDR", default=False, tags=["reboot_on_missing_sdr"]),
+        Env("_ADSBIM_REBOOT_ON_MISSING_SDR", default=False, tags=["reboot_on_missing_sdr", "is_enabled"]),
         Env("_ADSBIM_ROMS_WAIT", default=60, tags=["roms_wait"]),
         Env("_ADSBIM_ROMS_MAX", default=5, tags=["roms_max"]),
         #
