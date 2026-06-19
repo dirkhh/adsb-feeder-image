@@ -54,8 +54,8 @@ def run_subprocess(command, timeout=180):
 
 class BME280_i2c:
     def __init__(self):
-        # check that i2c is enabled
-        self.success, output = run_subprocess("lsmod | grep i2c_bcm2835 2> /dev/null", timeout=5)
+        # check that i2c is enabled (should work on more RPi boards)
+        self.success, output = run_subprocess("lsmod | grep i2c_bcm 2> /dev/null", timeout=5)
         if not self.success:
             logger.info("i2c is not enabled")
             return
@@ -74,15 +74,23 @@ class BME280_i2c:
                 self.success = False
                 logger.info("Failed to import bme280 and smbus2")
                 return
-        # BME280 sensor address (default address)
-        self.address = 0x77
 
-        # Initialize I2C bus
-        self.bus = smbus2.SMBus(1)
-        self.bme280 = bme280
-
-        # Load calibration parameters
-        self.calibration_params = self.bme280.load_calibration_params(self.bus, self.address)
+        # BME280 sensor potential addresses
+        addresses = [0x77, 0x76]
+        for address_probe in addresses:
+            try:
+                # Load calibration parameters
+                self.calibration_params = self.bme280.load_calibration_params(self.bus, address_probe)
+                self.address = address_probe
+                logger.info(f"Found BME280 at address {address_probe:#x}")
+                self.success = True
+                break
+            except Exception:
+                continue
+        else:
+            logger.info("Could not find BME280 on i2c bus")
+            self.address = None
+            self.success = False
 
     def get_temperature(self):
         if not self.success:
