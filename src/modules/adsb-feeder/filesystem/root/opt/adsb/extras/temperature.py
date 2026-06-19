@@ -75,6 +75,10 @@ class BME280_i2c:
                 logger.info("Failed to import bme280 and smbus2")
                 return
 
+        # Initialize I2C bus
+        self.bus = smbus2.SMBus(1)
+        self.bme280 = bme280
+
         # BME280 sensor potential addresses
         addresses = [0x77, 0x76]
         for address_probe in addresses:
