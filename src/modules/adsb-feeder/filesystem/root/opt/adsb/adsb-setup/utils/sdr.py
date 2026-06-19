@@ -1,9 +1,12 @@
+import json
 import re
 import subprocess
 import sys
 import time
 from threading import Lock
 from typing import Dict, List, Set, Tuple
+
+from utils.paths import get_adsb_base_dir
 
 from .util import print_err
 
@@ -93,6 +96,7 @@ class SDRDevices:
         self.last_probe: float = 0.0
         self.last_debug_out = ""
         self.lock = Lock()
+        self.waiting_for_sdr = -1
 
     def __len__(self):
         return len(self.sdrs)
@@ -261,6 +265,50 @@ class SDRDevices:
                 assigned_sdr.purpose = purpose
                 assigned_sdr.gain = gain
                 assigned_sdr.biastee = biastee
+
+    def reboot_on_missing_sdr(self) -> bool:
+        if not self._d.env_by_tags("reboot_on_missing_sdr").value:
+            return False
+        used_serials = [self._d.env_by_tags(purpose).value for purpose in ["978serial", "1090serial"]]
+        used_serials = [serial for serial in used_serials if serial != ""]
+        available_serials = [sdr._serial for sdr in self.sdrs]
+        missing_serials = [serial for serial in used_serials if serial not in available_serials]
+        if len(missing_serials) > 0:
+            # these SDRs are gone - make sure we wait at least the minimum wait time
+            now = time.time()
+            if self.waiting_for_sdr == -1:
+                self.waiting_for_sdr = now + self._d.env_by_tags("roms_wait").valueint
+            if now < self.waiting_for_sdr:
+                return False
+            # remember which SDR(s) we are waiting for and how many times we have rebooted
+            counter = self.update_sdr_wait_flagfile(missing_serials)
+            if counter <= self._d.env_by_tags("roms_max").valueint:
+                return True
+        else:
+            self.waiting_for_sdr = -1
+            _ = self.update_sdr_wait_flagfile([])
+        return False
+
+    def update_sdr_wait_flagfile(self, missing_serials: list[str]):
+        flagfile = get_adsb_base_dir() / "sdr_flag_file.json"
+        if len(missing_serials) == 0:
+            flagfile.unlink(missing_ok=True)
+            return 0
+        try:
+            with flagfile.open() as f:
+                sdr_flag_data = json.load(f)
+        except Exception:
+            sdr_flag_data = {"serials": [], "num_tries": 0}
+        sdr_flag_data["num_tries"] = sdr_flag_data.get("num_tries", 0) + 1
+        # the missing serials are written into the flag file for debugging purposes
+        # I'm not sure this is useful, but it doesn't hurt
+        sdr_flag_data["serials"] = missing_serials
+        try:
+            with flagfile.open(mode="w") as f:
+                json.dump(sdr_flag_data, f)
+        except Exception:
+            print_err(f"failed to write sdr flag data {sdr_flag_data} to file {flagfile}")
+        return sdr_flag_data.get("num_tries", 1)
 
     def get_sdr_by_serial(self, serial: str):
         self.ensure_populated()

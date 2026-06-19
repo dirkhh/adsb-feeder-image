@@ -4314,10 +4314,22 @@ class AdsbIm:
             used_serials = [self._d.env_by_tags(purpose).value for purpose in ["978serial", "1090serial"]]
             used_serials = [serial for serial in used_serials if serial != ""]
             if any([serial not in available_serials for serial in used_serials]):
+                requested_reboot = self.exiting
+                if not requested_reboot:
+                    requested_reboot = self._sdrdevices.reboot_on_missing_sdr()
                 print_err(f"used serials: {used_serials}")
                 print_err(f"available serials: {available_serials}")
-                print_err("director redirecting to sdr_setup: at least one used device is not present")
-                report_issue(f"Missing SDR detected, please check / adjust the configuration and apply the changes!")
+                if requested_reboot:
+                    print_err("automated reboot triggered")
+                    report_issue(f"Missing SDR detected, automated reboot triggered! Change settings if unwanted.")
+                    # every_minute() might have already triggered this
+                    if not self.exiting:
+                        self._system.reboot(delay=120)
+                        self.exiting = True
+
+                else:
+                    print_err("director redirecting to sdr_setup: at least one used device is not present")
+                    report_issue(f"Missing SDR detected, please check / adjust the configuration and apply the changes!")
                 return self.sdr_setup()
         elif not self._d.is_enabled("stage2"):
             # we don't do ADS-B, we don't do any of the other protocols, and this isn't a stage 2
@@ -4528,6 +4540,11 @@ class AdsbIm:
             self.update_global_name(False)
 
         self._sdrdevices.ensure_populated()
+
+        # finally, check that we found all SDRs we expected to find:
+        if not self.exiting and self._sdrdevices.reboot_on_missing_sdr():
+            self._system.reboot(delay=120)
+            self.exiting = True
 
         self.update_net_dev()
 
