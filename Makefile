@@ -119,14 +119,14 @@ sync-py-control:
 	ssh -O check -S "${SSH_CONTROL}" root@$(HOST) || make ssh-control
 
 	rsync -av \
-	--delete --exclude="*.pyc" --progress \
+	--delete --exclude="*.pyc" --compress --progress \
 	-e "ssh -S ${SSH_CONTROL}" \
 	src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup/ \
 	root@$(HOST):/opt/adsb/adsb-setup/
 
 	# adsb-setup as already been rsynced above, skip
 	rsync -av \
-	--exclude="adsb-setup" --exclude="*.pyc" --progress \
+	--exclude="adsb-setup" --exclude="*.pyc" --compress --progress \
 	-e "ssh -S ${SSH_CONTROL}" \
 	src/modules/adsb-feeder/filesystem/root/opt/adsb/ \
 	root@$(HOST):/opt/adsb/
