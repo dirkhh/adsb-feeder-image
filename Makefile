@@ -130,12 +130,6 @@ sync-py-control:
 	src/modules/adsb-feeder/filesystem/root/opt/adsb/ \
 	root@$(HOST):/opt/adsb/
 
-	rsync -av \
-	--exclude="*.pyc" --progress \
-	-e "ssh -S ${SSH_CONTROL}" \
-	src/modules/adsb-feeder/filesystem/root/etc/ \
-	root@$(HOST):/etc/
-
 	ssh -S "${SSH_CONTROL}" root@$(HOST) "\
 		rm -f /opt/adsb/.cachebust_done; \
 		bash /opt/adsb/scripts/cachebust.sh Makefile;\
