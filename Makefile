@@ -130,13 +130,6 @@ sync-py-control:
 	src/modules/adsb-feeder/filesystem/root/opt/adsb/ \
 	root@$(HOST):/opt/adsb/
 
-	mkdir -p src/modules/adsb-feeder/filesystem/root/usr/bin
-	rsync -av \
-	--exclude="*.pyc" --progress \
-	-e "ssh -S ${SSH_CONTROL}" \
-	src/modules/adsb-feeder/filesystem/root/usr/bin/ \
-	root@$(HOST):/usr/bin/
-
 	rsync -av \
 	--exclude="*.pyc" --progress \
 	-e "ssh -S ${SSH_CONTROL}" \
