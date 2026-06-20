@@ -124,8 +124,9 @@ sync-py-control:
 	src/modules/adsb-feeder/filesystem/root/opt/adsb/adsb-setup/ \
 	root@$(HOST):/opt/adsb/adsb-setup/
 
+	# adsb-setup as already been rsynced above, skip
 	rsync -av \
-	--exclude="*.pyc" --progress \
+	--exclude="adsb-setup" --exclude="*.pyc" --progress \
 	-e "ssh -S ${SSH_CONTROL}" \
 	src/modules/adsb-feeder/filesystem/root/opt/adsb/ \
 	root@$(HOST):/opt/adsb/
