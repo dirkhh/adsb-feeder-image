@@ -136,12 +136,6 @@ sync-py-control:
 	src/modules/adsb-feeder/filesystem/root/etc/ \
 	root@$(HOST):/etc/
 
-# For good measure, copy this Makefile too
-	rsync -av \
-	-e "ssh -S ${SSH_CONTROL}" \
-	Makefile \
-	root@$(HOST):/opt/adsb/adsb-setup/Makefile
-
 	ssh -S "${SSH_CONTROL}" root@$(HOST) "\
 		rm -f /opt/adsb/.cachebust_done; \
 		bash /opt/adsb/scripts/cachebust.sh Makefile;\
