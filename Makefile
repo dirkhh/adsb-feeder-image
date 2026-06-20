@@ -149,12 +149,11 @@ sync-py-control:
 	Makefile \
 	root@$(HOST):/opt/adsb/adsb-setup/Makefile
 
-	ssh -S "${SSH_CONTROL}" root@$(HOST) '\
+	ssh -S "${SSH_CONTROL}" root@$(HOST) "\
 		rm -f /opt/adsb/.cachebust_done; \
 		bash /opt/adsb/scripts/cachebust.sh Makefile;\
-	'
-
-	ssh -S "${SSH_CONTROL}" root@$(HOST) "echo ${SET_VERBOSE} > /opt/adsb/verbose"
+		echo ${SET_VERBOSE} > /opt/adsb/verbose; \
+	"
 
 run-loop:
 # python3 app.py in a loop
