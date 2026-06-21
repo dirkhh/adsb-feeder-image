@@ -508,8 +508,9 @@ class LastSeen:
 
 
 class Healthcheck:
-    def __init__(self, data):
+    def __init__(self, data,system):
         self._d = data
+        self._system = system
         self.good = True
         self.pingInterval = 60 * 60  # 60 minutes
         self.graceTime = 5 * 60  # 5 minutes from failure to failPing
@@ -583,11 +584,19 @@ class Healthcheck:
 
         uf_path = "/run/adsb-feeder-"
         if self._d.env_by_tags("aggregator_choice").value == "nano":
+            container_name = "nanofeeder"
             uf_path += "nanofeeder"
         else:
+            container_name = "ultrafeeder"
             uf_path += "ultrafeeder"
 
+        container_status = self._system.getContainerStatus(container_name)
+        if container_status == "down":
+            self.set_failed("1090 container is down")
+            return
+
         try:
+
             with open(f"{uf_path}/readsb/stats.json") as f:
                 obj = json.load(f)
                 now = obj.get("now")

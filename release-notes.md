@@ -1,5 +1,6 @@
 Changes since v3.0.12
 =======
+- healthcheck: properly identify container down (instead of wrongly assuming the SDR is down)
 - healthcheck: add experimental feature to force automatic reboots when a configured SDR disappears
 - temperature: improve handling of BM280 sensors
 - update RadarVirtuel container and setup

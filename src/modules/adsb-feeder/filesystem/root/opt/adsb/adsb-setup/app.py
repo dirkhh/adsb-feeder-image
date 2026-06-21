@@ -200,7 +200,7 @@ class AdsbIm:
         self.wifi = None
         self.wifi_ssid = ""
 
-        self.healthcheck = Healthcheck(self._d)
+        self.healthcheck = Healthcheck(self._d, self._system)
 
         # prepare for app use (vs ADS-B Feeder Image use)
         # newer images will include a flag file that indicates that this is indeed
