@@ -241,7 +241,17 @@ class Data:
             table=0,
             adsb_config="adsb,adsb.dataero.eu,30005,beast_reduce_plus_out",
             mlat_config="mlat,adsb.dataero.eu,31090",
-            policy="https://dataero.eu/privacy-policy"
+            policy="https://dataero.eu/privacy-policy",
+        ),
+        NetConfig(
+            identifier="flyoverhead",
+            name="FlyOverhead",
+            website="https://flyoverhead.com/",
+            links=[""],
+            table=0,
+            adsb_config="adsb,feed.flyoverhead.com,30004,beast_reduce_plus_out",
+            mlat_config="",
+            policy="https://flyoverhead.com/legal/privacy",
         ),
     ]
 
