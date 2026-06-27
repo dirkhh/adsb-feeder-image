@@ -201,7 +201,7 @@ class Data:
             table=0,
             adsb_config="adsb,feed.planespotters.net,30004,beast_reduce_plus_out",
             mlat_config="mlat,mlat.planespotters.net,31090,39005",
-            policy="https://www.planespotters.net/legal/privacypolicy/"
+            policy="https://www.planespotters.net/legal/privacypolicy/",
         ),
         NetConfig(
             identifier="flyitaly",
@@ -211,7 +211,7 @@ class Data:
             table=0,
             adsb_config="adsb,dati.flyitalyadsb.com,4905,beast_reduce_plus_out",
             mlat_config="mlat,dati.flyitalyadsb.com,30100,39002",
-            policy="https://flyitalyadsb.com/informazioni-legali-e-privacy/"
+            policy="https://flyitalyadsb.com/informazioni-legali-e-privacy/",
         ),
         NetConfig(
             identifier="hpradar",
@@ -221,7 +221,7 @@ class Data:
             table=0,
             adsb_config="adsb,skyfeed.hpradar.com,30004,beast_reduce_plus_out",
             mlat_config="mlat,skyfeed.hpradar.com,31090,39011",
-            policy=""
+            policy="",
         ),
         NetConfig(
             identifier="avdelphi",
@@ -246,7 +246,7 @@ class Data:
     ]
 
     # create dictionary from list
-    netconfigs = { entry.identifier: entry for entry in netconfigs_list }
+    netconfigs = {entry.identifier: entry for entry in netconfigs_list}
 
     # we have four different types of "feeders":
     # 1. integrated feeders (single SBC where one Ultrafeeder collects from SDR and send to aggregator)

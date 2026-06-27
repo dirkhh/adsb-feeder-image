@@ -1,15 +1,23 @@
-from uuid import uuid4
-
 from utils.util import is_true, mf_get_ip_and_triplet, print_err
 
 
 class NetConfig:
-    def __init__(self, identifier: str, name: str, website: str, links: str, table: int, adsb_config: str, mlat_config: str, policy: str):
+    def __init__(
+        self,
+        identifier: str,
+        name: str,
+        website: str,
+        links: str,
+        table: int,
+        adsb_config: str,
+        mlat_config: str,
+        policy: str,
+    ):
         self.identifier = identifier
         self.name = name
         self.website = website
         self.links = links
-        self.table = table # which table for status display
+        self.table = table  # which table for status display
         self.adsb_config = adsb_config
         self.mlat_config = mlat_config
         self.policy = policy
