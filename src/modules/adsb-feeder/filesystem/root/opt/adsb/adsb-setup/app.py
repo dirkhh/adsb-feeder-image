@@ -346,13 +346,14 @@ class AdsbIm:
         ]
 
         netconfigs = self._d.netconfigs
+
         def add_to_list_if_missing(item, tlist):
             if item not in tlist:
                 tlist.append(item)
 
         for key, value in netconfigs.items():
-            if not any([ key == entry[0] for entry in self.all_aggregators ]):
-                self.all_aggregators.append([key, key, "", [""], 1 if value.has_policy else 0 ])
+            if not any([key == entry[0] for entry in self.all_aggregators]):
+                self.all_aggregators.append([key, key, "", [""], 1 if value.has_policy else 0])
             add_to_list_if_missing(f"{key}--ultrafeeder--is_enabled", self.microfeeder_setting_tags)
             add_to_list_if_missing(f"{key}--ultrafeeder--uuid", self.microfeeder_setting_tags)
 
@@ -361,7 +362,6 @@ class AdsbIm:
             if entry[0] in netconfigs.keys():
                 self.uf_aggregators.append(entry)
 
-        self.microfeeder_setting_tags = tuple(self.microfeeder_setting_tags)
         print_err(self.all_aggregators)
         print_err(self.microfeeder_setting_tags)
 
@@ -2900,7 +2900,7 @@ class AdsbIm:
             # make sure the uuids are populated and valid UUIDs
             # generate / migrate uuid for each aggregator
             for name, conf in self._d.netconfigs.items():
-                if name == 'adsblol':
+                if name == "adsblol":
                     oldvar_uuid = self._d.env_by_tags("adsblol_uuid").list_get(sitenum)
                 else:
                     oldvar_uuid = self._d.env_by_tags("ultrafeeder_uuid").list_get(sitenum)

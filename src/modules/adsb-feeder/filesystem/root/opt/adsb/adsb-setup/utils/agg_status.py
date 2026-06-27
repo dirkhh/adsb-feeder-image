@@ -498,7 +498,7 @@ class LastSeen:
 
 
 class Healthcheck:
-    def __init__(self, data,system):
+    def __init__(self, data, system):
         self._d = data
         self._system = system
         self.good = True
