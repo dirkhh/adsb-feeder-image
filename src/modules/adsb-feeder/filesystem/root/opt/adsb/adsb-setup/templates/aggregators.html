@@ -44,22 +44,6 @@
       Enable MLAT (for selected aggregators supporting MLAT)
     </label>
   </div>
-
-  <div class="col-12 h5 mt-3">Select the <span class="text-primary">account-less</span> ADS-B aggregators you want to feed:</div>
-  <div class="col-12 col-md-6 col-lg-4 my-2">
-    <button type="button" class="btn btn-large btn-primary w-100 with-checkbox" data-mdb-ripple-init><input
-              type="radio" class="me-2" name="aggregator_choice"  id="all" value="all" required {% if env_value_by_tag("aggregator_choice")=="all" %} checked {% endif %}
-              onclick="$('.ultrafeeder').each(function(){$(this).prop('checked', true)});"> All</button>
-  </div>
-  <div class="col-12 col-md-6 col-lg-4 my-2">
-    <button type="button" class="btn btn-large btn-primary w-100 with-checkbox" data-mdb-ripple-init><input type="radio"
-              class="me-2" name="aggregator_choice" id="privacy" value="privacy" required {% if env_value_by_tag("aggregator_choice")=="privacy" %} checked {% endif %}
-              onclick="$('.ultrafeeder').each(function(){$(this).prop('checked', ! $(this).hasClass('no_privacy'))});"> Privacy</button>
-  </div>
-  <div class="col-12 col-md-6 col-lg-4 my-2">
-    <button type="button" class="btn btn-large btn-primary w-100 with-checkbox" data-mdb-ripple-init><input type="radio"
-              class="me-2" name="aggregator_choice" id="individual" value="individual" required {% if env_value_by_tag("aggregator_choice")=="individual" %} checked {% endif %}> Individual</button>
-  </div>
   <div class="col-12 form-check">
     <input class="form-check-input me-1" type="checkbox" name="mlat_privacy--is_enabled" id="mlat_privacy--is_enabled"
            {% if list_is_enabled("mlat_privacy", m) %}checked{% endif %} />
@@ -69,101 +53,64 @@
         aggregator maps</a> -- OFF = your site will be visible at an approximate location.)
     </label>
   </div>
-  <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1 ultrafeeder" name="is_enabled--ultrafeeder--adsblol"
-           id="is_enabled--adsblol" {{ uf_enabled("adsblol", m) }} onclick="$('#individual').click();" />
-    <label for="is_enabled--adsblol">
-      <a href="https://adsb.lol/">adsb.lol</a> <a href="https://adsb.lol/privacy-license/" title="Privacy Policy" style="font-size: 0.8em;">🛡️</a>
-    </label>
-  </div>
-  <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1 ultrafeeder" name="is_enabled--ultrafeeder--flyitaly"
-           id="is_enabled--flyitaly" {{ uf_enabled("flyitaly", m) }}  onclick="$('#individual').click();" />
-    <label for="is_enabled--flyitaly">
-      <a href="https://flyitalyadsb.com/">Fly Italy ADSB</a> <a href="https://flyitalyadsb.com/informazioni-legali-e-privacy/" title="Privacy Policy" style="font-size: 0.8em;">🛡️</a>
-    </label>
-  </div>
-  <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1 ultrafeeder" name="is_enabled--ultrafeeder--avdelphi"
-           id="is_enabled--avdelphi" {{ uf_enabled("avdelphi", m) }}  onclick="$('#individual').click();" />
-    <label for="is_enabled--avdelphi">
-      <a href="https://www.avdelphi.com/">AVDelphi</a> <a href="https://www.avdelphi.com/privacy.html" title="Privacy Policy" style="font-size: 0.8em;">🛡️</a>
-    </label>
-  </div>
-  <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1 ultrafeeder" name="is_enabled--ultrafeeder--planespotters"
-           id="is_enabled--planespotters" {{ uf_enabled("planespotters", m) }}  onclick="$('#individual').click();" />
-    <label for="is_enabled--planespotters">
-      <a href="https://www.planespotters.net/">planespotters.net</a> <a href="https://www.planespotters.net/legal/privacypolicy/" title="Privacy Policy" style="font-size: 0.8em;">🛡️</a>
-    </label>
-  </div>
-  <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1 ultrafeeder" data-mdb-toggle="tooltip"
-           title="This site is missing a clear data/privacy policy" name="is_enabled--ultrafeeder--tat"
-           id="is_enabled--tat" {{ uf_enabled("tat", m) }} onclick="$('#individual').click();" />
-    <label for="is_enabled--tat">
-      <a href="https://theairtraffic.com/">TheAirTraffic.com</a> <a href="https://theairtraffic.com/privacy/" title="Privacy Policy" style="font-size: 0.8em;">🛡️</a>
-    </label>
-  </div>
-  <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1 ultrafeeder" name="is_enabled--ultrafeeder--adsbfi" id="is_enabled--adsbfi"
-           {{ uf_enabled("adsbfi", m) }} onclick="$('#individual').click();" />
-    <label for="is_enabled--adsbfi">
-      <a href="https://adsb.fi/">adsb.fi</a> <a href="https://adsb.fi/privacy" title="Privacy Policy" style="font-size: 0.8em;">🛡️</a>
-    </label>
-  </div>
-  <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1 ultrafeeder no_privacy" data-mdb-toggle="tooltip"
-           title="This site is missing a clear data/privacy policy"
-           name="is_enabled--ultrafeeder--hpradar" id="is_enabled--hpradar" {{ uf_enabled("hpradar", m) }} onclick="$('#individual').click();" />
-    <label for="is_enabled--hpradar">
-      <a href="https://skylink.hpradar.com/">HPRadar</a> <span title="This site is missing a clear data/privacy policy" style="font-size: 0.8em;">⚠️</span>
-    </label>
-  </div>
-  <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1 ultrafeeder" name="is_enabled--ultrafeeder--alive" id="is_enabled--alive"
-           {{ uf_enabled("alive", m) }} onclick="$('#individual').click();"/>
-    <label for="is_enabled--alive">
-      <a href="https://airplanes.live/">airplanes.live</a> <a href="https://airplanes.live/privacy-policy/" title="Privacy Policy" style="font-size: 0.8em;">🛡️</a>
-    </label>
-  </div>
-  <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1 ultrafeeder" name="is_enabled--ultrafeeder--adsbx" id="is_enabled--adsbx"
-           {{ uf_enabled("adsbx", m) }} onclick="$('#individual').click();" />
-    <label for="is_enabled--adsbx">
-      <a href="https://www.adsbexchange.com/">ADSBExchange</a> <a href="https://www.adsbexchange.com/privacy-policy/" title="Privacy Policy" style="font-size: 0.8em;">🛡️</a>
-    </label>
-  </div>
-  <!-- RadarVirtuel is not simply an Ultrafeeder config, yet it's now also accountless. So... umm. -->
 
+  <div class="col-12 h5 mt-3">Select the <span class="text-primary">account-less</span> ADS-B aggregators you want to feed:</div>
+  <div class="col-12 col-md-6 col-lg-4 my-2">
+    <button type="button" class="btn btn-large btn-primary w-100 with-checkbox" data-mdb-ripple-init><input
+              type="radio" class="me-2" name="aggregator_choice"  id="all" value="all" required {% if env_value_by_tag("aggregator_choice")=="all" %} checked {% endif %}
+              onclick="$('.account-less').prop('checked', true); $('.uuid-fields').removeClass('d-none');"> All</button>
+  </div>
+  <div class="col-12 col-md-6 col-lg-4 my-2">
+    <button type="button" class="btn btn-large btn-primary w-100 with-checkbox" data-mdb-ripple-init><input type="radio"
+              class="me-2" name="aggregator_choice" id="privacy" value="privacy" required {% if env_value_by_tag("aggregator_choice")=="privacy" %} checked {% endif %}
+              onclick="$('.account-less').each(function(){ var c=$(this).hasClass('privacy'); $(this).prop('checked',c); $(this).closest('.form-check').find('.uuid-fields').toggleClass('d-none',!c); });"> Privacy</button>
+  </div>
+  <div class="col-12 col-md-6 col-lg-4 my-2">
+    <button type="button" class="btn btn-large btn-primary w-100 with-checkbox" data-mdb-ripple-init><input type="radio"
+              class="me-2" name="aggregator_choice" id="individual" value="individual" required {% if env_value_by_tag("aggregator_choice")=="individual" %} checked {% endif %}> Individual</button>
+  </div>
 
+  <div class="col-12 mt-3 mb-1 h5">Select the ADS-B aggregators you want to feed:</div>
+
+  {% macro ultrafeeder_agg_entry(conf, m) %}
+  <div class="col-12 form-check">
+    <input type="checkbox" class="form-check-input me-1 account-less {% if conf.policy != '' %}privacy{% endif %}"
+           name="{{ conf.identifier }}--ultrafeeder--is_enabled"
+           id="{{ conf.identifier }}--ultrafeeder--is_enabled" {{ uf_enabled(conf.identifier, m) }}
+           onclick="$(this).closest('.form-check').find('.uuid-fields').toggleClass('d-none', !this.checked); $('#individual').prop('checked', true);" />
+    <div class="row">
+      <label class="col-12 col-md-4" for="{{ conf.identifier }}--ultrafeeder--is_enabled">
+        <a href="{{ conf.website }}">{{ conf.name }}</a> <a href="{{ conf.policy }}" title="Privacy Policy"
+            style="font-size: 0.8em;">{{ "🛡️" if conf.policy else "⚠️" }}</a>
+      </label>
+      <div class="form-group col-12 col-md-8 d-flex align-items-center gap-2 uuid-fields" id="{{ conf.identifier.upper() }}_ULTRAFEEDER_FIELDS">
+        <label class="mb-0 text-nowrap" for="{{ conf.identifier }}--ultrafeeder--uuid">UUID</label>
+        <input type="text" id="{{ conf.identifier }}--ultrafeeder--uuid" name="{{ conf.identifier }}--ultrafeeder--uuid"
+               class="form-control text-end" style="max-width: 24em;"
+               {{ uf_enabled(conf.identifier, m) | replace("checked", "required") }}
+               placeholder=" {{ conf.name }} UUID"
+               value="{{ list_value_by_tags(["ultrafeeder", conf.identifier, "uuid"], m) }}">
+      </div>
+    </div>
+  </div>
+  {% endmacro %}
+
+  <!-- first, the known good accountless aggregators -->
+  {% for conf in (netconfigs.values() | selectattr('table', 'equalto', 0) | sort(attribute='ordinal')) %}
+  {{ ultrafeeder_agg_entry(conf, m) }}
+  {% endfor %}
+
+  <!-- then, RadarVirtuel, which is not simply an Ultrafeeder config, yet it's now also accountless. So... umm. -->
   <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1" name="radarvirtuel--is_enabled" id="radarvirtuel--is_enabled"
-           {{ others_enabled("radarvirtuel", m) }} onclick="$('#individual').click();" />
+    <input type="checkbox" class="form-check-input me-1 account-less" name="radarvirtuel--is_enabled" id="radarvirtuel--is_enabled"
+            {{ others_enabled("radarvirtuel", m) }} onclick="$('#individual').click();" />
     <label for="radarvirtuel--is_enabled">
       <a href="https://www.radarvirtuel.com/">RadarVirtuel</a> <span
             title="This site is missing a clear data/privacy policy" style="font-size: 0.8em;">⚠️</span>
     </label>
   </div>
 
-
-
-  <div class="col-12 form-check text-end">
-    <div class="form-group collapse" id="showuuids">
-      {% if uf_enabled("adsblol", m) %}
-      adsb.lol UUID:
-      <input type="text" id="adsblol_uuid" name="adsblol_uuid" class="form-control text-end"
-             value="{{ list_value_by_tag("adsblol_uuid", m) }}" />
-      {% endif %}<br>
-      Ultrafeeder UUID:
-      <input type="text" id="ultrafeeder_uuid" name="ultrafeeder_uuid" class="form-control text-end"
-             value="{{ list_value_by_tag("ultrafeeder_uuid", m) }}" />
-      <br>
-    </div>
-    <button class="btn btn-secondary small" type="button" data-mdb-toggle="collapse" data-mdb-target="#showuuids"
-            aria-expanded="false" aria-controls="showuuids">show UUIDS</button>
-  </div>
-  <div class="col-12 mt-3 mb-1 h5">Select the <span class="text-primary">account based</span> ADS-B aggregators you want to feed:</div>
+  <!-- next, the account-based ones -->
   <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="flightradar--is_enabled" id="flightradar--is_enabled"
            {{ others_enabled("flightradar", m) }} />
@@ -349,23 +296,15 @@
         </div>
     </label>
   </div>
-  {% for identifier, conf in netconfigs.items() %}
-  <div class="col-12 form-check">
-    <input type="checkbox" class="form-check-input me-1" name="{{ conf.identifier }}--ultrafeeder--is_enabled" id="{{ conf.identifier }}--ultrafeeder--is_enabled"
-           {{ uf_enabled(conf.identifier, m) }} />
-    <label class="col-4" for="{{ conf.identifier }}--ultrafeeder--is_enabled">
-      <a href={{ conf.website }}>{{ conf.name }}</a> <a href="{{ conf.policy }}" title="Privacy Policy" style="font-size: 0.8em;">{{ "🛡️" if conf.policy else "⚠️" }}</a>
-      <div class="form-group" id="{{ conf.identifier.upper() }}_ULTRAFEEDER_FIELDS">
-        <label for="{{ conf.identifier }}--ultrafeeder--uuid">
-          UUID
-        </label>
-        <input type="text" id="{{ conf.identifier }}--ultrafeeder--uuid" name="{{ conf.identifier }}--ultrafeeder--uuid" class="form-control text-end"
-            {{ uf_enabled(conf.identifier, m) | replace("checked", "required" ) }} placeholder=" {{ conf.name }} UUID"
-            value="{{ list_value_by_tags(["ultrafeeder", conf.identifier, "uuid"], m) }}">
-      </div>
-    </label>
-  </div>
+  <!-- last, the out-of-favor ones -->
+  {% for conf in (netconfigs.values() | selectattr('table', 'equalto', 1) | sort(attribute='ordinal')) %}
+  {{ ultrafeeder_agg_entry(conf, m) }}
   {% endfor %}
+  <script>
+    $('.account-less').each(function() {
+      $(this).closest('.form-check').find('.uuid-fields').toggleClass('d-none', !this.checked);
+    });
+  </script>
   <hr>
   {% endif %}
   <!-- end of the ADS-B section -->
