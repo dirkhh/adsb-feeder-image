@@ -7,7 +7,7 @@ class NetConfig:
         identifier: str,
         name: str,
         website: str,
-        links: str,
+        links: list[str],
         table: int,
         adsb_config: str,
         mlat_config: str,

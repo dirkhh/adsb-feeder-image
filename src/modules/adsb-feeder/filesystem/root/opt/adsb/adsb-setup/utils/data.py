@@ -237,7 +237,7 @@ class Data:
             identifier="dataero",
             name="Dataero",
             website="https://dataero.eu/",
-            links=[],
+            links=[""],
             table=0,
             adsb_config="adsb,adsb.dataero.eu,30005,beast_reduce_plus_out",
             mlat_config="mlat,adsb.dataero.eu,31090",
