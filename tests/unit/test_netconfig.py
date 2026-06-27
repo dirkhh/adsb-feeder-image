@@ -8,6 +8,21 @@ from uuid import uuid4
 from utils.netconfig import NetConfig, UltrafeederConfig
 
 
+def make_netconfig(adsb_config, mlat_config, has_policy):
+    """Convenience wrapper matching the old 3-arg signature used in these tests."""
+    return NetConfig(
+        identifier="test",
+        name="Test",
+        website="",
+        links=[],
+        table=0,
+        ordinal=0,
+        adsb_config=adsb_config,
+        mlat_config=mlat_config,
+        policy="https://example.com" if has_policy else "",
+    )
+
+
 class TestNetConfig:
     """Test the NetConfig class"""
 
@@ -17,18 +32,18 @@ class TestNetConfig:
         mlat_config = "mlat_line_config"
         has_policy = True
 
-        netconfig = NetConfig(adsb_config, mlat_config, has_policy)
+        netconfig = make_netconfig(adsb_config, mlat_config, has_policy)
 
         assert netconfig.adsb_config == adsb_config
         assert netconfig.mlat_config == mlat_config
-        assert netconfig._has_policy == has_policy
+        assert netconfig.has_policy == has_policy
 
     def test_netconfig_has_policy_property(self):
         """Test has_policy property"""
-        netconfig = NetConfig("adsb", "mlat", True)
+        netconfig = make_netconfig("adsb", "mlat", True)
         assert netconfig.has_policy is True
 
-        netconfig = NetConfig("adsb", "mlat", False)
+        netconfig = make_netconfig("adsb", "mlat", False)
         assert netconfig.has_policy is False
 
     def test_generate_without_uuid(self):
@@ -36,7 +51,7 @@ class TestNetConfig:
         adsb_config = "adsb_line_config"
         mlat_config = "mlat_line_config"
 
-        netconfig = NetConfig(adsb_config, mlat_config, True)
+        netconfig = make_netconfig(adsb_config, mlat_config, True)
 
         result = netconfig.generate()
 
@@ -48,7 +63,7 @@ class TestNetConfig:
         mlat_config = "mlat_line_config"
         test_uuid = "12345678-1234-1234-1234-123456789abc"
 
-        netconfig = NetConfig(adsb_config, mlat_config, True)
+        netconfig = make_netconfig(adsb_config, mlat_config, True)
 
         result = netconfig.generate(uuid=test_uuid)
 
@@ -61,7 +76,7 @@ class TestNetConfig:
         mlat_config = "mlat_line_config"
         invalid_uuid = "invalid-uuid"
 
-        netconfig = NetConfig(adsb_config, mlat_config, True)
+        netconfig = make_netconfig(adsb_config, mlat_config, True)
 
         result = netconfig.generate(uuid=invalid_uuid)
 
@@ -73,7 +88,7 @@ class TestNetConfig:
         adsb_config = "adsb_line_config"
         mlat_config = "mlat_line_config"
 
-        netconfig = NetConfig(adsb_config, mlat_config, True)
+        netconfig = make_netconfig(adsb_config, mlat_config, True)
 
         result = netconfig.generate(mlat_privacy=False)
 
@@ -84,7 +99,7 @@ class TestNetConfig:
         adsb_config = "adsb_line_config"
         mlat_config = ""
 
-        netconfig = NetConfig(adsb_config, mlat_config, True)
+        netconfig = make_netconfig(adsb_config, mlat_config, True)
 
         result = netconfig.generate()
 
@@ -95,7 +110,7 @@ class TestNetConfig:
         adsb_config = "adsb_line_config"
         mlat_config = "mlat_line_config"
 
-        netconfig = NetConfig(adsb_config, mlat_config, True)
+        netconfig = make_netconfig(adsb_config, mlat_config, True)
 
         result = netconfig.generate(mlat_enable=False)
 
@@ -107,7 +122,7 @@ class TestNetConfig:
         mlat_config = "mlat_line_config"
         test_uuid = "12345678-1234-1234-1234-123456789abc"
 
-        netconfig = NetConfig(adsb_config, mlat_config, True)
+        netconfig = make_netconfig(adsb_config, mlat_config, True)
 
         result = netconfig.generate(uuid=test_uuid, mlat_enable=False)
 
@@ -119,7 +134,7 @@ class TestNetConfig:
         adsb_config = "adsb_line_config"
         mlat_config = ""
 
-        netconfig = NetConfig(adsb_config, mlat_config, True)
+        netconfig = make_netconfig(adsb_config, mlat_config, True)
 
         result = netconfig.generate(uuid="12345678-1234-1234-1234-123456789abc")
 
@@ -132,7 +147,7 @@ class TestNetConfig:
         mlat_config = "mlat_line_config"
         real_uuid = str(uuid4())
 
-        netconfig = NetConfig(adsb_config, mlat_config, True)
+        netconfig = make_netconfig(adsb_config, mlat_config, True)
 
         result = netconfig.generate(uuid=real_uuid)
 
@@ -308,7 +323,7 @@ class TestNetConfigIntegration:
         # Create NetConfig
         adsb_config = "adsb_line_config"
         mlat_config = "mlat_line_config"
-        netconfig = NetConfig(adsb_config, mlat_config, True)
+        netconfig = make_netconfig(adsb_config, mlat_config, True)
 
         # Create UltrafeederConfig
         mock_data = MagicMock()
@@ -328,14 +343,14 @@ class TestNetConfigIntegration:
         # Scenario 1: Basic ADS-B only
         adsb_config = "adsb_line_config"
         mlat_config = ""
-        netconfig = NetConfig(adsb_config, mlat_config, False)
+        netconfig = make_netconfig(adsb_config, mlat_config, False)
 
         result = netconfig.generate()
         assert result == "adsb_line_config;"
 
         # Scenario 2: ADS-B with MLAT and privacy
         mlat_config = "mlat_line_config"
-        netconfig = NetConfig(adsb_config, mlat_config, True)
+        netconfig = make_netconfig(adsb_config, mlat_config, True)
 
         result = netconfig.generate()
         assert result == "adsb_line_config;mlat_line_config,--privacy"
@@ -381,7 +396,7 @@ class TestNetConfigIntegration:
     def test_config_error_handling(self):
         """Test error handling in config classes"""
         # Test NetConfig with None values
-        netconfig = NetConfig(None, None, False)
+        netconfig = make_netconfig(None, None, False)
 
         result = netconfig.generate()
         assert result == "None;None"
@@ -400,7 +415,7 @@ class TestNetConfigIntegration:
     def test_config_edge_cases(self):
         """Test edge cases in config classes"""
         # Test NetConfig with empty strings
-        netconfig = NetConfig("", "", False)
+        netconfig = make_netconfig("", "", False)
 
         result = netconfig.generate()
         assert result == ";"
@@ -408,7 +423,7 @@ class TestNetConfigIntegration:
         # Test NetConfig with very long strings
         long_adsb = "a" * 1000
         long_mlat = "b" * 1000
-        netconfig = NetConfig(long_adsb, long_mlat, True)
+        netconfig = make_netconfig(long_adsb, long_mlat, True)
 
         result = netconfig.generate()
         assert result == f"{long_adsb};{long_mlat},--privacy"
