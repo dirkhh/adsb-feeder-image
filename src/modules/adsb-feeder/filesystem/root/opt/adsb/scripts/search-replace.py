@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import json
+import re
 import sys
 
 config = json.load(open("/opt/adsb/config/config.json", "r"))
@@ -47,7 +48,7 @@ sanitize_vars = [
     "FEEDER_SM_USERNAME",
     "FEEDER_SM_PASSWORD",
     "SKYSTATS_DB_PASSWORD",
-]
+] + [k for k in config if re.match(r"ULTRAFEEDER_\w+_UUID$", k)]
 
 for name in sanitize_vars:
     item = config[name]
