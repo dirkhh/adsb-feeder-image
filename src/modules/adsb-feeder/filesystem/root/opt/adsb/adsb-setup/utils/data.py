@@ -243,6 +243,17 @@ class Data:
             policy="https://flyoverhead.com/legal/privacy",
         ),
         NetConfig(
+            identifier="flyrealtraffic",
+            name="RealTraffic",
+            website="https://flyrealtraffic.com/",
+            links=[""],
+            table=1,
+            ordinal=89,
+            adsb_config="adsb,feed.flyrealtraffic.com,30004,beast_reduce_plus_out",
+            mlat_config="",
+            policy="",
+        ),
+        NetConfig(
             identifier="hpradar",
             name="HPRadar",
             website="https://skylink.hpradar.com/",
