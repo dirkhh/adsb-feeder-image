@@ -58,12 +58,12 @@
   <div class="col-12 col-md-6 col-lg-4 my-2">
     <button type="button" class="btn btn-large btn-primary w-100 with-checkbox" data-mdb-ripple-init><input
               type="radio" class="me-2" name="aggregator_choice"  id="all" value="all" required {% if env_value_by_tag("aggregator_choice")=="all" %} checked {% endif %}
-              onclick="$('.account-less').prop('checked', true); $('.uuid-fields').removeClass('d-none');"> All</button>
+              onclick="$('.account-less').prop('checked', true); $('.uuid-fields').removeClass('invisible');"> All</button>
   </div>
   <div class="col-12 col-md-6 col-lg-4 my-2">
     <button type="button" class="btn btn-large btn-primary w-100 with-checkbox" data-mdb-ripple-init><input type="radio"
               class="me-2" name="aggregator_choice" id="privacy" value="privacy" required {% if env_value_by_tag("aggregator_choice")=="privacy" %} checked {% endif %}
-              onclick="$('.account-less').each(function(){ var c=$(this).hasClass('privacy'); $(this).prop('checked',c); $(this).closest('.form-check').find('.uuid-fields').toggleClass('d-none',!c); });"> Privacy</button>
+              onclick="$('.account-less').each(function(){ var c=$(this).hasClass('privacy'); $(this).prop('checked',c); $(this).closest('.form-check').find('.uuid-fields').toggleClass('invisible',!c); });"> Privacy</button>
   </div>
   <div class="col-12 col-md-6 col-lg-4 my-2">
     <button type="button" class="btn btn-large btn-primary w-100 with-checkbox" data-mdb-ripple-init><input type="radio"
@@ -77,7 +77,7 @@
     <input type="checkbox" class="form-check-input me-1 account-less {% if conf.policy != '' %}privacy{% endif %}"
            name="{{ conf.identifier }}--ultrafeeder--is_enabled"
            id="{{ conf.identifier }}--ultrafeeder--is_enabled" {{ uf_enabled(conf.identifier, m) }}
-           onclick="$(this).closest('.form-check').find('.uuid-fields').toggleClass('d-none', !this.checked); $('#individual').prop('checked', true);" />
+           onclick="$(this).closest('.form-check').find('.uuid-fields').toggleClass('invisible', !this.checked); $('#individual').prop('checked', true);" />
     <div class="row">
       <label class="col-12 col-md-4" for="{{ conf.identifier }}--ultrafeeder--is_enabled">
         <a href="{{ conf.website }}">{{ conf.name }}</a> <a href="{{ conf.policy }}" title="Privacy Policy"
@@ -302,7 +302,7 @@
   {% endfor %}
   <script>
     $('.account-less').each(function() {
-      $(this).closest('.form-check').find('.uuid-fields').toggleClass('d-none', !this.checked);
+      $(this).closest('.form-check').find('.uuid-fields').toggleClass('invisible', !this.checked);
     });
   </script>
   <hr>
