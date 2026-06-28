@@ -1,6 +1,6 @@
 Changes since v3.0.12
 =======
-- add two new aggregators, Dataero and FlyOverhead
+- add new aggregators, ADSBiq, RealTraffic, Dataero, and FlyOverhead
 - webUI: completely rethink and redo the data sharing page
 - healthcheck: properly identify container down (instead of wrongly assuming the SDR is down)
 - healthcheck: add experimental feature to force automatic reboots when a configured SDR disappears
