@@ -232,6 +232,17 @@ class Data:
             policy="https://dataero.eu/privacy-policy",
         ),
         NetConfig(
+            identifier="adsbiq",
+            name="ADSBiq",
+            website="https://adsbiq.com/",
+            links=[""],
+            table=1,
+            ordinal=84,
+            adsb_config="adsb,feed.adsbiq.com,30004,beast_reduce_plus_out",
+            mlat_config="mlat,feed.adsbiq.com,31090",
+            policy="https://adsbiq.com/privacy",
+        ),
+        NetConfig(
             identifier="flyoverhead",
             name="FlyOverhead",
             website="https://flyoverhead.com/",
