@@ -509,7 +509,7 @@ class Data:
             tags=["sdrmap", "key"],
         ),
         # ADSB.im specific
-        Env("_ADSBIM_AGGREGATORS_SELECTION", tags=["aggregator_choice"]),
+        Env("_ADSBIM_AGGREGATORS_SELECTION", default="individual", tags=["aggregator_choice"]),
         Env("_ADSBIM_BASE_VERSION", default="", tags=["base_version", "norestore"]),
         Env("_ADSBIM_STATE_PREVIOUS_VERSION", "", tags=["previous_version", "norestore"]),
         Env("_ADSBIM_SEEN_CHANGELOG", default=True, tags=["seen_changelog"]),
