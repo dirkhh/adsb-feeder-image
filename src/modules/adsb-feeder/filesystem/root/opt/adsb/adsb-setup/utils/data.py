@@ -17,7 +17,7 @@ from .paths import (
     SECURE_IMAGE_FILE,
     VERSION_FILE,
 )
-from .util import is_true, print_err
+from .util import is_true, print_err, stack_info
 
 
 @dataclass
@@ -1116,13 +1116,13 @@ class Data:
         matches: list[Env] = []
         for e in self._env:
             if not e.tags:
-                print_err(f"{e} has no tags")
+                stack_info(f"{e} has no tags")
             if all(t in e.tags for t in tags):
                 matches.append(e)
         if len(matches) == 0:
             raise Exception(f"No Env for tags {tags}")
         if len(matches) > 1:
-            print_err(f"More than one match for tags {tags}")
+            stack_info(f"More than one match for tags {tags}")
             for e in matches:
                 print_err(f"  {e}")
 
@@ -1146,7 +1146,7 @@ class Data:
         e = self._get_enabled_env_by_tags(tags_list)
         if type(e._value) == list:
             ret = is_true(e.list_get(0))
-            print_err(f"is_enabled called on list: {e}[0] = {ret}")
+            stack_info(f"is_enabled called on list: {e}[0] = {ret}")
             return ret
         return is_true(e._value)
 
