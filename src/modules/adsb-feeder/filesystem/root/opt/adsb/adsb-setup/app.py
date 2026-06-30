@@ -362,9 +362,6 @@ class AdsbIm:
             if entry[0] in netconfigs.keys():
                 self.uf_aggregators.append(entry)
 
-        print_err(self.all_aggregators)
-        print_err(self.microfeeder_setting_tags)
-
         self._routemanager.add_proxy_routes(self._d.proxy_routes)
         self.app.add_url_rule("/geojson", "geojson", self.geojson)
         self.app.add_url_rule("/icons.png", "iconspng", self.iconspng)
