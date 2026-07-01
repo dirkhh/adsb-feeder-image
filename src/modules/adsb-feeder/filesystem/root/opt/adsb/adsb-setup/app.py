@@ -4926,11 +4926,19 @@ class AdsbIm:
 
         netdog = simple_cmd_result(f"tail -n 10 {get_adsb_base_dir()}/logs/netdog.log 2>/dev/null")
 
-        containers = [
-            self._d.env_by_tags(["container", container]).value
-            for container in self._d.tag_for_name.values()
-            if self._d.is_enabled(container) or container == "ultrafeeder"
-        ]
+        ids = [ 0 ] if not self._d.is_enabled("stage2") else self.micro_indices()
+        containers = []
+        for container in self._d.tag_for_name.values():
+            enabled = False
+            if container == "ultrafeeder":
+                enabled = True
+            elif container == "skystats":
+                enabled = self._d.is_enabled(container)
+            else:
+                enabled = any(self._d.list_is_enabled(container, idx) for idx in ids)
+            if enabled:
+                containers.append(self._d.env_by_tags(["container", container]).value)
+
         return render_template(
             "info.html",
             board=board,
