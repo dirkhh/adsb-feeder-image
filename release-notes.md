@@ -1,5 +1,6 @@
 Changes since v3.0.12
 =======
+- cleanup: improve error and debug messages in logs
 - add new aggregators, ADSBiq, RealTraffic, Dataero, and FlyOverhead
 - webUI: completely rethink and redo the data sharing page
 - healthcheck: properly identify container down (instead of wrongly assuming the SDR is down)
@@ -16,8 +17,7 @@ Changes since v3.0.12
 > Images can take more than 5 minutes before the web interface is available. Please be patient.
 
 > [!NOTE]
-> Currently the Odroid image and the default LePotato images do NOT support WiFi. For the default Raspberry Pi image (but not the new Raspbian image for LePotato), WiFi can be configured with the Pi Imager when you write the image to SD-card, DietPi based images do support WiFi, but they require editing two files on the DOS partition included with the image BEFORE the first boot. Please look at the [adsb.im FAQ](https://adsb.im/faq) for details.
-> Alternatively, if there is no network connection detected, all WiFi enabled images will create a hotspot named `adsb.im-feeder`. You can then connect to that hotspot and set up SSID/password of the access point you want the feeder to connect to.
+> Currently the default LePotato images does NOT support WiFi. For the other images, we recommend against configuring WiFi with the Pi Imager when you write the image to SD-card. Instead use the automatic hotspot to set up WiFi: if there is no network connection detected, all WiFi enabled images will create a hotspot named `adsb.im-feeder`. You can then connect to that hotspot and set up SSID/password of the access point you want the feeder to connect to.
 
 For Raspberry Pis there are multiple images available. For most users the Raspbian based `adsb-im-raspberrypi64-pi-2-3-4-5-v....img.xz` is likely the best choice, but there are also two DietPi based images available for those who prefer that.
 
