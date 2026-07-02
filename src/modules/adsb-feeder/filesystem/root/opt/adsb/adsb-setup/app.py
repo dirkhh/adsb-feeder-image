@@ -1337,6 +1337,10 @@ class AdsbIm:
         if self._d.ultrafeeder[0].enabled_aggregators:
             return True
 
+        # radarvirtuel is a weird special case, handle it seperately
+        if self._d.list_is_enabled("radarvirtuel", idx=0):
+            return True
+
         # of course, maybe they picked just one or more proprietary aggregators and that's all they want...
         for submit_key in self._other_aggregators.keys():
             key = submit_key.replace("--submit", "")
@@ -4926,7 +4930,7 @@ class AdsbIm:
 
         netdog = simple_cmd_result(f"tail -n 10 {get_adsb_base_dir()}/logs/netdog.log 2>/dev/null")
 
-        ids = [ 0 ] if not self._d.is_enabled("stage2") else self.micro_indices()
+        ids = [0] if not self._d.is_enabled("stage2") else self.micro_indices()
         containers = []
         for container in self._d.tag_for_name.values():
             enabled = False
