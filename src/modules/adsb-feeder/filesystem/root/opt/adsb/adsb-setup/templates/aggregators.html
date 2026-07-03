@@ -80,8 +80,12 @@
            onclick="$(this).closest('.form-check').find('.uuid-fields').toggleClass('invisible', !this.checked); $('#individual').prop('checked', true);" />
     <div class="row">
       <label class="col-12 col-md-4" for="{{ conf.identifier }}--ultrafeeder--is_enabled">
-        <a href="{{ conf.website }}">{{ conf.name }}</a> <a href="{{ conf.policy }}" title="Privacy Policy"
-            style="font-size: 0.8em;">{{ "🛡️" if conf.policy else "⚠️" }}</a>
+        <a href="{{ conf.website }}">{{ conf.name }}</a>
+        {% if conf.policy %}
+        <a href="{{ conf.policy }}" title="Privacy Policy" style="font-size: 0.8em;">🛡️ </a>
+        {% else %}
+        <span title="This site is missing a clear data/privacy policy" style="font-size: 0.8em;">⚠️</span>
+        {% endif %}
       </label>
       <div class="form-group col-12 col-md-8 d-flex align-items-center gap-2 uuid-fields" id="{{ conf.identifier.upper() }}_ULTRAFEEDER_FIELDS">
         <label class="mb-0 text-nowrap" for="{{ conf.identifier }}--ultrafeeder--uuid">UUID</label>
