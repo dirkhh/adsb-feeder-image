@@ -297,6 +297,17 @@ class Data:
             mlat_config="",
             policy="https://www.avdelphi.com/privacy.html",
         ),
+        NetConfig(
+            identifier="adsbitalia",
+            name="ADSB Italia",
+            website="https://www.adsbitalia.it/",
+            links=[""],
+            table=1,
+            ordinal=172,
+            adsb_config="adsb,adsbitalia.it,31108,beast_reduce_plus_out;",
+            mlat_config="mlat,mlat.adsbitalia.it,41113;",
+            policy="",
+        ),
     ]
 
     # create dictionary from list
