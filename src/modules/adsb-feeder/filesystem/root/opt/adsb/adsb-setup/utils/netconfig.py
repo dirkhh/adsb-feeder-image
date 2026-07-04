@@ -164,8 +164,8 @@ class UltrafeederConfig:
                 ret.add(f"adsb,dump978,30978,uat_in")
 
         # finally, add user provided things
-        ultrafeeder_extra_args = self._d.env_by_tags("ultrafeeder_extra_args").value.replace("\n", "")
-        ultrafeeder_extra_args_microsites = self._d.env_by_tags("ultrafeeder_extra_args_microsites").value.replace("\n", "")
+        ultrafeeder_extra_args = self._d.env_by_tags("ultrafeeder_extra_args").value.translate(str.maketrans("", "", "\r\n"))
+        ultrafeeder_extra_args_microsites = self._d.env_by_tags("ultrafeeder_extra_args_microsites").value.translate(str.maketrans("", "", "\r\n"))
         if ultrafeeder_extra_args:
             if not is_stage2:
                 ret.add(ultrafeeder_extra_args)
