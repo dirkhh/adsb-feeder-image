@@ -1,5 +1,7 @@
 Changes since v3.0.12
 =======
+- ultrafeeder extra args: deal with \r
+- new aggs: flightdeck, adsbitalia
 - cleanup: improve error and debug messages in logs
 - add new aggregators, ADSBiq, RealTraffic, Dataero, and FlyOverhead
 - webUI: completely rethink and redo the data sharing page
