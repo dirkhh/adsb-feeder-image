@@ -362,6 +362,14 @@ class AdsbIm:
             if entry[0] in netconfigs.keys():
                 self.uf_aggregators.append(entry)
 
+        # check if FlightGazer is running on this image or alongside the app on this system
+        # before we compile all the proxy routes
+        self._d.env_by_tags("flightgazer_proxy").value = self._service_exists("flightgazer-webapp.service")
+        if self._d.is_enabled("flightgazer_proxy") and not any(
+            endpoint == "/flightgazer/" for endpoint, _, _ in self._d._proxy_routes
+        ):
+            self._d._proxy_routes.append(["/flightgazer/", "FLIGHTGAZER", "/flightgazer/"])
+
         self._routemanager.add_proxy_routes(self._d.proxy_routes)
         self.app.add_url_rule("/geojson", "geojson", self.geojson)
         self.app.add_url_rule("/icons.png", "iconspng", self.iconspng)
@@ -2753,6 +2761,15 @@ class AdsbIm:
             self._d.env_by_tags("sonde").value = True
         if self._d.is_enabled("is_ais_feeder"):
             self._d.env_by_tags("shipfeeder").value = True
+
+    def _service_exists(self, service_name: str) -> bool:
+        if not service_name:
+            return False
+        success, _ = run_shell_captured(
+            f"systemctl list-unit-files --type=service {service_name} 2>/dev/null | grep -q '^{service_name}\\s'",
+            timeout=5,
+        )
+        return success
 
     def handle_temp_sensor(self, temp_sensor, dht22_pin=0):
         if temp_sensor.value == "dht22":

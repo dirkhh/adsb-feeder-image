@@ -97,6 +97,7 @@ class Data:
         ["/acarshub/", "ACARSHUB", "/"],
         ["/aiscatcher/", "AISCATCHER", "/"],
         ["/radiosonde/", "RADIOSONDE", "/"],
+        ["/flightgazer/", "FLIGHTGAZER", "/flightgazer/"],
     ]
 
     @property
@@ -551,6 +552,8 @@ class Data:
         Env("AF_FLIGHTRADAR_PORT", default=8754, tags=["frport"]),
         Env("AF_PLANEFINDER_PORT", default=30053, tags=["pfport"]),
         Env("AF_SKYSTATS_PORT", default=5173, tags=["skystatsport", "norestore"]),
+        Env("AF_FLIGHTGAZER_PORT", default=9898, tags=["flightgazerport", "norestore"]),
+        Env("AF_IS_FLIGHTGAZER_PROXY_ENABLED", default=False, tags=["flightgazer_proxy", "is_enabled"]),
         Env("AF_DOCKER_IPV6", default=False, tags=["docker_ipv6", "is_enabled", "norestore"]),
         Env("AF_TELEGRAF_ADSB", default=False, tags=["telegraf_adsb", "is_enabled"]),
         Env("TELEGRAF_URL_1090", default="", tags=["telegraf_url_1090"]),
