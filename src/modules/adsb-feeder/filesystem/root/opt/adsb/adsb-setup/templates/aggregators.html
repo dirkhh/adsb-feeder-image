@@ -161,7 +161,7 @@
       </div>
     </label>
   </div>
-  <div class="ol-12 form-check">
+  <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="flightaware--is_enabled" id="flightaware--is_enabled"
            {{ others_enabled("flightaware", m) }} />
     <label class="mx-1 w-auto" for="flightaware--is_enabled">
@@ -186,7 +186,7 @@
       </div>
     </label>
   </div>
-  <div class="ol-12 form-check">
+  <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="radarbox--is_enabled" id="radarbox--is_enabled"
            {{ others_enabled("radarbox", m) }} />
     <label class="mx-1 w-auto" for="radarbox--is_enabled">
@@ -206,7 +206,7 @@
       </div>
     </label>
   </div>
-  <div class="ol-12 form-check">
+  <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="planefinder--is_enabled" id="planefinder--is_enabled"
            {{ others_enabled("planefinder", m) }} />
     <label class="mx-1 w-auto" for="planefinder--is_enabled">
@@ -223,7 +223,7 @@
       </div>
     </label>
   </div>
-  <div class="ol-12 form-check">
+  <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="adsbhub--is_enabled" id="adsbhub--is_enabled"
            {{ others_enabled("adsbhub", m) }} />
     <label class="mx-1 w-auto" for="adsbhub--is_enabled">
@@ -241,7 +241,7 @@
       </div>
     </label>
   </div>
-  <div class="ol-12 form-check">
+  <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="opensky--is_enabled" id="opensky--is_enabled"
            {{ others_enabled("opensky", m) }} />
     <label class="mx-1 w-auto" for="opensky--is_enabled">
@@ -263,7 +263,7 @@
       </div>
     </label>
   </div>
-  <div class="ol-12 form-check">
+  <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="1090uk--is_enabled" id="1090uk--is_enabled"
            {{ others_enabled("1090uk", m) }} />
     <label class="mx-1 w-auto" for="1090uk--is_enabled">
@@ -280,7 +280,7 @@
       </div>
     </label>
   </div>
-  <div class="ol-12 form-check">
+  <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="sdrmap--is_enabled" id="sdrmap--is_enabled"
            {{ others_enabled("sdrmap", m) }} />
     <label class="mx-1 w-auto" for="sdrmap--is_enabled">
@@ -317,7 +317,7 @@
   {% if is_enabled('acarsdec') or is_enabled('acarsdec2') or is_enabled('dumpvdl2') %}
   <h3 class="note-primary" >ACARS / VDL2 / HFDL</h3>
   <div class="col-12 mt-3 mb-1 h5">Select the ACARS (including VDL2 / HFDL) aggregators you want to feed:</div>
-  <div class="ol-12 form-check">
+  <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="feed_acars_airframes--is_enabled" id="feed_acars_airframes--is_enabled" {{ nonadsb_enabled("feed_acars_airframes", m) }} />
     <label class="mx-1 w-auto" for="feed_acars_airframes--is_enabled">
       <a href="https://airframes.io/">Airframes.io</a> is an unbiased and unfiltered transportation aggregation service
@@ -325,7 +325,7 @@
       Most people interested in tracking this kind of data want to feed this aggregator.
     </label>
   </div>
-  <div class="ol-12 form-check">
+  <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="feed_acars_acarsdrama--is_enabled" id="feed_acars_acarsdrama--is_enabled" {{ nonadsb_enabled("feed_acars_acarsdrama", m) }} />
     <label class="mx-1 w-auto" for="feed_acars_acarsdrama--is_enabled">
       <a href="https://acarsdrama.com/">AcarsDrama</a> is a rather different type of aggregator. They are mainly focused
@@ -334,13 +334,13 @@
       them an approximate location of your feeder.
     </label>
   </div>
-  <div class="ol-12 form-check">
+  <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="feed_acars_adsblol--is_enabled" id="feed_acars_adsblol--is_enabled" {{ nonadsb_enabled("feed_acars_adsblol", m) }} />
     <label class="mx-1 w-auto" for="feed_acars_adsblol--is_enabled">
       <a href="https://www.adsb.lol/docs/open-data/aircraft-data-links/">adsb.lol</a> is focused on dumping the raw data into a publicly available github repository.
     </label>
   </div>
-  <div class="ol-12 form-check">
+  <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="feed_acars_avdelphi--is_enabled"
            id="feed_acars_avdelphi--is_enabled" {{ nonadsb_enabled("feed_acars_avdelphi", m) }} />
     <label class="mx-1 w-auto" for="feed_acars_avdelphi--is_enabled">
@@ -358,7 +358,7 @@
   <h3 class="note-primary">AIS</h3>
   <div class="col-12 mt-3 mb-1 h5">Select the AIS aggregators you want to feed:</div>
   <!-- Airframes.io -->
-  <div class="ol-12 form-check mb-2">
+  <div class="col-12 form-check mb-2">
     <input type="checkbox" class="form-check-input me-1" name="ais_feed_airframes--is_enabled"
            id="ais_feed_airframes--is_enabled" {{ nonadsb_enabled("ais_feed_airframes", m) }} />
     <label class="mx-1 w-auto" for="ais_feed_airframes--is_enabled">
@@ -367,7 +367,7 @@
     </label>
   </div>
   <!-- AIS Catcher -->
-  <div class="ol-12 form-check">
+  <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="ais_feed_aiscatcher--is_enabled"
            id="ais_feed_aiscatcher--is_enabled" {{ nonadsb_enabled("ais_feed_aiscatcher", m) }} />
     <label class="mx-1 w-auto" for="ais_feed_aiscatcher--is_enabled">
@@ -382,7 +382,7 @@
     </label>
   </div>
   <!-- AIS Friends -->
-  <div class="ol-12 form-check">
+  <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="ais_feed_aisfriends--is_enabled"
            id="ais_feed_aisfriends--is_enabled" {{ nonadsb_enabled("ais_feed_aisfriends", m) }} />
     <label class="mx-1 w-auto" for="ais_feed_aisfriends--is_enabled">
@@ -399,7 +399,7 @@
     </label>
   </div>
   <!-- AISHub -->
-  <div class="ol-12 form-check">
+  <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="ais_feed_aishub--is_enabled"
            id="ais_feed_aishub--is_enabled" {{ nonadsb_enabled("ais_feed_aishub", m) }} />
     <label class="mx-1 w-auto" for="ais_feed_aishub--is_enabled">
@@ -416,7 +416,7 @@
     </label>
   </div>
   <!--     HPRadar    -->
-  <div class="ol-12 form-check mb-2">
+  <div class="col-12 form-check mb-2">
     <input type="checkbox" class="form-check-input me-1" name="ais_feed_ais_hpradar--is_enabled"
            id="ais_feed_ais_hpradar--is_enabled" {{ nonadsb_enabled("ais_feed_ais_hpradar", m) }} />
     <label class="mx-1 w-auto" for="ais_feed_ais_hpradar--is_enabled">
@@ -424,7 +424,7 @@
     </label>
   </div>
   <!--     sdrmap    -->
-  <div class="ol-12 form-check">
+  <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="ais_feed_sdrmap--is_enabled"
            id="ais_feed_sdrmap--is_enabled" {{ nonadsb_enabled("ais_feed_sdrmap", m) }} />
     <label class="mx-1 w-auto" for="ais_feed_sdrmap--is_enabled">
@@ -444,7 +444,7 @@
     </label>
   </div>
   <!--     MarineTraffic    -->
-  <div class="ol-12 form-check">
+  <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="ais_feed_marinetraffic--is_enabled"
             id="ais_feed_marinetraffic--is_enabled" {{ nonadsb_enabled("ais_feed_marinetraffic", m) }} />
     <label class="mx-1 w-auto" for="ais_feed_marinetraffic--is_enabled">
@@ -461,7 +461,7 @@
     </label>
   </div>
   <!--     MyShipTracking    -->
-  <div class="ol-12 form-check">
+  <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="ais_feed_myshiptracking--is_enabled"
             id="ais_feed_myshiptracking--is_enabled" {{ nonadsb_enabled("ais_feed_myshiptracking", m) }} />
     <label class="mx-1 w-auto" for="ais_feed_myshiptracking--is_enabled">
@@ -479,7 +479,7 @@
     </label>
   </div>
   <!--     pocketmariner / Boatbeacon    -->
-  <div class="ol-12 form-check">
+  <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="ais_feed_boatbeacon--is_enabled"
             id="ais_feed_boatbeacon--is_enabled" {{ nonadsb_enabled("ais_feed_boatbeacon", m) }} />
     <label class="mx-1 w-auto" for="ais_feed_boatbeacon--is_enabled">
@@ -496,7 +496,7 @@
     </label>
   </div>
   <!--     shipfinder    -->
-  <div class="ol-12 form-check mb-2">
+  <div class="col-12 form-check mb-2">
     <input type="checkbox" class="form-check-input me-1" name="ais_feed_shipfinder--is_enabled"
            id="ais_feed_shipfinder--is_enabled" {{ nonadsb_enabled("ais_feed_shipfinder", m) }} />
     <label class="mx-1 w-auto" for="ais_feed_shipfinder--is_enabled">
@@ -504,7 +504,7 @@
     </label>
   </div>
   <!--     ShippingExplorer    -->
-  <div class="ol-12 form-check">
+  <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="ais_feed_shippingexplorer--is_enabled"
            id="ais_feed_shippingexplorer--is_enabled" {{ nonadsb_enabled("ais_feed_shippingexplorer", m) }} />
     <label class="mx-1 w-auto" for="ais_feed_shippingexplorer--is_enabled">
@@ -521,7 +521,7 @@
     </label>
   </div>
   <!--     ShipXplorer    -->
-  <div class="ol-12 form-check">
+  <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="ais_feed_shipxplorer--is_enabled"
            id="ais_feed_shipxplorer--is_enabled" {{ nonadsb_enabled("ais_feed_shipxplorer", m) }} />
     <label class="mx-1 w-auto" for="ais_feed_shipxplorer--is_enabled">
@@ -539,7 +539,7 @@
     </label>
   </div>
   <!--     VesselFinder    -->
-  <div class="ol-12 form-check">
+  <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="ais_feed_vesselfinder--is_enabled"
            id="ais_feed_vesselfinder--is_enabled" {{ nonadsb_enabled("ais_feed_vesselfinder", m) }} />
     <label class="mx-1 w-auto" for="ais_feed_vesselfinder--is_enabled">
