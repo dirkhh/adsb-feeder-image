@@ -1,5 +1,6 @@
 Changes since v3.0.12
 =======
+- beta-notes: clean up data sharing page visuals
 - ultrafeeder extra args: deal with \r
 - new aggs: flightdeck, adsbitalia
 - cleanup: improve error and debug messages in logs
