@@ -104,16 +104,6 @@
   {{ ultrafeeder_agg_entry(conf, m) }}
   {% endfor %}
 
-  <!-- then, RadarVirtuel, which is not simply an Ultrafeeder config, yet it's now also accountless. So... umm. -->
-  <div class="col-xl-2 col-lg-3 col-sm-4 form-check">
-    <input type="checkbox" class="form-check-input me-1 account-less" name="radarvirtuel--is_enabled" id="radarvirtuel--is_enabled"
-            {{ others_enabled("radarvirtuel", m) }} onclick="$('#individual').click();" />
-    <label for="radarvirtuel--is_enabled">
-      <a href="https://www.radarvirtuel.com/">RadarVirtuel</a> <span
-            title="This site is missing a clear data/privacy policy" style="font-size: 0.8em;">⚠️</span>
-    </label>
-  </div>
-
   <!-- next, the account-based ones -->
   <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="flightradar--is_enabled" id="flightradar--is_enabled"
@@ -141,23 +131,6 @@
                value="{{ list_value_by_tags(["flightradar_uat", "key"], m) }}" />
         <button type="submit" class="btn btn-primary mt-1" name="flightradar--submit" value="{{stay}}">Request
           key</button>
-      </div>
-    </label>
-  </div>
-  <div class="col-12 form-check">
-    <input type="checkbox" class="form-check-input me-1" name="planewatch--is_enabled" id="planewatch--is_enabled"
-           {{ others_enabled("planewatch", m) }} />
-    <label class="mx-1 w-auto" for="planewatch--is_enabled">
-      <a href="https://plane.watch">Plane.watch</a> <span title="This site is missing a clear data/privacy policy" style="font-size: 0.8em;">⚠️</span>
-      <div class="form-group" id="PW_FIELDS">
-        <label for="planewatch--key">
-          To sign up for an API key go to <a href="https://atc.plane.watch/">atc.plane.watch</a>, sign up for an
-          account, log in and click on <b>Feeders, + New Feeder</b>. Fill out the details and save the data. This will
-          show you an API key that you can enter here.
-        </label>
-        <input type="text" id="planewatch--key" name="planewatch--key" class="form-control w-75"
-               {{ others_enabled("planewatch", m) | replace("checked", "required" ) }}
-               placeholder=" Plane.watch API key" value="{{ list_value_by_tags(["planewatch", "key"], m) }}">
       </div>
     </label>
   </div>
@@ -264,6 +237,23 @@
     </label>
   </div>
   <div class="col-12 form-check">
+    <input type="checkbox" class="form-check-input me-1" name="planewatch--is_enabled" id="planewatch--is_enabled"
+           {{ others_enabled("planewatch", m) }} />
+    <label class="mx-1 w-auto" for="planewatch--is_enabled">
+      <a href="https://plane.watch">Plane.watch</a> <span title="This site is missing a clear data/privacy policy" style="font-size: 0.8em;">⚠️</span>
+      <div class="form-group" id="PW_FIELDS">
+        <label for="planewatch--key">
+          To sign up for an API key go to <a href="https://atc.plane.watch/">atc.plane.watch</a>, sign up for an
+          account, log in and click on <b>Feeders, + New Feeder</b>. Fill out the details and save the data. This will
+          show you an API key that you can enter here.
+        </label>
+        <input type="text" id="planewatch--key" name="planewatch--key" class="form-control w-75"
+               {{ others_enabled("planewatch", m) | replace("checked", "required" ) }}
+               placeholder=" Plane.watch API key" value="{{ list_value_by_tags(["planewatch", "key"], m) }}">
+      </div>
+    </label>
+  </div>
+  <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="1090uk--is_enabled" id="1090uk--is_enabled"
            {{ others_enabled("1090uk", m) }} />
     <label class="mx-1 w-auto" for="1090uk--is_enabled">
@@ -298,6 +288,14 @@
                placeholder="sdrmap password" value="{{ list_value_by_tags(["sdrmap", "key"], m) }}" />
 
         </div>
+    </label>
+  </div>
+  <div class="col-12 form-check">
+    <input type="checkbox" class="form-check-input me-1 account-less" name="radarvirtuel--is_enabled" id="radarvirtuel--is_enabled"
+            {{ others_enabled("radarvirtuel", m) }} onclick="$('#individual').click();" />
+    <label for="radarvirtuel--is_enabled">
+      <a href="https://www.radarvirtuel.com/">RadarVirtuel</a> <span
+            title="This site is missing a clear data/privacy policy" style="font-size: 0.8em;">⚠️</span>
     </label>
   </div>
   <!-- last, the out-of-favor ones -->
