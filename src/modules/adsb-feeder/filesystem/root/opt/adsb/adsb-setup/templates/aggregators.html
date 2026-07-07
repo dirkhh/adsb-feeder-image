@@ -87,10 +87,10 @@
         <span title="This site is missing a clear data/privacy policy" style="font-size: 0.8em;">⚠️</span>
         {% endif %}
       </label>
-      <div class="form-group col-12 col-md-8 d-flex align-items-center gap-2 uuid-fields" id="{{ conf.identifier.upper() }}_ULTRAFEEDER_FIELDS">
-        <label class="mb-0 text-nowrap" for="{{ conf.identifier }}--ultrafeeder--uuid">UUID</label>
+      <div class="form-group col-12 col-md-8 uuid-fields" id="{{ conf.identifier.upper() }}_ULTRAFEEDER_FIELDS">
+        <label class="pr-2" for="{{ conf.identifier }}--ultrafeeder--uuid">UUID</label>
         <input type="text" id="{{ conf.identifier }}--ultrafeeder--uuid" name="{{ conf.identifier }}--ultrafeeder--uuid"
-               class="form-control text-end" style="max-width: 24em;"
+               class="form-control text-end" style="width: 22em; display: inline-block;"
                {{ uf_enabled(conf.identifier, m) | replace("checked", "required") }}
                placeholder=" {{ conf.name }} UUID"
                value="{{ list_value_by_tags(["ultrafeeder", conf.identifier, "uuid"], m) }}">
