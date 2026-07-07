@@ -105,6 +105,8 @@
   {{ ultrafeeder_agg_entry(conf, m) }}
   {% endfor %}
 
+  <div></div><!-- hspace -->
+
   <!-- next, the account-based ones -->
   <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="flightradar--is_enabled" id="flightradar--is_enabled"
@@ -197,6 +199,7 @@
       </div>
     </label>
   </div>
+  <div></div><!-- hspace -->
   <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="adsbhub--is_enabled" id="adsbhub--is_enabled"
            {{ others_enabled("adsbhub", m) }} />
@@ -271,6 +274,7 @@
       </div>
     </label>
   </div>
+  <div></div><!-- hspace -->
   <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="sdrmap--is_enabled" id="sdrmap--is_enabled"
            {{ others_enabled("sdrmap", m) }} />
@@ -300,7 +304,12 @@
     </label>
   </div>
   <!-- last, the out-of-favor ones -->
+  {% set ns = namespace(xy = 2) %}
   {% for conf in (netconfigs.values() | selectattr('table', 'equalto', 1) | sort(attribute='ordinal')) %}
+  {% if ns.xy % 4 == 0 %}
+  <div></div><!-- hspace -->
+  {% endif %}
+  {% set ns.xy = ns.xy + 1 %}
   {{ ultrafeeder_agg_entry(conf, m) }}
   {% endfor %}
   <hr>
