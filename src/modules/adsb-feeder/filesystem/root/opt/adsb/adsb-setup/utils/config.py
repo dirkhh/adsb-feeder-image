@@ -4,6 +4,7 @@ import os.path
 import tempfile
 import threading
 import time
+from copy import deepcopy
 
 from .paths import ADSB_CONFIG_DIR, CONFIG_JSON_FILE, ENV_FILE, USER_ENV_FILE
 from .util import print_err
@@ -35,7 +36,7 @@ def read_values_from_config_json(no_cache=False):
     except Exception:
         print_err("Failed to read .json file")
     else:
-        config_cache = ret
+        config_cache = deepcopy(ret)
         config_cache_updated = time.time()
     return ret
 
@@ -51,9 +52,9 @@ def write_values_to_config_json(data: dict, reason="no reason provided"):
         os.rename(tmp, CONFIG_JSON_FILE)
     except Exception:
         print_err(f"Error writing config.json to {CONFIG_JSON_FILE}")
-        return  # don't update cache if write failed
-    config_cache = data
-    config_cache_updated = time.time()
+    else:
+        config_cache = deepcopy(data)
+        config_cache_updated = time.time()
 
 
 def read_values_from_env_file():

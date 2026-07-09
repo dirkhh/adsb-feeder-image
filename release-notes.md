@@ -1,5 +1,6 @@
 Changes since v3.0.12
 =======
+- configuration: fix logic error which could result in env vars not being saved to disk
 - beta-notes: data sharing settings all / privacy: one time action, no automatic addition of new aggregators. beta users with this setting, please check data sharing page
 - beta-notes: only use old ultrafeeder UUID for previously existing aggregators when updating
 - beta-notes: clean up data sharing page visuals
