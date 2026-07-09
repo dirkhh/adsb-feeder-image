@@ -2906,7 +2906,7 @@ class AdsbIm:
                 else:
                     oldvar_uuid = self._d.env_by_tags("ultrafeeder_uuid").list_get(sitenum)
 
-                if name not in [ "adsblol", "adsbfi", "alive", "adsbx", "tat", "flyitaly", "planespotters", "hpradar", "avdelphi" ]:
+                if name not in ["adsblol", "adsbfi", "alive", "adsbx", "tat", "flyitaly", "planespotters", "hpradar", "avdelphi"]:
                     # only use the ultrafeeder UUID for aggregators that existed before this migration
                     oldvar_uuid = ""
 
