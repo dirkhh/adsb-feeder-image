@@ -93,7 +93,7 @@ class Env:
                 value = ""
 
             file_values[self._name] = value
-            write_values_to_config_json(file_values, reason=f"{self._name} = {value}")
+            write_values_to_config_json(file_values, reason=f"{self._name} = {value} (old value: {value_in_file})")
 
     def __str__(self):
         return f"Env({self._name}, {self._value})"
