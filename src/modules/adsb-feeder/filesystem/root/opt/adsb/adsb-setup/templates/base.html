@@ -512,6 +512,8 @@
       handleVisibilityChange();
 
 
+      {% if is_enabled('stage2') %}
+
       let feederTarget = 0;
       let parameters = location.search.substring(1).split('&');
       for (let i = 0; i < parameters.length; i++) {
@@ -519,9 +521,7 @@
           feederTarget = parameters[i].split("=")[1];
         }
       }
-      {% if is_enabled('stage2') %}
       console.log(`feederTarget: ${feederTarget}`);
-      {% endif %}
       let siteNames = [];
       {% for site in env_value_by_tag('site_name') %}
       siteNames.push('{{site}}');
@@ -549,6 +549,8 @@
         });
         $("#stats_current").addClass("d-none");
       }
+
+      {% endif %}
     }); // end of the $(function(){});
 
     let check_mf_task = {};
