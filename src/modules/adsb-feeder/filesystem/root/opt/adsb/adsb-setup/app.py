@@ -3615,11 +3615,6 @@ class AdsbIm:
                     # thus it is imperative to set it otherwise there can be a redirect cycle
                     self._d.env_by_tags("aggregators_chosen").value = True
 
-                    # if aggregator choice currently is "all" or "privacy", change it to
-                    # "individual" as the user presumably wants to change the selection
-                    if self._d.env_by_tags("aggregator_choice").valuestr in ["all", "privacy"]:
-                        self._d.env_by_tags("aggregator_choice").value = "individual"
-
                     # NOTE: seems like these 2 variables have an unfortunate name as they indicate
                     # that at least one aggregator is selected, not that a choice has been made
                     if any([form.get(key) == "1" for key in form.keys() if "feed_acars" in key]):
