@@ -3606,7 +3606,7 @@ class AdsbIm:
                         self._multi_outline_bg.cancel()
                         self._multi_outline_bg = None
                     self._d.env_by_tags("aggregators_chosen").value = False
-                    self._d.env_by_tags("aggregator_choice").value = ""
+                    self._d.env_by_tags("aggregator_choice").value = "individual"
 
                 if key == "aggregators":
                     # user has clicked Submit on Aggregator page
