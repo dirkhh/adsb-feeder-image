@@ -70,14 +70,8 @@ class UltrafeederConfig:
                 print_err(f"netconfigs references tag {name} with no associated env")
                 continue
             if aggregator_selection in ["micro", "nano"] or (self._d.is_enabled("stage2") and self._micro == 0):
-                aggregator_env.list_set(self._micro, False)
-            elif aggregator_selection == "all":
-                aggregator_env.list_set(self._micro, True)
-            elif aggregator_selection == "privacy":
-                aggregator_env.list_set(
-                    self._micro,
-                    self._d.netconfigs[name].has_policy,
-                )
+                # leave env variables intact but return netconfig that has no aggregators
+                continue
             if is_true(aggregator_env.list_get(self._micro)):
                 ret[name] = value
         return ret
