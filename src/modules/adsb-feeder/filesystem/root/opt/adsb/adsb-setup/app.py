@@ -4046,17 +4046,6 @@ class AdsbIm:
                     self._multi_outline_bg = Background(60, self.push_multi_outline)
                 unique_name = self.unique_site_name(form.get("site_name"), idx=0)
                 self._d.env_by_tags("site_name").list_set(0, unique_name)
-            # if this is a regular feeder and the user is changing to 'individual' selection
-            # (either in initial setup or when coming back to that setting later), show them
-            # the aggregator selection page next
-            if (
-                key == "aggregator_choice"
-                and not self._d.is_enabled("stage2")
-                and value == "individual"
-                and self._d.env_by_tags("aggregator_choice").value != "individual"
-            ):
-                # show the aggregator selection
-                next_url = url_for("aggregators")
             # finally, painfully ensure that we remove explicitly asigned SDRs from other asignments
             # this relies on the web page to ensure that each SDR is only asigned on purpose
             # the key in quesiton will be explicitely set and does not need clearing
