@@ -55,19 +55,24 @@
   </div>
 
   <div class="col-12 h5 mt-3">Quick-select of <span class="text-primary">account-less</span> ADS-B aggregators you want to feed:</div>
-  <div class="col-12 col-md-6 col-lg-4 my-2">
+  <div class="col-12 col-md-6 col-lg-3 my-2">
     <button type="button" class="btn btn-large btn-primary w-100 with-checkbox" data-mdb-ripple-init><input
               type="radio" class="me-2" name="aggregator_choice"  id="all" value="all" required {% if env_value_by_tag("aggregator_choice")=="all" %} checked {% endif %}
               onclick="$('.account-less').prop('checked', true); $('.uuid-fields').toggle(true);"> All</button>
   </div>
-  <div class="col-12 col-md-6 col-lg-4 my-2">
+  <div class="col-12 col-md-6 col-lg-3 my-2">
     <button type="button" class="btn btn-large btn-primary w-100 with-checkbox" data-mdb-ripple-init><input type="radio"
               class="me-2" name="aggregator_choice" id="privacy" value="privacy" required {% if env_value_by_tag("aggregator_choice")=="privacy" %} checked {% endif %}
               onclick="$('.account-less').each(function(){ var c=$(this).hasClass('privacy'); $(this).prop('checked',c); $(this).closest('.form-check').find('.uuid-fields').toggle(c); });"> Privacy</button>
   </div>
-  <div class="col-12 col-md-6 col-lg-4 my-2">
+  <div class="col-12 col-md-6 col-lg-3 my-2">
     <button type="button" class="btn btn-large btn-primary w-100 with-checkbox" data-mdb-ripple-init><input type="radio"
               class="me-2" name="aggregator_choice" id="individual" value="individual" required {% if env_value_by_tag("aggregator_choice")=="individual" %} checked {% endif %}> Individual</button>
+  </div>
+  <div class="col-12 col-md-6 col-lg-3 my-2">
+    <button type="button" class="btn btn-large btn-primary w-100 with-checkbox" data-mdb-ripple-init><input type="radio"
+              class="me-2" name="aggregator_choice" id="none" value="individual" required
+              onclick="$('.account-less').prop('checked', false); $('.uuid-fields').toggle(false);"> None</button>
   </div>
 
   <div class="col-12 mt-3 mb-1 h5">Select the ADS-B aggregators you want to feed:</div>
