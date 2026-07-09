@@ -537,12 +537,16 @@
         }
         $("#options").attr("href", "/visualization?m=" + feederTarget);
         $("#data_sharing_current_link").attr("href", "/aggregators?m=" + feederTarget);
-        $("#data_sharing_current").removeClass("d-none");
+        $("#data_sharing_current_link").off("click"); // jquery: remove all click event listeners
         $("#stats_current").removeClass("d-none");
         $("#stats_current").attr("href", "/stats_" + feederTarget + "/");
         $("#stats_current").text(`${siteName} Stats`);
       } else {
-        $("#data_sharing_current").addClass("d-none");
+        $("#data_sharing_current_link").attr("href", "");
+        $("#data_sharing_current_link").on("click", (event) => {
+          event.preventDefault();
+          alert("Please select a target site, Data Sharing is not available for combined data.");
+        });
         $("#stats_current").addClass("d-none");
       }
     }); // end of the $(function(){});
