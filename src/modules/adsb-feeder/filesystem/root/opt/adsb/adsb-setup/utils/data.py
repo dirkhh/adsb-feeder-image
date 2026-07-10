@@ -306,7 +306,7 @@ class Data:
             ordinal=172,
             adsb_config="adsb,adsbitalia.it,31108,beast_reduce_plus_out;",
             mlat_config="mlat,mlat.adsbitalia.it,41113;",
-            policy="",
+            policy="https://www.adsbitalia.it/privacy-policy.html",
         ),
     ]
 
