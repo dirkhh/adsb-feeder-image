@@ -81,6 +81,11 @@ class PathConfig:
     def CONFIG_JSON_FILE(self) -> Path:
         return self.ADSB_CONFIG_DIR / "config.json"
 
+    @property
+    def DOCKER_IMAGE_OVERRIDES_FILE(self) -> Path:
+        """User-provided container image override file (persistent across updates)."""
+        return self.ADSB_CONFIG_DIR / "docker.image.overrides"
+
     # System files
     @property
     def MACHINE_ID_FILE(self) -> Path:

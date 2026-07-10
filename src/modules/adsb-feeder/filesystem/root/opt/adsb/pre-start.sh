@@ -87,6 +87,30 @@ if [ ! -f .env ] ; then
     echo "_ADSBIM_BASE_VERSION=$(cat /opt/adsb/adsb.im.version)" >> .env
     echo "_ADSBIM_CONTAINER_VERSION=$(cat /opt/adsb/adsb.im.version)" >> .env
 fi
+
+# apply persistent container image overrides if present
+if [ -f docker.image.overrides ]; then
+    echo "$(date -u +"%FT%T.%3NZ") applying docker.image.overrides to .env" >> /run/adsb-feeder-image.log
+    while IFS='=' read -r key value; do
+        # skip comments, blank lines, and lines without '='
+        [[ -z "$key" || "$key" =~ ^[[:space:]]*# ]] && continue
+        key="${key//[$'\r\n']/}"
+        value="${value//[$'\r\n']/}"
+        # validate key: uppercase letters, digits, underscore, ends in _CONTAINER
+        if [[ "$key" =~ ^[A-Z0-9_]+_CONTAINER$ ]] && [ -n "$value" ]; then
+            if grep -q "^${key}=" .env 2>/dev/null; then
+                sed -i "s|^${key}=.*|${key}=${value}|" .env
+                echo "$(date -u +"%FT%T.%3NZ") override applied: ${key}=${value}" >> /run/adsb-feeder-image.log
+            else
+                echo "${key}=${value}" >> .env
+                echo "$(date -u +"%FT%T.%3NZ") override added: ${key}=${value}" >> /run/adsb-feeder-image.log
+            fi
+        else
+            echo "$(date -u +"%FT%T.%3NZ") override skipped (invalid key or empty value): ${key}=${value}" >> /run/adsb-feeder-image.log
+        fi
+    done < docker.image.overrides
+fi
+
 if [ ! -f config.json ] ; then
     bash /opt/adsb/create-json-from-env.sh
 fi

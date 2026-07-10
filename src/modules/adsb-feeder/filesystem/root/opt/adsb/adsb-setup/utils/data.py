@@ -10,6 +10,7 @@ from .netconfig import NetConfig
 from .paths import (
     ADSB_BASE_DIR,
     ADSB_CONFIG_DIR,
+    DOCKER_IMAGE_OVERRIDES_FILE,
     DOCKER_IMAGE_VERSIONS_FILE,
     ENV_FILE,
     FEEDER_IMAGE_NAME_FILE,
@@ -898,6 +899,73 @@ class Data:
         # Unexpected errors should always be logged
         print_err(f"Error loading container versions from {DOCKER_IMAGE_VERSIONS_FILE}: {e}")
         # Don't raise - allow system to continue with degraded functionality
+
+    # Compiled on first use for override key validation
+    _OVERRIDE_KEY_RE = None
+
+    def __post_init__(self):
+        """Apply persistent container image overrides if present."""
+        self._apply_image_overrides()
+
+    def _apply_image_overrides(self):
+        """
+        Apply persistent container image overrides from
+        /opt/adsb/config/docker.image.overrides.
+
+        This file lives in config/ so it survives updates.
+        Format: KEY=VALUE, one per line.
+        Keys must match ``^[A-Z0-9_]+_CONTAINER$`` ;
+        invalid lines are rejected with an error.
+        """
+        if not os.path.exists(DOCKER_IMAGE_OVERRIDES_FILE):
+            return
+
+        import re
+
+        if Data._OVERRIDE_KEY_RE is None:
+            Data._OVERRIDE_KEY_RE = re.compile(r"^[A-Z0-9_]+_CONTAINER$")
+
+        try:
+            with open(DOCKER_IMAGE_OVERRIDES_FILE, "r") as f:
+                for line_num, line in enumerate(f, 1):
+                    stripped = line.strip()
+                    if not stripped or stripped.startswith("#"):
+                        continue
+                    if "=" not in stripped:
+                        print_err(
+                            f"docker.image.overrides line {line_num}: "
+                            f"malformed line (no '='), skipping: {stripped}"
+                        )
+                        continue
+                    key, _, value = stripped.partition("=")
+                    key = key.strip()
+                    value = value.strip()
+                    if not value:
+                        print_err(
+                            f"docker.image.overrides line {line_num}: "
+                            f"empty value for key '{key}', skipping"
+                        )
+                        continue
+                    if not Data._OVERRIDE_KEY_RE.match(key):
+                        print_err(
+                            f"docker.image.overrides line {line_num}: "
+                            f"invalid key '{key}' — must match uppercase letters, "
+                            f"digits, underscore and end with _CONTAINER"
+                        )
+                        continue
+                    entry = self.env(key)
+                    if entry is None:
+                        print_err(
+                            f"docker.image.overrides line {line_num}: "
+                            f"key '{key}' not found in container versions, skipping"
+                        )
+                        continue
+                    entry.value = value  # Env setter writes to config.json
+                    print_err(
+                        f"docker.image.overrides: applied {key}={value}"
+                    )
+        except Exception as e:
+            print_err(f"Error reading {DOCKER_IMAGE_OVERRIDES_FILE}: {e}")
 
     @property
     def envs_for_envfile(self) -> dict[str, Union[str, int, bool]]:

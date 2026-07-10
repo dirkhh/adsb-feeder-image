@@ -138,6 +138,42 @@ Uninstall after having installed via the above script:
 sudo bash /opt/adsb/app-uninstall
 ```
 
+## Customizing container images
+
+The ADS-B Feeder Image ships with known-good Docker container image versions
+listed in ``/opt/adsb/docker.image.versions``.  These are updated with each
+release.
+
+If you need to pin a different image for a particular container (for example, a
+custom build or a different registry), create the file
+``/opt/adsb/config/docker.image.overrides``.  This file lives under ``config/``
+so it **survives updates**.  Each non-comment, non-blank line must be of the
+form:
+
+```
+CONTAINER_KEY=image:tag
+```
+
+- ``CONTAINER_KEY`` must consist **only** of uppercase letters (``A-Z``),
+  digits (``0-9``), and underscores (``_``), and **must** end with
+  ``_CONTAINER`` (e.g. ``SKYSTATS_CONTAINER``).
+- ``image:tag`` is the full Docker image reference you want to use (e.g.
+  ``ghcr.io/tomcarman/skystats:9.9.9``).
+- Lines starting with ``#`` are comments and are ignored.
+- Invalid keys or empty ``image:tag`` values are skipped with an error
+  logged to ``/run/adsb-feeder-image.log``.
+
+Overrides are applied **after** the vendor defaults and **before** the
+``.env`` / ``config.json`` files are written or any Docker Compose
+services are restarted, so the custom image is in effect immediately.
+
+Example:
+```
+# /opt/adsb/config/docker.image.overrides
+SKYSTATS_CONTAINER=my.registry.example.com/skystats:custom-v1.0.0
+FR24_CONTAINER=my.registry.example.com/fr24:dev-latest
+```
+
 # for developers
 
 This repo actually contains the scripting to create the SD card image for some common SBCs to run an ADS-B feeder. And as 'releases' it publishes such images.

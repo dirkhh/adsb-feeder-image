@@ -15,6 +15,18 @@ fi
 if [ ! -f /opt/adsb/config/config.json ] ; then
     echo "create config.json file from scratch" >> /run/adsb-feeder-image.log
     source /opt/adsb/docker.image.versions
+
+    # apply persistent container image overrides (exists in config/, survives updates)
+    if [ -f /opt/adsb/config/docker.image.overrides ]; then
+        while IFS='=' read -r key value; do
+            [[ -z "$key" || "$key" =~ ^[[:space:]]*# ]] && continue
+            key="${key//[$'\r\n']/}"
+            value="${value//[$'\r\n']/}"
+            if [[ "$key" =~ ^[A-Z0-9_]+_CONTAINER$ ]] && [ -n "$value" ]; then
+                printf -v "$key" '%s' "$value"
+            fi
+        done < /opt/adsb/config/docker.image.overrides
+    fi
     _ADSBIM_BASE_VERSION=$(cat /opt/adsb/adsb.im.version)
     _ADSBIM_CONTAINER_VERSION=$(cat /opt/adsb/adsb.im.version)
     echo " \
