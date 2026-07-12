@@ -1,5 +1,6 @@
 Changes since v3.0.12
 =======
+- beta-notes: fix adsbitalia mlat status / add privacy policy
 - stage2: always show Data Sharing link / show explanation for combined target
 - update plane.watch container to fix cert issue
 - configuration: fix logic error which could result in env vars not being saved to disk
