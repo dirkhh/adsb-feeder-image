@@ -1,22 +1,16 @@
 Changes since v3.0.12
 =======
-- beta-notes: update planewatch once more
-- beta-notes: fix adsbitalia mlat status / add privacy policy
-- stage2: always show Data Sharing link / show explanation for combined target
-- update plane.watch container to fix cert issue
-- configuration: fix logic error which could result in env vars not being saved to disk
-- beta-notes: data sharing settings all / privacy: one time action, no automatic addition of new aggregators. beta users with this setting, please check data sharing page
-- beta-notes: only use old ultrafeeder UUID for previously existing aggregators when updating
-- beta-notes: clean up data sharing page visuals
-- ultrafeeder extra args: deal with \r
-- new aggs: flightdeck, adsbitalia
-- cleanup: improve error and debug messages in logs
-- add new aggregators, ADSBiq, RealTraffic, Dataero, and FlyOverhead
+- add new aggregators: ADSBiq, RealTraffic, Dataero, FlyOverhead, flightdeck, adsbitalia
 - webUI: completely rethink and redo the data sharing page
+- stage2: always show Data Sharing link / show explanation for combined target
+- configuration: fix logic error which could result in env vars not being saved to disk
+- update plane.watch container to fix cert issue
+- update RadarVirtuel container and setup
+- ultrafeeder extra args: deal with \r
+- cleanup: improve error and debug messages in logs
 - healthcheck: properly identify container down (instead of wrongly assuming the SDR is down)
 - healthcheck: add experimental feature to force automatic reboots when a configured SDR disappears
 - temperature: improve handling of BM280 sensors
-- update RadarVirtuel container and setup
 - beta-notes: stage2 minor piaware link fix on data sharing page
 - stage2: support well more than 40 sites (resources permitting)
 
