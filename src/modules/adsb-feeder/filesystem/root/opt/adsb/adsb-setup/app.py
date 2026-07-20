@@ -1905,16 +1905,16 @@ class AdsbIm:
 
     def clear_range_outline(self, idx=0):
         suffix = self.uf_suffix(idx)
-        print_err(f"resetting range outline for {suffix}")
         setGainPath = pathlib.Path(f"/run/adsb-feeder-{suffix}/readsb/setGain")
 
         self.waitSetGainRace()
+        print_err(f"resetting range outline for {suffix}")
         string2file(path=str(setGainPath), string="resetRangeOutline", verbose=True)
 
     def waitSetGainRace(self):
         # readsb checks this the setGain file every 0.2 seconds
-        # avoid races by only writing to it every 0.25 seconds
-        wait = self.lastSetGainWrite + 0.25 - time.time()
+        # avoid races by only writing to it every 0.5 seconds
+        wait = self.lastSetGainWrite + 0.5 - time.time()
 
         if wait > 0:
             time.sleep(wait)
@@ -2393,6 +2393,7 @@ class AdsbIm:
 
             # this adjusts the gain while readsb is running
             self.waitSetGainRace()
+            print_err(f"writing to /run/readsb/setGain: {gain}")
             string2file(path=str(setGainPath), string=f"{gain}\n")
 
     def setup_or_disable_uat(self, sitenum):
