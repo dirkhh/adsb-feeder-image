@@ -122,14 +122,20 @@ class Aggregator:
             # for several of these containers "timeout" is actually the expected behavior;
             # they don't stop on their own. So just grab the output and kill the container
             output = exc.stdout.decode() if exc.stdout else ""
+            stderr = exc.stderr.decode() if exc.stderr else ""
             print_err(f"docker run {cmdline} received a timeout error after {timeout} with output {output}")
+            if stderr:
+                print_err(f"docker run {cmdline} stderr: {stderr}")
 
             force_remove_container("temp_container")
         except subprocess.SubprocessError as exc:
             print_err(f"docker run {cmdline} ended with an exception {exc}")
         else:
             output = result.stdout if result.stdout else ""
-            print_err(f"docker run {cmdline} completed with output {output}")
+            stderr = result.stderr if result.stderr else ""
+            print_err(f"docker run {cmdline} completed with stdout: {output}")
+            if stderr:
+                print_err(f"docker run {cmdline} stderr: {stderr}")
         return output
 
     # the default case is straight forward. Remember the key and enable the aggregator
