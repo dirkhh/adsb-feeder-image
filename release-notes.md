@@ -1,18 +1,6 @@
-Changes since v3.0.12
+Changes since v3.0.13
 =======
-- add new aggregators: ADSBiq, RealTraffic, Dataero, FlyOverhead, flightdeck, adsbitalia
-- webUI: completely rethink and redo the data sharing page
-- stage2: always show Data Sharing link / show explanation for combined target
-- configuration: fix logic error which could result in env vars not being saved to disk
-- update plane.watch container to fix cert issue
-- update RadarVirtuel container and setup
-- ultrafeeder extra args: deal with \r
-- cleanup: improve error and debug messages in logs
-- healthcheck: properly identify container down (instead of wrongly assuming the SDR is down)
-- healthcheck: add experimental feature to force automatic reboots when a configured SDR disappears
-- temperature: improve handling of BM280 sensors
-- beta-notes: stage2 minor piaware link fix on data sharing page
-- stage2: support well more than 40 sites (resources permitting)
+- update containers
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)
