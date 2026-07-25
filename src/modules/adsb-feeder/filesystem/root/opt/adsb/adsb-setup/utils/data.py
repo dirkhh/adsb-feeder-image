@@ -1,5 +1,7 @@
 # dataclass
+import csv
 import os
+import traceback
 from dataclasses import dataclass, field
 from typing import Any, ClassVar, Optional, Union
 
@@ -309,6 +311,40 @@ class Data:
             policy="https://www.adsbitalia.it/privacy-policy.html",
         ),
     ]
+
+    # load custom aggregators from csv file
+    # name;adsb_config;mlat_config;webURL;statusURL;privacyURL
+    custom_aggs_filename = "/opt/adsb/config/custom_aggregators.csv"
+    custom_aggs_ordinal = 1021
+    try:
+        with open(custom_aggs_filename, "r") as file:
+            clean_lines = (line for line in file if not line.lstrip().startswith('#'))
+            reader = csv.reader(clean_lines, delimiter=";")
+            for row in reader:
+                print_err(f"parsing: {row}")
+                # Extend the list with ""
+                row += [""] * (8 - len(row))
+                no_space_name = "".join(row[0].split())
+                netconfig = NetConfig(
+                    identifier=no_space_name,
+                    name=row[0],
+                    website=row[3],
+                    links=[row[4]],
+                    table=1,
+                    ordinal=custom_aggs_ordinal,
+                    adsb_config=row[1],
+                    mlat_config=row[2],
+                    policy=row[5],
+                )
+                netconfigs_list.append(netconfig)
+                custom_aggs_ordinal = custom_aggs_ordinal + 1
+
+    except FileNotFoundError:
+        pass
+    except Exception:
+        # Unexpected errors should always be logged
+        print_err(f"Error loading {custom_aggs_filename}")
+        print_err(traceback.format_exc())
 
     # create dictionary from list
     netconfigs = {entry.identifier: entry for entry in netconfigs_list}
