@@ -8,6 +8,7 @@ import traceback
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Optional
+from urllib.parse import urlencode
 
 from .data import Data
 from .paths import PREVIOUS_VERSION_FILE
@@ -49,6 +50,8 @@ class AggStatus:
         self._url = url
         self._system = system
         self.ultrafeeder_aggs = list(data.netconfigs.keys())
+        self._opensky_data_status = T.Unknown
+        self._opensky_data_next_check = 0.0
 
     @property
     def beast(self) -> str:
@@ -107,6 +110,41 @@ class AggStatus:
             self._mlat = T.Warning
 
         return
+
+    def get_opensky_data_status(self):
+        now = time.time()
+        if now < self._opensky_data_next_check:
+            self._beast = self._opensky_data_status
+            return
+
+        serial = str(self._d.env_by_tags(["opensky", "key"]).list_get(self._idx))
+        if not serial:
+            self._opensky_data_status = T.Unknown
+        else:
+            query = urlencode({"begin": int(now) - 1800, "end": int(now), "serials": serial})
+            status_dict, status = self.get_json(f"https://opensky-network.org/api/stats/msg-rates?{query}")
+            self._opensky_data_status = T.Unknown
+            if status == 200 and isinstance(status_dict, dict):
+                series = status_dict.get("series")
+                if isinstance(series, dict):
+                    samples = series.get(serial)
+                    if not samples:
+                        self._opensky_data_status = T.Disconnected
+                    else:
+                        try:
+                            sample_time_ms, messages_per_minute = samples[-1]
+                            sample_age = now - float(sample_time_ms) / 1000
+                            if sample_age < 300 and float(messages_per_minute) > 0:
+                                self._opensky_data_status = T.Good
+                            elif sample_age < 1800:
+                                self._opensky_data_status = T.Warning
+                            else:
+                                self._opensky_data_status = T.Disconnected
+                        except (IndexError, TypeError, ValueError):
+                            pass
+
+        self._opensky_data_next_check = now + 60
+        self._beast = self._opensky_data_status
 
     def get_beast_status(self):
         bconf = None
@@ -328,7 +366,7 @@ class AggStatus:
             self._mlat = T.Disabled
             self._last_check = datetime.now()
         elif self._agg == "opensky":
-            self._beast = T.Unknown
+            self.get_opensky_data_status()
             self._mlat = T.Disabled
             self._last_check = datetime.now()
         elif self._agg == "radarvirtuel":
