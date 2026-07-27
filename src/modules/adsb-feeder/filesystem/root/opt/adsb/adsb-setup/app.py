@@ -353,7 +353,7 @@ class AdsbIm:
 
         for key, value in netconfigs.items():
             if not any([key == entry[0] for entry in self.all_aggregators]):
-                self.all_aggregators.append([key, key, "", [""], 1 if value.has_policy else 0])
+                self.all_aggregators.append([key, key, "", value.links, 1 if value.has_policy else 0])
             add_to_list_if_missing(f"{key}--ultrafeeder--is_enabled", self.microfeeder_setting_tags)
             add_to_list_if_missing(f"{key}--ultrafeeder--uuid", self.microfeeder_setting_tags)
 
