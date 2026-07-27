@@ -288,17 +288,9 @@ class AdsbIm:
             "sdrmap--submit": Sdrmap(self._system),
         }
         # fmt: off
-        self.all_aggregators: list = [
+        other_aggs: list = [
             # tag, name, map link, status link, table number
-            ["adsblol", "adsb.lol", "https://adsb.lol/", ["https://api.adsb.lol/0/me"], 0],
-            ["flyitaly", "Fly Italy ADSB", "https://mappa.flyitalyadsb.com/", ["https://my.flyitalyadsb.com/am_i_feeding"], 0],
-            ["avdelphi", "AVDelphi", "https://www.avdelphi.com/coverage.html", [""], 0],
-            ["planespotters", "Planespotters", "https://radar.planespotters.net/", ["https://www.planespotters.net/feed/status"], 0],
-            ["tat", "TheAirTraffic", "https://globe.theairtraffic.com/", ["https://theairtraffic.com/myip/"], 0],
-            ["adsbfi", "adsb.fi", "https://globe.adsb.fi/", ["https://api.adsb.fi/v1/myip"], 0],
-            ["adsbx", "ADSBExchange", "https://globe.adsbexchange.com/", ["https://www.adsbexchange.com/myip/"], 0],
-            ["hpradar", "HPRadar", "https://skylink.hpradar.com/", [""], 0],
-            ["alive", "airplanes.live", "https://globe.airplanes.live/", ["https://airplanes.live/myfeed/"], 0],
+            # ultrafeeder aggregators are added from netconfigs (see data.py)
             ["flightradar", "flightradar24", "https://www.flightradar24.com/", ["/fr24STG2IDX/"], 1],
             ["planewatch", "Plane.watch", "https:/plane.watch/desktop.html", [""], 1],
             ["flightaware", "FlightAware", "https://www.flightaware.com/live/map", ["/fa-statusSTG2IDX/"], 1],
@@ -306,9 +298,9 @@ class AdsbIm:
             ["planefinder", "PlaneFinder", "https://planefinder.net/", ["/planefinder-statSTG2IDX/"], 1],
             ["adsbhub", "ADSBHub", "https://www.adsbhub.org/coverage.php", [""], 1],
             ["opensky", "OpenSky", "https://map.opensky-network.org/", ["https://opensky-network.org/my-opensky/sensors/view-sensors"], 1],
-            ["radarvirtuel", "RadarVirtuel", "https://www.radarvirtuel.com/", [""], 0],
             ["1090uk", "1090MHz UK", "https://1090mhz.uk", ["https://www.1090mhz.uk/mystatus.php?key=<FEEDER_1090UK_API_KEY>"], 1],
             ["sdrmap", "sdrmap", "https://sdrmap.org/", ["https://sdrmap.org/?station=<FEEDER_SM_USERNAME>"], 1],
+            ["radarvirtuel", "RadarVirtuel", "https://www.radarvirtuel.com/", [""], 1],
         ]
 
         self.agg_matrix = None
@@ -351,11 +343,15 @@ class AdsbIm:
             if item not in tlist:
                 tlist.append(item)
 
+        # splice netconfigs into all_aggregators list in the desired order
+        uf_aggs = []
         for key, value in netconfigs.items():
-            if not any([key == entry[0] for entry in self.all_aggregators]):
-                self.all_aggregators.append([key, key, "", value.links, 1 if value.has_policy else 0])
+            uf_aggs.append([key, value.name, value.website, value.links, value.table])
             add_to_list_if_missing(f"{key}--ultrafeeder--is_enabled", self.microfeeder_setting_tags)
             add_to_list_if_missing(f"{key}--ultrafeeder--uuid", self.microfeeder_setting_tags)
+
+        # tag, name, map link, status link, table number
+        self.all_aggregators: list = [*(uf_aggs[0:4]), *other_aggs, *(uf_aggs[4:])]
 
         self.uf_aggregators: list = []
         for entry in self.all_aggregators:
