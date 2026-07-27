@@ -353,11 +353,6 @@ class AdsbIm:
         # tag, name, map link, status link, table number
         self.all_aggregators: list = [*(uf_aggs[0:4]), *other_aggs, *(uf_aggs[4:])]
 
-        self.uf_aggregators: list = []
-        for entry in self.all_aggregators:
-            if entry[0] in netconfigs.keys():
-                self.uf_aggregators.append(entry)
-
         self._routemanager.add_proxy_routes(self._d.proxy_routes)
         self.app.add_url_rule("/geojson", "geojson", self.geojson)
         self.app.add_url_rule("/icons.png", "iconspng", self.iconspng)
@@ -4295,8 +4290,6 @@ class AdsbIm:
             m=str(m),
             piastatport=str(m * 1000 + make_int(self._d.env_by_tags("piastatport").value)),
             netconfigs=self._d.netconfigs,
-            all_aggregators=self.all_aggregators,
-            uf_aggregators=self.uf_aggregators,
         )
 
     @check_restart_lock
