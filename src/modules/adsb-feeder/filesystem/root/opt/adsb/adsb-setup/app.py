@@ -1038,6 +1038,13 @@ class AdsbIm:
                 with fobj as file, zipfile.ZipFile(file, mode="w") as backup_zip:
                     backup_zip.write(adsb_path / "config.json", arcname="config.json")
 
+                    def backup_if_exists(file):
+                        if not file.exists():
+                            return
+                        backup_zip.write(file, arcname=file.relative_to(adsb_path))
+
+                    backup_if_exists(adsb_path / "custom_aggregators.csv")
+
                     for microIndex in [0] + self.micro_indices():
                         if microIndex == 0:
                             uf_path = adsb_path / "ultrafeeder"
@@ -1187,7 +1194,7 @@ class AdsbIm:
                     print_err(f"restore skipped for path breakout name: {name}")
                     continue
                 # only accept the .env file and config.json and files for ultrafeeder
-                if name != ".env" and name != "config.json" and not name.startswith("ultrafeeder/"):
+                if name not in [".env", "config.json", "custom_aggregators.csv"] and not name.startswith("ultrafeeder/"):
                     continue
                 restore_zip.extract(name, restore_path)
                 restored_files.append(name)
@@ -1201,8 +1208,8 @@ class AdsbIm:
                 if len(parts) < 3:
                     continue
                 uf_paths.add(parts[0] + "/" + parts[1] + "/")
-            elif os.path.isfile(adsb_path / name):
-                if filecmp.cmp(adsb_path / name, restore_path / name):
+            else:
+                if os.path.isfile(adsb_path / name) and filecmp.cmp(adsb_path / name, restore_path / name):
                     print_err(f"{name} is unchanged")
                     unchanged.append(name)
                 else:
