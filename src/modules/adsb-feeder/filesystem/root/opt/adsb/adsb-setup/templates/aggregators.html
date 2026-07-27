@@ -571,11 +571,25 @@
 
   <button type="submit" class="btn btn-primary btn-rounded  btn-block btn-lg p-4 mb-3 my-5" name="aggregators"
           value={{go}}>Apply</button>
+
+  <div class="container-fluid mt-2 mb-4 small text-muted" id="emoji_key">
+      <span class="ms-2">🛡️ = link to the site's privacy / data policy</span>
+      <span class="ms-3">⚠️ = site does not provide a clear privacy / data policy</span>
+  </div>
+
+  <div class="col-12 form-group">
+    <label for="mlat_name_override">
+      Override station name for MLAT:
+    </label>
+    <input
+      type="text" id="mlat_name_override" name="mlat_name_override"
+      class="form-control" style="width: 22em; display: inline-block;"
+      placeholder="{{ list_value_by_tags(["site_name"], m) }}"
+      value="{{ list_value_by_tags(["mlat_name_override"], m) }}"
+    />
+  </div>
+
 </form>
-<div class="container-fluid mt-2 mb-4 small text-muted" id="emoji_key">
-  <span class="ms-2">🛡️ = link to the site's privacy / data policy</span>
-  <span class="ms-3">⚠️ = site does not provide a clear privacy / data policy</span>
-</div>
 <script>
   const box_fields = [
     ["flightradar--is_enabled", "FR_FIELDS", ["flightradar--key"]],

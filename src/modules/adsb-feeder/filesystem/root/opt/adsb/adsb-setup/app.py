@@ -2887,6 +2887,8 @@ class AdsbIm:
 
         for sitenum in [0] + self.micro_indices():
             site_name = str(self._d.env_by_tags("site_name").list_get(sitenum))
+            override_name = str(self._d.env_by_tags("mlat_name_override").list_get(sitenum))
+            site_name = site_name if not override_name else override_name
             sanitized = "".join(c if c.isalnum() or c in "-_." else "_" for c in site_name)
             self._d.env_by_tags("site_name_sanitized").list_set(sitenum, sanitized)
 

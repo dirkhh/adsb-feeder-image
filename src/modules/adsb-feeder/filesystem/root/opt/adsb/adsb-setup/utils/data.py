@@ -367,6 +367,7 @@ class Data:
         Env("_ADSB_IM_INITIALS", default=["CHANGEME"], tags=["initials"]),
         Env("MLAT_SITE_NAME", default=[""], is_mandatory=True, tags=["site_name"]),
         Env("MLAT_SITE_NAME_SANITIZED", default=[""], is_mandatory=True, tags=["site_name_sanitized"]),
+        Env("MLAT_NAME_OVERRIDE", default=[""], tags=["mlat_name_override"]),
         # global name
         Env("_ADSBIM_FQDN", default="", tags=["fqdn"]),
         Env("_ADSBIM_FQDN_IP", default="", tags=["fqdn_ip"]),
