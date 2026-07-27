@@ -1765,6 +1765,7 @@ class AdsbIm:
         n = len(self.micro_indices()) + 1
         matrix = [0] * n
         active_aggregators = []
+        table = 0
         for idx in range(len(aggregators)):
             agg = aggregators[idx][0]
             status_link_list = aggregators[idx][3]
@@ -1794,6 +1795,9 @@ class AdsbIm:
                     status_link_list.append(final_link)
 
             if agg_enabled:
+                aggregators[idx][4] = table
+                # distribute aggregators between tables evenly
+                table = 0 if table else 1
                 active_aggregators.append(aggregators[idx])
 
         agg_debug_print = f"final aggregator structure: {active_aggregators}"
