@@ -393,7 +393,7 @@ class AggStatus:
     def check_alive_maplink(self):
         # currently airplanes live uses the first 16 characters of the uuid as the feed id
         # this works better than getting it for the API because the API only returns 1 feed id
-        uuid = str(self._d.env_by_tags("ultrafeeder_uuid").list_get(self._idx))
+        uuid = str(self._d.env_by_tags(["ultrafeeder", "alive", "uuid"]).list_get(self._idx))
         feed_id = uuid.replace("-", "")[:16]
         map_link = f"https://globe.airplanes.live/?uuid={feed_id}"
         self._d.env_by_tags("alivemaplink").list_set(self._idx, map_link)
@@ -416,7 +416,7 @@ class AggStatus:
     def adsbx_feeder_id(self):
         feeder_id = str(self._d.env_by_tags("adsbxfeederid").list_get(self._idx))
         uuid_saved = str(self._d.env_by_tags("adsbxfeederid_uuid").list_get(self._idx))
-        uuid = str(self._d.env_by_tags("ultrafeeder_uuid").list_get(self._idx))
+        uuid = str(self._d.env_by_tags(["ultrafeeder", "adsbx", "uuid"]).list_get(self._idx))
         adsbx_id = ""
         if uuid_saved != uuid or not feeder_id or len(feeder_id) != 12:
             # get the adsbexchange feeder id for the anywhere map / status things
