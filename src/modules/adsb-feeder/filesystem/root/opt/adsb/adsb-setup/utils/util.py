@@ -307,6 +307,7 @@ def run_shell_captured(command: str = "", timeout: int = 1800) -> tuple[bool, st
         )
     except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
         # something went wrong
+        print_err(f"run_shell_captured: {e}")
         output = ""
         if e.stdout:
             output += e.stdout.decode()
