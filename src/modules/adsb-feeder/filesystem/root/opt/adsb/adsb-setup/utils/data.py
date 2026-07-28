@@ -318,7 +318,7 @@ class Data:
     custom_aggs_ordinal = 1021
     try:
         with open(custom_aggs_filename, "r") as file:
-            clean_lines = (line for line in file if not line.lstrip().startswith('#'))
+            clean_lines = (line for line in file if not line.lstrip().startswith("#"))
             reader = csv.reader(clean_lines, delimiter=";")
             for row in reader:
                 print_err(f"parsing: {row}")
