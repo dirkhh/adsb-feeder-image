@@ -105,8 +105,8 @@
   </div>
   {% endmacro %}
 
-  <!-- first, the known good accountless aggregators -->
-  {% for conf in (netconfigs.values() | selectattr('table', 'equalto', 0) | sort(attribute='ordinal')) %}
+  <!-- first, some popular accountless aggregators -->
+  {% for conf in (netconfigs.values() | sort(attribute='ordinal'))[:4] %}
   {{ ultrafeeder_agg_entry(conf, m) }}
   {% endfor %}
 
@@ -310,7 +310,7 @@
   </div>
   <!-- last, the out-of-favor ones -->
   {% set ns = namespace(xy = 2) %}
-  {% for conf in (netconfigs.values() | selectattr('table', 'equalto', 1) | sort(attribute='ordinal')) %}
+  {% for conf in (netconfigs.values() | sort(attribute='ordinal'))[4:] %}
   {% if ns.xy % 4 == 0 %}
   <div></div><!-- hspace -->
   {% endif %}
