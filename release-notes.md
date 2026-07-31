@@ -1,5 +1,6 @@
 Changes since v3.0.13
 =======
+- beta-notes: fixup AIS ship display in tar1090
 - fix map link for live / exchange for new installs
 - add mlat station name override on data sharing page
 - update containers

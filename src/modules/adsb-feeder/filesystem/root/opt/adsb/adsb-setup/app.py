@@ -883,6 +883,7 @@ class AdsbIm:
             "content-length",
             "transfer-encoding",
             "connection",
+            "access-control-allow-origin",
         ]
         headers = [(k, v) for k, v in res.raw.headers.items() if k.lower() not in excluded_headers]
         headers.append(("Access-Control-Allow-Origin", "*"))
