@@ -110,7 +110,7 @@
   {{ ultrafeeder_agg_entry(conf, m) }}
   {% endfor %}
 
-  <div></div><!-- hspace -->
+  <div></div><div></div><!-- hspace -->
 
   <!-- next, the account-based ones -->
   <div class="col-12 form-check">
@@ -204,7 +204,7 @@
       </div>
     </label>
   </div>
-  <div></div><!-- hspace -->
+  <div></div><div></div><!-- hspace -->
   <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="adsbhub--is_enabled" id="adsbhub--is_enabled"
            {{ others_enabled("adsbhub", m) }} />
@@ -279,7 +279,7 @@
       </div>
     </label>
   </div>
-  <div></div><!-- hspace -->
+  <div></div><div></div><!-- hspace -->
   <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="sdrmap--is_enabled" id="sdrmap--is_enabled"
            {{ others_enabled("sdrmap", m) }} />
@@ -312,7 +312,7 @@
   {% set ns = namespace(xy = 2) %}
   {% for conf in (netconfigs.values() | sort(attribute='ordinal'))[4:] %}
   {% if ns.xy % 4 == 0 %}
-  <div></div><!-- hspace -->
+  <div></div><div></div><!-- hspace -->
   {% endif %}
   {% set ns.xy = ns.xy + 1 %}
   {{ ultrafeeder_agg_entry(conf, m) }}

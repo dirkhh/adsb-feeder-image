@@ -1,5 +1,6 @@
 Changes since v3.0.13
 =======
+- data sharing page: slightly increase vertical space for visual grouping
 - beta-notes: restore data sharing page ordering from last stable
 - beta-notes: fixup AIS ship display in tar1090
 - fix map link for live / exchange for new installs
