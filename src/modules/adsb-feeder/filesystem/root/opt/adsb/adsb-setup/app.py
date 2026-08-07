@@ -345,7 +345,7 @@ class AdsbIm:
 
         # splice netconfigs into all_aggregators list in the desired order
         uf_aggs = []
-        for key, value in netconfigs.items():
+        for key, value in sorted(netconfigs.items(), key=lambda x: x[1].ordinal):
             uf_aggs.append([key, value.name, value.website, value.links, value.table])
             add_to_list_if_missing(f"{key}--ultrafeeder--is_enabled", self.microfeeder_setting_tags)
             add_to_list_if_missing(f"{key}--ultrafeeder--uuid", self.microfeeder_setting_tags)
