@@ -8,18 +8,18 @@ class NetConfig:
         name: str,
         website: str,
         links: list[str],
-        table: int,
         ordinal: int,
         adsb_config: str,
         mlat_config: str,
         policy: str,
+        table: int = 0,
     ):
         self.identifier = identifier
         self.name = name
         self.website = website
         self.links = links  # status links
-        self.table = table  # which table for status display
-        self.ordinal = ordinal  # order within each table
+        self.table = table  # which table for status display (now assigned dynamically)
+        self.ordinal = ordinal  # ordering
         self.adsb_config = adsb_config
         self.mlat_config = mlat_config
         self.policy = policy
