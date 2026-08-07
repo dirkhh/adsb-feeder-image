@@ -1202,5 +1202,5 @@ class Data:
             tags_list = tags
         e = self._get_enabled_env_by_tags(tags_list)
         ret = is_true(e.list_get(idx)) if e else False
-        print_err(f"list_is_enabled: {e}[{idx}] = {ret}", level=8)
+        #print_err(f"list_is_enabled: {e}[{idx}] = {ret}", level=8)
         return ret
