@@ -1,5 +1,7 @@
 Changes since v3.0.13
 =======
+- opensky: add feed status
+- beta-notes: data sharing page: fix up order
 - data sharing page: slightly increase vertical space for visual grouping
 - beta-notes: restore data sharing page ordering from last stable
 - beta-notes: fixup AIS ship display in tar1090
