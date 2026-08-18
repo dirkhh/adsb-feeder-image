@@ -408,18 +408,22 @@
             {% if env_value_by_tag("netbird_name") != "" %}
             This device should now be on your NetBird network as '{{ env_value_by_tag("netbird_name") }}'.
             {% elif env_value_by_tag("netbird_ll") =="" %}
-            You can add options like a specific <code>--management-url</code> below for self-hosted setups.
+            For self-hosted Netbird, enter your management URL below (for example
+            <code>https://netbird.example.com</code>). Leave it blank for Netbird Cloud.
             {% endif %}
           </label>
         </div>
         {% if (env_value_by_tag("netbird_name") =="" and env_value_by_tag("netbird_ll") =="") or not netbird_running %}
         <div class="col-8">
+          <input class="form-control mx-auto w-100 mb-2" id="netbird_management_url" name="netbird_management_url" type="text"
+                 value="{{ env_value_by_tag('netbird_management_url') }}"
+                 placeholder="Management URL (required for self-hosted)">
           <input class="form-control mx-auto w-100 mb-2" id="netbird_setup_key" name="netbird_setup_key" type="text"
                  value="{{ env_value_by_tag('netbird_setup_key') }}"
                  placeholder="Enter your Netbird setup key (optional)">
           <input class="form-control mx-auto w-100" id="netbird_extras" name="netbird_extras" type="text"
                  value="{{ env_value_by_tag('netbird_extras') }}"
-                 placeholder="Enter additional netbird options you need">
+                 placeholder="Optional extra flags, e.g. --admin-url=https://...">
         </div>
         <div class="col-4">
           <button type="submit" class="btn btn-primary mx-auto w-100" name="netbird" value="go">Apply</button>

@@ -745,6 +745,11 @@ class Data:
             default="",
         ),
         Env(
+            "_ADSBIM_STATE_NETBIRD_MANAGEMENT_URL",
+            tags=["netbird_management_url"],
+            default="",
+        ),
+        Env(
             "_ADSBIM_STATE_NETBIRD_SETUP_KEY",
             tags=["netbird_setup_key", "key"],
             default="",

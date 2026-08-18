@@ -92,6 +92,7 @@ class TestDataClass:
         assert data.env_by_tags("netbird_ll").name == "_ADSBIM_STATE_NETBIRD_LOGIN_LINK"
         assert data.env_by_tags("netbird_extras").name == "_ADSBIM_STATE_NETBIRD_EXTRA_ARGS"
         assert data.env_by_tags("netbird_setup_key").name == "_ADSBIM_STATE_NETBIRD_SETUP_KEY"
+        assert data.env_by_tags("netbird_management_url").name == "_ADSBIM_STATE_NETBIRD_MANAGEMENT_URL"
 
     def test_proxy_routes(self):
         """Test proxy routes configuration"""
