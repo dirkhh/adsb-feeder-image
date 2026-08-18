@@ -76,9 +76,10 @@
     </div>
     <div class="mt-3 d-none" id="stage2_no_contact_found">Connect a Stage 2 system (which will feed aggregators) to this
       system.
-      Most likely {% if tailscale_address != "" or zerotier_address != "" %}one of {%endif%}{{ local_address }}
+      Most likely {% if tailscale_address != "" or zerotier_address != "" or netbird_address != "" %}one of {%endif%}{{ local_address }}
       {% if tailscale_address != "" %}, {{ tailscale_address}}{% endif %}{% if zerotier_address != "" %},
-      {{ zerotier_address}}{% endif %} will work as the IP address for this {{ env_value_by_tag('aggregator_choice') }} feeder.
+      {{ zerotier_address}}{% endif %}{% if netbird_address != "" %},
+      {{ netbird_address}}{% endif %} will work as the IP address for this {{ env_value_by_tag('aggregator_choice') }} feeder.
     </div>
   </div>
   <div class="col-12 mb-3 {% if not adsb or is_enabled('stage2') %} d-none {% endif %}">

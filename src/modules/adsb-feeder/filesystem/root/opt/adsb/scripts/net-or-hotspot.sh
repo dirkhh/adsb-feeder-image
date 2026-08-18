@@ -37,6 +37,9 @@ function test_network() {
     pgrep zerotier-one &>/dev/null && zerotier-cli status 2>&1 | grep -qs -e ONLINE &
     pids+=($!)
 
+    pgrep -x netbird &>/dev/null && netbird status --json 2>/dev/null | jq -e '.management.connected == true' >/dev/null &
+    pids+=($!)
+
     # wait returns zero for a specific backgrounded pid when the exit status for that pid was zero
     # this also works for pids that have already exited when wait is called
     for pid in ${pids[@]}; do

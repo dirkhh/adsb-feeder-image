@@ -199,6 +199,7 @@ class AdsbIm:
         # let's only instantiate the Wifi class if we are on WiFi
         self.wifi = None
         self.wifi_ssid = ""
+        self.netbird_address = ""
 
         self.healthcheck = Healthcheck(self._d, self._system)
 
@@ -628,6 +629,28 @@ class AdsbIm:
         new_name = "".join(c for c in name if c.isalnum() or c == "-")
         new_name = new_name.strip("-")[:63]
         return new_name
+
+    def ensure_netbird_installed(self):
+        if os.path.exists("/usr/bin/netbird"):
+            return True
+        print_err("netbird not installed, attempting to install")
+        success, output = run_shell_captured(
+            "set -e; "
+            "if [[ ! -s /usr/share/keyrings/netbird-archive-keyring.gpg ]]; then "
+            "curl -fsSL https://pkgs.netbird.io/debian/public.key | gpg --dearmor -o /usr/share/keyrings/netbird-archive-keyring.gpg; "
+            "fi; "
+            "echo 'deb [signed-by=/usr/share/keyrings/netbird-archive-keyring.gpg] https://pkgs.netbird.io/debian stable main' "
+            "> /etc/apt/sources.list.d/netbird.list; "
+            "apt-get update; apt-get install -y netbird; "
+            "systemctl disable netbird || true; "
+            "systemctl stop netbird || true; "
+            "systemctl mask netbird || true",
+            timeout=180,
+        )
+        if not success or not os.path.exists("/usr/bin/netbird"):
+            print_err(f"failed to install netbird: {output}")
+            return False
+        return True
 
     def set_hostname(self, site_name: str):
         os_flag_file = self._d.data_path / "os.adsb.feeder.image"
@@ -3707,7 +3730,7 @@ class AdsbIm:
                     if channel == "branch":
                         channel, _ = self.extract_channel()
                     return self.do_feeder_update(channel)
-                if key == "nightly_update" or key == "zerotier":
+                if key == "nightly_update" or key == "zerotier" or key == "netbird":
                     # this will be handled through the separate key/value pairs
                     pass
                 if key == "os_update":
@@ -3777,6 +3800,119 @@ class AdsbIm:
                         "systemctl disable --now zerotier-one && systemctl mask zerotier-one", timeout=30
                     )
                     continue
+                if allow_insecure and key == "netbird_disable_go" and form.get("netbird_disable") == "disable":
+                    self._d.env_by_tags("netbird_setup_key").value = ""
+                    self._d.env_by_tags("netbird_name").value = ""
+                    self._d.env_by_tags("netbird_ll").value = ""
+                    success, output = run_shell_captured(
+                        "netbird down >/dev/null 2>&1 || true; "
+                        "systemctl disable --now netbird && systemctl mask netbird",
+                        timeout=30,
+                    )
+                    continue
+                if allow_insecure and key == "netbird":
+                    if not self.ensure_netbird_installed():
+                        report_issue("failed to install netbird - check the logs for details")
+                        continue
+                    nb_setup_key = (form.get("netbird_setup_key") or "").strip()
+                    if nb_setup_key and not re.fullmatch(r"[A-Za-z0-9._-]{8,128}", nb_setup_key):
+                        report_issue("Netbird setup key contains unexpected characters")
+                        continue
+                    self._d.env_by_tags("netbird_setup_key").value = nb_setup_key
+                    nb_args = form.get("netbird_extras", "")
+                    nb_cli_switch = ""
+                    nb_cli_value = ""
+                    if nb_args:
+                        try:
+                            nb_cli_switch, nb_cli_value = nb_args.split("=")
+                        except Exception:
+                            nb_cli_switch, nb_cli_value = ["", ""]
+
+                        if nb_cli_switch != "--management-url":
+                            report_issue(
+                                "at this point we only allow the --management-url=<server> argument; "
+                                "please let us know at the Zulip support link why you need "
+                                f"this to support {nb_cli_switch}"
+                            )
+                            continue
+                        print_err(f"management url arg is {nb_cli_value}")
+                        match = re.match(
+                            r"^https?://[-a-zA-Z0-9._\+~=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?::[0-9]{1,5})?(?:[-a-zA-Z0-9()_\+.~/=]*)$",
+                            nb_cli_value,
+                        )
+                        if not match:
+                            report_issue(f"the management URL didn't make sense {nb_cli_value}")
+                            continue
+                    print_err(f"starting netbird (args='{nb_args}')")
+                    try:
+                        subprocess.run(
+                            ["/usr/bin/systemctl", "unmask", "netbird"],
+                            timeout=20.0,
+                        )
+                        subprocess.run(
+                            ["/usr/bin/systemctl", "enable", "--now", "netbird"],
+                            timeout=20.0,
+                        )
+                        name = self.onlyAlphaNumDash(self._d.env_by_tags("site_name").list_get(0))
+                        cmd = ["/usr/bin/netbird", "up", "--no-browser", "--disable-dns"]
+                        if name:
+                            cmd += [f"--hostname={name}"]
+                        if nb_setup_key:
+                            cmd += ["--setup-key", nb_setup_key]
+                        if nb_args:
+                            cmd += [f"--management-url={nb_cli_value}"]
+                        print_err(f"running {cmd}")
+                        proc = subprocess.Popen(
+                            cmd,
+                            stderr=subprocess.STDOUT,
+                            stdout=subprocess.PIPE,
+                            text=True,
+                        )
+                        if not proc or not proc.stdout:
+                            report_issue("exception trying to set up netbird - giving up")
+                            continue
+                        os.set_blocking(proc.stdout.fileno(), False)
+                    except Exception:
+                        report_issue("exception trying to set up netbird - giving up")
+                        continue
+                    else:
+                        startTime = time.time()
+                        match = None
+                        while time.time() - startTime < 30:
+                            output = proc.stdout.readline()
+                            if not output:
+                                if proc.poll() != None:
+                                    break
+                                time.sleep(0.1)
+                                continue
+                            print_err(output.rstrip("\n"))
+                            if not nb_setup_key:
+                                match = re.search(
+                                    r"(https://\S*(?:activate|login\.netbird|/register|user_code=)\S*)",
+                                    output,
+                                )
+                                if match:
+                                    break
+
+                        if nb_setup_key:
+                            try:
+                                proc.wait(timeout=max(1.0, 30 - (time.time() - startTime)))
+                            except Exception:
+                                proc.terminate()
+                        else:
+                            proc.terminate()
+
+                    if match:
+                        login_link = match.group(1).rstrip(").,;")
+                        print_err(f"found login link {login_link}")
+                        self._d.env_by_tags("netbird_ll").value = login_link
+                    elif nb_setup_key and proc.returncode == 0:
+                        print_err("netbird connected using setup key")
+                        self._d.env_by_tags("netbird_ll").value = ""
+                        self._d.env_by_tags("netbird_setup_key").value = ""
+                    else:
+                        report_issue("ERROR: netbird didn't provide a login link or complete setup within 30 seconds")
+                    return redirect(url_for("systemmgmt"))
                 if allow_insecure and key == "tailscale":
                     # grab extra arguments if given
                     ts_args = form.get("tailscale_extras", "")
@@ -4172,10 +4308,12 @@ class AdsbIm:
             return self.update()
         tailscale_running = False
         zerotier_running = False
+        netbird_running = False
         if self._d.is_feeder_image:
             success, output = run_shell_captured("ps -e", timeout=2)
             zerotier_running = "zerotier-one" in output
             tailscale_running = "tailscaled" in output
+            netbird_running = bool(re.search(r"\bnetbird\b", output))
             # is tailscale set up?
             try:
                 if not tailscale_running:
@@ -4202,6 +4340,32 @@ class AdsbIm:
                     self._d.env_by_tags("tailscale_ll").value = ""
                 else:
                     self._d.env_by_tags("tailscale_name").value = ""
+            # is netbird set up?
+            try:
+                if not netbird_running:
+                    raise ProcessLookupError
+                result = subprocess.run(
+                    ["netbird", "status", "--json"],
+                    check=True,
+                    capture_output=True,
+                    timeout=5.0,
+                )
+            except Exception:
+                self._d.env_by_tags("netbird_name").value = ""
+                self._d.env_by_tags("netbird_ll").value = ""
+            else:
+                nb_status = json.loads(result.stdout.decode() or "{}")
+                nb_connected = bool(nb_status.get("management", {}).get("connected")) or (
+                    str(nb_status.get("status", "")).lower() == "connected"
+                )
+                nb_fqdn = nb_status.get("fqdn") or nb_status.get("FQDN") or ""
+                if nb_connected and nb_fqdn:
+                    netbird_name = nb_fqdn.split(".")[0]
+                    print_err(f"configured as {netbird_name} on netbird")
+                    self._d.env_by_tags("netbird_name").value = netbird_name
+                    self._d.env_by_tags("netbird_ll").value = ""
+                elif not nb_connected:
+                    self._d.env_by_tags("netbird_name").value = ""
         # create a potential new root password in case the user wants to change it
         self.rpw = self.generate_random_password()
         # similarly, create a password for WebAuth if none exists
@@ -4215,6 +4379,7 @@ class AdsbIm:
             "systemmgmt.html",
             tailscale_running=tailscale_running,
             zerotier_running=zerotier_running,
+            netbird_running=netbird_running,
             hotspot_enabled=not self._d.hotspot_disabled_path.exists(),
             rpw=self.rpw,
             auth_pwd=self._provisional_password,
@@ -4616,6 +4781,22 @@ class AdsbIm:
             self.zerotier_address = result
         else:
             self.zerotier_address = ""
+        if self._d.env_by_tags("netbird_name").value:
+            try:
+                result = (
+                    subprocess.run(
+                        ["netbird", "status", "--ipv4"],
+                        capture_output=True,
+                        timeout=2.0,
+                    )
+                    .stdout.decode()
+                    .strip()
+                )
+            except Exception:
+                result = ""
+            self.netbird_address = result.split("/")[0] if result else ""
+        else:
+            self.netbird_address = ""
 
         # reset undervoltage warning after 2h
         if self._d.env_by_tags("under_voltage").value and now - self.undervoltage_epoch > 2 * 3600:
@@ -4689,6 +4870,7 @@ class AdsbIm:
             local_address=local_address,
             tailscale_address=self.tailscale_address,
             zerotier_address=self.zerotier_address,
+            netbird_address=self.netbird_address,
             stage2_suggestion=stage2_suggestion,
             matrix=self.agg_matrix,
             compose_up_failed=compose_up_failed,

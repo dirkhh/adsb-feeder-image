@@ -1,5 +1,6 @@
 Changes since v3.0.13
 =======
+- add Netbird as a VPN option alongside Tailscale and Zerotier
 - opensky: add feed status
 - beta-notes: data sharing page: fix up order
 - data sharing page: slightly increase vertical space for visual grouping
