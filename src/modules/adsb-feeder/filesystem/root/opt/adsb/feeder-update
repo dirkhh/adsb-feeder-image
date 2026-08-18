@@ -328,10 +328,9 @@ EOF
     # ensure netbird is available on existing images (kept disabled/masked unless configured)
     if ! command -v netbird &>/dev/null; then
         echo "Adding Netbird repo and installing client"
-        if [[ ! -s /usr/share/keyrings/netbird-archive-keyring.gpg ]]; then
-            curl -fsSL "https://pkgs.netbird.io/debian/public.key" \
-                | gpg --dearmor -o /usr/share/keyrings/netbird-archive-keyring.gpg
-        fi
+        curl -fsSL "https://pkgs.netbird.io/debian/public.key" \
+            | gpg --dearmor | tee /usr/share/keyrings/netbird-archive-keyring.gpg >/dev/null
+        chmod 644 /usr/share/keyrings/netbird-archive-keyring.gpg
         cat >/etc/apt/sources.list.d/netbird.list <<EOF
 deb [signed-by=/usr/share/keyrings/netbird-archive-keyring.gpg] https://pkgs.netbird.io/debian stable main
 EOF
@@ -339,7 +338,6 @@ EOF
         apt-get install -y netbird
         systemctl disable netbird || true
         systemctl stop netbird || true
-        systemctl mask netbird || true
     fi
 fi
 

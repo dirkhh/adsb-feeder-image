@@ -635,16 +635,15 @@ class AdsbIm:
             return True
         print_err("netbird not installed, attempting to install")
         success, output = run_shell_captured(
-            "set -e; "
-            "if [[ ! -s /usr/share/keyrings/netbird-archive-keyring.gpg ]]; then "
-            "curl -fsSL https://pkgs.netbird.io/debian/public.key | gpg --dearmor -o /usr/share/keyrings/netbird-archive-keyring.gpg; "
-            "fi; "
+            "set -euo pipefail; "
+            "curl -fsSL https://pkgs.netbird.io/debian/public.key | gpg --dearmor "
+            "| tee /usr/share/keyrings/netbird-archive-keyring.gpg >/dev/null; "
+            "chmod 644 /usr/share/keyrings/netbird-archive-keyring.gpg; "
             "echo 'deb [signed-by=/usr/share/keyrings/netbird-archive-keyring.gpg] https://pkgs.netbird.io/debian stable main' "
             "> /etc/apt/sources.list.d/netbird.list; "
             "apt-get update; apt-get install -y netbird; "
             "systemctl disable netbird || true; "
-            "systemctl stop netbird || true; "
-            "systemctl mask netbird || true",
+            "systemctl stop netbird || true",
             timeout=180,
         )
         if not success or not os.path.exists("/usr/bin/netbird"):
@@ -3806,7 +3805,7 @@ class AdsbIm:
                     self._d.env_by_tags("netbird_ll").value = ""
                     success, output = run_shell_captured(
                         "netbird down >/dev/null 2>&1 || true; "
-                        "systemctl disable --now netbird && systemctl mask netbird",
+                        "systemctl disable --now netbird",
                         timeout=30,
                     )
                     continue
@@ -3845,10 +3844,6 @@ class AdsbIm:
                             continue
                     print_err(f"starting netbird (args='{nb_args}')")
                     try:
-                        subprocess.run(
-                            ["/usr/bin/systemctl", "unmask", "netbird"],
-                            timeout=20.0,
-                        )
                         subprocess.run(
                             ["/usr/bin/systemctl", "enable", "--now", "netbird"],
                             timeout=20.0,

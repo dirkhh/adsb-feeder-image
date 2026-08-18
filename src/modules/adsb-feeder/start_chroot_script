@@ -50,6 +50,7 @@ echo "deb http://download.zerotier.com/debian/${DEBIAN_DISTRO} ${DEBIAN_DISTRO} 
 curl -fsSL "https://pkgs.tailscale.com/stable/debian/${DEBIAN_DISTRO}.noarmor.gpg" | sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
 curl -fsSL "https://pkgs.tailscale.com/stable/debian/${DEBIAN_DISTRO}.tailscale-keyring.list" | sudo tee /etc/apt/sources.list.d/tailscale.list
 curl -fsSL "https://pkgs.netbird.io/debian/public.key" | gpg --dearmor | sudo tee /usr/share/keyrings/netbird-archive-keyring.gpg >/dev/null
+chmod 644 /usr/share/keyrings/netbird-archive-keyring.gpg
 echo "deb [signed-by=/usr/share/keyrings/netbird-archive-keyring.gpg] https://pkgs.netbird.io/debian stable main" | sudo tee /etc/apt/sources.list.d/netbird.list
 
 # setup Python/Flask
@@ -98,9 +99,9 @@ apt-get install -y zerotier-one tailscale netbird
 systemctl disable tailscaled
 systemctl disable zerotier-one
 systemctl disable netbird
+systemctl stop netbird || true
 systemctl mask tailscaled
 systemctl mask zerotier-one
-systemctl mask netbird
 
 df -h
 
