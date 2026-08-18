@@ -3889,7 +3889,7 @@ class AdsbIm:
                         )
                         run_shell_captured("netbird down >/dev/null 2>&1 || true", timeout=15)
                         name = self.onlyAlphaNumDash(self._d.env_by_tags("site_name").list_get(0))
-                        cmd = ["/usr/bin/netbird", "up", "--no-browser", "--disable-dns"]
+                        cmd = ["/usr/bin/netbird", "up", "--no-browser", "--disable-dns", "--disable-firewall"]
                         if name:
                             cmd += [f"--hostname={name}"]
                         if nb_setup_key:
@@ -4366,6 +4366,8 @@ class AdsbIm:
         tailscale_running = False
         zerotier_running = False
         netbird_running = False
+        netbird_connected = False
+        netbird_address = ""
         if self._d.is_feeder_image:
             success, output = run_shell_captured("ps -e", timeout=2)
             zerotier_running = "zerotier-one" in output
@@ -4416,13 +4418,18 @@ class AdsbIm:
                     str(nb_status.get("status", "")).lower() == "connected"
                 )
                 nb_fqdn = nb_status.get("fqdn") or nb_status.get("FQDN") or ""
-                if nb_connected and nb_fqdn:
-                    netbird_name = nb_fqdn.split(".")[0]
+                nb_ip = (nb_status.get("netbirdIp") or nb_status.get("NetbirdIP") or "").split("/")[0]
+                if nb_connected and (nb_fqdn or nb_ip):
+                    netbird_connected = True
+                    netbird_address = nb_ip
+                    self.netbird_address = nb_ip
+                    netbird_name = nb_fqdn.split(".")[0] if nb_fqdn else nb_ip
                     print_err(f"configured as {netbird_name} on netbird")
                     self._d.env_by_tags("netbird_name").value = netbird_name
                     self._d.env_by_tags("netbird_ll").value = ""
                 elif not nb_connected:
                     self._d.env_by_tags("netbird_name").value = ""
+                    self.netbird_address = ""
         # create a potential new root password in case the user wants to change it
         self.rpw = self.generate_random_password()
         # similarly, create a password for WebAuth if none exists
@@ -4437,6 +4444,8 @@ class AdsbIm:
             tailscale_running=tailscale_running,
             zerotier_running=zerotier_running,
             netbird_running=netbird_running,
+            netbird_connected=netbird_connected,
+            netbird_address=netbird_address,
             hotspot_enabled=not self._d.hotspot_disabled_path.exists(),
             rpw=self.rpw,
             auth_pwd=self._provisional_password,

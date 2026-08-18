@@ -396,23 +396,36 @@
         <div class="col-12 mb-2">
           <label for="netbird">
             Netbird support allows to connect your ADS-B Feeder to your own NetBird network.
-            {% if env_value_by_tag("netbird_name") == "" %}<br />In order to do this, we will start
+            {% if env_value_by_tag("netbird_name") == "" and not netbird_connected|default(false) %}<br />In order to do this, we will start
             the <code>netbird</code> client on the feeder SBC. You can provide a setup key (recommended
             for headless feeders) or leave it empty so we can add a login link for browser
-            authentication.{% endif %}<br />
+            authentication.{% endif %}
             {% if env_value_by_tag("netbird_ll") != "" %}
+            <br />
             Click this <a href="{{ env_value_by_tag('netbird_ll') }}" target="_blank">link to open {{
                         env_value_by_tag("netbird_ll") }}</a>. After you have logged in, please come back to this tab
             and
-            reload this page.{% endif %}
-            {% if env_value_by_tag("netbird_name") != "" %}
-            This device should now be on your NetBird network as '{{ env_value_by_tag("netbird_name") }}'.
-            {% elif env_value_by_tag("netbird_ll") =="" %}
+            reload this page.
+            {% elif env_value_by_tag("netbird_name") == "" and not netbird_connected|default(false) %}
+            <br />
             For self-hosted Netbird, enter your management URL below (for example
             <code>https://netbird.example.com</code>). Leave it blank for Netbird Cloud.
             {% endif %}
           </label>
         </div>
+        {% if netbird_connected|default(false) or env_value_by_tag("netbird_name") != "" %}
+        <div class="col-12 mb-3">
+          <div class="alert alert-success mb-0">
+            <strong>Netbird is connected and running.</strong>
+            {% if env_value_by_tag("netbird_name") != "" %}
+            <br />Name: <code>{{ env_value_by_tag("netbird_name") }}</code>
+            {% endif %}
+            {% if netbird_address %}
+            <br />Netbird IP: <a href="http://{{ netbird_address }}/"><code>http://{{ netbird_address }}/</code></a>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
         {% if (env_value_by_tag("netbird_name") =="" and env_value_by_tag("netbird_ll") =="") or not netbird_running %}
         <div class="col-8">
           <input class="form-control mx-auto w-100 mb-2" id="netbird_management_url" name="netbird_management_url" type="text"
