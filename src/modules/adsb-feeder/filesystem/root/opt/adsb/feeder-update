@@ -325,7 +325,7 @@ EOF
         fi
     done
 
-    # ensure netbird is available on existing images (kept disabled/masked unless configured)
+    # install netbird on existing images
     if ! command -v netbird &>/dev/null; then
         echo "Adding Netbird repo and installing client"
         curl -fsSL "https://pkgs.netbird.io/debian/public.key" \

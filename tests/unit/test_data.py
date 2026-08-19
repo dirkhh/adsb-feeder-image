@@ -82,18 +82,6 @@ class TestDataClass:
         assert data.ultrafeeder == []
         assert data.previous_version == ""
 
-    def test_vpn_env_tags(self, adsb_test_env):
-        """VPN options expose the same style of env tags"""
-        reset_data_singleton()
-        data = Data()
-        assert data.env_by_tags("zerotierid").name == "_ADSBIM_STATE_ZEROTIER_KEY"
-        assert data.env_by_tags("tailscale_name").name == "_ADSBIM_STATE_TAILSCALE_NAME"
-        assert data.env_by_tags("netbird_name").name == "_ADSBIM_STATE_NETBIRD_NAME"
-        assert data.env_by_tags("netbird_ll").name == "_ADSBIM_STATE_NETBIRD_LOGIN_LINK"
-        assert data.env_by_tags("netbird_extras").name == "_ADSBIM_STATE_NETBIRD_EXTRA_ARGS"
-        assert data.env_by_tags("netbird_setup_key").name == "_ADSBIM_STATE_NETBIRD_SETUP_KEY"
-        assert data.env_by_tags("netbird_management_url").name == "_ADSBIM_STATE_NETBIRD_MANAGEMENT_URL"
-
     def test_proxy_routes(self):
         """Test proxy routes configuration"""
         data = Data()

@@ -395,68 +395,77 @@
       <div class="row align-items-center">
         <div class="col-12 mb-2">
           <label for="netbird">
-            Netbird support allows to connect your ADS-B Feeder to your own NetBird network.
-            {% if env_value_by_tag("netbird_name") == "" and not netbird_connected|default(false) %}<br />In order to do this, we will start
+            Netbird support allows to connect your ADS-B Feeder to your own Netbird network.
+            {% if env_value_by_tag("netbird_name") == "" %}<br />In order to do this, we will start
             the <code>netbird</code> client on the feeder SBC. You can provide a setup key (recommended
             for headless feeders) or leave it empty so we can add a login link for browser
-            authentication.{% endif %}
+            authentication.{% endif %}<br />
             {% if env_value_by_tag("netbird_ll") != "" %}
-            <br />
             Click this <a href="{{ env_value_by_tag('netbird_ll') }}" target="_blank">link to open {{
-                        env_value_by_tag("netbird_ll") }}</a>. After you have logged in, please come back to this tab
+                        env_value_by_tag("netbird_ll") }}</a>.
+            {% if netbird_user_code %} Confirm this code in the browser: <code>{{ netbird_user_code }}</code>.{% endif %}
+            After you have logged in, please come back to this tab
             and
             reload this page.
-            {% elif env_value_by_tag("netbird_name") == "" and not netbird_connected|default(false) %}
-            <br />
-            For self-hosted Netbird, enter your management URL below (for example
-            <code>https://netbird.example.com</code>). Leave it blank for Netbird Cloud.
-            {% endif %}
-          </label>
-        </div>
-        {% if netbird_connected|default(false) or env_value_by_tag("netbird_name") != "" %}
-        <div class="col-12 mb-3">
-          <div class="alert alert-success mb-0">
-            <strong>Netbird is connected and running.</strong>
-            {% if env_value_by_tag("netbird_name") != "" %}
-            <br />Name: <code>{{ env_value_by_tag("netbird_name") }}</code>
-            {% endif %}
+            {% elif env_value_by_tag("netbird_name") != "" %}
+            This device should now be on your Netbird network as '{{ env_value_by_tag("netbird_name") }}'.
             {% if netbird_address %}
             <br />Netbird IP: <a href="http://{{ netbird_address }}/"><code>http://{{ netbird_address }}/</code></a>
             {% endif %}
-          </div>
+            {% else %}
+            For self-hosted Netbird, enter your management URL below. Leave it blank for Netbird Cloud.
+            {% endif %}
+          </label>
         </div>
-        {% endif %}
         {% if (env_value_by_tag("netbird_name") =="" and env_value_by_tag("netbird_ll") =="") or not netbird_running %}
         <div class="col-8">
           <input class="form-control mx-auto w-100 mb-2" id="netbird_management_url" name="netbird_management_url" type="text"
                  value="{{ env_value_by_tag('netbird_management_url') }}"
-                 placeholder="Management URL (required for self-hosted)">
-          <input class="form-control mx-auto w-100 mb-2" id="netbird_setup_key" name="netbird_setup_key" type="text"
+                 placeholder="Management URL (leave blank for Netbird Cloud)">
+          <input class="form-control mx-auto w-100" id="netbird_setup_key" name="netbird_setup_key" type="text"
                  value="{{ env_value_by_tag('netbird_setup_key') }}"
                  placeholder="Enter your Netbird setup key (optional)">
-          <input class="form-control mx-auto w-100" id="netbird_extras" name="netbird_extras" type="text"
-                 value="{{ env_value_by_tag('netbird_extras') }}"
-                 placeholder="Optional extra flags, e.g. --admin-url=https://...">
         </div>
         <div class="col-4">
-          <button type="submit" class="btn btn-primary mx-auto w-100" name="netbird" value="go">Apply</button>
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="netbird" value="go">Connect</button>
         </div>
         {% else %}
-        <div class="col-8">
-          <input class="form-control mx-auto w-100" id="netbird_disable" name="netbird_disable" type="text">
-          To <strong>disable</strong> Netbird, enter "disable" and press Submit.
+        <div class="col-8 text-danger">
+          This will prevent you from accessing this feeder if you use a Netbird network to connect to it.
         </div>
         <div class="col-4">
-          <button type="submit" class="btn btn-primary mx-auto w-100" name="netbird_disable_go"
-                  value="go">Apply</button>
-        </div>
-        <div class="col-12 text-danger">
-          This will prevent you from accessing this feeder if you use a Netbird network to connect to it.
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="netbird_disconnect"
+                  value="go">Disconnect</button>
         </div>
         {% endif %}
       </div>
     </form>
   </div>
+  {% if env_value_by_tag("netbird_ll") != "" and env_value_by_tag("netbird_name") == "" %}
+  <div class="modal fade" id="netbird_login_dialog" tabindex="-1" aria-labelledby="netbird_login_label" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="netbird_login_label">Netbird login</h5>
+          <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismiss="modal"
+                  aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          {% if netbird_user_code %}
+          <p>Confirm this code matches the one shown in the browser:</p>
+          <p class="text-center"><code style="font-size: 1.75rem;">{{ netbird_user_code }}</code></p>
+          {% endif %}
+          <p>Open the login page, finish authentication, then reload this page.</p>
+          <p class="text-break"><a href="{{ env_value_by_tag('netbird_ll') }}" target="_blank">{{ env_value_by_tag('netbird_ll') }}</a></p>
+        </div>
+        <div class="modal-footer">
+          <a class="btn btn-primary" href="{{ env_value_by_tag('netbird_ll') }}" target="_blank">Open login page</a>
+          <button type="button" class="btn btn-secondary" data-mdb-ripple-init data-mdb-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
   <div class="col-12 col-lg-6 {% if is_enabled('secure_image') or env_value_by_tag('board_name').startswith("Virtualized") %} d-none {% endif %}">
     <h5 class="mt-3">{% if wifi != "" %}Reconfigure{% else %}Connect to{% endif %} WiFi</h5>
     <form method="POST" onsubmit="show_spinner(); return true;">
@@ -498,6 +507,15 @@
   <!-- FULL_IMAGE_ONLY_END -->
 </div>
 <script>
+  {% if env_value_by_tag("netbird_ll") != "" and env_value_by_tag("netbird_name") == "" %}
+  (function() {
+    const key = "nbll:" + {{ (netbird_user_code or env_value_by_tag('netbird_ll'))|tojson }};
+    if (!sessionStorage.getItem(key)) {
+      sessionStorage.setItem(key, "1");
+      new mdb.Modal(document.getElementById("netbird_login_dialog")).show();
+    }
+  })();
+  {% endif %}
   fetch("/api/status/im", { signal: AbortSignal.timeout(5000) })
   .then(response => response.json())
   .then(data => {
