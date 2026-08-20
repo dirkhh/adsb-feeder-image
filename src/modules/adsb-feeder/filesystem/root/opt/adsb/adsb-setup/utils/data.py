@@ -295,6 +295,16 @@ class Data:
             mlat_config="mlat,mlat.adsbitalia.it,41113",
             policy="https://www.adsbitalia.it/privacy-policy.html",
         ),
+        NetConfig(
+            identifier="map.flights",
+            name="map.flights",
+            website="https://map.flights",
+            links=[""],
+            ordinal=173,
+            adsb_config="adsb,feed.map.flights,30004,beast_reduce_plus_out",
+            mlat_config="",
+            policy="https://map.flights/privacy",
+        ),
     ]
 
     # load custom aggregators from csv file
