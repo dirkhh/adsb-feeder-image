@@ -1,5 +1,6 @@
 Changes since v3.0.12
 =======
+- add map.flights as an account-less aggregator
 - add new aggregators: ADSBiq, RealTraffic, Dataero, FlyOverhead, flightdeck, adsbitalia
 - webUI: completely rethink and redo the data sharing page
 - stage2: always show Data Sharing link / show explanation for combined target

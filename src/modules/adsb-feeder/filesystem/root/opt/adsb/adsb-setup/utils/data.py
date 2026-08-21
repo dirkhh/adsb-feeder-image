@@ -254,6 +254,17 @@ class Data:
             policy="https://flyoverhead.com/legal/privacy",
         ),
         NetConfig(
+            identifier="mapflights",
+            name="map.flights",
+            website="https://map.flights/",
+            links=["https://map.flights/receivers"],
+            table=1,
+            ordinal=86,
+            adsb_config="adsb,feed.map.flights,30004,beast_reduce_plus_out",
+            mlat_config="",
+            policy="https://map.flights/privacy",
+        ),
+        NetConfig(
             identifier="flyrealtraffic",
             name="RealTraffic",
             website="https://flyrealtraffic.com/",

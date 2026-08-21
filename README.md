@@ -42,6 +42,7 @@ These ADS-B aggregators are also supported:
 - [FlightAware](https://flightaware.com)
 - [Flightradar24](https://www.flightradar24.com)
 - [hpradar](https://skylink.hpradar.com/)
+- [map.flights](https://map.flights)
 - [OpenSky Network](https://opensky-network.org)
 - [Plane.watch](https://plane.watch)
 - [Plane Finder](https://planefinder.net)
