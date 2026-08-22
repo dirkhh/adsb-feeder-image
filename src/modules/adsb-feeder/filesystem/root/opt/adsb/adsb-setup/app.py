@@ -296,6 +296,7 @@ class AdsbIm:
             ["planespotters", "Planespotters", "https://radar.planespotters.net/", ["https://www.planespotters.net/feed/status"], 0],
             ["tat", "TheAirTraffic", "https://globe.theairtraffic.com/", ["https://theairtraffic.com/myip/"], 0],
             ["adsbfi", "adsb.fi", "https://globe.adsb.fi/", ["https://api.adsb.fi/v1/myip"], 0],
+            ["adsbwin", "adsb.win", "https://map.adsb.win/", ["https://adsb.win/my-feeder"], 0],
             ["adsbx", "ADSBExchange", "https://globe.adsbexchange.com/", ["https://www.adsbexchange.com/myip/"], 0],
             ["hpradar", "HPRadar", "https://skylink.hpradar.com/", [""], 0],
             ["alive", "airplanes.live", "https://globe.airplanes.live/", ["https://airplanes.live/myfeed/"], 0],

@@ -166,6 +166,17 @@ class Data:
             policy="https://adsb.fi/privacy",
         ),
         NetConfig(
+            identifier="adsbwin",
+            name="adsb.win",
+            website="https://adsb.win/",
+            links=["https://adsb.win/my-feeder"],
+            table=0,
+            ordinal=15,
+            adsb_config="adsb,feed.adsb.win,30004,beast_reduce_plus_out",
+            mlat_config="mlat,mlat.adsb.win,31090,39013",
+            policy="https://adsb.win/privacy-license",
+        ),
+        NetConfig(
             identifier="alive",
             name="airplanes.live",
             website="https://globe.airplanes.live/",
