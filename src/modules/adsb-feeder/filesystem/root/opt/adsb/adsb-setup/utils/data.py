@@ -152,7 +152,7 @@ class Data:
             links=["https://api.adsb.lol/0/me"],
             ordinal=0,
             adsb_config="adsb,feed.adsb.lol,30004,beast_reduce_plus_out",
-            mlat_config="mlat,feed.adsb.lol,31090,39001",
+            mlat_config="mlat,feed.adsb.lol,31090",
             policy="https://adsb.lol/privacy-license/",
         ),
         NetConfig(
@@ -162,7 +162,7 @@ class Data:
             links=["https://api.adsb.fi/v1/myip"],
             ordinal=10,
             adsb_config="adsb,feed.adsb.fi,30004,beast_reduce_plus_out",
-            mlat_config="mlat,feed.adsb.fi,31090,39007",
+            mlat_config="mlat,feed.adsb.fi,31090",
             policy="https://adsb.fi/privacy",
         ),
         NetConfig(
@@ -172,7 +172,7 @@ class Data:
             links=["https://airplanes.live/myfeed/"],
             ordinal=20,
             adsb_config="adsb,feed.airplanes.live,30004,beast_reduce_plus_out",
-            mlat_config="mlat,feed.airplanes.live,31090,39012",
+            mlat_config="mlat,feed.airplanes.live,31090",
             policy="https://airplanes.live/privacy-policy/",
         ),
         NetConfig(
@@ -182,7 +182,7 @@ class Data:
             links=["https://www.adsbexchange.com/myip/"],
             ordinal=30,
             adsb_config="adsb,feed1.adsbexchange.com,30004,beast_reduce_plus_out",
-            mlat_config="mlat,feed.adsbexchange.com,31090,39003",
+            mlat_config="mlat,feed.adsbexchange.com,31090",
             policy="https://www.adsbexchange.com/privacy-policy/",
         ),
         NetConfig(
@@ -192,7 +192,7 @@ class Data:
             links=["https://theairtraffic.com/myip/"],
             ordinal=73,
             adsb_config="adsb,feed.theairtraffic.com,30004,beast_reduce_plus_out",
-            mlat_config="mlat,feed.theairtraffic.com,31090,39004",
+            mlat_config="mlat,feed.theairtraffic.com,31090",
             policy="https://theairtraffic.com/privacy/",
         ),
         NetConfig(
@@ -202,7 +202,7 @@ class Data:
             links=["https://my.flyitalyadsb.com/am_i_feeding"],
             ordinal=75,
             adsb_config="adsb,dati.flyitalyadsb.com,4905,beast_reduce_plus_out",
-            mlat_config="mlat,dati.flyitalyadsb.com,30100,39002",
+            mlat_config="mlat,dati.flyitalyadsb.com,30100",
             policy="https://flyitalyadsb.com/informazioni-legali-e-privacy/",
         ),
         NetConfig(
@@ -212,7 +212,7 @@ class Data:
             links=["https://www.planespotters.net/feed/status"],
             ordinal=77,
             adsb_config="adsb,feed.planespotters.net,30004,beast_reduce_plus_out",
-            mlat_config="mlat,mlat.planespotters.net,31090,39005",
+            mlat_config="mlat,mlat.planespotters.net,31090",
             policy="https://www.planespotters.net/legal/privacypolicy/",
         ),
         NetConfig(
@@ -272,7 +272,7 @@ class Data:
             links=[""],
             ordinal=90,
             adsb_config="adsb,skyfeed.hpradar.com,30004,beast_reduce_plus_out",
-            mlat_config="mlat,skyfeed.hpradar.com,31090,39011",
+            mlat_config="mlat,skyfeed.hpradar.com,31090",
             policy="",
         ),
         NetConfig(
