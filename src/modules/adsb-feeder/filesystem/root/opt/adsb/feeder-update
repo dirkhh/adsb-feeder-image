@@ -345,6 +345,7 @@ EOF
             apt-get install -y netbird
             systemctl disable netbird || true
             systemctl stop netbird || true
+            rm -f /etc/systemd/system/netbird.service
         fi
     fi
 fi

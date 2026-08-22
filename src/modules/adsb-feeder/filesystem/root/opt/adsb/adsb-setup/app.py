@@ -3791,13 +3791,16 @@ class AdsbIm:
                         "netbird down --delete >/dev/null 2>&1 || "
                         "netbird down --logout >/dev/null 2>&1 || "
                         "netbird down >/dev/null 2>&1 || true; "
-                        "systemctl disable --now netbird || true",
+                        "systemctl disable --now netbird || true; "
+                        "rm -f /etc/systemd/system/netbird.service; ",
                         timeout=30,
                     )
                     return redirect(url_for("systemmgmt"))
                 if allow_insecure and key == "netbird_down":
                     success, output = run_shell_captured(
-                        "netbird down >/dev/null 2>&1 || true; systemctl disable --now netbird",
+                        "netbird down >/dev/null 2>&1 || true; "
+                        "systemctl disable --now netbird; "
+                        "rm -f /etc/systemd/system/netbird.service; ",
                         timeout=30,
                     )
                     return redirect(url_for("systemmgmt"))

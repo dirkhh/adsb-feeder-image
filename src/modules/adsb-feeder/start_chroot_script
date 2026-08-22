@@ -100,6 +100,7 @@ systemctl disable zerotier-one
 systemctl disable netbird
 systemctl mask tailscaled
 systemctl mask zerotier-one
+rm -f /etc/systemd/system/netbird.service
 
 df -h
 
