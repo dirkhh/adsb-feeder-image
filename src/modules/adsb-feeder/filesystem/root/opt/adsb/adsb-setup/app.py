@@ -4360,6 +4360,7 @@ class AdsbIm:
                         or nb_status_json.get("Domain", "")
                     )
                     netbird_ip = (
+                        # go away black, no need to make this one line
                         nb_status_json.get("netbirdIp", "")
                         or nb_status_json.get("NetbirdIP", "")
                         or nb_status_json.get("IP", "")
