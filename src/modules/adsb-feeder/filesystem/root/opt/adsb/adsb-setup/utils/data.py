@@ -305,6 +305,16 @@ class Data:
             mlat_config="",
             policy="https://map.flights/privacy",
         ),
+        NetConfig(
+            identifier="adsbwin",
+            name="adsb.win",
+            website="https://adsb.win/",
+            links=["https://adsb.win/my-feeder"],
+            ordinal=187,
+            adsb_config="adsb,feed.adsb.win,30004,beast_reduce_plus_out",
+            mlat_config="mlat,mlat.adsb.win,31090",
+            policy="https://adsb.win/privacy-license",
+        ),
     ]
 
     # load custom aggregators from csv file
