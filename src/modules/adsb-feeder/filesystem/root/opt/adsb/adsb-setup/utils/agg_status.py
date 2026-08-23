@@ -73,6 +73,10 @@ class AggStatus:
         uf_dir += f"uf_{self._idx}" if self._idx != 0 else "ultrafeeder"
         return uf_dir
 
+    def opensky_mlat_path(self):
+        suffix = f"_{self._idx}" if self._idx != 0 else ""
+        return f"/run/adsb-feeder-opensky{suffix}/mlat-client-stats.json"
+
     def get_mlat_status(self, path=None):
         # if mlat isn't enabled ignore status check results
         if not self._d.list_is_enabled("mlat_enable", self._idx):
@@ -367,7 +371,7 @@ class AggStatus:
             self._last_check = datetime.now()
         elif self._agg == "opensky":
             self.get_opensky_data_status()
-            self._mlat = T.Disabled
+            self.get_mlat_status(path=self.opensky_mlat_path())
             self._last_check = datetime.now()
         elif self._agg == "radarvirtuel":
             self._beast = T.Unknown
