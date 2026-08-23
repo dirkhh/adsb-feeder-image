@@ -3818,6 +3818,7 @@ class AdsbIm:
                         return redirect(url_for("systemmgmt"))
                     print_err("starting netbird")
                     try:
+                        subprocess.run(["/bin/bash", "/opt/adsb/scripts/install-netbird.sh"])
                         if os.path.exists("/etc/systemd/system/netbird.service"):
                             os.remove("/etc/systemd/system/netbird.service")
                         subprocess.run(
@@ -3892,6 +3893,7 @@ class AdsbIm:
                     self._d.env_by_tags("netbird_setup_key").value = nb_setup_key
                     print_err("starting netbird")
                     try:
+                        subprocess.run(["/bin/bash", "/opt/adsb/scripts/install-netbird.sh"])
                         if os.path.exists("/etc/systemd/system/netbird.service"):
                             os.remove("/etc/systemd/system/netbird.service")
                         subprocess.run(
@@ -3968,6 +3970,7 @@ class AdsbIm:
                             continue
                     print_err(f"starting tailscale (args='{ts_args}')")
                     try:
+                        subprocess.run(["/bin/bash", "/opt/adsb/scripts/install-tailscale.sh"])
                         subprocess.run(
                             ["/usr/bin/systemctl", "unmask", "tailscaled"],
                             timeout=20.0,
@@ -4167,6 +4170,7 @@ class AdsbIm:
                 continue
             if allow_insecure and key == "zerotierid":
                 try:
+                    subprocess.run(["/bin/bash", "/opt/adsb/scripts/install-zerotier.sh"])
                     subprocess.call("/usr/bin/systemctl unmask zerotier-one", shell=True)
                     subprocess.call("/usr/bin/systemctl enable --now zerotier-one", shell=True)
                     sleep(5.0)  # this gives the service enough time to get ready
