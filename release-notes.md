@@ -1,5 +1,8 @@
 Changes since v3.0.13
 =======
+- opensky: add mlat-client
+- pseudo vpn / wireguard clients: only install when required
+- add netbird
 - add aggregators: map.flights, adsb.win
 - opensky: add feed status
 - beta-notes: data sharing page: fix up order
