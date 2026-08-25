@@ -1,5 +1,6 @@
 Changes since v3.0.13
 =======
+- AIS: allow configuring non-standard data sources using extra options and not assigning SDR
 - opensky: add mlat-client
 - pseudo vpn / wireguard clients: only install when required
 - add netbird

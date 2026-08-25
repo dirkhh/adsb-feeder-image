@@ -55,12 +55,16 @@ services:
     ports:
       - ${AF_AISCATCHER_PORT:-9990}:80
       - 9988:9988/udp
+    tty: false # work-around for /dev read-only mount + /dev/console error
     device_cgroup_rules:
+      # serial devices
+      - 'c 188:* rwm'
+      # USB devices
       - 'c 189:* rwm'
     tmpfs:
       - /tmp
     volumes:
       - "/etc/localtime:/etc/localtime:ro"
       - "/opt/adsb/ais/shipxplorer/data:/data"
-      - /dev:/dev:rw
+      - /dev:/dev:ro
 

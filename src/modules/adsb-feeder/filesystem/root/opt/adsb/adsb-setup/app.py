@@ -3250,11 +3250,20 @@ class AdsbIm:
             sonde_sdr_type = ""
             self._d.env_by_tags("run_sonde").value = False
         aisserial = self._d.env_by_tags("aisserial").valuestr
-        aissdr = self._sdrdevices.get_sdr_by_serial(aisserial)
-        if aissdr != self._sdrdevices.null_sdr:
-            aissdr.purpose = "ais"
-            self._d.env_by_tags("ais_sdr_type").value = aissdr._type
-            self._d.env_by_tags("run_shipfeeder").value = self._d.is_enabled(["shipfeeder"])
+        if self._d.is_enabled(["shipfeeder"]):
+            aissdr = self._sdrdevices.get_sdr_by_serial(aisserial)
+            if aissdr != self._sdrdevices.null_sdr:
+                aissdr.purpose = "ais"
+                self._d.env_by_tags("ais_sdr_type").value = aissdr._type
+                self._d.env_by_tags("run_shipfeeder").value = True
+            elif self._d.env_by_tags("ais_sx_extra_options").value != "":
+                # assume people want to configure a non-SDR data source
+                # run shipfeeder despite no SDR being assigned
+                self._d.env_by_tags("ais_sdr_type").value = "other"
+                self._d.env_by_tags("run_shipfeeder").value = True
+            else:
+                self._d.env_by_tags("run_shipfeeder").value = False
+
             if self._d.is_enabled("run_shipfeeder") and self._d.env_by_tags("ais_station_name").value == "":
                 self._d.env_by_tags("ais_station_name").value = (
                     f"{self._d.env_by_tags('initials').list_get(0)}-{self._d.env_by_tags('closest_airport').list_get(0)}-AIS"
@@ -3264,9 +3273,6 @@ class AdsbIm:
                 if self._d.is_enabled(["shipfeeder"]) and self._d.is_enabled(["show_ships_on_map"])
                 else ""
             )
-        else:
-            self._d.env_by_tags("tar1090_aiscatcher_url").value = ""
-            self._d.env_by_tags("run_shipfeeder").value = False
 
         # hfdlobserver is a bit different -- all we need to do is check if it's enabled
         self.update_hfdlobserver_config()
