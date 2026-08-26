@@ -1,5 +1,6 @@
 Changes since v3.0.13
 =======
+- skystats: update to bugfix version for empty tables
 - beta-log: update containers again
 - AIS: allow configuring non-standard data sources using extra options and not assigning SDR
 - opensky: add mlat-client
