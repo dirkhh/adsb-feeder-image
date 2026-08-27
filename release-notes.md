@@ -1,5 +1,6 @@
 Changes since v3.0.13
 =======
+- beta-log: update containers again (rtl-sdr blog v4l support, sorry for the extra download)
 - skystats: update to bugfix version for empty tables
 - beta-log: update containers again
 - AIS: allow configuring non-standard data sources using extra options and not assigning SDR
