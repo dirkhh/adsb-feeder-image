@@ -4402,7 +4402,6 @@ class AdsbIm:
                         ["/usr/bin/netbird", "status", "--json"],
                         check=True,
                         capture_output=True,
-                        text=True,
                     )
                     nb_status_json = json.loads(result.stdout or "{}")
                     netbird_fqdn = (
