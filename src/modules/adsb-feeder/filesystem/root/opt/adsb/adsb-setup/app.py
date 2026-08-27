@@ -3263,16 +3263,58 @@ class AdsbIm:
                 self._d.env_by_tags("run_shipfeeder").value = True
             else:
                 self._d.env_by_tags("run_shipfeeder").value = False
+        else:
+            self._d.env_by_tags("run_shipfeeder").value = False
 
-            if self._d.is_enabled("run_shipfeeder") and self._d.env_by_tags("ais_station_name").value == "":
+        self._d.env_by_tags("tar1090_aiscatcher_url").value = (
+            f"http://HOSTNAME:{self._d.env_by_tags('webport').value}/"
+            if self._d.is_enabled(["run_shipfeeder"]) and self._d.is_enabled(["show_ships_on_map"])
+            else ""
+        )
+
+        if self._d.is_enabled("run_shipfeeder"):
+            if self._d.env_by_tags("ais_station_name").value == "":
                 self._d.env_by_tags("ais_station_name").value = (
                     f"{self._d.env_by_tags('initials').list_get(0)}-{self._d.env_by_tags('closest_airport').list_get(0)}-AIS"
                 )
-            self._d.env_by_tags("tar1090_aiscatcher_url").value = (
-                f"http://HOSTNAME:{self._d.env_by_tags('webport').value}/"
-                if self._d.is_enabled(["shipfeeder"]) and self._d.is_enabled(["show_ships_on_map"])
-                else ""
-            )
+
+            # unset the ports to disable some AIS feeds if necessary
+            if self._d.env_by_tags("ais_feed_ais_hpradar").list_get(0):
+                self._d.env_by_tags("ais_hpradar_udp_port").list_set(0, "4100")
+            else:
+                self._d.env_by_tags("ais_hpradar_udp_port").list_set(0, "")
+
+            if not self._d.env_by_tags("ais_feed_marinetraffic").list_get(0):
+                self._d.env_by_tags("ais_marinetraffic_udp_port").list_set(0, "")
+            if not self._d.env_by_tags("ais_feed_aisaprsfi").list_get(0):
+                self._d.env_by_tags("ais_aprsfi_feeder_key").list_set(0, "")
+            if not self._d.env_by_tags("ais_feed_boatbeacon").list_get(0):
+                self._d.env_by_tags("ais_boatbeacon_udp_port").list_set(0, "")
+            if not self._d.env_by_tags("ais_feed_myshiptracking").list_get(0):
+                self._d.env_by_tags("ais_myshiptracking_udp_port").list_set(0, "")
+            if not self._d.env_by_tags("ais_feed_vesselfinder").list_get(0):
+                self._d.env_by_tags("ais_vesselfinder_udp_port").list_set(0, "")
+            if not self._d.env_by_tags("ais_feed_shipxplorer").list_get(0):
+                self._d.env_by_tags("ais_shipxplorer_udp_port").list_set(0, "")
+            if not self._d.env_by_tags("ais_feed_shippingexplorer").list_get(0):
+                self._d.env_by_tags("ais_shippingexplorer_udp_port").list_set(0, "")
+            if not self._d.env_by_tags("ais_feed_vesseltracker").list_get(0):
+                self._d.env_by_tags("ais_vesseltracker_udp_port").list_set(0, "")
+            if not self._d.env_by_tags("ais_feed_aishub").list_get(0):
+                self._d.env_by_tags("aishub_udp_port").list_set(0, "")
+
+            if not self._d.env_by_tags("ais_feed_airframes").list_get(0):
+                self._d.env_by_tags("ais_airframes_station_id").list_set(0, "")
+            if not self._d.env_by_tags("ais_feed_aisfriends").list_get(0):
+                self._d.env_by_tags("aisfriends_udp_port").list_set(0, "")
+            if not self._d.env_by_tags("ais_feed_aiscatcher").list_get(0):
+                self._d.env_by_tags("aiscatcher_feeder_key").list_set(0, "")
+
+            if self._d.env_by_tags("ais_feed_sdrmap").list_get(0):
+                ais_sdrmap_user = self._d.env_by_tags(["sdrmap", "user"]).list_get(0)
+            else:
+                ais_sdrmap_user = ""
+            self._d.env_by_tags("ais_sdrmap_user").list_set(0, ais_sdrmap_user)
 
         # hfdlobserver is a bit different -- all we need to do is check if it's enabled
         self.update_hfdlobserver_config()
