@@ -82,6 +82,22 @@ class TestDataClass:
         assert data.ultrafeeder == []
         assert data.previous_version == ""
 
+    def test_airspy_decoder_tuning_configuration(self):
+        """Test Airspy tuning environment names, tags, and adsb.im defaults."""
+        data = Data()
+        expected = {
+            "airspy_cputime_target": ("AIRSPY_ADSB_CPUTIME_TARGET", 60),
+            "airspy_preamble_filter_max": ("AIRSPY_ADSB_PREAMBLE_FILTER_MAX", 20),
+            "airspy_sample_rate": ("AIRSPY_ADSB_SAMPLE_RATE", 12),
+            "airspy_timeout": ("AIRSPY_ADSB_TIMEOUT", 90),
+        }
+
+        for tag, (name, default) in expected.items():
+            env = data.env_by_tags(tag)
+            assert env.name == name
+            assert env.default == default
+            assert tag in env.tags
+
     def test_proxy_routes(self):
         """Test proxy routes configuration"""
         data = Data()
