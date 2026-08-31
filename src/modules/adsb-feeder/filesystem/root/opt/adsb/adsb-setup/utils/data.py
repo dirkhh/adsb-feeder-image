@@ -263,7 +263,7 @@ class Data:
             ordinal=89,
             adsb_config="adsb,feed.tryflightdeck.com,30004,beast_reduce_plus_out",
             mlat_config="",
-            policy="",
+            policy="https://www.tryflightdeck.com/feeder-privacy",
         ),
         NetConfig(
             identifier="hpradar",
