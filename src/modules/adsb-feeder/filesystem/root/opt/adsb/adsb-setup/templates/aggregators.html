@@ -356,6 +356,12 @@
       feed on their <a href="https://www.avdelphi.com/claim_feed.html">website</a> before you are allowed to feed them.
     </label>
   </div>
+  <div class="col-12 form-check">
+    <input type="checkbox" class="form-check-input me-1" name="feed_acars_flightdeck--is_enabled" id="feed_acars_flightdeck--is_enabled" {{ nonadsb_enabled("feed_acars_flightdeck", m) }} />
+    <label class="mx-1 w-auto" for="feed_acars_flightdeck--is_enabled">
+      <a href="https://www.tryflightdeck.com/">FlightDeck</a>
+    </label>
+  </div>
   <hr>
 
   {% endif %}

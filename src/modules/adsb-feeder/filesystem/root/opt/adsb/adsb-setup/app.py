@@ -3363,6 +3363,9 @@ class AdsbIm:
             feed_acars_tcp += "feed-acars.adsb.lol:5550;"
             feed_vdl2_tcp += "feed-acars.adsb.lol:5552;"
             feed_hfdl_tcp += "feed-acars.adsb.lol:5551;"
+        if self._d.list_is_enabled("feed_acars_flightdeck", 0):
+            feed_acars_udp += "acars.tryflightdeck.com:5550;"
+            feed_vdl2_udp += "acars.tryflightdeck.com:5555;"
 
         if not self._d.is_enabled(["run_acarsdec"]):
             feed_acars_udp = ""
