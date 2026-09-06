@@ -20,14 +20,25 @@ rm -f /var/lib/man-db/auto-update
 DEBIAN_DISTRO=$(grep /etc/os-release -e VERSION_CODENAME | cut -d= -f2)
 
 # free up space
-GCC="gcc-12"
-if [[ "${DEBIAN_DISTRO}" == trixie ]]; then
-    GCC="gcc-14"
-fi
-apt-get autoremove -y ${GCC} dpkg-dev gdb build-essential \
+apt-get autoremove -y dpkg-dev gdb build-essential \
     mkvtoolnix iso-codes shared-mime-info \
     rpicam-apps-lite\* p7zip\* \
+    gcc-14 gcc-14-for-host \
+    cloud-init \
+    rpi-connect-lite \
+    xauth \
+    file \
+    strace \
+    make \
     || true
+
+# removing saves around X MBytes in images size
+# gcc: 60
+# cloud-init: 10
+# rpi-connect-lite: 7
+# xauth: 1
+# file: 1
+# strace: 2
 
 echo "building on $(hostname) - available disk space inside the image:"
 df -h
