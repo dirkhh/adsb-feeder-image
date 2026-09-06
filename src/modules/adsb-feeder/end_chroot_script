@@ -17,7 +17,7 @@ umount /var/cache/apt || true
 
 # free up space
 apt-get clean -y
-find  /var/lib/apt/lists | grep -v InRelease | xargs rm -rf
+rm -rf  /var/lib/apt/lists/*
 rm -rf /tmp/* /var/log/* /var/cache/* /var/lib/dpkg/status-old
 
 # remove pycache, nothing found doesn't mean failure thus always return true
