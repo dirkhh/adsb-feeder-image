@@ -4,7 +4,7 @@
 
 ### Cleanup
 apt-get clean -y
-find  /var/lib/apt/lists | grep -v InRelease | xargs rm -rf
+rm -rf  /var/lib/apt/lists/*
 rm -rf /tmp/* /var/log/* /var/cache/debconf/templates.dat* /var/lib/dpkg/status-old
 
 # this is kinda harsh... but it makes the image easier to compress
