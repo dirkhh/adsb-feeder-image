@@ -42,20 +42,30 @@ systemctl restart systemd-journald && echo "journal should now be persistent"
 # are included here as well; the Python cryptography module is a bit of the odd one
 # out, but having it here should work.
 /boot/dietpi/func/dietpi-set_software ntpd-mode 0
-apt install -y --no-install-recommends chrony ifplugd ifmetric
+apt install -y --no-install-recommends chrony
 
-# ifmetric ensures proper precedence for local network connections
-# dhclient applies the metric setting from interfaces only to the default
-# routes not to the other routes
-#
-# ifplugd will trigger on link state and up or down the interface
-# ifplugd is required so ethernet works when the link is established after boot
-sed -i  /etc/default/ifplugd \
-    -e 's/^INTERFACES=.*/INTERFACES="eth0"/' \
-    -e 's/^ARGS=.*/ARGS="-q -f -u2 -d2 -w -I --initial-down"/'
-systemctl restart --no-block ifplugd
+cat >> /usr/lib/systemd/system/adsb-ethplugd.service <<EOF
+[Unit]
+Description=Simple replacement for ifplugd (only used on adsb.im dietpi images)
+After=network.target
 
-# ifplugd will handle eth0, not necessary for networking service to bring it up
+[Service]
+SyslogIdentifier=ethplugd
+ExecStart=/opt/adsb/scripts/ethplugd.sh
+Restart=always
+Type=simple
+RestartSec=5
+StartLimitInterval=1
+StartLimitBurst=100
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+
+systemctl enable --now adsb-ethplugd.service
+
+# the ethplugd.sh will handle eth0, not necessary for networking service to bring it up
 sed -i -e 's/^allow-hotplug\s*eth0/#\0/' /etc/network/interfaces
 
 # if no network is configured in wpa_supplicant.conf, disable wifi
