@@ -42,7 +42,7 @@ systemctl restart systemd-journald && echo "journal should now be persistent"
 # are included here as well; the Python cryptography module is a bit of the odd one
 # out, but having it here should work.
 /boot/dietpi/func/dietpi-set_software ntpd-mode 0
-apt install -y --no-install-recommends chrony ifplugd ifmetric python3-cryptography
+apt install -y --no-install-recommends chrony ifplugd ifmetric
 
 # ifmetric ensures proper precedence for local network connections
 # dhclient applies the metric setting from interfaces only to the default
