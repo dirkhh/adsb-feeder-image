@@ -5,9 +5,6 @@
 # it will simply fail to grab the port and exit
 python3 /opt/adsb/adsb-setup/waiting-app.py 80 /var/tmp/dietpi/logs/dietpi-firstrun-setup.log "Second boot of" &>>/run/adsb-feeder-image.log &
 
-# avoid unnecessary diskwrites by zerotier
-ln -sf /dev/null /var/lib/zerotier-one/metrics.prom
-
 # override daemon.json with the options we want
 cat > /etc/docker/daemon.json <<EOF
 {
