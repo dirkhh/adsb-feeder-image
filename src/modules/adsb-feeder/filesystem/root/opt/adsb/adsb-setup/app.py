@@ -2833,8 +2833,44 @@ class AdsbIm:
             return
         self._d.env_by_tags("graphs1090_other_temp1").value = "/run/ambient-temperature"
 
+    def migrate_legacy_airspy_sample_rate(self):
+        """Move valid legacy raw Airspy sample-rate overrides into the dedicated setting."""
+        extra_env = self._d.env_by_tags("ultrafeeder_extra_env")
+        lines = extra_env.valuestr.splitlines()
+        retained_lines = []
+        migrated_sample_rate = None
+
+        for line in lines:
+            match = re.fullmatch(r"\s*AIRSPY_ADSB_MLAT_FREQ\s*=\s*(\S+)\s*", line)
+            if not match:
+                retained_lines.append(line)
+                continue
+
+            try:
+                sample_rate = int(match.group(1))
+            except ValueError:
+                retained_lines.append(line)
+                continue
+
+            if sample_rate not in {12, 20, 24}:
+                retained_lines.append(line)
+                continue
+
+            migrated_sample_rate = sample_rate
+
+        if migrated_sample_rate is not None:
+            print_err(
+                "migrating AIRSPY_ADSB_MLAT_FREQ from additional container environment variables "
+                f"to AIRSPY_ADSB_SAMPLE_RATE={migrated_sample_rate}"
+            )
+            self._d.env_by_tags("airspy_sample_rate").value = migrated_sample_rate
+            # write_values_to_env_file expects textarea lines to use CRLF separators
+            extra_env.value = "\r\n".join(retained_lines)
+
     def handle_implied_settings(self):
         print_err("running handle_implied_settings")
+
+        self.migrate_legacy_airspy_sample_rate()
 
         # make sure we show the temperature block if we have a temperature sensor
         self._d.env_by_tags("temperature_block").value = (
@@ -4352,11 +4388,79 @@ class AdsbIm:
     @check_restart_lock
     def expert(self):
         if request.method == "POST":
+            if "airspy_decoder_tuning--submit" in request.form or "airspy_decoder_tuning--reset" in request.form:
+                return self.update_airspy_decoder_tuning()
             return self.update()
         # make sure we only show the gpsd option if gpsd is correctly configured and running
         self._d.env_by_tags("has_gpsd").value = self._system.check_gpsd()
 
         return render_template("expert.html")
+
+    @staticmethod
+    def validate_airspy_decoder_tuning(form) -> Tuple[Dict[str, int], List[str]]:
+        """Validate all Airspy decoder tuning fields without applying partial updates."""
+        fields = [
+            ("airspy_cputime_target", "CPU time target", 5, 95, None),
+            ("airspy_preamble_filter_max", "Maximum preamble filter", 1, 60, None),
+            ("airspy_sample_rate", "Sample rate", None, None, {12, 20, 24}),
+            ("airspy_timeout", "Aircraft timeout", 1, 300, None),
+        ]
+        values: Dict[str, int] = {}
+        errors: List[str] = []
+
+        for tag, label, minimum, maximum, allowed in fields:
+            raw_value = form.get(tag)
+            try:
+                value = int(raw_value)
+            except (TypeError, ValueError):
+                errors.append(f"{label} must be a whole number.")
+                continue
+
+            if allowed is not None and value not in allowed:
+                errors.append(f"{label} must be 12, 20, or 24 MSPS.")
+                continue
+            if minimum is not None and maximum is not None and not minimum <= value <= maximum:
+                errors.append(f"{label} must be between {minimum} and {maximum}.")
+                continue
+            values[tag] = value
+
+        return values, errors
+
+    def update_airspy_decoder_tuning(self):
+        """Apply or reset the dedicated Airspy decoder tuning settings."""
+        if not self._d.is_enabled("airspy"):
+            flash("Airspy decoder tuning is only available when an Airspy is configured for 1090 MHz.")
+            return redirect(url_for("expert"))
+
+        if "airspy_decoder_tuning--reset" in request.form:
+            values = {
+                tag: self._d.env_by_tags(tag).default
+                for tag in [
+                    "airspy_cputime_target",
+                    "airspy_preamble_filter_max",
+                    "airspy_sample_rate",
+                    "airspy_timeout",
+                ]
+            }
+            message = "Airspy decoder tuning restored to adsb.im defaults."
+        else:
+            values, errors = self.validate_airspy_decoder_tuning(request.form)
+            if errors:
+                for error in errors:
+                    flash(error)
+                return redirect(url_for("expert"))
+            message = "Airspy decoder tuning updated."
+
+        for tag, value in values.items():
+            self._d.env_by_tags(tag).value = value
+
+        self.write_envfile()
+        flash(message)
+
+        if self._d.is_enabled("base_config"):
+            self._system._restart.bg_run(cmdline=f"{get_adsb_base_dir()}/docker-compose-start", silent=False)
+            return render_template("/restarting.html")
+        return redirect(url_for("expert"))
 
     def change_sdr_serial_ui(self):
         return render_template("change_sdr_serial_ui.html")
