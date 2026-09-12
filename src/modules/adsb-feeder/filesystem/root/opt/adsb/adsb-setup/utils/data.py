@@ -299,7 +299,7 @@ class Data:
             identifier="map.flights",
             name="map.flights",
             website="https://map.flights",
-            links=[""],
+            links=["https://map.flights/myfeed"],
             ordinal=173,
             adsb_config="adsb,feed.map.flights,30004,beast_reduce_plus_out",
             mlat_config="",
