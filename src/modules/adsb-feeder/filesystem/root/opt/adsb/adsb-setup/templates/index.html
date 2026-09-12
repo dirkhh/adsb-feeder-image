@@ -861,9 +861,10 @@
   }
 
   function setIcon(agg, cat, idx, icon, color) {
-    //console.log("#" + agg + cat + idx);
-    $("#" + agg + cat + idx).html(icon);
-    $("#" + agg + cat + idx).attr("class", color);
+    // look the element up by id rather than building a selector: aggregator
+    // identifiers can contain characters that are special in CSS selectors
+    // (the "." in "map.flights") and $("#map.flightsbeast0") matches nothing
+    $(document.getElementById(agg + cat + idx)).html(icon).attr("class", color);
   }
 
   async function reset_status(agg, idx) {
