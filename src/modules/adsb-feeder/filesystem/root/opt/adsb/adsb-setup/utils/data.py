@@ -302,7 +302,7 @@ class Data:
             links=["https://map.flights/myfeed"],
             ordinal=173,
             adsb_config="adsb,feed.map.flights,30004,beast_reduce_plus_out",
-            mlat_config="",
+            mlat_config="mlat,mlat.map.flights,31090",
             policy="https://map.flights/privacy",
         ),
         NetConfig(
