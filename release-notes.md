@@ -1,23 +1,8 @@
-Changes since v3.0.13
+Changes since v3.0.14
 =======
-- beta-log: add flightdeck acars / privacy policy
-- AIS: fix data sharing enable logic (could not be disabled once enabled)
-- beta-log: update containers again (rtl-sdr blog v4l support, sorry for the extra download)
-- skystats: update to bugfix version for empty tables
-- beta-log: update containers again
-- AIS: allow configuring non-standard data sources using extra options and not assigning SDR
-- opensky: add mlat-client
-- pseudo vpn / wireguard clients: only install when required
-- add netbird
-- add aggregators: map.flights, adsb.win
-- opensky: add feed status
-- beta-notes: data sharing page: fix up order
-- data sharing page: slightly increase vertical space for visual grouping
-- beta-notes: restore data sharing page ordering from last stable
-- beta-notes: fixup AIS ship display in tar1090
-- fix map link for live / exchange for new installs
-- add mlat station name override on data sharing page
-- update containers
+- update README.md to list all the aggregators supported
+- fix the code to allow aggregator IDs containing a dot
+- add map.flights MLAT and status link
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)
