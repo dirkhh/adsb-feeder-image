@@ -3,6 +3,7 @@ Changes since v3.0.14
 - update README.md to list all the aggregators supported
 - fix the code to allow aggregator IDs containing a dot
 - add map.flights MLAT and status link
+- add Skydex and PlaneTrack aggregators
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)

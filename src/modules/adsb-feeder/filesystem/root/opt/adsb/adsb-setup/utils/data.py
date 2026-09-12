@@ -315,6 +315,26 @@ class Data:
             mlat_config="mlat,mlat.adsb.win,31090",
             policy="https://adsb.win/privacy-license",
         ),
+        NetConfig(
+            identifier="planetrack",
+            name="PlaneTrack",
+            website="https://planetrack.ai/",
+            links=["https://planetrack.ai/myip", "https://planetrack.ai/feeders"],
+            ordinal=196,
+            adsb_config="adsb,feed.planetrack.ai,30004,beast_reduce_plus_out",
+            mlat_config="mlat,feed.planetrack.ai,31090",
+            policy="https://planetrack.ai/privacy.html",
+        ),
+        NetConfig(
+            identifier="skydex",
+            name="Skydex",
+            website="https://feed.skydex.online/",
+            links=["hhttps://skydex.online/feed"],
+            ordinal=203,
+            adsb_config="adsb,feed.skydex.online,30004,beast_reduce_plus_out",
+            mlat_config="",
+            policy="https://feed.skydex.online/privacy.html",
+        ),
     ]
 
     # load custom aggregators from csv file
