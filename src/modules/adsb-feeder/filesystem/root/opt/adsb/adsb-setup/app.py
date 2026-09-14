@@ -2594,6 +2594,9 @@ class AdsbIm:
         print_err(f"update_global: check_ip()", level=8)
         ext_ip = self._system.check_ip()
         fqdn_ip = self._d.env_by_tags("fqdn_ip").value
+        if ext_ip is None:
+            print_err(f"update_global: can't update, external IP not known", level=8)
+            return
         if not (
             fqdn == ""
             or not lookup_match
@@ -2605,8 +2608,6 @@ class AdsbIm:
             print_err(f"update_global: no update needed", level=8)
             return
 
-        if ext_ip is not None:
-            self._d.env_by_tags("fqdn_ext_ip").value = ext_ip
         url = f"{self._d.adsbim_api_url}/0/globalname"
         challenge_response = None
         if fqdn != "":
@@ -2676,6 +2677,7 @@ class AdsbIm:
         # Update environment values
         self._d.env_by_tags("fqdn").value = fqdn
         self._d.env_by_tags("fqdn_ip").value = self.local_address
+        self._d.env_by_tags("fqdn_ext_ip").value = ext_ip
         self._d.env_by_tags("fqdn_used_site_name").value = data["site_name"]
 
         # Save certificate, private key, and chain to files
