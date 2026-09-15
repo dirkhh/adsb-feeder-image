@@ -10,7 +10,152 @@ import json
 import tempfile
 from pathlib import Path
 
+from flask import Flask
+
 from app import AdsbIm
+
+
+class TestAirspyDecoderTuning:
+    """Test dedicated Airspy decoder tuning validation and migration."""
+
+    @staticmethod
+    def airspy_app():
+        app = object.__new__(AdsbIm)
+        app._d = MagicMock()
+        app._system = MagicMock()
+        app.write_envfile = MagicMock()
+        app._d.is_enabled.side_effect = lambda tag: tag == "airspy"
+        flask_app = Flask(__name__)
+        flask_app.secret_key = "test-secret"
+        flask_app.add_url_rule("/expert", "expert", lambda: "expert")
+        return app, flask_app
+
+    def test_validate_airspy_decoder_tuning(self):
+        values, errors = AdsbIm.validate_airspy_decoder_tuning(
+            {
+                "airspy_cputime_target": "95",
+                "airspy_preamble_filter_max": "60",
+                "airspy_sample_rate": "24",
+                "airspy_timeout": "300",
+            }
+        )
+
+        assert errors == []
+        assert values == {
+            "airspy_cputime_target": 95,
+            "airspy_preamble_filter_max": 60,
+            "airspy_sample_rate": 24,
+            "airspy_timeout": 300,
+        }
+
+    @pytest.mark.parametrize(
+        ("field", "value", "message"),
+        [
+            ("airspy_cputime_target", "4", "CPU time target must be between 5 and 95."),
+            ("airspy_preamble_filter_max", "61", "Maximum preamble filter must be between 1 and 60."),
+            ("airspy_sample_rate", "16", "Sample rate must be 12, 20, or 24 MSPS."),
+            ("airspy_timeout", "301", "Aircraft timeout must be between 1 and 300."),
+            ("airspy_timeout", "invalid", "Aircraft timeout must be a whole number."),
+        ],
+    )
+    def test_reject_invalid_airspy_decoder_tuning(self, field, value, message):
+        form = {
+            "airspy_cputime_target": "60",
+            "airspy_preamble_filter_max": "20",
+            "airspy_sample_rate": "12",
+            "airspy_timeout": "90",
+        }
+        form[field] = value
+
+        values, errors = AdsbIm.validate_airspy_decoder_tuning(form)
+
+        assert message in errors
+        assert field not in values
+
+    def test_migrate_legacy_airspy_sample_rate(self):
+        app = object.__new__(AdsbIm)
+        app._d = MagicMock()
+        extra_env = MagicMock(valuestr="READSB_RANGE_OUTLINE_HOURS=72\r\nAIRSPY_ADSB_MLAT_FREQ=20")
+        sample_rate = MagicMock()
+        app._d.env_by_tags.side_effect = lambda tag: {
+            "ultrafeeder_extra_env": extra_env,
+            "airspy_sample_rate": sample_rate,
+        }[tag]
+
+        app.migrate_legacy_airspy_sample_rate()
+
+        assert sample_rate.value == 20
+        assert extra_env.value == "READSB_RANGE_OUTLINE_HOURS=72"
+
+    def test_keep_invalid_legacy_airspy_sample_rate(self):
+        app = object.__new__(AdsbIm)
+        app._d = MagicMock()
+        extra_env = MagicMock(valuestr="AIRSPY_ADSB_MLAT_FREQ=16")
+        sample_rate = MagicMock()
+        app._d.env_by_tags.side_effect = lambda tag: {
+            "ultrafeeder_extra_env": extra_env,
+            "airspy_sample_rate": sample_rate,
+        }[tag]
+
+        app.migrate_legacy_airspy_sample_rate()
+
+        assert sample_rate.value != 16
+        assert extra_env.value != ""
+
+    def test_invalid_update_is_atomic(self):
+        app, flask_app = self.airspy_app()
+        envs = {
+            tag: MagicMock(value=default, default=default)
+            for tag, default in {
+                "airspy_cputime_target": 60,
+                "airspy_preamble_filter_max": 20,
+                "airspy_sample_rate": 12,
+                "airspy_timeout": 90,
+            }.items()
+        }
+        app._d.env_by_tags.side_effect = lambda tag: envs[tag]
+
+        with flask_app.test_request_context(
+            "/expert",
+            method="POST",
+            data={
+                "airspy_cputime_target": "95",
+                "airspy_preamble_filter_max": "20",
+                "airspy_sample_rate": "16",
+                "airspy_timeout": "90",
+                "airspy_decoder_tuning--submit": "go",
+            },
+        ):
+            response = app.update_airspy_decoder_tuning()
+
+        assert response.status_code == 302
+        assert {tag: env.value for tag, env in envs.items()} == {
+            "airspy_cputime_target": 60,
+            "airspy_preamble_filter_max": 20,
+            "airspy_sample_rate": 12,
+            "airspy_timeout": 90,
+        }
+        app.write_envfile.assert_not_called()
+
+    def test_reset_airspy_decoder_tuning(self):
+        app, flask_app = self.airspy_app()
+        defaults = {
+            "airspy_cputime_target": 60,
+            "airspy_preamble_filter_max": 20,
+            "airspy_sample_rate": 12,
+            "airspy_timeout": 90,
+        }
+        envs = {tag: MagicMock(value=1, default=default) for tag, default in defaults.items()}
+        app._d.env_by_tags.side_effect = lambda tag: envs[tag]
+
+        with flask_app.test_request_context(
+            "/expert", method="POST", data={"airspy_decoder_tuning--reset": "go"}
+        ):
+            response = app.update_airspy_decoder_tuning()
+
+        assert response.status_code == 302
+        assert {tag: env.value for tag, env in envs.items()} == defaults
+        app.write_envfile.assert_called_once_with()
 
 
 class TestAdsbImInitialization:

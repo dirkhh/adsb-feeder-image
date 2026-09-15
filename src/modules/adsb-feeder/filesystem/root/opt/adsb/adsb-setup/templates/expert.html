@@ -15,6 +15,63 @@
   {% endwith %}
 </div>
 <div class="row small">
+  {% if is_enabled('airspy') %}
+  <div class="col-12">
+    <h5 class="mt-4">Airspy decoder tuning</h5>
+    <form method="POST">
+      <div class="row">
+        <div class="col-12 mb-3">
+          These advanced settings tune the Airspy decoder used for the 1090 MHz receiver. The defaults are suitable
+          for most installations. Higher settings can provide small improvements at a significant CPU, USB, and
+          temperature cost.
+        </div>
+        <div class="col-12 col-md-6 col-xl-3 mb-3">
+          <label for="airspy_cputime_target" class="form-label"><strong>CPU time target (%)</strong></label>
+          <input class="form-control" id="airspy_cputime_target" name="airspy_cputime_target" type="number" min="5"
+                 max="95" required value="{{ env_value_by_tag('airspy_cputime_target') }}">
+          <div class="form-text">5–95. A higher target lets the decoder use more CPU and may increase temperature.</div>
+        </div>
+        <div class="col-12 col-md-6 col-xl-3 mb-3">
+          <label for="airspy_preamble_filter_max" class="form-label"><strong>Maximum preamble filter</strong></label>
+          <input class="form-control" id="airspy_preamble_filter_max" name="airspy_preamble_filter_max" type="number"
+                 min="1" max="60" required value="{{ env_value_by_tag('airspy_preamble_filter_max') }}">
+          <div class="form-text">1–60. Higher values use more CPU, usually for only a small reception improvement.</div>
+        </div>
+        <div class="col-12 col-md-6 col-xl-3 mb-3">
+          <label for="airspy_sample_rate" class="form-label"><strong>Sample rate (MSPS)</strong></label>
+          <select class="form-select" id="airspy_sample_rate" name="airspy_sample_rate" required>
+            {% for sample_rate in [12, 20, 24] %}
+            <option value="{{ sample_rate }}"{% if env_value_by_tag('airspy_sample_rate') == sample_rate %} selected{% endif %}>
+              {{ sample_rate }}
+            </option>
+            {% endfor %}
+          </select>
+          <div class="form-text">
+            12 is recommended. 20 uses considerably more CPU and USB bandwidth and can cause MLAT clock instability;
+            24 is supported only by Airspy R2 hardware.
+          </div>
+        </div>
+        <div class="col-12 col-md-6 col-xl-3 mb-3">
+          <label for="airspy_timeout" class="form-label"><strong>Aircraft timeout (seconds)</strong></label>
+          <input class="form-control" id="airspy_timeout" name="airspy_timeout" type="number" min="1" max="300"
+                 required value="{{ env_value_by_tag('airspy_timeout') }}">
+          <div class="form-text">1–300. Increase this to retain aircraft that briefly leave receiver coverage.</div>
+        </div>
+        <div class="col-12 col-md-4 col-xl-3 mb-2">
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="airspy_decoder_tuning--submit" value="go">
+            Apply Airspy tuning
+          </button>
+        </div>
+        <div class="col-12 col-md-4 col-xl-3 mb-2">
+          <button type="submit" class="btn btn-secondary mx-auto w-100" name="airspy_decoder_tuning--reset" value="go"
+                  formnovalidate>
+            Restore adsb.im defaults
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+  {% endif %}
   <div class="col-12 col-lg-6">
     <h5 class="mt-4">Add additional Ultrafeeder arguments</h5>
     <form method="POST">
