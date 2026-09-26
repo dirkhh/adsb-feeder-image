@@ -2645,7 +2645,9 @@ class AdsbIm:
 
         print_err(
             f"Global name update started in background thread fqdn={fqdn}, lookup_match={lookup_match}, "
-            f"fqdn_ip={fqdn_ip}, local={self.local_address}, ext_ip={ext_ip}, force_update={force_update}"
+            f"fqdn_ip={fqdn_ip}, local={self.local_address}, "
+            f"ext_ip={ext_ip}, fqdn_ext_ip={self._d.env_by_tags('fqdn_ext_ip').value}, "
+            f"force_update={force_update}, fqdn_cert_state={self._d.env_by_tags('fqdn_cert_state').value}"
         )
 
         if challenge_response:
