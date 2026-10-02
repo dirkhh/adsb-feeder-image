@@ -1,5 +1,6 @@
 Changes since v3.0.14
 =======
+- update container versions
 - update README.md to list all the aggregators supported
 - fix the code to allow aggregator IDs containing a dot
 - add map.flights MLAT and status link
