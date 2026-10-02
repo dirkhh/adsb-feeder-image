@@ -428,9 +428,15 @@ class RadarBox(Aggregator):
         if self._d.env_by_tags("rbthermalhack").value != "":
             extra_env += f"-v {ADSB_RB_DIR}:/sys/class/thermal:ro "
 
+        # Sanitize all inputs just in case
+        safe_lat = shlex.quote(str(self.lat))
+        safe_lon = shlex.quote(str(self.lon))
+        safe_alt = shlex.quote(str(self.alt))
+        safe_docker_image = shlex.quote(docker_image)
+
         cmdline = (
-            f"--rm -i --network adsb_im_bridge -e BEASTHOST=ultrafeeder -e LAT={self.lat} "
-            f"-e LONG={self.lon} -e ALT={self.alt} {extra_env} {docker_image}"
+            f"--rm -i --network adsb_im_bridge -e BEASTHOST=ultrafeeder -e LAT={safe_lat} "
+            f"-e LONG={safe_lon} -e ALT={safe_alt} {extra_env} {safe_docker_image}"
         )
         output = self._docker_run_with_timeout(cmdline, 45.0)
         sharing_key_match = re.search("Your new key is ([a-zA-Z0-9]*)", output)
@@ -469,6 +475,12 @@ class OpenSky(Aggregator):
         )
 
     def _request_fr_serial(self, user: str) -> Optional[str]:
+        # OpenSky usernames are alphanumeric (plus a few separator characters)
+        if not re.match(r"^[A-Za-z0-9_.-]+$", user):
+            print_err(f"Invalid OpenSky username format: {user}")
+            flash("Invalid OpenSky username")
+            return None
+
         # we know that the container Env is always a string
         docker_image = self._d.env_by_tags(["opensky", "container"]).valuestr
 
@@ -476,9 +488,16 @@ class OpenSky(Aggregator):
             report_issue("failed to download the OpenSky docker image")
             return None
 
+        # Sanitize all inputs, just in case...
+        safe_lat = shlex.quote(str(self.lat))
+        safe_lon = shlex.quote(str(self.lon))
+        safe_alt = shlex.quote(str(self.alt))
+        safe_user = shlex.quote(user)
+        safe_docker_image = shlex.quote(docker_image)
+
         cmdline = (
-            f"--rm -i --network adsb_im_bridge -e BEASTHOST=ultrafeeder -e LAT={self.lat} "
-            f"-e LONG={self.lon} -e ALT={self.alt} -e OPENSKY_USERNAME={user} {docker_image}"
+            f"--rm -i --network adsb_im_bridge -e BEASTHOST=ultrafeeder -e LAT={safe_lat} "
+            f"-e LONG={safe_lon} -e ALT={safe_alt} -e OPENSKY_USERNAME={safe_user} {safe_docker_image}"
         )
         output = self._docker_run_with_timeout(cmdline, 60.0)
         serial_match = re.search("Got a new serial number: ([-a-zA-Z0-9]*)", output)
