@@ -4241,6 +4241,13 @@ class AdsbIm:
                     airport = self.closest_airport_dict(lat, long)
                     if airport and "icao" in airport:
                         self._d.env_by_tags("closest_airport").list_set(0, airport.get("icao", ""))
+            if key == "alt":
+                # altitude is a plain integer denoting meters (ft conversion done in the frontend)
+                try:
+                    value = str(int(re.sub("[a-zA-Z ]", "", value)))
+                except ValueError:
+                    print_err(f"invalid altitude value: {value}")
+                    continue
             if key == "tz":
                 self.set_tz(value)
                 continue
