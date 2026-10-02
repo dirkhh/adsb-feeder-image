@@ -4848,8 +4848,7 @@ class AdsbIm:
             try:
                 result = (
                     subprocess.run(
-                        "tailscale ip -4 2>/dev/null",
-                        shell=True,
+                        ["tailscale", "ip", "-4"],
                         capture_output=True,
                         timeout=2.0,
                     )
@@ -4867,7 +4866,6 @@ class AdsbIm:
                 result = (
                     subprocess.run(
                         ["zerotier-cli", "get", f"{zt_network}", "ip4"],
-                        shell=True,
                         capture_output=True,
                         timeout=2.0,
                     )
