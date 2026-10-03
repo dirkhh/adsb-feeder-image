@@ -1,5 +1,6 @@
 Changes since v3.0.14
 =======
+- niche: allow serial over GPIO for AIS (manual config still required)
 - update container versions
 - core: some hardening updates
 - update README.md to list all the aggregators supported

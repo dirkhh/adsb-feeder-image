@@ -61,6 +61,8 @@ services:
       - 'c 188:* rwm'
       # USB devices
       - 'c 189:* rwm'
+      # serial via GPIO devices
+      - 'c 204:* rwm'
     tmpfs:
       - /tmp
     volumes:
