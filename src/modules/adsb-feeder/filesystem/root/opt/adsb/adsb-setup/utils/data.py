@@ -329,7 +329,7 @@ class Data:
             identifier="skydex",
             name="Skydex",
             website="https://feed.skydex.online/",
-            links=["hhttps://skydex.online/feed"],
+            links=["https://skydex.online/feed"],
             ordinal=203,
             adsb_config="adsb,feed.skydex.online,30004,beast_reduce_plus_out",
             mlat_config="",
