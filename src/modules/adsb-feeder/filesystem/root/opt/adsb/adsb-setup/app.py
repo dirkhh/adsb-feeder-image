@@ -3371,6 +3371,28 @@ class AdsbIm:
             feed_acars_udp += "acars.tryflightdeck.com:5550;"
             feed_vdl2_udp += "acars.tryflightdeck.com:5555;"
 
+        acars_extra_feeds = self._d.env_by_tags("acars_extra_feeds").value.split()
+        for feed in acars_extra_feeds:
+            fs = feed.split(",")
+            flavor = fs[0]
+            protocol = fs[1]
+            target = fs[2]
+            target = target.strip(";")
+            if protocol == "udp":
+                if flavor == "acars":
+                    feed_acars_udp += target + ";"
+                if flavor == "vdl2":
+                    feed_vdl2_udp += target + ";"
+                if flavor == "hfdl":
+                    feed_hfdl_udp += target + ";"
+            if protocol == "tcp":
+                if flavor == "acars":
+                    feed_acars_tcp += target + ";"
+                if flavor == "vdl2":
+                    feed_vdl2_tcp += target + ";"
+                if flavor == "hfdl":
+                    feed_hfdl_tcp += target + ";"
+
         if not self._d.is_enabled(["run_acarsdec"]):
             feed_acars_udp = ""
             feed_acars_tcp = ""

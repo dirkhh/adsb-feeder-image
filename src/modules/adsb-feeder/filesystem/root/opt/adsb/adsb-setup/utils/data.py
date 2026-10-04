@@ -809,6 +809,10 @@ class Data:
             tags=["ultrafeeder_extra_args_microsites"],
         ),
         Env(
+            "_ADSBIM_STATE_ACARS_EXTRA_FEEDS",
+            tags=["acars_extra_feeds"],
+        ),
+        Env(
             "FEEDER_TAR1090_ENABLE_AC_DB",
             default=True,
             tags=["tar1090_ac_db", "is_enabled"],

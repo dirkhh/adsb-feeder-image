@@ -333,5 +333,29 @@
       </div>
     </form>
   </div>
+  <div class="col-12 col-lg-6">
+    <h5 class="mt-4">Add additional ACARS feeds</h5>
+    <form method="POST">
+      <div class="row align-items-center">
+        <div class="col-12 mb-2">
+          <label for="acars_extra_feeds">
+            <br>Example: acars,udp,feed.example.net:5550
+            <br>Example: vdl2,udp,feed.example.net:5555
+            <br>Example: vdl2,tcp,feed.example.net:5555
+            <br>Make sure have each entry on a new line
+          </label>
+        </div>
+        <div class="col-12">
+          <textarea class="mx-auto w-100" id="acars_extra_feeds" name="acars_extra_feeds" rows="10"
+                    placeholder="acars,udp,feed.example.net:5550"
+                    >{{ env_value_by_tag('acars_extra_feeds') }}</textarea>
+        </div>
+        <div class="col-4">
+          <button type="submit" class="btn btn-primary mx-auto w-100" name="acars_extra_feeds--submit"
+                  value="go">Apply</button>
+        </div>
+      </div>
+    </form>
+  </div>
 </div>
 {% endblock %}
