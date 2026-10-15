@@ -60,8 +60,15 @@
     <input class="form-check-input me-1" type="checkbox" name="clear_range" id="clear_range" />
     <label for="clear_range" class="mb-3">
       The tar1090 map maintains an outline for the area around your feeder where planes have been observed; sometimes it
-      may be desirable to reset that (for example after you changed location). Select the checkbox and submit below to
-      clear that range outline.
+      may be desirable to reset that (for example after you changed location).
+      {% if is_enabled('stage2') and m == 0 %}
+      <br>
+      <br>
+      For the main instance of a stage2 install, please reset the range outlines for the individual
+      sites and allow 1 minute for the main instance to update the range outline.
+      {% else %}
+      Select the checkbox and submit below to clear that range outline.
+      {% endif %}
     </label>
   </div>
 
