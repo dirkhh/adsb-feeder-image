@@ -1,5 +1,6 @@
 Changes since v3.0.14
 =======
+- add healthcheck to warn user of low disk space
 - aggregators: add AvioADSB
 - acars: allow custom feeds via expert page
 - niche: allow serial over GPIO for AIS (manual config still required)

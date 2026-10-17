@@ -12,7 +12,7 @@ from urllib.parse import urlencode
 
 from .data import Data
 from .paths import PREVIOUS_VERSION_FILE
-from .util import generic_get_json, get_plain_url, make_int, print_err
+from .util import generic_get_json, get_plain_url, make_int, print_err, run_shell_captured
 
 T = Enum("T", ["Disconnected", "Unknown", "Good", "Bad", "Warning", "Disabled", "Starting", "ContainerDown"])
 # deprecated status symbol, might be useful again for something?
@@ -626,6 +626,19 @@ class Healthcheck:
         if container_status == "down":
             self.set_failed("1090 container is down")
             return
+
+        success, output = run_shell_captured("df -m /opt/adsb --output=size,pcent,avail", timeout=5)
+        if success:
+            try:
+                line1, line2 = output.splitlines()
+                size, percent, available = line2.split()
+                percent = percent.strip("%")
+                if float(percent) > 90:
+                    fail.append("Disk Space: over 90% used")
+                if float(available) < 1500:
+                    fail.append("Disk Space: less than 1500 MB free")
+            except Exception:
+                print_err(traceback.format_exc())
 
         try:
 
