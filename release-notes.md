@@ -1,5 +1,6 @@
 Changes since v3.0.14
 =======
+- fix stage2 microfeeder detection when the remote is script install with other http server on 80
 - add healthcheck to warn user of low disk space
 - aggregators: add AvioADSB
 - acars: allow custom feeds via expert page

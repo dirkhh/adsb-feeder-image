@@ -2087,6 +2087,11 @@ class AdsbIm:
             print_err(f"checking remote feeder {url}")
             try:
                 response = requests.get(url, timeout=5.0)
+                if response.status_code != 200:
+                    print_err(
+                        f"failed to check base_info from remote feeder {ip}:{port} (http status code {response.status_code})"
+                    )
+                    continue
                 print_err(f"response code: {response.status_code}")
                 json_dict = response.json()
                 print_err(f"json_dict: {type(json_dict)} {json_dict}")
