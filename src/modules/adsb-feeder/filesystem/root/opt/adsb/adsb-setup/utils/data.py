@@ -839,6 +839,7 @@ class Data:
         ),
         Env(
             "_ADSBIM_STATE_REMOTE_SDR",
+            default="",
             tags=["remote_sdr"],
         ),
         Env(

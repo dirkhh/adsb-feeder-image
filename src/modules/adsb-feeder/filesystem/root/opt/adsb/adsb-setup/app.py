@@ -4975,7 +4975,10 @@ class AdsbIm:
         channel, current_branch = self.extract_channel()
 
         # take a look at the SDRs configured so that the index page can be adjusted accordingly
-        adsb = len([sdr for sdr in self._sdrdevices.sdrs if sdr.purpose in ["1090", "1090_2", "978"]]) > 0
+        adsb = (
+            len([sdr for sdr in self._sdrdevices.sdrs if sdr.purpose in ["1090", "1090_2", "978"]]) > 0
+            or self._d.env_by_tags("remote_sdr").valuestr
+        )
         return render_template(
             "index.html",
             aggregators=self.agg_structure,
