@@ -2769,8 +2769,10 @@ class AdsbIm:
 
     def handle_temp_sensor(self, temp_sensor, dht22_pin=0):
         if temp_sensor.value == "dht22":
-            if self._d.env_by_tags("board_name").valuestr.startswith("Raspberry Pi 5"):
-                # pigpiod doesn't work on the pi5, rely on native dht program
+            board_name = self._d.env_by_tags("board_name").valuestr
+            if board_name.startswith("Raspberry Pi 5") or board_name.startswith("Raspberry Pi 4"):
+                # pigpiod doesn't work on the pi5 and isn't available on Trixie,
+                # rely on native dht program
                 default_file_content = f"GPIO_PIN={dht22_pin}\n"
             elif self._d.env_by_tags("board_name").valuestr.startswith("Raspberry Pi"):
                 # this is not a commonly used feature, so let's install dependencies here

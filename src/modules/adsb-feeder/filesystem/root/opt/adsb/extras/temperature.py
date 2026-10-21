@@ -52,6 +52,22 @@ def run_subprocess(command, timeout=180):
     return (True, output)
 
 
+def install_pigpio():
+    # only needed as a fallback if the native dht app can't be used; newer OS
+    # releases (Trixie) don't have the packages, so this is allowed to fail
+    success, output = run_subprocess("apt-cache policy pigpiod | grep -q 'Candidate: [0-9]'", timeout=60)
+    if not success:
+        logging.info("pigpiod is not available from the package repositories")
+        return False
+    success, output = run_subprocess(
+        "apt install -y python3-pigpio pigpiod && systemctl enable --now pigpiod",
+        timeout=600,
+    )
+    if not success:
+        logging.error(f"Failed to install pigpiod and python3-pigpio: {output}")
+    return success
+
+
 class BME280_i2c:
     def __init__(self):
         # check that i2c is enabled (should work on more RPi boards)
@@ -281,8 +297,20 @@ if __name__ == "__main__":
             if sensor.success:
                 logger.info(f"Running native dht on {model}")
             else:
-                import pigpio
-                import rpi_dht22
+                try:
+                    import pigpio
+                    import rpi_dht22
+                except ImportError:
+                    # the native app isn't usable - on Pi4 (not Pi5) try to install pigpio, if the OS still has it
+                    if not model.startswith("Raspberry Pi 4") or not install_pigpio():
+                        logger.error("native dht failed and pigpio isn't available")
+                        sys.exit(1)
+                    try:
+                        import pigpio
+                        import rpi_dht22
+                    except ImportError as e:
+                        logger.error(f"installed pigpio but can't import it: {e}")
+                        sys.exit(1)
 
                 sensor = RPI(pin)
                 logger.info(f"Running legacy Python module on {model}")

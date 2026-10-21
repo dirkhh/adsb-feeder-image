@@ -1,7 +1,6 @@
 [Unit]
 Description=ADS-B Feeder Temperature Service
-Requires=$PIGPIO
-After=adsb-setup.service $PIGPIO
+After=adsb-setup.service
 
 [Service]
 SyslogIdentifier=adsb-temperature
