@@ -335,6 +335,16 @@ class Data:
             mlat_config="",
             policy="https://feed.skydex.online/privacy.html",
         ),
+        NetConfig(
+            identifier="avioadsb",
+            name="AvioADSB",
+            website="https://avioadsb.org/live/",
+            links=["https://avioadsb.org/api/feed/status"],
+            ordinal=210,
+            adsb_config="adsb,feed.avioadsb.org,30004,beast_reduce_plus_out",
+            mlat_config="",
+            policy="https://avioadsb.org/data-policy",
+        ),
     ]
 
     # load custom aggregators from csv file
