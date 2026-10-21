@@ -40,6 +40,7 @@ These ADS-B aggregators are also supported:
 - [ADSBHub](https://adsbhub.org)
 - [ADSB Italia](https://www.adsbitalia.it/)
 - [ADSBiq](https://adsbiq.com/)
+- [AvioADSB](https://avioadsb.org/)
 - [sdrmap](https://sdrmap.org/)
 - [airplanes.live](https://airplanes.live)
 - [AVDelphi](https://www.avdelphi.com)
