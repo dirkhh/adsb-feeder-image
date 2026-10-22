@@ -345,6 +345,16 @@ class Data:
             mlat_config="",
             policy="https://avioadsb.org/data-policy",
         ),
+        NetConfig(
+            identifier="mlatuk",
+            name="mlat.uk",
+            website="https://mlat.uk",
+            links=[""],
+            ordinal=211,
+            adsb_config="adsb,feed.mlat.uk,30004,beast_reduce_plus_out;",
+            mlat_config="mlat,feed.mlat.uk,31090",
+            policy="https://www.mlat.uk/privacy",
+        ),
     ]
 
     # load custom aggregators from csv file
