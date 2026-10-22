@@ -351,7 +351,7 @@ class Data:
             website="https://mlat.uk",
             links=[""],
             ordinal=211,
-            adsb_config="adsb,feed.mlat.uk,30004,beast_reduce_plus_out;",
+            adsb_config="adsb,feed.mlat.uk,30004,beast_reduce_plus_out",
             mlat_config="mlat,feed.mlat.uk,31090",
             policy="https://www.mlat.uk/privacy",
         ),

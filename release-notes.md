@@ -1,5 +1,6 @@
 Changes since v3.0.14
 =======
+- beta-notes: mlat.uk config: remove extra semicolon
 - DHT temperature sensors: re-add support for the Trixie based images on older Raspberry Pi devices
 - aggregators: add status link for adsbItalia
 - aggregators: add mlat.uk
