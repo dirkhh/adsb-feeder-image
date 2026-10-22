@@ -161,23 +161,36 @@ class RPInative:
     def __init__(self, pin):
         self.pin = pin
         self.success = True
-        if not os.path.exists(f"/opt/adsb/extras/dht-{VERSION}"):
+        binary = f"/opt/adsb/extras/dht-{VERSION}"
+        if not os.path.exists(binary):
             # download the file from GitHub
             logging.info(f"Downloading dht-{VERSION}")
             github_release_url = f"https://github.com/dirkhh/DHT-read/releases/download/{VERSION}/dht"
-            command = f"curl -L {github_release_url} -o /opt/adsb/extras/dht-{VERSION}"
+            command = f"curl -fsSL {github_release_url} -o {binary}"
             success, output = run_subprocess(command)
             if not success:
                 logging.error(f"Failed to download dht-{VERSION}: {output}")
                 self.success = False
+                if os.path.exists(binary):
+                    try:
+                        os.unlink(binary)
+                    except OSError:
+                        pass
             else:
                 logging.info(f"Downloaded dht-{VERSION}")
-                os.chmod(f"/opt/adsb/extras/dht-{VERSION}", 0o755)
+                try:
+                    os.chmod(binary, 0o755)
+                except OSError as e:
+                    logging.error(f"Failed to chmod dht-{VERSION}: {e}")
+                    self.success = False
         if self.success:
             # make sure the binary can run here (not true for a 64bit binary on a 32bit OS);
             # an invalid pin makes it exit right away without touching the hardware
             try:
-                subprocess.run([f"/opt/adsb/extras/dht-{VERSION}", "invalid"], capture_output=True, timeout=10)
+                res = subprocess.run([binary, "invalid"], capture_output=True, timeout=10)
+                if res.returncode < 0:
+                    logging.error(f"dht-{VERSION} crashed with signal {-res.returncode}")
+                    self.success = False
             except (OSError, subprocess.SubprocessError) as e:
                 logging.error(f"dht-{VERSION} can't be executed: {e}")
                 self.success = False
