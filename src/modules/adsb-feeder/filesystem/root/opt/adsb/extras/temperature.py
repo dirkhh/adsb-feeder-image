@@ -27,7 +27,7 @@ import tempfile
 # so for PC9 (aka pin 7 on the 26 pin header) pass in 9
 
 # set the version of the dht native app that this expects:
-VERSION = "v0.2.0"
+VERSION = "v1.0.0"
 
 
 def run_subprocess(command, timeout=180):
@@ -173,6 +173,14 @@ class RPInative:
             else:
                 logging.info(f"Downloaded dht-{VERSION}")
                 os.chmod(f"/opt/adsb/extras/dht-{VERSION}", 0o755)
+        if self.success:
+            # make sure the binary can run here (not true for a 64bit binary on a 32bit OS);
+            # an invalid pin makes it exit right away without touching the hardware
+            try:
+                subprocess.run([f"/opt/adsb/extras/dht-{VERSION}", "invalid"], capture_output=True, timeout=10)
+            except (OSError, subprocess.SubprocessError) as e:
+                logging.error(f"dht-{VERSION} can't be executed: {e}")
+                self.success = False
 
     def get_temperature(self):
         success, output = run_subprocess(f"timeout 55 /opt/adsb/extras/dht-{VERSION} -t {self.pin} 2>/dev/null", timeout=60)
@@ -289,8 +297,8 @@ if __name__ == "__main__":
                 pin = 9
             sensor = OPI(gpio, pin)
             logger.info(f"Running on {model}")
-        # for Pi4 and 5 try the native app first, if that doesn't work, try the Python module
-        elif model is not None and (model.startswith("Raspberry Pi 5") or model.startswith("Raspberry Pi 4")):
+        # on Raspberry Pis try the native app first, if that doesn't work, try the Python module
+        elif model is not None and model.startswith("Raspberry Pi"):
             if pin is None:
                 pin = 4
             sensor = RPInative(pin)
@@ -301,8 +309,9 @@ if __name__ == "__main__":
                     import pigpio
                     import rpi_dht22
                 except ImportError:
-                    # the native app isn't usable - on Pi4 (not Pi5) try to install pigpio, if the OS still has it
-                    if not model.startswith("Raspberry Pi 4") or not install_pigpio():
+                    # the native app isn't usable - except on Pi5 (where pigpio doesn't work)
+                    # try to install pigpio, if the OS still has it
+                    if model.startswith("Raspberry Pi 5") or not install_pigpio():
                         logger.error("native dht failed and pigpio isn't available")
                         sys.exit(1)
                     try:
@@ -314,15 +323,6 @@ if __name__ == "__main__":
 
                 sensor = RPI(pin)
                 logger.info(f"Running legacy Python module on {model}")
-        # other Raspberry Pi models just go with the Python code
-        elif model is not None and model.startswith("Raspberry Pi"):
-            if pin is None:
-                pin = 4
-            import pigpio
-            import rpi_dht22
-
-            sensor = RPI(pin)
-            logger.info(f"Running legacy Python module on {model}")
         else:
             logger.error(f"No support for temperature sensors on |{model}|")
             print(f"No support for temperature sensors on |{model}|")

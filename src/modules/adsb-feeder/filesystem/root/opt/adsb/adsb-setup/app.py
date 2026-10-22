@@ -2770,21 +2770,10 @@ class AdsbIm:
     def handle_temp_sensor(self, temp_sensor, dht22_pin=0):
         if temp_sensor.value == "dht22":
             board_name = self._d.env_by_tags("board_name").valuestr
-            if board_name.startswith("Raspberry Pi 5") or board_name.startswith("Raspberry Pi 4"):
-                # pigpiod doesn't work on the pi5 and isn't available on Trixie,
-                # rely on native dht program
-                default_file_content = f"GPIO_PIN={dht22_pin}\n"
-            elif self._d.env_by_tags("board_name").valuestr.startswith("Raspberry Pi"):
-                # this is not a commonly used feature, so let's install dependencies here
-                success, output = run_shell_captured(
-                    "dpkg-query -l pigpiod 2>&1 | grep -q ii || apt install -y python3-pigpio pigpiod && systemctl enable --now pigpiod",
-                    timeout=600,
-                )
-                if not success:
-                    report_issue(f"failed to install pigpiod and python3-pigpio - check the logs for details")
-                    print_err(f"failed to install pigpiod and python3-pigpio: {output}")
-                    temp_sensor.value = ""
-                    return
+            if board_name.startswith("Raspberry Pi"):
+                # pigpiod doesn't work on the pi5 and isn't available on Trixie, so rely
+                # on the native dht program; temperature.py installs pigpiod as a
+                # fallback (not on the Pi5) if the native program can't be used
                 default_file_content = f"GPIO_PIN={dht22_pin}\n"
             else:
                 print_err(f"temp_sensor: {temp_sensor.value} is not supported on this board")
