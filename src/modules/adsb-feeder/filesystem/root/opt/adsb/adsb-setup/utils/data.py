@@ -289,7 +289,7 @@ class Data:
             identifier="adsbitalia",
             name="ADSB Italia",
             website="https://www.adsbitalia.it/",
-            links=[""],
+            links=["https://adsbitalia.it/status.html"],
             ordinal=172,
             adsb_config="adsb,adsbitalia.it,31108,beast_reduce_plus_out",
             mlat_config="mlat,mlat.adsbitalia.it,41113",

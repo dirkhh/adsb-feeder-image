@@ -1,5 +1,7 @@
 Changes since v3.0.14
 =======
+- DHT temperature sensors: re-add support for the Trixie based images on older Raspberry Pi devices
+- aggregators: add status link for adsbItalia
 - aggregators: add mlat.uk
 - fix stage2 microfeeder detection when the remote is script install with other http server on 80
 - add healthcheck to warn user of low disk space
