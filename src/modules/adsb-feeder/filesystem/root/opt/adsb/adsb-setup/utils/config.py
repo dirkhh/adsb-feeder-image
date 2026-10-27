@@ -114,6 +114,8 @@ def write_values_to_env_file(values):
 
 
 conversion = {
+    # legacy Airspy sample-rate name (the container still accepts it as a fallback)
+    "AIRSPY_ADSB_MLAT_FREQ": "AIRSPY_ADSB_SAMPLE_RATE",
     # web ports, needed in docker-compose files
     "_ADSBIM_STATE_WEBPORT": "AF_WEBPORT",
     "_ADSBIM_STATE_DAZZLE_PORT": "AF_DAZZLE_PORT",
