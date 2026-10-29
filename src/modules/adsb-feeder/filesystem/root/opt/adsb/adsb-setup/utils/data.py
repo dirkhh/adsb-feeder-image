@@ -355,6 +355,16 @@ class Data:
             mlat_config="mlat,feed.mlat.uk,31090",
             policy="https://www.mlat.uk/privacy",
         ),
+        NetConfig(
+            identifier="ulsterradar",
+            name="UlsterRadar",
+            website="https://ulsterradar.com/",
+            links=["https://ulsterradar.com/my-feeder.php"],
+            ordinal=212,
+            adsb_config="adsb,feed.ulsterradar.com,30004,beast_reduce_plus_out",
+            mlat_config="mlat,mlat.ulsterradar.com,31092",
+            policy="https://ulsterradar.com/feed-policy.php",
+        ),      
     ]
 
     # load custom aggregators from csv file
