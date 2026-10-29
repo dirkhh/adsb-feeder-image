@@ -1,20 +1,7 @@
-Changes since v3.0.14
+Changes since v3.0.15
 =======
-- DHT temperature sensors: re-add support for the Trixie based images on older Raspberry Pi devices
-- aggregators: add mlat.uk
-- aggregators: add AvioADSB
-- aggregators: add Skydex
-- aggregators: add PlaneTrack
-- aggregators: add status link for adsbItalia
-- aggregators: add map.flights MLAT and status link
-- stage2: fix microfeeder detection when the remote is script install with other http server on 80
-- core: add healthcheck to warn user of low disk space
-- acars: allow custom feeds via expert page
-- niche: allow serial over GPIO for AIS (manual config still required)
-- core: some hardening updates
-- update README.md to list all the aggregators supported
-- fix the code to allow aggregator IDs containing a dot
-- update container versions
+- sync README.md with data.py to ensure all aggregators are listed
+- aggregators: add UlsterRadar
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)
