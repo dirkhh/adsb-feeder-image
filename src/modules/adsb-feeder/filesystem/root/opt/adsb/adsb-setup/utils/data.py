@@ -984,6 +984,9 @@ class Data:
         Env("AIS_SHIPFINDER_SHAREDATA", default=[""], tags=["ais_feed_shipfinder", "is_enabled"]),
         Env("AIS_FEED_SHIPPINGEXPLORER", default=[False], tags=["ais_feed_shippingexplorer", "is_enabled"]),
         Env("AIS_FEED_SHIPXPLORER", default=[False], tags=["ais_feed_shipxplorer", "is_enabled"]),
+        # "station" feeds via sxfeeder and registers the station, "udp" only sends data to a
+        # dedicated UDP port; empty means "not chosen yet" and is inferred from the other settings
+        Env("_ADSBIM_STATE_AIS_SHIPXPLORER_METHOD", default=[""], tags=["ais_shipxplorer_method"]),
         Env("AIS_FEED_VESSELFINDER", default=[False], tags=["ais_feed_vesselfinder", "is_enabled"]),
         Env("AIS_FEED_VESSELTRACKER", default=[False], tags=["ais_feed_vesseltracker", "is_enabled"]),
         Env("AIS_AIRFRAMES_STATION_ID", default=[""], tags=["ais_airframes_station_id"]),
@@ -998,6 +1001,8 @@ class Data:
         Env("AIS_RADARVIRTUEL_FEEDER_KEY", default=[""], tags=["ais_radarvirtuel_feeder_key"]),
         Env("AIS_RADARVIRTUEL_STATION_ID", default=[""], tags=["ais_radarvirtuel_station_id"]),
         Env("AIS_SHIPPINGEXPLORER_UDP_PORT", default=[""], tags=["ais_shippingexplorer_udp_port"]),
+        Env("AIS_SHIPXPLORER_SHARING_KEY", default=[""], tags=["ais_shipxplorer_sharing_key"]),
+        Env("AIS_SHIPXPLORER_SERIAL_NUMBER", default=[""], tags=["ais_shipxplorer_serial_number"]),
         Env("AIS_SHIPXPLORER_UDP_PORT", default=[""], tags=["ais_shipxplorer_udp_port"]),
         Env("AIS_VESSELFINDER_UDP_PORT", default=[""], tags=["ais_vesselfinder_udp_port"]),
         Env("AIS_VESSELTRACKER_UDP_PORT", default=[""], tags=["ais_vesseltracker_udp_port"]),

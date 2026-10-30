@@ -2833,6 +2833,43 @@ class AdsbIm:
             return
         self._d.env_by_tags("graphs1090_other_temp1").value = "/run/ambient-temperature"
 
+    def shipxplorer_method(self):
+        # ShipXplorer can be fed in two mutually exclusive ways:
+        # "udp" sends data to a dedicated UDP port, but it does not register the station
+        # "station" runs sxfeeder with a sharing key and a serial number, which does
+        # if both are configured, AIS-catcher warns about duplicate feeding, so we only ever
+        # pass one of them to the container
+        # an empty value means the user hasn't made that choice yet (either a new feeder or
+        # one that was set up before we offered the choice) -- infer it from what is configured
+        method = self._d.env_by_tags("ais_shipxplorer_method").list_get(0)
+        if method in ["udp", "station"]:
+            return method
+        return "udp" if self._d.env_by_tags("ais_shipxplorer_udp_port").list_get(0) else "station"
+
+    def update_shipxplorer_config(self):
+        # remember the method so the inference above only ever happens once, then clear the
+        # settings of the other one -- that way the container only ever sees one of the two
+        station_tags = ["ais_shipxplorer_sharing_key", "ais_shipxplorer_serial_number"]
+        method = self.shipxplorer_method()
+        enabled = self._d.env_by_tags("ais_feed_shipxplorer").list_get(0)
+        self._d.env_by_tags("ais_shipxplorer_method").list_set(0, method)
+        if not enabled:
+            unused = station_tags + ["ais_shipxplorer_udp_port"]
+        elif method == "station":
+            unused = ["ais_shipxplorer_udp_port"]
+        else:
+            unused = station_tags
+        for tag in unused:
+            self._d.env_by_tags(tag).list_set(0, "")
+        if (
+            enabled
+            and method == "station"
+            and self._d.is_enabled("shipfeeder")
+            and not all(self._d.env_by_tags(tag).list_get(0) for tag in station_tags)
+        ):
+            # sxfeeder silently does nothing unless it has both, so tell the user instead
+            report_issue("ShipXplorer needs both a sharing key and a serial number - not feeding ShipXplorer")
+
     def handle_implied_settings(self):
         print_err("running handle_implied_settings")
 
@@ -3294,8 +3331,6 @@ class AdsbIm:
                 self._d.env_by_tags("ais_myshiptracking_udp_port").list_set(0, "")
             if not self._d.env_by_tags("ais_feed_vesselfinder").list_get(0):
                 self._d.env_by_tags("ais_vesselfinder_udp_port").list_set(0, "")
-            if not self._d.env_by_tags("ais_feed_shipxplorer").list_get(0):
-                self._d.env_by_tags("ais_shipxplorer_udp_port").list_set(0, "")
             if not self._d.env_by_tags("ais_feed_shippingexplorer").list_get(0):
                 self._d.env_by_tags("ais_shippingexplorer_udp_port").list_set(0, "")
             if not self._d.env_by_tags("ais_feed_vesseltracker").list_get(0):
@@ -3315,6 +3350,10 @@ class AdsbIm:
             else:
                 ais_sdrmap_user = ""
             self._d.env_by_tags("ais_sdrmap_user").list_set(0, ais_sdrmap_user)
+
+        # not under run_shipfeeder: the two ShipXplorer methods must not both survive while
+        # the shipfeeder isn't running yet, or they are both still set once it starts
+        self.update_shipxplorer_config()
 
         # hfdlobserver is a bit different -- all we need to do is check if it's enabled
         self.update_hfdlobserver_config()
@@ -4572,6 +4611,7 @@ class AdsbIm:
             uf_enabled=uf_enabled,
             others_enabled=others_enabled,
             nonadsb_enabled=nonadsb_enabled,
+            shipxplorer_method=self.shipxplorer_method(),
             site=site,
             m=str(m),
             piastatport=str(m * 1000 + make_int(self._d.env_by_tags("piastatport").value)),

@@ -1,5 +1,6 @@
 Changes since v3.0.14
 =======
+- aggregators: ShipXplorer can now register the station with a sharing key and serial number
 - DHT temperature sensors: re-add support for the Trixie based images on older Raspberry Pi devices
 - aggregators: add mlat.uk
 - aggregators: add AvioADSB
