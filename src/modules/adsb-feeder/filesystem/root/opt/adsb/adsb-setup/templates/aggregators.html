@@ -676,7 +676,10 @@
       let active = enabled && name == method;
       $(document.getElementById(fields[0])).toggle(active);
       for (const input_field of fields[1]) {
-        $(document.getElementById(input_field)).prop("required", active);
+        // disabled as well as not required: a hidden input is still constraint validated,
+        // so a half typed port of the other method would block Apply with nothing to show
+        // the user. The unused values get cleared by the backend anyway.
+        $(document.getElementById(input_field)).prop("required", active).prop("disabled", !active);
       }
     }
   }
