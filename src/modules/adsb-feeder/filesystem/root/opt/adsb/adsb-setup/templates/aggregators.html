@@ -554,7 +554,7 @@
                id="ais_shipxplorer_method--station" {% if shipxplorer_method == "station" %}checked{% endif %} />
         <label class="form-check-label" for="ais_shipxplorer_method--station">
           Sharing key and serial number &ndash; this registers your station, so ShipXplorer shows it as online
-          and tracks its uptime. Both values are shown when you register.
+          and tracks its uptime.
         </label>
       </div>
       <div class="mb-2 ms-4" id="SHIPXPLORER_STATION_FIELDS">
@@ -569,8 +569,7 @@
         <input type="radio" class="form-check-input" name="ais_shipxplorer_method" value="udp"
                id="ais_shipxplorer_method--udp" {% if shipxplorer_method == "udp" %}checked{% endif %} />
         <label class="form-check-label" for="ais_shipxplorer_method--udp">
-          Dedicated UDP port &ndash; this only sends data. Your station is not registered and ShipXplorer will
-          report it as offline.
+          Dedicated UDP port &ndash; this only sends data, so your station's uptime is not tracked.
         </label>
       </div>
       <div class="ms-4" id="SHIPXPLORER_UDP_FIELDS">
