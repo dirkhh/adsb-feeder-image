@@ -540,17 +540,45 @@
            id="ais_feed_shipxplorer--is_enabled" {{ nonadsb_enabled("ais_feed_shipxplorer", m) }} />
     <label class="mx-1 w-auto" for="ais_feed_shipxplorer--is_enabled">
       <a href="https://www.shipxplorer.com//">ShipXplorer</a> is a US commercial aggregator for AIS data, part of AirNav Radar.
-      <div class="form-group" id="SHIPXPLORER_FIELDS">
-        <label for="ais_shipxplorer_udp_port">Get a dedicated UDP port assigned by
-          by <a href="https://www.shipxplorer.com/addcoverage">registering your station</a> and enter
-          the UDP port you receive here.
+    </label>
+    <!-- the fields are outside the label on purpose: the radio buttons and their own labels
+         would otherwise toggle the checkbox above -->
+    <div class="form-group ms-1" id="SHIPXPLORER_FIELDS">
+      <div class="mb-1">
+        <a href="https://www.shipxplorer.com/addcoverage">Register your station</a> with ShipXplorer, then pick
+        one of the two ways to feed. They are mutually exclusive &ndash; configuring both results in duplicate
+        data being sent.
+      </div>
+      <div class="form-check">
+        <input type="radio" class="form-check-input" name="ais_shipxplorer_method" value="station"
+               id="ais_shipxplorer_method--station" {% if shipxplorer_method == "station" %}checked{% endif %} />
+        <label class="form-check-label" for="ais_shipxplorer_method--station">
+          Sharing key and serial number &ndash; this registers your station, so ShipXplorer shows it as online
+          and tracks its uptime.
         </label>
+      </div>
+      <div class="mb-2 ms-4" id="SHIPXPLORER_STATION_FIELDS">
+        <input type="text" id="ais_shipxplorer_sharing_key" name="ais_shipxplorer_sharing_key"
+               class="form-control w-75" placeholder="ShipXplorer Sharing Key"
+               value="{{ list_value_by_tags('ais_shipxplorer_sharing_key',m) }}" />
+        <input type="text" id="ais_shipxplorer_serial_number" name="ais_shipxplorer_serial_number"
+               class="form-control w-75" placeholder="ShipXplorer Serial Number (e.g. SXTRPI001234)"
+               value="{{ list_value_by_tags('ais_shipxplorer_serial_number',m) }}" />
+      </div>
+      <div class="form-check">
+        <input type="radio" class="form-check-input" name="ais_shipxplorer_method" value="udp"
+               id="ais_shipxplorer_method--udp" {% if shipxplorer_method == "udp" %}checked{% endif %} />
+        <label class="form-check-label" for="ais_shipxplorer_method--udp">
+          Dedicated UDP port &ndash; this only sends data, so your station's uptime is not tracked.
+        </label>
+      </div>
+      <div class="ms-4" id="SHIPXPLORER_UDP_FIELDS">
         <input type="text" id="ais_shipxplorer_udp_port" name="ais_shipxplorer_udp_port"
                pattern="^\d{3,5}$"
                class="form-control w-75" placeholder="ShipXplorer UDP Port"
                value="{{ list_value_by_tags('ais_shipxplorer_udp_port',m) }}" />
       </div>
-    </label>
+    </div>
   </div>
   <!--     VesselFinder    -->
   <div class="col-12 form-check">
@@ -616,7 +644,7 @@
     ["ais_feed_vesselfinder--is_enabled", "VESSELFINDER_FIELDS", ["ais_vesselfinder_udp_port"]],
     ["ais_feed_marinetraffic--is_enabled", "MARINETRAFFIC_FIELDS", ["ais_marinetraffic_udp_port"]],
     ["ais_feed_myshiptracking--is_enabled", "MYSHIPTRACKING_FIELDS", ["ais_myshiptracking_udp_port"]],
-    ["ais_feed_shipxplorer--is_enabled", "SHIPXPLORER_FIELDS", ["ais_shipxplorer_udp_port"]],
+    ["ais_feed_shipxplorer--is_enabled", "SHIPXPLORER_FIELDS", []],
     {% for identifier, conf in netconfigs.items() %}
     ["{{ conf.identifier }}--ultrafeeder--is_enabled", "{{ conf.identifier.upper() }}_ULTRAFEEDER_FIELDS", ["{{ conf.identifier }}--ultrafeeder--uuid"]],
     {% endfor %}
@@ -634,6 +662,31 @@
     });
     fields.toggle(box.prop("checked"));
   }
+  // ShipXplorer can be fed either with a sharing key and serial number or with a dedicated
+  // UDP port, but not both -- only show and require the fields of the selected method
+  const shipxplorer_methods = {
+    station: ["SHIPXPLORER_STATION_FIELDS", ["ais_shipxplorer_sharing_key", "ais_shipxplorer_serial_number"]],
+    udp: ["SHIPXPLORER_UDP_FIELDS", ["ais_shipxplorer_udp_port"]],
+  };
+  function shipxplorer_update() {
+    let enabled = $(document.getElementById("ais_feed_shipxplorer--is_enabled")).prop("checked");
+    let method = $("input[name='ais_shipxplorer_method']:checked").val();
+    for (const [name, fields] of Object.entries(shipxplorer_methods)) {
+      let active = enabled && name == method;
+      $(document.getElementById(fields[0])).toggle(active);
+      for (const input_field of fields[1]) {
+        // disabled as well as not required: a hidden input is still constraint validated,
+        // so a half typed port of the other method would block Apply with nothing to show
+        // the user. The unused values get cleared by the backend anyway.
+        $(document.getElementById(input_field)).prop("required", active).prop("disabled", !active);
+      }
+    }
+  }
+  // by id, not by selector: see the comment on box_fields above
+  $(document.getElementById("ais_feed_shipxplorer--is_enabled")).on("click", shipxplorer_update);
+  $("input[name='ais_shipxplorer_method']").on("click", shipxplorer_update);
+  shipxplorer_update();
+
   $(document).ready(function () {
     $(".with-checkbox").each(function () {
       $(this).on("click", function (ev) {
