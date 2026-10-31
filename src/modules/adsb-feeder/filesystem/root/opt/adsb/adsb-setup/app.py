@@ -2850,6 +2850,10 @@ class AdsbIm:
         # remember the method so the inference above only ever happens once, then clear the
         # settings of the other one -- that way the container only ever sees one of the two
         station_tags = ["ais_shipxplorer_sharing_key", "ais_shipxplorer_serial_number"]
+        # the env file strips values on export, so normalize them here too -- otherwise a
+        # whitespace only entry looks configured to us but reaches the container empty
+        for tag in station_tags + ["ais_shipxplorer_udp_port"]:
+            self._d.env_by_tags(tag).list_set(0, str(self._d.env_by_tags(tag).list_get(0)).strip())
         method = self.shipxplorer_method()
         enabled = self._d.env_by_tags("ais_feed_shipxplorer").list_get(0)
         self._d.env_by_tags("ais_shipxplorer_method").list_set(0, method)

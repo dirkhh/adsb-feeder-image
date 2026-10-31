@@ -191,3 +191,49 @@ class TestShipXplorerContainerConfig:
         assert d.env_by_tags("ais_shipxplorer_sharing_key").name == "AIS_SHIPXPLORER_SHARING_KEY"
         assert d.env_by_tags("ais_shipxplorer_serial_number").name == "AIS_SHIPXPLORER_SERIAL_NUMBER"
         assert d.env_by_tags("ais_shipxplorer_method").name == "_ADSBIM_STATE_AIS_SHIPXPLORER_METHOD"
+
+
+class TestShipXplorerWhitespace:
+    """Values are normalized the same way the env file exports them"""
+
+    def test_whitespace_only_serial_counts_as_missing(self, sx_app):
+        adsb_im, envs = sx_app
+        envs["ais_shipxplorer_method"].list_set(0, "station")
+        envs["ais_shipxplorer_sharing_key"].list_set(0, "a-sharing-key")
+        envs["ais_shipxplorer_serial_number"].list_set(0, "   ")
+
+        with patch("app.report_issue") as mock_report_issue:
+            adsb_im.update_shipxplorer_config()
+
+        assert envs["ais_shipxplorer_serial_number"].list_get(0) == ""
+        mock_report_issue.assert_called_once()
+
+    def test_whitespace_only_port_does_not_look_like_a_udp_feeder(self, sx_app):
+        # an unset method is inferred from the port, which must not be fooled by blanks
+        adsb_im, envs = sx_app
+        envs["ais_shipxplorer_udp_port"].list_set(0, "  ")
+
+        adsb_im.update_shipxplorer_config()
+
+        assert envs["ais_shipxplorer_method"].list_get(0) == "station"
+
+    def test_surrounding_whitespace_is_trimmed_off_the_credentials(self, sx_app):
+        adsb_im, envs = sx_app
+        envs["ais_shipxplorer_method"].list_set(0, "station")
+        envs["ais_shipxplorer_sharing_key"].list_set(0, "  a-sharing-key  ")
+        envs["ais_shipxplorer_serial_number"].list_set(0, " SXTRPI001234\n")
+
+        adsb_im.update_shipxplorer_config()
+
+        assert envs["ais_shipxplorer_sharing_key"].list_get(0) == "a-sharing-key"
+        assert envs["ais_shipxplorer_serial_number"].list_get(0) == "SXTRPI001234"
+
+
+class TestShipXplorerDiagnostics:
+    """Share Diagnostics ships config.json and .env, so the credentials must be sanitized"""
+
+    def test_credentials_are_in_the_sanitizer(self):
+        sanitizer = (ADSB_ROOT / "scripts" / "search-replace.py").read_text()
+
+        assert '"AIS_SHIPXPLORER_SHARING_KEY"' in sanitizer
+        assert '"AIS_SHIPXPLORER_SERIAL_NUMBER"' in sanitizer
