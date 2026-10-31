@@ -63,6 +63,8 @@ run-tests:
 	$$PYTEST src/tools/automated-boot-testing/tests/ -v || FAILURES="$$FAILURES selenium-tests,"; \
 	echo "=== Running automated-boot-testing tests ==="; \
 	(cd src/tools/automated-boot-testing && $$PYTEST test_serial_console_reader.py test_metrics.py -v) || FAILURES="$$FAILURES automated-boot-testing,"; \
+	echo "=== Checking README.md is in sync with data.py ==="; \
+	python3 scripts/check-readme-sync.py || FAILURES="$$FAILURES readme-sync,"; \
 	echo "=========================================="; \
 	if [ -z "$$FAILURES" ]; then \
 		echo "All tests passed"; \
