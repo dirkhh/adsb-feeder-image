@@ -1,6 +1,7 @@
 Changes since v3.0.14
 =======
 - DHT temperature sensors: re-add support for the Trixie based images on older Raspberry Pi devices
+- aggregators: add planedata.io
 - aggregators: add mlat.uk
 - aggregators: add AvioADSB
 - aggregators: add Skydex
