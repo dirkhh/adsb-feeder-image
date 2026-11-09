@@ -475,8 +475,9 @@ class OpenSky(Aggregator):
         )
 
     def _request_fr_serial(self, user: str) -> Optional[str]:
-        # OpenSky usernames are alphanumeric (plus a few separator characters)
-        if not re.match(r"^[A-Za-z0-9_.-]+$", user):
+        # OpenSky usernames are alphanumeric plus a few separator / email characters;
+        # no quotes, '$', backslash, parentheses or whitespace as they end up in the .env file
+        if not re.match(r"^[A-Za-z0-9_.@+%!^~=-]{1,128}$", user):
             print_err(f"Invalid OpenSky username format: {user}")
             flash("Invalid OpenSky username")
             return None
