@@ -334,8 +334,10 @@ class AggStatus:
                     self._d.env_by_tags(["radarbox", "sn"]).list_set(self._idx, station_serial)
                     self._d.env_by_tags(["radarbox", "snkey"]).list_set(self._idx, rbkey)
             if station_serial:
-                html_url = f"https://www.radarbox.com/stations/{station_serial}"
+                html_url = f"https://www.airnavradar.com/stations/{station_serial}"
                 rb_page, status = get_plain_url(html_url)
+                if status != 200:
+                    print_err(f"Aggregator Status AirNav broken due to bad html response {status} for URL: {html_url}")
                 match = re.search(r"window.init\((.*)\)", rb_page) if rb_page else None
                 if match:
                     rb_json = match.group(1)
@@ -346,7 +348,7 @@ class AggStatus:
                         mlat_online = station.get("mlat_online")
                         self._beast = T.Good if online else T.Disconnected
                         self._mlat = T.Good if mlat_online else T.Disconnected
-                        self._last_check = datetime.now()
+                self._last_check = datetime.now()
         elif self._agg == "1090uk":
             self._beast = T.Unknown
             self._mlat = T.Disabled
