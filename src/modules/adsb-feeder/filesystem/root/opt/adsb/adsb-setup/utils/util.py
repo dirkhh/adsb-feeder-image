@@ -359,15 +359,17 @@ def get_plain_url(plain_url: str, method: str = "GET", data: Optional[str] = Non
     """
     requests.packages.urllib3.util.connection.HAS_IPV6 = False  # type: ignore[attr-defined]
     status = -1
+    try:
+        with open("/opt/adsb/adsb.im.version", "r") as f:
+            file_version = f.read().strip()
+            agent = f"adsb.im/{file_version}"
+    except Exception:
+        print_err(traceback.format_exc())
+        agent = "adsb.im"
+    print_err(agent)
     headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/117.0",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.5",
-        "Upgrade-Insecure-Requests": "1",
-        "Sec-Fetch-Dest": "document",
-        "Sec-Fetch-Mode": "navigate",
-        "Sec-Fetch-Site": "none",
-        "Sec-Fetch-User": "?1",
+        "User-Agent": agent,
+        "Accept": "*/*",
     }
     method = method.upper()
     if data is not None:
