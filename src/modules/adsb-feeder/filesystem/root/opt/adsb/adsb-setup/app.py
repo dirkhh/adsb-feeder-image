@@ -2875,6 +2875,7 @@ class AdsbIm:
             report_issue("ShipXplorer needs both a sharing key and a serial number - not feeding ShipXplorer")
 
     def handle_implied_settings(self):
+        # derived implicit (for when can't find this function in the future)
         print_err("running handle_implied_settings")
 
         # make sure we show the temperature block if we have a temperature sensor
