@@ -1,5 +1,7 @@
 Changes since v3.0.15
 =======
+- relax user name handling for OpenSky
+- attempt to improve the AirNav status situation
 - update container versions
 - aggregators: ShipXplorer can now register the station with a sharing key and serial number
 - sync README.md with data.py to ensure all aggregators are listed
