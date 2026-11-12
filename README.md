@@ -54,6 +54,7 @@ These ADS-B aggregators are also supported:
 - [OpenSky Network](https://opensky-network.org)
 - [Plane.watch](https://plane.watch)
 - [Plane Finder](https://planefinder.net)
+- [planedata.io](https://planedata.io/)
 - [Planespotters.net](http://planespotters.net)
 - [PlaneTrack](https://planetrack.ai/)
 - [Skydex](https://feed.skydex.online/)
