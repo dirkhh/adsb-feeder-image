@@ -365,6 +365,16 @@ class Data:
             mlat_config="mlat,mlat.ulsterradar.com,31092",
             policy="https://ulsterradar.com/feed-policy.php",
         ),
+        NetConfig(
+            identifier="planedata",
+            name="planedata.io",
+            website="https://planedata.io/",
+            links=["https://planedata.io/contribute"],
+            ordinal=213,
+            adsb_config="adsb,feed.planedata.io,30004,beast_reduce_plus_out",
+            mlat_config="mlat,feed.planedata.io,31090",
+            policy="https://planedata.io/privacy",
+        ),
     ]
 
     # load custom aggregators from csv file
