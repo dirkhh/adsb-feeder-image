@@ -319,7 +319,7 @@ class Data:
             identifier="planetrack",
             name="PlaneTrack",
             website="https://planetrack.ai/",
-            links=["https://planetrack.ai/myip", "https://planetrack.ai/feeders"],
+            links=["https://planetrack.ai/myip?uuid=<ULTRAFEEDER_PLANETRACK_UUID>", "https://planetrack.ai/feeders"],
             ordinal=196,
             adsb_config="adsb,feed.planetrack.ai,30004,beast_reduce_plus_out",
             mlat_config="mlat,feed.planetrack.ai,31090",
