@@ -375,6 +375,16 @@ class Data:
             mlat_config="mlat,feed.planedata.io,31090",
             policy="https://planedata.io/privacy",
         ),
+        NetConfig(
+            identifier="tailnav",
+            name="TailNav",
+            website="https://tailnav.com/",
+            links=["https://tailnav.com/feed/check"],
+            ordinal=220,
+            adsb_config="adsb,feed.tailnav.com,30004,beast_reduce_plus_out",
+            mlat_config="",
+            policy="https://tailnav.com/privacy",
+        ),
     ]
 
     # load custom aggregators from csv file

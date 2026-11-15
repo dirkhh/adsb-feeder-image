@@ -7,6 +7,7 @@ Changes since v3.0.15
 - sync README.md with data.py to ensure all aggregators are listed
 - aggregators: add UlsterRadar
 - aggregators: add planedata.io
+- aggregators: add TailNav
 - aggregators: fix PlaneTrack status link
 
 > [!NOTE]
