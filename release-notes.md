@@ -7,6 +7,7 @@ Changes since v3.0.15
 - sync README.md with data.py to ensure all aggregators are listed
 - aggregators: add UlsterRadar
 - aggregators: add planedata.io
+- aggregators: fix PlaneTrack status link
 
 > [!NOTE]
 > Based on the available usage information, I have significantly reduced the number of images provided here. If there's one that you need for a different SBC which is supported either by Armbian or DietPi, please post a request on the [Zulip server](https://adsblol.zulipchat.com/#narrow/stream/391168-adsb-feeder-image)
