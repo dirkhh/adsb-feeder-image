@@ -76,7 +76,12 @@
   </div>
 
   <div class="col-12 mt-3 mb-1 h5">Select the ADS-B aggregators you want to feed:</div>
-
+  <div class="col-12 my-1">
+    <a href="https://adsb.lol">adsb.lol</a> is the main source of the route information displayed in the map.
+    Because of their open data commitment, we are able to extract likely route data from the historical data
+    and display those in the map (combined with data from other open data projects).
+    The people feeding adsb.lol are by far the largest contributors to that route data, so feeding adsb.lol is <b>highly encouraged</b>
+  </div>
   {% macro ultrafeeder_agg_entry(conf, m) %}
   <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1 account-less {% if conf.policy != '' %}privacy{% endif %}"

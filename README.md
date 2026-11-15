@@ -27,10 +27,10 @@ Additionally, this software stack (with some differences in the user experience)
 
 The idea is to create a "complete" ADS-B / SDR feeder that feeds pretty much all of the ADS-B flight trackers / aggregators (as well as ACARS, AIS, and Sonde aggreagators).
 
-These ADS-B aggregators have a comittment to open data ([daily release of the data](https://github.com/adsblol/globe_history)); they also share with each other the data fed to them (in order to improve mlat coverage, it still makes sense to feed all of them):
-- [adsb.lol](https://adsb.lol)
-- [Fly Italy Adsb](https://flyitalyadsb.com)
-- [TheAirTraffic](http://theairtraffic.com)
+[adsb.lol](https://adsb.lol) is the main source of the route information displayed in the map. Because of the open data commitment of
+this site, we are able to extract likely route data from the historical data ([daily release of the data](https://github.com/adsblol/globe_history)) and submit the resulting routes to the upstream repo that provides the route data for most free web services, including
+the one provided by [adsb.im](https://adsb.im). The people feeding adsb.lol are by far the largest contributors to that route data,
+so feeding adsb.lol is <b>highly encouraged</b>
 
 These ADS-B aggregators are also supported:
 - [1090MHz UK](https://1090mhz.uk/)
@@ -48,6 +48,7 @@ These ADS-B aggregators are also supported:
 - [FlightAware](https://flightaware.com)
 - [FlightDeck](https://www.tryflightdeck.com/)
 - [Flightradar24](https://www.flightradar24.com)
+- [Fly Italy Adsb](https://flyitalyadsb.com)
 - [FlyOverhead](https://flyoverhead.com/)
 - [hpradar](https://skylink.hpradar.com/)
 - [map.flights](https://map.flights)
@@ -63,6 +64,7 @@ These ADS-B aggregators are also supported:
 - [sdrmap](https://sdrmap.org/)
 - [Skydex](https://feed.skydex.online/)
 - [TailNav](https://tailnav.com)
+- [TheAirTraffic](http://theairtraffic.com)
 - [UlsterRadar](https://ulsterradar.com/)
 
 
