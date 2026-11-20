@@ -385,6 +385,16 @@ class Data:
             mlat_config="",
             policy="https://tailnav.com/privacy",
         ),
+        NetConfig(
+            identifier="metaratlas",
+            name="Metar Atlas",
+            website="https://metaratlas.com/",
+            links=["https://metaratlas.com/feed/status"],
+            ordinal=221,
+            adsb_config="adsb,feed.metaratlas.com,30004,beast_reduce_plus_out",
+            mlat_config="",
+            policy="https://metaratlas.com/feed/privacy",
+        ),
     ]
 
     # load custom aggregators from csv file

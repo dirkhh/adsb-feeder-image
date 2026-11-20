@@ -8,6 +8,7 @@ Changes since v3.0.15
 - aggregators: add UlsterRadar
 - aggregators: add planedata.io
 - aggregators: add TailNav
+- aggregators: add Metar Atlas
 - aggregators: fix PlaneTrack status link
 
 > [!NOTE]
