@@ -20,7 +20,11 @@ services:
       - FREQUENCIES=${ACARS_FREQUENCIES:-130.025 130.450 131.125 131.450 131.475 131.525 131.550 131.725 130.425 130.825 130.850 131.200 131.075}
       - FEED_ID=${ACARS_FEED_ID}
       - OUTPUT_SERVER=acars_router
-      - OUTPUT_SERVER_MODE=tcp
+      # zmq, not tcp: acars-bridge's tcp/udp output pins the first resolved address, which is
+      # IPv6 when the docker bridge has IPv6 enabled, while acars_router only listens on 0.0.0.0.
+      # libzmq resolves IPv4 only and re-resolves on reconnect (same path dumpvdl2 already uses).
+      - OUTPUT_SERVER_MODE=zmq
+      - OUTPUT_SERVER_PORT=35550
       # USER_PROVIDED_ENV_START
       # USER_PROVIDED_ENV_END
     tmpfs:
