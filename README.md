@@ -64,6 +64,7 @@ These ADS-B aggregators are also supported:
 - [sdrmap](https://sdrmap.org/)
 - [Skydex](https://feed.skydex.online/)
 - [TailNav](https://tailnav.com)
+- [Metar Atlas](https://metaratlas.com/)
 - [TheAirTraffic](http://theairtraffic.com)
 - [UlsterRadar](https://ulsterradar.com/)
 
