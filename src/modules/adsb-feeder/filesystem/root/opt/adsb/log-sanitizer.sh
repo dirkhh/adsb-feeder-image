@@ -141,4 +141,4 @@ replace_args+='s/((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9][0-9]?|2[0-4]
 replace_args+='s/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/<hidden-uuid>/g;'
 
 # sanitize log by replacing all the stuff that should stay private
-generate_log | perl -pe "${replace_args}" | /opt/adsb/scripts/search-replace.py "$(hostname)" HOSTNAME
+generate_log | perl -pe "${replace_args}" | /opt/adsb/scripts/search-replace.py "$(hostname)" HOSTNAME "$(hostname | tr -d -)" HOSTNAME

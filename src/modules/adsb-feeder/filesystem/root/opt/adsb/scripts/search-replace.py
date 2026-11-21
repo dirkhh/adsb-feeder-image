@@ -52,6 +52,7 @@ sanitize_vars = [
     "FEEDER_SM_USERNAME",
     "FEEDER_SM_PASSWORD",
     "SKYSTATS_DB_PASSWORD",
+    "_ADSBIM_FQDN",
 ] + [k for k in config if re.match(r"ULTRAFEEDER_\w+_UUID$", k)]
 
 for name in sanitize_vars:
