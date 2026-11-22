@@ -239,7 +239,10 @@ function check_missing() {
         if ! command -v avahi-publish &>/dev/null || ! command -v avahi-resolve &>/dev/null; then
             missing+=("avahi-utils")
         fi
-        if [[ -d /boot/dietpi/ ]] && ! command -v ifplugd &>/dev/null; then
+        # install ifplugd only on old dietpi installs <trixie where it is available
+        # trixie and onwards have the new ethplugd replacement which is just a script, can be
+        # detected due to that service file
+        if [[ -d /boot/dietpi/ ]] && ! [[ -f /usr/lib/systemd/system/adsb-ethplugd.service ]] && ! command -v ifplugd &>/dev/null; then
             configure_ifplugd="yes"
             missing+=("ifplugd" "ifmetric")
         fi
