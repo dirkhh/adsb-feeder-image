@@ -295,7 +295,7 @@ class System:
                 if line and line[1] == '"' and line[-2] == '"':
                     # the names show up as '"ultrafeeder"'
                     containers.append(line[2:-2])
-        except subprocess.SubprocessError as e:
+        except (subprocess.SubprocessError, OSError) as e:
             print_err(f"docker ps failed {e}")
         return containers
 

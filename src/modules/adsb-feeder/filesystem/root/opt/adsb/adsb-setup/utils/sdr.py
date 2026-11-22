@@ -433,8 +433,8 @@ class SDRDevices:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
             )
-        except subprocess.SubprocessError:
-            print_err(f"rtl_eeprom -d 0 -s {newserial} failed")
+        except (subprocess.SubprocessError, OSError) as e:
+            print_err(f"rtl_eeprom -d 0 -s {newserial} failed: {e}")
             return f"[ERROR] rtl_eeprom -d 0 -s {newserial} failed"
         print_err(f"rtl_eeprom -d 0 -s {newserial} output: {result.stdout}")
 

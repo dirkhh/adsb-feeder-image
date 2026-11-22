@@ -816,8 +816,8 @@ class AdsbIm:
         try:
             print_err(f"calling timedatectl set-timezone {timezone}")
             subprocess.run(["timedatectl", "set-timezone", f"{timezone}"], check=True)
-        except subprocess.SubprocessError:
-            print_err(f"failed to set up timezone ({timezone}) using timedatectl, try dpkg-reconfigure instead")
+        except (subprocess.SubprocessError, OSError) as e:
+            print_err(f"failed to set up timezone ({timezone}) using timedatectl ({e}), try dpkg-reconfigure instead")
             try:
                 subprocess.run(["test", "-f", f"/usr/share/zoneinfo/{timezone}"], check=True)
             except Exception:
@@ -1292,6 +1292,8 @@ class AdsbIm:
                 )
             except subprocess.TimeoutExpired:
                 print_err("timeout expired joining Zerotier network... trying to continue...")
+            except OSError as e:
+                print_err(f"couldn't run zerotier-cli to join the Zerotier network ({e})... trying to continue...")
 
         self.handle_implied_settings()
         self.write_envfile()
