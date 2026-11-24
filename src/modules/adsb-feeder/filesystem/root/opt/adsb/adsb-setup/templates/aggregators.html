@@ -367,6 +367,15 @@
       <a href="https://www.tryflightdeck.com/">FlightDeck</a>
     </label>
   </div>
+  <div class="col-12 form-check">
+    <input type="checkbox" class="form-check-input me-1" name="feed_acars_avioadsb--is_enabled" id="feed_acars_avioadsb--is_enabled" {{ nonadsb_enabled("feed_acars_avioadsb", m) }} />
+    <label class="mx-1 w-auto" for="feed_acars_avioadsb--is_enabled">
+      <a href="https://avioadsb.org/acars">AvioADSB</a> merges ACARS, VDL2 and HFDL messages into a free API and a live
+      message feed, joined to ADS-B positions. Messages are kept for one hour and not archived. You can
+      <a href="https://avioadsb.org/api/feed/status">check that your feed arrives</a>; see their
+      <a href="https://avioadsb.org/data-policy">data policy</a>.
+    </label>
+  </div>
   <hr>
 
   {% endif %}

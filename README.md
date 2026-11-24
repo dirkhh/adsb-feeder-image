@@ -74,6 +74,7 @@ For ACARS / VDL2 / HFDL the image currently supports
 - [ACARS Drama](https://acarsdrama.com/)
 - [adsb.lol](https://www.adsb.lol/docs/open-data/aircraft-data-links/)
 - [AVDelphi](https://avdelphi.com/)
+- [AvioADSB](https://avioadsb.org/acars)
 
 For AIS, the image currently supports these community aggregators
 - [airframes.io](https://airframes.io)
