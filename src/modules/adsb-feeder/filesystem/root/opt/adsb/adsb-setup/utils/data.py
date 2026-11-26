@@ -342,7 +342,7 @@ class Data:
             links=["https://avioadsb.org/api/feed/status"],
             ordinal=210,
             adsb_config="adsb,feed.avioadsb.org,30004,beast_reduce_plus_out",
-            mlat_config="",
+            mlat_config="mlat,feed.avioadsb.org,31004",
             policy="https://avioadsb.org/data-policy",
         ),
         NetConfig(
