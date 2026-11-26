@@ -3412,6 +3412,10 @@ class AdsbIm:
         if self._d.list_is_enabled("feed_acars_flightdeck", 0):
             feed_acars_udp += "acars.tryflightdeck.com:5550;"
             feed_vdl2_udp += "acars.tryflightdeck.com:5555;"
+        if self._d.list_is_enabled("feed_acars_avioadsb", 0):
+            feed_acars_tcp += "feed.avioadsb.org:31005;"
+            feed_vdl2_tcp += "feed.avioadsb.org:31006;"
+            feed_hfdl_tcp += "feed.avioadsb.org:31007;"
 
         acars_extra_feeds = self._d.env_by_tags("acars_extra_feeds").value.split()
         for feed in acars_extra_feeds:

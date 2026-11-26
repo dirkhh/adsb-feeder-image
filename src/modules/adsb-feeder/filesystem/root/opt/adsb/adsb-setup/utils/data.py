@@ -342,7 +342,7 @@ class Data:
             links=["https://avioadsb.org/api/feed/status"],
             ordinal=210,
             adsb_config="adsb,feed.avioadsb.org,30004,beast_reduce_plus_out",
-            mlat_config="",
+            mlat_config="mlat,feed.avioadsb.org,31004",
             policy="https://avioadsb.org/data-policy",
         ),
         NetConfig(
@@ -990,6 +990,7 @@ class Data:
         Env("FEED_ACARS_ACARSDRAMA", default=[False], tags=["feed_acars_acarsdrama", "is_enabled"]),
         Env("FEED_ACARS_ADSBLOL", default=[False], tags=["feed_acars_adsblol", "is_enabled"]),
         Env("FEED_ACARS_FLIGHTDECK", default=[False], tags=["feed_acars_flightdeck", "is_enabled"]),
+        Env("FEED_ACARS_AVIOADSB", default=[False], tags=["feed_acars_avioadsb", "is_enabled"]),
         # note that the ACARS and VDL Mode 2 strings start with a semicolon but HFDL does not -- see acars_router.yml
         Env("FEED_STRING_ACARS_UDP", default="", tags=["feed_string_acars_udp"]),
         Env("FEED_STRING_ACARS_TCP", default="", tags=["feed_string_acars_tcp"]),

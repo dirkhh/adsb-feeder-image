@@ -6,6 +6,8 @@ Changes since v3.0.15
 - aggregators: ShipXplorer can now register the station with a sharing key and serial number
 - sync README.md with data.py to ensure all aggregators are listed
 - aggregators: add UlsterRadar
+- acars: add AvioADSB as ACARS / VDL2 / HFDL aggregator
+- aggregators: AvioADSB now takes MLAT data
 - aggregators: add planedata.io
 - aggregators: add TailNav
 - aggregators: add Metar Atlas
