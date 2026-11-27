@@ -81,6 +81,7 @@ For AIS, the image currently supports these community aggregators
 - [AIS Friends](https://aisfriends.com/)
 - [AISHub](https://www.aishub.net/)
 - [HPRadar](https://sea.hpradar.com/)
+- [Open Waters](https://openwaters.io/ais/)
 - [sdrmap](https://sdrmap.org/)
 
 As well as a number of commercial AIS aggregators

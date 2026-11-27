@@ -135,6 +135,8 @@ replace_args+='s/_ADSB_STATE_SSH_KEY.*/_ADSB_STATE_SSH_KEY <redacted>/;'
 replace_args+='s/Accepted publickey.*/Accepted publickey <redacted>/;'
 # replace dropbear pubkey messages
 replace_args+='s/Pubkey auth.*/Pubkey auth <redacted>/;'
+# replace the Open Waters station token that shipfeeder logs when it is created
+replace_args+='s/\bak1\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/<hidden-openwaters-token>/g;'
 # now get rid of anything that looks like an IP address
 replace_args+='s/((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])/<hidden-ip-address>/g;'
 # finally, replace everything that looks like a uuid
