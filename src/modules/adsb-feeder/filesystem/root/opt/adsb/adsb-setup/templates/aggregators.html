@@ -442,6 +442,15 @@
       <a href="https://sea.hpradar.com/">HPRadar</a> is a free aggregator for AIS (and ADS-B) data.
     </label>
   </div>
+  <!--     Open Waters    -->
+  <div class="col-12 form-check mb-2">
+    <input type="checkbox" class="form-check-input me-1" name="ais_feed_openwaters--is_enabled"
+           id="ais_feed_openwaters--is_enabled" {{ nonadsb_enabled("ais_feed_openwaters", m) }} />
+    <label class="mx-1 w-auto" for="ais_feed_openwaters--is_enabled">
+      <a href="https://openwaters.io/ais/">Open Waters</a> is the OpenStreetMap of AIS: a volunteer-fed network that
+      publishes its data under open licenses. No sign-up needed.
+    </label>
+  </div>
   <!--     sdrmap    -->
   <div class="col-12 form-check">
     <input type="checkbox" class="form-check-input me-1" name="ais_feed_sdrmap--is_enabled"

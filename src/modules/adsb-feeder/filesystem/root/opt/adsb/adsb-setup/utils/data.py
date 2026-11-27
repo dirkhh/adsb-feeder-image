@@ -1019,6 +1019,7 @@ class Data:
         Env("AIS_FEED_AISHPRADAR", default=[False], tags=["ais_feed_ais_hpradar", "is_enabled"]),
         Env("AIS_FEED_AISMARINETRAFFIC", default=[False], tags=["ais_feed_marinetraffic", "is_enabled"]),
         Env("AIS_FEED_AISMYSHIPTRACKING", default=[False], tags=["ais_feed_myshiptracking", "is_enabled"]),
+        Env("AIS_OPENWATERS_SHAREDATA", default=[""], tags=["ais_feed_openwaters", "is_enabled"]),
         Env("AIS_FEED_SDRMAP", default=[False], tags=["ais_feed_sdrmap", "is_enabled"]),
         Env("AIS_SDRMAP_USER", default=[""], tags=["ais_sdrmap_user"]),
         Env("AIS_SHIPFINDER_SHAREDATA", default=[""], tags=["ais_feed_shipfinder", "is_enabled"]),
